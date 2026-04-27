@@ -2,6 +2,7 @@ services:
   - type: web
     name: turfspot-backend
     env: node
+    rootDirectory: server
     buildCommand: npm install
     startCommand: npm start
     envVars:
