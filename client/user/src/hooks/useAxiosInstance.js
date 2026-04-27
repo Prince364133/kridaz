@@ -1,8 +1,7 @@
 import axios from "axios";
-import { config } from "@/lib/config";
 
 const axiosInstance = axios.create({
-  baseURL: config.api.baseUrl,
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000",
 });
 
 // Request interceptor: attach JWT token from Redux-Persist storage

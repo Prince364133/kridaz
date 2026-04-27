@@ -1,17 +1,15 @@
 import { createBrowserRouter } from "react-router-dom";
-import Root from "@/layouts/Root";
-import LandingHome from "@/home/page";
-import Login from "@/pages/auth/Login";
-import SignUp from "@/pages/auth/SignUp";
-import { VenuesDashboard as Turf } from "@/features/venues/components/VenuesDashboard";
-import { VenueDetailsDashboard as TurfDetails } from "@/features/venues/components/VenueDetailsDashboard";
-import BecomeOwner from "@/features/becomeOwner/BecomeOwner";
-import ProtectedLayout from "@/layouts/ProtectedLayout";
-import Reservation from "@/components/Reservation";
-import TurfBookingHistory from "@/components/turf/TurfBookingHistory";
-import NotFound from "@/components/common/NotFound";
-import VenueBookingPage from "@/venues/[venueId]/booking/page";
-import VenueCheckoutPage from "@/venues/[venueId]/checkout/page";
+import Root from "./layouts/Root";
+import Home from "./pages/Home";
+import Login from "./pages/auth/Login";
+import SignUp from "./pages/auth/SignUp";
+import Turf from "./components/turf/Turf";
+import TurfDetails from "./components/turf/TurfDetails";
+import BecomeOwner from "./features/becomeOwner/BecomeOwner";
+import ProtectedLayout from "./layouts/ProtectedLayout";
+import Reservation from "./components/Reservation";
+import TurfBookingHistory from "./components/turf/TurfBookingHistory";
+import NotFound from "./components/common/NotFound";
 
 const router = createBrowserRouter([
   {
@@ -21,7 +19,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <LandingHome />,
+        element: <Home />,
       },
       {
         path: "login",
@@ -36,43 +34,29 @@ const router = createBrowserRouter([
         element: <Turf />,
       },
       {
-        path: "venues",
-        element: <Turf />,
-      },
-      {
-        path: "turf/:venueId",
+        path: "turf/:id",
         element: <TurfDetails />,
-      },
-      {
-        path: "venues/:venueId",
-        element: <TurfDetails />,
-      },
-      {
-        path: "venues/:venueId/booking",
-        element: <VenueBookingPage />,
-      },
-      {
-        path: "venues/:venueId/checkout",
-        element: <VenueCheckoutPage />,
       },
     ],
   },
   {
     path: "/auth",
     element: <ProtectedLayout />,
+    // errorElement: <div>Error</div>,
     children: [
       {
         path: "",
-        element: <LandingHome />,
+        element: <Home />,
       },
       {
         path: "turfs",
         element: <Turf />,
       },
       {
-        path: "turf/:venueId",
+        path: "turf/:id",
         element: <TurfDetails />,
       },
+
       {
         path: "reserve/:id",
         element: <Reservation />,

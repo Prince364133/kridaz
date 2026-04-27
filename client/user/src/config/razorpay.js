@@ -11,7 +11,7 @@ export const createOrder = async (totalPrice) => {
 export const handlePayment = async (order,user) => {
    return new Promise((resolve, reject) => {
     const options = {
-      key: config.razorpay.keyId,
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
       amount: order.amount,
       currency: order.currency,
       order_id: order.id, // Make sure this is included
