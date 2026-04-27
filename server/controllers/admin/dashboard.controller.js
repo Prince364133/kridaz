@@ -48,7 +48,7 @@ const getDashboard = async (req, res) => {
       bookingHistory,
     });
   } catch (err) {
-    console.log(err);
+    console.error("Error getting dashboard:", err.message);
     return res.status(500).json({ message: "Error getting dashboard" });
   }
 };

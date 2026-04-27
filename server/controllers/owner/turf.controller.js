@@ -5,16 +5,25 @@ import chalk from "chalk";
 import Review from "../../models/review.model.js"
 
 export const turfRegister = async (req, res) => {
-  const image = req.file.path;
   const owner = req.owner.id;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: false, message: errors.array() });
   }
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "Turf image is required" });
+  }
   try {
-    // upload the turf image to cloudinary
-    const turfImage = await cloudinary.uploader.upload(image, {
-      folder: "TurfSpot/turfs",
+    // Upload the turf image buffer directly to Cloudinary (no temp file on disk)
+    const turfImage = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: "TurfSpot/turfs" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      uploadStream.end(req.file.buffer);
     });
     const turf = new Turf({
       image: turfImage.secure_url,
@@ -71,14 +80,14 @@ export const editTurfById = async (req, res) => {
 
   const { id } = req.params;
   const { sportTypes, sportsType, ...otherDetails } = req.body;
-  if (req.body.sportsType) {
-    sportTypes.push(sportsType);
+  const updatedSportTypes = Array.isArray(sportTypes) ? [...sportTypes] : [];
+  if (sportsType) {
+    updatedSportTypes.push(sportsType);
   }
- 
 
   const updatedTurfData = {
     ...otherDetails,
-    sportTypes,
+    sportTypes: updatedSportTypes,
   };
 
   try {
@@ -97,7 +106,7 @@ export const editTurfById = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Turf updated successfully", allTurfs });
   } catch (err) {
-    console.log(err.message);
+    console.error("Error updating turf:", err.message);
     return res.status(500).json({ success: false, message: err.message });
   }
 };

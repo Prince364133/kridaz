@@ -7,10 +7,7 @@ export const getOwnerBookings = async (req, res) => {
 
     // Find turfs owned by this owner
     const ownedTurfs = await Turf.find({ owner: ownerId }).select("_id");
-    console.log(ownedTurfs.length, "ownedTurfs");
-
     if (ownedTurfs.length === 0) {
-      console.log("No bookings found for this owner's turfs");
       return res.status(404).json({ message: "No turfs found for this owner" });
     }
 
@@ -32,7 +29,7 @@ export const getOwnerBookings = async (req, res) => {
       },
       {
         $lookup: {
-          from: "turves",
+          from: "turfs",
           localField: "turf",
           foreignField: "_id",
           as: "turf",

@@ -1,10 +1,10 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  // baseURL: "http://localhost:1234",
-  baseURL: "https://turf-spot-be.vercel.app",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000",
 });
 
+// Request interceptor: attach JWT token from Redux-Persist storage
 axiosInstance.interceptors.request.use((config) => {
   let token = null;
   try {
@@ -28,5 +28,18 @@ axiosInstance.interceptors.request.use((config) => {
 
   return config;
 });
+
+// Response interceptor: redirect to login on expired/invalid token
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear stale auth state and redirect to login
+      localStorage.removeItem("persist:user");
+      window.location.href = "/auth/login";
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default axiosInstance;

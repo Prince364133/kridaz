@@ -35,7 +35,9 @@ export const viewReviewsByTurf = async (req, res) => {
   const { id } = req.params; // turf id
   try {
     const reviews = await Review.find({ turf: id }).sort({ createdAt: -1 }).populate("user", "name")
-    const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length; // average rating
+    const averageRating = reviews.length > 0
+      ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
+      : 0;
      return res
        .status(200)
        .json({

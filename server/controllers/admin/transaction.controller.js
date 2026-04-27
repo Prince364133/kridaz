@@ -10,8 +10,8 @@ export const getAllTransaction = async (req,res)=>{
         .json({ success: false, message: "Unauthorized access denied" });
     }
     try {
-        const transactions = await Booking.find({},{createdAt:1,payment:1, totalPrice:1 }).populate("user", {name:1, _id:0}).populate("turf",{name:1,_id:0}).sort({createAt:-1});
-        console.log(transactions, "transactions");
+        const transactions = await Booking.find({},{createdAt:1,payment:1, totalPrice:1 }).populate("user", {name:1, _id:0}).populate("turf",{name:1,_id:0}).sort({createdAt:-1});
+
         return res.status(200).json({
             message: " Fetched all transactions",
             transactions,

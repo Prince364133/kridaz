@@ -1,28 +1,31 @@
-import {
-  parseISO,
-  addHours,
-  addMinutes,
-  setYear,
-  setMonth,
-  setDate,
-} from "date-fns";
+import { toZonedTime, fromZonedTime, format } from "date-fns-tz";
+import { parseISO } from "date-fns";
 
+/**
+ * Converts a UTC ISO time string to the application timezone,
+ * then sets its calendar date to match selectedTurfDate.
+ *
+ * @param {string} timeString       - ISO 8601 time string (UTC)
+ * @param {string} selectedTurfDate - ISO 8601 date string (YYYY-MM-DD)
+ * @returns {Date} - Date object with adjusted time and date
+ */
 function adjustTime(timeString, selectedTurfDate) {
-  // Parse the original time
+  const timeZone = process.env.TIMEZONE || "Asia/Kolkata";
+
+  // Convert UTC time to the local timezone
   const originalTime = parseISO(timeString);
+  const zonedTime = toZonedTime(originalTime, timeZone);
 
-  // Parse the selected turf date
+  // Parse the selected date in the same timezone
   const turfDate = parseISO(selectedTurfDate);
+  const zonedDate = toZonedTime(turfDate, timeZone);
 
-  // Add 5 hours and 30 minutes
-  let adjustedTime = addMinutes(addHours(originalTime, 5), 30);
+  // Override the date components while keeping the time components
+  zonedTime.setFullYear(zonedDate.getFullYear());
+  zonedTime.setMonth(zonedDate.getMonth());
+  zonedTime.setDate(zonedDate.getDate());
 
-  // Set the date components from the selectedTurfDate
-  adjustedTime = setYear(adjustedTime, turfDate.getFullYear());
-  adjustedTime = setMonth(adjustedTime, turfDate.getMonth());
-  adjustedTime = setDate(adjustedTime, turfDate.getDate());
-
-  return adjustedTime;
+  return zonedTime;
 }
 
 export default adjustTime;

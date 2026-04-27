@@ -30,7 +30,7 @@ export const getDashboardData = async (req, res) => {
         { $group: { _id: "$turf", count: { $sum: 1 } } },
         {
           $lookup: {
-            from: "turves",
+            from: "turfs",
             localField: "_id",
             foreignField: "_id",
             as: "turfInfo",
@@ -66,7 +66,7 @@ export const getDashboardData = async (req, res) => {
       { $unwind: "$turfInfo" },
       { $project: { name: "$turfInfo.name", bookings: 1 } },
     ]);
-      console.log(rijobookingsPerTurf, "rijobookingsPerTurf");
+
     res.json({
       totalBookings,
       totalReviews,
