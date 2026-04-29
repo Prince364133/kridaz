@@ -8,7 +8,7 @@ import OwnerRequest from "../../models/ownerRequest.model.js";
 //  owner request controller when admin approves the owner, the owner can register and login
 
 export const ownerRequest = async (req, res) => {
-  const { name, email, phone } = req.body;
+  const { name, email, phone, role } = req.body;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: false, message: errors.array() });
@@ -24,6 +24,7 @@ export const ownerRequest = async (req, res) => {
       name,
       email,
       phone,
+      role: role || "owner",
     });
     await newOwnerRequest.save();
     return res
@@ -36,7 +37,7 @@ export const ownerRequest = async (req, res) => {
 };
 
 export const registerOwner = async (req, res) => {
-  const { name, email, phone, password } = req.body;
+  const { name, email, phone, password, role } = req.body;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: false, message: errors.array() });
@@ -76,6 +77,7 @@ export const registerOwner = async (req, res) => {
       email,
       phone,
       password: hashedPassword,
+      role: role || ownerRequest.role || "owner",
     });
     await newOwner.save();
     const token = generateOwnerToken(newOwner);

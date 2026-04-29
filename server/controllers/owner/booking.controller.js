@@ -4,14 +4,18 @@ import Turf from "../../models/turf.model.js";
 export const getOwnerBookings = async (req, res) => {
   try {
     const ownerId = req.owner.id;
+    console.log("Owner ID from token:", ownerId);
 
     // Find turfs owned by this owner
     const ownedTurfs = await Turf.find({ owner: ownerId }).select("_id");
+    console.log("Owned turfs count:", ownedTurfs.length);
+    
     if (ownedTurfs.length === 0) {
       return res.status(404).json({ message: "No turfs found for this owner" });
     }
 
     const turfIds = ownedTurfs.map((turf) => turf._id);
+    console.log("Turf IDs for match:", turfIds);
 
     const bookings = await Booking.aggregate([
       {
@@ -29,7 +33,7 @@ export const getOwnerBookings = async (req, res) => {
       },
       {
         $lookup: {
-          from: "turfs",
+          from: "turves",
           localField: "turf",
           foreignField: "_id",
           as: "turf",

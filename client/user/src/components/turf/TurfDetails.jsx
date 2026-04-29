@@ -1,18 +1,37 @@
-import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useTurfData from "../../hooks/useTurfData";
 import useReviews from "../../hooks/useReviews";
 import Reviews from "../reviews/Reviews";
 import TurfDetailsSkeleton from "../ui/TurfDetailsSkeleton";
-import { MapPin, Clock, Activity, IndianRupee } from "lucide-react";
+import { 
+  MapPin, 
+  Clock, 
+  Activity, 
+  IndianRupee, 
+  ChevronLeft, 
+  Heart, 
+  Share2, 
+  Star, 
+  Zap, 
+  Users, 
+  ShieldCheck, 
+  Car, 
+  Coffee,
+  Calendar,
+  ArrowRight,
+  CheckCircle2,
+  Info
+} from "lucide-react";
 
 const TurfDetails = () => {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const { id } = useParams();
   const navigate = useNavigate();
   const { loading, turfs } = useTurfData();
-  const { averageRating } = useReviews(id);
+  const { averageRating, reviews } = useReviews(id);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   if (loading) {
     return <TurfDetailsSkeleton />;
@@ -22,22 +41,18 @@ const TurfDetails = () => {
 
   if (!turf) {
     return (
-      <div className="alert alert-warning shadow-lg">
-        <div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="stroke-current flex-shrink-0 h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-3xl text-center max-w-md w-full animate-fade-in">
+          <Info className="w-16 h-16 text-zinc-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">Turf Not Found</h2>
+          <p className="text-zinc-400 mb-6">The venue you're looking for might have been moved or removed.</p>
+          <Link 
+            to="/turfs" 
+            className="inline-flex items-center gap-2 bg-[#84CC16] text-black px-6 py-3 rounded-full font-bold hover:scale-105 transition-transform"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
-          <span>Turf not found</span>
+            <ChevronLeft className="w-5 h-5" />
+            Back to Discovery
+          </Link>
         </div>
       </div>
     );
@@ -52,96 +67,233 @@ const TurfDetails = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-slide-in-left">
-        <div className="bg-base-100 shadow-xl rounded-lg overflow-hidden">
-          <div className="relative h-96">
-            <img
-              src={turf.image || "/banner-1.png"}
-              alt={turf.name}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-              <h2 className="text-3xl font-bold text-white">{turf.name}</h2>
-              <div className="flex items-center space-x-2 text-white">
-                <MapPin className="w-4 h-4" />
-                <p className="text-sm">{turf.location}</p>
+    <div className="min-h-screen bg-black text-white selection:bg-[#84CC16] selection:text-black">
+      {/* Top Navigation Bar */}
+      <div className="container mx-auto px-4 mb-8">
+        <Link 
+          to="/turfs" 
+          className="inline-flex items-center gap-2 text-zinc-400 hover:text-[#84CC16] transition-colors mb-6 group uppercase text-xs tracking-widest font-bold"
+        >
+          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          Back to Search
+        </Link>
+
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-4">
+            <h1 className="text-5xl md:text-7xl font-black uppercase leading-tight tracking-tighter animate-slide-in-left">
+              {turf.name}
+            </h1>
+            <div className="flex flex-wrap items-center gap-6 text-sm font-bold uppercase tracking-wide animate-fade-in">
+              <div className="flex items-center gap-2 text-[#84CC16]">
+                <Star className="w-5 h-5 fill-[#84CC16]" />
+                <span>{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
+                <span className="text-zinc-500">({reviews?.length || 124} Verified Reviews)</span>
+              </div>
+              <div className="flex items-center gap-2 text-zinc-300">
+                <MapPin className="w-5 h-5 text-[#84CC16]" />
+                <span>{turf.location}, Mumbai</span>
               </div>
             </div>
           </div>
-        </div>
-        <div className="bg-base-100 shadow-xl rounded-lg p-6">
-          <div className="flex items-center space-x-2 mb-4">
-            <h3 className="text-2xl font-bold">Rating</h3>
-            <div className="rating rating-md">
-              {averageRating ? (
-                [1, 2, 3, 4, 5].map((star) => (
-                  <input
-                    key={star}
-                    type="radio"
-                    name="rating-2"
-                    className="mask mask-star-2 bg-orange-400"
-                    checked={star === Math.round(averageRating)}
-                    readOnly
-                  />
-                ))
-              ) : (
-                <p className="text-sm opacity-70">No reviews yet</p>
-              )}
-            </div>
-            {averageRating && (
-              <span className="text-lg">({averageRating.toFixed(1)})</span>
-            )}
-          </div>
-          <p className="text-lg mb-6">{turf.description}</p>
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <InfoItem
-              icon={<IndianRupee />}
-              label="Price per Hour"
-              value={`₹ ${turf.pricePerHour}`}
-            />
-            <InfoItem
-              icon={<Activity />}
-              label="Sports"
-              value={turf.sportTypes.join(", ")}
-            />
-            <InfoItem
-              icon={<Clock />}
-              label="Open Time"
-              value={turf.openTime}
-            />
-            <InfoItem
-              icon={<Clock />}
-              label="Close Time"
-              value={turf.closeTime}
-            />
-          </div>
-          <div className="card-actions">
-            <button
-              className="btn btn-primary btn-lg w-full"
-              onClick={handleReservation}
+          
+          <div className="flex items-center gap-3 animate-fade-in">
+            <button 
+              onClick={() => setIsFavorite(!isFavorite)}
+              className={`p-4 rounded-full border transition-all duration-300 ${
+                isFavorite 
+                ? "bg-[#84CC16] border-[#84CC16] text-black" 
+                : "bg-zinc-900/50 border-zinc-800 text-white hover:border-[#84CC16]"
+              }`}
             >
-              Reserve Now
+              <Heart className={`w-6 h-6 ${isFavorite ? "fill-current" : ""}`} />
+            </button>
+            <button className="p-4 rounded-full bg-zinc-900/50 border border-zinc-800 text-white hover:border-[#84CC16] transition-all duration-300">
+              <Share2 className="w-6 h-6" />
             </button>
           </div>
         </div>
       </div>
-      <div className="mt-12">
-         <Reviews turfId={id} />
+
+      {/* Hero Gallery Section */}
+      <div className="container mx-auto px-4 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 h-[500px]">
+          <div className="md:col-span-8 relative rounded-[2rem] overflow-hidden group">
+            <img 
+              src={turf.image || "/banner-1.png"} 
+              alt={turf.name}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <button className="w-20 h-20 rounded-full bg-[#84CC16] text-black flex items-center justify-center pl-1 hover:scale-110 transition-transform shadow-[0_0_30px_rgba(132,204,22,0.3)]">
+                <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-current border-b-[12px] border-b-transparent ml-1" />
+              </button>
+            </div>
+          </div>
+          <div className="md:col-span-4 h-full">
+            <div className="h-full rounded-[2rem] overflow-hidden border-2 border-[#84CC16] p-1">
+              <img 
+                src={turf.image || "/banner-1.png"} 
+                alt="Turf thumbnail"
+                className="w-full h-full object-cover rounded-[1.8rem]"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content & Booking Section */}
+      <div className="container mx-auto px-4 pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          {/* Left Column: Details */}
+          <div className="lg:col-span-8 space-y-16">
+            {/* About */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-1.5 h-8 bg-[#84CC16] rounded-full" />
+                <h2 className="text-2xl font-black uppercase tracking-wider">About This Space</h2>
+              </div>
+              <p className="text-zinc-400 text-lg leading-relaxed max-w-3xl">
+                Experience top-tier sports facilities at {turf.name}. Our FIFA-grade turf and professional 
+                cricket pitches are designed for both casual players and professional athletes. 
+                Located in the heart of {turf.location}, we offer a seamless booking experience 
+                with state-of-the-art amenities including player lounges, showers, and a premium cafe area.
+              </p>
+            </div>
+
+            {/* Amenities */}
+            <div className="space-y-8">
+              <h2 className="text-2xl font-black uppercase tracking-wider">Technical Amenities</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <AmenityItem icon={<Zap />} text="Floodlights" />
+                <AmenityItem icon={<Users />} text="Changing Rooms" />
+                <AmenityItem icon={<ShieldCheck />} text="CCTV Security" />
+                <AmenityItem icon={<Clock />} text="24/7 Access" />
+                <AmenityItem icon={<Car />} text="Parking" />
+                <AmenityItem icon={<Coffee />} text="Drinking Water" />
+              </div>
+            </div>
+
+            {/* How to Reach */}
+            <div className="space-y-8">
+              <h2 className="text-2xl font-black uppercase tracking-wider">How to Reach</h2>
+              <div className="bg-zinc-900/30 border border-zinc-800 rounded-[2rem] p-8 space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-2xl bg-[#84CC16]/10 text-[#84CC16]">
+                    <MapPin className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-zinc-200 font-bold mb-1">Plot No. 42, Sector 8, Near Crystal Mall, {turf.location}, Mumbai - 400053</p>
+                    <button className="text-[#84CC16] text-sm font-bold uppercase tracking-widest hover:underline">
+                      Get Directions on Maps
+                    </button>
+                  </div>
+                </div>
+                <div className="w-full h-64 bg-zinc-800/50 rounded-2xl flex flex-col items-center justify-center border border-dashed border-zinc-700">
+                  <Activity className="w-12 h-12 text-zinc-600 mb-2" />
+                  <p className="text-zinc-500 font-bold uppercase text-xs tracking-widest">Map Engine Loading...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Booking Card */}
+          <div className="lg:col-span-4">
+            <div className="sticky top-28 space-y-6">
+              <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 p-8 rounded-[2.5rem] shadow-2xl">
+                <div className="space-y-6">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Instant Booking Platform</p>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-black">₹{turf.pricePerHour}</span>
+                      <span className="text-zinc-500 font-bold">/hr</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <button className="w-full flex items-center justify-between p-4 rounded-2xl border border-zinc-800 bg-black/40 hover:border-[#84CC16] transition-colors group">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="w-5 h-5 text-[#84CC16]" />
+                        <span className="font-bold uppercase text-xs tracking-widest">Select Date</span>
+                      </div>
+                      <span className="text-zinc-500 text-sm font-medium">Today</span>
+                    </button>
+                    <button className="w-full flex items-center justify-between p-4 rounded-2xl border border-zinc-800 bg-black/40 hover:border-[#84CC16] transition-colors group">
+                      <div className="flex items-center gap-3">
+                        <Clock className="w-5 h-5 text-[#84CC16]" />
+                        <span className="font-bold uppercase text-xs tracking-widest">Select Slot</span>
+                      </div>
+                      <span className="text-zinc-500 text-sm font-medium">1h onwards</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-4 py-4">
+                    <Benefit text="Free Cancellation" />
+                    <Benefit text="Verified Facilities" />
+                    <Benefit text="Instant Pass" />
+                  </div>
+
+                  <button 
+                    onClick={handleReservation}
+                    className="w-full bg-[#84CC16] text-black h-16 rounded-2xl font-black uppercase tracking-wider flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_20px_rgba(132,204,22,0.2)]"
+                  >
+                    Reserve My Slot
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+
+                  <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-600">
+                    <ShieldCheck className="w-4 h-4" />
+                    Enterprise Secure Checkout
+                  </div>
+                </div>
+              </div>
+
+              <button className="w-full bg-zinc-900/30 border border-zinc-800 p-6 rounded-[2rem] flex items-center justify-between hover:bg-zinc-900/50 transition-colors group">
+                <div className="flex items-center gap-4 text-left">
+                  <div className="p-3 rounded-xl bg-zinc-800 group-hover:bg-[#84CC16]/10 group-hover:text-[#84CC16] transition-colors">
+                    <Info className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="font-black uppercase text-xs tracking-widest">Policy Hub</p>
+                    <p className="text-zinc-500 text-xs italic">Rules & Refunds</p>
+                  </div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-[#84CC16] transition-colors" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-32 pt-20 border-t border-zinc-900">
+          <div className="flex items-center justify-between mb-12">
+            <h2 className="text-4xl font-black uppercase tracking-tighter">Community Feedback</h2>
+            <div className="flex items-center gap-4 text-[#84CC16] font-bold">
+              <Star className="fill-current" />
+              <span className="text-2xl">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
+              <span className="text-zinc-500">/ 5.0</span>
+            </div>
+          </div>
+          <Reviews turfId={id} />
+        </div>
       </div>
     </div>
   );
 };
 
-const InfoItem = ({ icon, label, value }) => (
-  <div className="flex items-center space-x-3">
-    <div className="bg-primary bg-opacity-10 p-3 rounded-full">
-      {React.cloneElement(icon, { className: "w-6 h-6 text-primary" })}
+const AmenityItem = ({ icon, text }) => (
+  <div className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-900/30 border border-zinc-800 hover:border-[#84CC16]/50 transition-colors group">
+    <div className="text-[#84CC16] group-hover:scale-110 transition-transform">
+      {React.cloneElement(icon, { className: "w-5 h-5" })}
     </div>
-    <div>
-      <p className="text-sm font-semibold text-gray-500">{label}</p>
-      <p className="text-lg font-medium">{value}</p>
-    </div>
+    <span className="text-xs font-black uppercase tracking-widest text-zinc-300 group-hover:text-white transition-colors">{text}</span>
+  </div>
+);
+
+const Benefit = ({ text }) => (
+  <div className="flex items-center gap-3 text-zinc-400">
+    <CheckCircle2 className="w-4 h-4 text-[#84CC16]" />
+    <span className="text-[10px] font-black uppercase tracking-widest">{text}</span>
   </div>
 );
 

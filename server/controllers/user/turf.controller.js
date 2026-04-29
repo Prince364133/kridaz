@@ -7,6 +7,7 @@ import { format, parseISO, startOfDay } from "date-fns";
 export const getAllTurfs = async (req, res) => {
   try {
     const turfs = await Turf.find({});
+    console.log(`[DEBUG] getAllTurfs: Found ${turfs.length} turfs in collection: ${Turf.collection.name}`);
     return res.status(200).json({ turfs });
   } catch (err) {
     console.log(chalk.red("Error in getAllTurfs"), err);

@@ -3,9 +3,9 @@ import Root from "./layouts/Root";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
+import PartnersGateway from "./pages/PartnersGateway";
 import Turf from "./components/turf/Turf";
 import TurfDetails from "./components/turf/TurfDetails";
-import BecomeOwner from "./features/becomeOwner/BecomeOwner";
 import ProtectedLayout from "./layouts/ProtectedLayout";
 import Reservation from "./components/Reservation";
 import TurfBookingHistory from "./components/turf/TurfBookingHistory";
@@ -37,6 +37,10 @@ const router = createBrowserRouter([
         path: "turf/:id",
         element: <TurfDetails />,
       },
+      {
+        path: "partners",
+        element: <PartnersGateway />,
+      },
     ],
   },
   {
@@ -60,10 +64,6 @@ const router = createBrowserRouter([
       {
         path: "reserve/:id",
         element: <Reservation />,
-      },
-      {
-        path: "become-owner",
-        element: <BecomeOwner />,
       },
       {
         path: "booking-history",

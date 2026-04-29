@@ -1,6 +1,6 @@
-# TurfSpot
+# BookMySportz
 
-TurfSpot is a comprehensive turf booking application with three modules: Admin, Owner, and User. This app allows users to view and book turf grounds, owners to manage their turfs and bookings, and admins to oversee all activities within the platform.
+BookMySportz is a comprehensive turf booking application with three modules: Admin, Owner, and User. This app allows users to view and book turf grounds, owners to manage their turfs and bookings, and admins to oversee all activities within the platform.
 
 ## Features
 
@@ -28,8 +28,8 @@ TurfSpot is a comprehensive turf booking application with three modules: Admin, 
 
 ## 🌐 URLs
 
-- **User App**: [https://turf-spot.vercel.app/](https://turf-spot.vercel.app/)
-- **Owner/Admin App**: [https://turf-spot-ao.vercel.app/](https://turf-spot-ao.vercel.app/)
+- **User App**: [https://book-my-sportz.vercel.app/](https://book-my-sportz.vercel.app/)
+- **Owner/Admin App**: [https://book-my-sportz-ao.vercel.app/](https://book-my-sportz-ao.vercel.app/)
 
 ### 🔐 Admin Credentials (For Demo)
 
@@ -51,14 +51,9 @@ TurfSpot is a comprehensive turf booking application with three modules: Admin, 
 
 
 ## Installation
-
-1. Clone the repository
-   ```bash
-   git clone https://github.com/RijoKsd/TurfSpot.git
-   ```
 2. Install dependencies for both client and server
    ```bash
-   cd TurfSpot
+   cd BookMySportz
    npm install
    cd server
    npm install
@@ -114,12 +109,3 @@ TurfSpot is a comprehensive turf booking application with three modules: Admin, 
 3. Commit your changes (`git commit -m 'Add some feature'`)
 4. Push to the branch (`git push origin feature/your-feature`)
 5. Create a new Pull Request
-
-## License
-
-This project is licensed under the MIT License.
-
-## Contact
-
-For any inquiries or questions, please contact us at [rijobdk@gmail.com](mailto:rijobdk@gmail.com).
-

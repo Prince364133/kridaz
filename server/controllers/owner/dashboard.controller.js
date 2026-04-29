@@ -30,7 +30,7 @@ export const getDashboardData = async (req, res) => {
         { $group: { _id: "$turf", count: { $sum: 1 } } },
         {
           $lookup: {
-            from: "turfs",
+            from: "turves",
             localField: "_id",
             foreignField: "_id",
             as: "turfInfo",
@@ -57,7 +57,7 @@ export const getDashboardData = async (req, res) => {
       { $group: { _id: "$turf", bookings: { $sum: 1 } } },
       {
         $lookup: {
-          from: "turfs",
+          from: "turves",
           localField: "_id",
           foreignField: "_id",
           as: "turfInfo",

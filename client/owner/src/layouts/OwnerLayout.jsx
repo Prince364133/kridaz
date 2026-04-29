@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 
-import { OwnerSidebar, AuthenticatedNavbar } from "@components/layout";
+import { OwnerSidebar, AuthenticatedNavbar, PartnerFooter } from "@components/layout";
 
-const OwnerLayout = () => {
+const PartnerLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-black">
       <AuthenticatedNavbar toggleSidebar={toggleSidebar} />
-      <div className="flex flex-1 pt-16">
+      <div className="flex flex-1 pt-16 lg:pt-20">
         <OwnerSidebar
           isOpen={isOpen}
           toggleSidebar={toggleSidebar}
@@ -27,7 +27,7 @@ const OwnerLayout = () => {
           transition-all 
           duration-300 
           ease-in-out
-          ${isOpen ? "lg:ml-64" : "ml-0"}
+          lg:ml-64
         `}
         >
           <div className="container mx-auto">
@@ -35,8 +35,9 @@ const OwnerLayout = () => {
           </div>
         </main>
       </div>
+      <PartnerFooter />
     </div>
   );
 };
 
-export default OwnerLayout;
+export default PartnerLayout;

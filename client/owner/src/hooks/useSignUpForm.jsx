@@ -32,6 +32,10 @@ const registerSchema = yup.object().shape({
     .string()
     .required("Enter your password")
     .oneOf([yup.ref("password"), null], "Passwords must match"),
+  role: yup
+    .string()
+    .required("Select a role")
+    .oneOf(["owner", "coach", "umpire"], "Invalid role selected"),
 });
 
 const useSignUpForm = () => {
@@ -41,12 +45,18 @@ const useSignUpForm = () => {
 
 
 
+  const queryParams = new URLSearchParams(window.location.search);
+  const defaultRole = queryParams.get("role") || "owner";
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(registerSchema),
+    defaultValues: {
+      role: defaultRole
+    }
   });
 
   const onSubmit = async (data) => {
@@ -60,10 +70,13 @@ const useSignUpForm = () => {
         dispatch(login({ token: result.token, role: result.role }));
         if (result.role === "owner") {
           navigate("/owner");
+        } else if (result.role === "coach") {
+          navigate("/coach");
+        } else if (result.role === "umpire") {
+          navigate("/umpire");
         } else if (result.role === "admin") {
           navigate("/admin");
         }
-        
     } catch (error){
        if (error.response) {
         // Server responded with a status other than 200 range

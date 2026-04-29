@@ -20,6 +20,6 @@ const turfSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Turf = mongoose.model("Turf", turfSchema);
+const Turf = mongoose.model("Turf", turfSchema, "turves");
 
 export default Turf;

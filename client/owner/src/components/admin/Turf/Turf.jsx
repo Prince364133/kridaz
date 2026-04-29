@@ -2,45 +2,74 @@ import React from "react";
 import { MapPin, Clock, Star, Calendar } from "lucide-react";
 import { format } from "date-fns";
 
+/**
+ * Admin Turf card — follows the BookMySportz design system.
+ * rounded-2xl, lime green accents, pill badges.
+ */
 const Turf = ({ turf }) => {
   return (
-    <div className="card bg-base-100 shadow-xl w-full hover:shadow-2xl transition-shadow duration-300">
-      <figure className="relative h-48 sm:h-56 md:h-64">
+    <div className="bms-card group flex flex-col">
+      {/* ── Image ─────────────────────────────────────────────────── */}
+      <div className="relative overflow-hidden" style={{ height: "200px" }}>
         <img
-          src={turf.image}
+          <img src={turf.image} alt={turf.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onError={(e) => { e.target.onerror = null; e.target.src = "/banner-2.png"; }} />
           alt={turf.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute top-0 right-0 bg-base-100 text-primary font-semibold px-3 py-1 m-2 rounded-full">
-          ₹{turf.pricePerHour}/hr
+        {/* Price badge */}
+        <div className="absolute top-3 left-3">
+          <span className="badge-featured">₹{turf.pricePerHour}/hr</span>
         </div>
-      </figure>
-      <div className="card-body p-4 sm:p-6">
-        <h2 className="card-title text-lg sm:text-xl mb-2">{turf.name}</h2>
-        <p className="text-sm sm:text-base text-gray-600 mb-4">
-          {turf.description}
-        </p>
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="flex items-center">
-            <MapPin size={18} className="mr-2 text-primary" />
-            <span>{turf.location}</span>
-          </div>
-          <div className="flex items-center">
-            <Clock size={18} className="mr-2 text-primary" />
-            <span>
-              {turf.openTime} - {turf.closeTime}
-            </span>
-          </div>
-          <div className="flex items-center">
-            <Star size={18} className="mr-2 text-primary" />
-            <span>{turf.avgRating} ratings</span>
-          </div>
-          <div className="flex items-center">
-            <Calendar size={18} className="mr-2 text-primary" />
-            <span>{format(new Date(turf.createdAt), "dd MMM yyyy")}</span>
+        {/* Status badge */}
+        <div className="absolute top-3 right-3 flex items-center gap-1.5 badge-distance">
+          <div className="w-1.5 h-1.5 bg-[#84CC16] rounded-full animate-pulse" />
+          <span>Active</span>
+        </div>
+      </div>
+
+      {/* ── Body ──────────────────────────────────────────────────── */}
+      <div className="flex flex-col flex-1 p-4 gap-2">
+        {/* Rating row */}
+        <div className="flex items-center justify-between">
+          <span className="badge-sport">Arena</span>
+          <div className="flex items-center gap-1">
+            <Star size={12} className="text-yellow-400 fill-yellow-400" />
+            <span className="text-white text-xs font-semibold">{turf.avgRating || "4.8"}</span>
           </div>
         </div>
-         
+
+        {/* Title */}
+        <h3 className="font-display text-lg uppercase tracking-wide text-white group-hover:text-primary transition-colors leading-tight line-clamp-2">
+          {turf.name}
+        </h3>
+
+        {/* Location */}
+        <div className="flex items-center gap-1.5 text-[#888] text-xs">
+          <MapPin size={11} className="text-[#84CC16] shrink-0" />
+          <span className="truncate">{turf.location}</span>
+        </div>
+
+        {/* Hours */}
+        <div className="flex items-center gap-1.5 text-[#888] text-xs">
+          <Clock size={11} className="text-[#84CC16] shrink-0" />
+          <span>{turf.openTime} – {turf.closeTime}</span>
+        </div>
+
+        {/* Added date */}
+        {turf.createdAt && (
+          <div className="flex items-center gap-1.5 text-[#888] text-xs">
+            <Calendar size={11} className="text-[#84CC16] shrink-0" />
+            <span>Added {format(new Date(turf.createdAt), "dd MMM yyyy")}</span>
+          </div>
+        )}
+
+        {/* Progress bar */}
+        <div className="mt-auto pt-3 border-t border-[#2A2A2A]">
+          <div className="w-full h-1 bg-[#2A2A2A] rounded-full overflow-hidden">
+            <div className="h-full bg-[#84CC16]/60 rounded-full group-hover:bg-[#84CC16] transition-all duration-700" style={{ width: "70%" }} />
+          </div>
+          <p className="text-[10px] text-[#888] font-mono uppercase tracking-wider mt-1">Booking Rate</p>
+        </div>
       </div>
     </div>
   );

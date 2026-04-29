@@ -43,6 +43,10 @@ const useLoginForm = () => {
       dispatch(login({token:result.token,role:result.role}));
       if(result.role === "owner") {
         navigate("/owner");
+      }else if(result.role === "coach") {
+        navigate("/coach");
+      }else if(result.role === "umpire") {
+        navigate("/umpire");
       }else if(result.role === "admin") {
         navigate("/admin");
       }

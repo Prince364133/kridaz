@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, Activity, ShieldCheck, Zap } from "lucide-react";
 import ThemeSwitcher from "../common/ThemeSwitcher.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
@@ -8,32 +8,41 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const role = useSelector((state) => state?.auth?.role);
- const path = role === "admin" ? "/admin" : "/owner";
+  const path = role === "admin" ? "/admin" : role === "coach" ? "/coach" : role === "umpire" ? "/umpire" : "/partner";
+  
   const handleLogout = () => {
     dispatch(logout());
     navigate("/", { replace: true });
   };
+
   return (
-    <div className="navbar bg-base-100 fixed top-0 z-50 shadow-md">
-      <div className="navbar-start">
-        <button className="btn btn-ghost lg:hidden" onClick={toggleSidebar}>
-          <Menu size={24} />
-        </button>
-        <Link to={path} className="btn btn-ghost normal-case text-xl max-sm:p-0">
-          <img
-            src="/logo.png"
-            alt="TurfSpot"
-            className="h-10 w-10 mask mask-squircle"
-          />
-          TurfSpot
-        </Link>
-      </div>
-      <div className="navbar-end">
-        <ThemeSwitcher />
-        <button className="btn btn-primary btn-outline" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
+    <div className="fixed top-0 left-0 right-0 z-50 flex flex-col">
+
+      <nav className="navbar bg-surface/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 h-16 lg:h-20">
+        <div className="navbar-start">
+          <button className="p-2 mr-4 text-white hover:text-primary transition-colors lg:hidden" onClick={toggleSidebar}>
+            <Menu size={24} />
+          </button>
+          <Link to={path} className="flex items-center gap-4 group">
+            <div className="w-24 h-12 sm:w-44 sm:h-16 bg-transparent flex items-center justify-center transition-all overflow-hidden">
+               <img src="/logo.png" alt="BookMySportz Logo" className="w-full h-full object-contain" />
+            </div>
+          </Link>
+        </div>
+
+        <div className="navbar-end gap-6">
+          <div className="hidden sm:block">
+            <ThemeSwitcher />
+          </div>
+          <div className="h-8 w-[1px] bg-white/5 mx-2" />
+          <button 
+            className="btn-bms-ghost h-10 px-6 font-display-heavy text-[11px] tracking-widest" 
+            onClick={handleLogout}
+          >
+            SIGNOUT
+          </button>
+        </div>
+      </nav>
     </div>
   );
 };

@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { AdminSidebar, AuthenticatedNavbar } from "@components/layout";
+import { AdminSidebar, AuthenticatedNavbar, PartnerFooter } from "@components/layout";
 
 const AdminLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-black">
       <AuthenticatedNavbar toggleSidebar={toggleSidebar} />
-      <div className="flex flex-1 pt-16">
+      <div className="flex flex-1 pt-24">
         <AdminSidebar
           isOpen={isOpen}
           toggleSidebar={toggleSidebar}
@@ -26,7 +26,7 @@ const AdminLayout = () => {
           transition-all 
           duration-300 
           ease-in-out
-          ${isOpen ? "lg:ml-64" : "ml-0"}
+          lg:ml-64
         `}
         >
           <div className="container mx-auto">
@@ -34,6 +34,7 @@ const AdminLayout = () => {
           </div>
         </main>
       </div>
+      <PartnerFooter />
     </div>
   );
 };

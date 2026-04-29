@@ -44,22 +44,18 @@ export default function AuthNavbar() {
               <Link to="/auth/booking-history">My Bookings</Link>
             </li>
             <li>
-              <NavLink
-                to="/auth/become-owner"
-                className={({ isActive }) => (isActive ? "text-accent" : "")}
-              >
-                Become an Owner
-              </NavLink>
+              <Link to="/partners">
+                Partner Network
+              </Link>
             </li>
           </ul>
         </div>
-        <Link to="/auth" className="btn btn-ghost normal-case text-xl">
+        <Link to="/auth" className="btn btn-ghost p-2">
           <img
             src="/logo.png"
-            alt="TurfSpot"
-            className="h-10 w-10 mask mask-squircle"
+            alt="BookMySportz"
+            className="h-10 w-full object-contain"
           />
-          TurfSpot
         </Link>
       </div>
       <div className="navbar-center hidden lg:flex">
@@ -74,12 +70,9 @@ export default function AuthNavbar() {
             <Link to="/auth/booking-history">My Bookings</Link>
           </li>
           <li>
-            <NavLink
-              to="/auth/become-owner"
-              className={({ isActive }) => (isActive ? "text-accent" : "")}
-            >
-              Become an Owner
-            </NavLink>
+            <Link to="/partners">
+              Partner Network
+            </Link>
           </li>
         </ul>
       </div>

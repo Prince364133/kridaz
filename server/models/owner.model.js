@@ -6,7 +6,7 @@ const ownerSchema = new mongoose.Schema(
     email: { type: String, required: true },
     password: { type: String, required: true },
     phone: { type: String, required: true },
-    role: { type: String, enum: ["admin", "owner"], default: "owner" },
+    role: { type: String, enum: ["admin", "owner", "coach", "umpire"], default: "owner" },
   },
   { timestamps: true }
 );

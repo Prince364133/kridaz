@@ -18,7 +18,7 @@ async function generateQRCode(
 
     // Upload the QR code to Cloudinary
     const uploadResponse = await cloudinary.uploader.upload(qrCodeDataURL, {
-      folder: "TurfSpot/qrcode"
+      folder: "BookMySportz/qrcode"
     });
 
     console.log("QR code has been generated and uploaded successfully!");

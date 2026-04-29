@@ -17,7 +17,7 @@ export const turfRegister = async (req, res) => {
     // Upload the turf image buffer directly to Cloudinary (no temp file on disk)
     const turfImage = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: "TurfSpot/turfs" },
+        { folder: "BookMySportz/turfs" },
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
