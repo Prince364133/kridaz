@@ -76,7 +76,7 @@ export const AdBannerSection = ({ banners = [] }) => {
               <span className="inline-block px-3 py-1 rounded-full bg-primary/20 border border-primary/30 text-primary text-[10px] font-bold uppercase tracking-widest">
                 Special Promotion
               </span>
-              <h2 className="font-display text-4xl md:text-6xl uppercase leading-none text-white tracking-tighter">
+              <h2 className="font-display text-4xl md:text-6xl uppercase leading-none text-white tracking-tight">
                 {currentBanner.title}
               </h2>
               {currentBanner.targetUrl && (

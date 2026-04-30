@@ -4,39 +4,49 @@ import { format, addDays, isSameDay } from "date-fns";
 
 const DateSelection = ({ selectedDate, handleDateChange }) => {
   return (
-    <div className="flex flex-col space-y-4 mb-6">
-      <div className="w-full">
-        <label className="label">
-          <span className="label-text">Select Date</span>
-        </label>
-        <DatePicker
-          selected={selectedDate}
-          onChange={handleDateChange}
-          dateFormat="dd-MM-yyyy"
-          minDate={new Date()}
-          className="input input-bordered w-full"
-        />
+    <div className="space-y-6">
+      <div className="flex items-center gap-4 mb-2">
+        <div className="w-1 h-6 bg-[#84CC16] rounded-full" />
+        <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">1. Select Date</h3>
       </div>
-      <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
-        <button
-          className="btn btn-outline btn-sm w-full sm:w-auto"
-          onClick={() => handleDateChange(addDays(selectedDate, -1))}
-          disabled={isSameDay(selectedDate, new Date())}
-        >
-          PREV DATE
-        </button>
-        <div className="badge badge-primary text-lg p-4">
-          {format(selectedDate, "dd-MM-yyyy")}
+      
+      <div className="flex flex-col sm:flex-row items-center gap-6">
+        <div className="w-full sm:w-auto relative group">
+          <DatePicker
+            selected={selectedDate}
+            onChange={handleDateChange}
+            dateFormat="dd-MM-yyyy"
+            minDate={new Date()}
+            className="bg-black/40 border border-white/10 text-white rounded-2xl px-6 py-4 focus:border-[#84CC16] outline-none transition-all w-full sm:w-64 font-bold text-sm"
+          />
         </div>
-        <button
-          className="btn btn-outline btn-sm w-full sm:w-auto"
-          onClick={() => handleDateChange(addDays(selectedDate, 1))}
-        >
-          NEXT DATE
-        </button>
+
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <button
+            className="flex-1 sm:flex-none px-6 py-4 border border-white/10 text-zinc-400 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:border-[#84CC16]/30 hover:text-white transition-all disabled:opacity-10"
+            onClick={() => handleDateChange(addDays(selectedDate, -1))}
+            disabled={isSameDay(selectedDate, new Date())}
+          >
+            Previous
+          </button>
+          
+          <div className="px-8 py-4 bg-[#84CC16]/10 border border-[#84CC16]/20 rounded-2xl text-center min-w-[120px]">
+            <span className="text-xs font-bold text-[#84CC16] uppercase tracking-widest">
+              {format(selectedDate, "dd MMM")}
+            </span>
+          </div>
+
+          <button
+            className="flex-1 sm:flex-none px-6 py-4 border border-white/10 text-zinc-400 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:border-[#84CC16]/30 hover:text-white transition-all"
+            onClick={() => handleDateChange(addDays(selectedDate, 1))}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );
 };
+
 
 export default DateSelection;

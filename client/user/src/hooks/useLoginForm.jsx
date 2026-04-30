@@ -41,7 +41,7 @@ const useLoginForm = () => {
       const result = await response.data;
       toast.success(result.message);
       dispatch(login(result.token));
-      navigate("/auth", { replace: true });
+      navigate("/", { replace: true });
       axiosInstance.defaults.headers.common[
         "Authorization"
       ] = `Bearer ${result.token}`;

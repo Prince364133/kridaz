@@ -24,13 +24,13 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { name: "HOME", path: isLoggedIn ? "/auth" : "/" },
-    { name: "ARENAS", path: isLoggedIn ? "/auth/turfs" : "/turfs" },
+    { name: "HOME", path: "/" },
+    { name: "VENUES", path: "/turfs" },
     { name: "PARTNERS", path: "/partners" },
   ];
 
   if (isLoggedIn) {
-    navLinks.push({ name: "MISSION LOG", path: "/auth/booking-history" });
+    navLinks.push({ name: "BOOKINGS", path: "/booking-history" });
   }
 
   return (
@@ -43,14 +43,14 @@ const Navbar = () => {
             boxShadow: isScrolled ? "0 20px 40px rgba(0, 0, 0, 0.4)" : "none"
           }}
         >
-          {/* Cinematic Logo Unit */}
-          <Link to={isLoggedIn ? "/auth" : "/"} className="group flex items-center gap-6">
+          {/* Logo Section */}
+          <Link to="/" className="group flex items-center gap-6">
             <div className="flex items-center justify-center">
               <img src="/logo.png" alt="TurfSpot" className="h-8 lg:h-10 w-auto brightness-125 group-hover:scale-105 transition-transform duration-500" />
             </div>
-            <div className="hidden sm:block border-l-2 border-[#84CC16]/30 pl-6 h-10 flex flex-col justify-center">
-              <span className="block text-[9px] font-mono font-black text-[#84CC16] tracking-[0.4em] uppercase leading-none mb-1.5 opacity-80">Operational_Hub</span>
-              <span className="block text-xl font-display-heavy text-white tracking-[0.15em] leading-none uppercase">TurfSpot</span>
+            <div className="hidden sm:block border-l border-white/20 pl-6 h-10 flex flex-col justify-center">
+              <span className="block text-xs font-semibold text-[#84CC16] mb-1 opacity-80 uppercase tracking-wider">BookMySportz</span>
+              <span className="block text-xl font-bold text-white leading-none">TurfSpot</span>
             </div>
           </Link>
 
@@ -60,7 +60,7 @@ const Navbar = () => {
               <Link
                 key={link.name}
                 to={link.path}
-                className={`text-[11px] font-mono font-bold tracking-[0.3em] transition-all hover:text-primary relative group/link ${
+                className={`text-sm font-semibold transition-all hover:text-primary relative group/link ${
                   location.pathname === link.path ? "text-primary" : "text-white/60"
                 }`}
               >
@@ -86,38 +86,35 @@ const Navbar = () => {
               <>
                 <Link 
                   to="/login" 
-                  className="hidden sm:flex items-center gap-2 text-[10px] font-mono font-black text-white/40 hover:text-[#84CC16] tracking-[0.2em] uppercase transition-all hover:translate-x-1"
+                  className="hidden sm:flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-white transition-all hover:translate-x-1"
                 >
-                  <ShieldCheck size={14} className="opacity-50" />
+                  <ShieldCheck size={16} className="opacity-50" />
                   Login
                 </Link>
                 
-                <Link to="/signup" className="btn-bms h-11 px-8 text-[11px] font-black tracking-[0.2em] flex items-center gap-3 shadow-[0_0_20px_rgba(132,204,22,0.2)]">
-                  JOIN NOW <ArrowRight size={14} />
+                <Link to="/signup" className="btn-bms h-11 px-8 text-sm font-semibold flex items-center gap-3">
+                  Sign Up <ArrowRight size={16} />
                 </Link>
               </>
             ) : (
               <div className="flex items-center gap-6">
-                <div className="hidden md:flex flex-col items-end border-r border-white/10 pr-6 mr-1">
-                  <span className="text-[8px] font-mono text-white/20 uppercase tracking-[0.3em]">Player_Rank</span>
-                  <span className="text-[11px] font-display-heavy text-[#84CC16] tracking-[0.2em]">{role?.toUpperCase() || "ATHLETE"}</span>
-                </div>
+
                 <div className="dropdown dropdown-end">
-                  <label tabIndex={0} className="w-12 h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer notched-corner group">
+                  <label tabIndex={0} className="w-10 h-10 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group">
                     <User size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
                   </label>
-                  <ul tabIndex={0} className="dropdown-content mt-4 p-1 shadow-2xl bg-black border border-white/10 notched-corner w-52 overflow-hidden backdrop-blur-xl">
+                  <ul tabIndex={0} className="dropdown-content mt-4 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-xl w-52 overflow-hidden backdrop-blur-xl">
                     <li>
-                      <Link to="/profile" className="flex items-center gap-3 p-4 text-[10px] font-mono text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all uppercase tracking-widest">
-                        <User size={14} /> Profile_View
+                      <Link to="/profile" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                        <User size={16} /> Profile
                       </Link>
                     </li>
                     <li className="border-t border-white/5">
                       <button 
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 p-4 text-[10px] font-mono text-red-500/60 hover:text-red-500 hover:bg-red-500/5 transition-all uppercase tracking-widest"
+                        className="w-full flex items-center gap-3 p-4 text-sm font-medium text-red-500/80 hover:text-red-500 hover:bg-red-500/5 transition-all"
                       >
-                        <LogOut size={14} /> Disconnect
+                        <LogOut size={16} /> Logout
                       </button>
                     </li>
                   </ul>
@@ -145,7 +142,7 @@ const Navbar = () => {
             </div>
             <button 
               onClick={() => setMobileMenuOpen(false)} 
-              className="w-12 h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-primary/50 transition-all notched-corner group"
+              className="w-12 h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-primary/50 transition-all rounded-xl group"
             >
               <X size={24} className="text-white/50 group-hover:text-primary transition-colors" />
             </button>
@@ -153,18 +150,13 @@ const Navbar = () => {
 
           {/* Links and Actions */}
           <div className="flex flex-col items-center gap-10">
-            <div className="flex flex-col items-center gap-2 mb-4">
-              <span className="telemetry-label text-[8px] opacity-40">System Version 1.0.4</span>
-              <div className="h-[1px] w-12 bg-primary/30" />
-            </div>
-
             <div className="flex flex-col items-center gap-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-4xl font-display-heavy text-white hover:text-primary transition-all hover:scale-110 tracking-widest"
+                  className="text-3xl font-bold text-white hover:text-primary transition-all hover:scale-110"
                 >
                   {link.name}
                 </Link>
@@ -176,9 +168,9 @@ const Navbar = () => {
                 <Link 
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="btn-bms px-16 py-5 text-xl tracking-widest"
+                  className="btn-bms px-16 py-4 text-lg font-semibold"
                 >
-                  LOGIN
+                  Login
                 </Link>
               ) : (
                 <button 
@@ -186,24 +178,19 @@ const Navbar = () => {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="flex items-center gap-3 px-12 py-4 border border-red-500/30 text-red-500 font-display-heavy text-xl hover:bg-red-500/10 transition-colors tracking-widest"
+                  className="flex items-center gap-3 px-12 py-4 border border-red-500/30 text-red-500 font-bold text-lg hover:bg-red-500/10 transition-colors"
                 >
-                  TERMINATE_SESSION
+                  Logout
                 </button>
               )}
             </div>
           </div>
           
-          {/* Footer Telemetry */}
+          {/* Footer Branding */}
           <div className="absolute bottom-10 flex flex-col items-center gap-4">
-            <p className="text-[9px] font-mono text-white/20 tracking-[0.4em] uppercase">
-              &copy; {new Date().getFullYear()} BookMySportz // Engineered for Athletes
+            <p className="text-xs text-white/40">
+              &copy; {new Date().getFullYear()} BookMySportz Enterprise
             </p>
-            <div className="flex gap-4">
-              <div className="w-1.5 h-1.5 bg-primary/20 rounded-full" />
-              <div className="w-1.5 h-1.5 bg-primary/20 rounded-full animate-pulse" />
-              <div className="w-1.5 h-1.5 bg-primary/20 rounded-full" />
-            </div>
           </div>
         </div>
       )}

@@ -52,20 +52,11 @@ export const getDashboardData = async (req, res) => {
       ]),
     ]);
 
-   const  rijobookingsPerTurf =  await Booking.aggregate([
-      { $match: { turf: { $in: turfIds } } },
-      { $group: { _id: "$turf", bookings: { $sum: 1 } } },
-      {
-        $lookup: {
-          from: "turves",
-          localField: "_id",
-          foreignField: "_id",
-          as: "turfInfo",
-        },
-      },
-      { $unwind: "$turfInfo" },
-      { $project: { name: "$turfInfo.name", bookings: 1 } },
-    ]);
+    const recentBookings = await Booking.find({ turf: { $in: turfIds } })
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .populate("user", "name email")
+      .populate("turf", "name location");
 
     res.json({
       totalBookings,
@@ -74,6 +65,7 @@ export const getDashboardData = async (req, res) => {
       totalTurfs: turfs.length,
       bookingsPerTurf,
       revenueOverTime,
+      recentBookings,
     });
   } catch (error) {
     console.error("Error fetching dashboard data:", error);

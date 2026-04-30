@@ -1,21 +1,21 @@
 const Footer = () => {
   return (
-    <footer className="bg-[#050505] py-10 lg:py-20 border-t border-gray-900">
+    <footer className="bg-[#050505] py-12 border-t border-white/5">
       <div className="container mx-auto px-4 text-center">
-        <div className="flex justify-center mb-4">
-          <img src="/logo.png" alt="BookMySportz Logo" className="w-20 h-20 object-contain" />
+        <div className="flex justify-center mb-6">
+          <img src="/logo.png" alt="BookMySportz Logo" className="h-16 w-auto object-contain" />
         </div>
-        <p className="text-gray-500 font-secondary text-xs uppercase tracking-[0.3em] mb-12 max-w-sm mx-auto">
-          The ultimate arena for elite turf bookings. Step up your game.
+        <p className="text-white/40 text-sm mb-10 max-w-sm mx-auto">
+          The professional platform for sports turf bookings. Step up your game with ease.
         </p>
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-800 to-transparent mb-12"></div>
-        <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-12">
-            <span className="text-[10px] font-mono text-gray-600 uppercase tracking-widest cursor-pointer hover:text-primary transition-colors">Privacy Protocol</span>
-            <span className="text-[10px] font-mono text-gray-600 uppercase tracking-widest cursor-pointer hover:text-primary transition-colors">Terms of Engagement</span>
-            <span className="text-[10px] font-mono text-gray-600 uppercase tracking-widest cursor-pointer hover:text-primary transition-colors">Support Center</span>
+        <div className="w-full h-px bg-white/5 mb-10"></div>
+        <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-10">
+            <span className="text-xs text-white/50 hover:text-[#84CC16] transition-colors cursor-pointer">Privacy Policy</span>
+            <span className="text-xs text-white/50 hover:text-[#84CC16] transition-colors cursor-pointer">Terms of Service</span>
+            <span className="text-xs text-white/50 hover:text-[#84CC16] transition-colors cursor-pointer">Support Center</span>
         </div>
-        <p className="text-gray-700 text-[10px] font-mono uppercase tracking-[0.2em]">
-          &copy; {new Date().getFullYear()} BookMySportz. Engineered for Athletes.
+        <p className="text-white/20 text-[10px] uppercase tracking-widest">
+          &copy; {new Date().getFullYear()} BookMySportz. All rights reserved.
         </p>
       </div>
     </footer>

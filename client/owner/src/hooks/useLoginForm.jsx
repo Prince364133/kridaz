@@ -38,11 +38,11 @@ const useLoginForm = () => {
   const onSubmit = async (data) => {
    setLoading(true);
     try {
-      const response = await axiosInstance.post("api/owner/auth/login", data);
+      const response = await axiosInstance.post("/api/owner/auth/login", data);
       const result = await response.data;
       dispatch(login({token:result.token,role:result.role}));
       if(result.role === "owner") {
-        navigate("/owner");
+        navigate("/partner");
       }else if(result.role === "coach") {
         navigate("/coach");
       }else if(result.role === "umpire") {

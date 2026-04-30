@@ -16,9 +16,6 @@ const SearchTurf = ({ onSearch }) => {
         onSubmit={handleSearch} 
         className="relative group"
       >
-        {/* Glow Effect */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-[#84CC16] to-[#4D7C0F] rounded-[2rem] blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-        
         <div className="relative flex flex-col md:flex-row items-center bg-[#111]/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-2 shadow-2xl">
           
           {/* Venue Search */}

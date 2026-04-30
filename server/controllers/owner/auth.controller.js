@@ -44,25 +44,25 @@ export const registerOwner = async (req, res) => {
   }
 
   try {
-    const ownerRequest = await OwnerRequest.findOne({ email });
+    // const ownerRequest = await OwnerRequest.findOne({ email });
 
-    if (!ownerRequest) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Owner request does not exist" });
-    }
+    // if (!ownerRequest) {
+    //   return res
+    //     .status(400)
+    //     .json({ success: false, message: "Owner request does not exist" });
+    // }
 
-    if (ownerRequest.status === "pending") {
-      return res
-        .status(400)
-        .json({ success: false, message: "Owner request is not approved" });
-    }
+    // if (ownerRequest.status === "pending") {
+    //   return res
+    //     .status(400)
+    //     .json({ success: false, message: "Owner request is not approved" });
+    // }
 
-    if (ownerRequest.status === "rejected") {
-      return res
-        .status(400)
-        .json({ success: false, message: "Owner request is rejected" });
-    }
+    // if (ownerRequest.status === "rejected") {
+    //   return res
+    //     .status(400)
+    //     .json({ success: false, message: "Owner request is rejected" });
+    // }
 
     const owner = await Owner.findOne({ email });
     if (owner) {
@@ -77,7 +77,7 @@ export const registerOwner = async (req, res) => {
       email,
       phone,
       password: hashedPassword,
-      role: role || ownerRequest.role || "owner",
+      role: role || (typeof ownerRequest !== 'undefined' ? ownerRequest.role : null) || "owner",
     });
     await newOwner.save();
     const token = generateOwnerToken(newOwner);

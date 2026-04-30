@@ -19,20 +19,20 @@ export default function CoachDashboard() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-6 border-b border-white/5">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-primary font-mono text-xs uppercase tracking-[0.4em]">
+          <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest">
             <Target size={14} className="animate-pulse" />
-            <span>Coaching Mode: Active</span>
+            <span>Coach Status: Active</span>
           </div>
-          <h1 className="text-5xl font-display font-black italic uppercase tracking-tighter text-white">
-            Training <span className="text-primary">Intel</span>
+          <h1 className="text-5xl font-black uppercase tracking-tight text-white">
+            Training <span className="text-primary">Dashboard</span>
           </h1>
-          <p className="text-gray-500 font-mono text-xs">ELITE PERFORMANCE TRACKER // ALPHA-1</p>
+          <p className="text-gray-500 text-xs font-medium uppercase tracking-wider">Professional Performance Management</p>
         </div>
         
         <div className="flex gap-3">
-          <div className="px-4 py-2 bg-black notched-corner border border-white/5 flex items-center gap-2">
+          <div className="px-4 py-2 bg-black rounded-xl border border-white/5 flex items-center gap-2">
             <Award size={16} className="text-primary" />
-            <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Pro License Verified</span>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Verified Instructor</span>
           </div>
         </div>
       </div>
@@ -47,13 +47,13 @@ export default function CoachDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Performance Graph */}
-        <div className="lg:col-span-2 p-8 bg-[#0A0A0A] notched-corner border border-white/5 relative group">
+        <div className="lg:col-span-2 p-8 bg-[#0A0A0A] rounded-2xl border border-white/5 relative group">
           <div className="flex justify-between items-center mb-10">
             <div>
-              <h2 className="text-xl font-display font-black italic uppercase tracking-tight text-white">Student Progress</h2>
-              <p className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Aggregate Achievement Metrics</p>
+              <h2 className="text-xl font-black uppercase tracking-tight text-white">Student Progress</h2>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Aggregate Achievement Metrics</p>
             </div>
-            <div className="p-2 bg-white/5 notched-corner border border-white/5">
+            <div className="p-2 bg-white/5 rounded-xl border border-white/5">
                <TrendingUp className="text-primary" size={16} />
             </div>
           </div>
@@ -71,7 +71,7 @@ export default function CoachDashboard() {
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 10}} />
                 <YAxis axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 10}} />
                 <Tooltip 
-                  contentStyle={{backgroundColor: '#000', border: '1px solid rgba(132,204,22,0.2)', fontFamily: 'monospace'}}
+                  contentStyle={{backgroundColor: '#000', border: '1px solid rgba(132,204,22,0.2)', borderRadius: '12px'}}
                   itemStyle={{color: '#84CC16'}}
                 />
                 <Area type="monotone" dataKey="revenue" stroke="#84CC16" strokeWidth={3} fill="url(#coachColor)" />
@@ -81,25 +81,25 @@ export default function CoachDashboard() {
         </div>
 
         {/* Upcoming Roster */}
-        <div className="p-8 bg-[#0A0A0A] notched-corner border border-white/5 flex flex-col">
-          <h2 className="text-xl font-display font-black italic uppercase tracking-tight text-white mb-6">Upcoming Ops</h2>
+        <div className="p-8 bg-[#0A0A0A] rounded-2xl border border-white/5 flex flex-col">
+          <h2 className="text-xl font-black uppercase tracking-tight text-white mb-6">Upcoming Sessions</h2>
           <div className="flex-1 space-y-4">
             {[
               { name: 'Advanced Batting', time: '14:00', student: 'Rahul K.', type: 'Private' },
               { name: 'Bowling Masterclass', time: '16:30', student: 'Group (12)', type: 'Batch' },
               { name: 'Video Analysis', time: '19:00', student: 'Sanya M.', type: 'Virtual' },
             ].map((op, i) => (
-              <div key={i} className="p-4 bg-white/[0.02] border-l-2 border-primary group hover:bg-white/[0.05] transition-all">
+              <div key={i} className="p-4 bg-white/[0.02] border-l-2 border-primary group hover:bg-white/[0.05] transition-all rounded-r-xl">
                 <div className="flex justify-between items-start mb-1">
-                  <span className="text-[10px] font-mono text-gray-400">{op.time}</span>
-                  <span className="text-[9px] font-mono text-primary uppercase tracking-tighter">{op.type}</span>
+                  <span className="text-[10px] font-bold text-gray-400">{op.time}</span>
+                  <span className="text-[9px] font-bold text-primary uppercase tracking-widest">{op.type}</span>
                 </div>
-                <h4 className="text-sm font-display font-bold text-white mb-1 uppercase tracking-tight">{op.name}</h4>
-                <p className="text-[10px] font-mono text-gray-500 uppercase">{op.student}</p>
+                <h4 className="text-sm font-bold text-white mb-1 uppercase tracking-tight">{op.name}</h4>
+                <p className="text-[10px] font-medium text-gray-500 uppercase">{op.student}</p>
               </div>
             ))}
           </div>
-          <button className="mt-8 w-full py-3 bg-primary text-black notched-corner font-display font-black italic uppercase text-xs tracking-widest hover:scale-[0.98] transition-all">
+          <button className="mt-8 w-full py-3 bg-primary text-black rounded-xl font-bold uppercase text-xs tracking-widest hover:scale-[0.98] transition-all shadow-lg shadow-primary/10">
             Schedule Session
           </button>
         </div>
@@ -107,3 +107,4 @@ export default function CoachDashboard() {
     </div>
   );
 }
+

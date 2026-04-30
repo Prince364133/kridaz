@@ -36,7 +36,7 @@ const OwnerBookings = () => {
       <div className="max-w-7xl mx-auto">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6 border-l-8 border-primary pl-6">
           <div>
-            <h1 className="text-4xl md:text-6xl font-display font-black italic tracking-tighter text-white">
+            <h1 className="text-4xl md:text-6xl font-display font-black italic tracking-tight text-white">
               BOOKINGS <span className="text-primary">OVERVIEW</span>
             </h1>
             <p className="text-gray-500 font-secondary uppercase tracking-widest mt-2">

@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Plus } from "lucide-react";
 import useTurfManagement from "@hooks/owner/useTurfManagement";
 import EditTurfForm from "./EditTurfForm";
 import TurfCardSkeleton from "./TurfCardSkeleton";
@@ -32,13 +34,23 @@ const TurfManagement = () => {
   return (
     <div className="p-4 md:p-8 bg-[#0a0a0a] min-h-screen text-white">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-12 border-l-8 border-primary pl-6">
-          <h1 className="text-4xl md:text-6xl font-display font-black italic tracking-tighter text-white uppercase">
-            ARENA <span className="text-primary">MANAGEMENT</span>
-          </h1>
-          <p className="text-gray-500 font-secondary uppercase tracking-widest mt-2">
-            Inventory Control | BookMySportz
-          </p>
+        <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="border-l-8 border-primary pl-6">
+            <h1 className="text-4xl md:text-6xl font-display font-black italic tracking-tight text-white uppercase">
+              ARENA <span className="text-primary">MANAGEMENT</span>
+            </h1>
+            <p className="text-gray-500 font-secondary uppercase tracking-widest mt-2">
+              Inventory Control | BookMySportz
+            </p>
+          </div>
+          
+          <Link 
+            to="/partner/add-turf"
+            className="flex items-center gap-2 px-8 py-4 bg-primary text-black font-black uppercase tracking-tighter hover:bg-white hover:scale-105 transition-all duration-300 rounded-xl shadow-[4px_4px_0px_#fff] hover:shadow-none active:translate-y-1"
+          >
+            <Plus size={20} strokeWidth={3} />
+            Add New Venue
+          </Link>
         </header>
 
         {isLoading ? (

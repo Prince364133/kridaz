@@ -11,7 +11,7 @@ const NotFound = () => {
         <p className="text-lg mb-8">
           The page you&#39;re looking for doesn&#39;t exist or has been moved.
         </p>
-        <Link to={isLoggedIn ? "/auth": "/"} className="btn btn-primary">
+        <Link to={"/"} className="btn btn-primary">
           Go Back Home
         </Link>
       </div>

@@ -1,14 +1,17 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 // import {ProtectedRoute} from "@components/ProtectedRoute"
 
 import Home from "@pages/Home.jsx";
 import Login from "@pages/Login";
-import SignUp from "@pages/SignUp";
 import VenueOwnerLanding from "@pages/VenueOwnerLanding";
 import CoachLanding from "@pages/CoachLanding";
 import UmpireLanding from "@pages/UmpireLanding";
 import PartnersGateway from "@pages/PartnersGateway";
+import VenueOwnerSignUp from "@pages/VenueOwnerSignUp";
+import CoachSignUp from "@pages/CoachSignUp";
+import UmpireSignUp from "@pages/UmpireSignUp";
+import ComingSoon from "@pages/ComingSoon";
 
 //  all the components that are used in the layout
 import { AdminLayout, PartnerLayout, GuestLayout, CoachLayout, UmpireLayout } from "@layouts";
@@ -51,10 +54,10 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <Home />,
+        element: <Navigate to="/login" replace />,
       },
       {
-        path: "partner",
+        path: "venue-owner",
         element: <VenueOwnerLanding />,
       },
       {
@@ -70,8 +73,20 @@ const router = createBrowserRouter([
         element: <Login />,
       },
       {
-        path: "signup",
-        element: <SignUp />,
+        path: "signup/venue-owner",
+        element: <VenueOwnerSignUp />,
+      },
+      {
+        path: "signup/coach",
+        element: <CoachSignUp />,
+      },
+      {
+        path: "signup/umpire",
+        element: <UmpireSignUp />,
+      },
+      {
+        path: "coming-soon",
+        element: <ComingSoon />,
       },
       {
         path: "partners",
@@ -147,6 +162,27 @@ const router = createBrowserRouter([
     children: [
       { path: "", element: <UmpireDashboard /> },
     ],
+  },
+  // Legacy Redirects
+  {
+    path: "/owner",
+    element: <Navigate to="/partner" replace />,
+  },
+  {
+    path: "/owner/add-turf",
+    element: <Navigate to="/partner/add-turf" replace />,
+  },
+  {
+    path: "/owner/turfs",
+    element: <Navigate to="/partner/turfs" replace />,
+  },
+  {
+    path: "/owner/reviews",
+    element: <Navigate to="/partner/reviews" replace />,
+  },
+  {
+    path: "/owner/bookings",
+    element: <Navigate to="/partner/bookings" replace />,
   },
 ]);
 

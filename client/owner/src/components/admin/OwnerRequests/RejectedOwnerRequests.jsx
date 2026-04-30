@@ -21,11 +21,11 @@ const RejectedOwnerRequests = () => {
       <div className="max-w-7xl mx-auto space-y-12">
         {/* Header Section */}
         <div className="relative">
-          <div className="absolute -left-4 top-0 w-1 h-20 bg-primary shadow-[0_0_15px_rgba(113,179,0,0.5)]"></div>
-          <h1 className="text-6xl md:text-8xl font-display font-black italic tracking-tighter leading-none uppercase text-red-500">
-            Rejected <span className="text-primary">Recruits</span>
+          <div className="absolute -left-4 top-0 w-1 h-12 bg-red-500 rounded-full shadow-[0_0_15px_rgba(239,68,68,0.5)]"></div>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight uppercase text-red-500">
+            Rejected <span className="text-[#84CC16]">Requests</span>
           </h1>
-          <p className="font-mono text-gray-500 text-sm tracking-[0.4em] uppercase mt-4">Denied Personnel & Access Rejections</p>
+          <p className="text-gray-400 text-sm mt-2">Denied Owner Authorizations</p>
         </div>
 
         <div className="space-y-8">
@@ -35,11 +35,11 @@ const RejectedOwnerRequests = () => {
           />
           
           {rejectedRequests.length === 0 ? (
-            <div className="relative p-12 notched-corner border border-white/5 bg-[#111111] text-center overflow-hidden">
+            <div className="relative p-12 rounded-2xl border border-white/10 bg-[#111] text-center overflow-hidden">
                <div className="absolute top-0 left-0 w-full h-full bg-red-500/5 blur-[100px]"></div>
                <div className="relative space-y-4">
-                  <p className="font-display font-black italic text-2xl uppercase tracking-wider text-gray-400">No Rejected Units Found</p>
-                  <p className="font-mono text-xs text-gray-600 uppercase tracking-widest">The archives show no denied recruitment requests.</p>
+                  <p className="font-bold text-2xl text-gray-400">No Rejected Requests</p>
+                  <p className="text-sm text-gray-500">There are no denied recruitment requests.</p>
                </div>
             </div>
           ) : (

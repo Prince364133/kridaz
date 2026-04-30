@@ -56,7 +56,7 @@ const useBookingConfirmation = (
       );
       const result = await response.data;
       toast.success(result.message);
-      navigate("/auth/booking-history");
+      navigate("/booking-history");
     } catch (err) {
       if (err.response) {
         toast.error(err.response?.data?.message);

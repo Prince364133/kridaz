@@ -41,7 +41,7 @@ const useBecomeOwner = () => {
             );
             const result = await response.data;
              toast.success(result.message);
-             navigate("/auth")
+             navigate("/")
          } catch (error) {
            if(error.response){
              toast.error(error.response?.data?.message);

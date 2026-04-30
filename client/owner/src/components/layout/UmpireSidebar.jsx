@@ -1,9 +1,19 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { X, LayoutDashboard, Trophy, Calendar, Star, ShieldCheck, Activity } from "lucide-react";
+import { X, LayoutDashboard, Trophy, Calendar, Star, ShieldCheck, Activity, LogOut } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { logout } from "@redux/slices/authSlice.js";
+import { useNavigate } from "react-router-dom";
 
 const UmpireSidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/", { replace: true });
+  };
 
   const navItems = [
     { to: "/umpire", label: "OVERVIEW", icon: LayoutDashboard },
@@ -37,21 +47,17 @@ const UmpireSidebar = ({ isOpen, toggleSidebar }) => {
               <X size={20} />
             </button>
           </div>
-          <div className="flex flex-col">
-            <span className="telemetry-label text-[10px] text-primary/80 mb-1">Sector 9-Official</span>
-            <span className="font-display-heavy text-xl text-white tracking-widest leading-none">INTEGRITY_HUB</span>
-          </div>
           
           <div className="flex items-center gap-2">
              <Activity size={10} className="text-primary animate-pulse" />
-             <span className="telemetry-label text-[9px] text-white/30 uppercase tracking-[0.3em]">Compliance Check</span>
+             <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Status Active</span>
           </div>
         </div>
 
         {/* Navigation */}
         <div className="p-4 py-8 space-y-4">
           <div className="px-4 mb-4">
-             <span className="telemetry-label text-[9px] text-white/20 uppercase tracking-[0.4em]">Duty Roster</span>
+             <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Navigation</span>
           </div>
           <nav className="space-y-1">
             {navItems.map((item) => {
@@ -60,7 +66,7 @@ const UmpireSidebar = ({ isOpen, toggleSidebar }) => {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`flex items-center px-4 py-3 group relative overflow-hidden transition-all duration-500 ${
+                  className={`flex items-center px-4 py-3 group relative overflow-hidden transition-all duration-500 rounded-xl ${
                     isActive ? "text-black" : "text-white/40 hover:text-white"
                   }`}
                   onClick={() => {
@@ -68,14 +74,14 @@ const UmpireSidebar = ({ isOpen, toggleSidebar }) => {
                   }}
                 >
                   {isActive && (
-                    <div className="absolute inset-0 bg-primary notched-corner -z-10 animate-in fade-in zoom-in-95 duration-500" />
+                    <div className="absolute inset-0 bg-primary -z-10 animate-in fade-in zoom-in-95 duration-500" />
                   )}
                   {!isActive && (
-                    <div className="absolute inset-0 bg-white/5 notched-corner -z-10 opacity-0 group-hover:opacity-100 transition-all duration-500" />
+                    <div className="absolute inset-0 bg-white/5 -z-10 opacity-0 group-hover:opacity-100 transition-all duration-500" />
                   )}
                   
                   <item.icon size={16} className={`mr-4 transition-transform duration-500 ${isActive ? "text-black" : "text-white/20 group-hover:text-primary"}`} />
-                  <span className="font-display-heavy text-lg tracking-widest pt-1">
+                  <span className="text-sm font-bold tracking-widest pt-1 uppercase">
                     {item.label}
                   </span>
                   
@@ -89,20 +95,30 @@ const UmpireSidebar = ({ isOpen, toggleSidebar }) => {
         </div>
 
         {/* User Profile / Status */}
-        <div className="absolute bottom-0 left-0 w-full p-8 border-t border-white/5 bg-black/40 backdrop-blur-xl">
-          <div className="flex items-center gap-4 group">
-            <div className="w-11 h-11 bg-white/5 notched-corner border border-white/10 flex items-center justify-center text-primary group-hover:border-primary transition-all duration-500">
-               <ShieldCheck size={20} className="text-white/20 group-hover:text-primary transition-colors" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                 <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                 <span className="telemetry-label text-[9px] text-primary">Protocol Active</span>
+        <div className="absolute bottom-0 left-0 w-full p-6 border-t border-white/5 bg-black/40 backdrop-blur-xl space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-primary/10 flex items-center justify-center rounded-lg border border-primary/20">
+                <ShieldCheck size={14} className="text-primary" />
               </div>
-              <div className="text-[11px] font-display-heavy text-white/60 tracking-widest leading-none">MATCH_OFFICIAL</div>
+              <div>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                   <div className="w-1 h-1 bg-primary rounded-full animate-pulse" />
+                   <span className="text-[8px] font-black uppercase tracking-widest text-primary">Status</span>
+                </div>
+                <div className="text-[9px] font-bold text-white/40 tracking-widest leading-none uppercase">OFFICIAL</div>
+              </div>
             </div>
+            <button 
+              onClick={handleLogout}
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-red-500 hover:border-red-500/50 hover:bg-red-500/10 transition-all duration-300 group"
+              title="Sign Out"
+            >
+              <LogOut size={18} className="group-hover:translate-x-0.5 transition-transform" />
+            </button>
           </div>
         </div>
+
       </aside>
     </>
   );

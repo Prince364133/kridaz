@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import chalk from "chalk";
 import Turf from "../../models/turf.model.js";
 import TimeSlot from "../../models/timeSlot.model.js";
@@ -5,6 +6,15 @@ import { format, parseISO, startOfDay } from "date-fns";
 
 // get all turfs
 export const getAllTurfs = async (req, res) => {
+  // Check if database is connected
+  if (mongoose.connection.readyState !== 1) {
+    console.log(chalk.yellow("[WARN] getAllTurfs: Database not connected. State:"), mongoose.connection.readyState);
+    return res.status(503).json({ 
+      message: "Database connecting. Please refresh in a moment.",
+      status: "CONNECTING"
+    });
+  }
+
   try {
     const turfs = await Turf.find({});
     console.log(`[DEBUG] getAllTurfs: Found ${turfs.length} turfs in collection: ${Turf.collection.name}`);

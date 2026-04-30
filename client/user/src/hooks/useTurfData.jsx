@@ -7,24 +7,38 @@ const useTurfData = () => {
   const dispatch = useDispatch();
   const { turfs, loading, error } = useSelector((state) => state.turf);
 
-  useEffect(() => {
-    const fetchTurfData = async () => {
-      try {
-        dispatch(setLoading(true));
-        // Fetch your turf data here
-        const response = await axiosInstance.get("/api/user/turf/all");
-        const data = await response.data.turfs;
-        dispatch(setTurfs(data));
-      } catch (err) {
-        dispatch(setError(err.message));
-      } finally {
-        dispatch(setLoading(false));
+  const fetchTurfData = async () => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      
+      // Add a 10-second timeout to the request
+      const response = await axiosInstance.get("/api/user/turf/all", { timeout: 10000 });
+      
+      if (response.data && response.data.turfs) {
+        dispatch(setTurfs(response.data.turfs));
+      } else {
+        console.warn("[useTurfData] Unexpected response format:", response.data);
+        dispatch(setTurfs([]));
       }
-    };
+    } catch (err) {
+      console.error("[useTurfData] Error:", err);
+      let message = "Failed to connect to server";
+      if (err.code === "ECONNABORTED") message = "Request timed out. Server might be slow.";
+      else if (err.response?.data?.message) message = err.response.data.message;
+      else if (err.message) message = err.message;
+      
+      dispatch(setError(message));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  useEffect(() => {
     fetchTurfData();
   }, []);
 
-  return { turfs, loading, error };
+  return { turfs, loading, error, refetch: fetchTurfData };
 };
 
 export default useTurfData;

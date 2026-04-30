@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ArrowRight, Activity, Globe, ShieldCheck, User, LogOut } from "lucide-react";
+import { Menu, X, ArrowRight, ShieldCheck, User, LogOut } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
@@ -26,42 +26,41 @@ const GuestNavbar = () => {
   };
 
   const navLinks = [
-    { name: "NETWORK", path: "/" },
-    { name: "PARTNERS", path: "/partners" },
-    { name: "VENUES", path: "/partner" },
-    { name: "COACHES", path: "/coach-landing" },
-    { name: "OFFICIALS", path: "/umpire-landing" },
+    { name: "Partners", path: "/partners" },
+    { name: "Venues", path: "/venue-owner" },
+    { name: "Coaches", path: "/coach-landing" },
+    { name: "Officials", path: "/umpire-landing" },
   ];
 
   return (
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-      scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/5 py-3" : "bg-transparent py-6"
+      scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/5 py-2" : "bg-transparent py-4"
     }`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
         
-        {/* Cinematic Logo Unit */}
-        <Link to="/" className="group flex items-center gap-6">
+        {/* Brand Logo Unit */}
+        <Link to="/" className="group flex items-center gap-4">
           <div className="flex items-center justify-center">
-            <img src="/logo.png" alt="BookMySportz" className="h-8 lg:h-10 w-auto brightness-125 group-hover:scale-105 transition-transform duration-500" />
+            <img src="/logo.png" alt="BookMySportz" className="h-8 lg:h-10 w-auto transition-transform duration-500 group-hover:scale-105" />
           </div>
-          <div className="hidden sm:block border-l-2 border-[#84CC16]/30 pl-6 h-10 flex flex-col justify-center">
-            <span className="block text-[9px] font-mono font-black text-[#84CC16] tracking-[0.4em] uppercase leading-none mb-1.5 opacity-80">Partner Portal</span>
-            <span className="block text-xl font-display-heavy text-white tracking-[0.15em] leading-none">COMMANDER</span>
+          <div className="hidden sm:block border-l border-white/20 pl-4 h-8 flex flex-col justify-center">
+            <span className="block text-[10px] font-semibold text-[#84CC16] tracking-wider uppercase leading-none mb-1">Partner Portal</span>
+            <span className="block text-lg font-bold text-white tracking-tight leading-none uppercase">Business</span>
           </div>
         </Link>
 
-        {/* Tactical Navigation (Desktop) */}
-        <div className="hidden lg:flex items-center gap-10">
+        {/* Navigation (Desktop) */}
+        <div className="hidden lg:flex items-center gap-8">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               to={link.path}
-              className={`text-[11px] font-display-heavy tracking-[0.2em] transition-all relative group ${
-                location.pathname === link.path ? "text-[#84CC16]" : "text-white/40 hover:text-white"
+              className={`text-sm font-medium transition-all relative group ${
+                location.pathname === link.path ? "text-[#84CC16]" : "text-white/60 hover:text-white"
               }`}
             >
               {link.name}
-              <span className={`absolute -bottom-1 left-0 h-[1px] bg-[#84CC16] transition-all duration-300 ${
+              <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#84CC16] transition-all duration-300 ${
                 location.pathname === link.path ? "w-full" : "w-0 group-hover:w-full"
               }`} />
             </Link>
@@ -74,38 +73,38 @@ const GuestNavbar = () => {
             <>
               <Link 
                 to="/login" 
-                className="hidden sm:flex items-center gap-2 text-[10px] font-mono font-black text-white/40 hover:text-[#84CC16] tracking-[0.2em] uppercase transition-all hover:translate-x-1"
+                className="hidden sm:flex items-center gap-2 text-sm font-medium text-white/60 hover:text-[#84CC16] transition-all"
               >
-                <ShieldCheck size={14} className="opacity-50" />
-                Secure Login
+                <ShieldCheck size={16} className="opacity-50" />
+                Login
               </Link>
               
-              <Link to="/signup" className="btn-bms h-11 px-8 text-[11px] font-black tracking-[0.2em] flex items-center gap-3 shadow-[0_0_20px_rgba(132,204,22,0.2)]">
-                ENLIST <ArrowRight size={14} />
+              <Link to="/partners" className="bg-[#84CC16] text-black h-10 px-6 rounded-md text-sm font-bold flex items-center gap-2 hover:bg-[#a3e635] transition-all shadow-lg shadow-[#84CC16]/10">
+                Join Now <ArrowRight size={16} />
               </Link>
             </>
           ) : (
-            <div className="flex items-center gap-6">
-              <div className="hidden md:flex flex-col items-end border-r border-white/10 pr-6 mr-1">
-                <span className="text-[8px] font-mono text-white/20 uppercase tracking-[0.3em]">Operational_Node</span>
-                <span className="text-[11px] font-display-heavy text-[#84CC16] tracking-[0.2em]">{role?.toUpperCase() || "COMMANDER"}</span>
+            <div className="flex items-center gap-4">
+              <div className="hidden md:flex flex-col items-end border-r border-white/10 pr-4">
+                <span className="text-[10px] text-white/40 uppercase tracking-wider">Account Type</span>
+                <span className="text-sm font-bold text-[#84CC16]">{role?.charAt(0).toUpperCase() + role?.slice(1) || "Partner"}</span>
               </div>
               <div className="dropdown dropdown-end">
-                <label tabIndex={0} className="w-12 h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer notched-corner group">
-                  <User size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+                <label tabIndex={0} className="w-10 h-10 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 rounded-full transition-all cursor-pointer group">
+                  <User size={20} className="text-white/60 group-hover:text-[#84CC16] transition-colors" />
                 </label>
-                <ul tabIndex={0} className="dropdown-content mt-4 p-1 shadow-2xl bg-black border border-white/10 notched-corner w-52 overflow-hidden backdrop-blur-xl">
+                <ul tabIndex={0} className="dropdown-content mt-4 p-2 shadow-2xl bg-[#121212] border border-white/10 rounded-xl w-56 overflow-hidden backdrop-blur-xl">
                   <li>
-                    <Link to="/partner/profile" className="flex items-center gap-3 p-4 text-[10px] font-mono text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all uppercase tracking-widest">
-                      <User size={14} /> Profile_Core
+                    <Link to="/partner/profile" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                      <User size={16} /> My Profile
                     </Link>
                   </li>
-                  <li className="border-t border-white/5">
+                  <li className="mt-1 pt-1 border-t border-white/5">
                     <button 
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-3 p-4 text-[10px] font-mono text-red-500/60 hover:text-red-500 hover:bg-red-500/5 transition-all uppercase tracking-widest"
+                      className="w-full flex items-center gap-3 p-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/5 rounded-lg transition-all"
                     >
-                      <LogOut size={14} /> Abort_Session
+                      <LogOut size={16} /> Logout
                     </button>
                   </li>
                 </ul>
@@ -120,35 +119,31 @@ const GuestNavbar = () => {
         </div>
       </div>
 
-      {/* Mobile Tactical Menu */}
-      <div className={`lg:hidden fixed inset-0 z-40 bg-black/95 backdrop-blur-2xl transition-all duration-500 ${
+      {/* Mobile Menu */}
+      <div className={`lg:hidden fixed inset-0 z-40 bg-black/98 backdrop-blur-2xl transition-all duration-500 ${
         isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
       }`}>
-        <div className="flex flex-col h-full pt-32 px-10 gap-12">
+        <div className="flex flex-col h-full pt-28 px-8 gap-8">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               to={link.path}
               onClick={() => setIsOpen(false)}
-              className="text-5xl font-display-heavy italic text-white/20 hover:text-[#84CC16] transition-colors tracking-tighter uppercase"
+              className="text-4xl font-bold text-white/30 hover:text-[#84CC16] transition-colors"
             >
               {link.name}
             </Link>
           ))}
           
-          <div className="mt-auto pb-20 space-y-6">
-            <div className="h-[1px] w-full bg-white/5" />
-            <div className="flex items-center justify-between">
-               <div className="flex flex-col gap-1">
-                 <span className="text-[10px] font-mono text-white/20 uppercase">System Status</span>
-                 <span className="text-[10px] font-mono text-[#84CC16] uppercase">All Nodes Online</span>
-               </div>
+          <div className="mt-auto pb-12 space-y-6">
+            <div className="h-[1px] w-full bg-white/10" />
+            <div className="flex items-center justify-end">
                <Link 
                 to="/login" 
                 onClick={() => setIsOpen(false)}
-                className="text-[10px] font-mono text-[#84CC16] border border-[#84CC16]/30 px-4 py-2 rounded-full uppercase"
+                className="text-sm font-bold text-[#84CC16] border border-[#84CC16]/30 px-6 py-2 rounded-lg"
                >
-                 Sign In
+                 Login
                </Link>
             </div>
           </div>

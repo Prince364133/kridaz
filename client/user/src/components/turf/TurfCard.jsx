@@ -4,7 +4,7 @@ import { MapPin, Star } from "lucide-react";
 
 const TurfCard = ({ turf, featured = false, distance = "2.4 km" }) => {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const to = isLoggedIn ? `/auth/turf/${turf._id}` : `/turf/${turf._id}`;
+  const to = `/turf/${turf._id}`;
 
   const rating = turf.rating ?? 5.0;
   const reviews = turf.reviewCount ?? 8189;
@@ -24,7 +24,7 @@ const TurfCard = ({ turf, featured = false, distance = "2.4 km" }) => {
         
         {/* Top Left: FEATURED Badge */}
         {featured && (
-          <div className="absolute top-3 left-3 bg-[#84CC16] px-4 py-1.5 rounded-full shadow-lg">
+          <div className="absolute top-3 left-3 bg-[#84CC16] px-4 py-1.5 rounded-full">
             <span className="text-[10px] font-black text-black uppercase tracking-tight">FEATURED</span>
           </div>
         )}

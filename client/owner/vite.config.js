@@ -20,4 +20,12 @@ export default defineConfig({
       "@layouts": path.resolve(__dirname, "./src/layouts")
     },
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:4000",
+        changeOrigin: true,
+      },
+    },
+  },
 });

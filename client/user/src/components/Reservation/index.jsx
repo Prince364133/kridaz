@@ -22,17 +22,21 @@ const Reservation = () => {
     loading,
   } = useReservation();
 
-if( loading) return <ReservationSkeleton />;
+  if (loading) return <ReservationSkeleton />;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-6">Reserve Turf</h2>
-      <div className="card bg-base-100 shadow-xl">
-        <div className="card-body p-4 sm:p-6">
+    <div className="min-h-screen bg-black text-white py-20 px-4">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-4xl font-bold uppercase tracking-tight mb-12 text-center md:text-left">
+          Complete Your <span className="text-[#84CC16]">Reservation</span>
+        </h2>
+        
+        <div className="bg-zinc-900/50 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl space-y-12">
           <DateSelection
             selectedDate={selectedDate}
             handleDateChange={handleDateChange}
           />
+          
           <TimeSelection
             availableTimes={availableTimes}
             selectedStartTime={selectedStartTime}
@@ -41,6 +45,7 @@ if( loading) return <ReservationSkeleton />;
             timeSlots={timeSlots}
             duration={duration}
           />
+          
           {selectedStartTime && (
             <DurationSelection
               selectedStartTime={selectedStartTime}
@@ -49,6 +54,7 @@ if( loading) return <ReservationSkeleton />;
               isDurationAvailable={isDurationAvailable}
             />
           )}
+          
           {selectedStartTime && duration > 0 && (
             <ReservationSummary
               selectedDate={selectedDate}
@@ -57,9 +63,10 @@ if( loading) return <ReservationSkeleton />;
               pricePerHour={pricePerHour}
             />
           )}
-          <div className="mt-6">
+          
+          <div className="pt-8">
             <button
-              className="btn btn-primary w-full relative"
+              className="w-full bg-[#84CC16] hover:bg-[#A3E635] text-black h-16 rounded-2xl font-bold uppercase tracking-widest transition-all disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center gap-3 active:scale-95"
               disabled={
                 !selectedStartTime ||
                 !isDurationAvailable(selectedStartTime, duration) ||
@@ -68,18 +75,20 @@ if( loading) return <ReservationSkeleton />;
               onClick={confirmReservation}
             >
               {loading ? (
-                <span className="absolute inset-0 flex items-center justify-center">
-                  <span className="loading loading-spinner loading-md"></span>
-                </span>
+                <span className="loading loading-spinner loading-md"></span>
               ) : (
-                "Confirm Reservation"
+                "Confirm Booking"
               )}
             </button>
+            <p className="text-center text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-4">
+              Secure Enterprise Transaction
+            </p>
           </div>
         </div>
       </div>
     </div>
   );
 };
+
 
 export default Reservation;

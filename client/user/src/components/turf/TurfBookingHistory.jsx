@@ -25,33 +25,32 @@ const TurfBookingHistory = () => {
   return (
     <div className="min-h-screen bg-[#000] py-12 px-4 relative overflow-hidden">
       {/* Decorative Background Elements */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2" />
+
 
       <div className="container mx-auto max-w-4xl relative z-10">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-6 text-center md:text-left">
-          <div className="space-y-2">
-            <div className="flex items-center justify-center md:justify-start gap-3 text-primary font-mono text-[10px] uppercase tracking-[0.4em]">
+          <div className="space-y-3">
+            <div className="flex items-center justify-center md:justify-start gap-3 text-[#84CC16] font-bold text-[10px] uppercase tracking-widest">
                <Activity size={14} className="animate-pulse" />
-               <span>Player Passport Active</span>
+               <span>Booking Management Active</span>
             </div>
-            <h1 className="text-5xl font-display font-black italic uppercase tracking-tighter text-white">
-              Mission <span className="text-primary">Logs</span>
+            <h1 className="text-5xl font-bold uppercase tracking-tight text-white">
+              Booking <span className="text-[#84CC16]">History</span>
             </h1>
-            <p className="text-gray-500 font-mono text-[10px] uppercase tracking-widest leading-relaxed">
-              Global Booking Intelligence // History Verified
+            <p className="text-gray-400 text-sm max-w-md">
+              View and manage your previous bookings and upcoming games.
             </p>
           </div>
           
           <div className="flex gap-4">
-             <div className="px-6 py-4 bg-[#0A0A0A] border border-white/5 notched-corner text-center min-w-[120px] group hover:border-primary/30 transition-all">
-                <p className="text-[10px] font-mono text-gray-500 uppercase mb-1">Bookings</p>
-                <p className="text-3xl font-display font-black italic text-white group-hover:text-primary transition-colors">{bookings.length}</p>
+             <div className="px-8 py-6 bg-[#0A0A0A] border border-white/10 rounded-2xl text-center min-w-[140px] group hover:border-[#84CC16]/30 transition-all">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Total Bookings</p>
+                <p className="text-4xl font-bold text-white group-hover:text-[#84CC16] transition-colors">{bookings.length}</p>
              </div>
-             <div className="px-6 py-4 bg-[#0A0A0A] border border-white/5 notched-corner text-center min-w-[120px] group hover:border-primary/30 transition-all">
-                <p className="text-[10px] font-mono text-gray-500 uppercase mb-1">Rank</p>
-                <p className="text-3xl font-display font-black italic text-white group-hover:text-primary transition-colors">PRO</p>
+             <div className="px-8 py-6 bg-[#0A0A0A] border border-white/10 rounded-2xl text-center min-w-[140px] group hover:border-[#84CC16]/30 transition-all">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Member Level</p>
+                <p className="text-4xl font-bold text-white group-hover:text-[#84CC16] transition-colors">PRO</p>
              </div>
           </div>
         </div>
@@ -59,23 +58,23 @@ const TurfBookingHistory = () => {
         {/* Bookings Feed */}
         <div className="space-y-8">
           {bookings.length === 0 ? (
-            <div className="p-12 text-center bg-[#0A0A0A] notched-corner border border-white/5 space-y-6">
-               <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto text-gray-600">
-                  <Calendar size={32} />
+            <div className="p-16 text-center bg-[#0A0A0A] rounded-[32px] border border-white/10 space-y-8">
+               <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto text-gray-500">
+                  <Calendar size={36} />
                </div>
                <div>
-                  <h3 className="text-xl font-display font-bold text-white uppercase italic">No Missions Logged</h3>
-                  <p className="text-gray-500 font-mono text-xs mt-2 uppercase tracking-widest">Awaiting your first stadium deployment...</p>
+                  <h3 className="text-2xl font-bold text-white uppercase">No Bookings Yet</h3>
+                  <p className="text-gray-400 text-sm mt-3 max-w-sm mx-auto">You haven't booked any venues yet. Explore local arenas and start playing!</p>
                </div>
-               <button className="px-8 py-3 bg-primary text-black notched-corner font-display font-black italic uppercase text-xs tracking-widest hover:scale-95 transition-all">
-                 Book Arena Now
+               <button className="px-10 py-4 bg-[#84CC16] text-black rounded-xl font-bold uppercase text-xs tracking-widest hover:scale-105 active:scale-95 transition-all">
+                 Explore Venues
                </button>
             </div>
           ) : (
             bookings.map((booking) => (
               <div
                 key={booking._id}
-                className="group relative overflow-hidden bg-[#0A0A0A] border border-white/5 notched-corner transition-all duration-500 hover:border-primary/30 hover:scale-[1.01]"
+                className="group relative overflow-hidden bg-[#0A0A0A] border border-white/10 rounded-3xl transition-all duration-500 hover:border-[#84CC16]/30 hover:shadow-2xl"
               >
                 {/* Visual Accent */}
                 <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -84,8 +83,8 @@ const TurfBookingHistory = () => {
                   <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
                     {/* QR Code Section */}
                     <div className="relative shrink-0 group/qr">
-                      <div className="absolute inset-0 bg-primary/20 blur-[20px] rounded-full opacity-0 group-hover/qr:opacity-100 transition-opacity" />
-                      <div className="relative p-3 bg-white notched-corner">
+
+                      <div className="relative p-4 bg-white rounded-2xl">
                         <img
                           src={booking.qrCode}
                           alt="Booking QR"
@@ -93,7 +92,7 @@ const TurfBookingHistory = () => {
                         />
                       </div>
                       <div className="mt-3 text-center">
-                         <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest">Entry Token</span>
+                         <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Entry Pass</span>
                       </div>
                     </div>
 
@@ -101,50 +100,50 @@ const TurfBookingHistory = () => {
                     <div className="flex-1 space-y-6 w-full">
                       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                          <h2 className="text-3xl font-display font-black italic text-white uppercase tracking-tighter group-hover:text-primary transition-colors">
+                          <h2 className="text-3xl font-bold text-white uppercase tracking-tight group-hover:text-[#84CC16] transition-colors">
                             {booking.turf.name}
                           </h2>
-                          <div className="flex items-center gap-2 mt-1 text-gray-500 font-mono text-[10px] uppercase tracking-widest">
-                            <MapPin size={10} className="text-primary" />
+                          <div className="flex items-center gap-2 mt-2 text-gray-400 font-medium text-xs">
+                            <MapPin size={12} className="text-[#84CC16]" />
                             {booking.turf.location}
                           </div>
                         </div>
-                        <div className="px-4 py-1.5 bg-primary/10 border border-primary/20 notched-corner">
-                           <span className="text-[10px] font-mono text-primary uppercase tracking-[0.2em] font-bold">Confirmed</span>
+                        <div className="px-4 py-1.5 bg-[#84CC16]/10 border border-[#84CC16]/20 rounded-full">
+                           <span className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest">Confirmed</span>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-6 pt-6 border-t border-white/5">
-                        <div className="space-y-1">
-                          <p className="text-[9px] font-mono text-gray-600 uppercase tracking-widest">Deployment Date</p>
-                          <div className="flex items-center gap-2 text-white font-display font-bold">
-                             <Calendar size={14} className="text-primary" />
-                             <span className="uppercase tracking-tight">{booking.timeSlot.date}</span>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8 border-t border-white/5">
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Booking Date</p>
+                          <div className="flex items-center gap-2 text-white font-bold">
+                             <Calendar size={14} className="text-[#84CC16]" />
+                             <span className="tracking-tight">{booking.timeSlot.date}</span>
                           </div>
                         </div>
-                        <div className="space-y-1">
-                          <p className="text-[9px] font-mono text-gray-600 uppercase tracking-widest">Time Window</p>
-                          <div className="flex items-center gap-2 text-white font-display font-bold">
-                             <Clock size={14} className="text-primary" />
-                             <span className="uppercase tracking-tight">{booking.timeSlot.formattedStartTime} - {booking.timeSlot.formattedEndTime}</span>
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Time Slot</p>
+                          <div className="flex items-center gap-2 text-white font-bold">
+                             <Clock size={14} className="text-[#84CC16]" />
+                             <span className="tracking-tight">{booking.timeSlot.formattedStartTime} - {booking.timeSlot.formattedEndTime}</span>
                           </div>
                         </div>
-                        <div className="space-y-1">
-                          <p className="text-[9px] font-mono text-gray-600 uppercase tracking-widest">Mission Cost</p>
-                          <div className="flex items-center gap-1 text-primary font-display font-black text-xl italic">
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Amount Paid</p>
+                          <div className="flex items-center gap-1 text-[#84CC16] font-bold text-xl">
                              <IndianRupee size={16} />
                              <span>{booking.totalPrice}</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex justify-end pt-4">
+                      <div className="flex justify-end pt-6">
                         <button
-                          className="flex items-center gap-2 px-6 py-2 border border-white/10 hover:border-primary/50 text-white hover:text-primary notched-corner text-[10px] font-mono uppercase tracking-[0.2em] transition-all group/btn"
+                          className="flex items-center gap-2 px-8 py-2.5 border border-white/10 hover:border-[#84CC16]/50 text-white hover:text-[#84CC16] rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all group/btn"
                           onClick={() => openReviewModal(booking.turf._id)}
                         >
-                          Submit Debrief
-                          <Zap size={12} className="group-hover/btn:fill-primary transition-all" />
+                          Write a Review
+                          <Zap size={12} className="group-hover/btn:fill-[#84CC16] transition-all" />
                         </button>
                       </div>
                     </div>
@@ -170,12 +169,13 @@ const TurfBookingHistory = () => {
 
       {/* Decorative Sidebar Labels */}
       <div className="fixed right-8 top-1/2 -translate-y-1/2 hidden xl:block">
-         <div className="rotate-90 origin-right text-[10px] font-mono text-gray-800 uppercase tracking-[1em] whitespace-nowrap">
-            PLAYER_BOOKING_HISTORY_PROTOCOL_V4
+         <div className="rotate-90 origin-right text-[10px] font-bold text-white/5 uppercase tracking-[1em] whitespace-nowrap">
+            PLAYER DASHBOARD
          </div>
       </div>
     </div>
   );
 };
+
 
 export default TurfBookingHistory;

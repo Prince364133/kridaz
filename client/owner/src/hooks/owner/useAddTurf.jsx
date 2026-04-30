@@ -125,7 +125,7 @@ export default function useAddTurf() {
       );
        const result = await response.data;
       toast.success(result.message);
-      navigate("/owner/turfs");
+      navigate("/partner/turfs");
      } catch (error) {
       if (error.response) {
         toast.error(error.response?.data?.message);

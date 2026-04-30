@@ -4,23 +4,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide scrollbar but keep scrollable */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* ── Design Tokens ──────────────────────────────────────────────── */
 :root {
   --primary:       #84CC16;
-  --primary-glow:  rgba(132, 204, 22, 0.4);
+  --primary-glow:  rgba(132, 204, 22, 0.1);
   --primary-dark:  #5F9300;
   --bg-base:       #000000;
   --surface:       #0A0A0A;
   --surface-2:     #111111;
   --border:        rgba(255, 255, 255, 0.05);
-  --border-glow:   rgba(132, 204, 22, 0.2);
+  --border-glow:   rgba(255, 255, 255, 0.1);
   --fg:            #FFFFFF;
-  --muted:         #888888;
-  --tactical:      #444444;
+  --muted:         #A0A0A0;
 }
 
 /* ── Base ────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
 
 body {
   font-family: "Inter", sans-serif;
@@ -33,7 +47,7 @@ body {
 /* ── Typography ──────────────────────────────────────────────────── */
 h1, h2, h3, .font-display {
   font-family: "Bebas Neue", sans-serif;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -66,50 +80,48 @@ h1, h2, h3, .font-display {
   gap: 8px;
   background-color: var(--primary);
   color: #000;
-  font-family: "Bebas Neue", sans-serif;
-  font-weight: 900;
-  font-style: italic;
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
   font-size: 14px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  border-radius: 9999px;
-  padding: 10px 24px;
+  border-radius: 12px;
+  padding: 12px 28px;
   border: none;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 0 rgba(132, 204, 22, 0);
+  box-shadow: 0 4px 12px rgba(132, 204, 22, 0.1);
 }
 .btn-bms:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.05);
   transform: translateY(-1px);
-  box-shadow: 0 4px 20px var(--primary-glow);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 .btn-bms:active {
   transform: translateY(0);
 }
 
-/* Notched Tactical Button */
-.btn-tactical {
+/* Secondary button style */
+.btn-bms-outline {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background-color: var(--primary);
-  color: #000;
-  font-family: "Bebas Neue", sans-serif;
-  font-weight: 900;
-  font-style: italic;
+  background-color: transparent;
+  color: var(--fg);
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
   font-size: 14px;
   text-transform: uppercase;
-  padding: 10px 24px;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
-  border: none;
+  border-radius: 12px;
+  padding: 12px 28px;
+  border: 1.5px solid var(--border);
   cursor: pointer;
   transition: all 0.2s;
 }
-.btn-tactical:hover {
-  filter: brightness(1.1);
-  transform: scale(1.02);
+.btn-bms-outline:hover {
+  border-color: var(--primary);
+  background-color: rgba(132, 204, 22, 0.05);
 }
 
 /* Ghost/outline pill */
@@ -151,9 +163,9 @@ h1, h2, h3, .font-display {
 .bms-card {
   background-color: var(--surface);
   border: 1px solid var(--border);
+  border-radius: 24px;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
 }
 .bms-card:hover {
   border-color: var(--border-glow);
@@ -240,27 +252,6 @@ h1, h2, h3, .font-display {
   to   { opacity: 1; transform: translateY(0); }
 }
 .animate-fadeInUp { animation: fadeInUp 0.6s ease-out both; }
-
-/* ── Legacy compatibility ────────────────────────────────────────── */
-/* Keep notched-corner available for selective use in admin tactical views */
-.notched-corner {
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
-}
-
-.font-display-heavy {
-  font-family: "Bebas Neue", sans-serif;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-  font-style: italic;
-  font-weight: 900;
-}
-
-.telemetry-label {
-  font-family: "Space Mono", monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.3em;
-  font-size: 10px;
-}
 
 /* ── Layout Utilities ─────────────────────────────────────────────── */
 .scrollbar-hide::-webkit-scrollbar {

@@ -19,8 +19,10 @@ import {
   Building,
   Users,
   ChevronRight,
-  ArrowUpRight
+  ArrowUpRight,
+  Activity
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import CountUp from "react-countup";
 import useOwnerDashboard from "@hooks/owner/useOwnerDashboard";
 import DashboardSkeleton from "./DashboardSkeleton";
@@ -34,12 +36,12 @@ const OwnerDashboard = () => {
     return (
       <div className="flex flex-col justify-center items-center min-h-[60vh] text-white">
         <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="font-display font-black italic text-xl uppercase tracking-wider text-red-500">Telemetry Link Severed</p>
+        <p className="font-bold text-xl uppercase tracking-wider text-red-500">Connection Interrupted</p>
         <button 
           onClick={() => window.location.reload()}
-          className="mt-6 px-8 py-3 border border-red-500/50 text-red-500 font-display font-black italic uppercase notched-corner hover:bg-red-500/10 transition-all"
+          className="mt-6 px-8 py-3 border border-red-500/50 text-red-500 font-bold uppercase rounded-xl hover:bg-red-500/10 transition-all"
         >
-          Retry Link
+          Try Again
         </button>
       </div>
     );
@@ -52,6 +54,7 @@ const OwnerDashboard = () => {
     totalTurfs,
     bookingsPerTurf,
     revenueOverTime,
+    recentBookings = [],
   } = dashboardData;
 
   const revenueChartData = revenueOverTime.map((item) => ({
@@ -60,79 +63,123 @@ const OwnerDashboard = () => {
   }));
 
   return (
-    <div className="p-6 lg:p-10 bg-[#000] min-h-screen text-white relative overflow-hidden">
-      {/* Background HUD Overlay */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{ backgroundImage: `radial-gradient(#84CC16 1px, transparent 1px)`, backgroundSize: "32px 32px" }} />
+    <div className="p-6 lg:p-10 bg-[#000] min-h-screen text-white relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#84CC16]/5 to-transparent pointer-events-none" />
       
       <div className="max-w-7xl mx-auto space-y-16 relative z-10">
         {/* Header Hero Section */}
-        <div className="relative pt-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 notched-corner border border-primary/20 bg-primary/5 text-[10px] font-mono text-primary uppercase tracking-[0.2em]">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_#84CC16]" />
-              Sector Command: Active
-            </div>
-            <div className="h-[1px] flex-1 bg-white/5" />
-          </div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-end">
-            <div className="space-y-6">
-              <h1 className="text-7xl md:text-9xl font-display-heavy leading-[0.8] tracking-tighter italic">
-                ARENA<br />
-                <span className="text-primary">INTELLIGENCE</span>
-              </h1>
-              <p className="text-gray-500 font-mono text-sm tracking-tight border-l-2 border-primary/30 pl-6 py-2 max-w-md">
-                Live operational telemetry and yield diagnostics for your sports empire. Monitor performance, scale sectors, and command your arena network.
-              </p>
-            </div>
-            
-            <div className="flex flex-wrap gap-4 justify-end">
-              <div className="px-6 py-4 notched-corner bg-surface/50 border border-white/5 backdrop-blur-md">
-                <p className="telemetry-label text-gray-500 mb-1">System Load</p>
-                <div className="flex items-center gap-3">
-                   <div className="h-1.5 w-32 bg-white/5 rounded-full overflow-hidden">
-                     <div className="h-full bg-primary w-[78%]" />
-                   </div>
-                   <span className="font-mono text-xs text-primary">78%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Stats Grid - High Impact */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard 
-            title="TOTAL MISSIONS" 
+            title="TOTAL BOOKINGS" 
             value={totalBookings} 
             icon={Calendar} 
-            className="bg-surface/30 border-white/5"
+            trend="up"
+            trendValue="12"
+            className="bg-white/5 border-white/10 rounded-2xl"
           />
           <StatCard 
-            title="PLAYER INTEL" 
-            value={totalReviews} 
-            icon={Star} 
-            className="bg-surface/30 border-white/5"
+            title="ACTIVE USERS" 
+            value={Math.round(totalBookings * 0.8)} 
+            icon={Users} 
+            trend="up"
+            trendValue="5"
+            className="bg-white/5 border-white/10 rounded-2xl"
           />
           <StatCard
-            title="TOTAL YIELD"
+            title="TOTAL REVENUE"
             value={totalRevenue}
             icon={TrendingUp}
             prefix="₹"
-            className="bg-primary/5 border-primary/20 text-primary shadow-[0_0_50px_rgba(132,204,22,0.05)]"
+            trend="up"
+            trendValue="8"
+            className="bg-[#84CC16]/5 border-[#84CC16]/20 text-[#84CC16] rounded-2xl"
           />
           <StatCard 
-            title="ACTIVE SECTORS" 
-            value={totalTurfs} 
-            icon={Building} 
-            className="bg-surface/30 border-white/5"
+            title="UTILIZATION" 
+            value={76} 
+            icon={Activity} 
+            trend="up"
+            trendValue="3"
+            className="bg-white/5 border-white/10 rounded-2xl"
           />
+        </div>
+
+        {/* Intelligence Hub - Main View */}
+        <div className="space-y-8">
+           <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white uppercase tracking-tight leading-none mb-2">Recent Operations</h2>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em]">Live Booking Telemetry</p>
+              </div>
+              <Link to="/partner/bookings" className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-[#84CC16] uppercase tracking-widest hover:bg-[#84CC16] hover:text-black transition-all">
+                View All Bookings
+              </Link>
+           </div>
+
+           <div className="bg-[#0A0A0A] border border-white/5 rounded-[32px] overflow-hidden shadow-2xl">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-white/[0.02] border-b border-white/5">
+                    <th className="p-6 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Athlete</th>
+                    <th className="p-6 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Arena</th>
+                    <th className="p-6 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Time Slot</th>
+                    <th className="p-6 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Status</th>
+                    <th className="p-6 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] text-right">Revenue</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {recentBookings.length > 0 ? (
+                    recentBookings.map((booking) => (
+                      <tr key={booking._id} className="group hover:bg-white/[0.02] transition-colors">
+                        <td className="p-6">
+                           <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-[#84CC16]/20 border border-[#84CC16]/50 flex items-center justify-center text-[#84CC16] text-[10px] font-bold rounded-lg uppercase">
+                                {booking.user?.name?.substring(0, 2) || "PL"}
+                              </div>
+                              <span className="text-sm font-bold text-white group-hover:text-[#84CC16] transition-colors">{booking.user?.name || "Player"}</span>
+                           </div>
+                        </td>
+                        <td className="p-6 text-sm text-gray-400 font-medium">{booking.turf?.name || "Venue"}</td>
+                        <td className="p-6">
+                           <div className="flex flex-col">
+                              <span className="text-xs text-white font-bold">{booking.timeSlot}</span>
+                              <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-0.5">
+                                {new Date(booking.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                              </span>
+                           </div>
+                        </td>
+                        <td className="p-6">
+                           <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest ${
+                             booking.status === 'confirmed' ? 'bg-[#84CC16]/20 text-[#84CC16]' : 
+                             booking.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' : 
+                             'bg-red-500/20 text-red-500'
+                           }`}>
+                             {booking.status}
+                           </span>
+                        </td>
+                        <td className="p-6 text-right">
+                           <span className="text-sm font-bold text-[#84CC16]">₹{booking.totalPrice}</span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="p-12 text-center text-gray-500 text-xs font-bold uppercase tracking-[0.2em]">
+                        No recent operations detected
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+           </div>
         </div>
 
         {/* Charts Section - HUD Style */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <ChartCard title="MISSION DISTRIBUTION" subtitle="Bookings per Arena">
+          <ChartCard title="BOOKING DISTRIBUTION" subtitle="Performance across venues">
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={bookingsPerTurf}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
@@ -142,26 +189,24 @@ const OwnerDashboard = () => {
                   fontSize={10} 
                   tickLine={false} 
                   axisLine={false}
-                  fontFamily="monospace"
                 />
                 <YAxis 
                   stroke="#444" 
                   fontSize={10} 
                   tickLine={false} 
                   axisLine={false}
-                  fontFamily="monospace"
                 />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#000', border: '1px solid #222', borderRadius: '0px' }}
-                  itemStyle={{ color: '#84CC16', fontFamily: 'monospace', textTransform: 'uppercase' }}
+                  contentStyle={{ backgroundColor: '#0A0A0A', border: '1px solid #222', borderRadius: '12px' }}
+                  itemStyle={{ color: '#84CC16', textTransform: 'uppercase' }}
                   cursor={{ fill: 'rgba(132,204,22,0.05)' }}
                 />
-                <Bar dataKey="bookings" fill="#84CC16" radius={[0, 0, 0, 0]} barSize={32} />
+                <Bar dataKey="bookings" fill="#84CC16" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="REVENUE TRAJECTORY" subtitle="Yield Over Time">
+          <ChartCard title="REVENUE GROWTH" subtitle="Earnings over time">
             <ResponsiveContainer width="100%" height={350}>
               <AreaChart data={revenueChartData}>
                 <defs>
@@ -177,18 +222,16 @@ const OwnerDashboard = () => {
                   fontSize={10} 
                   tickLine={false} 
                   axisLine={false}
-                  fontFamily="monospace"
                 />
                 <YAxis 
                   stroke="#444" 
                   fontSize={10} 
                   tickLine={false} 
                   axisLine={false}
-                  fontFamily="monospace"
                 />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#000', border: '1px solid #222', borderRadius: '0px' }}
-                  itemStyle={{ color: '#84CC16', fontFamily: 'monospace', textTransform: 'uppercase' }}
+                  contentStyle={{ backgroundColor: '#0A0A0A', border: '1px solid #222', borderRadius: '12px' }}
+                  itemStyle={{ color: '#84CC16', textTransform: 'uppercase' }}
                 />
                 <Area 
                   type="monotone" 
@@ -203,44 +246,13 @@ const OwnerDashboard = () => {
           </ChartCard>
         </div>
 
-        {/* Action Bento Grid - Premium Style */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 bg-surface/30 p-10 notched-corner border border-white/5 flex flex-col justify-between group hover:border-primary/50 transition-all duration-500 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] pointer-events-none" />
-            <div className="relative z-10">
-              <div className="text-[10px] font-mono text-primary uppercase tracking-[0.4em] mb-4">Strategic Growth</div>
-              <h3 className="text-4xl md:text-5xl font-display-heavy italic mb-4 leading-none">EXPANSION PROTOCOL</h3>
-              <p className="text-gray-500 text-sm max-w-md leading-relaxed">Scale your operation by deploying new arenas into the BMS network. Access advanced player traffic and automated revenue streams.</p>
-            </div>
-            <button className="mt-12 self-start flex items-center gap-3 font-display-heavy text-xl text-primary uppercase group-hover:gap-6 transition-all">
-              Initiate Deployment <ArrowUpRight size={24} />
-            </button>
-          </div>
-          
-          <div className="bg-primary p-10 notched-corner flex flex-col justify-between group cursor-pointer hover:brightness-110 transition-all relative overflow-hidden shadow-[0_0_40px_rgba(132,204,22,0.1)]">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-[40px]" />
-             <div className="w-14 h-14 bg-black flex items-center justify-center notched-corner mb-12 shadow-xl group-hover:-rotate-6 transition-transform">
-                <Users className="text-primary" size={28} />
-             </div>
-             <div>
-               <h3 className="text-4xl font-display-heavy text-black uppercase leading-[0.8] mb-3">PLAYER<br />FEEDBACK</h3>
-               <p className="text-black/50 text-[10px] font-mono uppercase tracking-[0.3em]">Incoming Intel Analysis</p>
-             </div>
-             <ChevronRight className="self-end text-black group-hover:translate-x-3 transition-transform" size={32} />
-          </div>
-        </div>
 
         {/* Footer Metrics */}
-        <div className="pt-16 border-t border-white/5 flex flex-wrap gap-8 justify-between items-center pb-8">
+        <div className="pt-16 border-t border-white/5 flex flex-wrap gap-8 justify-between items-center pb-8 opacity-40">
           <div className="flex items-center gap-4">
-             <span className="telemetry-label text-gray-700">OS_CORE: v2.4.8_STABLE</span>
-             <div className="h-4 w-[1px] bg-white/5" />
-             <span className="telemetry-label text-gray-700">LATENCY: 12ms</span>
-          </div>
-          <div className="flex gap-2">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="w-1 h-1 bg-primary/20 rounded-full" />
-            ))}
+             <span className="text-[10px] font-bold uppercase tracking-widest">System Status: Optimized</span>
+             <div className="h-4 w-[1px] bg-white/10" />
+             <span className="text-[10px] font-bold uppercase tracking-widest">Business Intelligence Platform</span>
           </div>
         </div>
       </div>
@@ -249,11 +261,11 @@ const OwnerDashboard = () => {
 };
 
 const ChartCard = ({ title, subtitle, children }) => (
-  <div className="bg-[#111] p-8 notched-corner border border-white/5 shadow-2xl relative overflow-hidden group">
-    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[80px] group-hover:bg-primary/10 transition-colors"></div>
-    <div className="mb-8">
-      <h2 className="text-2xl font-display italic font-black text-white uppercase tracking-tight leading-none mb-2">{title}</h2>
-      <p className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.3em]">{subtitle}</p>
+  <div className="bg-[#0A0A0A] p-10 rounded-[32px] border border-white/10 shadow-2xl relative overflow-hidden group">
+    <div className="absolute top-0 right-0 w-40 h-40 bg-[#84CC16]/5 blur-[100px] group-hover:bg-[#84CC16]/10 transition-colors"></div>
+    <div className="mb-10">
+      <h2 className="text-2xl font-bold text-white uppercase tracking-tight leading-none mb-3">{title}</h2>
+      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em]">{subtitle}</p>
     </div>
     {children}
   </div>

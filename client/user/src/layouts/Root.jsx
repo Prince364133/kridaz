@@ -5,7 +5,7 @@ import UserFooter from "../components/layout/UserFooter";
 
 const Root = () => {
   const location = useLocation();
-  const isHomePage = ["/", "/auth", "/login", "/signup"].includes(location.pathname);
+  const isHomePage = ["/", "/login", "/signup"].includes(location.pathname);
 
   return (
     <div className="flex flex-col min-h-screen">

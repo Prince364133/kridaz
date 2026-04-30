@@ -45,12 +45,12 @@ const useSignUpForm = () => {
     try {
       const response = await axiosInstance.post(
         "/api/user/auth/register",
-        data
+        { ...data, role: "user" }
       );
       const result = await response.data;
       toast.success(result.message);
       dispatch(login(result.token));
-      navigate("/auth", { replace: true });
+      navigate("/", { replace: true });
       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
     } catch (error) {
       if (error.response) {

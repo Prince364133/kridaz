@@ -46,36 +46,36 @@ const Turf = () => {
     }
   };
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-500 font-bold uppercase tracking-widest">
-        Error loading turfs: {error.message}
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center text-gray-500 font-bold uppercase tracking-widest">
+  //       Service temporarily unavailable
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-black text-white pb-20 overflow-x-hidden">
       {/* ── Background Decoration ──────────────────────────────── */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#84CC16]/10 to-transparent pointer-events-none opacity-50" />
-      <div className="absolute top-[200px] right-[-100px] w-[500px] h-[500px] bg-[#84CC16]/5 blur-[120px] rounded-full pointer-events-none" />
+
 
       <div className="max-w-7xl mx-auto px-6 pt-40 relative z-10">
         
         {/* ── Header Section ───────────────────────────────────── */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#84CC16]/20 bg-[#84CC16]/5 text-[#84CC16] text-[10px] font-black uppercase tracking-[0.2em] mb-8 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#84CC16]/20 bg-[#84CC16]/5 text-[#84CC16] text-[10px] font-bold uppercase tracking-[0.2em] mb-8 animate-fade-in">
             <Zap size={12} className="fill-[#84CC16]" />
-            AI-POWERED MATCHMAKING
+            Enterprise Booking System
           </div>
-          <h1 className="text-6xl md:text-8xl font-display uppercase leading-[0.85] tracking-tighter mb-6">
-            Elite <span className="text-[#84CC16]">Arenas</span> <br/> 
-            Wait For <span className="italic">You.</span>
+          <h1 className="text-6xl md:text-8xl font-bold uppercase leading-[0.85] tracking-tight mb-6">
+            Premium <span className="text-[#84CC16]">Facilities</span> <br/> 
+            For <span>Champions.</span>
           </h1>
           <p className="max-w-xl mx-auto text-gray-500 font-medium text-lg mb-12">
-            Discover and book the most premium sports facilities. Engineered for performance, designed for champions.
+            Discover and book professional sports facilities. Premium quality venues for your next match.
           </p>
         </div>
+
 
         {/* ── Search Bar ────────────────────────────────────────── */}
         <SearchTurf onSearch={handleSearch} />
@@ -88,7 +88,7 @@ const Turf = () => {
               onClick={() => filterByCategory(cat.id)}
               className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest border transition-all ${
                 activeCategory === cat.id 
-                ? "bg-[#84CC16] text-black border-[#84CC16] shadow-lg shadow-[#84CC16]/20 scale-105" 
+                ? "bg-[#84CC16] text-black border-[#84CC16] scale-105" 
                 : "bg-[#111] text-gray-500 border-white/5 hover:border-white/10 hover:text-white"
               }`}
             >
@@ -130,7 +130,7 @@ const Turf = () => {
         ) : (
           <div className="py-32 text-center">
             <Trophy size={48} className="mx-auto text-gray-800 mb-6" />
-            <h3 className="text-2xl font-display uppercase text-gray-400 mb-2">No arenas found</h3>
+            <h3 className="text-2xl font-display uppercase text-gray-400 mb-2">Venues Not Found</h3>
             <p className="text-gray-600">Try adjusting your filters or search keywords.</p>
             <button 
               onClick={() => { setFilteredTurfs(turfs); setActiveCategory("all"); }}

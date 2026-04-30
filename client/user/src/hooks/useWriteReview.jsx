@@ -45,7 +45,7 @@ const useWriteReview = () => {
       const result = await response.data;
       toast.success(result.message);
       closeReviewModal();
-      navigate(`/auth/turf/${turfId}`);
+      navigate(`/turf/${turfId}`);
     } catch (err) {
       console.error(err);
     } finally {

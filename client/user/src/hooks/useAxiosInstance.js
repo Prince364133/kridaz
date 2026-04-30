@@ -36,7 +36,7 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401) {
       // Clear stale auth state and redirect to login
       localStorage.removeItem("persist:user");
-      window.location.href = "/auth/login";
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }

@@ -6,10 +6,12 @@ import SignUp from "./pages/auth/SignUp";
 import PartnersGateway from "./pages/PartnersGateway";
 import Turf from "./components/turf/Turf";
 import TurfDetails from "./components/turf/TurfDetails";
-import ProtectedLayout from "./layouts/ProtectedLayout";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Reservation from "./components/Reservation";
 import TurfBookingHistory from "./components/turf/TurfBookingHistory";
 import NotFound from "./components/common/NotFound";
+import Profile from "./pages/Profile";
+import BlogDetail from "./pages/BlogDetail";
 
 const router = createBrowserRouter([
   {
@@ -41,33 +43,33 @@ const router = createBrowserRouter([
         path: "partners",
         element: <PartnersGateway />,
       },
-    ],
-  },
-  {
-    path: "/auth",
-    element: <ProtectedLayout />,
-    // errorElement: <div>Error</div>,
-    children: [
       {
-        path: "",
-        element: <Home />,
+        path: "profile",
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: "turfs",
-        element: <Turf />,
+        path: "blogs/:id",
+        element: <BlogDetail />,
       },
-      {
-        path: "turf/:id",
-        element: <TurfDetails />,
-      },
-
       {
         path: "reserve/:id",
-        element: <Reservation />,
+        element: (
+          <ProtectedRoute>
+            <Reservation />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "booking-history",
-        element: <TurfBookingHistory />,
+        element: (
+          <ProtectedRoute>
+            <TurfBookingHistory />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

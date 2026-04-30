@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "../hooks/useAxiosInstance";
 import useTurfData from "../hooks/useTurfData";
-import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, Share2, Info, Check, X } from "lucide-react";
+import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus } from "lucide-react";
 import { AdBannerSection } from "../components/Marketing/AdBannerSection";
 import { VideoSection } from "../components/Marketing/VideoSection";
 import BlogSection from "../components/Blogs/BlogSection";
@@ -58,6 +58,16 @@ const features = [
   { img: "https://images.unsplash.com/photo-1529661161859-45041a7d65bd?w=600&q=80", icon: Trophy, title: "Social Community", desc: "Join sport tribes, share your achievements, and connect." },
 ];
 
+const sports = [
+  { name: 'CRICKET', img: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=1000&auto=format&fit=crop' },
+  { name: 'FOOTBALL', img: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1000&auto=format&fit=crop' },
+  { name: 'BADMINTON', img: 'https://images.unsplash.com/photo-1626225967041-96424b05421d?q=80&w=1000&auto=format&fit=crop' },
+  { name: 'TENNIS', img: 'https://images.unsplash.com/photo-1622279457486-62dcc4a4bd13?q=80&w=1000&auto=format&fit=crop' },
+  { name: 'SWIMMING', img: 'https://images.unsplash.com/photo-1519315901367-f34ff9154487?q=80&w=1000&auto=format&fit=crop' },
+  { name: 'BASKETBALL', img: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1000&auto=format&fit=crop' },
+  { name: 'VOLLEYBALL', img: 'https://images.unsplash.com/photo-1592656094267-764a45160876?q=80&w=1000&auto=format&fit=crop' },
+];
+
 // player skill levels based on booking count
 const getLevel = (count) => {
   if (count >= 20) return { label: "PRO", color: PRI };
@@ -71,7 +81,7 @@ const avatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.le
 
 export default function Home() {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const { turfs, loading: turfLoading } = useTurfData();
+  const { turfs, loading: turfLoading, error } = useTurfData();
   const [activeTab, setActiveTab] = useState("venues");
   const [players, setPlayers] = useState([]);
   const [turfSearch, setTurfSearch] = useState("");
@@ -101,9 +111,10 @@ export default function Home() {
     fetchData();
   }, []);
 
-  const filteredTurfs = turfs.filter(t =>
-    !turfSearch || t.name?.toLowerCase().includes(turfSearch.toLowerCase()) ||
-    t.sportTypes?.join(" ").toLowerCase().includes(turfSearch.toLowerCase())
+  const filteredTurfs = (turfs || []).filter(t =>
+    !turfSearch || 
+    t.name?.toLowerCase().includes(turfSearch.toLowerCase()) ||
+    t.sportTypes?.some(s => s.toLowerCase().includes(turfSearch.toLowerCase()))
   );
 
   return (
@@ -127,13 +138,12 @@ export default function Home() {
 
         <div className="absolute inset-0 opacity-[0.05] z-1"
           style={{ backgroundImage: `radial-gradient(${PRI} 1px, transparent 1px)`, backgroundSize: "36px 36px" }} />
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 rounded-full pointer-events-none z-1"
-          style={{ background: `radial-gradient(circle, rgba(132,204,22,0.1) 0%, transparent 70%)` }} />
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 rounded-full pointer-events-none z-1" />
 
         <div className="relative max-w-full mx-auto px-10 lg:px-20 w-full grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <div>
-              <h1 className="font-display leading-[0.85] tracking-tighter uppercase" style={{ fontSize: "clamp(3rem,8vw,6.5rem)" }}>
+              <h1 className="font-display leading-[0.85] tracking-tight uppercase" style={{ fontSize: "clamp(3rem,8vw,6.5rem)" }}>
                 More Than <span style={{ color: PRI }}>Booking.</span><br />
                 Where Players<br />Belong.
               </h1>
@@ -144,10 +154,10 @@ export default function Home() {
             </p>
 
             <Link 
-              to={isLoggedIn ? "/auth/turfs" : "/signup"} 
+              to={isLoggedIn ? "/turfs" : "/signup"} 
               className="block w-fit group mb-6 lg:mb-12"
             >
-              <div className="inline-flex items-center gap-2 bg-primary text-black px-6 py-3 rounded-full font-bold shadow-[0_0_30px_rgba(132,204,22,0.3)] group-hover:scale-105 transition-all text-base">
+              <div className="inline-flex items-center gap-2 bg-primary text-black px-6 py-3 rounded-full font-bold group-hover:scale-105 transition-all text-base">
                 Book Now <ArrowRight size={18} />
               </div>
             </Link>
@@ -160,7 +170,7 @@ export default function Home() {
             <div className="absolute bottom-0 right-0 w-full flex items-center justify-end gap-4 z-20 pb-4 pr-12">
               {[
                 { img: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=700&q=80", label: "Football Ground", cls: "w-56 h-36 opacity-80" },
-                { img: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=700&q=80", label: "Cricket Campus", cls: "w-72 h-52 z-10 shadow-[0_0_40px_rgba(132,204,22,0.15)]" },
+                { img: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=700&q=80", label: "Cricket Campus", cls: "w-72 h-52 z-10" },
                 { img: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=700&q=80", label: "Badminton Hub", cls: "w-56 h-36 opacity-80" },
               ].map(c => (
                 <Link 
@@ -171,7 +181,7 @@ export default function Home() {
                 >
                   <img src={c.img} alt={c.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to top,rgba(0,0,0,0.8),transparent)" }} />
-                  <p className="absolute bottom-3 left-3 font-display text-lg uppercase tracking-tighter">{c.label}</p>
+                  <p className="absolute bottom-3 left-3 font-display text-lg uppercase tracking-tight">{c.label}</p>
                 </Link>
               ))}
             </div>
@@ -238,21 +248,24 @@ export default function Home() {
         </div>
 
         {/* Venue grid */}
-        {loading ? (
+        {loading || turfLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="rounded-2xl border animate-pulse" style={{ height: 320, backgroundColor: "#111", borderColor: BDR }} />
             ))}
           </div>
-        ) : filteredTurfs.length === 0 ? (
-          <div className="text-center py-16" style={{ color: "#888" }}>
-            <p className="font-display text-3xl mb-2">No Arenas Found</p>
-            <p className="text-sm">Try a different search term</p>
+        ) : (error || filteredTurfs.length === 0) ? (
+          <div className="text-center py-24 animate-fadeIn">
+            <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Search size={32} className="text-gray-600" />
+            </div>
+            <p className="font-display text-3xl mb-3 uppercase tracking-tight">Venues Not Found</p>
+            <p className="text-gray-500 text-sm uppercase tracking-[0.2em] mb-8">Try adjusting your search or filters</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {filteredTurfs.slice(0, 8).map((t, i) => (
-              <Link to={isLoggedIn ? `/auth/turfs/${t._id}` : "/login"} key={t._id} className="bms-card group flex flex-col no-underline bg-[#111] rounded-2xl border border-[#2a2a2a] overflow-hidden">
+              <Link to={isLoggedIn ? `/turf/${t._id}` : "/login"} key={t._id} className="bms-card group flex flex-col no-underline bg-[#111] rounded-2xl border border-[#2a2a2a] overflow-hidden">
                 <div className="relative overflow-hidden" style={{ height: 180 }}>
                   <img src={t.image || "/banner-1.png"}
                     onError={(e) => { e.target.onerror = null; e.target.src = "/banner-1.png"; }}
@@ -286,7 +299,7 @@ export default function Home() {
         )}
 
         <div className="text-center mt-6 lg:mt-10">
-          <Link to={isLoggedIn ? "/auth/turfs" : "/login"} className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-full border transition-all hover:border-[#84CC16] hover:text-[#84CC16]"
+          <Link to={isLoggedIn ? "/turfs" : "/login"} className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-full border transition-all hover:border-[#84CC16] hover:text-[#84CC16]"
             style={{ borderColor: BDR, color: "#888" }}>
             View All Venues <ChevronRight size={16} />
           </Link>
@@ -305,14 +318,14 @@ export default function Home() {
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 lg:mb-8">
               <div>
-                <h2 className="font-display text-5xl md:text-6xl uppercase leading-none text-white flex items-center gap-3">
+                <h2 className="font-display text-[26px] sm:text-4xl md:text-6xl uppercase leading-none text-white flex items-center gap-2 md:gap-3 whitespace-nowrap">
                   JOIN <span style={{ color: PRI }}>GAMES NEAR YOU</span>
                 </h2>
                 <p className="font-mono text-xs uppercase tracking-widest mt-2" style={{ color: "#888" }}>
                   No team? No problem. Find your people. Build your network. Play together.
                 </p>
               </div>
-              <Link to={isLoggedIn ? "/auth/turfs" : "/login"} className="text-sm font-bold flex items-center gap-2 hover:text-[#84CC16] transition-colors" style={{ color: "#888" }}>
+              <Link to={isLoggedIn ? "/turfs" : "/login"} className="text-sm font-bold flex items-center gap-2 hover:text-[#84CC16] transition-colors" style={{ color: "#888" }}>
                 View More Games <ChevronRight size={16} />
               </Link>
             </div>
@@ -328,14 +341,14 @@ export default function Home() {
             </div>
 
             {/* Game Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-4 md:pb-0">
               {[
                 { time: "6:00-9:00 pm", status: "Joined", statusColor: "#4ADE80", name: "Sampad", sport: "CRICKET", loc: "Malakpet, Hyderabad", dist: "+ 2.1km Away", filled: 2, total: 11, img: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&q=80" },
                 { time: "6:00-9:00 pm", status: "Started", statusColor: "#F97316", name: "Sunny", sport: "FOOTBALL", loc: "Malakpet, Hyderabad", dist: "+ 3.5km Away", filled: 6, total: 12, img: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&q=80" },
                 { time: "6:00-9:00 pm", status: "Slot Full", statusColor: "#6B7280", name: "Srikar", sport: "BADMINTON", loc: "Malakpet, Hyderabad", dist: "+ 5km Away", filled: 4, total: 4, img: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=600&q=80" },
                 { time: "6:00-9:00 pm", status: "Joined", statusColor: "#4ADE80", name: "Prince", sport: "CRICKET", loc: "Malakpet, Hyderabad", dist: "+ 9km Away", filled: 2, total: 11, img: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&q=80" },
               ].map((game, i) => (
-                <div key={i} className="relative rounded-3xl overflow-hidden border group" style={{ height: "360px", borderColor: BDR }}>
+                <div key={i} className="min-w-[75vw] md:min-w-0 snap-center relative rounded-3xl overflow-hidden border group shrink-0 md:shrink" style={{ height: "360px", borderColor: BDR }}>
                   <img src={game.img} alt={game.sport} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.9) 100%)" }} />
                   
@@ -491,14 +504,14 @@ export default function Home() {
             </div>
 
             {/* Professionals Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-4 md:pb-0">
               {[
                 { name: "ROGER FEDERER", exp: "20+ Years", spec: "Grand Slam Expert", price: "₹5,000/hr", img: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&q=80", rating: "5.0 (500 reviews)" },
                 { name: "SARAH WILLIAMS", exp: "10+ Years", spec: "Fitness & Conditioning", price: "₹2,500/hr", img: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80", rating: "4.9 (320 reviews)" },
                 { name: "VIRAT KOHLI", exp: "15+ Years", spec: "Masterclass Batting", price: "₹10,000/hr", img: "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?w=400&q=80", rating: "5.0 (1k+ reviews)" },
                 { name: "JOHN DOE", exp: "8+ Years", spec: "Certified Umpire", price: "₹1,000/match", img: "https://images.unsplash.com/photo-1587329310686-91414b8e3cb7?w=400&q=80", rating: "4.8 (150 reviews)" },
               ].map((pro, i) => (
-                <div key={i} className="rounded-3xl border overflow-hidden flex flex-col group" style={{ backgroundColor: "#111", borderColor: BDR }}>
+                <div key={i} className="min-w-[75vw] md:min-w-0 snap-center rounded-3xl border overflow-hidden flex flex-col group shrink-0 md:shrink" style={{ backgroundColor: "#111", borderColor: BDR }}>
                   {/* Image Section */}
                   <div className="relative h-[280px] overflow-hidden shrink-0">
                     <img src={pro.img} alt={pro.name} className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105" />
@@ -577,7 +590,7 @@ export default function Home() {
                    <span key={t} className="px-4 py-1.5 rounded-full text-xs font-bold border" style={{ borderColor: BDR, backgroundColor: "rgba(255,255,255,0.05)" }}>{t}</span>
                  ))}
                </div>
-               <Link to={isLoggedIn ? "/auth/turfs" : "/login"} className="inline-block bg-white text-black font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition-colors">Find Venues</Link>
+               <Link to={isLoggedIn ? "/turfs" : "/login"} className="inline-block bg-white text-black font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition-colors">Find Venues</Link>
              </div>
           </div>
           
@@ -595,7 +608,7 @@ export default function Home() {
                    <div>
                      <h3 className="font-display text-4xl italic mb-1 leading-none">CHALLENGE<br/>PLAYERS</h3>
                      <p className="text-gray-400 text-sm mb-4">Skill-matched opponents.</p>
-                     <Link to={isLoggedIn ? "/auth/turfs" : "/login"} className="font-bold text-white flex items-center gap-2 hover:text-[#84CC16] transition-colors">Start Match <ArrowRight size={16} /></Link>
+                     <Link to={isLoggedIn ? "/turfs" : "/login"} className="font-bold text-white flex items-center gap-2 hover:text-[#84CC16] transition-colors">Start Match <ArrowRight size={16} /></Link>
                    </div>
                  </div>
                </div>
@@ -610,7 +623,7 @@ export default function Home() {
                    <div>
                      <h3 className="font-display text-4xl italic mb-1 leading-none">COMMUNITY</h3>
                      <p className="text-gray-400 text-sm mb-4">Join tribes & share wins.</p>
-                     <Link to={isLoggedIn ? "/auth/turfs" : "/login"} className="font-bold text-white flex items-center gap-2 hover:text-[#84CC16] transition-colors">Join Now <ArrowRight size={16} /></Link>
+                     <Link to={isLoggedIn ? "/turfs" : "/login"} className="font-bold text-white flex items-center gap-2 hover:text-[#84CC16] transition-colors">Join Now <ArrowRight size={16} /></Link>
                    </div>
                  </div>
                </div>
@@ -629,7 +642,7 @@ export default function Home() {
                    <div>
                      <h3 className="font-display text-2xl italic mb-1 leading-none uppercase">MARKETPLACE</h3>
                      <p className="text-gray-400 text-xs mb-4">Premium gear.</p>
-                     <Link to={isLoggedIn ? "/auth/turfs" : "/login"} className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Shop Now <ArrowRight size={14} /></Link>
+                     <Link to={isLoggedIn ? "/turfs" : "/login"} className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Shop Now <ArrowRight size={14} /></Link>
                    </div>
                  </div>
                </div>
@@ -645,7 +658,7 @@ export default function Home() {
                    <div>
                      <h3 className="font-display text-2xl italic mb-1 leading-none uppercase">PRO COACHES</h3>
                      <p className="text-gray-400 text-xs mb-4">Expert training.</p>
-                     <Link to={isLoggedIn ? "/auth/turfs" : "/login"} className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Find Coach <ArrowRight size={14} /></Link>
+                     <Link to={isLoggedIn ? "/turfs" : "/login"} className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Find Coach <ArrowRight size={14} /></Link>
                    </div>
                  </div>
                </div>
@@ -661,7 +674,7 @@ export default function Home() {
                    <div>
                      <h3 className="font-display text-2xl italic mb-1 leading-none uppercase">REFEREES</h3>
                      <p className="text-gray-400 text-xs mb-4">Hire officials.</p>
-                     <Link to={isLoggedIn ? "/auth/turfs" : "/login"} className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Book Now <ArrowRight size={14} /></Link>
+                     <Link to={isLoggedIn ? "/turfs" : "/login"} className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Book Now <ArrowRight size={14} /></Link>
                    </div>
                  </div>
                </div>
@@ -674,10 +687,10 @@ export default function Home() {
       <section className="py-10 lg:py-20 px-6 max-w-7xl mx-auto overflow-hidden">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 lg:mb-10 gap-4">
           <div>
-            <h2 className="font-display text-5xl md:text-6xl uppercase flex items-center gap-3">
-              Your <span style={{ color: PRI }}>Social Arena</span> <Info size={20} className="text-gray-600 cursor-help" />
+            <h2 className="font-display text-3xl sm:text-4xl md:text-6xl uppercase flex items-center gap-2 md:gap-3 whitespace-nowrap">
+              Your <span style={{ color: PRI }}>Social Arena</span> <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
             </h2>
-            <p className="text-gray-400 mt-2">Swipe to see what's happening in the field</p>
+            <p className="text-gray-400 mt-2 text-sm md:text-base">Swipe to see what's happening in the field</p>
           </div>
           <Link to="/community" className="text-white font-bold flex items-center gap-2 hover:text-[#84CC16] transition-colors uppercase tracking-widest text-sm">
             Explore Community <ChevronRight size={16} />
@@ -727,46 +740,41 @@ export default function Home() {
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
-                <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-                  <Activity size={12} className="text-[#84CC16]" />
-                  <span className="text-[10px] font-mono font-bold tracking-widest text-white">LIVE_ACTION</span>
-                </div>
-              </div>
             </div>
           ))}
         </div>
       </section>
-      {/* ── THE ELITE EDGE (TABLE FORMAT) ── */}
-      <section className="py-12 lg:py-24 px-6 max-w-7xl mx-auto">
-        <div className="text-center mb-10 lg:mb-16">
-          <h2 className="font-display text-5xl md:text-8xl uppercase leading-none">
-            SYSTEM <span style={{ color: PRI }}>UPGRADE</span>
+      
+      {/* ── WHY CHOOSE US (COMPARISON TABLE) ── */}
+      <section className="py-12 lg:py-32 px-6 max-w-7xl mx-auto">
+        <div className="text-center mb-16 lg:mb-24">
+          <h2 className="text-5xl md:text-8xl font-bold uppercase leading-none tracking-tight">
+            WHY CHOOSE <span className="text-[#84CC16]">TURFSPOT?</span>
           </h2>
-          <p className="text-gray-400 mt-6 text-lg md:text-xl max-w-3xl mx-auto">
-            Compare the traditional way with the BookMySportz ecosystem. Built for performance, designed for victory.
+          <p className="text-white/40 mt-8 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
+            Experience the next generation of sports management. Built for performance, designed for athletes.
           </p>
         </div>
 
-        <div className="relative bg-[#0A0A0A] border rounded-[2.5rem] overflow-hidden shadow-2xl" style={{ borderColor: BDR }}>
+        <div className="relative bg-[#0A0A0A] border border-white/5 rounded-[48px] overflow-hidden shadow-2xl">
           {/* Header Row */}
-          <div className="grid grid-cols-3 border-b text-[11px] font-mono font-bold tracking-[0.4em] text-gray-500 bg-white/5 p-8" style={{ borderColor: BDR }}>
-            <div className="uppercase">Core_Systems</div>
-            <div className="text-center uppercase">Legacy_Apps</div>
-            <div className="text-center uppercase text-primary">BookMySportz_Pro</div>
+          <div className="grid grid-cols-3 border-b border-white/5 text-[10px] font-bold tracking-[0.3em] text-white/30 bg-white/[0.02] p-10">
+            <div className="uppercase">PLATFORM FEATURES</div>
+            <div className="text-center uppercase">TRADITIONAL APPS</div>
+            <div className="text-center uppercase text-[#84CC16]">TURFSPOT ADVANTAGE</div>
           </div>
 
           {/* Table Body */}
-          <div className="divide-y" style={{ borderColor: BDR }}>
+          <div className="divide-y divide-white/5">
             {comparisonFeatures.map((feature, idx) => (
-              <div key={idx} className="grid grid-cols-3 items-center group hover:bg-white/[0.02] transition-colors p-8 md:p-10 relative">
+              <div key={idx} className="grid grid-cols-3 items-center group hover:bg-white/[0.01] transition-colors p-10 relative">
                 {/* Feature Name */}
-                <div className="flex flex-col gap-1">
-                  <span className="text-white font-display text-xl md:text-2xl uppercase group-hover:text-primary transition-colors">
+                <div className="flex flex-col gap-2">
+                  <span className="text-white text-xl md:text-2xl font-bold uppercase tracking-tight group-hover:text-[#84CC16] transition-colors">
                     {feature.name}
                   </span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[8px] font-mono px-2 py-0.5 rounded border border-white/5 text-white/30 uppercase tracking-widest">
+                    <span className="text-[9px] font-bold px-2.5 py-1 rounded-full bg-white/5 text-white/40 uppercase tracking-widest border border-white/5">
                       {feature.status}
                     </span>
                   </div>
@@ -774,46 +782,37 @@ export default function Home() {
 
                 {/* Others Column */}
                 <div className="text-center">
-                   <div className="inline-flex flex-col items-center gap-2 opacity-30 group-hover:opacity-50 transition-opacity">
-                     <span className="text-xs font-mono font-bold text-gray-400 line-through decoration-red-500/50">
+                   <div className="inline-flex flex-col items-center gap-3 opacity-20 group-hover:opacity-40 transition-opacity">
+                     <span className="text-xs font-bold text-white uppercase tracking-widest">
                        {feature.others}
                      </span>
-                     <X size={16} className="text-red-500/30" />
+                     <X size={18} className="text-red-500" />
                    </div>
                 </div>
 
                 {/* BMS Column (Highlighted) */}
                 <div className="relative text-center h-full flex items-center justify-center">
-                   {/* Vertical Highlight Overlay */}
-                   <div className="absolute inset-y-0 inset-x-4 bg-primary/[0.02] rounded-2xl pointer-events-none" />
+                   <div className="absolute inset-y-0 inset-x-2 bg-[#84CC16]/[0.02] rounded-3xl pointer-events-none" />
                    
-                   <div className="relative flex flex-col items-center gap-2">
-                     <span className="text-xs md:text-sm font-mono font-black text-white tracking-widest uppercase">
+                   <div className="relative flex flex-col items-center gap-3">
+                     <span className="text-xs md:text-sm font-black text-white tracking-widest uppercase">
                        {feature.bms}
                      </span>
-                     <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center border border-primary/30 shadow-[0_0_15px_rgba(132,204,22,0.2)]">
-                       <Check size={14} className="text-primary" />
+                     <div className="w-8 h-8 rounded-full bg-[#84CC16]/10 flex items-center justify-center border border-[#84CC16]/30">
+                       <Check size={16} className="text-[#84CC16]" />
                      </div>
                    </div>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Footer of Table */}
-          <div className="p-8 bg-white/5 border-t text-center" style={{ borderColor: BDR }}>
-             <span className="text-[10px] font-mono font-bold tracking-[0.5em] text-primary uppercase animate-pulse">
-               Complete Ecosystem Access Authorized
-             </span>
-          </div>
         </div>
-
         {/* Bottom Callout */}
-        <div className="mt-12 flex justify-center">
-           <div className="flex items-center gap-6 text-gray-600">
-             <div className="h-[1px] w-12 bg-gray-800" />
-             <span className="text-[10px] font-mono tracking-[0.3em] uppercase">One App. Limitless Potential.</span>
-             <div className="h-[1px] w-12 bg-gray-800" />
+        <div className="mt-16 flex justify-center">
+           <div className="flex items-center gap-6 text-white/20">
+             <div className="h-[1px] w-12 bg-white/10" />
+             <span className="text-[10px] font-bold tracking-[0.4em] uppercase">One App. Limitless Potential.</span>
+             <div className="h-[1px] w-12 bg-white/10" />
            </div>
         </div>
       </section>
@@ -847,6 +846,55 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── SPORTS GRID ── */}
+      <section className="py-20 px-6 max-w-7xl mx-auto border-t" style={{ borderColor: BDR }}>
+        <div className="flex flex-col items-center text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#84CC16]/20 bg-[#84CC16]/5 mb-6">
+            <Timer size={14} className="text-[#84CC16]" />
+            <span className="text-[10px] font-bold tracking-widest text-[#84CC16] uppercase">100+ Sports Available</span>
+          </div>
+          <h2 className="text-5xl md:text-7xl font-bold uppercase tracking-tight mb-6 leading-none">
+            UNLEASH YOUR <span className="text-[#84CC16]">ATHLETE</span> WITHIN
+          </h2>
+          <p className="text-gray-500 max-w-2xl text-lg uppercase tracking-wider font-medium">
+            From the pitch to the pool, find your game and dominate the field.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {sports.map((sport, idx) => (
+            <div 
+              key={sport.name} 
+              className={`relative h-[300px] md:h-[400px] rounded-[2rem] overflow-hidden border group transition-all duration-500 hover:border-[#84CC16]/50 ${
+                idx === 0 ? 'md:col-span-1' : ''
+              }`}
+              style={{ borderColor: BDR }}
+            >
+              <img 
+                src={sport.img} 
+                alt={sport.name} 
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90" />
+              <div className="absolute bottom-8 left-8">
+                <h3 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter leading-none text-white drop-shadow-2xl">
+                  {sport.name}
+                </h3>
+              </div>
+            </div>
+          ))}
+          
+          {/* View All Card */}
+          <div className="relative h-[300px] md:h-[400px] rounded-[2rem] overflow-hidden border border-dashed flex flex-col items-center justify-center group cursor-pointer transition-all hover:bg-white/5"
+               style={{ borderColor: BDR }}>
+            <div className="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Plus size={32} className="text-gray-500 group-hover:text-[#84CC16]" />
+            </div>
+            <span className="text-xs font-bold uppercase tracking-[0.3em] text-gray-500">View All Sports</span>
+          </div>
+        </div>
+      </section>
+
       {/* ── APP DOWNLOAD SECTION ── */}
       <section className="py-12 lg:py-24 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
@@ -856,7 +904,7 @@ export default function Home() {
               {/* Left Side: Mockup */}
               <div className="relative order-2 lg:order-1">
                 <div className="relative group">
-                  <div className="absolute -inset-10 bg-primary/20 blur-[100px] rounded-full opacity-30 group-hover:opacity-50 transition-opacity" />
+                  <div className="absolute -inset-10 bg-primary/5 rounded-full opacity-10 group-hover:opacity-20 transition-opacity" />
                   <img 
                     src="/sports_app_mockup_1777351423147.png" 
                     alt="BookMySportz App Mockup" 
@@ -867,13 +915,13 @@ export default function Home() {
 
               {/* Right Side: Content */}
               <div className="order-1 lg:order-2 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full mb-8">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  <span className="text-[10px] font-mono font-bold tracking-widest text-primary uppercase">Mobile_System_Ready</span>
+                <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-[#84CC16]/20 bg-[#84CC16]/5 mb-8">
+                  <div className="w-2 h-2 bg-[#84CC16] rounded-full animate-pulse" />
+                  <span className="text-[10px] font-bold tracking-widest text-[#84CC16] uppercase">Mobile App Coming Soon</span>
                 </div>
 
-                <h2 className="font-display text-6xl md:text-8xl uppercase leading-[0.9] mb-8">
-                  BOOK <span className="text-white/20">•</span> PLAY <span className="text-white/20">•</span> <span style={{ color: PRI }}>WIN</span>
+                <h2 className="text-6xl md:text-8xl font-bold uppercase leading-[0.9] mb-8 tracking-tight">
+                  BOOK <span className="text-white/20">•</span> PLAY <span className="text-white/20">•</span> <span className="text-[#84CC16]">WIN</span>
                 </h2>
 
                 <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-xl">
@@ -893,26 +941,26 @@ export default function Home() {
                          </svg>
                       </div>
                       <div className="flex flex-col items-start leading-none opacity-50">
-                        <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">Get it on</span>
-                        <span className="text-lg font-bold text-white">Google Play</span>
+                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Get it on</p>
+                        <p className="text-lg font-bold text-white">Google Play</p>
                       </div>
                     </a>
                   </div>
 
                   {/* App Store Button */}
                   <div className="relative group">
-                    <div className="absolute -top-2 -right-2 z-20 bg-primary text-black text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
+                    <div className="absolute -top-2 -right-2 z-20 bg-[#84CC16] text-black text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
                       Coming Soon
                     </div>
-                    <a href="#" className="flex items-center gap-4 bg-white/5 border px-8 py-4 rounded-2xl transition-all cursor-not-allowed" style={{ borderColor: BDR }}>
+                    <a href="#" className="flex items-center gap-4 bg-white/5 border border-white/10 px-8 py-4 rounded-2xl transition-all cursor-not-allowed">
                       <div className="w-8 h-8 flex items-center justify-center opacity-50">
                          <svg className="w-full h-full text-white" viewBox="0 0 24 24" fill="currentColor">
                            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.1 2.48-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.31-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
                          </svg>
                       </div>
                       <div className="flex flex-col items-start leading-none opacity-50">
-                        <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">Download on the</span>
-                        <span className="text-lg font-bold text-white">App Store</span>
+                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Download on the</p>
+                        <p className="text-lg font-bold text-white">App Store</p>
                       </div>
                     </a>
                   </div>
@@ -922,27 +970,27 @@ export default function Home() {
             </div>
 
             {/* Background Decorative Elements */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/2 rounded-full -translate-y-1/2 translate-x-1/2 opacity-5" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/2 rounded-full translate-y-1/2 -translate-x-1/2 opacity-5" />
           </div>
         </div>
       </section>
       {/* ── FOOTER BANNER ── */}
-      <section className="px-6 pb-12 pt-6 max-w-7xl mx-auto">
-        <div className="rounded-[40px] border flex flex-wrap lg:flex-nowrap items-center justify-between p-2 lg:p-4 divide-y lg:divide-y-0 lg:divide-x" style={{ borderColor: BDR, backgroundColor: "#0A0A0A" }}>
+      <section className="px-3 lg:px-6 pb-12 pt-6 max-w-7xl mx-auto">
+        <div className="rounded-[30px] lg:rounded-[40px] border grid grid-cols-4 lg:flex lg:flex-nowrap items-stretch p-2 lg:p-4 divide-x" style={{ borderColor: BDR, backgroundColor: "#0A0A0A" }}>
           {[
-            { title: "LIST YOUR VENUE", sub: "AND EARN NOW!", icon: Store },
-            { title: "HOST YOUR GAME", sub: "START HOSTING NOW", icon: Ticket },
-            { title: "DOWNLOAD THE APP", sub: "ANDROID AND IOS", icon: Download },
-            { title: "YOUR BOOKINGS", sub: "UPCOMING & PAST", icon: CalendarDays }
+            { title: "LIST VENUE", sub: "EARN NOW", icon: Store },
+            { title: "HOST GAME", sub: "START HOSTING", icon: Ticket },
+            { title: "GET APP", sub: "ANDROID & IOS", icon: Download },
+            { title: "BOOKINGS", sub: "YOUR PAST", icon: CalendarDays }
           ].map(item => (
-            <div key={item.title} className="flex-1 flex items-center gap-4 px-6 py-6 lg:py-2" style={{ borderColor: BDR }}>
-              <div className="w-12 h-12 rounded-full flex items-center justify-center border shrink-0" style={{ borderColor: PRI, backgroundColor: "rgba(132,204,22,0.1)" }}>
-                 <item.icon size={20} style={{ color: PRI }} />
+            <div key={item.title} className="flex-1 flex flex-col lg:flex-row items-center justify-center lg:justify-start text-center lg:text-left gap-2 lg:gap-4 px-1 lg:px-6 py-4 lg:py-2" style={{ borderColor: BDR }}>
+              <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-full flex items-center justify-center border shrink-0" style={{ borderColor: PRI, backgroundColor: "rgba(132,204,22,0.1)" }}>
+                 <item.icon className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: PRI }} />
               </div>
-              <div>
-                 <h4 className="font-display text-xl leading-none mb-1 text-white">{item.title}</h4>
-                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{item.sub}</p>
+              <div className="w-full">
+                 <h4 className="font-display text-[9px] sm:text-xs lg:text-xl leading-tight lg:leading-none mb-0.5 lg:mb-1 text-white">{item.title}</h4>
+                 <p className="text-[6px] sm:text-[8px] lg:text-[10px] font-bold text-gray-500 uppercase tracking-wider lg:tracking-widest hidden sm:block">{item.sub}</p>
               </div>
             </div>
           ))}

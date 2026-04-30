@@ -60,14 +60,14 @@ const TurfDetails = () => {
 
   const handleReservation = () => {
     if (isLoggedIn) {
-      navigate(`/auth/reserve/${id}`);
+      navigate(`/reserve/${id}`);
     } else {
       navigate(`/login`);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-[#84CC16] selection:text-black">
+    <div className="min-h-screen bg-black text-white">
       {/* Top Navigation Bar */}
       <div className="container mx-auto px-4 mb-8">
         <Link 
@@ -80,7 +80,7 @@ const TurfDetails = () => {
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-4">
-            <h1 className="text-5xl md:text-7xl font-black uppercase leading-tight tracking-tighter animate-slide-in-left">
+            <h1 className="text-5xl md:text-7xl font-black uppercase leading-tight tracking-tight animate-slide-in-left">
               {turf.name}
             </h1>
             <div className="flex flex-wrap items-center gap-6 text-sm font-bold uppercase tracking-wide animate-fade-in">
@@ -125,7 +125,7 @@ const TurfDetails = () => {
             />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <button className="w-20 h-20 rounded-full bg-[#84CC16] text-black flex items-center justify-center pl-1 hover:scale-110 transition-transform shadow-[0_0_30px_rgba(132,204,22,0.3)]">
+              <button className="w-20 h-20 rounded-full bg-[#84CC16] text-black flex items-center justify-center pl-1 hover:scale-110 transition-transform">
                 <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-current border-b-[12px] border-b-transparent ml-1" />
               </button>
             </div>
@@ -151,32 +151,32 @@ const TurfDetails = () => {
             <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="w-1.5 h-8 bg-[#84CC16] rounded-full" />
-                <h2 className="text-2xl font-black uppercase tracking-wider">About This Space</h2>
+                <h2 className="text-2xl font-bold uppercase tracking-wider">Facility Overview</h2>
               </div>
               <p className="text-zinc-400 text-lg leading-relaxed max-w-3xl">
-                Experience top-tier sports facilities at {turf.name}. Our FIFA-grade turf and professional 
+                Experience top-tier sports facilities at {turf.name}. Our professional-grade turf and
                 cricket pitches are designed for both casual players and professional athletes. 
-                Located in the heart of {turf.location}, we offer a seamless booking experience 
-                with state-of-the-art amenities including player lounges, showers, and a premium cafe area.
+                Located in {turf.location}, we offer a seamless booking experience 
+                with premium amenities including player lounges, showers, and a cafe area.
               </p>
             </div>
 
             {/* Amenities */}
             <div className="space-y-8">
-              <h2 className="text-2xl font-black uppercase tracking-wider">Technical Amenities</h2>
+              <h2 className="text-2xl font-bold uppercase tracking-wider">Facility Amenities</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <AmenityItem icon={<Zap />} text="Floodlights" />
                 <AmenityItem icon={<Users />} text="Changing Rooms" />
-                <AmenityItem icon={<ShieldCheck />} text="CCTV Security" />
+                <AmenityItem icon={<ShieldCheck />} text="Security" />
                 <AmenityItem icon={<Clock />} text="24/7 Access" />
                 <AmenityItem icon={<Car />} text="Parking" />
-                <AmenityItem icon={<Coffee />} text="Drinking Water" />
+                <AmenityItem icon={<Coffee />} text="Water" />
               </div>
             </div>
 
             {/* How to Reach */}
             <div className="space-y-8">
-              <h2 className="text-2xl font-black uppercase tracking-wider">How to Reach</h2>
+              <h2 className="text-2xl font-bold uppercase tracking-wider">How to Reach</h2>
               <div className="bg-zinc-900/30 border border-zinc-800 rounded-[2rem] p-8 space-y-6">
                 <div className="flex items-start gap-4">
                   <div className="p-3 rounded-2xl bg-[#84CC16]/10 text-[#84CC16]">
@@ -185,13 +185,13 @@ const TurfDetails = () => {
                   <div>
                     <p className="text-zinc-200 font-bold mb-1">Plot No. 42, Sector 8, Near Crystal Mall, {turf.location}, Mumbai - 400053</p>
                     <button className="text-[#84CC16] text-sm font-bold uppercase tracking-widest hover:underline">
-                      Get Directions on Maps
+                      View on Maps
                     </button>
                   </div>
                 </div>
                 <div className="w-full h-64 bg-zinc-800/50 rounded-2xl flex flex-col items-center justify-center border border-dashed border-zinc-700">
                   <Activity className="w-12 h-12 text-zinc-600 mb-2" />
-                  <p className="text-zinc-500 font-bold uppercase text-xs tracking-widest">Map Engine Loading...</p>
+                  <p className="text-zinc-500 font-bold uppercase text-xs tracking-widest">Map Loading...</p>
                 </div>
               </div>
             </div>
@@ -203,9 +203,9 @@ const TurfDetails = () => {
               <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 p-8 rounded-[2.5rem] shadow-2xl">
                 <div className="space-y-6">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Instant Booking Platform</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Professional Booking Portal</p>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-black">₹{turf.pricePerHour}</span>
+                      <span className="text-4xl font-bold">₹{turf.pricePerHour}</span>
                       <span className="text-zinc-500 font-bold">/hr</span>
                     </div>
                   </div>
@@ -221,29 +221,29 @@ const TurfDetails = () => {
                     <button className="w-full flex items-center justify-between p-4 rounded-2xl border border-zinc-800 bg-black/40 hover:border-[#84CC16] transition-colors group">
                       <div className="flex items-center gap-3">
                         <Clock className="w-5 h-5 text-[#84CC16]" />
-                        <span className="font-bold uppercase text-xs tracking-widest">Select Slot</span>
+                        <span className="font-bold uppercase text-xs tracking-widest">Select Time</span>
                       </div>
                       <span className="text-zinc-500 text-sm font-medium">1h onwards</span>
                     </button>
                   </div>
 
                   <div className="space-y-4 py-4">
-                    <Benefit text="Free Cancellation" />
+                    <Benefit text="Flexible Cancellation" />
                     <Benefit text="Verified Facilities" />
-                    <Benefit text="Instant Pass" />
+                    <Benefit text="Digital Pass" />
                   </div>
 
                   <button 
                     onClick={handleReservation}
-                    className="w-full bg-[#84CC16] text-black h-16 rounded-2xl font-black uppercase tracking-wider flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_20px_rgba(132,204,22,0.2)]"
+                    className="w-full bg-[#84CC16] text-black h-16 rounded-2xl font-bold uppercase tracking-wider flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all"
                   >
-                    Reserve My Slot
+                    Reserve Now
                     <ArrowRight className="w-5 h-5" />
                   </button>
 
-                  <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-600">
+                  <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-600">
                     <ShieldCheck className="w-4 h-4" />
-                    Enterprise Secure Checkout
+                    Enterprise-Grade Secure Checkout
                   </div>
                 </div>
               </div>
@@ -254,8 +254,8 @@ const TurfDetails = () => {
                     <Info className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="font-black uppercase text-xs tracking-widest">Policy Hub</p>
-                    <p className="text-zinc-500 text-xs italic">Rules & Refunds</p>
+                    <p className="font-bold uppercase text-xs tracking-widest">Venue Policies</p>
+                    <p className="text-zinc-500 text-xs font-medium">Rules & Refunds</p>
                   </div>
                 </div>
                 <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-[#84CC16] transition-colors" />
@@ -267,7 +267,7 @@ const TurfDetails = () => {
         {/* Reviews Section */}
         <div className="mt-32 pt-20 border-t border-zinc-900">
           <div className="flex items-center justify-between mb-12">
-            <h2 className="text-4xl font-black uppercase tracking-tighter">Community Feedback</h2>
+            <h2 className="text-4xl font-bold uppercase tracking-tight">Customer Reviews</h2>
             <div className="flex items-center gap-4 text-[#84CC16] font-bold">
               <Star className="fill-current" />
               <span className="text-2xl">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
@@ -276,6 +276,7 @@ const TurfDetails = () => {
           </div>
           <Reviews turfId={id} />
         </div>
+
       </div>
     </div>
   );

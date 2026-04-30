@@ -165,10 +165,10 @@ export const BlogManagement = () => {
               <div className="mt-auto flex items-center gap-2 pt-4 border-t border-white/5">
                 <button
                   onClick={() => handleOpenModal(blog)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-all text-xs font-bold uppercase tracking-wider"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-all text-xs font-bold uppercase tracking-widest"
                 >
                   <Edit2 size={14} />
-                  Edit Ops
+                  Edit Details
                 </button>
                 <button
                   onClick={() => handleDelete(blog._id)}
@@ -186,8 +186,8 @@ export const BlogManagement = () => {
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/10">
               <FileText size={32} className="text-gray-600" />
             </div>
-            <h3 className="text-white font-display-heavy text-xl tracking-widest">NO ARTICLES FOUND</h3>
-            <p className="text-gray-500 text-sm mt-1">Start by creating your first tactical report.</p>
+            <h3 className="text-white font-bold text-xl tracking-tight uppercase">No Articles Found</h3>
+            <p className="text-gray-500 text-sm mt-1">Start by creating your first business article.</p>
           </div>
         )}
       </div>
@@ -196,18 +196,14 @@ export const BlogManagement = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
           <div className="w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative">
-            {/* Tactical Grid Overlay */}
-            <div className="absolute inset-0 pointer-events-none opacity-[0.03]" 
-                 style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
-            
             <div className="p-8 border-b border-white/10 flex items-center justify-between bg-black/40 relative z-10">
               <div>
-                <h2 className="text-2xl font-bold font-bebas tracking-[0.2em] text-white">
-                  {editingItem ? "REDACT ARTICLE" : "INITIATE ARTICLE"}
+                <h2 className="text-2xl font-bold tracking-tight text-white uppercase">
+                  {editingItem ? "Edit Article" : "Create Article"}
                 </h2>
                 <div className="flex items-center gap-2 mt-1">
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                  <span className="telemetry-label text-[10px] text-primary">System Ready</span>
+                  <span className="text-[10px] font-bold text-primary uppercase tracking-widest">System Ready</span>
                 </div>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all">
@@ -218,7 +214,7 @@ export const BlogManagement = () => {
             <form onSubmit={handleSubmit} className="p-8 space-y-6 relative z-10 max-h-[70vh] overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-2 gap-6">
                 <div className="col-span-2">
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.3em] text-white/30 mb-2">Headline</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Headline</label>
                   <input
                     type="text"
                     required
@@ -230,7 +226,7 @@ export const BlogManagement = () => {
                 </div>
                 
                 <div className="col-span-2">
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.3em] text-white/30 mb-2">Lead / Subtitle</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Lead / Subtitle</label>
                   <input
                     type="text"
                     value={formData.subtitle}
@@ -241,7 +237,7 @@ export const BlogManagement = () => {
                 </div>
 
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.3em] text-white/30 mb-2">Visual Intel (Image URL)</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Article Image URL</label>
                   <input
                     type="text"
                     required
@@ -253,7 +249,7 @@ export const BlogManagement = () => {
                 </div>
 
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.3em] text-white/30 mb-2">Category</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Category</label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
@@ -269,7 +265,7 @@ export const BlogManagement = () => {
                 </div>
 
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.3em] text-white/30 mb-2">Read Time</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Read Time</label>
                   <input
                     type="text"
                     value={formData.readTime}
@@ -280,18 +276,18 @@ export const BlogManagement = () => {
                 </div>
 
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.3em] text-white/30 mb-2">Date String</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Date String</label>
                   <input
                     type="text"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all font-mono"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all"
                     placeholder="e.g. 23RD JULY 2024"
                   />
                 </div>
 
                 <div className="col-span-2">
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.3em] text-white/30 mb-2">Article Intel (Content - Markdown/HTML)</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Article Content (Markdown/HTML)</label>
                   <textarea
                     required
                     rows={8}
@@ -303,7 +299,7 @@ export const BlogManagement = () => {
                 </div>
 
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.3em] text-white/30 mb-2">Views (Simulated)</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Views (Simulated)</label>
                   <input
                     type="text"
                     value={formData.views}
@@ -313,7 +309,7 @@ export const BlogManagement = () => {
                 </div>
 
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.3em] text-white/30 mb-2">Likes (Simulated)</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Likes (Simulated)</label>
                   <input
                     type="text"
                     value={formData.likes}
@@ -329,19 +325,20 @@ export const BlogManagement = () => {
                   onClick={() => setIsModalOpen(false)}
                   className="flex-1 py-4 rounded-2xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all uppercase tracking-widest text-xs"
                 >
-                  ABORT MISSION
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="flex-1 py-4 rounded-2xl bg-lime-500 text-black font-bold hover:bg-lime-400 transition-all shadow-[0_0_30px_rgba(132,204,22,0.4)] uppercase tracking-widest text-xs"
                 >
-                  EXECUTE UPLOAD
+                  Save Article
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
     </div>
   );
 };

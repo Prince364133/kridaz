@@ -42,7 +42,7 @@ const BlogSection = () => {
     <section className="py-20 px-6 max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
         <div>
-          <h2 className="font-display text-5xl md:text-7xl uppercase leading-none tracking-tighter">
+          <h2 className="font-display text-5xl md:text-7xl uppercase leading-none tracking-tight">
             BLOGS AND <span style={{ color: PRI }}>ARTICLES</span>
           </h2>
           <p className="text-gray-500 font-mono text-xs uppercase tracking-[0.3em] mt-3">
@@ -54,12 +54,19 @@ const BlogSection = () => {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Mobile: horizontal scroll | Desktop: grid */}
+      <div className="
+        flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth no-scrollbar
+        md:grid md:grid-cols-2 md:overflow-visible md:pb-0
+        lg:grid-cols-4
+      ">
         {blogs.slice(0, 4).map((blog, idx) => (
           <Link 
             key={blog._id} 
             to={`/blogs/${blog._id}`}
-            className="group relative aspect-[3/4.5] rounded-[2rem] overflow-hidden border border-white/5 bg-zinc-900 flex flex-col"
+            className="group relative rounded-[2rem] overflow-hidden border border-white/5 bg-zinc-900 flex flex-col snap-start
+              shrink-0 w-[75vw] aspect-[3/4.5]
+              md:w-auto md:shrink md:aspect-[3/4.5]"
           >
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
@@ -107,7 +114,7 @@ const BlogSection = () => {
               </div>
             </div>
 
-            {/* Subtle Progress Bar Placeholder */}
+            {/* Progress Bar */}
             <div className="absolute bottom-0 left-0 h-1 bg-primary/20 w-full">
               <div className="h-full bg-primary w-0 group-hover:w-full transition-all duration-1000 ease-out" />
             </div>

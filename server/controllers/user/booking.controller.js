@@ -94,54 +94,64 @@ export const verifyPayment = async (req, res) => {
       turf.location
     );
 
+    console.log("[PAYMENT] Successfully verified signature for Order:", orderId);
+
     // Create time slot and booking
+    try {
+      const [timeSlot, booking] = await Promise.all([
+        TimeSlot.create({
+          turf: turfId,
+          startTime: adjustedStartTime,
+          endTime: adjustedEndTime,
+        }),
+        Booking.create({
+          user: userId,
+          turf: turfId,
+          timeSlot: null, // Will be updated after TimeSlot is created
+          totalPrice,
+          qrCode: QRcode,
+          payment: { orderId, paymentId },
+        }),
+      ]);
 
-    const [timeSlot, booking] = await Promise.all([
-      TimeSlot.create({
-        turf: turfId,
-        startTime: adjustedStartTime,
-        endTime: adjustedEndTime,
-      }),
-      Booking.create({
-        user: userId,
-        turf: turfId,
-        timeSlot: null, // Will be updated after TimeSlot is created
+      console.log("[BOOKING] Records created successfully. Finalizing linkage...");
+      booking.timeSlot = timeSlot._id;
+
+      await Promise.all([
+        booking.save(),
+        User.findByIdAndUpdate(userId, { $push: { bookings: booking._id } }),
+      ]);
+
+      console.log("[BOOKING] Transaction complete for user:", userId);
+
+      // Generate and send email
+      const htmlContent = generateHTMLContent(
+        turf.name,
+        turf.location,
+        formattedDate,
+        formattedStartTime,
+        formattedEndTime,
         totalPrice,
-        qrCode: QRcode,
-        payment: { orderId, paymentId },
-      }),
-    ]);
+        QRcode
+      );
 
-    // Update the booking with time slot
+      generateEmail(user.email, "Booking Confirmation", htmlContent).catch(err => {
+        console.error("[EMAIL] Failed to send ticket:", err.message);
+      });
 
-    booking.timeSlot = timeSlot._id;
-
-    await Promise.all([
-      booking.save(),
-      User.findByIdAndUpdate(userId, { $push: { bookings: booking._id } }),
-    ]);
-
-    // Generate and send email
-    const htmlContent = generateHTMLContent(
-      turf.name,
-      turf.location,
-      formattedDate,
-      formattedStartTime,
-      formattedEndTime,
-      totalPrice,
-      QRcode
-    );
-
-    await generateEmail(user.email, "Booking Confirmation", htmlContent);
-    return res.status(200).json({
-      success: true,
-      message: "Booking successful, Check your email for the receipt",
-    });
+      return res.status(200).json({
+        success: true,
+        message: "Booking successful, Check your email for the receipt",
+      });
+    } catch (dbError) {
+      console.error("[DATABASE] Failed to save booking records:", dbError);
+      throw dbError;
+    }
   } catch (error) {
     console.error("Error in verifyPayment", error);
     return res.status(500).json({
       success: false,
-      message: "An error occurred while processing your booking",
+      message: "An error occurred while processing your booking: " + error.message,
     });
   }
 };

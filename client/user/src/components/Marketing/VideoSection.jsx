@@ -44,7 +44,7 @@ export const VideoSection = ({ videos = [] }) => {
     <section className="py-20 bg-black overflow-hidden border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6 mb-12 flex items-end justify-between">
         <div>
-          <h2 className="font-display text-5xl md:text-7xl uppercase leading-none text-white tracking-tighter">
+          <h2 className="font-display text-5xl md:text-7xl uppercase leading-none text-white tracking-tight">
             Playbook <span style={{ color: PRI }}>Highlights</span>
           </h2>
           <p className="font-script text-2xl mt-2" style={{ color: PRI }}>watch the elite in action</p>

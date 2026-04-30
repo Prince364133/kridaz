@@ -12,9 +12,10 @@ const Turf = ({ turf }) => {
       {/* ── Image ─────────────────────────────────────────────────── */}
       <div className="relative overflow-hidden" style={{ height: "200px" }}>
         <img
-          <img src={turf.image} alt={turf.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onError={(e) => { e.target.onerror = null; e.target.src = "/banner-2.png"; }} />
+          src={turf.image}
           alt={turf.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          onError={(e) => { e.target.onerror = null; e.target.src = "/banner-2.png"; }}
         />
         {/* Price badge */}
         <div className="absolute top-3 left-3">

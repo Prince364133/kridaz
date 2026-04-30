@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, Activity, ShieldCheck, Zap } from "lucide-react";
+import { Menu } from "lucide-react";
 import ThemeSwitcher from "../common/ThemeSwitcher.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
@@ -17,10 +17,9 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 flex flex-col">
-
       <nav className="navbar bg-surface/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 h-16 lg:h-20">
         <div className="navbar-start">
-          <button className="p-2 mr-4 text-white hover:text-primary transition-colors lg:hidden" onClick={toggleSidebar}>
+          <button className="p-2 mr-4 text-white hover:text-[#84CC16] transition-colors lg:hidden" onClick={toggleSidebar}>
             <Menu size={24} />
           </button>
           <Link to={path} className="flex items-center gap-4 group">
@@ -36,10 +35,10 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
           </div>
           <div className="h-8 w-[1px] bg-white/5 mx-2" />
           <button 
-            className="btn-bms-ghost h-10 px-6 font-display-heavy text-[11px] tracking-widest" 
+            className="text-sm font-bold text-white hover:text-[#84CC16] transition-colors px-4 py-2" 
             onClick={handleLogout}
           >
-            SIGNOUT
+            Logout
           </button>
         </div>
       </nav>
