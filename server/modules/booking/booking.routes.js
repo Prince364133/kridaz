@@ -1,0 +1,23 @@
+import express from "express";
+import { 
+  createOrder, 
+  verifyPayment, 
+  getUserBookings,
+  getOwnerBookings
+} from "./booking.controller.js";
+import { createOrderSchema, verifyPaymentSchema } from "./booking.validator.js";
+import { validate } from "../../middleware/validate.middleware.js";
+import verifyUserToken from "../../middleware/jwt/user.middleware.js";
+import verifyOwnerToken from "../../middleware/jwt/owner.middleware.js";
+
+const router = express.Router();
+
+// User routes
+router.post("/user/order", verifyUserToken, validate(createOrderSchema), createOrder);
+router.post("/user/verify", verifyUserToken, validate(verifyPaymentSchema), verifyPayment);
+router.get("/user/all", verifyUserToken, getUserBookings);
+
+// Owner routes
+router.get("/owner/all", verifyOwnerToken, getOwnerBookings);
+
+export default router;

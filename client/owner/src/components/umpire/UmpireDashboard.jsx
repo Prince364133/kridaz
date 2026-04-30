@@ -1,16 +1,33 @@
 import React from "react";
-import { Trophy, Calendar, Star, DollarSign, Zap, Shield, MapPin } from "lucide-react";
+import { Trophy, Calendar, Star, DollarSign, Zap, Shield, MapPin, BarChart as BarChartIcon } from "lucide-react";
 import StatCard from "../admin/Dashboard/StatCard";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-const matchData = [
-  { name: 'Wk 1', matches: 4 },
-  { name: 'Wk 2', matches: 7 },
-  { name: 'Wk 3', matches: 5 },
-  { name: 'Wk 4', matches: 8 },
-];
+import useUmpireDashboard from "@hooks/owner/useUmpireDashboard";
+import DashboardSkeleton from "../owner/Dashboard/DashboardSkeleton";
 
 export default function UmpireDashboard() {
+  const { dashboardData, loading, error } = useUmpireDashboard();
+
+  if (loading) return <DashboardSkeleton />;
+  if (error) {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-[60vh] text-white text-center">
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="font-bold text-xl uppercase tracking-wider text-primary">System Offline</p>
+        <button onClick={() => window.location.reload()} className="mt-6 px-8 py-3 border border-primary/50 text-primary font-bold uppercase rounded-xl hover:bg-primary/10 transition-all">Retry Link</button>
+      </div>
+    );
+  }
+
+  const {
+    matchesOfficiated,
+    upcomingMatches,
+    officialRating,
+    earnings,
+    matchEngagement,
+    upcomingAssignments
+  } = dashboardData;
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header Section */}
@@ -36,10 +53,10 @@ export default function UmpireDashboard() {
 
       {/* Primary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Matches Officiated" value={18} icon={Trophy} />
-        <StatCard title="Upcoming Matches" value={2} icon={Calendar} />
-        <StatCard title="Official Rating" value={4.9} icon={Star} />
-        <StatCard title="Earnings" value={12000} icon={DollarSign} prefix="₹" />
+        <StatCard title="Matches Officiated" value={matchesOfficiated} icon={Trophy} />
+        <StatCard title="Upcoming Matches" value={upcomingMatches} icon={Calendar} />
+        <StatCard title="Official Rating" value={officialRating} icon={Star} />
+        <StatCard title="Earnings" value={earnings} icon={DollarSign} prefix="₹" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -51,50 +68,61 @@ export default function UmpireDashboard() {
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Monthly Assignment Analytics</p>
             </div>
             <div className="p-2 bg-white/5 rounded-xl border border-white/5">
-               <BarChart size={16} className="text-primary" />
+               <BarChartIcon size={16} className="text-primary" />
             </div>
           </div>
           
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={matchData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff05" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 10}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 10}} />
-                <Tooltip 
-                  cursor={{fill: '#ffffff05'}}
-                  contentStyle={{backgroundColor: '#000', border: '1px solid rgba(132,204,22,0.2)', borderRadius: '12px'}}
-                />
-                <Bar dataKey="matches" fill="#84CC16" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="h-[300px] w-full flex items-center justify-center border border-white/5 border-dashed rounded-2xl">
+            {matchEngagement.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={matchEngagement}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff05" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 10}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#4b5563', fontSize: 10}} />
+                  <Tooltip 
+                    cursor={{fill: '#ffffff05'}}
+                    contentStyle={{backgroundColor: '#000', border: '1px solid rgba(132,204,22,0.2)', borderRadius: '12px'}}
+                  />
+                  <Bar dataKey="matches" fill="#84CC16" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-center space-y-2 opacity-20">
+                <BarChartIcon size={24} className="mx-auto" />
+                <span className="text-[9px] font-black uppercase tracking-widest">No activity data</span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Immediate Assignments */}
         <div className="p-8 bg-[#0A0A0A] rounded-2xl border border-white/5 flex flex-col">
           <h2 className="text-xl font-black uppercase tracking-tight text-white mb-6">Upcoming Assignments</h2>
-          <div className="flex-1 space-y-4">
-            {[
-              { match: 'Mumbai Warriors vs Pune Stars', time: 'Tomorrow, 16:00', venue: 'Shivaji Park', role: 'Main Umpire' },
-              { match: 'Corporate League Final', time: '25th Oct, 09:30', venue: 'MCA Stadium', role: '3rd Umpire' },
-            ].map((match, i) => (
-              <div key={i} className="p-5 bg-white/[0.02] rounded-xl border border-white/5 group hover:bg-white/[0.05] transition-all relative">
-                <div className="absolute top-4 right-4">
-                  <Zap size={12} className="text-primary opacity-30 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <h4 className="text-sm font-bold text-white mb-2 uppercase tracking-tight leading-tight">{match.match}</h4>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-[10px] font-medium text-gray-500">
-                    <Calendar size={10} /> {match.time}
+          <div className="flex-1 space-y-4 overflow-y-auto max-h-[300px]">
+            {upcomingAssignments.length > 0 ? (
+              upcomingAssignments.map((match, i) => (
+                <div key={i} className="p-5 bg-white/[0.02] rounded-xl border border-white/5 group hover:bg-white/[0.05] transition-all relative">
+                  <div className="absolute top-4 right-4">
+                    <Zap size={12} className="text-primary opacity-30 group-hover:opacity-100 transition-opacity" />
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] font-medium text-gray-500">
-                    <MapPin size={10} /> {match.venue}
+                  <h4 className="text-sm font-bold text-white mb-2 uppercase tracking-tight leading-tight">{match.match}</h4>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-[10px] font-medium text-gray-500">
+                      <Calendar size={10} /> {match.time}
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] font-medium text-gray-500">
+                      <MapPin size={10} /> {match.venue}
+                    </div>
+                    <div className="mt-3 text-[9px] font-bold text-primary uppercase tracking-widest">Role: {match.role}</div>
                   </div>
-                  <div className="mt-3 text-[9px] font-bold text-primary uppercase tracking-widest">Role: {match.role}</div>
                 </div>
+              ))
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center space-y-3 opacity-20 py-10">
+                 <Zap size={32} />
+                 <span className="text-[10px] font-bold uppercase tracking-widest">Clear Roster</span>
               </div>
-            ))}
+            )}
           </div>
           <button className="mt-8 w-full py-3 border border-white/10 hover:bg-white/5 rounded-xl font-bold uppercase text-xs tracking-widest transition-all">
             Review Protocols

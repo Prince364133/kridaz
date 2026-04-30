@@ -8,7 +8,7 @@ import {
   createVideo,
   updateVideo,
   deleteVideo,
-} from "../../controllers/admin/marketing.controller.js";
+} from "../../modules/marketing/marketing.controller.js";
 
 const router = Router();
 

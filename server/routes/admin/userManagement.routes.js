@@ -1,10 +1,8 @@
 import express from "express";
-import {getAllUsers} from "../../controllers/admin/userManagement.controller.js"
-import verifyAdminToken from "../../middleware/jwt/admin.middleware.js";
+import { getAllUsers } from "../../modules/admin/admin.controller.js"
 
 const userManagementRouter = express.Router();
 
 userManagementRouter.get("/all", getAllUsers);
 
 export default userManagementRouter;
-

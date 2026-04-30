@@ -1,7 +1,7 @@
 import { ArrowRight, Users, Target, Video } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const PRI = "#84CC16";
+const PRI = "#3B82F6"; // Blue for coaches
 
 const benefits = [
   { icon: Users, title: "Manage Roster", desc: "Easily track student progress, manage subscriptions, and organize batches." },
@@ -11,7 +11,7 @@ const benefits = [
 
 export default function CoachLanding() {
   return (
-    <div className="min-h-screen text-white pt-20 pb-20" style={{ backgroundColor: "#000" }}>
+    <div className="min-h-screen text-white pt-32 pb-20" style={{ backgroundColor: "#000" }}>
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{ backgroundImage: `radial-gradient(${PRI} 1px, transparent 1px)`, backgroundSize: "36px 36px" }} />
 

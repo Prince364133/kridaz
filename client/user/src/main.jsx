@@ -7,14 +7,17 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { RouterProvider } from 'react-router-dom'
 import router from "./router"
 import { Toaster } from 'react-hot-toast'
+import ErrorBoundary from "./components/common/ErrorBoundary";
 
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <RouterProvider router={router} />
-        <Toaster position="bottom-center" duration={500} />
+        <ErrorBoundary>
+          <RouterProvider router={router} />
+          <Toaster position="bottom-center" duration={500} />
+        </ErrorBoundary>
       </PersistGate>
     </Provider>
   </React.StrictMode>

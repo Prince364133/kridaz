@@ -11,8 +11,7 @@ const useTurfManagement = () => {
     try {
       // Replace this with your actual API call
       const response = await axiosInstance.get("/api/owner/turf/all");
-      const result = await response.data;
-      setTurfs(result);
+      setTurfs(response.data);
     } catch (err) {
       setError("Failed to fetch turfs");
     } finally {
@@ -22,14 +21,8 @@ const useTurfManagement = () => {
 
   const addTurf = async (newTurf) => {
     try {
-      // Replace this with your actual API call
-      const response = await fetch("/api/turfs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTurf),
-      });
-      const addedTurf = await response.json();
-      setTurfs((prev) => [...prev, addedTurf]);
+      const response = await axiosInstance.post("/api/owner/turf/register", newTurf);
+      setTurfs((prev) => [...prev, response.data]);
     } catch (err) {
       setError("Failed to add turf");
     }
@@ -41,8 +34,7 @@ const useTurfManagement = () => {
         `/api/owner/turf/${turfId}`,
         updatedTurf
       );
-      const result = await response.data;
-      setTurfs(result.allTurfs);
+      setTurfs(response.data.allTurfs);
     } catch (error) {
       console.log(error, "error in edit turf");
     }
@@ -50,9 +42,8 @@ const useTurfManagement = () => {
 
   const deleteTurf = async (id) => {
     try {
-      // Replace this with your actual API call
-      await fetch(`/api/turfs/${id}`, { method: "DELETE" });
-      setTurfs((prev) => prev.filter((turf) => turf.id !== id));
+      await axiosInstance.delete(`/api/owner/turf/${id}`);
+      setTurfs((prev) => prev.filter((turf) => turf._id !== id));
     } catch (err) {
       setError("Failed to delete turf");
     }

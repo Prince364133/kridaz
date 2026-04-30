@@ -25,18 +25,19 @@ const addTurfSchema = yup.object().shape({
     .required("Enter the price per hour of the turf")
     .min(500, "Price per hour must be at least 500 rupees")
     .max(3000, "Price per hour must be at most 3000 rupees"),
-  image: yup
+  images: yup
     .mixed()
     .test(
-      "image",
-      "Please upload a valid image (PNG, JPEG, or WebP)",
+      "images",
+      "Please upload at least one valid image (PNG, JPEG, or WebP). Max 10 images.",
       function (value) {
-        if (!value || !value[0]) return false;
-        const file = value[0];
+        if (!value || value.length === 0) return false;
+        if (value.length > 10) return false;
         const acceptedFormats = ["image/png", "image/jpeg", "image/webp"];
-        return acceptedFormats.includes(file.type);
+        return Array.from(value).every(file => acceptedFormats.includes(file.type));
       }
     ),
+  youtubeUrl: yup.string().url("Invalid YouTube URL").nullable(),
   openTime: yup.date().required("Open time is required"),
   closeTime: yup
     .date()
@@ -46,6 +47,14 @@ const addTurfSchema = yup.object().shape({
     .array()
     .of(yup.string())
     .min(1, "At least one sport type is required"),
+  groundTypes: yup
+    .array()
+    .of(yup.string())
+    .min(1, "At least one ground type is required"),
+  facilities: yup
+    .array()
+    .of(yup.string())
+    .min(1, "At least one facility is required"),
 });
 
 export default function useAddTurf() {
@@ -62,22 +71,38 @@ export default function useAddTurf() {
     resolver: yupResolver(addTurfSchema),
     defaultValues: {
       sportTypes: [],
+      groundTypes: [],
+      facilities: [],
       openTime: null,
       closeTime: null,
+      youtubeUrl: "",
     },
   });
 
   const [sportTypes, setSportTypes] = useState([]);
+  const [groundTypes, setGroundTypes] = useState([]);
+  const [facilities, setFacilities] = useState([]);
   const [newSportType, setNewSportType] = useState("");
+  const [newGroundType, setNewGroundType] = useState("");
+  const [newFacility, setNewFacility] = useState("");
   const openTime = watch("openTime");
 
   useEffect(() => {
     setValue("sportTypes", sportTypes);
   }, [sportTypes, setValue]);
 
-  const addSportType = () => {
-    if (newSportType && !sportTypes.includes(newSportType)) {
-      setSportTypes([...sportTypes, newSportType]);
+  useEffect(() => {
+    setValue("groundTypes", groundTypes);
+  }, [groundTypes, setValue]);
+
+  useEffect(() => {
+    setValue("facilities", facilities);
+  }, [facilities, setValue]);
+
+  const addSportType = (type) => {
+    const sport = typeof type === 'string' ? type : newSportType;
+    if (sport && !sportTypes.includes(sport)) {
+      setSportTypes([...sportTypes, sport]);
       setNewSportType("");
     }
   };
@@ -86,24 +111,50 @@ export default function useAddTurf() {
     setSportTypes(sportTypes.filter((sport) => sport !== type));
   };
 
+  const addGroundType = (type) => {
+    const ground = typeof type === 'string' ? type : newGroundType;
+    if (ground && !groundTypes.includes(ground)) {
+      setGroundTypes([...groundTypes, ground]);
+      setNewGroundType("");
+    }
+  };
+
+  const removeGroundType = (type) => {
+    setGroundTypes(groundTypes.filter((ground) => ground !== type));
+  };
+
+  const addFacility = (item) => {
+    const facility = typeof item === 'string' ? item : newFacility;
+    if (facility && !facilities.includes(facility)) {
+      setFacilities([...facilities, facility]);
+      setNewFacility("");
+    }
+  };
+
+  const removeFacility = (item) => {
+    setFacilities(facilities.filter((f) => f !== item));
+  };
+
   const onSubmit = async (data) => {
     setLoading(true);
 
     const formData = new FormData();
 
     Object.keys(data).forEach((key) => {
-      if (key === "image") {
-        if (data[key] && data[key][0]) {
-          formData.append(key, data[key][0]);
+      if (key === "images") {
+        if (data[key]) {
+          Array.from(data[key]).forEach((file) => {
+            formData.append("images", file);
+          });
         }
       } else if (key === "openTime" || key === "closeTime") {
         if (data[key] instanceof Date) {
           formData.append(key, format(data[key], "hh:mm aa"));
         }
-      } else if (key === "sportTypes") {
+      } else if (key === "sportTypes" || key === "groundTypes" || key === "facilities") {
         if (Array.isArray(data[key])) {
-          data[key].forEach((sport, index) => {
-            formData.append(`sportTypes[${index}]`, sport);
+          data[key].forEach((item) => {
+            formData.append(key, item);
           });
         }
       } else {
@@ -123,7 +174,7 @@ export default function useAddTurf() {
           },
         }
       );
-       const result = await response.data;
+       const result = response.data;
       toast.success(result.message);
       navigate("/partner/turfs");
      } catch (error) {
@@ -151,6 +202,16 @@ export default function useAddTurf() {
     setNewSportType,
     addSportType,
     removeSportType,
+    groundTypes,
+    newGroundType,
+    setNewGroundType,
+    addGroundType,
+    removeGroundType,
+    facilities,
+    newFacility,
+    setNewFacility,
+    addFacility,
+    removeFacility,
     openTime,
     loading,
   };

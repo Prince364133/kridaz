@@ -1,7 +1,8 @@
-import express from "express";         
-import {getAllTransaction} from "../../controllers/admin/transaction.controller.js";
+import express from "express";
+import { getAllTransactions } from "../../modules/admin/admin.controller.js"
+
 const transactionRouter = express.Router();
 
-transactionRouter.get("/", getAllTransaction);
+transactionRouter.get("/all", getAllTransactions);
 
 export default transactionRouter;

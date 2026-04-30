@@ -11,7 +11,12 @@ import Reservation from "./components/Reservation";
 import TurfBookingHistory from "./components/turf/TurfBookingHistory";
 import NotFound from "./components/common/NotFound";
 import Profile from "./pages/Profile";
+import Blogs from "./pages/Blogs";
 import BlogDetail from "./pages/BlogDetail";
+import VenueOwnerSignUp from "./pages/auth/VenueOwnerSignUp";
+import CoachSignUp from "./pages/auth/CoachSignUp";
+import UmpireSignUp from "./pages/auth/UmpireSignUp";
+import ComingSoon from "./pages/ComingSoon";
 
 const router = createBrowserRouter([
   {
@@ -36,12 +41,40 @@ const router = createBrowserRouter([
         element: <Turf />,
       },
       {
-        path: "turf/:id",
-        element: <TurfDetails />,
-      },
-      {
         path: "partners",
         element: <PartnersGateway />,
+      },
+      {
+        path: "partners/venues",
+        element: <PartnersGateway />,
+      },
+      {
+        path: "partners/coaches",
+        element: <PartnersGateway />,
+      },
+      {
+        path: "partners/officials",
+        element: <PartnersGateway />,
+      },
+      {
+        path: "signup/venue",
+        element: <VenueOwnerSignUp />,
+      },
+      {
+        path: "signup/coach",
+        element: <CoachSignUp />,
+      },
+      {
+        path: "signup/official",
+        element: <UmpireSignUp />,
+      },
+      {
+        path: "waitlist-success",
+        element: <ComingSoon />,
+      },
+      {
+        path: "turf/:id",
+        element: <TurfDetails />,
       },
       {
         path: "profile",
@@ -50,6 +83,10 @@ const router = createBrowserRouter([
             <Profile />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: "blogs",
+        element: <Blogs />,
       },
       {
         path: "blogs/:id",

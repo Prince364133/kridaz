@@ -10,7 +10,7 @@ const PublicLayout = () => {
   return (
     <div className="flex flex-col min-h-screen bg-black">
       <PublicNavbar />
-      <main className={`flex-grow ${isLandingPage ? "" : "pt-16 lg:pt-20"}`}>
+      <main className="flex-grow pt-16 lg:pt-20">
         <Outlet />
       </main>
       <PartnerFooter />

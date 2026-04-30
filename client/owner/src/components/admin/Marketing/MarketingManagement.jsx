@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../../hooks/useAxiosInstance";
 import { toast } from "react-hot-toast";
 import { Plus, Trash2, Edit2, Layout, Video, Check, X, GripVertical } from "lucide-react";
 
@@ -19,7 +19,7 @@ export const MarketingManagement = () => {
     isActive: true,
   });
 
-  const API_BASE = `${import.meta.env.VITE_API_URL}/api/admin/marketing`;
+  const API_BASE = "/api/admin/marketing";
 
   useEffect(() => {
     fetchData();
@@ -29,12 +29,13 @@ export const MarketingManagement = () => {
     try {
       setLoading(true);
       const [bannersRes, videosRes] = await Promise.all([
-        axios.get(`${API_BASE}/banners`, { withCredentials: true }),
-        axios.get(`${API_BASE}/videos`, { withCredentials: true }),
+        axiosInstance.get(`${API_BASE}/banners`),
+        axiosInstance.get(`${API_BASE}/videos`),
       ]);
       setBanners(bannersRes.data.banners || []);
       setVideos(videosRes.data.videos || []);
     } catch (error) {
+      console.error("Marketing fetch error:", error);
       toast.error("Failed to fetch marketing data");
     } finally {
       setLoading(false);
@@ -63,26 +64,28 @@ export const MarketingManagement = () => {
     e.preventDefault();
     try {
       if (editingItem) {
-        await axios.put(`${API_BASE}/${activeTab}/${editingItem._id}`, formData, { withCredentials: true });
+        await axiosInstance.put(`${API_BASE}/${activeTab}/${editingItem._id}`, formData);
         toast.success("Updated successfully");
       } else {
-        await axios.post(`${API_BASE}/${activeTab}`, formData, { withCredentials: true });
+        await axiosInstance.post(`${API_BASE}/${activeTab}`, formData);
         toast.success("Created successfully");
       }
       setIsModalOpen(false);
       fetchData();
     } catch (error) {
-      toast.error("Failed to save data");
+      console.error("Marketing save error:", error);
+      toast.error(error.response?.data?.message || "Failed to save data");
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure?")) return;
     try {
-      await axios.delete(`${API_BASE}/${activeTab}/${id}`, { withCredentials: true });
+      await axiosInstance.delete(`${API_BASE}/${activeTab}/${id}`);
       toast.success("Deleted successfully");
       fetchData();
     } catch (error) {
+      console.error("Marketing delete error:", error);
       toast.error("Failed to delete");
     }
   };

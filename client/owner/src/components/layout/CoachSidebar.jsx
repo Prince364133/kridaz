@@ -33,24 +33,17 @@ const CoachSidebar = ({ isOpen, toggleSidebar }) => {
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-screen w-64 bg-surface border-r border-white/5 z-50 transition-transform duration-500 ease-in-out lg:translate-x-0 ${
+        className={`fixed bg-surface border-r border-white/5 z-50 transition-transform duration-500 ease-in-out lg:translate-x-0 
+          w-64 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Branding Area */}
-        <div className="flex flex-col p-8 border-b border-white/5 bg-black/20 gap-4">
-          <div className="flex items-center justify-between">
-            <div className="w-32 h-10 bg-transparent overflow-hidden">
-              <img src="/logo.png" alt="Logo" className="w-full h-full object-contain object-left" />
-            </div>
-            <button onClick={toggleSidebar} className="lg:hidden text-white hover:text-primary transition-colors">
+        {/* Mobile Header (Hidden on Desktop) */}
+        <div className="flex flex-col p-4 border-b border-white/5 bg-black/20 gap-4 lg:hidden">
+          <div className="flex items-center justify-end">
+            <button onClick={toggleSidebar} className="text-white hover:text-primary transition-colors">
               <X size={20} />
             </button>
-          </div>
-          
-          <div className="flex items-center gap-2">
-             <Activity size={10} className="text-primary animate-pulse" />
-             <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Status Active</span>
           </div>
         </div>
 

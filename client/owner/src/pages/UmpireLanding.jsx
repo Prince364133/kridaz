@@ -1,7 +1,7 @@
 import { ArrowRight, Calendar, Star, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const PRI = "#84CC16";
+const PRI = "#F59E0B"; // Amber for officials
 
 const benefits = [
   { icon: Trophy, title: "Find Tournaments", desc: "Get notified about local tournaments and matches that need certified officials." },
@@ -11,7 +11,7 @@ const benefits = [
 
 export default function UmpireLanding() {
   return (
-    <div className="min-h-screen text-white pt-20 pb-20" style={{ backgroundColor: "#000" }}>
+    <div className="min-h-screen text-white pt-32 pb-20" style={{ backgroundColor: "#000" }}>
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{ backgroundImage: `radial-gradient(${PRI} 1px, transparent 1px)`, backgroundSize: "36px 36px" }} />
 

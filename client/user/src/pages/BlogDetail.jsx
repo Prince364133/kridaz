@@ -12,10 +12,21 @@ export default function BlogDetail() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
+  const handleLike = async () => {
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/user/blogs/${id}/like`);
+      if (res.data.success) {
+        setBlog(prev => ({ ...prev, likes: res.data.blog.likes }));
+      }
+    } catch (err) {
+      console.error("Error liking blog:", err);
+    }
+  };
+
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/features/blogs/${id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/blogs/${id}`);
         setBlog(res.data.blog);
       } catch (err) {
         setNotFound(true);
@@ -124,10 +135,13 @@ export default function BlogDetail() {
               <Eye size={13} style={{ color: PRI }} />
               {blog.views} views
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-gray-500">
-              <ThumbsUp size={13} style={{ color: PRI }} />
+            <button 
+              onClick={handleLike}
+              className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-white transition-all group"
+            >
+              <ThumbsUp size={13} className="group-hover:scale-110 transition-transform" style={{ color: PRI }} />
               {blog.likes} likes
-            </div>
+            </button>
           </div>
         </div>
       </div>

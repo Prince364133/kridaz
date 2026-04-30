@@ -146,14 +146,11 @@ const AdminSidebar = ({ isOpen, toggleSidebar, className }) => {
     <aside
       className={`${className} bg-surface border-r border-white/5 overflow-y-auto fixed 
           w-64 transition-transform duration-300 ease-in-out z-40
-          min-h-screen`}
+          top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)]`}
     >
-      <div className="flex flex-col p-8 border-b border-white/5 bg-black/20 gap-4">
-        <div className="flex items-center justify-between">
-          <div className="w-32 h-10 bg-transparent overflow-hidden">
-            <img src="/logo.png" alt="BookMySportz" className="w-full h-full object-contain object-left" />
-          </div>
-          <button onClick={toggleSidebar} className="lg:hidden text-white hover:text-[#84CC16] transition-colors">
+      <div className="flex flex-col p-4 border-b border-white/5 bg-black/20 gap-4 lg:hidden">
+        <div className="flex items-center justify-end">
+          <button onClick={toggleSidebar} className="text-white hover:text-[#84CC16] transition-colors">
             <X size={20} />
           </button>
         </div>

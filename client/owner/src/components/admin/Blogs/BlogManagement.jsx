@@ -8,17 +8,16 @@ export const BlogManagement = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
     content: "",
-    imageUrl: "",
     readTime: "5 mins read",
     date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(),
     category: "Sports",
     author: "BookMySportz Team",
-    views: "0",
-    likes: "0",
     order: 0,
     status: "published",
   });
@@ -42,43 +41,82 @@ export const BlogManagement = () => {
   };
 
   const handleOpenModal = (item = null) => {
+    setImageFile(null);
     if (item) {
       setEditingItem(item);
-      setFormData(item);
+      setFormData({
+        title: item.title,
+        subtitle: item.subtitle,
+        content: item.content,
+        readTime: item.readTime,
+        date: item.date,
+        category: item.category,
+        author: item.author,
+        order: item.order,
+        status: item.status,
+      });
+      setImagePreview(item.imageUrl);
     } else {
       setEditingItem(null);
       setFormData({
         title: "",
         subtitle: "",
         content: "",
-        imageUrl: "",
         readTime: "5 mins read",
         date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(),
         category: "Sports",
         author: "BookMySportz Team",
-        views: "0",
-        likes: "0",
         order: blogs.length + 1,
         status: "published",
       });
+      setImagePreview(null);
     }
     setIsModalOpen(true);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const data = new FormData();
+      Object.keys(formData).forEach(key => {
+        data.append(key, formData[key]);
+      });
+      if (imageFile) {
+        data.append('image', imageFile);
+      }
+      
       if (editingItem) {
-        await axios.put(`${API_BASE}/${editingItem._id}`, formData, { withCredentials: true });
+        await axios.put(`${API_BASE}/${editingItem._id}`, data, { 
+          withCredentials: true,
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         toast.success("Blog updated successfully");
       } else {
-        await axios.post(API_BASE, formData, { withCredentials: true });
+        if (!imageFile) {
+          return toast.error("Please select an image");
+        }
+        await axios.post(API_BASE, data, { 
+          withCredentials: true,
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         toast.success("Blog created successfully");
       }
       setIsModalOpen(false);
       fetchData();
     } catch (error) {
-      toast.error("Failed to save blog");
+      toast.error(error.response?.data?.message || "Failed to save blog");
     }
   };
 
@@ -236,16 +274,31 @@ export const BlogManagement = () => {
                   />
                 </div>
 
-                <div className="col-span-2 md:col-span-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Article Image URL</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all text-sm"
-                    placeholder="https://images.unsplash.com/..."
-                  />
+                <div className="col-span-2">
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Article Image</label>
+                  <div className="flex flex-col gap-4">
+                    {imagePreview && (
+                      <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10">
+                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        <button 
+                          type="button"
+                          onClick={() => { setImageFile(null); setImagePreview(null); }}
+                          className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-red-500 transition-all"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    )}
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 rounded-2xl cursor-pointer hover:bg-white/5 hover:border-lime-500/50 transition-all group">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Plus className="w-8 h-8 text-gray-500 group-hover:text-lime-500 mb-2" />
+                        <p className="text-xs text-gray-500 font-bold uppercase tracking-widest group-hover:text-gray-300">
+                          {imagePreview ? "Change Image" : "Upload Article Image"}
+                        </p>
+                      </div>
+                      <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                    </label>
+                  </div>
                 </div>
 
                 <div className="col-span-2 md:col-span-1">
@@ -286,6 +339,16 @@ export const BlogManagement = () => {
                   />
                 </div>
 
+                <div className="col-span-2 md:col-span-1">
+                   <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Order</label>
+                   <input
+                    type="number"
+                    value={formData.order}
+                    onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all"
+                  />
+                </div>
+
                 <div className="col-span-2">
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Article Content (Markdown/HTML)</label>
                   <textarea
@@ -295,26 +358,6 @@ export const BlogManagement = () => {
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                     className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-lime-500 transition-all resize-none custom-scrollbar"
                     placeholder="Write your article content here..."
-                  />
-                </div>
-
-                <div className="col-span-2 md:col-span-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Views (Simulated)</label>
-                  <input
-                    type="text"
-                    value={formData.views}
-                    onChange={(e) => setFormData({ ...formData, views: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all"
-                  />
-                </div>
-
-                <div className="col-span-2 md:col-span-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Likes (Simulated)</label>
-                  <input
-                    type="text"
-                    value={formData.likes}
-                    onChange={(e) => setFormData({ ...formData, likes: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all"
                   />
                 </div>
               </div>

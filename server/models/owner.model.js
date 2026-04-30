@@ -7,6 +7,7 @@ const ownerSchema = new mongoose.Schema(
     password: { type: String, required: true },
     phone: { type: String, required: true },
     role: { type: String, enum: ["admin", "owner", "coach", "umpire"], default: "owner" },
+    waitlistPosition: { type: Number },
   },
   { timestamps: true }
 );

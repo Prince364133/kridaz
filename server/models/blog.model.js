@@ -36,12 +36,12 @@ const blogSchema = new mongoose.Schema(
       default: "BookMySportz Team",
     },
     views: {
-      type: String,
-      default: "0",
+      type: Number,
+      default: 0,
     },
     likes: {
-      type: String,
-      default: "0",
+      type: Number,
+      default: 0,
     },
     order: {
       type: Number,

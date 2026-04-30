@@ -1,167 +1,135 @@
-import { ArrowRight, Store, Award, Shield, Target, Cpu, Zap, Globe, Activity } from "lucide-react";
-import { Link } from "react-router-dom";
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { Globe, Building2, Users, ShieldCheck } from 'lucide-react';
 
-const PRI = "#84CC16";
-const BDR = "#2A2A2A";
-
-const partners = [
-  {
-    role: "Venue Partner",
-    title: "MANAGE VENUES",
-    desc: "Deploy advanced booking automation and real-time turf analytics. Scale your facility's operational efficiency.",
-    link: "http://localhost:5174/venue-owner",
-    icon: Store,
-    stat: "99.9% Uptime",
-    id: "VP-01"
-  },
-  {
-    role: "Professional Coach",
-    title: "COACHING EXCELLENCE",
-    desc: "Orchestrate masterclasses and manage student rosters with professional precision. Expand your brand's reach.",
-    link: "http://localhost:5174/coach-landing",
-    icon: Award,
-    stat: "Verified",
-    id: "PC-02"
-  },
-  {
-    role: "Certified Umpire",
-    title: "EXPERT OFFICIATING",
-    desc: "Connect with premium tournament circuits. Synchronize your officiating schedule with our partner platform.",
-    link: "http://localhost:5174/umpire-landing",
-    icon: Shield,
-    stat: "Certified",
-    id: "CU-03"
-  },
-];
-
-export default function PartnersGateway() {
+const PartnersGateway = () => {
   return (
-    <div className="min-h-screen bg-[#000] text-white">
-      {/* Professional Background Overlay */}
-      <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none z-0" />
-      <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0"
-        style={{ backgroundImage: `radial-gradient(${PRI} 1px, transparent 1px)`, backgroundSize: "40px 40px" }} />
-      
-      {/* ── HERO SECTION ── */}
-      <section className="relative min-h-[85vh] flex items-center pt-16 lg:pt-20 pb-20 overflow-hidden border-b border-[#2A2A2A]">
-        {/* Right-Aligned Visual */}
-        <div className="absolute right-0 top-0 w-full lg:w-[70%] h-full z-0 opacity-40">
-          <img 
-            src="https://images.unsplash.com/photo-1551958219-acbc608c6377?w=1600&q=80" 
-            alt="Partners Network" 
-            className="h-full w-full object-cover transition-all duration-[5000ms] hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
-        </div>
+    <div className="min-h-screen bg-[#050505] relative overflow-hidden font-sans">
+      {/* Background Image - Soccer balls on the right */}
+      <div 
+        className="absolute inset-0 z-0 opacity-60 pointer-events-none"
+        style={{
+          backgroundImage: 'url("https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80")',
+          backgroundPosition: 'right 20% center',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'cover',
+          maskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)',
+          WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 70%)'
+        }}
+      />
 
-        <div className="container mx-auto px-6 lg:px-20 relative z-10">
-          <div className="max-w-4xl space-y-12">
-            {/* Status Tag */}
-            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full border border-[#84CC16]/30 bg-[#84CC16]/5 animate-fadeIn">
-               <Activity className="w-4 h-4 text-[#84CC16]" />
-               <span className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest">Global Partner Network: Active</span>
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 pt-40 pb-20 relative z-10">
+        {/* Breadcrumb / Tag */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/5 text-white/90 text-[10px] font-bold uppercase tracking-[0.2em] mb-12"
+        >
+          <div className="w-5 h-5 rounded-full bg-[#84CC16]/20 flex items-center justify-center">
+            <Globe className="w-3 h-3 text-[#84CC16]" />
+          </div>
+          Join Our Global Network
+        </motion.div>
+
+        {/* Hero Section */}
+        <div className="max-w-5xl">
+          <motion.h1 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-[80px] md:text-[110px] font-black text-white leading-[0.85] mb-12 tracking-tight"
+          >
+            JOIN US AS A <br />
+            <span className="text-[#84CC16]">PARTNER.</span>
+          </motion.h1>
+
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex gap-8 mb-20 border-l-2 border-[#84CC16] pl-8"
+          >
+            <p className="text-xl text-white/40 leading-relaxed max-w-2xl font-medium">
+              Connect with TurfSpot to access a unified sports ecosystem. Whether you are a <br />
+              Venue Owner, Professional Coach, or Certified Official, we provide the ultimate <br />
+              platform to scale your impact.
+            </p>
+          </motion.div>
+
+          {/* Action Buttons and Stats in One Row */}
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-8">
+            <div className="flex flex-wrap gap-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Link
+                  to="/signup/venue"
+                  className="flex items-center gap-3 bg-[#84CC16] text-black px-8 py-5 rounded-xl font-black text-sm hover:bg-[#a3e635] transition-all shadow-[0_0_30px_rgba(132,204,22,0.2)]"
+                >
+                  <Building2 size={18} />
+                  Venue Owner
+                </Link>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+              >
+                <Link
+                  to="/signup/coach"
+                  className="flex items-center gap-3 bg-[#3B82F6] text-white px-8 py-5 rounded-xl font-black text-sm hover:bg-blue-600 transition-all shadow-[0_0_30px_rgba(59,130,246,0.3)]"
+                >
+                  <Users size={18} />
+                  Coach
+                </Link>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <Link
+                  to="/signup/official"
+                  className="flex items-center gap-3 bg-[#F59E0B] text-black px-8 py-5 rounded-xl font-black text-sm hover:bg-amber-500 transition-all shadow-[0_0_30px_rgba(245,158,11,0.2)]"
+                >
+                  <ShieldCheck size={18} />
+                  Umpire
+                </Link>
+              </motion.div>
             </div>
 
-            <div className="space-y-6">
-              <h1 className="text-7xl lg:text-[10rem] font-bold leading-[0.8] tracking-tight uppercase">
-                JOIN US AS A <br />
-                <span className="text-[#84CC16]">PARTNER.</span>
-              </h1>
-              <p className="text-gray-500 uppercase tracking-widest max-w-2xl border-l border-[#84CC16]/50 pl-8 ml-2 text-sm">
-                Join our exclusive network of sports operators. Whether managing venues, coaching talent, or officiating matches—we provide the competitive advantage.
-              </p>
-            </div>
+            {/* Separator */}
+            <div className="hidden md:block w-px h-12 bg-white/10" />
 
-            <div className="flex flex-wrap items-center gap-6 pt-6">
-              <Link to="/signup" className="btn-bms h-16 px-12 text-xl tracking-widest flex items-center gap-4">
-                JOIN NOW <ArrowRight className="w-6 h-6" />
-              </Link>
-              <div className="hidden sm:flex items-center gap-10 border-l border-white/10 pl-10">
-                <div className="space-y-1">
-                  <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Active Partners</div>
-                  <div className="text-2xl font-bold text-[#84CC16]">1,240+</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Growth Rate</div>
-                  <div className="text-2xl font-bold text-[#84CC16]">85.4%</div>
-                </div>
-              </div>
+            {/* Stats */}
+            <div className="flex gap-12">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                <div className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2">Active Partners</div>
+                <div className="text-4xl font-black text-white/90 tracking-tighter">1,200+</div>
+              </motion.div>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7 }}
+              >
+                <div className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2">Growth Rate</div>
+                <div className="text-4xl font-black text-[#84CC16] tracking-tighter">85% YoY</div>
+              </motion.div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Vertical Decoration */}
-        <div className="absolute bottom-12 left-12 hidden lg:block">
-           <div className="text-[10px] font-bold text-white/10 rotate-90 origin-left uppercase tracking-[1em]">Partner_Ecosystem_Layer</div>
-        </div>
-      </section>
-
-      {/* ── SELECTION GRID ── */}
-      <section className="relative z-10 py-32 container mx-auto px-6">
-        <div className="grid lg:grid-cols-3 gap-10">
-          {partners.map((p, idx) => (
-            <div key={p.role} className="group relative">
-               {/* Background Glow */}
-
-               
-               <div className="relative h-full flex flex-col p-10 bg-[#111] border border-[#2A2A2A] rounded-[32px] overflow-hidden transition-all duration-500 group-hover:-translate-y-2 group-hover:border-[#84CC16]/50">
-                  {/* Partner ID */}
-                  <div className="absolute top-8 right-8 text-[10px] font-bold text-white/10 uppercase tracking-widest">{p.id}</div>
-                  
-                  {/* Icon Box */}
-                  <div className="w-16 h-16 rounded-2xl bg-black border border-[#2A2A2A] flex items-center justify-center mb-10 transition-all">
-                    <p.icon size={28} className="text-[#84CC16]" />
-                  </div>
-
-                  <div className="space-y-4 mb-8">
-                    <div className="text-[10px] font-bold text-[#84CC16] tracking-widest uppercase">{p.role}</div>
-                    <h3 className="text-4xl font-bold text-white uppercase tracking-tight leading-none">{p.title}</h3>
-                  </div>
-
-                  <p className="text-gray-400 text-sm leading-relaxed mb-12 flex-1">
-                    {p.desc}
-                  </p>
-
-                  <div className="space-y-6">
-                    <div className="flex justify-between items-center py-4 border-y border-white/5">
-                       <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">System Status</span>
-                       <span className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest">{p.stat}</span>
-                    </div>
-
-                    <a 
-                      href={p.link} 
-                      className="w-full flex items-center justify-between h-14 px-6 border border-white/5 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-white/5 hover:border-[#84CC16]/50 transition-all group/link"
-                    >
-                      Get Started
-                      <ArrowRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
-                    </a>
-                  </div>
-               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Global Footer CTA */}
-        <div className="mt-40 p-20 bg-[#0A0A0A] border border-[#2A2A2A] rounded-[48px] relative overflow-hidden text-center group">
-
-           <div className="relative z-10 space-y-10">
-              <div className="flex flex-col items-center gap-4">
-                 <div className="w-16 h-1 bg-[#84CC16]" />
-                 <h2 className="text-6xl font-bold text-white uppercase tracking-tight">Already a Partner?</h2>
-                 <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Access your professional dashboard</p>
-              </div>
-              
-              <a 
-                href="http://localhost:5174/login" 
-                className="btn-bms h-16 px-16 text-xl tracking-widest inline-flex items-center gap-4"
-              >
-                ACCESS DASHBOARD <Zap className="w-5 h-5" />
-              </a>
-           </div>
-        </div>
-      </section>
+      {/* Background Decor */}
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#84CC16]/5 blur-[150px] rounded-full -mr-96 -mt-96 pointer-events-none" />
     </div>
   );
-}
+};
 
+export default PartnersGateway;

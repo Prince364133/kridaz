@@ -1,7 +1,7 @@
 import express from "express";
-import { getAllFeatureFlags } from "../controllers/featureFlag.controller.js";
-import { getActiveMarketing } from "../controllers/admin/marketing.controller.js";
-import { getBlogs, getBlogById } from "../controllers/admin/blog.controller.js";
+import { getAllFeatureFlags } from "../modules/admin/featureFlag.controller.js";
+import { getActiveMarketing } from "../modules/marketing/marketing.controller.js";
+import { getBlogs, getBlogById } from "../modules/blog/blog.controller.js";
 
 const router = express.Router();
 

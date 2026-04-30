@@ -40,11 +40,29 @@ const useLoginForm = () => {
       const response = await axiosInstance.post("/api/user/auth/login", data);
       const result = await response.data;
       toast.success(result.message);
-      dispatch(login(result.token));
-      navigate("/", { replace: true });
-      axiosInstance.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${result.token}`;
+      
+      const { token, role } = result;
+      dispatch(login({ token, role }));
+      
+      axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      // Role-based redirection
+      switch (role) {
+        case "admin":
+          window.location.href = "http://localhost:5174/admin"; // Or use navigate if integrated
+          break;
+        case "owner":
+          window.location.href = "http://localhost:5174/partner";
+          break;
+        case "coach":
+          window.location.href = "http://localhost:5174/coach";
+          break;
+        case "umpire":
+          window.location.href = "http://localhost:5174/umpire";
+          break;
+        default:
+          navigate("/", { replace: true });
+      }
     } catch (error) {
       if (error.response) {
         toast.error(error.response?.data?.message);

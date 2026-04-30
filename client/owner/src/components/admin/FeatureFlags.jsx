@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../hooks/useAxiosInstance";
 import { toast } from "react-hot-toast";
 import { Activity, ToggleLeft, ToggleRight, Server } from "lucide-react";
 
@@ -14,7 +14,7 @@ export const FeatureFlags = () => {
   const fetchFlags = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/features`);
+      const res = await axiosInstance.get(`/api/features`);
       if (res.data.success) {
         setFlags(res.data.data);
       }
@@ -28,10 +28,9 @@ export const FeatureFlags = () => {
 
   const handleToggle = async (key, currentStatus) => {
     try {
-      const res = await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/admin/features/${key}`,
-        { enabled: !currentStatus },
-        { withCredentials: true }
+      const res = await axiosInstance.put(
+        `/api/admin/features/${key}`,
+        { enabled: !currentStatus }
       );
       
       if (res.data.success) {

@@ -9,10 +9,23 @@ const BlogSection = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const handleLike = async (e, id) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/user/blogs/${id}/like`);
+      if (res.data.success) {
+        setBlogs(prev => prev.map(b => b._id === id ? { ...b, likes: res.data.blog.likes } : b));
+      }
+    } catch (err) {
+      console.error("Error liking blog:", err);
+    }
+  };
+
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/features/blogs`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/blogs`);
         setBlogs(response.data.blogs || []);
       } catch (error) {
         console.error("Error fetching blogs:", error);
@@ -103,10 +116,13 @@ const BlogSection = () => {
                     <Eye size={14} style={{ color: PRI }} />
                     {blog.views}
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs font-mono text-white/40">
-                    <ThumbsUp size={14} style={{ color: PRI }} />
+                  <button 
+                    onClick={(e) => handleLike(e, blog._id)}
+                    className="flex items-center gap-1.5 text-xs font-mono text-white/40 hover:text-white transition-colors group/btn"
+                  >
+                    <ThumbsUp size={14} style={{ color: PRI }} className="group-hover/btn:scale-110 transition-transform" />
                     {blog.likes}
-                  </div>
+                  </button>
                 </div>
                 <button className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/40 hover:bg-white/10 hover:text-white transition-all">
                   <Share2 size={14} />

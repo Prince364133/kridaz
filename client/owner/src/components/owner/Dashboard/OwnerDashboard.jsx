@@ -50,42 +50,44 @@ const OwnerDashboard = () => {
   const {
     totalBookings,
     totalReviews,
+    averageRating,
     totalRevenue,
     totalTurfs,
     bookingsPerTurf,
     revenueOverTime,
     recentBookings = [],
+    utilization,
+    activeUsers
   } = dashboardData;
 
-  const revenueChartData = revenueOverTime.map((item) => ({
-    date: new Date(item._id).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+  const revenueChartData = (revenueOverTime || []).map((item) => ({
+    date: item.name,
     revenue: item.revenue,
   }));
+
+  const formatTime = (dateStr) => {
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
 
   return (
     <div className="p-6 lg:p-10 bg-[#000] min-h-screen text-white relative">
       <div className="absolute inset-0 bg-gradient-to-br from-[#84CC16]/5 to-transparent pointer-events-none" />
       
       <div className="max-w-7xl mx-auto space-y-16 relative z-10">
-        {/* Header Hero Section */}
-
-
         {/* Stats Grid - High Impact */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard 
             title="TOTAL BOOKINGS" 
             value={totalBookings} 
             icon={Calendar} 
-            trend="up"
-            trendValue="12"
             className="bg-white/5 border-white/10 rounded-2xl"
           />
           <StatCard 
-            title="ACTIVE USERS" 
-            value={Math.round(totalBookings * 0.8)} 
-            icon={Users} 
-            trend="up"
-            trendValue="5"
+            title="AVG RATING" 
+            value={averageRating || 0} 
+            icon={Star} 
+            suffix=" / 5"
             className="bg-white/5 border-white/10 rounded-2xl"
           />
           <StatCard
@@ -93,16 +95,13 @@ const OwnerDashboard = () => {
             value={totalRevenue}
             icon={TrendingUp}
             prefix="₹"
-            trend="up"
-            trendValue="8"
             className="bg-[#84CC16]/5 border-[#84CC16]/20 text-[#84CC16] rounded-2xl"
           />
           <StatCard 
             title="UTILIZATION" 
-            value={76} 
+            value={utilization || 0} 
             icon={Activity} 
-            trend="up"
-            trendValue="3"
+            suffix="%"
             className="bg-white/5 border-white/10 rounded-2xl"
           />
         </div>
@@ -126,7 +125,7 @@ const OwnerDashboard = () => {
                     <th className="p-6 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Athlete</th>
                     <th className="p-6 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Arena</th>
                     <th className="p-6 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Time Slot</th>
-                    <th className="p-6 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Status</th>
+                    <th className="p-6 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Date</th>
                     <th className="p-6 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] text-right">Revenue</th>
                   </tr>
                 </thead>
@@ -145,19 +144,14 @@ const OwnerDashboard = () => {
                         <td className="p-6 text-sm text-gray-400 font-medium">{booking.turf?.name || "Venue"}</td>
                         <td className="p-6">
                            <div className="flex flex-col">
-                              <span className="text-xs text-white font-bold">{booking.timeSlot}</span>
-                              <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-0.5">
-                                {new Date(booking.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                              <span className="text-xs text-white font-bold tracking-tight">
+                                {booking.timeSlot ? `${formatTime(booking.timeSlot.startTime)} - ${formatTime(booking.timeSlot.endTime)}` : "TBD"}
                               </span>
                            </div>
                         </td>
                         <td className="p-6">
-                           <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest ${
-                             booking.status === 'confirmed' ? 'bg-[#84CC16]/20 text-[#84CC16]' : 
-                             booking.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' : 
-                             'bg-red-500/20 text-red-500'
-                           }`}>
-                             {booking.status}
+                           <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">
+                             {new Date(booking.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
                            </span>
                         </td>
                         <td className="p-6 text-right">

@@ -31,13 +31,35 @@ const TurfDetails = () => {
   const navigate = useNavigate();
   const { loading, turfs } = useTurfData();
   const { averageRating, reviews } = useReviews(id);
+  const turf = turfs.find((t) => t._id === id);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const galleryRef = React.useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Auto-scroll logic
+  React.useEffect(() => {
+    let interval;
+    const imagesLength = turf?.images?.length || 0;
+    if (isAutoPlaying && imagesLength > 1) {
+      interval = setInterval(() => {
+        const nextIndex = (activeIndex + 1) % imagesLength;
+        setActiveIndex(nextIndex);
+        if (galleryRef.current) {
+          const scrollAmount = galleryRef.current.offsetWidth * nextIndex;
+          galleryRef.current.scrollTo({
+            left: scrollAmount,
+            behavior: "smooth"
+          });
+        }
+      }, 4000);
+    }
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, activeIndex, turf?.images?.length]);
 
   if (loading) {
     return <TurfDetailsSkeleton />;
   }
-
-  const turf = turfs.find((t) => t._id === id);
 
   if (!turf) {
     return (
@@ -65,6 +87,15 @@ const TurfDetails = () => {
       navigate(`/login`);
     }
   };
+
+  const getYouTubeID = (url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const videoId = getYouTubeID(turf.youtubeUrl);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -116,27 +147,67 @@ const TurfDetails = () => {
 
       {/* Hero Gallery Section */}
       <div className="container mx-auto px-4 mb-12">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 h-[500px]">
-          <div className="md:col-span-8 relative rounded-[2rem] overflow-hidden group">
-            <img 
-              src={turf.image || "/banner-1.png"} 
-              alt={turf.name}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <button className="w-20 h-20 rounded-full bg-[#84CC16] text-black flex items-center justify-center pl-1 hover:scale-110 transition-transform">
-                <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-current border-b-[12px] border-b-transparent ml-1" />
-              </button>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          {/* Main Image Gallery - Scrollable & Auto-sliding */}
+          <div className="md:col-span-8 relative aspect-video rounded-[2.5rem] overflow-hidden group border border-zinc-800 shadow-2xl bg-zinc-900">
+            <div 
+              ref={galleryRef}
+              className="flex overflow-x-auto snap-x snap-mandatory h-full scrollbar-hide scroll-smooth"
+              onMouseEnter={() => setIsAutoPlaying(false)}
+              onMouseLeave={() => setIsAutoPlaying(true)}
+            >
+              {(turf.images && turf.images.length > 0 ? turf.images : [turf.image]).map((img, index) => (
+                <div key={index} className="flex-none w-full h-full snap-center relative">
+                  <img 
+                    src={img || "/banner-1.png"} 
+                    alt={`${turf.name} ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                  <div className="absolute bottom-8 left-8 px-5 py-2.5 bg-black/40 backdrop-blur-xl rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 flex items-center gap-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#84CC16] animate-pulse" />
+                    Archive {index + 1} / {turf.images?.length || 1}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Gallery Controls Overlay */}
+            <div className="absolute top-8 right-8 flex gap-2">
+              <div className="px-4 py-2 bg-black/40 backdrop-blur-xl rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10 text-zinc-400">
+                16:9 Tactical View
+              </div>
             </div>
           </div>
+
+          {/* Video Column */}
           <div className="md:col-span-4 h-full">
-            <div className="h-full rounded-[2rem] overflow-hidden border-2 border-[#84CC16] p-1">
-              <img 
-                src={turf.image || "/banner-1.png"} 
-                alt="Turf thumbnail"
-                className="w-full h-full object-cover rounded-[1.8rem]"
-              />
+            {/* Video Slot - Full Height */}
+            <div className="h-full min-h-[300px] rounded-[2.5rem] overflow-hidden border border-zinc-800 bg-black relative group shadow-2xl">
+              {videoId ? (
+                <iframe
+                  className="w-full h-full"
+                  src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0`}
+                  title="Venue Video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-zinc-600">
+                  <Activity className="w-12 h-12 mb-2 opacity-20" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">No Stream Available</p>
+                </div>
+              )}
+              <div className="absolute top-6 left-6 px-4 py-2 bg-[#84CC16] text-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
+                Live Feed
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute bottom-6 left-6 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <p className="text-[10px] font-black uppercase tracking-widest text-[#84CC16]">Security Protocol</p>
+                <p className="text-white text-xs font-bold uppercase">Real-time surveillance active</p>
+              </div>
             </div>
           </div>
         </div>
@@ -165,12 +236,28 @@ const TurfDetails = () => {
             <div className="space-y-8">
               <h2 className="text-2xl font-bold uppercase tracking-wider">Facility Amenities</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <AmenityItem icon={<Zap />} text="Floodlights" />
-                <AmenityItem icon={<Users />} text="Changing Rooms" />
-                <AmenityItem icon={<ShieldCheck />} text="Security" />
-                <AmenityItem icon={<Clock />} text="24/7 Access" />
-                <AmenityItem icon={<Car />} text="Parking" />
-                <AmenityItem icon={<Coffee />} text="Water" />
+                {turf.facilities && turf.facilities.length > 0 ? (
+                  turf.facilities.map((facility, index) => (
+                    <AmenityItem 
+                      key={index}
+                      icon={facility.toLowerCase().includes('parking') ? <Car /> : 
+                            facility.toLowerCase().includes('water') ? <Coffee /> :
+                            facility.toLowerCase().includes('washroom') ? <Users /> :
+                            facility.toLowerCase().includes('lighting') ? <Zap /> :
+                            <ShieldCheck />} 
+                      text={facility} 
+                    />
+                  ))
+                ) : (
+                  <>
+                    <AmenityItem icon={<Zap />} text="Floodlights" />
+                    <AmenityItem icon={<Users />} text="Changing Rooms" />
+                    <AmenityItem icon={<ShieldCheck />} text="Security" />
+                    <AmenityItem icon={<Clock />} text="24/7 Access" />
+                    <AmenityItem icon={<Car />} text="Parking" />
+                    <AmenityItem icon={<Coffee />} text="Water" />
+                  </>
+                )}
               </div>
             </div>
 

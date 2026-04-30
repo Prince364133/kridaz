@@ -1,21 +1,20 @@
-import { Router } from "express";
-import {
-  registerOwner,
-  loginOwner,
-  ownerRequest,
-} from "../../controllers/owner/auth.controller.js";
-import {
-  validateRegisterInput,
-  validateLoginInput,
-  validateOwnerRequestInput,
-} from "../../middleware/validators/owner/authValidator.js";
+import express from "express";
+import { 
+  registerOwner, 
+  login,
+  ownerRequest 
+} from "../../modules/auth/auth.controller.js";
+import { 
+  ownerRegisterSchema, 
+  userLoginSchema,
+  ownerRequestSchema 
+} from "../../modules/auth/auth.validator.js";
+import { validate } from "../../middleware/validate.middleware.js";
 
-const authRouter = Router();
-authRouter.post("/register",validateRegisterInput,  registerOwner);
-authRouter.post("/login",validateLoginInput, loginOwner);
-authRouter.post("/ownerRequest",validateOwnerRequestInput, ownerRequest);
+const router = express.Router();
 
-export default authRouter;
+router.post("/register", validate(ownerRegisterSchema), registerOwner);
+router.post("/login", validate(userLoginSchema), login);
+router.post("/ownerRequest", validate(ownerRequestSchema), ownerRequest);
 
-
-
+export default router;

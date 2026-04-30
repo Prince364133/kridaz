@@ -21,8 +21,11 @@ const verifyOwnerToken = async (req, res, next) => {
         });
     }
     req.owner = decoded;
-    if(req.owner.role !=="owner"){
-        return res.status(403).json({ success: false, message: "Unauthorized" });
+    
+    // Allow owner, coach, and umpire roles
+    const allowedRoles = ["owner", "coach", "umpire", "admin"];
+    if (!allowedRoles.includes(req.owner.role)) {
+        return res.status(403).json({ success: false, message: "Unauthorized role" });
     }
     next();
   } catch (err) {

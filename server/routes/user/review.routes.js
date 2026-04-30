@@ -2,7 +2,7 @@ import express from "express";
 import {
   addReview,
   viewReviewsByTurf,
-} from "../../controllers/user/review.controller.js";
+} from "../../modules/review/review.controller.js";
 import verifyUserToken from "../../middleware/jwt/user.middleware.js";
 
 const reviewRouter = express.Router();

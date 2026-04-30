@@ -1,111 +1,74 @@
-# BookMySportz
+# TurfSpot 🏟️
 
-BookMySportz is a comprehensive turf booking application with three modules: Admin, Owner, and User. This app allows users to view and book turf grounds, owners to manage their turfs and bookings, and admins to oversee all activities within the platform.
+TurfSpot is a production-grade platform for turf booking and sports management. It unifies Users, Venue Owners, Coaches, and Admins into a single, seamless experience.
 
-## Features
+## 🚀 Key Features
 
-### User Module
+### 👤 User Portal
+- **Discovery**: Search and filter turfs by location, sport, and price.
+- **Booking**: Real-time slot selection and secure payments via Razorpay.
+- **Profiles**: Track bookings, manage reviews, and view public profiles.
+- **Partnership**: Simple application process to become a Venue Owner.
 
-- **Browse Turfs**: Users can view various turfs, check their details, and select time slots for booking.
-- **Slot Booking**: Purchase time slots using Razorpay. After booking, users receive a confirmation email with all the booking details, including price, turf name, start time, end time, and a QR code containing all these details.
-- **Rate Turfs**: Users can provide ratings for the turfs they have booked.
-- **Become Owner**: Users can apply to become turf owners by filling out a form. Admins will review the application and send an approval or rejection email accordingly.
+### 🏢 Partner Hub (Owners, Coaches, Umpires)
+- **Unified Dashboard**: View analytics, revenue, and booking trends.
+- **Management**: Register and edit turfs, manage available slots, and respond to reviews.
+- **Role-Based Access**: Specialized views for Venue Owners, Coaches, and Umpires.
 
-### Owner Module
-
-- **Turf Management**: Owners can add new turfs, manage their existing turfs, and view all related booking details.
-- **Dashboard**: Owners have access to a dashboard where they can view transactions and booking statistics in a graphical format.
-- **Review Management**: Owners can view and manage reviews left by users for their turfs.
-
-### Admin Module
-
-- **Owner Requests**: Admins can approve or reject requests from users who wish to become owners. If approved, the user will receive an email with a registration link to the owner section.
-- **User and Owner Management**: Admins can view all users and owners registered on the platform.
-- **Turf Management**: Admins can view all turfs listed by owners and manage them as necessary.
-- **Transaction Overview**: Admins have access to all transactions on the platform and can view transaction data on a monthly basis in graph format.
+### 🛡️ Admin Suite
+- **Request Oversight**: Approve or reconsider owner registration requests.
+- **User Management**: Monitor and manage all platform participants.
+- **System Marketing**: Control landing page banners and video content.
 
 ---
 
-## 🌐 URLs
-
-- **User App**: [https://book-my-sportz.vercel.app/](https://book-my-sportz.vercel.app/)
-- **Owner/Admin App**: [https://book-my-sportz-ao.vercel.app/](https://book-my-sportz-ao.vercel.app/)
-
-### 🔐 Admin Credentials (For Demo)
-
-- **Email**: `admin@gmail.com`  
-- **Password**: `rijo.com`
-
-> 🛠️ **Note**: Admin accounts are created directly in the database. The admin process involves adding an owner manually in the `owners` table and updating their `role` to `admin`.
+## 🛠 Tech Stack
+- **Frontend**: React (Vite), Redux Toolkit, Tailwind CSS, Axios.
+- **Backend**: Node.js, Express, MongoDB (Mongoose), Zod.
+- **Services**: Razorpay (Payments), Cloudinary (Images), Nodemailer (Emails).
 
 ---
 
-## Technologies Used
+## 📂 Documentation
+- **[Architecture](ARCHITECTURE.md)**: Deep dive into the project's design and modular structure.
+- **[Developer Guide](DEVELOPER_GUIDE.md)**: How to set up your environment and start contributing.
+- **[API Reference](server/README.md)**: (Coming Soon) Detailed backend API documentation.
 
-- **Frontend**: React, Tailwind CSS, DaisyUI, Redux
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB
-- **Payments**: Razorpay
-- **Image Hosting**: Cloudinary
+---
 
+## 🚦 Getting Started
 
+### Prerequisites
+- Node.js (v16+)
+- MongoDB (Local or Atlas)
 
-## Installation
-2. Install dependencies for both client and server
+### Installation
+
+1. **Clone the repository**
    ```bash
-   cd BookMySportz
-   npm install
-   cd server
-   npm install
-   cd ../client/owner
-   npm install
-   cd ../user
-   npm install
-   ```
-3. Create a `.env` file in the `server` directory and add the following environment variables:
-
-   ```env
-    PORT = your_port
-    MONGO_URI=your_mongo_uri
-
-    CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-    CLOUDINARY_API_KEY=your_cloudinary_api_key
-    CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-
-    OWNER_URL = your_owner_url
-    USER_URL = your_user_url
-
-    EMAIL = your_email for sending emails
-    PASSWORD = your_password for sending emails(you will get from app password in google account)
-
-    RAZORPAY_KEY_ID = your_razorpay_key_id
-    RAZORPAY_SECRET_KEY = your_razorpay_secret_key
-   
-    JWT_SECRET = your_jwt_secret
-
-
+   git clone https://github.com/your-repo/TurfSpot.git
+   cd TurfSpot
    ```
 
-4. Run the application
-
+2. **Setup Backend**
    ```bash
-   # To run the backend
    cd server
+   npm install
+   # Create .env based on example
    npm run server
+   ```
 
-   # To run the owner client
-   cd ../client/owner
-   npm run dev
-
-   # To run the user client
-   cd ../user
+3. **Setup Frontend**
+   ```bash
+   cd client/user
+   npm install
    npm run dev
    ```
 
-## Contributing
+---
 
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -m 'Add some feature'`)
-4. Push to the branch (`git push origin feature/your-feature`)
-5. Create a new Pull Request
+## 🤝 Contributing
+Please read our **[Developer Guide](DEVELOPER_GUIDE.md)** before submitting a Pull Request. We follow a modular architecture and strict validation standards.
+
+---
+**TurfSpot - Book Your Game, Own Your Passion.**

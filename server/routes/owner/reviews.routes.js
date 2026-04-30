@@ -1,9 +1,9 @@
-import {Router} from "express";
+import { Router } from "express";
 import verifyOwnerToken from "../../middleware/jwt/owner.middleware.js";
+import { getOwnerTurfReviews } from "../../modules/review/review.controller.js";
 
-import { getTurfsWithReviews } from "../../controllers/owner/review.controller.js";
 const reviewsRouter = Router();
 
-reviewsRouter.get("/turfs-with-reviews", verifyOwnerToken, getTurfsWithReviews);
+reviewsRouter.get("/turfs-with-reviews", verifyOwnerToken, getOwnerTurfReviews);
 
 export default reviewsRouter;

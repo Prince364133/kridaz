@@ -7,8 +7,11 @@ const useOwnerDashboard = () => {
     totalReviews: 0,
     totalRevenue: 0,
     totalTurfs: 0,
+    activeUsers: 0,
+    utilization: 0,
     bookingsPerTurf: [],
     revenueOverTime: [],
+    recentBookings: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,7 +21,7 @@ const useOwnerDashboard = () => {
       try {
         setLoading(true);
         const response = await axiosInstance.get("/api/owner/dashboard");
-         setDashboardData(response.data);
+        setDashboardData(response.data);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching dashboard data:", err);

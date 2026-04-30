@@ -12,6 +12,7 @@ import VenueOwnerSignUp from "@pages/VenueOwnerSignUp";
 import CoachSignUp from "@pages/CoachSignUp";
 import UmpireSignUp from "@pages/UmpireSignUp";
 import ComingSoon from "@pages/ComingSoon";
+import SignUpDispatcher from "@pages/SignUpDispatcher";
 
 //  all the components that are used in the layout
 import { AdminLayout, PartnerLayout, GuestLayout, CoachLayout, UmpireLayout } from "@layouts";
@@ -20,11 +21,19 @@ import {
   AddTurf,
   OwnerDashboard as PartnerDashboard,
   TurfManagement,
+  TurfDetails,
   OwnerReviews as PartnerReviews,
   OwnerBookings as PartnerBookings,
 } from "@components/owner";
 import CoachDashboard from "./components/coach/CoachDashboard";
+import CoachStudents from "./components/coach/CoachStudents";
+import CoachSessions from "./components/coach/CoachSessions";
+import CoachMasterclass from "./components/coach/CoachMasterclass";
+
 import UmpireDashboard from "./components/umpire/UmpireDashboard";
+import UmpireMatches from "./components/umpire/UmpireMatches";
+import UmpireSchedule from "./components/umpire/UmpireSchedule";
+import UmpireFeedback from "./components/umpire/UmpireFeedback";
 
 //  all the components that are used in the admin dashboard
 import {
@@ -71,6 +80,10 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <Login />,
+      },
+      {
+        path: "signup",
+        element: <SignUpDispatcher />,
       },
       {
         path: "signup/venue-owner",
@@ -137,6 +150,7 @@ const router = createBrowserRouter([
       { path: "", element: <PartnerDashboard /> },
       { path: "add-turf", element: <AddTurf /> },
       { path: "turfs", element: <TurfManagement /> },
+      { path: "turf/:id", element: <TurfDetails /> },
       { path: "reviews", element: <PartnerReviews /> },
       { path: "bookings", element: <PartnerBookings /> },
     ],
@@ -150,6 +164,9 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: "", element: <CoachDashboard /> },
+      { path: "students", element: <CoachStudents /> },
+      { path: "sessions", element: <CoachSessions /> },
+      { path: "masterclass", element: <CoachMasterclass /> },
     ],
   },
   {
@@ -161,6 +178,9 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: "", element: <UmpireDashboard /> },
+      { path: "matches", element: <UmpireMatches /> },
+      { path: "schedule", element: <UmpireSchedule /> },
+      { path: "feedback", element: <UmpireFeedback /> },
     ],
   },
   // Legacy Redirects
