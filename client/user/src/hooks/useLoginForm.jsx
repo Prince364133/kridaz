@@ -52,6 +52,8 @@ const useLoginForm = () => {
           window.location.href = "/admin";
           break;
         case "VERIFIED_VENUE_OWNER":
+        case "VENUE_OWNER":
+        case "owner":
           window.location.href = "/partner";
           break;
         case "COACH":

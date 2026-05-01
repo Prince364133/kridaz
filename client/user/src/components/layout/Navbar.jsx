@@ -131,12 +131,12 @@ const Navbar = () => {
                   </label>
                   <ul tabIndex={0} className="dropdown-content mt-4 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-xl w-52 overflow-hidden backdrop-blur-xl">
                     {/* Dashboard Link for Partners */}
-                    {["BMSP_ADMIN", "VERIFIED_VENUE_OWNER", "COACH", "UMPIRE"].includes(role) && (
+                    {["BMSP_ADMIN", "owner", "VENUE_OWNER", "VERIFIED_VENUE_OWNER", "COACH", "UMPIRE"].includes(role) && (
                       <li>
                         <a 
                           href={
                             role === "BMSP_ADMIN" ? "/admin" :
-                            role === "VERIFIED_VENUE_OWNER" ? "/partner" :
+                            ["owner", "VENUE_OWNER", "VERIFIED_VENUE_OWNER"].includes(role) ? "/partner" :
                             role === "COACH" ? "/coach" :
                             "/umpire"
                           }
@@ -214,11 +214,11 @@ const Navbar = () => {
             </div>
 
             <div className="mt-8 flex flex-col items-center gap-4">
-              {isLoggedIn && ["BMSP_ADMIN", "VERIFIED_VENUE_OWNER", "COACH", "UMPIRE"].includes(role) && (
+              {isLoggedIn && ["BMSP_ADMIN", "owner", "VENUE_OWNER", "VERIFIED_VENUE_OWNER", "COACH", "UMPIRE"].includes(role) && (
                 <a 
                   href={
                     role === "BMSP_ADMIN" ? "/admin" :
-                    role === "VERIFIED_VENUE_OWNER" ? "/partner" :
+                    ["owner", "VENUE_OWNER", "VERIFIED_VENUE_OWNER"].includes(role) ? "/partner" :
                     role === "COACH" ? "/coach" :
                     "/umpire"
                   }
