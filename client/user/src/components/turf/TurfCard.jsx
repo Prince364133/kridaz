@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { 
   MapPin, 
   Star, 
@@ -11,6 +11,7 @@ import {
 
 const TurfCard = ({ turf, featured = false }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const navigate = useNavigate();
   
   const to = `/turf/${turf._id}`;
   const images = turf.images?.length > 0 ? turf.images : [turf.image];
@@ -31,7 +32,10 @@ const TurfCard = ({ turf, featured = false }) => {
   };
 
   return (
-    <div className="bg-[#0A0A0A] rounded-[2rem] border border-white/[0.05] overflow-hidden flex flex-col transition-all duration-500 hover:border-white/[0.1] hover:shadow-2xl hover:shadow-black/50 group h-full">
+    <div 
+      onClick={() => navigate(to)}
+      className="bg-[#0A0A0A] rounded-[2rem] border border-white/[0.05] overflow-hidden flex flex-col transition-all duration-500 hover:border-white/[0.1] hover:shadow-2xl hover:shadow-black/50 group h-full cursor-pointer"
+    >
       
       {/* ── Image Section ────────────────────────────────── */}
       <div className="relative w-full h-[200px] overflow-hidden shrink-0 rounded-t-[2rem]">
@@ -73,11 +77,9 @@ const TurfCard = ({ turf, featured = false }) => {
       {/* ── Content Section ────────────────────────────── */}
       <div className="flex-1 p-5 flex flex-col">
         <div className="mb-4">
-          <Link to={to} className="block">
-            <h3 className="text-lg font-black text-white uppercase tracking-tight mb-1 group-hover:text-[#84CC16] transition-colors">
-              {turf.name}
-            </h3>
-          </Link>
+          <h3 className="text-lg font-black text-white uppercase tracking-tight mb-1 group-hover:text-[#84CC16] transition-colors">
+            {turf.name}
+          </h3>
           <div className="flex items-center gap-1.5 opacity-50 mb-4">
             <MapPin size={12} className="text-[#84CC16]" />
             <span className="text-white text-[10px] font-bold truncate">{location}</span>
@@ -95,18 +97,10 @@ const TurfCard = ({ turf, featured = false }) => {
           </div>
           
           {/* Price */}
-          <div className="text-[#84CC16] font-black text-base">
+          <div className="text-[#84CC16] font-black text-base mt-auto pt-4">
             ₹{turf.pricePerHour}<span className="text-[10px] text-white/30 ml-1">/hr</span>
           </div>
         </div>
-
-        {/* Primary Action Button */}
-        <Link 
-          to={to}
-          className="w-full py-3.5 mt-auto bg-[#84CC16] text-black font-black uppercase text-[12px] rounded-full flex items-center justify-center hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-[#84CC16]/10"
-        >
-          Book Now
-        </Link>
       </div>
     </div>
   );
