@@ -34,7 +34,7 @@ const useTurfManagement = () => {
 
   const toggleVisibility = async (id) => {
     try {
-      const response = await axiosInstance.patch(`/api/owner/turf/${id}/visibility`);
+      const response = await axiosInstance.put(`/api/owner/turf/${id}/visibility`);
       setTurfs((prev) => prev.map(t => t._id === id ? { ...t, isActive: response.data.isActive } : t));
       toast.success(response.data.message);
     } catch (err) {

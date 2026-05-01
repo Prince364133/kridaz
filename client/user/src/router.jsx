@@ -21,7 +21,7 @@ import UmpireLanding from "./pages/business/UmpireLanding";
 
 // Owner Portal Imports (via @owner alias)
 import { AdminLayout, PartnerLayout, CoachLayout, UmpireLayout } from "@owner/layouts";
-import { OwnerDashboard, AddTurf, TurfManagement, TurfDetails as OwnerTurfDetails, OwnerReviews, OwnerBookings } from "@owner/components/owner";
+import { OwnerDashboard, AddTurf, EditTurf, TurfManagement, TurfDetails as OwnerTurfDetails, OwnerReviews, OwnerBookings } from "@owner/components/owner";
 import CoachDashboard from "@owner/components/coach/CoachDashboard";
 import CoachStudents from "@owner/components/coach/CoachStudents";
 import CoachSessions from "@owner/components/coach/CoachSessions";
@@ -57,6 +57,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <OwnerDashboard /> },
       { path: "add-turf", element: <AddTurf /> },
+      { path: "edit-turf/:id", element: <EditTurf /> },
       { path: "turfs", element: <TurfManagement /> },
       { path: "turf/:id", element: <OwnerTurfDetails /> },
       { path: "reviews", element: <OwnerReviews /> },
