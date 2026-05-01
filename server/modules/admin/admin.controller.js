@@ -193,25 +193,61 @@ export const approveOwnerRequest = async (req, res) => {
     if (!ownerRequest) {
       return res.status(404).json({ success: false, message: "Owner request not found" });
     }
+
+    // Check if an owner already exists with this email
+    let owner = await Owner.findOne({ email: ownerRequest.email });
+    
+    if (!owner) {
+      // If a userId is associated, get the user's password
+      let password = "";
+      let googleId = "";
+      if (ownerRequest.userId) {
+        const user = await User.findById(ownerRequest.userId);
+        if (user) {
+          password = user.password;
+          googleId = user.googleId;
+        }
+      }
+
+      owner = new Owner({
+        name: ownerRequest.name,
+        email: ownerRequest.email,
+        phone: ownerRequest.phone,
+        password: password,
+        googleId: googleId,
+        role: ownerRequest.role,
+        businessDetails: ownerRequest.businessDetails, // We should add this to Owner model too if needed
+      });
+      await owner.save();
+    } else {
+      // Update existing owner's role
+      owner.role = ownerRequest.role;
+      // owner.businessDetails = ownerRequest.businessDetails;
+      await owner.save();
+    }
+
     ownerRequest.status = "approved";
     await ownerRequest.save();
     
     const to = ownerRequest.email;
-    const subject = "Your request has been approved";
+    const subject = "Your Professional Account has been Approved!";
     const html = ` 
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <h1 style="color: #4CAF50;">Your request to become an owner has been approved</h1>
-        <p>Congratulations! You can now create your account by clicking the button below:</p>
-        <button style="background-color: #4CAF50; border: none; padding: 10px 20px; text-align: center; display: inline-block; margin: 10px 0; cursor: pointer; border-radius: 5px;">
-            <a href="${process.env.OWNER_URL}" style="color: white; text-decoration: none; font-size: 16px;">Create your account</a>
-        </button>
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f9f9; padding: 20px; border-radius: 10px;">
+        <h1 style="color: #4CAF50;">Congratulations!</h1>
+        <p>Your request to become a <strong>${ownerRequest.role}</strong> on TurfSpot has been approved.</p>
+        <p>You can now access your dashboard using your existing login credentials:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${process.env.OWNER_URL || 'http://localhost:5173'}" style="background-color: #4CAF50; color: white; padding: 12px 25px; text-decoration: none; font-size: 16px; border-radius: 5px; font-weight: bold;">Go to Dashboard</a>
+        </div>
+        <p>If you have any questions, feel free to contact our support team.</p>
+        <p>Best regards,<br/>The TurfSpot Team</p>
     </div>`;
     
     await generateEmail(to, subject, html);
-    return res.status(200).json({ success: true, message: "Owner request approved" });
+    return res.status(200).json({ success: true, message: "Owner request approved and profile created" });
   } catch (err) {
     console.error("Error in approveOwnerRequest: ", err);
-    return res.status(500).json({ message: "error", data: err });
+    return res.status(500).json({ message: "error", data: err.message });
   }
 };
 

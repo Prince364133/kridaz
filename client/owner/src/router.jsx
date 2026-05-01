@@ -11,7 +11,6 @@ import UserLogin from "@user/pages/auth/Login";
 import UserSignUp from "@user/pages/auth/SignUp";
 import UserTurf from "@user/components/turf/Turf";
 import UserTurfDetails from "@user/components/turf/TurfDetails";
-import UserReservation from "@user/components/Reservation";
 import UserTurfBookingHistory from "@user/components/turf/TurfBookingHistory";
 import UserProfile from "@user/pages/Profile";
 import UserBlogs from "@user/pages/Blogs";
@@ -21,7 +20,6 @@ import UserBlogDetail from "@user/pages/BlogDetail";
 import UserVenueOwnerLanding from "@user/pages/business/VenueOwnerLanding";
 import UserCoachLanding from "@user/pages/business/CoachLanding";
 import UserUmpireLanding from "@user/pages/business/UmpireLanding";
-
 // Owner Portal Pages
 import PartnerDashboard from "@pages/Home.jsx";
 import Login from "@pages/Login";
@@ -40,6 +38,7 @@ import {
   EditTurf,
   TurfManagement,
   TurfDetails,
+  OwnerDashboard,
   OwnerReviews as PartnerReviews,
   OwnerBookings as PartnerBookings,
 } from "@components/owner";
@@ -67,7 +66,7 @@ import {
   BlogManagement,
 } from "@components/admin";
 import ProtectedRoute from "@components/ProtectedRoute/ProtectedRoute";
-import { NotFound } from "@components/common";
+import { NotFound, RootRedirect, ErrorBoundary } from "@components/common";
 
 const router = createBrowserRouter([
   // ── ADMIN PORTAL (High Priority) ──
@@ -158,9 +157,9 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <UserRoot />,
-    errorElement: <NotFound />,
+    errorElement: <ErrorBoundary />,
     children: [
-      { index: true, element: <UserHome /> },
+      { index: true, element: <RootRedirect /> },
       { path: "login", element: <UserLogin /> },
       { path: "signup", element: <UserSignUp /> },
       { path: "turfs", element: <UserTurf /> },
@@ -168,7 +167,6 @@ const router = createBrowserRouter([
       { path: "profile", element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
       { path: "blogs", element: <UserBlogs /> },
       { path: "blogs/:id", element: <UserBlogDetail /> },
-      { path: "reserve/:id", element: <ProtectedRoute><UserReservation /></ProtectedRoute> },
       { path: "booking-history", element: <ProtectedRoute><UserTurfBookingHistory /></ProtectedRoute> },
       
       // Business Landings
@@ -180,6 +178,7 @@ const router = createBrowserRouter([
       { path: "signup/venue", element: <VenueOwnerSignUp /> },
       { path: "signup/coach", element: <CoachSignUp /> },
       { path: "signup/official", element: <UmpireSignUp /> },
+      { path: "*", element: <NotFound /> },
     ],
   },
 
@@ -190,7 +189,7 @@ const router = createBrowserRouter([
   { path: "/umpire-landing", element: <Navigate to="/business/official" replace /> },
   { path: "/partners", element: <PartnersGateway /> },
   
-  // Catch-all
+  // Catch-all (Global)
   { path: "*", element: <NotFound /> },
 ]);
 

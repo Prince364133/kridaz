@@ -28,7 +28,7 @@ export default function VenueOwnerLanding() {
             <p className="text-gray-400 text-lg mb-8 max-w-lg">
               Transform your sports facility into a fully automated, high-yield business. BookMySportz connects you with thousands of local players actively looking for venues.
             </p>
-            <Link to="/signup?role=owner" className="inline-flex items-center gap-3 font-bold text-black rounded-full px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest" style={{ backgroundColor: PRI }}>
+            <Link to="/business/register?role=owner" className="inline-flex items-center gap-3 font-bold text-black rounded-full px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest" style={{ backgroundColor: PRI }}>
               Register Your Venue <ArrowRight size={20} />
             </Link>
           </div>

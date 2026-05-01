@@ -1,17 +1,28 @@
 import express from "express";
 import { 
   registerUser, 
-  login 
+  login,
+  sendOtp,
+  loginStep1,
+  googleAuth
 } from "../../modules/auth/auth.controller.js";
 import { 
   userRegisterSchema, 
-  userLoginSchema 
+  userLoginSchema,
+  sendOtpSchema,
+  loginStep1Schema
 } from "../../modules/auth/auth.validator.js";
 import { validate } from "../../middleware/validate.middleware.js";
 
+import { userAuth } from "../../middleware/jwt/user.middleware.js";
+
 const router = express.Router();
 
+router.post("/send-otp", validate(sendOtpSchema), sendOtp);
 router.post("/register", validate(userRegisterSchema), registerUser);
+router.post("/login-step1", validate(loginStep1Schema), loginStep1);
 router.post("/login", validate(userLoginSchema), login);
+router.post("/google-auth", googleAuth);
+router.post("/upgrade-request", userAuth, upgradeRequest);
 
 export default router;

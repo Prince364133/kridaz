@@ -24,46 +24,105 @@ const loginSchema = yup.object().shape({
 
 const useLoginForm = () => {
   const [loading, setLoading] = useState(false);
+  const [showOtpInput, setShowOtpInput] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
- 
+
   const {
     register,
     handleSubmit,
+    getValues,
+    trigger,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(loginSchema),
   });
 
+  const handleRoleRedirect = (role) => {
+    const normalizedRole = role?.toLowerCase();
+    if (normalizedRole === "bmsp_admin" || normalizedRole === "admin") {
+      navigate("/admin");
+    } else if (normalizedRole === "owner") {
+      navigate("/partner");
+    } else if (normalizedRole === "coach") {
+      navigate("/coach");
+    } else if (normalizedRole === "umpire") {
+      navigate("/umpire");
+    } else {
+      navigate("/");
+    }
+  };
+
+  const handleLoginStep1 = async () => {
+    const isValid = await trigger(["email", "password"]);
+    if (!isValid) return;
+
+    setLoading(true);
+    try {
+      const { email, password } = getValues();
+      const response = await axiosInstance.post("/api/owner/auth/login-step1", { email, password });
+      const result = response.data;
+
+      if (result.token) {
+        dispatch(login({ token: result.token, role: result.role }));
+        axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
+        toast.success(result.message);
+        handleRoleRedirect(result.role);
+      } else {
+        toast.success(result.message);
+        setShowOtpInput(true);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onSubmit = async (data) => {
-   setLoading(true);
+    if (!showOtpInput) {
+      return handleLoginStep1();
+    }
+
+    setLoading(true);
     try {
       const response = await axiosInstance.post("/api/owner/auth/login", data);
       const result = await response.data;
-      dispatch(login({token:result.token,role:result.role}));
-      if(result.role === "VERIFIED_VENUE_OWNER") {
-        navigate("/partner");
-      }else if(result.role === "COACH") {
-        navigate("/coach");
-      }else if(result.role === "UMPIRE") {
-        navigate("/umpire");
-      }else if(result.role === "BMSP_ADMIN") {
-        navigate("/admin");
-      }
-       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
-      toast.success(result.message);      
+      
+      dispatch(login({ token: result.token, role: result.role }));
+      axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
+      toast.success(result.message);
+      
+      handleRoleRedirect(result.role);
     } catch (error) {
-      console.error(error, "error");
-      if(error.response) {
-        toast.error(error.response?.data?.message);
-      } else if(error.request) {
-        toast.error("No response from server. Please try again later.");
-      } else {
-        toast.error(error.message);
-      }
-    }finally{
+      toast.error(error.response?.data?.message || "Verification failed");
+    } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.post("/api/owner/auth/google-auth", {
+        credential: credentialResponse.credential
+      });
+      const result = await response.data;
+      
+      dispatch(login({ token: result.token, role: result.role }));
+      axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
+      toast.success("Logged in with Google!");
+      
+      handleRoleRedirect(result.role);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Google login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error("Google authentication failed");
   };
 
   return {
@@ -72,6 +131,9 @@ const useLoginForm = () => {
     errors,
     onSubmit,
     loading,
+    showOtpInput,
+    handleGoogleSuccess,
+    handleGoogleError
   };
 };
 

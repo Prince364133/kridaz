@@ -18,6 +18,7 @@ import ComingSoon from "./pages/ComingSoon";
 import VenueOwnerLanding from "./pages/business/VenueOwnerLanding";
 import CoachLanding from "./pages/business/CoachLanding";
 import UmpireLanding from "./pages/business/UmpireLanding";
+import BusinessRegistration from "./pages/business/BusinessRegistration";
 
 // Owner Portal Imports (via @owner alias)
 import { AdminLayout, PartnerLayout, CoachLayout, UmpireLayout } from "@owner/layouts";
@@ -98,6 +99,7 @@ const router = createBrowserRouter([
       { path: "business/venue", element: <VenueOwnerLanding /> },
       { path: "business/coach", element: <CoachLanding /> },
       { path: "business/official", element: <UmpireLanding /> },
+      { path: "business/register", element: <BusinessRegistration /> },
       { path: "signup/venue", element: <VenueOwnerSignUp /> },
       { path: "signup/coach", element: <CoachSignUp /> },
       { path: "signup/official", element: <UmpireSignUp /> },

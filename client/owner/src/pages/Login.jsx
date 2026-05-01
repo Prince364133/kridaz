@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/slices/authSlice";
 import useLoginForm from "@hooks/useLoginForm";
+import { GoogleLogin } from "@react-oauth/google";
 import {
   ArrowRight,
   ShieldCheck,
@@ -23,7 +24,16 @@ import {
 
 const Login = () => {
   const dispatch = useDispatch();
-  const { register, handleSubmit, errors, onSubmit, loading } = useLoginForm();
+  const { 
+    register, 
+    handleSubmit, 
+    errors, 
+    onSubmit, 
+    loading,
+    showOtpInput,
+    handleGoogleSuccess,
+    handleGoogleError
+  } = useLoginForm();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -83,74 +93,111 @@ const Login = () => {
             <div className="p-8 md:p-10 space-y-8">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
-                {/* Email Input */}
-                <div className="space-y-2 group/field">
-                  <div className="flex justify-between px-1">
-                    <label className="text-xs font-bold text-white/30 uppercase tracking-widest group-focus-within/field:text-[#84CC16] transition-colors">Email Address</label>
-                  </div>
-                  <div className="relative group/input">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-[#84CC16] transition-colors">
-                      <User size={16} />
+                {showOtpInput ? (
+                  <div className="space-y-6">
+                    <div className="text-center mb-8">
+                      <h3 className="text-xl font-bold text-white uppercase tracking-wider">Verification</h3>
+                      <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] mt-2">Enter the 6-digit code sent to your email</p>
                     </div>
-                    <input
-                      {...register("email")}
-                      type="email"
-                      placeholder="name@business.com"
-                      className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all group-hover:bg-white/[0.05]"
-                    />
-                  </div>
-                </div>
 
-                {/* Password Input */}
-                <div className="space-y-2 group/field">
-                  <div className="flex justify-between px-1">
-                    <label className="text-xs font-bold text-white/30 uppercase tracking-widest group-focus-within/field:text-[#84CC16] transition-colors">Password</label>
-                    <Link to="/forgot-password" size="sm" className="text-[10px] text-white/20 hover:text-[#84CC16] transition-colors uppercase tracking-widest">Forgot?</Link>
-                  </div>
-                  <div className="relative group/input">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-[#84CC16] transition-colors">
-                      <Lock size={16} />
+                    <div className="space-y-2 group/field">
+                      <div className="relative group/input text-center">
+                        <input
+                          {...register("otp")}
+                          type="text"
+                          placeholder="000000"
+                          maxLength={6}
+                          className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-16 text-white text-center text-2xl tracking-[0.5em] font-bold outline-none transition-all"
+                        />
+                      </div>
+                      {errors.otp && <p className="text-red-400 text-[10px] uppercase tracking-widest text-center mt-2">{errors.otp.message}</p>}
                     </div>
-                    <input
-                      {...register("password")}
-                      type="password"
-                      placeholder="••••••••"
-                      className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all group-hover:bg-white/[0.05]"
-                    />
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full bg-[#84CC16] hover:bg-[#a3e635] text-black h-16 rounded-xl font-bold uppercase tracking-wider text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-[0_20px_40px_rgba(132,204,22,0.2)] disabled:opacity-50 group/btn"
+                    >
+                      {loading ? "Verifying..." : "Verify & Login"}
+                      {!loading && <ArrowRight className="w-6 h-6 group-hover/btn:translate-x-2 transition-transform" />}
+                    </button>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    {/* Google Login Button */}
+                    <div className="w-full flex flex-col items-center justify-center mb-2">
+                      <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleError}
+                        theme="filled_black"
+                        shape="rectangular"
+                        size="large"
+                        width="384px"
+                        text="signin_with"
+                      />
+                    </div>
 
-                {/* Submit Button */}
-                <div className="space-y-4 mt-8">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-[#84CC16] hover:bg-[#a3e635] text-black h-16 rounded-xl font-bold uppercase tracking-wider text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-[0_20px_40px_rgba(132,204,22,0.2)] disabled:opacity-50 group/btn"
-                  >
-                    {loading ? "Signing in..." : "Login"}
-                    {!loading && <ArrowRight className="w-6 h-6 group-hover/btn:translate-x-2 transition-transform" />}
-                  </button>
+                    <div className="flex items-center gap-4 w-full my-6">
+                      <div className="h-px bg-white/5 flex-1"></div>
+                      <span className="text-white/10 text-[10px] font-bold tracking-[0.3em] uppercase whitespace-nowrap">OR EMAIL</span>
+                      <div className="h-px bg-white/5 flex-1"></div>
+                    </div>
 
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      dispatch(login({ 
-                        token: "dummy-owner-token-12345", 
-                        role: "admin",
-                        user: {
-                          id: "admin-123",
-                          name: "Platform Administrator",
-                          email: "admin@turfspot.com",
-                        }
-                      }));
-                      window.location.href = "/admin";
-                    }}
-                    className="w-full bg-white/5 border border-white/10 hover:bg-white/10 text-white h-16 rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 active:scale-[0.98] transition-all group/demo"
-                  >
-                    <Zap className="w-4 h-4 text-[#84CC16] group-hover/demo:animate-pulse" />
-                    Quick Demo Access
-                  </button>
-                </div>
+                    <div className="space-y-6">
+                      {/* Email Input */}
+                      <div className="space-y-2 group/field">
+                        <div className="flex justify-between px-1">
+                          <label className="text-xs font-bold text-white/30 uppercase tracking-widest group-focus-within/field:text-[#84CC16] transition-colors">Email Address</label>
+                        </div>
+                        <div className="relative group/input">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-[#84CC16] transition-colors">
+                            <User size={16} />
+                          </div>
+                          <input
+                            {...register("email")}
+                            type="email"
+                            placeholder="name@business.com"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all group-hover:bg-white/[0.05]"
+                          />
+                        </div>
+                        {errors.email && <p className="text-red-400 text-[10px] uppercase tracking-widest mt-1 ml-1">{errors.email.message}</p>}
+                      </div>
+
+                      {/* Password Input */}
+                      <div className="space-y-2 group/field">
+                        <div className="flex justify-between px-1">
+                          <label className="text-xs font-bold text-white/30 uppercase tracking-widest group-focus-within/field:text-[#84CC16] transition-colors">Password</label>
+                          <Link to="/forgot-password" size="sm" className="text-[10px] text-white/20 hover:text-[#84CC16] transition-colors uppercase tracking-widest">Forgot?</Link>
+                        </div>
+                        <div className="relative group/input">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-[#84CC16] transition-colors">
+                            <Lock size={16} />
+                          </div>
+                          <input
+                            {...register("password")}
+                            type="password"
+                            placeholder="••••••••"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all group-hover:bg-white/[0.05]"
+                          />
+                        </div>
+                        {errors.password && <p className="text-red-400 text-[10px] uppercase tracking-widest mt-1 ml-1">{errors.password.message}</p>}
+                      </div>
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="space-y-4 mt-8">
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-[#84CC16] hover:bg-[#a3e635] text-black h-16 rounded-xl font-bold uppercase tracking-wider text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-[0_20px_40px_rgba(132,204,22,0.2)] disabled:opacity-50 group/btn"
+                      >
+                        {loading ? "Sending OTP..." : "Continue"}
+                        {!loading && <ArrowRight className="w-6 h-6 group-hover/btn:translate-x-2 transition-transform" />}
+                      </button>
+
+                    </div>
+                  </>
+                )}
               </form>
             </div>
 

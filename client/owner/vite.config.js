@@ -10,6 +10,7 @@ const __dirname = path.dirname(__filename);
 export default defineConfig({
   plugins: [react()],
   resolve: {
+    dedupe: ["react", "react-dom"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "@components": path.resolve(__dirname, "./src/components"),
@@ -30,7 +31,7 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: "http://localhost:4000",
+        target: "http://localhost:6001",
         changeOrigin: true,
       },
     },

@@ -4,14 +4,10 @@ import { createSlice } from "@reduxjs/toolkit";
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    role: "admin",
-    token: "dummy-admin-token-12345",
-    isAuthenticated: true,
-    user: {
-      id: "admin-123",
-      name: "Platform Administrator",
-      email: "admin@turfspot.com",
-    },
+    role: null,
+    token: null,
+    isAuthenticated: false,
+    user: null,
   },
   reducers: {
     login: (state, action) => {

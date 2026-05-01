@@ -23,11 +23,45 @@ const OwnerRequestCard = ({
       <div className="absolute top-0 right-0 w-24 h-24 bg-[#84CC16]/5 blur-[50px] group-hover:bg-[#84CC16]/10 transition-colors"></div>
       
       <div className="relative space-y-4">
-        <div className="space-y-1">
-          <p className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest">Owner Request</p>
-          <h3 className="text-2xl font-bold uppercase text-white tracking-tight truncate">
-            {request.name}
-          </h3>
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <p className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest">{request.role || 'Venue Owner'}</p>
+            <h3 className="text-2xl font-bold uppercase text-white tracking-tight truncate">
+              {request.name}
+            </h3>
+          </div>
+          {request.role && (
+            <div className="px-2 py-1 rounded bg-[#84CC16]/10 border border-[#84CC16]/20 text-[10px] font-bold text-[#84CC16] uppercase">
+              Upgrade
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-3 bg-white/5 p-4 rounded-xl border border-white/5">
+           {request.businessDetails?.businessName && (
+             <div className="space-y-1">
+               <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Business Name</p>
+               <p className="text-sm font-semibold text-white">{request.businessDetails.businessName}</p>
+             </div>
+           )}
+           {request.businessDetails?.registrationNumber && (
+             <div className="space-y-1">
+               <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Reg Number</p>
+               <p className="text-sm font-semibold text-white">{request.businessDetails.registrationNumber}</p>
+             </div>
+           )}
+           {request.businessDetails?.specialization && (
+             <div className="space-y-1">
+               <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Specialization</p>
+               <p className="text-sm font-semibold text-white">{request.businessDetails.specialization}</p>
+             </div>
+           )}
+           {request.businessDetails?.experience && (
+             <div className="space-y-1">
+               <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Experience</p>
+               <p className="text-sm font-semibold text-white">{request.businessDetails.experience}</p>
+             </div>
+           )}
         </div>
 
         <div className="space-y-2">

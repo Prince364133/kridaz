@@ -11,6 +11,7 @@ const __dirname = path.dirname(__filename);
 export default defineConfig({
   plugins: [react()],
   resolve: {
+    dedupe: ["react", "react-dom"],
     alias: {
       // Specific mappings MUST come before general ones
       "@hooks/owner": path.resolve(__dirname, "../owner/src/hooks/owner"),
@@ -34,7 +35,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:4000",
+        target: "http://localhost:6001",
         changeOrigin: true,
       },
     },

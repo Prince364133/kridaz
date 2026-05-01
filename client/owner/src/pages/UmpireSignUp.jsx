@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import useSignUpForm from "@hooks/useSignUpForm";
+import { GoogleLogin } from "@react-oauth/google";
 import {
   ArrowRight,
   ShieldCheck,
@@ -13,17 +14,67 @@ import {
   Award,
   Clipboard,
   CheckCircle2,
+  MapPin,
+  Locate,
+  UserSquare2
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 const ACCENT = "#F59E0B"; // Amber for umpires
 
 const UmpireSignUp = () => {
-  const { register, handleSubmit, errors, onSubmit, loading } = useSignUpForm("umpire");
+  const { 
+    register, 
+    handleSubmit, 
+    errors, 
+    onSubmit, 
+    loading,
+    setValue,
+    showOtpInput,
+    handleGoogleSuccess,
+    handleGoogleError
+  } = useSignUpForm("umpire");
   const [mounted, setMounted] = useState(false);
+  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const fetchLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setIsFetchingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await response.json();
+          if (data && data.address) {
+            const city = data.address.city || data.address.town || data.address.village || "";
+            const state = data.address.state || "";
+            const locationString = [city, state].filter(Boolean).join(", ");
+            setValue("location", locationString, { shouldValidate: true });
+            toast.success("Location fetched successfully");
+          } else {
+            toast.error("Could not determine location");
+          }
+        } catch (error) {
+          toast.error("Error fetching location details");
+        } finally {
+          setIsFetchingLocation(false);
+        }
+      },
+      (error) => {
+        setIsFetchingLocation(false);
+        toast.error("Location access denied or unavailable");
+      }
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#000] relative overflow-hidden flex flex-col items-center justify-start pt-24 lg:pt-32 pb-20 font-sans">
@@ -80,105 +131,206 @@ const UmpireSignUp = () => {
                   <span className="text-[10px] font-bold tracking-[0.2em] text-amber-400/60 uppercase">Official Registration</span>
                 </div>
                 <h2 className="text-2xl font-bold text-white uppercase tracking-wider">Join as an Umpire</h2>
-                <p className="text-xs text-white/20 uppercase tracking-widest">Secure your spot on the waitlist</p>
+                <p className="text-xs text-white/20 uppercase tracking-widest">Create your official profile</p>
               </div>
               <Flag size={32} className="text-amber-400/30" />
             </div>
 
             {/* Body */}
             <div className="p-8 md:p-14 space-y-10">
-              <input type="hidden" value="umpire" {...register("role")} />
-
               <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-3">
                 <div className="w-5 h-5 mt-0.5 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
                   <div className="w-2 h-2 rounded-full bg-amber-400" />
                 </div>
                 <p className="text-xs text-amber-300/70 leading-relaxed">
-                  The Officials module is <strong className="text-amber-300">coming soon</strong>. Register now to secure your spot on the early access waitlist and be among the first certified officials on the platform.
+                  The Officials module is <strong className="text-amber-300">coming soon</strong>. Register now to secure your spot on the early access waitlist.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-                  <div className="space-y-3 group/field">
-                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Full Name</label>
-                    <div className="relative">
-                      <User size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
-                      <input
-                        {...register("name")}
-                        type="text"
-                        placeholder="Your Name"
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-amber-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
+                {showOtpInput ? (
+                  <div className="space-y-6">
+                    <div className="text-center mb-8">
+                      <h3 className="text-xl font-bold text-white uppercase tracking-wider">Verification</h3>
+                      <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] mt-2">Enter the 6-digit code sent to your email</p>
+                    </div>
+
+                    <div className="space-y-2 group/field">
+                      <div className="relative group/input text-center">
+                        <input
+                          {...register("otp")}
+                          type="text"
+                          placeholder="000000"
+                          maxLength={6}
+                          className="w-full bg-white/[0.03] border border-white/5 focus:border-amber-500/50 rounded-xl h-16 text-white text-center text-2xl tracking-[0.5em] font-bold outline-none transition-all"
+                        />
+                      </div>
+                      {errors.otp && <p className="text-red-400 text-[10px] uppercase tracking-widest text-center mt-2">{errors.otp.message}</p>}
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full bg-amber-500 hover:bg-amber-400 text-black h-16 rounded-xl font-bold uppercase tracking-wider text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 group/btn"
+                    >
+                      {loading ? "Verifying..." : "Verify & Join Network"}
+                      {!loading && <ArrowRight className="w-6 h-6 group-hover/btn:translate-x-2 transition-transform" />}
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {/* Google Sign Up */}
+                    <div className="w-full flex flex-col items-center justify-center mb-2">
+                      <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleError}
+                        theme="filled_black"
+                        shape="rectangular"
+                        size="large"
+                        width="100%"
+                        text="signup_with"
                       />
                     </div>
-                    {errors.name && <p className="text-red-400 text-xs ml-1">{errors.name.message}</p>}
-                  </div>
 
-                  <div className="space-y-3 group/field">
-                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Email Address</label>
-                    <div className="relative">
-                      <Mail size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
-                      <input
-                        {...register("email")}
-                        type="email"
-                        placeholder="official@example.com"
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-amber-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
-                      />
+                    <div className="flex items-center gap-4 w-full my-6">
+                      <div className="h-px bg-white/5 flex-1"></div>
+                      <span className="text-white/10 text-[10px] font-bold tracking-[0.3em] uppercase whitespace-nowrap">OR REGISTER WITH EMAIL</span>
+                      <div className="h-px bg-white/5 flex-1"></div>
                     </div>
-                    {errors.email && <p className="text-red-400 text-xs ml-1">{errors.email.message}</p>}
-                  </div>
 
-                  <div className="space-y-3 group/field">
-                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Phone Number</label>
-                    <div className="relative">
-                      <Phone size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
-                      <input
-                        {...register("phone")}
-                        type="text"
-                        placeholder="+91 00000 00000"
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-amber-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+                      {/* Name */}
+                      <div className="space-y-3 group/field">
+                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Full Name</label>
+                        <div className="relative">
+                          <User size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
+                          <input
+                            {...register("name")}
+                            type="text"
+                            placeholder="Your Name"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-amber-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
+                          />
+                        </div>
+                        {errors.name && <p className="text-red-400 text-xs ml-1">{errors.name.message}</p>}
+                      </div>
+
+                      {/* Email */}
+                      <div className="space-y-3 group/field">
+                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Email Address</label>
+                        <div className="relative">
+                          <Mail size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
+                          <input
+                            {...register("email")}
+                            type="email"
+                            placeholder="official@example.com"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-amber-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
+                          />
+                        </div>
+                        {errors.email && <p className="text-red-400 text-xs ml-1">{errors.email.message}</p>}
+                      </div>
+
+                      {/* Phone */}
+                      <div className="space-y-3 group/field">
+                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Phone Number</label>
+                        <div className="relative">
+                          <Phone size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
+                          <input
+                            {...register("phone")}
+                            type="text"
+                            placeholder="+91 00000 00000"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-amber-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
+                          />
+                        </div>
+                        {errors.phone && <p className="text-red-400 text-xs ml-1">{errors.phone.message}</p>}
+                      </div>
+
+                      {/* Gender */}
+                      <div className="space-y-3 group/field">
+                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Gender</label>
+                        <div className="relative">
+                          <UserSquare2 size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10 z-10 pointer-events-none" />
+                          <select 
+                            {...register("gender")}
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-amber-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm appearance-none outline-none transition-all cursor-pointer"
+                            defaultValue=""
+                          >
+                            <option value="" disabled className="bg-black text-white/40">Select Gender</option>
+                            <option value="Male" className="bg-black text-white">Male</option>
+                            <option value="Female" className="bg-black text-white">Female</option>
+                            <option value="Other" className="bg-black text-white">Other</option>
+                            <option value="Prefer not to say" className="bg-black text-white">Prefer not to say</option>
+                          </select>
+                        </div>
+                        {errors.gender && <p className="text-red-400 text-xs ml-1">{errors.gender.message}</p>}
+                      </div>
+
+                      {/* Location */}
+                      <div className="space-y-3 md:col-span-2 group/field">
+                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Location</label>
+                        <div className="relative flex gap-2">
+                          <div className="relative flex-1">
+                            <MapPin size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
+                            <input 
+                              {...register("location")}
+                              type="text" 
+                              placeholder="City, State"
+                              className="w-full bg-white/[0.03] border border-white/5 focus:border-amber-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
+                            />
+                          </div>
+                          <button 
+                            type="button" 
+                            onClick={fetchLocation}
+                            disabled={isFetchingLocation}
+                            className="bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl h-14 px-4 flex items-center justify-center gap-2 text-white/80 transition-colors disabled:opacity-50 min-w-[120px]"
+                          >
+                            <Locate size={14} className={isFetchingLocation ? "animate-pulse text-amber-400" : ""} />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">{isFetchingLocation ? "Fetching..." : "Locate"}</span>
+                          </button>
+                        </div>
+                        {errors.location && <p className="text-red-400 text-xs ml-1">{errors.location.message}</p>}
+                      </div>
+
+                      {/* Password */}
+                      <div className="space-y-3 group/field">
+                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Password</label>
+                        <div className="relative">
+                          <Lock size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
+                          <input
+                            {...register("password")}
+                            type="password"
+                            placeholder="••••••••"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-amber-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
+                          />
+                        </div>
+                        {errors.password && <p className="text-red-400 text-xs ml-1">{errors.password.message}</p>}
+                      </div>
+
+                      {/* Confirm Password */}
+                      <div className="space-y-3 group/field">
+                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Confirm Password</label>
+                        <div className="relative">
+                          <ShieldCheck size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
+                          <input
+                            {...register("confirmPassword")}
+                            type="password"
+                            placeholder="••••••••"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-amber-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
+                          />
+                        </div>
+                        {errors.confirmPassword && <p className="text-red-400 text-xs ml-1">{errors.confirmPassword.message}</p>}
+                      </div>
                     </div>
-                    {errors.phone && <p className="text-red-400 text-xs ml-1">{errors.phone.message}</p>}
-                  </div>
 
-                  <div className="space-y-3 group/field">
-                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Password</label>
-                    <div className="relative">
-                      <Lock size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
-                      <input
-                        {...register("password")}
-                        type="password"
-                        placeholder="••••••••"
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-amber-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
-                      />
-                    </div>
-                    {errors.password && <p className="text-red-400 text-xs ml-1">{errors.password.message}</p>}
-                  </div>
-
-                  <div className="space-y-3 md:col-span-2 group/field">
-                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Confirm Password</label>
-                    <div className="relative">
-                      <ShieldCheck size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
-                      <input
-                        {...register("confirmPassword")}
-                        type="password"
-                        placeholder="••••••••"
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-amber-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
-                      />
-                    </div>
-                    {errors.confirmPassword && <p className="text-red-400 text-xs ml-1">{errors.confirmPassword.message}</p>}
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-amber-500 hover:bg-amber-400 text-black h-16 rounded-xl font-bold uppercase tracking-wider text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 group/btn"
-                >
-                  {loading ? "Securing Your Spot..." : "Join Officials Waitlist"}
-                  {!loading && <ArrowRight className="w-6 h-6 group-hover/btn:translate-x-2 transition-transform" />}
-                </button>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full bg-amber-500 hover:bg-amber-400 text-black h-16 rounded-xl font-bold uppercase tracking-wider text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 group/btn mt-4"
+                    >
+                      {loading ? "Sending OTP..." : "Continue to Verification"}
+                      {!loading && <ArrowRight className="w-6 h-6 group-hover/btn:translate-x-2 transition-transform" />}
+                    </button>
+                  </>
+                )}
               </form>
 
               <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">

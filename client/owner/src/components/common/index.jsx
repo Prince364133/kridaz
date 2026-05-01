@@ -13,4 +13,10 @@ export {default as Carousel} from "./Carousel.jsx";
 
 // Not Found Page
 export {default as NotFound} from "./NotFound.jsx";
+
+// Root Redirect
+export {default as RootRedirect} from "./RootRedirect.jsx";
+
+// Error Boundary
+export {default as ErrorBoundary} from "./ErrorBoundary.jsx";
  

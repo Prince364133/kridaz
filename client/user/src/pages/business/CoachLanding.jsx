@@ -28,7 +28,7 @@ export default function CoachLanding() {
             <p className="text-gray-400 text-lg mb-8 max-w-lg">
               Take your coaching business to the next level. BookMySportz provides the digital infrastructure to manage your students, schedule sessions, and grow your brand.
             </p>
-            <Link to="/signup?role=coach" className="inline-flex items-center gap-3 font-bold text-black rounded-full px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest" style={{ backgroundColor: PRI }}>
+            <Link to="/business/register?role=coach" className="inline-flex items-center gap-3 font-bold text-black rounded-full px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest" style={{ backgroundColor: PRI }}>
               Join as a Coach <ArrowRight size={20} />
             </Link>
           </div>
