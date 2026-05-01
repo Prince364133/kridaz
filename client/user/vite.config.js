@@ -29,17 +29,6 @@ export default defineConfig({
       "@pages": path.resolve(__dirname, "./src/pages"),
       "@layouts": path.resolve(__dirname, "./src/layouts"),
       "@owner": path.resolve(__dirname, "../owner/src"),
-
-      // Force shared dependencies to resolve from the user portal's node_modules
-      // This is critical for Vercel builds where owner/node_modules may not be present
-      "lucide-react": path.resolve(__dirname, "node_modules/lucide-react"),
-      "recharts": path.resolve(__dirname, "node_modules/recharts"),
-      "react-countup": path.resolve(__dirname, "node_modules/react-countup"),
-      "react-avatar": path.resolve(__dirname, "node_modules/react-avatar"),
-      "date-fns-tz": path.resolve(__dirname, "node_modules/date-fns-tz"),
-      "react": path.resolve(__dirname, "node_modules/react"),
-      "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
-      "react-router-dom": path.resolve(__dirname, "node_modules/react-router-dom"),
     },
   },
   server: {
