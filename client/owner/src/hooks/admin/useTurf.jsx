@@ -26,7 +26,29 @@ const useTurfData = () => {
     fetchTurfData();
   }, []);
 
-  return { turfData, loading };
+  const approveTurf = async (id) => {
+    try {
+      await axiosInstance.put(`/api/admin/turf/${id}/approve`);
+      await fetchTurfData();
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  };
+
+  const rejectTurf = async (id) => {
+    try {
+      await axiosInstance.put(`/api/admin/turf/${id}/reject`);
+      await fetchTurfData();
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  };
+
+  return { turfData, loading, approveTurf, rejectTurf, refetch: fetchTurfData };
 };
 
 export default useTurfData;

@@ -1,8 +1,10 @@
 import Review from "../../models/review.model.js";
 import Turf from "../../models/turf.model.js";
+import User from "../../models/user.model.js";
+import Owner from "../../models/owner.model.js";
 
 export const addReview = async (req, res) => {
-  const userId = req.user.user;
+  const userId = req.user.id || req.user.user;
   const { id } = req.params;
   const { rating, review: comment } = req.body;
 
@@ -11,7 +13,14 @@ export const addReview = async (req, res) => {
   }
 
   try {
-    const turf = await Turf.findById(id);
+    const [user, turf] = await Promise.all([
+      User.findById(userId).then(u => u || Owner.findById(userId)),
+      Turf.findById(id),
+    ]);
+
+    if (!user) {
+      return res.status(404).json({ message: "Account not found" });
+    }
     if (!turf) {
       return res.status(404).json({ message: "Turf not found" });
     }
@@ -82,7 +91,7 @@ export const getOwnerTurfReviews = async (req, res) => {
         avgRating: parseFloat(avgRating.toFixed(1)),
         reviews: turfReviews.map((review) => ({
           id: review._id,
-          userName: review.user.name,
+          userName: review.user ? review.user.name : "Partner/Other",
           rating: review.rating,
           comment: review.comment,
           createdAt: review.createdAt,

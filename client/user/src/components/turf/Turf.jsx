@@ -110,13 +110,13 @@ const Turf = () => {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {Array.from({ length: 6 }).map((_, index) => (
               <TurfCardSkeleton key={`skeleton-${index}`} />
             ))}
           </div>
         ) : filteredTurfs.length > 0 ? (
-          <div className="grid grid-cols-1 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filteredTurfs.map((turf, idx) => (
               <div key={turf._id} className="animate-fade-in-up" style={{ animationDelay: `${idx * 100}ms` }}>
                 <TurfCard 

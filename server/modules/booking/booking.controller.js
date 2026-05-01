@@ -2,6 +2,7 @@ import Booking from "../../models/booking.model.js";
 import Turf from "../../models/turf.model.js";
 import TimeSlot from "../../models/timeSlot.model.js";
 import User from "../../models/user.model.js";
+import Owner from "../../models/owner.model.js";
 import razorpay from "../../config/razorpay.js";
 import crypto from "crypto";
 import generateQRCode from "../../utils/generateQRCode.js";
@@ -12,13 +13,20 @@ import { format, parseISO } from "date-fns";
 // --- USER OPERATIONS ---
 
 export const createOrder = async (req, res) => {
-  const userId = req.user.user;
+  const userId = req.user.id || req.user.user;
   try {
     const { totalPrice } = req.body;
-    const user = await User.findById(userId).select("name email");
+    
+    // Check User collection first, then Owner collection
+    let user = await User.findById(userId).select("name email");
     if (!user) {
-      return res.status(400).json({ message: "User not found" });
+      user = await Owner.findById(userId).select("name email");
     }
+
+    if (!user) {
+      return res.status(404).json({ message: "Account not found. Please ensure you are logged in correctly." });
+    }
+
     const options = {
       amount: totalPrice * 100,
       currency: "INR",
@@ -32,10 +40,9 @@ export const createOrder = async (req, res) => {
 };
 
 export const verifyPayment = async (req, res) => {
-  const userId = req.user.user;
+  const userId = req.user.id || req.user.user;
   const {
-    id: turfId,
-    duration,
+    turfId,
     startTime,
     endTime,
     selectedTurfDate,
@@ -60,13 +67,15 @@ export const verifyPayment = async (req, res) => {
     const adjustedStartTime = adjustTime(startTime, selectedTurfDate);
     const adjustedEndTime = adjustTime(endTime, selectedTurfDate);
 
-    const [user, turf] = await Promise.all([
-      User.findById(userId),
+    // Check User collection first, then Owner collection
+    const [userResult, turf] = await Promise.all([
+      User.findById(userId).then(u => u || Owner.findById(userId)),
       Turf.findById(turfId),
     ]);
     
+    const user = userResult;
     if (!user || !turf) {
-      return res.status(404).json({ success: false, message: "User or Turf not found" });
+      return res.status(404).json({ success: false, message: "Account or Turf not found" });
     }
 
     const QRcode = await generateQRCode(
@@ -93,7 +102,10 @@ export const verifyPayment = async (req, res) => {
       payment: { orderId, paymentId },
     });
 
-    await User.findByIdAndUpdate(userId, { $push: { bookings: booking._id } });
+    // If it's a regular user, update their bookings array
+    if (user.constructor.modelName === "User") {
+      await User.findByIdAndUpdate(userId, { $push: { bookings: booking._id } });
+    }
 
     const htmlContent = generateHTMLContent(
       turf.name,
@@ -123,7 +135,7 @@ export const verifyPayment = async (req, res) => {
 };
 
 export const getUserBookings = async (req, res) => {
-  const userId = req.user.user;
+  const userId = req.user.id || req.user.user;
   try {
     const bookings = await Booking.find({ user: userId })
       .sort({ createdAt: -1 })
@@ -154,14 +166,14 @@ export const getOwnerBookings = async (req, res) => {
       { $lookup: { from: "users", localField: "user", foreignField: "_id", as: "user" } },
       { $lookup: { from: "turves", localField: "turf", foreignField: "_id", as: "turf" } },
       { $lookup: { from: "timeslots", localField: "timeSlot", foreignField: "_id", as: "timeSlot" } },
-      { $unwind: "$user" },
+      { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
       { $unwind: "$turf" },
       { $unwind: "$timeSlot" },
       {
         $project: {
           id: "$_id",
           turfName: "$turf.name",
-          userName: "$user.name",
+          userName: { $ifNull: ["$user.name", "Partner/Other"] },
           totalPrice: 1,
           bookingDate: "$createdAt",
           duration: {

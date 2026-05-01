@@ -143,7 +143,7 @@ export default function Home() {
         <div className="relative max-w-full mx-auto px-10 lg:px-20 w-full grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <div>
-              <h1 className="font-display leading-[0.85] tracking-tight uppercase" style={{ fontSize: "clamp(3rem,8vw,6.5rem)" }}>
+              <h1 className="font-display leading-[0.85] tracking-tighter uppercase" style={{ fontSize: "clamp(3rem,8vw,6.5rem)" }}>
                 More Than <span style={{ color: PRI }}>Booking.</span><br />
                 Where Players<br />Belong.
               </h1>
@@ -181,7 +181,7 @@ export default function Home() {
                 >
                   <img src={c.img} alt={c.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to top,rgba(0,0,0,0.8),transparent)" }} />
-                  <p className="absolute bottom-3 left-3 font-display text-lg uppercase tracking-tight">{c.label}</p>
+                  <p className="absolute bottom-3 left-3 font-display text-lg uppercase tracking-tighter">{c.label}</p>
                 </Link>
               ))}
             </div>
@@ -190,7 +190,7 @@ export default function Home() {
             <div className="absolute top-12 right-12 rounded-2xl p-4 border z-20"
               style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", borderColor: "rgba(132,204,22,0.25)" }}>
               <p className="font-display text-2xl text-primary leading-none">1M+</p>
-              <p className="text-[10px] uppercase tracking-[3px] mt-1 opacity-60" style={{ color: "#fff" }}>Bookings Made</p>
+              <p className="text-[10px] uppercase tracking-wider mt-1 opacity-60" style={{ color: "#fff" }}>Bookings Made</p>
             </div>
           </div>
         </div>
@@ -205,7 +205,7 @@ export default function Home() {
           {stats.map(s => (
             <div key={s.label} className="px-8 text-center">
               <p className="font-display text-4xl" style={{ color: PRI }}>{s.value}</p>
-              <p className="font-mono text-xs uppercase tracking-widest mt-1" style={{ color: "#888" }}>{s.label}</p>
+              <p className="font-mono text-xs uppercase tracking-wider mt-1" style={{ color: "#888" }}>{s.label}</p>
             </div>
           ))}
         </div>
@@ -260,7 +260,7 @@ export default function Home() {
               <Search size={32} className="text-gray-600" />
             </div>
             <p className="font-display text-3xl mb-3 uppercase tracking-tight">Venues Not Found</p>
-            <p className="text-gray-500 text-sm uppercase tracking-[0.2em] mb-8">Try adjusting your search or filters</p>
+            <p className="text-gray-500 text-sm uppercase tracking-wider mb-8">Try adjusting your search or filters</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

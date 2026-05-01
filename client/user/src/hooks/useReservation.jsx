@@ -1,17 +1,22 @@
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import useDateSelection from "./useDateSelection";
 import useTimeSelection from "./useTimeSelection";
 import useDurationSelection from "./useDurationSelection";
 import useBookingConfirmation from "./useBookingConfirmation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const useReservation = () => {
   const { id } = useParams();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedStartTime, setSelectedStartTime] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(
+    location.state?.selectedDate ? new Date(location.state.selectedDate) : new Date()
+  );
+  const [selectedStartTime, setSelectedStartTime] = useState(
+    location.state?.selectedSlot?.startTime || null
+  );
   const [bookedTime, setBookedTime] = useState([]);
-  const [timeSlots, setTimeSlots] = useState({ openTime: "", closeTime: "" });
+  const [timeSlots, setTimeSlots] = useState({ openTime: "", closeTime: "", generatedSlots: [] });
   const [pricePerHour, setPricePerHour] = useState(0);
   const [duration, setDuration] = useState(1);
 

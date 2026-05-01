@@ -17,11 +17,13 @@ const useUmpireDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
+        console.log("DEBUG: Fetching umpire dashboard data...");
         const response = await axiosInstance.get("/api/owner/dashboard/umpire");
+        console.log("DEBUG: Umpire dashboard response:", response.data);
         setDashboardData(response.data);
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching umpire dashboard data:", err);
+        console.error("DEBUG: Error fetching umpire dashboard data:", err.response?.data || err.message);
         setError("Failed to fetch dashboard data");
         setLoading(false);
       }

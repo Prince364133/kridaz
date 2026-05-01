@@ -1,8 +1,29 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 
-// import {ProtectedRoute} from "@components/ProtectedRoute"
+// Layouts
+import { AdminLayout, PartnerLayout, GuestLayout, CoachLayout, UmpireLayout } from "@layouts";
+import UserRoot from "@user/layouts/Root";
 
-import Home from "@pages/Home.jsx";
+// User Portal Pages (via @user alias)
+import UserHome from "@user/pages/Home";
+import UserLogin from "@user/pages/auth/Login";
+import UserSignUp from "@user/pages/auth/SignUp";
+import UserTurf from "@user/components/turf/Turf";
+import UserTurfDetails from "@user/components/turf/TurfDetails";
+import UserReservation from "@user/components/Reservation";
+import UserTurfBookingHistory from "@user/components/turf/TurfBookingHistory";
+import UserProfile from "@user/pages/Profile";
+import UserBlogs from "@user/pages/Blogs";
+import UserBlogDetail from "@user/pages/BlogDetail";
+
+// Business Landing Pages (User Portal)
+import UserVenueOwnerLanding from "@user/pages/business/VenueOwnerLanding";
+import UserCoachLanding from "@user/pages/business/CoachLanding";
+import UserUmpireLanding from "@user/pages/business/UmpireLanding";
+
+// Owner Portal Pages
+import PartnerDashboard from "@pages/Home.jsx";
 import Login from "@pages/Login";
 import VenueOwnerLanding from "@pages/VenueOwnerLanding";
 import CoachLanding from "@pages/CoachLanding";
@@ -14,12 +35,9 @@ import UmpireSignUp from "@pages/UmpireSignUp";
 import ComingSoon from "@pages/ComingSoon";
 import SignUpDispatcher from "@pages/SignUpDispatcher";
 
-//  all the components that are used in the layout
-import { AdminLayout, PartnerLayout, GuestLayout, CoachLayout, UmpireLayout } from "@layouts";
-
 import {
   AddTurf,
-  OwnerDashboard as PartnerDashboard,
+  EditTurf,
   TurfManagement,
   TurfDetails,
   OwnerReviews as PartnerReviews,
@@ -35,7 +53,6 @@ import UmpireMatches from "./components/umpire/UmpireMatches";
 import UmpireSchedule from "./components/umpire/UmpireSchedule";
 import UmpireFeedback from "./components/umpire/UmpireFeedback";
 
-//  all the components that are used in the admin dashboard
 import {
   UserManagement,
   NewOwnerRequests as NewPartnerRequests,
@@ -50,63 +67,10 @@ import {
   BlogManagement,
 } from "@components/admin";
 import ProtectedRoute from "@components/ProtectedRoute/ProtectedRoute";
-
-// 404 page
-
 import { NotFound } from "@components/common";
 
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <GuestLayout />,
-    errorElement: <NotFound />,
-    children: [
-      {
-        path: "",
-        element: <Navigate to="/login" replace />,
-      },
-      {
-        path: "venue-owner",
-        element: <VenueOwnerLanding />,
-      },
-      {
-        path: "coach-landing",
-        element: <CoachLanding />,
-      },
-      {
-        path: "umpire-landing",
-        element: <UmpireLanding />,
-      },
-      {
-        path: "login",
-        element: <Login />,
-      },
-      {
-        path: "signup",
-        element: <SignUpDispatcher />,
-      },
-      {
-        path: "signup/venue-owner",
-        element: <VenueOwnerSignUp />,
-      },
-      {
-        path: "signup/coach",
-        element: <CoachSignUp />,
-      },
-      {
-        path: "signup/umpire",
-        element: <UmpireSignUp />,
-      },
-      {
-        path: "coming-soon",
-        element: <ComingSoon />,
-      },
-      {
-        path: "partners",
-        element: <PartnersGateway />,
-      },
-    ],
-  },
+  // ── ADMIN PORTAL (High Priority) ──
   {
     path: "/admin",
     element: (
@@ -131,7 +95,6 @@ const router = createBrowserRouter([
           { path: ":ownerId/turf", element: <TurfList /> },
         ],
       },
-
       { path: "turfs", element: <AllTurf /> },
       { path: "transactions", element: <TransactionSection /> },
       { path: "features", element: <FeatureFlags /> },
@@ -139,6 +102,8 @@ const router = createBrowserRouter([
       { path: "blogs", element: <BlogManagement /> },
     ],
   },
+
+  // ── PARTNER PORTAL (High Priority) ──
   {
     path: "/partner",
     element: (
@@ -147,14 +112,17 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { path: "", element: <PartnerDashboard /> },
+      { index: true, element: <OwnerDashboard /> },
       { path: "add-turf", element: <AddTurf /> },
       { path: "turfs", element: <TurfManagement /> },
       { path: "turf/:id", element: <TurfDetails /> },
+      { path: "turf/:id/edit", element: <EditTurf /> },
       { path: "reviews", element: <PartnerReviews /> },
       { path: "bookings", element: <PartnerBookings /> },
     ],
   },
+
+  // ── COACH PORTAL (High Priority) ──
   {
     path: "/coach",
     element: (
@@ -163,12 +131,14 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { path: "", element: <CoachDashboard /> },
+      { index: true, element: <CoachDashboard /> },
       { path: "students", element: <CoachStudents /> },
       { path: "sessions", element: <CoachSessions /> },
       { path: "masterclass", element: <CoachMasterclass /> },
     ],
   },
+
+  // ── UMPIRE PORTAL (High Priority) ──
   {
     path: "/umpire",
     element: (
@@ -177,33 +147,51 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { path: "", element: <UmpireDashboard /> },
+      { index: true, element: <UmpireDashboard /> },
       { path: "matches", element: <UmpireMatches /> },
       { path: "schedule", element: <UmpireSchedule /> },
       { path: "feedback", element: <UmpireFeedback /> },
     ],
   },
-  // Legacy Redirects
+
+  // ── USER PORTAL (Fall-through Priority) ──
   {
-    path: "/owner",
-    element: <Navigate to="/partner" replace />,
+    path: "/",
+    element: <UserRoot />,
+    errorElement: <NotFound />,
+    children: [
+      { index: true, element: <UserHome /> },
+      { path: "login", element: <UserLogin /> },
+      { path: "signup", element: <UserSignUp /> },
+      { path: "turfs", element: <UserTurf /> },
+      { path: "turf/:id", element: <UserTurfDetails /> },
+      { path: "profile", element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
+      { path: "blogs", element: <UserBlogs /> },
+      { path: "blogs/:id", element: <UserBlogDetail /> },
+      { path: "reserve/:id", element: <ProtectedRoute><UserReservation /></ProtectedRoute> },
+      { path: "booking-history", element: <ProtectedRoute><UserTurfBookingHistory /></ProtectedRoute> },
+      
+      // Business Landings
+      { path: "business/venue", element: <UserVenueOwnerLanding /> },
+      { path: "business/coach", element: <UserCoachLanding /> },
+      { path: "business/official", element: <UserUmpireLanding /> },
+      
+      // Business Auth
+      { path: "signup/venue", element: <VenueOwnerSignUp /> },
+      { path: "signup/coach", element: <CoachSignUp /> },
+      { path: "signup/official", element: <UmpireSignUp /> },
+    ],
   },
-  {
-    path: "/owner/add-turf",
-    element: <Navigate to="/partner/add-turf" replace />,
-  },
-  {
-    path: "/owner/turfs",
-    element: <Navigate to="/partner/turfs" replace />,
-  },
-  {
-    path: "/owner/reviews",
-    element: <Navigate to="/partner/reviews" replace />,
-  },
-  {
-    path: "/owner/bookings",
-    element: <Navigate to="/partner/bookings" replace />,
-  },
+
+  // ── LEGACY & REDIRECTS ──
+  { path: "/owner", element: <Navigate to="/partner" replace /> },
+  { path: "/venue-owner", element: <Navigate to="/business/venue" replace /> },
+  { path: "/coach-landing", element: <Navigate to="/business/coach" replace /> },
+  { path: "/umpire-landing", element: <Navigate to="/business/official" replace /> },
+  { path: "/partners", element: <PartnersGateway /> },
+  
+  // Catch-all
+  { path: "*", element: <NotFound /> },
 ]);
 
 export default router;

@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import toast from "react-hot-toast";
 import axiosInstance from "../useAxiosInstance";
 import { useNavigate } from "react-router-dom";
 
-const addTurfSchema = yup.object().shape({
+const editTurfSchema = yup.object().shape({
   name: yup
     .string()
     .required("Enter the name of the turf")
@@ -27,11 +27,12 @@ const addTurfSchema = yup.object().shape({
     .max(3000, "Price per hour must be at most 3000 rupees"),
   images: yup
     .mixed()
+    .nullable()
     .test(
       "images",
-      "Please upload at least one valid image (PNG, JPEG, or WebP). Max 10 images.",
+      "Max 10 images allowed (PNG, JPEG, or WebP).",
       function (value) {
-        if (!value || value.length === 0) return false;
+        if (!value || value.length === 0) return true; // Optional on edit
         if (value.length > 10) return false;
         const acceptedFormats = ["image/png", "image/jpeg", "image/webp"];
         return Array.from(value).every(file => acceptedFormats.includes(file.type));
@@ -59,9 +60,11 @@ const addTurfSchema = yup.object().shape({
   breakTime: yup.number().min(0).max(60),
 });
 
-export default function useAddTurf() {
+export default function useEditTurf(turfId) {
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const navigate = useNavigate();
+  
   const {
     register,
     handleSubmit,
@@ -70,7 +73,7 @@ export default function useAddTurf() {
     setValue,
     watch,
   } = useForm({
-    resolver: yupResolver(addTurfSchema),
+    resolver: yupResolver(editTurfSchema),
     defaultValues: {
       sportTypes: [],
       groundTypes: [],
@@ -88,9 +91,6 @@ export default function useAddTurf() {
   const [sportTypes, setSportTypes] = useState([]);
   const [groundTypes, setGroundTypes] = useState([]);
   const [facilities, setFacilities] = useState([]);
-  const [newSportType, setNewSportType] = useState("");
-  const [newGroundType, setNewGroundType] = useState("");
-  const [newFacility, setNewFacility] = useState("");
   const [generatedSlots, setGeneratedSlots] = useState([]);
   
   const openTime = watch("openTime");
@@ -99,6 +99,48 @@ export default function useAddTurf() {
   const breakTime = watch("breakTime");
   const availableDays = watch("availableDays");
   const offDays = watch("offDays");
+
+  useEffect(() => {
+    const fetchTurf = async () => {
+      try {
+        const response = await axiosInstance.get(`/api/owner/turf/${turfId}/details`);
+        const { turf } = response.data;
+        
+        // Populate form
+        setValue("name", turf.name);
+        setValue("description", turf.description);
+        setValue("location", turf.location);
+        setValue("pricePerHour", turf.pricePerHour);
+        setValue("youtubeUrl", turf.youtubeUrl || "");
+        
+        setSportTypes(turf.sportTypes || []);
+        setGroundTypes(turf.groundTypes || []);
+        setFacilities(turf.facilities || []);
+
+        if (turf.openTime) {
+            const parsedOpen = parse(turf.openTime, "hh:mm aa", new Date());
+            setValue("openTime", parsedOpen);
+        }
+        if (turf.closeTime) {
+            const parsedClose = parse(turf.closeTime, "hh:mm aa", new Date());
+            setValue("closeTime", parsedClose);
+        }
+
+        if (turf.slotDuration) setValue("slotDuration", turf.slotDuration);
+        if (turf.breakTime !== undefined) setValue("breakTime", turf.breakTime);
+        if (turf.availableDays) setValue("availableDays", turf.availableDays);
+        if (turf.offDays) setValue("offDays", turf.offDays);
+        if (turf.generatedSlots) setGeneratedSlots(turf.generatedSlots);
+
+      } catch (err) {
+        toast.error("Failed to fetch turf details");
+        navigate("/partner/turfs");
+      } finally {
+        setFetching(false);
+      }
+    };
+    if (turfId) fetchTurf();
+  }, [turfId, setValue, navigate]);
 
   useEffect(() => {
     setValue("sportTypes", sportTypes);
@@ -113,10 +155,8 @@ export default function useAddTurf() {
   }, [facilities, setValue]);
 
   const addSportType = (type) => {
-    const sport = typeof type === 'string' ? type : newSportType;
-    if (sport && !sportTypes.includes(sport)) {
-      setSportTypes([...sportTypes, sport]);
-      setNewSportType("");
+    if (type && !sportTypes.includes(type)) {
+      setSportTypes([...sportTypes, type]);
     }
   };
 
@@ -125,10 +165,8 @@ export default function useAddTurf() {
   };
 
   const addGroundType = (type) => {
-    const ground = typeof type === 'string' ? type : newGroundType;
-    if (ground && !groundTypes.includes(ground)) {
-      setGroundTypes([...groundTypes, ground]);
-      setNewGroundType("");
+    if (type && !groundTypes.includes(type)) {
+      setGroundTypes([...groundTypes, type]);
     }
   };
 
@@ -137,10 +175,8 @@ export default function useAddTurf() {
   };
 
   const addFacility = (item) => {
-    const facility = typeof item === 'string' ? item : newFacility;
-    if (facility && !facilities.includes(facility)) {
-      setFacilities([...facilities, facility]);
-      setNewFacility("");
+    if (item && !facilities.includes(item)) {
+      setFacilities([...facilities, item]);
     }
   };
 
@@ -165,6 +201,10 @@ export default function useAddTurf() {
 
   useEffect(() => {
     if (openTime && closeTime && slotDuration) {
+      // If we already have generatedSlots from DB, and times haven't changed much, 
+      // we might want to preserve isActive status. But for simplicity, let's regenerate.
+      // A better way is to only regenerate if critical fields change.
+      
       const slots = [];
       let current = new Date(openTime);
       const end = new Date(closeTime);
@@ -174,10 +214,16 @@ export default function useAddTurf() {
         const slotEnd = new Date(current.getTime() + slotDuration * 60000);
         
         if (slotEnd <= end) {
+          const sTime = format(slotStart, "hh:mm aa");
+          const eTime = format(slotEnd, "hh:mm aa");
+          
+          // Try to preserve isActive from previous state if times match
+          const existing = generatedSlots.find(s => s.startTime === sTime && s.endTime === eTime);
+          
           slots.push({
-            startTime: format(slotStart, "hh:mm aa"),
-            endTime: format(slotEnd, "hh:mm aa"),
-            isActive: true
+            startTime: sTime,
+            endTime: eTime,
+            isActive: existing ? existing.isActive : true
           });
         }
         
@@ -195,12 +241,11 @@ export default function useAddTurf() {
 
   const onSubmit = async (data) => {
     setLoading(true);
-
     const formData = new FormData();
 
     Object.keys(data).forEach((key) => {
       if (key === "images") {
-        if (data[key]) {
+        if (data[key] && data[key].length > 0) {
           Array.from(data[key]).forEach((file) => {
             formData.append("images", file);
           });
@@ -225,11 +270,9 @@ export default function useAddTurf() {
     // Append generated slots
     formData.append("generatedSlots", JSON.stringify(generatedSlots));
 
-    for (let [key, value] of formData.entries()) {
-     }
     try {
-      const response = await axiosInstance.post(
-        "/api/owner/turf/register",
+      const response = await axiosInstance.put(
+        `/api/owner/turf/${turfId}`,
         formData,
         {
           headers: {
@@ -237,17 +280,10 @@ export default function useAddTurf() {
           },
         }
       );
-       const result = response.data;
-      toast.success(result.message);
-      navigate("/partner/turfs");
-     } catch (error) {
-      if (error.response) {
-        toast.error(error.response?.data?.message);
-      } else if (error.request) {
-        toast.error("No response from server. Please try again later.");
-      } else {
-        toast.error(error.message);
-      }
+      toast.success(response.data.message);
+      navigate(`/partner/turf/${turfId}`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Update failed");
     } finally {
       setLoading(false);
     }
@@ -261,18 +297,12 @@ export default function useAddTurf() {
     setValue,
     onSubmit,
     sportTypes,
-    newSportType,
-    setNewSportType,
     addSportType,
     removeSportType,
     groundTypes,
-    newGroundType,
-    setNewGroundType,
     addGroundType,
     removeGroundType,
     facilities,
-    newFacility,
-    setNewFacility,
     addFacility,
     removeFacility,
     openTime,
@@ -285,5 +315,6 @@ export default function useAddTurf() {
     toggleDay,
     toggleSlotActive,
     loading,
+    fetching,
   };
 }

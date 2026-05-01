@@ -2,9 +2,10 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "",
+  withCredentials: true,
 });
 
-// Request interceptor: attach JWT token from Redux-Persist storage
+// Request interceptor: attach JWT token from Redux-Persist storage (Optional fallback)
 axiosInstance.interceptors.request.use((config) => {
   let token = null;
   try {
@@ -17,7 +18,7 @@ axiosInstance.interceptors.request.use((config) => {
       }
     }
   } catch (error) {
-    console.error("Error parsing persisted user data:", error);
+    // Silently fail as the httpOnly cookie will be sent automatically
   }
 
   if (token) {

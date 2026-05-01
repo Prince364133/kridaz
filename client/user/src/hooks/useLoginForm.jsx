@@ -48,17 +48,17 @@ const useLoginForm = () => {
 
       // Role-based redirection
       switch (role) {
-        case "admin":
-          window.location.href = "http://localhost:5174/admin"; // Or use navigate if integrated
+        case "BMSP_ADMIN":
+          window.location.href = "/admin";
           break;
-        case "owner":
-          window.location.href = "http://localhost:5174/partner";
+        case "VERIFIED_VENUE_OWNER":
+          window.location.href = "/partner";
           break;
-        case "coach":
-          window.location.href = "http://localhost:5174/coach";
+        case "COACH":
+          window.location.href = "/coach";
           break;
-        case "umpire":
-          window.location.href = "http://localhost:5174/umpire";
+        case "UMPIRE":
+          window.location.href = "/umpire";
           break;
         default:
           navigate("/", { replace: true });

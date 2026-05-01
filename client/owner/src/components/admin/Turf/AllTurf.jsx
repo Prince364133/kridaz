@@ -4,7 +4,7 @@ import Turf from "./Turf";
 import TurfSkeleton from "./TurfSkeleton";
 
 export const AllTurf = () => {
-  const { turfData, loading } = useTurfData();
+  const { turfData, loading, approveTurf, rejectTurf } = useTurfData();
 
   if (loading) {
     return (
@@ -47,7 +47,12 @@ export const AllTurf = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {turfData.map((turf) => (
-              <Turf key={turf._id} turf={turf} />
+              <Turf 
+                key={turf._id} 
+                turf={turf} 
+                onApprove={approveTurf}
+                onReject={rejectTurf}
+              />
             ))}
           </div>
         )}

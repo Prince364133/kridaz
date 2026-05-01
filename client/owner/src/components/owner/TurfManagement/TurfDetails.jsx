@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import useTurfDetails from "@hooks/owner/useTurfDetails";
 import DashboardSkeleton from "../Dashboard/DashboardSkeleton";
+import toast from "react-hot-toast";
 
 // Booking Information Popup
 const BookingModal = ({ slot, onClose }) => {
@@ -21,8 +22,8 @@ const BookingModal = ({ slot, onClose }) => {
           <div>
             <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-2">Slot Telemetry</p>
             <h3 className="text-2xl font-black text-white uppercase tracking-tight">
-              {new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
-              {new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {typeof startTime === 'string' && startTime.includes(':') ? startTime : new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
+              {typeof endTime === 'string' && endTime.includes(':') ? endTime : new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </h3>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
@@ -112,18 +113,33 @@ const BookingModal = ({ slot, onClose }) => {
 export default function TurfDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { turfData, isLoading, error } = useTurfDetails(id);
+  const { turfData, isLoading, error, toggleVisibility, deleteArena } = useTurfDetails(id);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedSlot, setSelectedSlot] = useState(null);
 
-  React.useEffect(() => {
-    if (turfData?.slots?.length > 0) {
-      const dates = [...new Set(turfData.slots.map(slot => new Date(slot.startTime).toISOString().split('T')[0]))].sort();
-      if (dates.length > 0 && !dates.includes(selectedDate)) {
-        setSelectedDate(dates[0]);
+  const handleToggleVisibility = async () => {
+    const success = await toggleVisibility();
+    if (success) toast.success("Visibility updated");
+    else toast.error("Failed to update visibility");
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to decommission this arena? This will permanently delete all associated data.")) {
+      const success = await deleteArena();
+      if (success) {
+        toast.success("Arena decommissioned");
+        navigate("/partner/turfs");
+      } else {
+        toast.error("Failed to decommission arena");
       }
     }
-  }, [turfData, selectedDate]);
+  };
+
+  React.useEffect(() => {
+    // We'll use the current date as default
+    const today = new Date().toISOString().split('T')[0];
+    setSelectedDate(today);
+  }, []);
 
   if (isLoading) return <DashboardSkeleton />;
   if (error) return (
@@ -151,14 +167,37 @@ export default function TurfDetails() {
 
   const { turf, slots = [] } = turfData;
 
-  // Filter slots for selected date
-  const filteredSlots = slots.filter(slot => {
+  // Filter actual booked slots for selected date
+  const filteredBookings = slots.filter(slot => {
     const slotDate = new Date(slot.startTime).toISOString().split('T')[0];
     return slotDate === selectedDate;
   });
 
-  // Group slots by day for the calendar selector
-  const uniqueDates = [...new Set(slots.map(slot => new Date(slot.startTime).toISOString().split('T')[0]))].sort();
+  // Merge generated slots with actual bookings
+  const displaySlots = (turf.generatedSlots || []).map(gs => {
+    // Find if this specific slot (by time) is booked for the selected date
+    const booking = filteredBookings.find(b => {
+      const bStart = new Date(b.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return bStart === gs.startTime;
+    });
+
+    return {
+      _id: booking?._id || `gen-${gs.startTime}`,
+      startTime: gs.startTime,
+      endTime: gs.endTime,
+      isActive: gs.isActive,
+      isBooked: !!booking,
+      bookingDetails: booking?.bookingDetails || null,
+      isTemplate: !booking
+    };
+  });
+
+  // Group slots by day for the calendar selector - for now just use a 7-day range from today
+  const uniqueDates = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    return d.toISOString().split('T')[0];
+  });
 
   return (
     <div className="space-y-8 animate-fade-in pb-20">
@@ -188,6 +227,13 @@ export default function TurfDetails() {
              <div className="space-y-2">
                 <div className="flex items-center gap-2">
                    <h1 className="text-5xl font-black uppercase tracking-tight text-white">{turf.name}</h1>
+                    <div className={`px-3 py-1 border rounded-full flex items-center gap-1 ${
+                       turf.status === 'approved' ? 'bg-green-500/10 border-green-500/20 text-green-500' :
+                       turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                       'bg-yellow-500/10 border-yellow-500/20 text-yellow-500'
+                    }`}>
+                       <span className="text-[10px] font-black uppercase tracking-widest">{turf.status}</span>
+                    </div>
                    <div className="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full flex items-center gap-1">
                       <Star size={12} className="text-primary fill-primary" />
                       <span className="text-[10px] font-bold text-primary">{turf.avgRating?.toFixed(1) || "NEW"}</span>
@@ -206,11 +252,28 @@ export default function TurfDetails() {
              </div>
           </div>
           <div className="flex gap-3">
-             <button className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all flex items-center gap-2">
+             <button 
+                onClick={handleToggleVisibility}
+                className={`px-6 py-3 border rounded-xl font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${
+                  turf.isActive 
+                  ? "bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500/20" 
+                  : "bg-gray-500/10 border-gray-500/20 text-gray-500 hover:bg-gray-500/20"
+                }`}
+             >
+                <Zap size={14} className={turf.isActive ? "fill-green-500" : ""} />
+                {turf.isActive ? "Visible" : "Hidden"}
+             </button>
+             <button 
+                onClick={() => navigate(`/partner/turf/${id}/edit`)}
+                className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all flex items-center gap-2"
+             >
                 <Edit2 size={14} />
                 Edit Arena
              </button>
-             <button className="px-6 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 font-bold uppercase text-[10px] tracking-widest hover:bg-red-500/20 transition-all flex items-center gap-2">
+             <button 
+                onClick={handleDelete}
+                className="px-6 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 font-bold uppercase text-[10px] tracking-widest hover:bg-red-500/20 transition-all flex items-center gap-2"
+             >
                 <Trash2 size={14} />
                 Decommission
              </button>
@@ -296,11 +359,15 @@ export default function TurfDetails() {
            <div className="flex justify-between items-center">
               <h3 className="text-sm font-black uppercase tracking-[0.2em] text-gray-500 flex items-center gap-2">
                  <Clock size={16} className="text-primary" />
-                 Slot Manifest <span className="ml-2 px-2 py-0.5 bg-white/5 rounded text-[10px] text-primary">{filteredSlots.length} Active</span>
+                 Slot Manifest <span className="ml-2 px-2 py-0.5 bg-white/5 rounded text-[10px] text-primary">{displaySlots.filter(s => s.isActive).length} Active</span>
               </h3>
               <div className="flex gap-4">
                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-gray-500" />
+                    <div className="w-2 h-2 rounded-full bg-gray-800" />
+                    <span className="text-[10px] font-bold text-gray-500 uppercase">Inactive</span>
+                 </div>
+                 <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-white/20" />
                     <span className="text-[10px] font-bold text-gray-500 uppercase">Available</span>
                  </div>
                  <div className="flex items-center gap-2">
@@ -311,23 +378,25 @@ export default function TurfDetails() {
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredSlots.length > 0 ? (
-                filteredSlots.map((slot) => (
+              {displaySlots.length > 0 ? (
+                displaySlots.map((slot) => (
                   <button 
                     key={slot._id} 
-                    onClick={() => setSelectedSlot(slot)}
+                    onClick={() => slot.isBooked && setSelectedSlot(slot)}
+                    disabled={!slot.isActive || !slot.isBooked}
                     className={`relative overflow-hidden p-6 rounded-[24px] border transition-all duration-500 group text-left ${
-                      slot.isBooked 
-                      ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(132,204,22,0.1)]" 
-                      : "bg-white/[0.02] border-white/10 hover:border-white/30"
+                      !slot.isActive
+                      ? "bg-black/20 border-gray-900 opacity-40 cursor-not-allowed"
+                      : slot.isBooked 
+                      ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(132,204,22,0.1)] cursor-pointer" 
+                      : "bg-white/[0.02] border-white/10 hover:border-white/30 cursor-default"
                     }`}
                   >
                     <div className="flex justify-between items-start mb-6">
                        <div className="space-y-1">
                           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Time Sequence</p>
                           <h4 className="text-lg font-black text-white">
-                             {new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
-                             {new Date(slot.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                             {slot.startTime} - {slot.endTime}
                           </h4>
                        </div>
                        {slot.isBooked ? (

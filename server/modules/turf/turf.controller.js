@@ -12,7 +12,7 @@ import { getTurfWithAvgRating } from "./turf.service.js";
 
 export const getAllTurfs = async (req, res) => {
   try {
-    const turfs = await Turf.find({});
+    const turfs = await Turf.find({ status: "approved", isActive: true });
     const turfsWithRating = await Promise.all(turfs.map(getTurfWithAvgRating));
     return res.status(200).json({ turfs: turfsWithRating });
   } catch (err) {
@@ -59,6 +59,9 @@ export const getTimeSlotByTurfId = async (req, res) => {
       "openTime",
       "closeTime",
       "pricePerHour",
+      "generatedSlots",
+      "availableDays",
+      "offDays"
     ]);
     return res.status(200).json({ timeSlots: turfDetails, bookedTime });
   } catch (error) {
@@ -90,14 +93,22 @@ export const turfRegister = async (req, res) => {
 
     const imageUrls = await Promise.all(uploadPromises);
 
+    const { availableDays, offDays, generatedSlots, slotDuration, breakTime, ...otherData } = req.body;
+
     const turf = new Turf({
       image: imageUrls[0], 
       images: imageUrls,    
       owner,
-      ...req.body,
+      status: "pending",
+      ...otherData,
+      slotDuration: Number(slotDuration) || 60,
+      breakTime: Number(breakTime) || 0,
+      availableDays: Array.isArray(availableDays) ? availableDays : (availableDays ? [availableDays] : []),
+      offDays: Array.isArray(offDays) ? offDays : (offDays ? [offDays] : []),
+      generatedSlots: generatedSlots ? JSON.parse(generatedSlots) : [],
     });
     await turf.save();
-    return res.status(201).json({ success: true, message: "Turf created successfully" });
+    return res.status(201).json({ success: true, message: "Turf registered and sent for admin approval" });
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({ success: false, message: err.message });
@@ -140,15 +151,53 @@ export const editTurfById = async (req, res) => {
     updatedTurfData.facilities = Array.isArray(facilities) ? facilities : [facilities];
   }
 
+  if (req.body.availableDays) {
+    updatedTurfData.availableDays = Array.isArray(req.body.availableDays) ? req.body.availableDays : [req.body.availableDays];
+  }
+
+  if (req.body.offDays) {
+    updatedTurfData.offDays = Array.isArray(req.body.offDays) ? req.body.offDays : [req.body.offDays];
+  }
+
+  if (req.body.generatedSlots) {
+    updatedTurfData.generatedSlots = JSON.parse(req.body.generatedSlots);
+  }
+
+  if (req.body.slotDuration) updatedTurfData.slotDuration = Number(req.body.slotDuration);
+  if (req.body.breakTime !== undefined) updatedTurfData.breakTime = Number(req.body.breakTime);
+
   try {
     const turf = await Turf.findOne({ owner, _id: id });
     if (!turf) {
       return res.status(404).json({ success: false, message: "Turf not found" });
     }
 
+    // Handle Image Uploads if provided
+    if (req.files && req.files.length > 0) {
+      const uploadPromises = req.files.map((file) => {
+        return new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "BookMySportz/turfs" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result.secure_url);
+            }
+          );
+          uploadStream.end(file.buffer);
+        });
+      });
+
+      const imageUrls = await Promise.all(uploadPromises);
+      updatedTurfData.image = imageUrls[0];
+      updatedTurfData.images = imageUrls;
+    }
+
+    // Reset status to pending on edit
+    updatedTurfData.status = "pending";
+
     const updatedTurf = await Turf.findOneAndUpdate({ owner, _id: id }, updatedTurfData, { new: true });
     const allTurfs = await Turf.find({ owner });
-    return res.status(200).json({ success: true, message: "Turf updated successfully", allTurfs });
+    return res.status(200).json({ success: true, message: "Changes saved and sent for admin review", allTurfs });
   } catch (err) {
     console.error("Error updating turf:", err.message);
     return res.status(500).json({ success: false, message: err.message });
@@ -203,5 +252,61 @@ export const adminGetAllTurfs = async (req, res) => {
   } catch (error) {
     console.error("Error in adminGetAllTurfs: ", error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const adminApproveTurf = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const turf = await Turf.findByIdAndUpdate(id, { status: "approved" }, { new: true });
+    return res.status(200).json({ success: true, message: "Turf approved", turf });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const adminRejectTurf = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const turf = await Turf.findByIdAndUpdate(id, { status: "rejected" }, { new: true });
+    return res.status(200).json({ success: true, message: "Turf rejected", turf });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const toggleTurfVisibility = async (req, res) => {
+  const owner = req.owner.id;
+  const { id } = req.params;
+  try {
+    const turf = await Turf.findOne({ owner, _id: id });
+    if (!turf) return res.status(404).json({ success: false, message: "Turf not found" });
+    
+    turf.isActive = !turf.isActive;
+    await turf.save();
+    
+    return res.status(200).json({ 
+      success: true, 
+      message: `Turf listing ${turf.isActive ? 'enabled' : 'disabled'}`,
+      isActive: turf.isActive 
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const deleteTurf = async (req, res) => {
+  const owner = req.owner.id;
+  const { id } = req.params;
+  try {
+    const turf = await Turf.findOneAndDelete({ owner, _id: id });
+    if (!turf) return res.status(404).json({ success: false, message: "Turf not found or unauthorized" });
+    
+    // Also delete associated time slots
+    await TimeSlot.deleteMany({ turf: id });
+    
+    return res.status(200).json({ success: true, message: "Arena decommissioned successfully" });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
   }
 };

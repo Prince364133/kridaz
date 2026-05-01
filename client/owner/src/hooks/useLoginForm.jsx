@@ -41,13 +41,13 @@ const useLoginForm = () => {
       const response = await axiosInstance.post("/api/owner/auth/login", data);
       const result = await response.data;
       dispatch(login({token:result.token,role:result.role}));
-      if(result.role === "owner") {
+      if(result.role === "VERIFIED_VENUE_OWNER") {
         navigate("/partner");
-      }else if(result.role === "coach") {
+      }else if(result.role === "COACH") {
         navigate("/coach");
-      }else if(result.role === "umpire") {
+      }else if(result.role === "UMPIRE") {
         navigate("/umpire");
-      }else if(result.role === "admin") {
+      }else if(result.role === "BMSP_ADMIN") {
         navigate("/admin");
       }
        axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;

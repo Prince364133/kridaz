@@ -13,6 +13,7 @@ const GuestNavbar = () => {
   const { isLoggedIn, role } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:5173";
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -26,10 +27,10 @@ const GuestNavbar = () => {
   };
 
   const navLinks = [
-    { name: "Partners", path: "/partners" },
-    { name: "Venues", path: "/venue-owner" },
-    { name: "Coaches", path: "/coach-landing" },
-    { name: "Officials", path: "/umpire-landing" },
+    { name: "Business", path: "/partners", isExternal: false },
+    { name: "Venues", path: "/business/venue", isExternal: false },
+    { name: "Coaches", path: "/business/coach", isExternal: false },
+    { name: "Officials", path: "/business/official", isExternal: false },
   ];
 
   return (
@@ -41,29 +42,36 @@ const GuestNavbar = () => {
         {/* Brand Logo Unit */}
         <Link to="/" className="group flex items-center gap-4">
           <div className="flex items-center justify-center">
-            <img src="/logo.png" alt="BookMySportz" className="h-8 lg:h-10 w-auto transition-transform duration-500 group-hover:scale-105" />
-          </div>
-          <div className="hidden sm:block border-l border-white/20 pl-4 h-8 flex flex-col justify-center">
-            <span className="block text-[10px] font-semibold text-[#84CC16] tracking-wider uppercase leading-none mb-1">Partner Portal</span>
-            <span className="block text-lg font-bold text-white tracking-tight leading-none uppercase">Business</span>
+            <img src="/logo.png" alt="TurfSpot" className="h-8 lg:h-10 w-auto transition-transform duration-500 group-hover:scale-105" />
           </div>
         </Link>
 
         {/* Navigation (Desktop) */}
         <div className="hidden lg:flex items-center gap-8">
           {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              to={link.path}
-              className={`text-sm font-medium transition-all relative group ${
-                location.pathname === link.path ? "text-[#84CC16]" : "text-white/60 hover:text-white"
-              }`}
-            >
-              {link.name}
-              <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#84CC16] transition-all duration-300 ${
-                location.pathname === link.path ? "w-full" : "w-0 group-hover:w-full"
-              }`} />
-            </Link>
+            link.isExternal ? (
+              <a
+                key={link.name}
+                href={link.path}
+                className="text-sm font-medium text-white/60 hover:text-white transition-all relative group"
+              >
+                {link.name}
+                <span className="absolute -bottom-1 left-0 h-[2px] bg-[#84CC16] w-0 group-hover:w-full transition-all duration-300" />
+              </a>
+            ) : (
+              <Link
+                key={link.name}
+                to={link.path}
+                className={`text-sm font-medium transition-all relative group ${
+                  location.pathname === link.path ? "text-[#84CC16]" : "text-white/60 hover:text-white"
+                }`}
+              >
+                {link.name}
+                <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#84CC16] transition-all duration-300 ${
+                  location.pathname === link.path ? "w-full" : "w-0 group-hover:w-full"
+                }`} />
+              </Link>
+            )
           ))}
         </div>
 
@@ -125,14 +133,24 @@ const GuestNavbar = () => {
       }`}>
         <div className="flex flex-col h-full pt-28 px-8 gap-8">
           {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              to={link.path}
-              onClick={() => setIsOpen(false)}
-              className="text-4xl font-bold text-white/30 hover:text-[#84CC16] transition-colors"
-            >
-              {link.name}
-            </Link>
+            link.isExternal ? (
+              <a
+                key={link.name}
+                href={link.path}
+                className="text-4xl font-bold text-white/30 hover:text-[#84CC16] transition-colors"
+              >
+                {link.name}
+              </a>
+            ) : (
+              <Link
+                key={link.name}
+                to={link.path}
+                onClick={() => setIsOpen(false)}
+                className="text-4xl font-bold text-white/30 hover:text-[#84CC16] transition-colors"
+              >
+                {link.name}
+              </Link>
+            )
           ))}
           
           <div className="mt-auto pb-12 space-y-6">

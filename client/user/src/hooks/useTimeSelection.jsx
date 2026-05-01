@@ -23,22 +23,15 @@ const useTimeSelection = (
   setDuration
 ) => {
   const availableTimes = useMemo(() => {
-    if (!timeSlots.openTime || !timeSlots.closeTime) return [];
-
-    const times = [];
-    const openTime = parse(timeSlots.openTime, "hh:mm a", new Date());
-    const closeTime = parse(timeSlots.closeTime, "hh:mm a", new Date());
-
-    let currentTime = openTime;
-
-    while (isBefore(currentTime, closeTime)) {
-      times.push(format(currentTime, "hh:mm a"));
-      // currentTime = addMinutes(currentTime, 60);
-      currentTime = addHours(currentTime, 1);
+    if (timeSlots.generatedSlots && timeSlots.generatedSlots.length > 0) {
+      return timeSlots.generatedSlots
+        .filter(slot => slot.isActive)
+        .map(slot => slot.startTime);
     }
 
-    return times;
-  }, [timeSlots.openTime, timeSlots.closeTime]);
+    return [];
+
+  }, [timeSlots.openTime, timeSlots.closeTime, timeSlots.generatedSlots]);
 
   const handleTimeSelection = (time) => {
     setSelectedStartTime(time);
@@ -75,7 +68,7 @@ const useTimeSelection = (
 
     try {
       const response = await axiosInstance.get(
-        `/api/user/turf/timeslot?date=${date}&turfId=${turfId}`
+        `/api/user/turf/timeSlot?date=${date}&turfId=${turfId}`
       );
       const result = await response.data;
       setTimeSlots(result.timeSlots);

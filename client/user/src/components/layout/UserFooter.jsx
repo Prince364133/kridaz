@@ -38,8 +38,7 @@ const UserFooter = () => {
                 <img src="/logo.png" alt="TurfSpot" className="h-10 lg:h-12 w-auto brightness-125" />
               </div>
               <div className="border-l-2 border-[#84CC16]/30 pl-6 h-12 flex flex-col justify-center">
-                <span className="block text-xs font-semibold text-[#84CC16] mb-1.5 opacity-80">BookMySportz</span>
-                <span className="block text-2xl font-bold text-white leading-none">TurfSpot</span>
+                <span className="block text-xs font-semibold text-[#84CC16] mb-1.5 opacity-80 uppercase tracking-normal">Enterprise Platform</span>
               </div>
             </Link>
             <p className="text-white/60 text-sm leading-relaxed font-sans max-w-lg">
@@ -68,14 +67,14 @@ const UserFooter = () => {
             <ul className="space-y-4">
               {[
                 { name: "User Portal", path: "/" },
-                { name: "Partner Portal", path: "http://localhost:5174" },
-                { name: "Platform Admin", path: "http://localhost:5174/admin" },
-                { name: "Coach Access", path: "http://localhost:5174/coach-landing" }
+                { name: "Partner Portal", path: "/partner" },
+                { name: "Platform Admin", path: "/admin" },
+                { name: "Coach Access", path: "/business/coach" }
               ].map((link) => (
                 <li key={link.name}>
-                  <a href={link.path} className="text-white/60 hover:text-white transition-colors text-sm font-medium flex items-center gap-2 group">
+                  <Link to={link.path} className="text-white/60 hover:text-white transition-colors text-sm font-medium flex items-center gap-2 group">
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -86,9 +85,9 @@ const UserFooter = () => {
             <h4 className="text-sm font-bold text-white uppercase">Ecosystem</h4>
             <ul className="space-y-4">
               {[
-                { name: "Bookings", path: "#" },
+                { name: "Bookings", path: "/bookings" },
                 { name: "Venues", path: "/turfs" },
-                { name: "Blogs", path: "#" },
+                { name: "Support", path: "/support" },
                 { name: "Partners", path: "/partners" }
               ].map((link) => (
                 <li key={link.name}>

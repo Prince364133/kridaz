@@ -20,6 +20,38 @@ const turfSchema = new mongoose.Schema(
       ref: "Owner",
       required: true,
     },
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    slotDuration: {
+      type: Number,
+      default: 60, // in minutes
+    },
+    breakTime: {
+      type: Number,
+      default: 0, // in minutes
+    },
+    availableDays: {
+      type: [String],
+      default: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    },
+    offDays: {
+      type: [String],
+      default: [],
+    },
+    generatedSlots: [
+      {
+        startTime: String,
+        endTime: String,
+        isActive: { type: Boolean, default: true },
+      }
+    ],
   },
   { timestamps: true }
 );

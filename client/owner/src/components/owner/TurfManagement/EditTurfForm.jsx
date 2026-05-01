@@ -27,6 +27,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
     control,
     setValue,
     getValues,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(validationSchema),
@@ -91,17 +92,100 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
           className={`input input-bordered w-full mt-2 text-sm ${errors.location ? 'input-error' : ''}`}
         />
         {errors.location && <p className="text-error text-sm">{errors.location.message}</p>}
-        <input
-          type="text"
-          {...register('sportsType')}
-          placeholder="Sports Type"
-          className={`input input-bordered w-full mt-2 text-sm `}
-        />
- 
-      <div className="flex flex-col sm:flex-row gap-4 mt-2">
+
+        <div className="mt-4 space-y-4">
+          {/* Sport Arsenal */}
+          <div>
+            <label className="label py-1">
+              <span className="label-text text-[10px] font-bold uppercase tracking-widest opacity-60">Sport Arsenal</span>
+            </label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {watch('sportTypes')?.map((sport) => (
+                <span key={sport} className="px-3 py-1 bg-primary/20 text-primary border border-primary/30 rounded-lg text-[10px] font-bold flex items-center gap-2">
+                  {sport}
+                  <button type="button" onClick={() => setValue('sportTypes', watch('sportTypes').filter(s => s !== sport))} className="hover:text-white">×</button>
+                </span>
+              ))}
+            </div>
+            <select 
+              className="select select-bordered select-sm w-full text-xs"
+              onChange={(e) => {
+                const val = e.target.value;
+                const current = watch('sportTypes') || [];
+                if (val && !current.includes(val)) setValue('sportTypes', [...current, val]);
+                e.target.value = "";
+              }}
+            >
+              <option value="">Add Sport...</option>
+              {["Football", "Cricket", "Tennis", "Badminton", "Table Tennis", "Basketball", "Volleyball", "Hockey"].map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Ground Composition */}
+          <div>
+            <label className="label py-1">
+              <span className="label-text text-[10px] font-bold uppercase tracking-widest opacity-60">Ground Composition</span>
+            </label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {watch('groundTypes')?.map((ground) => (
+                <span key={ground} className="px-3 py-1 bg-white/10 text-white border border-white/20 rounded-lg text-[10px] font-bold flex items-center gap-2">
+                  {ground}
+                  <button type="button" onClick={() => setValue('groundTypes', watch('groundTypes').filter(g => g !== ground))} className="hover:text-primary">×</button>
+                </span>
+              ))}
+            </div>
+            <select 
+              className="select select-bordered select-sm w-full text-xs"
+              onChange={(e) => {
+                const val = e.target.value;
+                const current = watch('groundTypes') || [];
+                if (val && !current.includes(val)) setValue('groundTypes', [...current, val]);
+                e.target.value = "";
+              }}
+            >
+              <option value="">Add Ground Type...</option>
+              {["Natural Grass", "Artificial Turf", "Clay", "Hard Court", "Small Turf", "Indoor Court"].map(g => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Facilities */}
+          <div>
+            <label className="label py-1">
+              <span className="label-text text-[10px] font-bold uppercase tracking-widest opacity-60">Facility Amenities</span>
+            </label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {watch('facilities')?.map((facility) => (
+                <span key={facility} className="px-3 py-1 bg-zinc-800 text-zinc-300 border border-zinc-700 rounded-lg text-[10px] font-bold flex items-center gap-2">
+                  {facility}
+                  <button type="button" onClick={() => setValue('facilities', watch('facilities').filter(f => f !== facility))} className="hover:text-primary">×</button>
+                </span>
+              ))}
+            </div>
+            <select 
+              className="select select-bordered select-sm w-full text-xs"
+              onChange={(e) => {
+                const val = e.target.value;
+                const current = watch('facilities') || [];
+                if (val && !current.includes(val)) setValue('facilities', [...current, val]);
+                e.target.value = "";
+              }}
+            >
+              <option value="">Add Amenity...</option>
+              {["Parking", "Washroom", "Drinking Water", "Changing Room", "First Aid", "Locker Room", "Cafeteria", "WiFi", "Lighting", "Sitting Area"].map(f => (
+                <option key={f} value={f}>{f}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 mt-6">
         <div className="flex-1">
-          <label className="label">
-            <span className="label-text">Open Time</span>
+          <label className="label py-1">
+            <span className="label-text text-[10px] font-bold uppercase tracking-widest opacity-60">Open Time</span>
           </label>
           <Controller
             control={control}
@@ -116,16 +200,16 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                 timeIntervals={60}
                 timeCaption="Time"
                 dateFormat="h:mm aa"
-                className={`input input-bordered w-full text-sm ${errors.openTime ? 'input-error' : ''}`}
+                className={`input input-bordered w-full text-sm h-10 ${errors.openTime ? 'input-error' : ''}`}
                 filterTime={filterPassedTime}
               />
             )}
           />
-          {errors.openTime && <p className="text-error text-sm">{errors.openTime.message}</p>}
+          {errors.openTime && <p className="text-error text-[10px] uppercase font-bold">{errors.openTime.message}</p>}
         </div>
         <div className="flex-1">
-          <label className="label">
-            <span className="label-text">Close Time</span>
+          <label className="label py-1">
+            <span className="label-text text-[10px] font-bold uppercase tracking-widest opacity-60">Close Time</span>
           </label>
           <Controller
             control={control}
@@ -140,13 +224,13 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                 timeIntervals={60}
                 timeCaption="Time"
                 dateFormat="h:mm aa"
-                className={`input input-bordered w-full text-sm ${errors.closeTime ? 'input-error' : ''}`}
+                className={`input input-bordered w-full text-sm h-10 ${errors.closeTime ? 'input-error' : ''}`}
                 filterTime={filterCloseTime}
                 disabled={!getValues('openTime')}
               />
             )}
           />
-          {errors.closeTime && <p className="text-error text-sm">{errors.closeTime.message}</p>}
+          {errors.closeTime && <p className="text-error text-[10px] uppercase font-bold">{errors.closeTime.message}</p>}
         </div>
       </div>
 

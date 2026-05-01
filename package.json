@@ -4,15 +4,20 @@
   "private": true,
   "description": "TurfSpot Monorepo",
   "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:user\" \"npm run dev:owner\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:user": "cd client/user && npm run dev",
+    "dev:owner": "cd client/owner && npm run dev",
     "install:all": "pnpm recursive install",
     "test:all": "pnpm recursive test",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-react": "^7.34.1"
+    "eslint-plugin-react": "^7.34.1",
+    "prettier": "^3.2.5"
   }
 }

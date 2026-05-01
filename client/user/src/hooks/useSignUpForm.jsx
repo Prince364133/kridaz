@@ -49,7 +49,7 @@ const useSignUpForm = () => {
       );
       const result = await response.data;
       toast.success(result.message);
-      dispatch(login(result.token));
+      dispatch(login({ token: result.token, role: result.role }));
       navigate("/", { replace: true });
       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
     } catch (error) {

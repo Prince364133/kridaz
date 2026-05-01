@@ -8,7 +8,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const role = useSelector((state) => state?.auth?.role);
-  const path = role === "admin" ? "/admin" : role === "coach" ? "/coach" : role === "umpire" ? "/umpire" : "/partner";
+  const path = role === "BMSP_ADMIN" ? "/admin" : role === "COACH" ? "/coach" : role === "UMPIRE" ? "/umpire" : "/partner";
   
   const handleLogout = () => {
     dispatch(logout());

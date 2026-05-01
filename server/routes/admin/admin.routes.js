@@ -16,7 +16,7 @@ const adminRouter = Router()
 adminRouter.use("/blogs", verifyAdminToken, blogRouter);
 adminRouter.use("/marketing", verifyAdminToken, marketingRouter);
 adminRouter.use("/features", verifyAdminToken, featureFlagRouter);
-adminRouter.use("/owner-requests", verifyAdminToken, ownerRequestRouter);
+adminRouter.use("/partner-requests", verifyAdminToken, ownerRequestRouter);
 adminRouter.use("/users", verifyAdminToken, userManagementRouter);
 adminRouter.use("/owners", verifyAdminToken, ownerManagementRouter);
 adminRouter.use("/turfs", verifyAdminToken, turfRouter);

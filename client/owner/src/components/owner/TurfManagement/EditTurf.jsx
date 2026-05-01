@@ -1,12 +1,17 @@
 import React from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Controller } from "react-hook-form";
 import { setHours, setMinutes } from "date-fns";
-import { FormField } from "@components/common";
-import useAddTurf from "@hooks/owner/useAddTurf";
-import { Button } from "@components/common";
-const AddTurf = () => {
+import { FormField, Button } from "@components/common";
+import useEditTurf from "@hooks/owner/useEditTurf";
+import DashboardSkeleton from "../Dashboard/DashboardSkeleton";
+import { ArrowLeft } from "lucide-react";
+
+const EditTurf = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -15,13 +20,9 @@ const AddTurf = () => {
     setValue,
     onSubmit,
     sportTypes,
-    newSportType,
-    setNewSportType,
     addSportType,
     removeSportType,
     groundTypes,
-    newGroundType,
-    setNewGroundType,
     addGroundType,
     removeGroundType,
     facilities,
@@ -37,22 +38,34 @@ const AddTurf = () => {
     toggleDay,
     toggleSlotActive,
     loading,
-  } = useAddTurf();
+    fetching,
+  } = useEditTurf(id);
 
   const sportsOptions = ["Football", "Cricket", "Tennis", "Badminton", "Table Tennis", "Basketball", "Volleyball", "Hockey"];
   const groundTypeOptions = ["Natural Grass", "Artificial Turf", "Clay", "Hard Court", "Small Turf", "Indoor Court"];
   const facilitiesOptions = ["Parking", "Washroom", "Drinking Water", "Changing Room", "First Aid", "Locker Room", "Cafeteria", "WiFi", "Lighting", "Sitting Area"];
 
+  if (fetching) return <DashboardSkeleton />;
+
   return (
     <div className="p-4 md:p-8 bg-[#0a0a0a] min-h-screen text-white">
       <div className="max-w-5xl mx-auto">
-        <header className="mb-12 border-l-8 border-primary pl-6">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white uppercase">
-            ADD NEW <span className="text-primary">TURF</span>
-          </h1>
-          <p className="text-gray-500 uppercase tracking-widest mt-2 text-sm">
-            Register a New Facility | BookMySportz
-          </p>
+        <header className="mb-12 border-l-8 border-primary pl-6 flex justify-between items-end">
+          <div>
+             <button 
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 text-gray-500 hover:text-primary transition-colors font-bold uppercase text-[10px] tracking-widest mb-4"
+             >
+                <ArrowLeft size={14} />
+                Cancel Edit
+             </button>
+             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white uppercase">
+                EDIT <span className="text-primary">ARENA</span>
+             </h1>
+             <p className="text-gray-500 uppercase tracking-widest mt-2 text-sm">
+                Update Facility Intelligence | BookMySportz
+             </p>
+          </div>
         </header>
 
         <form
@@ -117,7 +130,7 @@ const AddTurf = () => {
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Facility Images (Up to 10)</span>
+                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold text-primary">Update Images (Optional)</span>
               </label>
               <div className="relative group">
                 <input
@@ -139,7 +152,7 @@ const AddTurf = () => {
               {errors.images && (
                 <span className="text-primary text-[10px] font-bold uppercase mt-1">{errors.images.message}</span>
               )}
-              <p className="text-[9px] text-gray-500 mt-2 uppercase tracking-tighter italic">Select multiple files at once. Max 10 images allowed.</p>
+              <p className="text-[9px] text-gray-500 mt-2 uppercase tracking-tighter italic">Leave empty to keep existing images. Max 10 allowed.</p>
             </div>
 
             <div className="form-control">
@@ -170,11 +183,6 @@ const AddTurf = () => {
                   </span>
                 ))}
               </div>
-              {errors.sportTypes && (
-                <span className="text-primary text-[10px] font-bold uppercase mt-1">
-                  {errors.sportTypes.message}
-                </span>
-              )}
             </div>
 
             <div className="form-control">
@@ -205,11 +213,6 @@ const AddTurf = () => {
                   </span>
                 ))}
               </div>
-              {errors.groundTypes && (
-                <span className="text-primary text-[10px] font-bold uppercase mt-1">
-                  {errors.groundTypes.message}
-                </span>
-              )}
             </div>
 
             <div className="form-control">
@@ -240,11 +243,6 @@ const AddTurf = () => {
                   </span>
                 ))}
               </div>
-              {errors.facilities && (
-                <span className="text-primary text-[10px] font-bold uppercase mt-1">
-                  {errors.facilities.message}
-                </span>
-              )}
             </div>
           </div>
 
@@ -417,7 +415,7 @@ const AddTurf = () => {
               className={`w-full py-4 bg-primary text-black font-bold text-xl uppercase tracking-widest hover:bg-white transition-all transform hover:scale-[1.01] active:scale-[0.99] rounded-xl shadow-[0_0_30px_rgba(113,179,0,0.3)] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={loading}
             >
-              {loading ? "SAVING..." : "REGISTER FACILITY"}
+              {loading ? "SAVING CHANGES..." : "UPDATE FACILITY INTELLIGENCE"}
             </button>
           </div>
         </form>
@@ -427,4 +425,4 @@ const AddTurf = () => {
 
 };
 
-export default AddTurf;
+export default EditTurf;

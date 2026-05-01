@@ -50,11 +50,11 @@ export default function Home() {
             {/* Status Tag */}
             <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-white/10 bg-white/5">
                <Globe className="w-4 h-4 text-[#84CC16]" />
-               <span className="text-[10px] font-bold tracking-[0.2em] text-white/60 uppercase">Global Partner Network</span>
+               <span className="text-[10px] font-bold tracking-wider text-white/60 uppercase">Global Partner Network</span>
             </div>
 
             <div className="space-y-6">
-              <h1 className="text-6xl lg:text-[7.5rem] font-bold leading-[0.85] tracking-tight uppercase">
+              <h1 className="text-6xl lg:text-[7.5rem] font-bold leading-[0.85] tracking-tighter uppercase">
                 GROW YOUR <br />
                 <span className="text-[#84CC16]">BUSINESS.</span>
               </h1>
@@ -78,8 +78,8 @@ export default function Home() {
       {/* ── PARTNERSHIP CATEGORIES ── */}
       <section className="py-32 container mx-auto px-6">
         <div className="text-center mb-20 space-y-4">
-           <h2 className="text-4xl font-bold uppercase tracking-tight">Built For Professionals</h2>
-           <p className="text-white/40 text-sm tracking-widest uppercase">Streamlined solutions for every role</p>
+           <h2 className="text-4xl font-bold uppercase tracking-tighter">Built For Professionals</h2>
+           <p className="text-white/40 text-sm tracking-wider uppercase">Streamlined solutions for every role</p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-10">
@@ -96,7 +96,7 @@ export default function Home() {
                     </div>
 
                     <div className="space-y-4 mb-8">
-                      <h3 className="text-3xl font-bold text-white uppercase tracking-tight leading-none">{b.title}</h3>
+                      <h3 className="text-3xl font-bold text-white uppercase tracking-tighter leading-none">{b.title}</h3>
                     </div>
 
                     <p className="text-white/40 text-sm leading-relaxed mb-12 flex-1">
@@ -105,7 +105,7 @@ export default function Home() {
 
                     <Link 
                       to={b.link} 
-                      className="inline-flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-[#84CC16] hover:gap-4 transition-all"
+                      className="inline-flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-[#84CC16] hover:gap-4 transition-all"
                     >
                       LEARN MORE <ArrowRight size={14} />
                     </Link>
@@ -123,13 +123,13 @@ export default function Home() {
            
            <div className="relative z-10 space-y-10">
               <div className="space-y-4">
-                 <h2 className="text-5xl font-bold text-white uppercase tracking-tight leading-none">Ready to Scale Your Operations?</h2>
-                 <p className="text-sm text-white/30 uppercase tracking-[0.4em]">Join 1,200+ partners worldwide</p>
+                 <h2 className="text-5xl font-bold text-white uppercase tracking-tighter leading-none">Ready to Scale Your Operations?</h2>
+                 <p className="text-sm text-white/30 uppercase tracking-widest">Join 1,200+ partners worldwide</p>
               </div>
               
               <Link 
                 to="/signup" 
-                className="bg-[#84CC16] hover:bg-[#a3e635] text-black h-16 px-16 rounded-xl text-lg font-bold tracking-widest uppercase inline-flex items-center gap-4 transition-all"
+                className="bg-[#84CC16] hover:bg-[#a3e635] text-black h-16 px-16 rounded-xl text-lg font-bold tracking-wider uppercase inline-flex items-center gap-4 transition-all"
               >
                 GET STARTED <ArrowRight className="w-5 h-5" />
               </Link>

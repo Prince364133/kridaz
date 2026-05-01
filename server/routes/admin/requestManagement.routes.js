@@ -8,9 +8,9 @@ import {
 
 const ownerRequestRouter = express.Router();
 
-ownerRequestRouter.get("/all", getAllRequestedOwners);
-ownerRequestRouter.post("/approve/:id", approveOwnerRequest);
-ownerRequestRouter.post("/reject/:id", deleteOwnerRequest);
-ownerRequestRouter.post("/reconsider/:id", reconsiderOwnerRequest);
+ownerRequestRouter.get("/list", getAllRequestedOwners);
+ownerRequestRouter.put("/:id/accept", approveOwnerRequest);
+ownerRequestRouter.delete("/:id", deleteOwnerRequest);
+ownerRequestRouter.put("/reconsider/:id", reconsiderOwnerRequest);
 
 export default ownerRequestRouter;

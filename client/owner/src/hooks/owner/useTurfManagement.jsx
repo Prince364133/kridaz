@@ -1,51 +1,44 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import axiosInstance from "../useAxiosInstance";
+import toast from "react-hot-toast";
 
 const useTurfManagement = () => {
   const [turfs, setTurfs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchTurfs = async () => {
+  const fetchTurfs = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Replace this with your actual API call
       const response = await axiosInstance.get("/api/owner/turf/all");
       setTurfs(response.data);
     } catch (err) {
       setError("Failed to fetch turfs");
+      toast.error("Failed to load your arenas");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const addTurf = async (newTurf) => {
-    try {
-      const response = await axiosInstance.post("/api/owner/turf/register", newTurf);
-      setTurfs((prev) => [...prev, response.data]);
-    } catch (err) {
-      setError("Failed to add turf");
-    }
-  };
-
-  const editTurf = async (updatedTurf, turfId) => {
-    try {
-      const response = await axiosInstance.put(
-        `/api/owner/turf/${turfId}`,
-        updatedTurf
-      );
-      setTurfs(response.data.allTurfs);
-    } catch (error) {
-      console.log(error, "error in edit turf");
-    }
-  };
+  }, []);
 
   const deleteTurf = async (id) => {
+    if (!window.confirm("Are you sure you want to decommission this arena? All associated slots and data will be permanently removed.")) return;
+    
     try {
       await axiosInstance.delete(`/api/owner/turf/${id}`);
       setTurfs((prev) => prev.filter((turf) => turf._id !== id));
+      toast.success("Arena decommissioned successfully");
     } catch (err) {
-      setError("Failed to delete turf");
+      toast.error(err.response?.data?.message || "Failed to delete turf");
+    }
+  };
+
+  const toggleVisibility = async (id) => {
+    try {
+      const response = await axiosInstance.patch(`/api/owner/turf/${id}/visibility`);
+      setTurfs((prev) => prev.map(t => t._id === id ? { ...t, isActive: response.data.isActive } : t));
+      toast.success(response.data.message);
+    } catch (err) {
+      toast.error("Failed to update visibility");
     }
   };
 
@@ -54,10 +47,10 @@ const useTurfManagement = () => {
     isLoading,
     error,
     fetchTurfs,
-    addTurf,
-    editTurf,
     deleteTurf,
+    toggleVisibility,
   };
 };
+
 
 export default useTurfManagement;

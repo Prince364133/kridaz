@@ -4,6 +4,6 @@ import verifyOwnerToken from "../../middleware/jwt/owner.middleware.js";
 
 const bookingsRouter = Router();
 
-bookingsRouter.get("/all", verifyOwnerToken, getOwnerBookings);
+bookingsRouter.get("/", verifyOwnerToken, getOwnerBookings);
 
 export default bookingsRouter;

@@ -27,7 +27,28 @@ const useTurfDetails = (turfId) => {
     fetchTurfDetails();
   }, [turfId]);
 
-  return { turfData, isLoading, error, refetch: fetchTurfDetails };
+  const toggleVisibility = async () => {
+    try {
+      await axiosInstance.put(`/api/owner/turf/${turfId}/visibility`);
+      await fetchTurfDetails();
+      return true;
+    } catch (err) {
+      console.error("Error toggling visibility:", err);
+      return false;
+    }
+  };
+
+  const deleteArena = async () => {
+    try {
+      await axiosInstance.delete(`/api/owner/turf/${turfId}`);
+      return true;
+    } catch (err) {
+      console.error("Error deleting arena:", err);
+      return false;
+    }
+  };
+
+  return { turfData, isLoading, error, refetch: fetchTurfDetails, toggleVisibility, deleteArena };
 };
 
 export default useTurfDetails;

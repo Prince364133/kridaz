@@ -94,14 +94,36 @@ const Login = () => {
                 </div>
 
                 {/* Submit Button */}
-                <button 
-                  type="submit" 
-                  disabled={loading}
-                  className="w-full bg-[#84CC16] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 group/btn mt-8" 
-                >
-                  {loading ? "Logging in..." : "Login"}
-                  {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
-                </button>
+                <div className="space-y-4 mt-8">
+                  <button 
+                    type="submit" 
+                    disabled={loading}
+                    className="w-full bg-[#84CC16] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 group/btn" 
+                  >
+                    {loading ? "Logging in..." : "Login"}
+                    {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
+                  </button>
+
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      dispatch(login({ 
+                        token: "dummy-token-12345", 
+                        role: "admin",
+                        user: {
+                          id: "admin-123",
+                          name: "Platform Administrator",
+                          email: "admin@turfspot.com",
+                        }
+                      }));
+                      window.location.href = "/admin";
+                    }}
+                    className="w-full bg-white/5 border border-white/10 hover:bg-white/10 text-white h-14 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all group/demo"
+                  >
+                    <Zap className="w-4 h-4 text-[#84CC16] group-hover/demo:animate-pulse" />
+                    Quick Demo Access
+                  </button>
+                </div>
               </form>
 
               {/* Alternative Actions */}

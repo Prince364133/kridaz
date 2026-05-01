@@ -49,9 +49,7 @@ const useOwnerRequests = () => {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get(
-        "/api/admin/owner-requests/list"
-      );
+      const response = await axiosInstance.get("/api/admin/partner-requests/list");
       const data = await response.data;
       setRequests(data.ownerRequests);
       setAllRequests(data.ownerRequests);
@@ -69,9 +67,7 @@ const useOwnerRequests = () => {
     setRequestId(id);
     try {
       // Replace with your actual API endpoint
-      const response = await axiosInstance.put(
-        `/api/admin/owner-requests/${id}/accept`
-      );
+      const response = await axiosInstance.put(`/api/admin/partner-requests/${id}/accept`);
       const result = await response.data;
        toast.success(result.message);
       setRequests(requests.filter((request) => request._id !== id));
@@ -86,9 +82,7 @@ const useOwnerRequests = () => {
   const handleReject = async (id) => {
     setRequestId(id);
     try {
-      const response = await axiosInstance.delete(
-        `/api/admin/owner-requests/${id}`
-      );
+      const response = await axiosInstance.delete(`/api/admin/partner-requests/${id}`);
       const result = await response.data;
       toast.success(result.message);
       setRequests(requests.filter((request) => request._id !== id));
@@ -103,9 +97,7 @@ const useOwnerRequests = () => {
   const handleReconsider = async (id) => {
     setRequestId(id);
     try {
-      const response = await axiosInstance.put(
-        `/api/admin/owner-requests/reconsider/${id}`
-      );
+      const response = await axiosInstance.put(`/api/admin/partner-requests/reconsider/${id}`);
       const result = await response.data;
       toast.success(result.message);
       setRejectedRequests(

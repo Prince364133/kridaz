@@ -3,6 +3,7 @@ import {
   registerUser, 
   registerOwner, 
   login, 
+  logout,
   ownerRequest 
 } from "./auth.controller.js";
 import { 
@@ -18,6 +19,7 @@ const router = express.Router();
 router.post("/user/register", validate(userRegisterSchema), registerUser);
 router.post("/owner/register", validate(ownerRegisterSchema), registerOwner);
 router.post("/login", validate(userLoginSchema), login);
+router.post("/logout", logout);
 router.post("/owner/request", validate(ownerRequestSchema), ownerRequest);
 
 export default router;

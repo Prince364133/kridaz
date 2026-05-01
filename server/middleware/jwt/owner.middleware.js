@@ -3,13 +3,18 @@ import jwt from "jsonwebtoken";
 const verifyOwnerToken = async (req, res, next) => {
   try {
     const header = req.headers.authorization;
-    if (!header)
-      return res.status(401).json({ message: "Invalid authorization" });
-    const token = header.split(" ")[1];
+    let token = null;
+
+    if (header && header.startsWith("Bearer ")) {
+      token = header.split(" ")[1];
+    } else if (req.cookies && req.cookies.auth_token) {
+      token = req.cookies.auth_token;
+    }
+
     if (!token) {
       return res
         .status(401)
-        .json({ success: false, message: "No token , authorization denied" });
+        .json({ success: false, message: "No token, authorization denied" });
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded) {
@@ -29,7 +34,8 @@ const verifyOwnerToken = async (req, res, next) => {
     }
     next();
   } catch (err) {
-    return res.status(500).json(err.message);
+    console.error("JWT Verification Error:", err.message);
+    return res.status(401).json({ success: false, message: "Unauthorized: " + err.message });
   }
 };
 

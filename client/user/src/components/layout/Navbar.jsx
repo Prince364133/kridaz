@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { User, ShoppingCart, Bell, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight } from "lucide-react";
+import { User, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { logout } from "../../redux/slices/authSlice";
 import ThemeSwitcher from "../common/ThemeSwitcher";
@@ -10,6 +10,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const partnerUrl = import.meta.env.VITE_PARTNER_URL || "http://localhost:5174";
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -26,15 +27,13 @@ const Navbar = () => {
   const isPartnerPortal = location.pathname.startsWith("/partners");
 
   const navLinks = isPartnerPortal ? [
-    { name: "Partners", path: "/partners" },
-    { name: "Venues", path: "/partners/venues" },
-    { name: "Coaches", path: "/partners/coaches" },
-    { name: "Officials", path: "/partners/officials" },
+    { name: "Venues", path: "/business/venue" },
+    { name: "Coaches", path: "/business/coach" },
+    { name: "Officials", path: "/business/official" },
   ] : [
     { name: "Home", path: "/" },
     { name: "Venues", path: "/turfs" },
-    { name: "Blogs", path: "/blogs" },
-    { name: "Partners", path: "/partners" },
+    { name: "Business", path: "#" },
   ];
 
   if (isLoggedIn && !isPartnerPortal) {
@@ -56,25 +55,12 @@ const Navbar = () => {
             <div className="flex items-center justify-center">
               <img src="/logo.png" alt="TurfSpot" className="h-8 lg:h-10 w-auto brightness-125 group-hover:scale-105 transition-transform duration-500" />
             </div>
-            <div className="hidden sm:block border-l border-white/20 pl-6 h-10 flex flex-col justify-center">
-              {location.pathname.startsWith("/partners") ? (
-                <>
-                  <span className="block text-xs font-semibold text-[#84CC16] mb-1 opacity-80 uppercase tracking-wider">Partner Portal</span>
-                  <span className="block text-xl font-bold text-white leading-none uppercase tracking-tighter">Business</span>
-                </>
-              ) : (
-                <>
-                  <span className="block text-xs font-semibold text-[#84CC16] mb-1 opacity-80 uppercase tracking-wider">BookMySportz</span>
-                  <span className="block text-xl font-bold text-white leading-none">TurfSpot</span>
-                </>
-              )}
-            </div>
           </Link>
 
           {/* DESKTOP LINKS */}
           <div className="hidden lg:flex items-center gap-10">
             {navLinks.map((link) => {
-              if (link.name === "Partners" || link.name === "PARTNERS") {
+              if (link.name === "Business") {
                 return (
                   <div key={link.name} className="dropdown dropdown-hover group/link">
                     <label 
@@ -88,23 +74,18 @@ const Navbar = () => {
                     </label>
                     <ul tabIndex={0} className="dropdown-content mt-4 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-xl w-48 overflow-hidden backdrop-blur-xl">
                       <li>
-                        <Link to="/partners" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
-                          Overview
+                        <Link to="/business/venue" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                          Venue Owner
                         </Link>
                       </li>
                       <li>
-                        <Link to="/partners/venues" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
-                          Venues
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/partners/coaches" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                        <Link to="/business/coach" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
                           Coaches
                         </Link>
                       </li>
                       <li>
-                        <Link to="/partners/officials" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
-                          Officials
+                        <Link to="/business/official" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                          Umpire
                         </Link>
                       </li>
                     </ul>
@@ -128,16 +109,6 @@ const Navbar = () => {
 
           {/* ACTIONS */}
           <div className="flex items-center gap-3 sm:gap-6">
-            <div className="hidden md:flex items-center gap-5 text-white/40 border-r border-white/5 pr-6 mr-1">
-              <button className="hover:text-primary transition-colors relative group">
-                <ShoppingCart size={18} />
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full group-hover:animate-ping" />
-              </button>
-              <button className="hover:text-primary transition-colors">
-                <Bell size={18} />
-              </button>
-            </div>
-
             {!isLoggedIn ? (
               <>
                 <Link 
@@ -154,51 +125,42 @@ const Navbar = () => {
               </>
             ) : (
               <div className="flex items-center gap-6">
-                {!["admin", "owner", "coach", "umpire"].includes(role) ? (
-                  // Normal User: Direct Profile Icon
-                  <Link 
-                    to="/profile" 
-                    className="w-10 h-10 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
-                    title="Profile"
-                  >
+                <div className="dropdown dropdown-end">
+                  <label tabIndex={0} className="w-10 h-10 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group">
                     <User size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
-                  </Link>
-                ) : (
-                  // Partner User: Dropdown with Dashboard
-                  <div className="dropdown dropdown-end">
-                    <label tabIndex={0} className="w-10 h-10 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group">
-                      <User size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
-                    </label>
-                    <ul tabIndex={0} className="dropdown-content mt-4 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-xl w-52 overflow-hidden backdrop-blur-xl">
+                  </label>
+                  <ul tabIndex={0} className="dropdown-content mt-4 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-xl w-52 overflow-hidden backdrop-blur-xl">
+                    {/* Dashboard Link for Partners */}
+                    {["BMSP_ADMIN", "VERIFIED_VENUE_OWNER", "COACH", "UMPIRE"].includes(role) && (
                       <li>
                         <a 
                           href={
-                            role === "admin" ? "http://localhost:5174/admin" :
-                            role === "owner" ? "http://localhost:5174/partner" :
-                            role === "coach" ? "http://localhost:5174/coach" :
-                            "http://localhost:5174/umpire"
+                            role === "BMSP_ADMIN" ? "/admin" :
+                            role === "VERIFIED_VENUE_OWNER" ? "/partner" :
+                            role === "COACH" ? "/coach" :
+                            "/umpire"
                           }
                           className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all"
                         >
                           <Activity size={16} /> Dashboard
                         </a>
                       </li>
-                      <li>
-                        <Link to="/profile" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
-                          <User size={16} /> Profile
-                        </Link>
-                      </li>
-                      <li className="border-t border-white/5">
-                        <button 
-                          onClick={handleLogout}
-                          className="w-full flex items-center gap-3 p-4 text-sm font-medium text-red-500/80 hover:text-red-500 hover:bg-red-500/5 transition-all"
-                        >
-                          <LogOut size={16} /> Logout
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-                )}
+                    )}
+                    <li>
+                      <Link to="/profile" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                        <User size={16} /> Profile
+                      </Link>
+                    </li>
+                    <li className="border-t border-white/5">
+                      <button 
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 p-4 text-sm font-medium text-red-500/80 hover:text-red-500 hover:bg-red-500/5 transition-all"
+                      >
+                        <LogOut size={16} /> Logout
+                      </button>
+                    </li>
+                  </ul>
+                </div>
               </div>
             )}
 
@@ -240,11 +202,11 @@ const Navbar = () => {
                   >
                     {link.name}
                   </Link>
-                  {(link.name === "PARTNERS" || link.name === "Partners") && (
+                  {(link.name === "Business") && (
                     <div className="flex flex-col items-center gap-3">
-                      <Link to="/partners/venues" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white/40 hover:text-primary transition-colors">Venues</Link>
-                      <Link to="/partners/coaches" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white/40 hover:text-primary transition-colors">Coaches</Link>
-                      <Link to="/partners/officials" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white/40 hover:text-primary transition-colors">Officials</Link>
+                      <Link to="/business/venue" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white/40 hover:text-primary transition-colors">Venue Owner</Link>
+                      <Link to="/business/coach" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white/40 hover:text-primary transition-colors">Coaches</Link>
+                      <Link to="/business/official" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white/40 hover:text-primary transition-colors">Umpire</Link>
                     </div>
                   )}
                 </div>
@@ -252,13 +214,13 @@ const Navbar = () => {
             </div>
 
             <div className="mt-8 flex flex-col items-center gap-4">
-              {isLoggedIn && ["admin", "owner", "coach", "umpire"].includes(role) && (
+              {isLoggedIn && ["BMSP_ADMIN", "VERIFIED_VENUE_OWNER", "COACH", "UMPIRE"].includes(role) && (
                 <a 
                   href={
-                    role === "admin" ? "http://localhost:5174/admin" :
-                    role === "owner" ? "http://localhost:5174/partner" :
-                    role === "coach" ? "http://localhost:5174/coach" :
-                    "http://localhost:5174/umpire"
+                    role === "BMSP_ADMIN" ? "/admin" :
+                    role === "VERIFIED_VENUE_OWNER" ? "/partner" :
+                    role === "COACH" ? "/coach" :
+                    "/umpire"
                   }
                   className="flex items-center gap-3 px-12 py-4 bg-primary/10 border border-primary/20 text-primary font-bold text-lg rounded-xl hover:bg-primary/20 transition-all"
                 >

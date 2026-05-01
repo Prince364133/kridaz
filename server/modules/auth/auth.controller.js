@@ -21,6 +21,15 @@ export const registerUser = async (req, res) => {
     const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
     const token = generateUserToken(newUser._id);
+
+    // Set cookie for shared auth between portals
+    res.cookie("auth_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
     return res
       .status(201)
       .json({ success: true, message: "User created successfully", token });
@@ -59,6 +68,15 @@ export const registerOwner = async (req, res) => {
     });
     await newOwner.save();
     const token = generateOwnerToken(newOwner);
+
+    // Set cookie for shared auth between portals
+    res.cookie("auth_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
     return res.status(201).json({
       success: true,
       message: waitlistPosition ? "You've been added to the waitlist!" : "Owner created successfully",
@@ -75,31 +93,45 @@ export const registerOwner = async (req, res) => {
 // Unified Login
 export const login = async (req, res) => {
   const { email, password } = req.body;
+  console.log("Unified login attempt for:", email);
   try {
-    // 1. Check User collection
-    let user = await User.findOne({ email });
+    // 1. Check Owner collection FIRST (Admins, Coaches, Umpires are here)
+    const owner = await Owner.findOne({ email });
     let role = "user";
     let token;
 
-    if (user) {
-      const isPasswordCorrect = await argon2.verify(user.password, password);
-      if (!isPasswordCorrect) {
-        return res.status(400).json({ success: false, message: "Incorrect password" });
-      }
-      token = generateUserToken(user._id);
-    } else {
-      // 2. Check Owner collection if not found in User
-      const owner = await Owner.findOne({ email });
-      if (!owner) {
-        return res.status(400).json({ success: false, message: "Account does not exist" });
-      }
+    if (owner) {
+      console.log("Found account in Owner collection. Role:", owner.role);
       const isPasswordCorrect = await argon2.verify(owner.password, password);
       if (!isPasswordCorrect) {
         return res.status(400).json({ success: false, message: "Incorrect password" });
       }
       role = owner.role;
       token = generateOwnerToken(owner);
+    } else {
+      // 2. Check User collection if not found in Owner
+      console.log("Account not in Owner collection. Checking User collection...");
+      let user = await User.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ success: false, message: "Account does not exist" });
+      }
+      const isPasswordCorrect = await argon2.verify(user.password, password);
+      if (!isPasswordCorrect) {
+        return res.status(400).json({ success: false, message: "Incorrect password" });
+      }
+      role = "user";
+      token = generateUserToken(user._id);
     }
+
+    console.log("Login successful. Assigned Role:", role);
+
+    // Set cookie for shared auth between portals
+    res.cookie("auth_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
 
     return res.status(200).json({ 
       success: true, 
@@ -108,9 +140,19 @@ export const login = async (req, res) => {
       role 
     });
   } catch (err) {
-    console.log(chalk.red(err.message));
-    return res.status(500).json({ success: false, message: err.message });
+    console.error(chalk.red("Login error:"), err);
+    return res.status(500).json({ success: false, message: "Internal server error during login" });
   }
+};
+
+// Logout
+export const logout = async (req, res) => {
+  res.clearCookie("auth_token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+  return res.status(200).json({ success: true, message: "Logged out successfully" });
 };
 
 // Owner Request (Waitlist/Inquiry)

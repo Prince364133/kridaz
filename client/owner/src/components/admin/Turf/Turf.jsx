@@ -1,14 +1,27 @@
 import React from "react";
-import { MapPin, Clock, Star, Calendar } from "lucide-react";
+import { MapPin, Clock, Star, Calendar, Check, X } from "lucide-react";
 import { format } from "date-fns";
+import toast from "react-hot-toast";
 
-/**
- * Admin Turf card — follows the BookMySportz design system.
- * rounded-2xl, lime green accents, pill badges.
- */
-const Turf = ({ turf }) => {
+const Turf = ({ turf, onApprove, onReject }) => {
+  const handleApprove = async () => {
+    if (window.confirm(`Approve ${turf.name}?`)) {
+      const success = await onApprove(turf._id);
+      if (success) toast.success("Turf Approved");
+      else toast.error("Action Failed");
+    }
+  };
+
+  const handleReject = async () => {
+    if (window.confirm(`Reject ${turf.name}?`)) {
+      const success = await onReject(turf._id);
+      if (success) toast.success("Turf Rejected");
+      else toast.error("Action Failed");
+    }
+  };
+
   return (
-    <div className="bms-card group flex flex-col">
+    <div className="bms-card group flex flex-col relative">
       {/* ── Image ─────────────────────────────────────────────────── */}
       <div className="relative overflow-hidden" style={{ height: "200px" }}>
         <img
@@ -22,9 +35,12 @@ const Turf = ({ turf }) => {
           <span className="badge-featured">₹{turf.pricePerHour}/hr</span>
         </div>
         {/* Status badge */}
-        <div className="absolute top-3 right-3 flex items-center gap-1.5 badge-distance">
-          <div className="w-1.5 h-1.5 bg-[#84CC16] rounded-full animate-pulse" />
-          <span>Active</span>
+        <div className={`absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+            turf.status === 'approved' ? 'bg-green-500/80 text-white' :
+            turf.status === 'rejected' ? 'bg-red-500/80 text-white' :
+            'bg-yellow-500/80 text-white'
+        }`}>
+          <span>{turf.status}</span>
         </div>
       </div>
 
@@ -35,7 +51,7 @@ const Turf = ({ turf }) => {
           <span className="badge-sport">Arena</span>
           <div className="flex items-center gap-1">
             <Star size={12} className="text-yellow-400 fill-yellow-400" />
-            <span className="text-white text-xs font-semibold">{turf.avgRating || "4.8"}</span>
+            <span className="text-white text-xs font-semibold">{turf.avgRating || "NEW"}</span>
           </div>
         </div>
 
@@ -50,30 +66,37 @@ const Turf = ({ turf }) => {
           <span className="truncate">{turf.location}</span>
         </div>
 
-        {/* Hours */}
-        <div className="flex items-center gap-1.5 text-[#888] text-xs">
-          <Clock size={11} className="text-[#84CC16] shrink-0" />
-          <span>{turf.openTime} – {turf.closeTime}</span>
-        </div>
-
         {/* Added date */}
         {turf.createdAt && (
-          <div className="flex items-center gap-1.5 text-[#888] text-xs">
+          <div className="flex items-center gap-1.5 text-[#888] text-[10px] font-bold uppercase tracking-tighter">
             <Calendar size={11} className="text-[#84CC16] shrink-0" />
             <span>Added {format(new Date(turf.createdAt), "dd MMM yyyy")}</span>
           </div>
         )}
 
-        {/* Progress bar */}
-        <div className="mt-auto pt-3 border-t border-[#2A2A2A]">
-          <div className="w-full h-1 bg-[#2A2A2A] rounded-full overflow-hidden">
-            <div className="h-full bg-[#84CC16]/60 rounded-full group-hover:bg-[#84CC16] transition-all duration-700" style={{ width: "70%" }} />
-          </div>
-          <p className="text-[10px] text-[#888] font-mono uppercase tracking-wider mt-1">Booking Rate</p>
-        </div>
+        {/* Admin Actions */}
+        {turf.status === 'pending' && (
+            <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-white/5">
+                <button 
+                    onClick={handleApprove}
+                    className="flex items-center justify-center gap-2 py-2 bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/20 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
+                >
+                    <Check size={12} />
+                    Approve
+                </button>
+                <button 
+                    onClick={handleReject}
+                    className="flex items-center justify-center gap-2 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
+                >
+                    <X size={12} />
+                    Reject
+                </button>
+            </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default Turf;
+

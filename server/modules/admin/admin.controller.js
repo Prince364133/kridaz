@@ -22,49 +22,70 @@ export const getAllUsers = async (req, res) => {
 };
 
 export const getAdminDashboardData = async (req, res) => {
+  console.log("Starting getAdminDashboardData fetch...");
   try {
-    const totalUsers = await User.countDocuments();
-    const totalOwners = await Owner.countDocuments({ role: "owner" });
-    const totalTurfs = await Turf.countDocuments();
-    const totalBookings = await Booking.countDocuments();
-    const pendingRequests = await OwnerRequest.countDocuments({
-      status: "pending",
-    });
-    const rejectedRequests = await OwnerRequest.countDocuments({
-      status: "rejected",
-    });
+    console.log("Fetching counts...");
+    const counts = await Promise.all([
+      User.countDocuments().catch(e => { console.error("User count failed:", e); return 0; }),
+      Owner.countDocuments({ role: "owner" }).catch(e => { console.error("Owner count failed:", e); return 0; }),
+      Turf.countDocuments().catch(e => { console.error("Turf count failed:", e); return 0; }),
+      Booking.countDocuments().catch(e => { console.error("Booking count failed:", e); return 0; }),
+      OwnerRequest.countDocuments({ status: "pending" }).catch(e => { console.error("PendingReq count failed:", e); return 0; }),
+      OwnerRequest.countDocuments({ status: "rejected" }).catch(e => { console.error("RejectedReq count failed:", e); return 0; }),
+    ]);
+    
+    const [totalUsers, totalOwners, totalTurfs, totalBookings, pendingRequests, rejectedRequests] = counts;
+    console.log("Counts fetched successfully:", { totalUsers, totalOwners, totalTurfs });
 
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const bookingHistory = await Booking.aggregate([
-      { $match: { createdAt: { $gte: thirtyDaysAgo } } },
-      {
-        $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-          amount: { $sum: "$totalPrice" },
+    
+    console.log("Running booking aggregation...");
+    let bookingHistory = [];
+    try {
+      bookingHistory = await Booking.aggregate([
+        { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            amount: { $sum: "$totalPrice" },
+          },
         },
-      },
-      { $sort: { _id: 1 } },
-      {
-        $project: {
-          date: "$_id",
-          amount: 1,
-          _id: 0,
+        { $sort: { _id: 1 } },
+        {
+          $project: {
+            date: "$_id",
+            amount: 1,
+            _id: 0,
+          },
         },
-      },
-    ]);
-    return res.status(200).json({
+      ]);
+      console.log("Aggregation completed. Results:", bookingHistory?.length || 0);
+    } catch (aggErr) {
+      console.warn("Aggregation failed (possibly empty collection):", aggErr.message);
+      bookingHistory = [];
+    }
+
+    const responseData = {
       totalUsers,
       totalOwners,
       totalTurfs,
       totalBookings,
       pendingRequests,
       rejectedRequests,
-      bookingHistory,
-    });
+      bookingHistory: bookingHistory || [],
+    };
+    
+    console.log("Dashboard data ready. Sending response.");
+    return res.status(200).json(responseData);
   } catch (err) {
-    console.error("Error getting dashboard:", err.message);
-    return res.status(500).json({ message: "Error getting dashboard" });
+    console.error("CRITICAL ERROR in getAdminDashboardData:", err);
+    return res.status(500).json({ 
+      success: false, 
+      message: "Error getting dashboard", 
+      error: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
   }
 };
 

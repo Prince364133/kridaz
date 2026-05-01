@@ -17,11 +17,13 @@ const useCoachDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
+        console.log("DEBUG: Fetching coach dashboard data...");
         const response = await axiosInstance.get("/api/owner/dashboard/coach");
+        console.log("DEBUG: Coach dashboard response:", response.data);
         setDashboardData(response.data);
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching coach dashboard data:", err);
+        console.error("DEBUG: Error fetching coach dashboard data:", err.response?.data || err.message);
         setError("Failed to fetch dashboard data");
         setLoading(false);
       }
