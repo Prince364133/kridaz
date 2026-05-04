@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { UmpireSidebar, AuthenticatedNavbar } from "@components/layout";
+import MobileBottomNav from "@user/components/layout/MobileBottomNav";
 
 const UmpireLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,6 +33,7 @@ const UmpireLayout = () => {
           className={`
           flex-1 
           p-4 
+          pb-24 lg:pb-4
           transition-all 
           duration-300 
           ease-in-out
@@ -43,6 +45,7 @@ const UmpireLayout = () => {
           </div>
         </main>
       </div>
+      <MobileBottomNav />
     </div>
   );
 };

@@ -43,7 +43,7 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="relative z-50 flex flex-col">
+    <nav className="relative z-50 hidden lg:flex flex-col">
 
       <div className={`flex justify-center transition-all duration-500 ${isScrolled ? "pt-0" : "pt-0"}`}>
         <div 

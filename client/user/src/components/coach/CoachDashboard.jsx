@@ -29,7 +29,7 @@ export default function CoachDashboard() {
   } = dashboardData;
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="p-4 md:p-10 space-y-6 md:space-y-10 animate-fade-in pt-4 pb-24 md:pb-10">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-6 border-b border-white/5">
         <div className="space-y-1">
@@ -37,7 +37,7 @@ export default function CoachDashboard() {
             <Target size={14} className="animate-pulse" />
             <span>Coach Status: Active</span>
           </div>
-          <h1 className="text-5xl font-black uppercase tracking-tight text-white">
+          <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-white">
             Training <span className="text-primary">Dashboard</span>
           </h1>
           <p className="text-gray-500 text-xs font-medium uppercase tracking-wider">Professional Performance Management</p>
@@ -52,7 +52,7 @@ export default function CoachDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard title="Active Trainees" value={activeTrainees} icon={Users} />
         <StatCard title="Total Sessions" value={totalSessions} icon={Calendar} />
         <StatCard title="Live Stream Mins" value={liveStreamMins} icon={Video} />
@@ -61,10 +61,10 @@ export default function CoachDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Performance Graph */}
-        <div className="lg:col-span-2 p-8 bg-[#0A0A0A] rounded-2xl border border-white/5 relative group">
-          <div className="flex justify-between items-center mb-10">
+        <div className="lg:col-span-2 p-4 md:p-8 bg-[#0A0A0A] rounded-2xl border border-white/5 relative group">
+          <div className="flex justify-between items-center mb-6 md:mb-10">
             <div>
-              <h2 className="text-xl font-black uppercase tracking-tight text-white">Student Progress</h2>
+              <h2 className="text-lg md:text-xl font-black uppercase tracking-tight text-white">Student Progress</h2>
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Aggregate Achievement Metrics</p>
             </div>
             <div className="p-2 bg-white/5 rounded-xl border border-white/5">
@@ -72,7 +72,7 @@ export default function CoachDashboard() {
             </div>
           </div>
           
-          <div className="h-[300px] w-full flex items-center justify-center border border-white/5 border-dashed rounded-2xl">
+          <div className="h-[250px] md:h-[300px] w-full flex items-center justify-center border border-white/5 border-dashed rounded-2xl">
             {studentProgress.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={studentProgress}>
@@ -102,8 +102,8 @@ export default function CoachDashboard() {
         </div>
 
         {/* Upcoming Roster */}
-        <div className="p-8 bg-[#0A0A0A] rounded-2xl border border-white/5 flex flex-col">
-          <h2 className="text-xl font-black uppercase tracking-tight text-white mb-6">Upcoming Sessions</h2>
+        <div className="p-6 md:p-8 bg-[#0A0A0A] rounded-2xl border border-white/5 flex flex-col">
+          <h2 className="text-lg md:text-xl font-black uppercase tracking-tight text-white mb-6">Upcoming Sessions</h2>
           <div className="flex-1 space-y-4 overflow-y-auto max-h-[300px]">
             {upcomingSessions.length > 0 ? (
               upcomingSessions.map((op, i) => (

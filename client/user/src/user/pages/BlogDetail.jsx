@@ -40,7 +40,7 @@ export default function BlogDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="space-y-6 w-full max-w-3xl px-6 pt-40">
+        <div className="space-y-6 w-full max-w-3xl px-6 pt-4">
           <div className="h-10 w-2/3 bg-white/5 animate-pulse rounded-xl" />
           <div className="h-6 w-1/3 bg-white/5 animate-pulse rounded-xl" />
           <div className="h-96 w-full bg-white/5 animate-pulse rounded-3xl" />
@@ -75,7 +75,7 @@ export default function BlogDetail() {
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
 
         {/* Back button */}
-        <div className="absolute top-28 left-6 z-10">
+        <div className="absolute top-10 left-6 z-10">
           <Link
             to="/"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-bold text-white/60 hover:text-white hover:border-white/30 transition-all backdrop-blur-sm"

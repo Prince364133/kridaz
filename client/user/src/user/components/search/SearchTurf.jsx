@@ -1,151 +1,151 @@
 import { useState, useEffect, useRef } from "react";
-import { Trophy, ChevronDown, Globe, RotateCcw, Crosshair } from "lucide-react";
+import { Trophy, ChevronDown, Globe, RotateCcw, Search } from "lucide-react";
 import { fetchStates, fetchCities } from "../../utils/locationService";
 
 const SPORTS_LIST = [
-  "Football", "Cricket", "Badminton", "Tennis", "Basketball", 
+  "Football", "Cricket", "Badminton", "Tennis", "Basketball",
   "Swimming", "Volleyball", "Table Tennis", "Squash", "Hockey"
 ];
 
-const SearchTurf = ({ onSearch }) => {
+/**
+ * SearchTurf — unified filter bar for the venue discovery page.
+ * Props:
+ *   onSearch(filters)  — called on every debounced change
+ *   userLocation       — { lat, lng } auto-detected by the parent (Turf.jsx)
+ */
+const SearchTurf = ({ onSearch, userLocation }) => {
   const [sport, setSport] = useState("");
-  const [radius, setRadius] = useState(50);
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
-  const [userLocation, setUserLocation] = useState(null);
-  const [isLocating, setIsLocating] = useState(false);
+
+  // search-inside-dropdown state
+  const [stateSearch, setStateSearch] = useState("");
+  const [citySearch, setCitySearch] = useState("");
+
   const [showSportDropdown, setShowSportDropdown] = useState(false);
   const [showStateDropdown, setShowStateDropdown] = useState(false);
   const [showCityDropdown, setShowCityDropdown] = useState(false);
-  
+
   const sportDropdownRef = useRef(null);
   const stateDropdownRef = useRef(null);
   const cityDropdownRef = useRef(null);
 
-  // Fetch states on mount
+  // ── Fetch states on mount ──────────────────────────────────────────
   useEffect(() => {
-    const loadStates = async () => {
-      const data = await fetchStates();
-      setStates(data);
-    };
-    loadStates();
+    fetchStates().then(setStates);
   }, []);
 
-  // Fetch cities when state changes
+  // ── Fetch cities whenever state changes ────────────────────────────
   useEffect(() => {
     if (state) {
-      const loadCities = async () => {
-        const data = await fetchCities(state);
-        setCities(data);
-      };
-      loadCities();
-      setCity(""); // Reset city when state changes
+      fetchCities(state).then((newCities) => {
+        setCities(newCities);
+        // Only clear city if the current city isn't in the new state's list
+        // and it wasn't just auto-filled from userLocation
+        if (city && !newCities.includes(city) && city !== userLocation?.city) {
+          setCity("");
+        }
+      });
     } else {
       setCities([]);
+      setCity("");
     }
   }, [state]);
 
-  // Get user location for radius filtering
-  const getMyLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
-      return;
-    }
-    setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        });
-        setIsLocating(false);
-      },
-      (error) => {
-        console.error("Error getting location:", error);
-        setIsLocating(false);
-        alert("Unable to retrieve your location. Please check permissions.");
-      }
-    );
-  };
-
-  // Close dropdowns when clicking outside
+  // ── Close dropdowns on outside click ──────────────────────────────
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (sportDropdownRef.current && !sportDropdownRef.current.contains(event.target)) setShowSportDropdown(false);
-      if (stateDropdownRef.current && !stateDropdownRef.current.contains(event.target)) setShowStateDropdown(false);
-      if (cityDropdownRef.current && !cityDropdownRef.current.contains(event.target)) setShowCityDropdown(false);
+    const handleClickOutside = (e) => {
+      if (sportDropdownRef.current && !sportDropdownRef.current.contains(e.target)) setShowSportDropdown(false);
+      if (stateDropdownRef.current && !stateDropdownRef.current.contains(e.target)) setShowStateDropdown(false);
+      if (cityDropdownRef.current && !cityDropdownRef.current.contains(e.target)) setShowCityDropdown(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Store onSearch in a ref to avoid infinite loops from unstable parent references
+  // ── Stable ref for onSearch to avoid infinite loops ────────────────
   const onSearchRef = useRef(onSearch);
   useEffect(() => { onSearchRef.current = onSearch; }, [onSearch]);
 
-  // Auto-search effect — debounced, triggers on filter changes only
+  // ── Debounced auto-search — fires on any filter change ─────────────
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      onSearchRef.current({ 
-        searchTerm: sport, 
-        radius: userLocation ? radius : undefined, 
-        city, 
+    const t = setTimeout(() => {
+      onSearchRef.current({
+        searchTerm: sport,
+        city,
         state,
+        // always pass user location so backend sorts by proximity
         lat: userLocation?.lat,
-        lng: userLocation?.lng
+        lng: userLocation?.lng,
       });
     }, 400);
+    return () => clearTimeout(t);
+  }, [sport, city, state, userLocation]);
 
-    return () => clearTimeout(delayDebounceFn);
-  }, [sport, radius, city, state, userLocation]);
+  // ── Auto-fill detected location names ──────────────────────────────
+  useEffect(() => {
+    if (userLocation?.state && !state) {
+      setState(userLocation.state);
+    }
+    if (userLocation?.city && !city) {
+      setCity(userLocation.city);
+    }
+  }, [userLocation]);
 
   const resetFilters = () => {
-    setCity("");
-    setState("");
-    setRadius(50);
     setSport("");
-    setUserLocation(null);
+    setState("");
+    setCity("");
+    setStateSearch("");
+    setCitySearch("");
   };
+
+  // ── Filtered lists for search-inside-dropdown ──────────────────────
+  const filteredStates = stateSearch
+    ? states.filter((s) => s.toLowerCase().includes(stateSearch.toLowerCase()))
+    : states;
+
+  const filteredCities = citySearch
+    ? cities.filter((c) => c.toLowerCase().includes(citySearch.toLowerCase()))
+    : cities;
 
   return (
     <div className="w-full max-w-[1500px] mx-auto animate-fade-in-up">
       <div className="relative group">
-        {/* Main Unified Bar */}
-        <div className="relative flex flex-col lg:flex-row items-stretch bg-black/80 backdrop-blur-3xl border border-white/10 rounded-[2rem] lg:rounded-full p-1.5 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] transition-all duration-700 hover:border-[#84CC16]/40">
-          
-          {/* Custom Sports Dropdown */}
-          <div className="flex-1 relative z-[100] border-b lg:border-b-0 lg:border-r border-white/5" ref={sportDropdownRef}>
+        {/* ── Main Bar ──────────────────────────────────────────── */}
+        <div className="relative flex flex-row items-center bg-black/80 backdrop-blur-3xl border border-white/10 rounded-full p-1.5 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] transition-all duration-700 hover:border-[#84CC16]/40 overflow-x-auto no-scrollbar">
+
+          {/* ── Sport Dropdown ─────────────────────────────────── */}
+          <div className="flex-1 min-w-[90px] relative z-[100] border-r border-white/5" ref={sportDropdownRef}>
             <button
               onClick={() => setShowSportDropdown(!showSportDropdown)}
-              className="flex items-center w-full h-full px-8 py-4 text-left group/btn"
+              className="flex items-center justify-center w-full h-full px-2 lg:px-8 py-2 lg:py-4 text-left"
             >
-              <Trophy className={`mr-4 shrink-0 transition-transform duration-500 ${showSportDropdown ? "scale-110 text-[#84CC16]" : "text-gray-500"}`} size={22} />
-              <div className="flex flex-col">
-                <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-0.5">Category</span>
-                <span className="text-[13px] font-black text-white uppercase tracking-wider truncate">
-                  {sport || "All Sports"}
-                </span>
+              <Trophy className={`hidden sm:block mr-2 lg:mr-4 shrink-0 w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-500 ${showSportDropdown ? "scale-110 text-[#84CC16]" : "text-gray-500"}`} />
+              <div className="flex flex-col items-center sm:items-start text-center sm:text-left w-full">
+                <span className="text-[6px] lg:text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-0.5">Category</span>
+                <span className="text-[9px] lg:text-[13px] font-black text-white uppercase tracking-wider truncate w-full">{sport || "All"}</span>
               </div>
-              <ChevronDown size={14} className={`ml-auto text-gray-600 transition-transform duration-500 ${showSportDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
+              <ChevronDown className={`hidden md:block ml-auto w-3 h-3 lg:w-4 lg:h-4 text-gray-600 transition-transform duration-500 ${showSportDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
             </button>
 
             {showSportDropdown && (
-              <div className="absolute top-[115%] left-0 w-72 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110] animate-in fade-in slide-in-from-top-4 duration-300">
-                <div className="p-2 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-track-white/5 scrollbar-thumb-[#84CC16]/20 grid grid-cols-1 gap-1">
+              <div className="absolute top-[115%] left-0 w-64 lg:w-72 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110]">
+                <div className="p-2 max-h-[300px] overflow-y-auto grid grid-cols-1 gap-1">
                   <button
                     onClick={() => { setSport(""); setShowSportDropdown(false); }}
-                    className="flex items-center px-4 py-3 rounded-xl hover:bg-[#84CC16]/10 text-left transition-colors group/opt"
+                    className="flex items-center px-4 py-3 rounded-xl hover:bg-[#84CC16]/10 text-left transition-colors"
                   >
-                    <Trophy size={14} className="mr-3 text-gray-600 group-hover/opt:text-[#84CC16]" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 group-hover/opt:text-white">All Sports</span>
+                    <Trophy size={14} className="mr-3 text-gray-600" />
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">All Sports</span>
                   </button>
                   {SPORTS_LIST.map((s) => (
                     <button
                       key={s}
                       onClick={() => { setSport(s); setShowSportDropdown(false); }}
-                      className={`flex items-center px-4 py-3 rounded-xl transition-all text-left group/opt ${sport === s ? "bg-[#84CC16] text-black" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+                      className={`flex items-center px-4 py-3 rounded-xl transition-all text-left ${sport === s ? "bg-[#84CC16] text-black" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
                     >
                       <span className={`text-[11px] font-bold uppercase tracking-wider ${sport === s ? "text-black" : ""}`}>{s}</span>
                     </button>
@@ -155,36 +155,50 @@ const SearchTurf = ({ onSearch }) => {
             )}
           </div>
 
-          {/* State Filter Dropdown */}
-          <div className="flex-1 relative z-[90] border-b lg:border-b-0 lg:border-r border-white/5" ref={stateDropdownRef}>
+          {/* ── State Dropdown (with search) ───────────────────── */}
+          <div className="flex-1 min-w-[90px] relative z-[90] border-r border-white/5" ref={stateDropdownRef}>
             <button
-              onClick={() => setShowStateDropdown(!showStateDropdown)}
-              className="flex items-center w-full h-full px-8 py-4 text-left group/btn"
+              onClick={() => { setShowStateDropdown(!showStateDropdown); setStateSearch(""); }}
+              className="flex items-center justify-center w-full h-full px-2 lg:px-8 py-2 lg:py-4 text-left"
             >
-              <Globe className={`mr-4 shrink-0 transition-transform duration-500 ${showStateDropdown ? "scale-110 text-[#84CC16]" : "text-gray-500"}`} size={22} />
-              <div className="flex flex-col">
-                <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-0.5">State</span>
-                <span className="text-[13px] font-black text-white uppercase tracking-wider truncate">
-                  {state || "Select State"}
-                </span>
+              <Globe className={`hidden sm:block mr-2 lg:mr-4 shrink-0 w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-500 ${showStateDropdown ? "scale-110 text-[#84CC16]" : "text-gray-500"}`} />
+              <div className="flex flex-col items-center sm:items-start text-center sm:text-left w-full">
+                <span className="text-[6px] lg:text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-0.5">State</span>
+                <span className="text-[9px] lg:text-[13px] font-black text-white uppercase tracking-wider truncate w-full">{state || "Select"}</span>
               </div>
-              <ChevronDown size={14} className={`ml-auto text-gray-600 transition-transform duration-500 ${showStateDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
+              <ChevronDown className={`hidden md:block ml-auto w-3 h-3 lg:w-4 lg:h-4 text-gray-600 transition-transform duration-500 ${showStateDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
             </button>
 
             {showStateDropdown && (
-              <div className="absolute top-[115%] left-0 w-72 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110] animate-in fade-in slide-in-from-top-4 duration-300">
-                <div className="p-2 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-track-white/5 scrollbar-thumb-[#84CC16]/20 grid grid-cols-1 gap-1">
+              <div className="absolute top-[115%] left-1/2 -translate-x-1/2 lg:translate-x-0 lg:left-0 w-64 lg:w-72 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110]">
+                {/* Search bar inside state dropdown */}
+                <div className="p-2 border-b border-white/5">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5">
+                    <Search size={13} className="text-gray-500 shrink-0" />
+                    <input
+                      autoFocus
+                      type="text"
+                      placeholder="Search state..."
+                      value={stateSearch}
+                      onChange={(e) => setStateSearch(e.target.value)}
+                      className="bg-transparent text-[11px] font-bold text-white placeholder-gray-600 outline-none w-full uppercase tracking-wider"
+                    />
+                  </div>
+                </div>
+                <div className="p-2 max-h-[260px] overflow-y-auto grid grid-cols-1 gap-1">
                   <button
                     onClick={() => { setState(""); setShowStateDropdown(false); }}
-                    className="flex items-center px-4 py-3 rounded-xl hover:bg-[#84CC16]/10 text-left transition-colors group/opt"
+                    className="flex items-center px-4 py-3 rounded-xl hover:bg-[#84CC16]/10 text-left transition-colors"
                   >
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 group-hover/opt:text-white">All States</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">All States</span>
                   </button>
-                  {states.map((s) => (
+                  {filteredStates.length === 0 ? (
+                    <p className="text-[11px] text-gray-600 px-4 py-3 uppercase tracking-wider">No results</p>
+                  ) : filteredStates.map((s) => (
                     <button
                       key={s}
-                      onClick={() => { setState(s); setShowStateDropdown(false); }}
-                      className={`flex items-center px-4 py-3 rounded-xl transition-all text-left group/opt ${state === s ? "bg-[#84CC16] text-black" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+                      onClick={() => { setState(s); setShowStateDropdown(false); setStateSearch(""); }}
+                      className={`flex items-center px-4 py-3 rounded-xl transition-all text-left ${state === s ? "bg-[#84CC16] text-black" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
                     >
                       <span className={`text-[11px] font-bold uppercase tracking-wider ${state === s ? "text-black" : ""}`}>{s}</span>
                     </button>
@@ -194,37 +208,51 @@ const SearchTurf = ({ onSearch }) => {
             )}
           </div>
 
-          {/* City Filter Dropdown */}
-          <div className="flex-1 relative z-[80] border-b lg:border-b-0 lg:border-r border-white/5" ref={cityDropdownRef}>
+          {/* ── City Dropdown (with search) ────────────────────── */}
+          <div className="flex-1 min-w-[90px] relative z-[80] border-r border-white/5" ref={cityDropdownRef}>
             <button
-              onClick={() => setShowCityDropdown(!showCityDropdown)}
+              onClick={() => { if (state) { setShowCityDropdown(!showCityDropdown); setCitySearch(""); } }}
               disabled={!state}
-              className={`flex items-center w-full h-full px-8 py-4 text-left group/btn ${!state ? "opacity-30 cursor-not-allowed" : ""}`}
+              className={`flex items-center justify-center w-full h-full px-2 lg:px-8 py-2 lg:py-4 text-left ${!state ? "opacity-30 cursor-not-allowed" : ""}`}
             >
-              <Globe className={`mr-4 shrink-0 transition-transform duration-500 ${showCityDropdown ? "scale-110 text-[#84CC16]" : "text-gray-500"}`} size={22} />
-              <div className="flex flex-col">
-                <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-0.5">City</span>
-                <span className="text-[13px] font-black text-white uppercase tracking-wider truncate">
-                  {city || "Select City"}
-                </span>
+              <Globe className={`hidden sm:block mr-2 lg:mr-4 shrink-0 w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-500 ${showCityDropdown ? "scale-110 text-[#84CC16]" : "text-gray-500"}`} />
+              <div className="flex flex-col items-center sm:items-start text-center sm:text-left w-full">
+                <span className="text-[6px] lg:text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-0.5">City</span>
+                <span className="text-[9px] lg:text-[13px] font-black text-white uppercase tracking-wider truncate w-full">{city || "Select"}</span>
               </div>
-              <ChevronDown size={14} className={`ml-auto text-gray-600 transition-transform duration-500 ${showCityDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
+              <ChevronDown className={`hidden md:block ml-auto w-3 h-3 lg:w-4 lg:h-4 text-gray-600 transition-transform duration-500 ${showCityDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
             </button>
 
             {showCityDropdown && state && (
-              <div className="absolute top-[115%] left-0 w-72 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110] animate-in fade-in slide-in-from-top-4 duration-300">
-                <div className="p-2 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-track-white/5 scrollbar-thumb-[#84CC16]/20 grid grid-cols-1 gap-1">
+              <div className="absolute top-[115%] right-0 w-64 lg:w-72 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110]">
+                {/* Search bar inside city dropdown */}
+                <div className="p-2 border-b border-white/5">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5">
+                    <Search size={13} className="text-gray-500 shrink-0" />
+                    <input
+                      autoFocus
+                      type="text"
+                      placeholder="Search city..."
+                      value={citySearch}
+                      onChange={(e) => setCitySearch(e.target.value)}
+                      className="bg-transparent text-[11px] font-bold text-white placeholder-gray-600 outline-none w-full uppercase tracking-wider"
+                    />
+                  </div>
+                </div>
+                <div className="p-2 max-h-[260px] overflow-y-auto grid grid-cols-1 gap-1">
                   <button
                     onClick={() => { setCity(""); setShowCityDropdown(false); }}
-                    className="flex items-center px-4 py-3 rounded-xl hover:bg-[#84CC16]/10 text-left transition-colors group/opt"
+                    className="flex items-center px-4 py-3 rounded-xl hover:bg-[#84CC16]/10 text-left transition-colors"
                   >
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 group-hover/opt:text-white">All Cities</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">All Cities</span>
                   </button>
-                  {cities.map((c) => (
+                  {filteredCities.length === 0 ? (
+                    <p className="text-[11px] text-gray-600 px-4 py-3 uppercase tracking-wider">No results</p>
+                  ) : filteredCities.map((c) => (
                     <button
                       key={c}
-                      onClick={() => { setCity(c); setShowCityDropdown(false); }}
-                      className={`flex items-center px-4 py-3 rounded-xl transition-all text-left group/opt ${city === c ? "bg-[#84CC16] text-black" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+                      onClick={() => { setCity(c); setShowCityDropdown(false); setCitySearch(""); }}
+                      className={`flex items-center px-4 py-3 rounded-xl transition-all text-left ${city === c ? "bg-[#84CC16] text-black" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
                     >
                       <span className={`text-[11px] font-bold uppercase tracking-wider ${city === c ? "text-black" : ""}`}>{c}</span>
                     </button>
@@ -234,40 +262,14 @@ const SearchTurf = ({ onSearch }) => {
             )}
           </div>
 
-          {/* Radius Selector & Geolocation */}
-          <div className="flex-[1.5] flex items-center px-8 py-4 w-full border-b lg:border-b-0 lg:border-r border-white/5">
-            <button 
-              onClick={getMyLocation}
-              className={`mr-5 p-2 rounded-full transition-all ${userLocation ? "bg-[#84CC16]/20 text-[#84CC16]" : "bg-white/5 text-gray-600 hover:text-white"}`}
-              title="Use My Location"
-            >
-              <Crosshair size={20} className={isLocating ? "animate-spin" : ""} />
-            </button>
-            <div className="flex flex-col w-full">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em]">Range</span>
-                <span className="text-[11px] font-black text-[#84CC16] tracking-tighter">{radius} KM</span>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="500"
-                step="5"
-                value={radius}
-                onChange={(e) => setRadius(parseInt(e.target.value))}
-                className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#84CC16] hover:accent-[#A3E635] transition-all"
-              />
-            </div>
-          </div>
-
-          {/* Reset Button Integrated */}
-          <div className="p-2 flex items-center justify-center lg:px-6">
+          {/* ── Reset Button ───────────────────────────────────── */}
+          <div className="p-1 sm:p-2 flex items-center justify-center lg:px-6">
             <button
               onClick={resetFilters}
-              className="flex items-center gap-2 px-6 py-3 rounded-full hover:bg-white/5 text-gray-600 hover:text-[#FF3B3B] transition-all group/reset whitespace-nowrap"
+              className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-2 sm:px-4 lg:px-6 py-2 lg:py-3 rounded-full hover:bg-white/5 text-gray-600 hover:text-[#FF3B3B] transition-all group/reset whitespace-nowrap"
             >
-              <RotateCcw size={16} className="group-hover/reset:rotate-[-180deg] transition-transform duration-500" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Reset</span>
+              <RotateCcw className="w-3 h-3 lg:w-4 lg:h-4 group-hover/reset:rotate-[-180deg] transition-transform duration-500" />
+              <span className="text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em]">Reset</span>
             </button>
           </div>
         </div>

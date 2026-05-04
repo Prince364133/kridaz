@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { OwnerSidebar, AuthenticatedNavbar } from "@components/layout";
 import ScrollToTop from "@components/common/ScrollToTop";
+import MobileBottomNav from "@user/components/layout/MobileBottomNav";
 
 const PartnerLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,6 +36,7 @@ const PartnerLayout = () => {
           className={`
           flex-1 
           p-4 
+          pb-24 lg:pb-4
           transition-all 
           duration-300 
           ease-in-out
@@ -46,6 +48,7 @@ const PartnerLayout = () => {
           </div>
         </main>
       </div>
+      <MobileBottomNav />
     </div>
   );
 };

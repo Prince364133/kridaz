@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { AdminSidebar, AuthenticatedNavbar } from "@components/layout";
+import MobileBottomNav from "@user/components/layout/MobileBottomNav";
 
 const AdminLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,6 +33,7 @@ const AdminLayout = () => {
           className={`
           flex-1 
           p-4 
+          pb-24 lg:pb-4
           transition-all 
           duration-300 
           ease-in-out
@@ -43,6 +45,7 @@ const AdminLayout = () => {
           </div>
         </main>
       </div>
+      <MobileBottomNav />
     </div>
   );
 };

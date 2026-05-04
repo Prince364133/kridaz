@@ -40,7 +40,7 @@ const Login = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-center pt-28 pb-12 font-sans">
+    <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-start pt-4 lg:pt-10 pb-12 font-sans">
       {/* ── BACKGROUND LAYER ── */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-black" />

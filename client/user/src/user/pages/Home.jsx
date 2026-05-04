@@ -3,10 +3,12 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "../hooks/useAxiosInstance";
 import useTurfData from "../hooks/useTurfData";
-import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus } from "lucide-react";
+import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus, Loader2 } from "lucide-react";
 import { AdBannerSection } from "../components/Marketing/AdBannerSection";
 import { VideoSection } from "../components/Marketing/VideoSection";
 import BlogSection from "../components/Blogs/BlogSection";
+import SearchPlayers from "../components/search/SearchPlayers";
+import SearchTurf from "../components/search/SearchTurf";
 
 const PRI = "#84CC16";
 const S2 = "#1A1A1A";
@@ -29,14 +31,11 @@ const socialPosts = [
 
 
 const highlights = [
-  { image: "https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=1200", span: "md:col-span-2 md:row-span-1" }, // Stadium
-  { image: "https://images.pexels.com/photos/159515/football-american-football-runner-player-159515.jpeg?auto=compress&cs=tinysrgb&w=800", span: "md:col-span-2 md:row-span-1" }, // Football Action
-  { image: "https://images.pexels.com/photos/1080884/pexels-photo-1080884.jpeg?auto=compress&cs=tinysrgb&w=800", span: "md:col-span-1 md:row-span-2" }, // Basketball
-  { image: "https://images.pexels.com/photos/209977/pexels-photo-209977.jpeg?auto=compress&cs=tinysrgb&w=800", span: "md:col-span-1 md:row-span-2" }, // Tennis
-  { image: "https://images.pexels.com/photos/3651674/pexels-photo-3651674.jpeg?auto=compress&cs=tinysrgb&w=1200", span: "md:col-span-2 md:row-span-2" }, // Cricket/Baseball
-  { image: "https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=800", span: "md:col-span-1 md:row-span-2" }, // Gym
-  { image: "https://images.pexels.com/photos/163444/sport-treadmill-training-fitness-163444.jpeg?auto=compress&cs=tinysrgb&w=800", span: "md:col-span-2 md:row-span-1" }, // Running
-  { image: "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=800", span: "md:col-span-2 md:row-span-1" }, // Sports Gear
+  { image: "https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=1200", span: "md:col-span-3" }, // Stadium
+  { image: "https://images.pexels.com/photos/159515/football-american-football-runner-player-159515.jpeg?auto=compress&cs=tinysrgb&w=800", span: "md:col-span-3" }, // Football Action
+  { image: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80", span: "md:col-span-2" }, // Cricket/Turf
+  { image: "https://images.unsplash.com/photo-1518605363189-cdb72b0e6bf3?w=800&q=80", span: "md:col-span-2" }, // Basketball/Football
+  { image: "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?w=800&q=80", span: "md:col-span-2" }, // Tennis
 ];
 
 const comparisonFeatures = [
@@ -73,91 +72,159 @@ const avatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.le
 
 export default function Home() {
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);
-  const { turfs, loading: turfLoading, error } = useTurfData();
   const [activeTab, setActiveTab] = useState("venues");
   const [players, setPlayers] = useState([]);
-  const [turfSearch, setTurfSearch] = useState("");
-  const [venues, setVenues] = useState([]);
+  const [turfFilters, setTurfFilters] = useState({});
+  const [playerFilters, setPlayerFilters] = useState({});
+  const [userLocation, setUserLocation] = useState(null);
+  const { turfs, loading: turfLoading, error } = useTurfData({ ...turfFilters, lat: userLocation?.lat, lng: userLocation?.lng });
+  const [locationStatus, setLocationStatus] = useState("detecting");
   const [marketing, setMarketing] = useState({ banners: [], videos: [] });
   const [loading, setLoading] = useState(true);
   const [featureFlags, setFeatureFlags] = useState({});
 
+  const detectLocation = () => {
+    setLocationStatus("detecting");
+    if (!navigator.geolocation) {
+      fallbackToIPLocation();
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        let city = "";
+        let state = "";
+        try {
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+          const data = await res.json();
+          city = data.city || data.locality || "";
+          state = data.principalSubdivision || "";
+        } catch (error) {
+          console.warn("Reverse geocoding failed:", error);
+        }
+        setUserLocation({ lat, lng, city, state });
+        setLocationStatus("granted");
+      },
+      (err) => {
+        console.warn("Geolocation failed:", err.message);
+        fallbackToIPLocation();
+      },
+      { timeout: 8000, maximumAge: 60000 }
+    );
+  };
+
+  const fallbackToIPLocation = async () => {
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+      if (data.latitude && data.longitude) {
+        setUserLocation({ lat: data.latitude, lng: data.longitude, city: data.city, state: data.region });
+        setLocationStatus("granted");
+      } else {
+        setLocationStatus("denied");
+      }
+    } catch (error) {
+      setLocationStatus("denied");
+    }
+  };
+
+  useEffect(() => {
+    detectLocation();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [venuesRes, marketingRes, playersRes] = await Promise.all([
+        const [venuesRes, marketingRes] = await Promise.all([
           axiosInstance.get("/api/features"),
           axiosInstance.get("/api/features/marketing"),
-          axiosInstance.get("/api/user/players").catch(() => ({ data: { players: [] } }))
         ]);
         setMarketing(marketingRes.data || { banners: [], videos: [] });
         setFeatureFlags(venuesRes.data.flagsMap || {});
-        setPlayers(playersRes.data.players || []);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching generic data:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
-  const filteredTurfs = (turfs || []).filter(t =>
-    !turfSearch ||
-    t.name?.toLowerCase().includes(turfSearch.toLowerCase()) ||
-    t.sportTypes?.some(s => s.toLowerCase().includes(turfSearch.toLowerCase()))
-  );
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      try {
+        const params = {
+          ...playerFilters,
+          lat: userLocation?.lat,
+          lng: userLocation?.lng,
+        };
+        const res = await axiosInstance.get("/api/user/players", { params });
+        setPlayers(res.data.players || []);
+      } catch (error) {
+        console.error("Error fetching players:", error);
+      }
+    };
+    fetchPlayers();
+  }, [playerFilters, userLocation]);
+
+  const handleTurfSearch = (filters) => {
+    setTurfFilters(filters);
+  };
+
+  const handlePlayerSearch = (filters) => {
+    setPlayerFilters(filters);
+  };
 
   return (
     <div className="min-h-screen text-white" style={{ backgroundColor: "#000" }}>
 
       {/* ── HERO ── */}
-      <section className="relative min-h-[70vh] lg:min-h-screen flex items-start lg:items-center pt-0 lg:pt-0 overflow-hidden">
-        {/* Right-Aligned Cinematic Background */}
-        <div className="absolute right-0 top-0 w-full lg:w-[85%] h-full z-0 pointer-events-none flex items-center justify-end">
-          <div className="relative h-[92%] w-auto transform lg:scale-[1.75] origin-right translate-y-64">
+      <section className="relative lg:min-h-screen flex items-start lg:items-center pt-16 pb-8 lg:pt-0 lg:pb-0 overflow-hidden">
+        {/* Right-Aligned Cinematic Background - Merged behind text */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <div className="relative h-full w-full">
             <img
               src="/hero%20image.png"
               alt="Hero Background"
-              className="h-full w-auto object-contain opacity-60 brightness-[70%]"
+              className="absolute inset-0 w-full h-full object-cover object-center lg:object-[right_center] opacity-40 lg:opacity-60 brightness-[60%] lg:brightness-[80%] transform scale-125 origin-center lg:scale-100 lg:origin-center transition-transform duration-1000"
             />
-            {/* Fade to black on the left to blend with text area */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/20 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
+            {/* Complex gradient mesh to blend with text area */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent lg:via-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
           </div>
         </div>
 
+
         <div className="absolute inset-0 opacity-[0.05] z-1"
           style={{ backgroundImage: `radial-gradient(${PRI} 1px, transparent 1px)`, backgroundSize: "36px 36px" }} />
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 rounded-full pointer-events-none z-1" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full pointer-events-none z-1" />
 
-        <div className="relative max-w-full mx-auto px-10 lg:px-20 w-full grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
+        <div className="relative max-w-full mx-auto px-6 lg:px-20 w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center pt-4 md:pt-0">
+          <div className="space-y-4 lg:space-y-6 relative z-10">
             <div>
-              <h1 className="font-display leading-[0.85] tracking-tighter uppercase" style={{ fontSize: "clamp(3rem,8vw,6.5rem)" }}>
+              <h1 className="font-display leading-[0.9] lg:leading-[0.85] tracking-tighter uppercase" style={{ fontSize: "clamp(2.5rem,10vw,6.5rem)" }}>
                 More Than <span style={{ color: PRI }}>Booking.</span><br />
                 Where Players<br />Belong.
               </h1>
-              <p className="font-script text-2xl mt-3" style={{ color: PRI }}>where champions play</p>
+              <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ color: PRI }}>where champions play</p>
             </div>
-            <p className="text-xl opacity-70 max-w-xl leading-relaxed mb-6 lg:mb-10">
+            <p className="text-sm lg:text-xl opacity-70 max-w-xl leading-relaxed mb-4 lg:mb-10">
               Discover premium sports venues, book your slot instantly, and connect with players across India.
             </p>
 
             <Link
               to={isLoggedIn ? "/turfs" : "/signup"}
-              className="block w-fit group mb-6 lg:mb-12"
+              className="block w-fit group mb-4 lg:mb-12"
             >
-              <div className="inline-flex items-center gap-2 bg-primary text-black px-6 py-3 rounded-full font-bold group-hover:scale-105 transition-all text-base">
+              <div className="inline-flex items-center gap-2 bg-[#84CC16] text-black px-8 py-3.5 rounded-full font-bold group-hover:scale-105 transition-all text-sm lg:text-base shadow-[0_0_20px_rgba(132,204,22,0.4)]">
                 Book Now <ArrowRight size={18} />
               </div>
             </Link>
           </div>
 
           <div className="relative hidden lg:block h-[600px]">
-
-
             {/* Arena Gallery at bottom */}
             <div className="absolute bottom-0 right-0 w-full flex items-center justify-end gap-4 z-20 pb-4 pr-12">
               {[
@@ -188,17 +255,19 @@ export default function Home() {
         </div>
       </section>
 
+
       {/* ── STATS ── */}
       <section className="border-y" style={{ borderColor: "#1A1A1A", backgroundColor: "#0A0A0A" }}>
-        <div className="max-w-screen-2xl mx-auto px-6 md:px-10 py-4 sm:py-8 grid grid-cols-2 md:grid-cols-4 divide-x divide-[#1A1A1A]">
-          {stats.map(s => (
-            <div key={s.label} className="px-8 text-center">
-              <p className="font-display text-4xl" style={{ color: PRI }}>{s.value}</p>
-              <p className="font-mono text-xs uppercase tracking-wider mt-1" style={{ color: "#888" }}>{s.label}</p>
+        <div className="max-w-screen-2xl mx-auto px-2 md:px-10 py-4 sm:py-8 grid grid-cols-4 divide-x divide-[#1A1A1A]">
+          {stats.map((s) => (
+            <div key={s.label} className="px-1 sm:px-4 md:px-8 text-center flex flex-col justify-center overflow-hidden">
+              <p className="font-display text-xl sm:text-3xl lg:text-4xl leading-none" style={{ color: PRI }}>{s.value}</p>
+              <p className="font-mono text-[8px] sm:text-[10px] lg:text-xs uppercase tracking-wider md:tracking-widest mt-1 lg:mt-2 opacity-50 truncate w-full">{s.label}</p>
             </div>
           ))}
         </div>
       </section>
+
 
       {/* ── FIND YOUR ARENA ── */}
       <section className="py-10 lg:py-20 px-6 md:px-10 w-full max-w-screen-2xl mx-auto">
@@ -210,30 +279,35 @@ export default function Home() {
         </div>
 
         {/* Search & Tabs Combined Row */}
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-4 mb-10 max-w-5xl mx-auto px-2">
-          {/* Tab toggle */}
-          <div className="flex gap-1.5 p-1.5 rounded-full border shrink-0" style={{ borderColor: BDR, background: "#111" }}>
-            {[{ key: "venues", label: "🏟 VENUES" }, { key: "marketplace", label: "🛒 MARKETPLACE" }].map(tab => (
-              <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                className="px-6 py-2.5 rounded-full font-bold text-xs transition-all whitespace-nowrap"
-                style={activeTab === tab.key ? { backgroundColor: PRI, color: "#000" } : { color: "#fff" }}>
-                {tab.label}
-              </button>
-            ))}
+        <div className="flex flex-col gap-8 mb-16 max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex gap-2 p-1 rounded-full bg-[#1A1A1A] border border-white/5">
+              {[{ key: "venues", label: "🏟 VENUES" }, { key: "marketplace", label: "🛒 MARKETPLACE" }].map(tab => (
+                <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                  className={`px-8 py-2.5 rounded-full font-bold text-xs transition-all duration-300 uppercase tracking-widest ${activeTab === tab.key ? "bg-[#84CC16] text-black shadow-[0_0_20px_rgba(132,204,22,0.3)]" : "text-gray-500 hover:text-white"}`}>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gray-500 flex items-center gap-2">
+              {locationStatus === "detecting" ? (
+                <Loader2 size={10} className="animate-spin text-[#84CC16]" />
+              ) : (
+                <MapPin size={10} style={{ color: PRI }} />
+              )}
+              {userLocation ? `${userLocation.city}, ${userLocation.state}` : "Detecting Location..."}
+            </p>
           </div>
 
-          {/* Search Bar */}
-          <div className="flex flex-1 w-full gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2" size={16} style={{ color: "#888" }} />
-              <input type="text" placeholder="Search venues (cricket, swimming, etc)..."
-                value={turfSearch} onChange={e => setTurfSearch(e.target.value)}
-                className="bms-search w-full bg-[#111] border border-[#2a2a2a] rounded-full py-3 pl-10 pr-4 text-white focus:outline-none focus:border-[#84CC16]" />
-            </div>
-            <button className="px-8 py-3 rounded-full font-bold text-black text-sm hover:brightness-110 transition-all shrink-0"
-              style={{ backgroundColor: PRI }}>
-              Search
-            </button>
+          <div className="w-full animate-fade-in">
+            {activeTab === "venues" ? (
+              <SearchTurf onSearch={handleTurfSearch} userLocation={userLocation} />
+            ) : (
+              <div className="relative flex-1 group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#84CC16] transition-colors" size={18} />
+                <input type="text" placeholder="Search marketplace products..." className="w-full bg-[#1A1A1A] border border-white/5 rounded-full py-4 pl-12 pr-6 text-xs font-bold text-white placeholder-gray-600 outline-none focus:border-[#84CC16]/50 transition-all shadow-2xl" />
+              </div>
+            )}
           </div>
         </div>
 
@@ -244,7 +318,7 @@ export default function Home() {
               <div key={i} className="rounded-2xl border animate-pulse" style={{ height: 320, backgroundColor: "#111", borderColor: BDR }} />
             ))}
           </div>
-        ) : (error || filteredTurfs.length === 0) ? (
+        ) : (error || (turfs || []).length === 0) ? (
           <div className="text-center py-24 animate-fadeIn">
             <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
               <Search size={32} className="text-gray-600" />
@@ -254,7 +328,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {filteredTurfs.slice(0, 8).map((t, i) => (
+            {(turfs || []).slice(0, 8).map((t, i) => (
               <Link to={isLoggedIn ? `/turf/${t._id}` : "/login"} key={t._id} className="bms-card group flex flex-col no-underline bg-[#111] rounded-2xl border border-[#2a2a2a] overflow-hidden">
                 <div className="relative overflow-hidden" style={{ height: 180 }}>
                   <img src={t.image || "/banner-1.png"}
@@ -264,9 +338,16 @@ export default function Home() {
                 </div>
                 <div className="flex flex-col flex-1 p-4 gap-2">
                   <h3 className="font-display text-base uppercase tracking-wide text-white group-hover:text-primary transition-colors leading-tight line-clamp-2">{t.name}</h3>
-                  <div className="flex items-center gap-1.5 text-xs" style={{ color: "#888" }}>
-                    <MapPin size={11} style={{ color: PRI }} />
-                    <span className="truncate">{t.location || "—"}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs" style={{ color: "#888" }}>
+                      <MapPin size={11} style={{ color: PRI }} />
+                      <span className="truncate">{t.location || t.city || "—"}</span>
+                    </div>
+                    {t.distance && (
+                      <span className="text-[10px] font-black text-[#84CC16] uppercase tracking-wider bg-[#84CC16]/5 px-1.5 py-0.5 rounded">
+                        {t.distance} km
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center justify-between mt-1">
                     <div className="flex items-center gap-1">
@@ -300,24 +381,14 @@ export default function Home() {
       <section className="py-10 lg:py-20 px-6 md:px-10" style={{ backgroundColor: "#0A0A0A" }}>
         <div className="max-w-screen-2xl mx-auto">
           {/* Header */}
-          <div className="flex flex-wrap items-end justify-between gap-6 mb-2 lg:mb-3">
-            <div>
-              <h2 className="font-display text-5xl md:text-6xl uppercase leading-none">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+            <div className="flex flex-col gap-1">
+              <h2 className="font-display text-2xl min-[375px]:text-3xl md:text-5xl lg:text-6xl whitespace-nowrap tracking-tight uppercase leading-none">
                 Find Players <span style={{ color: PRI }}>Near You</span>
               </h2>
-              <p className="font-mono text-xs uppercase tracking-widest mt-2" style={{ color: "#888" }}>
-                Connect with athletes in your neighborhood
-              </p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              {["Karnataka", "Bengaluru", "5 KM Radius"].map(f => (
-                <div key={f} className="flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-semibold"
-                  style={{ borderColor: BDR, color: "#888", backgroundColor: "#111" }}>
-                  <MapPin size={12} style={{ color: PRI }} /> {f}
-                </div>
-              ))}
-              <button className="px-6 py-2 rounded-full font-bold text-black text-xs"
-                style={{ backgroundColor: PRI }}>SEARCH</button>
+            <div className="w-full md:w-[600px]">
+              <SearchPlayers onSearch={handlePlayerSearch} userLocation={userLocation} />
             </div>
           </div>
 
@@ -376,11 +447,18 @@ export default function Home() {
                         {p.name || "Player"}
                       </p>
 
-                      <div className="flex items-center justify-center gap-1 opacity-60">
-                        <MapPin size={10} className="text-[#84CC16]" />
-                        <p className="text-[10px] font-medium text-gray-300 uppercase truncate max-w-[80px]" style={{ fontFamily: "sans-serif" }}>
-                          {p.location || "Hyderabad"}
-                        </p>
+                      <div className="flex flex-col items-center justify-center gap-1 opacity-60">
+                        <div className="flex items-center gap-1">
+                          <MapPin size={10} className="text-[#84CC16]" />
+                          <p className="text-[10px] font-medium text-gray-300 uppercase truncate max-w-[80px]" style={{ fontFamily: "sans-serif" }}>
+                            {p.city || p.location || "Nearby"}
+                          </p>
+                        </div>
+                        {p.distance && (
+                          <p className="text-[9px] font-black text-[#84CC16] uppercase tracking-wider bg-[#84CC16]/5 px-1.5 py-0.5 rounded">
+                            {p.distance} km away
+                          </p>
+                        )}
                       </div>
 
                       <p className="text-[9px] font-black text-[#84CC16] uppercase tracking-widest bg-[#84CC16]/10 px-2 py-0.5 rounded-full inline-block">
@@ -730,19 +808,13 @@ export default function Home() {
       <VideoSection videos={marketing.videos} />
 
       {/* ── PLAYBOOK HIGHLIGHTS (Images) ── */}
-
-      <section className="py-10 lg:py-20 px-6 md:px-10 w-full">
+      <section className="pt-[10px] pb-10 lg:pb-20 px-6 md:px-10 w-full">
         <div className="max-w-screen-2xl mx-auto">
-          <h2 className="font-display text-5xl md:text-6xl uppercase mb-8 lg:mb-12">
-            Playbook <span style={{ color: PRI }}>Highlights</span>
-          </h2>
-
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 auto-rows-[180px] md:auto-rows-[240px]">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
             {highlights.map((item, idx) => (
               <div
                 key={idx}
-                className={`relative overflow-hidden rounded-3xl group border border-white/10 backdrop-blur-sm bg-white/5 shadow-2xl transition-all duration-500 hover:border-primary/50 ${item.span}`}
+                className={`relative h-[240px] md:h-[350px] lg:h-[400px] overflow-hidden rounded-3xl group border border-white/10 backdrop-blur-sm bg-white/5 shadow-2xl transition-all duration-500 hover:border-primary/50 ${item.span}`}
               >
                 <img
                   src={item.image}
@@ -750,11 +822,6 @@ export default function Home() {
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-80 group-hover:opacity-100"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
-
-                {/* Glassy reflection effect on hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-                  <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-gradient-to-br from-white/10 via-transparent to-transparent rotate-45 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
-                </div>
               </div>
             ))}
           </div>
@@ -762,6 +829,8 @@ export default function Home() {
       </section>
 
       {/* ── WHY CHOOSE BMSPORTZ ── */}
+      {/* Hiding section as per user request */}
+      {/* 
       <section className="py-12 lg:py-24 px-6 md:px-10 w-full">
         <div className="max-w-screen-2xl mx-auto">
           <div className="text-center">
@@ -774,8 +843,11 @@ export default function Home() {
           </div>
         </div>
       </section>
+      */}
 
       {/* ── FEATURES ── */}
+      {/* Hiding section as per user request */}
+      {/*
       <section className="py-10 lg:py-20 px-6 md:px-10 w-full max-w-screen-2xl mx-auto">
         <div className="text-center mb-8 lg:mb-14">
           <h2 className="font-display text-5xl md:text-6xl uppercase">
@@ -802,23 +874,24 @@ export default function Home() {
           ))}
         </div>
       </section>
+      */}
 
 
 
       {/* ── APP DOWNLOAD SECTION ── */}
-      <section className="py-12 lg:py-24 relative overflow-hidden px-10 lg:px-20">
+      <section className="py-12 lg:py-24 relative overflow-hidden px-0 lg:px-20">
         <div className="max-w-full mx-auto">
-          <div className="bg-gradient-to-br from-[#0D0D0D] to-black border rounded-[3rem] p-12 md:p-24 overflow-hidden relative" style={{ borderColor: BDR }}>
+          <div className="bg-gradient-to-br from-[#0D0D0D] to-black border-y lg:border lg:rounded-[3rem] p-8 md:p-24 overflow-hidden relative" style={{ borderColor: BDR }}>
             <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-16 relative z-10">
 
               {/* Left Side: Mockup */}
-              <div className="relative order-2 lg:order-1">
+              <div className="relative order-2 lg:order-1 mt-12 lg:mt-0">
                 <div className="relative group">
                   <div className="absolute -inset-10 bg-primary/5 rounded-full opacity-10 group-hover:opacity-20 transition-opacity" />
                   <img
                     src="/sports_app_mockup_1777351423147.png"
                     alt="BookMySportz App Mockup"
-                    className="relative w-full max-w-2xl transform scale-110 lg:scale-150 -rotate-6 hover:rotate-0 transition-all duration-700"
+                    className="relative w-full max-w-2xl mx-auto transform scale-[1.5] sm:scale-110 lg:scale-150 -rotate-6 hover:rotate-0 transition-all duration-700"
                   />
                 </div>
               </div>
@@ -834,43 +907,43 @@ export default function Home() {
                   BOOK <span className="text-white/20">•</span> PLAY <span className="text-white/20">•</span> <span className="text-[#84CC16]">WIN</span>
                 </h2>
 
-                <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-xl">
-                  Take the ecosystem with you. Book slots, join matches, and track your performance from anywhere on the planet.
+                <p className="text-gray-400 text-base md:text-xl mb-12 max-w-xl mx-auto lg:mx-0">
+                  Take the ecosystem anywhere. Book slots, join matches, and track your stats.
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-center gap-6">
+                <div className="flex flex-row items-center gap-3 sm:gap-6 justify-center lg:justify-start w-full">
                   {/* Google Play Button */}
-                  <div className="relative group">
-                    <div className="absolute -top-2 -right-2 z-20 bg-primary text-black text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
+                  <div className="relative group flex-1 sm:flex-none">
+                    <div className="absolute -top-2 -right-1 sm:-right-2 z-20 bg-[#84CC16] text-black text-[6px] sm:text-[9px] font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest shadow-lg whitespace-nowrap">
                       Coming Soon
                     </div>
-                    <a href="#" className="flex items-center gap-4 bg-white/5 border px-8 py-4 rounded-2xl transition-all cursor-not-allowed" style={{ borderColor: BDR }}>
-                      <div className="w-8 h-8 flex items-center justify-center opacity-50">
+                    <a href="#" className="flex items-center justify-center gap-2 sm:gap-4 bg-white/5 border px-3 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl transition-all cursor-not-allowed w-full" style={{ borderColor: BDR }}>
+                      <div className="w-5 h-5 sm:w-8 sm:h-8 flex items-center justify-center opacity-50 shrink-0">
                         <svg className="w-full h-full text-white" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M3.609 1.814L13.792 12 3.609 22.186c-.18.23-.209.534-.075.79.133.257.394.424.681.424h.01c.145 0 .284-.041.405-.119l12.784-7.464 3.031 3.031c.141.141.331.22.53.22.199 0 .389-.079.53-.22l3.031-3.031c.141-.141.22-.331.22-.53 0-.199-.079-.389-.22-.53l-3.031-3.031 12.784-7.464c.121-.078.26-.119.405-.119h.01c.287 0 .548-.167.681-.424.134-.256.105-.56-.075-.79L3.609 1.814z" />
                         </svg>
                       </div>
-                      <div className="flex flex-col items-start leading-none opacity-50">
-                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Get it on</p>
-                        <p className="text-lg font-bold text-white">Google Play</p>
+                      <div className="flex flex-col items-start leading-none opacity-50 whitespace-nowrap">
+                        <p className="text-[6px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest mb-0.5 sm:mb-1">Get it on</p>
+                        <p className="text-[11px] sm:text-lg font-bold text-white">Google Play</p>
                       </div>
                     </a>
                   </div>
 
                   {/* App Store Button */}
-                  <div className="relative group">
-                    <div className="absolute -top-2 -right-2 z-20 bg-[#84CC16] text-black text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
+                  <div className="relative group flex-1 sm:flex-none">
+                    <div className="absolute -top-2 -right-1 sm:-right-2 z-20 bg-[#84CC16] text-black text-[6px] sm:text-[9px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest shadow-lg whitespace-nowrap">
                       Coming Soon
                     </div>
-                    <a href="#" className="flex items-center gap-4 bg-white/5 border border-white/10 px-8 py-4 rounded-2xl transition-all cursor-not-allowed">
-                      <div className="w-8 h-8 flex items-center justify-center opacity-50">
+                    <a href="#" className="flex items-center justify-center gap-2 sm:gap-4 bg-white/5 border border-white/10 px-3 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl transition-all cursor-not-allowed w-full">
+                      <div className="w-5 h-5 sm:w-8 sm:h-8 flex items-center justify-center opacity-50 shrink-0">
                         <svg className="w-full h-full text-white" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.1 2.48-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.31-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
                         </svg>
                       </div>
-                      <div className="flex flex-col items-start leading-none opacity-50">
-                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Download on the</p>
-                        <p className="text-lg font-bold text-white">App Store</p>
+                      <div className="flex flex-col items-start leading-none opacity-50 whitespace-nowrap">
+                        <p className="text-[6px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest mb-0.5 sm:mb-1">Download on</p>
+                        <p className="text-[11px] sm:text-lg font-bold text-white">App Store</p>
                       </div>
                     </a>
                   </div>
@@ -885,8 +958,8 @@ export default function Home() {
         </div>
       </section>
       {/* ── FOOTER BANNER ── */}
-      <section className="px-10 lg:px-20 pb-12 pt-6 w-full">
-        <div className="rounded-[30px] lg:rounded-[40px] border grid grid-cols-4 lg:flex lg:flex-nowrap items-stretch p-2 lg:p-4 divide-x" style={{ borderColor: BDR, backgroundColor: "#0A0A0A" }}>
+      <section className="w-full">
+        <div className="border-t border-b grid grid-cols-4 lg:flex lg:flex-nowrap items-stretch p-2 lg:p-4 divide-x" style={{ borderColor: BDR, backgroundColor: "#0A0A0A" }}>
           {[
             { title: "LIST VENUE", sub: "EARN NOW", icon: Store },
             { title: "HOST GAME", sub: "START HOSTING", icon: Ticket },

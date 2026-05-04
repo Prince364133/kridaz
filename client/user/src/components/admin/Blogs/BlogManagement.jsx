@@ -1,21 +1,115 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { Plus, Trash2, Edit2, FileText, Check, X, Eye, ThumbsUp } from "lucide-react";
+import {
+  Plus, Trash2, Edit2, FileText, X, Eye, ThumbsUp,
+  UploadCloud, ImageIcon, Loader2, CheckCircle2
+} from "lucide-react";
 
+// ── Image Upload Zone ─────────────────────────────────────────────────────────
+const ImageUploadZone = ({ value, onChange, onFileSelect }) => {
+  const inputRef = useRef(null);
+  const [dragging, setDragging] = useState(false);
+
+  const processFile = (file) => {
+    if (!file || !file.type.startsWith("image/")) {
+      return toast.error("Please select a valid image file");
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      return toast.error("Image must be under 8 MB");
+    }
+    onFileSelect(file);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    processFile(e.dataTransfer.files[0]);
+  };
+
+  const handleInputChange = (e) => {
+    processFile(e.target.files[0]);
+    // reset so the same file can be selected again
+    e.target.value = "";
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      {/* Drag-and-drop zone */}
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={handleDrop}
+        onClick={() => inputRef.current?.click()}
+        className={`
+          relative flex flex-col items-center justify-center w-full h-36 rounded-2xl border-2 border-dashed cursor-pointer transition-all
+          ${dragging
+            ? "border-[#84CC16] bg-[#84CC16]/10 scale-[1.01]"
+            : value
+              ? "border-[#84CC16]/40 bg-[#84CC16]/5 hover:border-[#84CC16]/60"
+              : "border-white/10 bg-white/2 hover:bg-white/5 hover:border-white/20"
+          }
+        `}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleInputChange}
+        />
+        {value ? (
+          <>
+            <CheckCircle2 size={28} className="text-[#84CC16] mb-2" />
+            <p className="text-[11px] font-bold text-[#84CC16] uppercase tracking-widest">Image Ready</p>
+            <p className="text-[10px] text-gray-600 mt-1 uppercase tracking-wider">Click to replace</p>
+          </>
+        ) : (
+          <>
+            <UploadCloud size={32} className={`mb-2 transition-colors ${dragging ? "text-[#84CC16]" : "text-gray-500"}`} />
+            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              {dragging ? "Drop to Upload" : "Click or Drag & Drop"}
+            </p>
+            <p className="text-[10px] text-gray-600 mt-1 uppercase tracking-wider">JPG · PNG · WEBP · max 8 MB</p>
+          </>
+        )}
+      </div>
+
+      {/* Live preview */}
+      {value && (
+        <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 group/preview">
+          <img src={value} alt="Preview" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/0 group-hover/preview:bg-black/40 transition-all flex items-center justify-center">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onChange(""); onFileSelect(null); }}
+              className="opacity-0 group-hover/preview:opacity-100 transition-opacity w-10 h-10 flex items-center justify-center rounded-full bg-red-500 text-white shadow-lg"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── Main Component ────────────────────────────────────────────────────────────
 export const BlogManagement = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
     content: "",
     readTime: "5 mins read",
-    date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(),
+    date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }).toUpperCase(),
     category: "Sports",
     author: "BookMySportz Team",
     order: 0,
@@ -24,19 +118,28 @@ export const BlogManagement = () => {
 
   const API_BASE = `${import.meta.env.VITE_API_URL}/api/admin/blogs`;
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(API_BASE, { withCredentials: true });
-      setBlogs(response.data.blogs || []);
-    } catch (error) {
+      const res = await axios.get(API_BASE, { withCredentials: true });
+      setBlogs(res.data.blogs || []);
+    } catch {
       toast.error("Failed to fetch blogs");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ── Handle file selection — generate local preview URL ──────────────────
+  const handleFileSelect = (file) => {
+    setImageFile(file);
+    if (file) {
+      const localUrl = URL.createObjectURL(file);
+      setImagePreview(localUrl);
+    } else {
+      setImagePreview(editingItem?.imageUrl || "");
     }
   };
 
@@ -44,9 +147,10 @@ export const BlogManagement = () => {
     setImageFile(null);
     if (item) {
       setEditingItem(item);
+      setImagePreview(item.imageUrl || "");
       setFormData({
         title: item.title,
-        subtitle: item.subtitle,
+        subtitle: item.subtitle || "",
         content: item.content,
         readTime: item.readTime,
         date: item.date,
@@ -55,68 +159,61 @@ export const BlogManagement = () => {
         order: item.order,
         status: item.status,
       });
-      setImagePreview(item.imageUrl);
     } else {
       setEditingItem(null);
+      setImagePreview("");
       setFormData({
         title: "",
         subtitle: "",
         content: "",
         readTime: "5 mins read",
-        date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase(),
+        date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }).toUpperCase(),
         category: "Sports",
         author: "BookMySportz Team",
         order: blogs.length + 1,
         status: "published",
       });
-      setImagePreview(null);
     }
     setIsModalOpen(true);
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
+  // ── Submit — use multipart/form-data when a file is selected ────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const isCreate = !editingItem;
+    if (isCreate && !imageFile) {
+      return toast.error("Please upload an article image");
+    }
+
     try {
+      setSubmitting(true);
+
       const data = new FormData();
-      Object.keys(formData).forEach(key => {
-        data.append(key, formData[key]);
-      });
+      Object.entries(formData).forEach(([k, v]) => data.append(k, v));
       if (imageFile) {
-        data.append('image', imageFile);
+        data.append("image", imageFile);
+      } else if (editingItem?.imageUrl) {
+        // editing without changing image — send existing URL as plain field
+        data.append("imageUrl", editingItem.imageUrl);
       }
-      
+
+      const config = { withCredentials: true };
+
       if (editingItem) {
-        await axios.put(`${API_BASE}/${editingItem._id}`, data, { 
-          withCredentials: true,
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await axios.put(`${API_BASE}/${editingItem._id}`, data, config);
         toast.success("Blog updated successfully");
       } else {
-        if (!imageFile) {
-          return toast.error("Please select an image");
-        }
-        await axios.post(API_BASE, data, { 
-          withCredentials: true,
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await axios.post(API_BASE, data, config);
         toast.success("Blog created successfully");
       }
+
       setIsModalOpen(false);
       fetchData();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to save blog");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -126,7 +223,7 @@ export const BlogManagement = () => {
       await axios.delete(`${API_BASE}/${id}`, { withCredentials: true });
       toast.success("Blog deleted successfully");
       fetchData();
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete blog");
     }
   };
@@ -134,13 +231,14 @@ export const BlogManagement = () => {
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-lime-500 border-t-transparent"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-lime-500 border-t-transparent" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl font-bebas">
@@ -159,6 +257,7 @@ export const BlogManagement = () => {
         </button>
       </div>
 
+      {/* Blog Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {blogs.map((blog, index) => (
           <div
@@ -166,13 +265,13 @@ export const BlogManagement = () => {
             className="group relative flex flex-col rounded-2xl border border-white/10 bg-[#1A1A1A] overflow-hidden transition-all hover:border-lime-500/50"
           >
             <div className="aspect-[4/3] w-full bg-black overflow-hidden relative">
-              <img 
-                src={blog.imageUrl} 
-                alt={blog.title} 
-                className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" 
+              <img
+                src={blog.imageUrl}
+                alt={blog.title}
+                className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
               />
               <div className="absolute top-4 left-4 font-display-heavy text-4xl text-white/10 italic">
-                {String(index + 1).padStart(2, '0')}
+                {String(index + 1).padStart(2, "0")}
               </div>
               <div className="absolute top-4 right-4 flex flex-col items-end gap-1">
                 <span className="text-[10px] font-bold text-white/60">{blog.date}</span>
@@ -206,7 +305,7 @@ export const BlogManagement = () => {
                   className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-all text-xs font-bold uppercase tracking-widest"
                 >
                   <Edit2 size={14} />
-                  Edit Details
+                  Edit
                 </button>
                 <button
                   onClick={() => handleDelete(blog._id)}
@@ -230,27 +329,35 @@ export const BlogManagement = () => {
         )}
       </div>
 
-      {/* Modal */}
+      {/* ── Modal ─────────────────────────────────────────────────────────── */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
           <div className="w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative">
-            <div className="p-8 border-b border-white/10 flex items-center justify-between bg-black/40 relative z-10">
+
+            {/* Modal Header */}
+            <div className="p-8 border-b border-white/10 flex items-center justify-between bg-black/40">
               <div>
                 <h2 className="text-2xl font-bold tracking-tight text-white uppercase">
                   {editingItem ? "Edit Article" : "Create Article"}
                 </h2>
                 <div className="flex items-center gap-2 mt-1">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                  <span className="text-[10px] font-bold text-primary uppercase tracking-widest">System Ready</span>
+                  <div className="w-2 h-2 rounded-full bg-[#84CC16] animate-pulse" />
+                  <span className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest">System Ready</span>
                 </div>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+              >
                 <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-8 space-y-6 relative z-10 max-h-[70vh] overflow-y-auto custom-scrollbar">
+            {/* Modal Form */}
+            <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-2 gap-6">
+
+                {/* Headline */}
                 <div className="col-span-2">
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Headline</label>
                   <input
@@ -262,7 +369,8 @@ export const BlogManagement = () => {
                     placeholder="ENTER ARTICLE HEADLINE..."
                   />
                 </div>
-                
+
+                {/* Subtitle */}
                 <div className="col-span-2">
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Lead / Subtitle</label>
                   <input
@@ -274,33 +382,23 @@ export const BlogManagement = () => {
                   />
                 </div>
 
+                {/* ── Image Upload ─────────────────────────────────────── */}
                 <div className="col-span-2">
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Article Image</label>
-                  <div className="flex flex-col gap-4">
-                    {imagePreview && (
-                      <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10">
-                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                        <button 
-                          type="button"
-                          onClick={() => { setImageFile(null); setImagePreview(null); }}
-                          className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-red-500 transition-all"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    )}
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 rounded-2xl cursor-pointer hover:bg-white/5 hover:border-lime-500/50 transition-all group">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Plus className="w-8 h-8 text-gray-500 group-hover:text-lime-500 mb-2" />
-                        <p className="text-xs text-gray-500 font-bold uppercase tracking-widest group-hover:text-gray-300">
-                          {imagePreview ? "Change Image" : "Upload Article Image"}
-                        </p>
-                      </div>
-                      <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
-                    </label>
-                  </div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2 flex items-center gap-2">
+                    <ImageIcon size={12} />
+                    Article Image {!editingItem && <span className="text-red-500">*</span>}
+                  </label>
+                  <ImageUploadZone
+                    value={imagePreview}
+                    onChange={setImagePreview}
+                    onFileSelect={handleFileSelect}
+                  />
+                  <p className="text-[10px] text-gray-600 mt-2 uppercase tracking-widest">
+                    Uploaded securely to Cloudinary · JPG · PNG · WEBP
+                  </p>
                 </div>
 
+                {/* Category */}
                 <div className="col-span-2 md:col-span-1">
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Category</label>
                   <select
@@ -317,6 +415,7 @@ export const BlogManagement = () => {
                   </select>
                 </div>
 
+                {/* Read Time */}
                 <div className="col-span-2 md:col-span-1">
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Read Time</label>
                   <input
@@ -328,6 +427,7 @@ export const BlogManagement = () => {
                   />
                 </div>
 
+                {/* Date */}
                 <div className="col-span-2 md:col-span-1">
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Date String</label>
                   <input
@@ -335,13 +435,14 @@ export const BlogManagement = () => {
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all"
-                    placeholder="e.g. 23RD JULY 2024"
+                    placeholder="e.g. 4 MAY 2026"
                   />
                 </div>
 
+                {/* Order */}
                 <div className="col-span-2 md:col-span-1">
-                   <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Order</label>
-                   <input
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Order</label>
+                  <input
                     type="number"
                     value={formData.order}
                     onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
@@ -349,6 +450,7 @@ export const BlogManagement = () => {
                   />
                 </div>
 
+                {/* Content */}
                 <div className="col-span-2">
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Article Content (Markdown/HTML)</label>
                   <textarea
@@ -362,6 +464,7 @@ export const BlogManagement = () => {
                 </div>
               </div>
 
+              {/* Footer Buttons */}
               <div className="pt-8 border-t border-white/10 flex gap-4">
                 <button
                   type="button"
@@ -372,16 +475,23 @@ export const BlogManagement = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-4 rounded-2xl bg-lime-500 text-black font-bold hover:bg-lime-400 transition-all shadow-[0_0_30px_rgba(132,204,22,0.4)] uppercase tracking-widest text-xs"
+                  disabled={submitting}
+                  className="flex-1 py-4 rounded-2xl bg-lime-500 text-black font-bold hover:bg-lime-400 transition-all shadow-[0_0_30px_rgba(132,204,22,0.4)] uppercase tracking-widest text-xs disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Save Article
+                  {submitting ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Uploading…
+                    </>
+                  ) : (
+                    "Save Article"
+                  )}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
     </div>
   );
 };

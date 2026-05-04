@@ -13,7 +13,7 @@ const SPORT_COLORS = {
   default: "#84CC16",
 };
 
-const TurfCard = ({ turf, featured = false }) => {
+const TurfCard = ({ turf, featured = false, distance = null }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const navigate = useNavigate();
@@ -70,10 +70,18 @@ const TurfCard = ({ turf, featured = false }) => {
           </div>
         </div>
 
-        {/* Rating pill */}
-        <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1 bg-black/60 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10">
-          <Star size={11} className="text-[#84CC16] fill-[#84CC16]" />
-          <span className="text-[11px] font-black text-white">{rating.toFixed(1)}</span>
+        {/* Rating & Distance pills */}
+        <div className="absolute bottom-3 right-3 z-20 flex items-center gap-2">
+          {distance && (
+            <div className="flex items-center gap-1 bg-[#84CC16] backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10 shadow-lg shadow-[#84CC16]/20">
+              <MapPin size={10} className="text-black fill-black" />
+              <span className="text-[10px] font-black text-black">{distance}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10">
+            <Star size={11} className="text-[#84CC16] fill-[#84CC16]" />
+            <span className="text-[11px] font-black text-white">{rating.toFixed(1)}</span>
+          </div>
         </div>
 
         {/* Carousel controls */}

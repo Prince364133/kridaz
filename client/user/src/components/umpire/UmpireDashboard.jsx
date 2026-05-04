@@ -29,7 +29,7 @@ export default function UmpireDashboard() {
   } = dashboardData;
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="p-4 md:p-10 space-y-6 md:space-y-10 animate-fade-in pt-4 pb-24 md:pb-10">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-6 border-b border-white/5">
         <div className="space-y-1">
@@ -37,7 +37,7 @@ export default function UmpireDashboard() {
             <Shield size={14} className="animate-pulse" />
             <span>Official Status: Ready</span>
           </div>
-          <h1 className="text-5xl font-black uppercase tracking-tight text-white">
+          <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-white">
             Match <span className="text-primary">Management</span>
           </h1>
           <p className="text-gray-500 text-xs font-medium uppercase tracking-wider">Integrity & Standards Control</p>
@@ -52,7 +52,7 @@ export default function UmpireDashboard() {
       </div>
 
       {/* Primary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard title="Matches Officiated" value={matchesOfficiated} icon={Trophy} />
         <StatCard title="Upcoming Matches" value={upcomingMatches} icon={Calendar} />
         <StatCard title="Official Rating" value={officialRating} icon={Star} />
@@ -61,10 +61,10 @@ export default function UmpireDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Match Volume Chart */}
-        <div className="lg:col-span-2 p-8 bg-[#0A0A0A] rounded-2xl border border-white/5 relative">
-          <div className="flex justify-between items-center mb-10">
+        <div className="lg:col-span-2 p-4 md:p-8 bg-[#0A0A0A] rounded-2xl border border-white/5 relative">
+          <div className="flex justify-between items-center mb-6 md:mb-10">
             <div>
-              <h2 className="text-xl font-black uppercase tracking-tight text-white">Match Engagement</h2>
+              <h2 className="text-lg md:text-xl font-black uppercase tracking-tight text-white">Match Engagement</h2>
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Monthly Assignment Analytics</p>
             </div>
             <div className="p-2 bg-white/5 rounded-xl border border-white/5">
@@ -72,7 +72,7 @@ export default function UmpireDashboard() {
             </div>
           </div>
           
-          <div className="h-[300px] w-full flex items-center justify-center border border-white/5 border-dashed rounded-2xl">
+          <div className="h-[250px] md:h-[300px] w-full flex items-center justify-center border border-white/5 border-dashed rounded-2xl">
             {matchEngagement.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={matchEngagement}>
@@ -96,12 +96,12 @@ export default function UmpireDashboard() {
         </div>
 
         {/* Immediate Assignments */}
-        <div className="p-8 bg-[#0A0A0A] rounded-2xl border border-white/5 flex flex-col">
-          <h2 className="text-xl font-black uppercase tracking-tight text-white mb-6">Upcoming Assignments</h2>
+        <div className="p-6 md:p-8 bg-[#0A0A0A] rounded-2xl border border-white/5 flex flex-col">
+          <h2 className="text-lg md:text-xl font-black uppercase tracking-tight text-white mb-6">Upcoming Assignments</h2>
           <div className="flex-1 space-y-4 overflow-y-auto max-h-[300px]">
             {upcomingAssignments.length > 0 ? (
               upcomingAssignments.map((match, i) => (
-                <div key={i} className="p-5 bg-white/[0.02] rounded-xl border border-white/5 group hover:bg-white/[0.05] transition-all relative">
+                <div key={i} className="p-4 md:p-5 bg-white/[0.02] rounded-xl border border-white/5 group hover:bg-white/[0.05] transition-all relative">
                   <div className="absolute top-4 right-4">
                     <Zap size={12} className="text-primary opacity-30 group-hover:opacity-100 transition-opacity" />
                   </div>

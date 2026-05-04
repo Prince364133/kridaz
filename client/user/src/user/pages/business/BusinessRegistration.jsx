@@ -180,7 +180,7 @@ export default function BusinessRegistration() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-32 pb-20 font-sans selection:bg-[#84CC16] selection:text-black">
+    <div className="min-h-screen bg-black text-white pt-4 pb-20 font-sans selection:bg-[#84CC16] selection:text-black">
       <div className="max-w-4xl mx-auto px-6">
         
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-8 group">

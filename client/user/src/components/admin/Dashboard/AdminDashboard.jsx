@@ -43,24 +43,24 @@ export default function AdminDashboard() {
   }));
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="p-4 lg:p-0 space-y-6 lg:space-y-8 animate-fade-in">
 
       {/* Primary Intelligence Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Users" value={totalUsers} icon={Users} />
-        <StatCard title="Active Venues" value={totalTurfs} icon={Landmark} />
-        <StatCard title="Total Bookings" value={totalBookings} icon={CreditCard} />
-        <StatCard title="Pending Verifications" value={pendingRequests} icon={ShieldCheck} />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <StatCard title="Total Users" value={totalUsers} icon={Users} className="p-4 lg:p-6" />
+        <StatCard title="Active Venues" value={totalTurfs} icon={Landmark} className="p-4 lg:p-6" />
+        <StatCard title="Total Bookings" value={totalBookings} icon={CreditCard} className="p-4 lg:p-6" />
+        <StatCard title="Pending Verifications" value={pendingRequests} icon={ShieldCheck} className="p-4 lg:p-6" />
       </div>
 
       {/* Advanced Telemetry Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Chart Card */}
-        <div className="lg:col-span-2 p-8 bg-[#0A0A0A] rounded-2xl border border-white/10 relative group overflow-hidden">
+        <div className="lg:col-span-2 p-6 lg:p-8 bg-[#0A0A0A] rounded-2xl border border-white/10 relative group overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#84CC16]/0 via-[#84CC16]/40 to-[#84CC16]/0" />
           <div className="flex justify-between items-center mb-10">
             <div>
-              <h2 className="text-xl font-bold uppercase tracking-tight text-white mb-1">Platform Activity</h2>
+              <h2 className="text-lg lg:text-xl font-bold uppercase tracking-tight text-white mb-1">Platform Activity</h2>
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">30-Day Financial Metrics</p>
             </div>
             <div className="flex gap-2">
@@ -69,7 +69,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           
-          <div className="h-[350px] w-full">
+          <div className="h-[300px] lg:h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <defs>
@@ -102,9 +102,9 @@ export default function AdminDashboard() {
         </div>
 
         {/* Security / System Logs Panel */}
-        <div className="p-8 bg-[#0A0A0A] rounded-2xl border border-white/10 flex flex-col">
-          <h2 className="text-xl font-bold uppercase tracking-tight text-white mb-6">System Status</h2>
-          <div className="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+        <div className="p-6 lg:p-8 bg-[#0A0A0A] rounded-2xl border border-white/10 flex flex-col">
+          <h2 className="text-lg lg:text-xl font-bold uppercase tracking-tight text-white mb-6">System Status</h2>
+          <div className="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar max-h-[300px] lg:max-h-none">
             {[
               { id: 'SEC-01', msg: 'Core Services Online', status: 'optimal' },
               { id: 'SEC-02', msg: 'Database Sync Active', status: 'optimal' },
@@ -128,11 +128,11 @@ export default function AdminDashboard() {
       </div>
 
       {/* Operator Quick View */}
-      <div className="p-10 bg-[#0A0A0A] rounded-[32px] border border-white/10 relative overflow-hidden">
+      <div className="p-6 lg:p-10 bg-[#0A0A0A] rounded-2xl lg:rounded-[32px] border border-white/10 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#84CC16]/5 blur-[100px]" />
-        <div className="flex justify-between items-center mb-10 relative z-10">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10 relative z-10">
            <div>
-              <h2 className="text-2xl font-bold uppercase tracking-tight text-white mb-1">Infrastructure Load</h2>
+              <h2 className="text-xl lg:text-2xl font-bold uppercase tracking-tight text-white mb-1">Infrastructure Load</h2>
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em]">Hardware & Network Telemetry</p>
             </div>
             <div className="flex items-center gap-3">
@@ -141,16 +141,16 @@ export default function AdminDashboard() {
             </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 relative z-10">
            {[
              { label: 'CPU LOAD', val: '12%', color: '#84CC16' },
              { label: 'MEM USAGE', val: '45%', color: '#84CC16' },
              { label: 'NETWORK', val: '0.8ms', color: '#84CC16' }
            ].map((metric, i) => (
-             <div key={i} className="p-6 border border-white/5 bg-white/[0.01] rounded-2xl group hover:border-[#84CC16]/20 transition-all">
+             <div key={i} className="p-4 lg:p-6 border border-white/5 bg-white/[0.01] rounded-2xl group hover:border-[#84CC16]/20 transition-all">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">{metric.label}</p>
                 <div className="flex items-end justify-between">
-                  <span className="text-3xl font-black text-white group-hover:text-[#84CC16] transition-colors">{metric.val}</span>
+                  <span className="text-2xl lg:text-3xl font-black text-white group-hover:text-[#84CC16] transition-colors">{metric.val}</span>
                   <Activity className="w-5 h-5 text-gray-600 group-hover:text-[#84CC16] transition-colors" />
                 </div>
                 <div className="mt-6 h-1 w-full bg-white/5 rounded-full overflow-hidden">

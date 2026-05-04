@@ -23,7 +23,7 @@ const VenueOwnerSignUp = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#000] relative overflow-hidden flex flex-col items-center justify-start pt-24 lg:pt-32 pb-20 font-sans">
+    <div className="min-h-screen bg-[#000] relative overflow-hidden flex flex-col items-center justify-start pt-4 lg:pt-10 pb-20 font-sans">
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-black/95 to-[#84CC16]/5" />
         <div className="absolute top-1/3 right-0 w-[600px] h-[600px] bg-[#84CC16]/5 blur-[150px] rounded-full pointer-events-none" />

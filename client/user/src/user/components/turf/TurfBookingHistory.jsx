@@ -23,7 +23,7 @@ const TurfBookingHistory = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#000] py-12 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#000] pt-4 pb-20 px-4 relative overflow-hidden">
       {/* Decorative Background Elements */}
 
 

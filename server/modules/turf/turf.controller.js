@@ -17,34 +17,41 @@ export const getAllTurfs = async (req, res) => {
 
     // 1. Proximity Search (Must be first if using $geoNear)
     if (lat && lng) {
-      pipeline.push({
+      // 1. Proximity Search (Must be first if using $geoNear)
+      // We use a very large maxDistance to ensure all venues are included but sorted by proximity
+      const geoNearStage = {
         $geoNear: {
           near: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
           distanceField: "distance",
-          maxDistance: (parseFloat(radius) || 50) * 1000,
           spherical: true,
           query: { status: "approved", isActive: true }
         }
-      });
+      };
+
+      // Add city/state filters into the geoNear query if present
+      if (city) geoNearStage.$geoNear.query.city = { $regex: new RegExp(`^${city}$`, "i") };
+      if (state) geoNearStage.$geoNear.query.state = { $regex: new RegExp(`^${state}$`, "i") };
+      if (searchTerm) {
+        geoNearStage.$geoNear.query.$or = [
+          { name: { $regex: searchTerm, $options: "i" } },
+          { sportTypes: { $regex: searchTerm, $options: "i" } }
+        ];
+      }
+
+      pipeline.push(geoNearStage);
     } else {
-      pipeline.push({ $match: { status: "approved", isActive: true } });
+      // No location provided - normal filtering
+      let matchQuery = { status: "approved", isActive: true };
+      if (city) matchQuery.city = { $regex: new RegExp(`^${city}$`, "i") };
+      if (state) matchQuery.state = { $regex: new RegExp(`^${state}$`, "i") };
+      if (searchTerm) {
+        matchQuery.$or = [
+          { name: { $regex: searchTerm, $options: "i" } },
+          { sportTypes: { $regex: searchTerm, $options: "i" } }
+        ];
+      }
+      pipeline.push({ $match: matchQuery });
     }
-
-    // 2. Keyword Search
-    if (searchTerm) {
-      pipeline.push({
-        $match: {
-          $or: [
-            { name: { $regex: searchTerm, $options: "i" } },
-            { sportTypes: { $regex: searchTerm, $options: "i" } }
-          ]
-        }
-      });
-    }
-
-    // 3. City/State Search
-    if (city) pipeline.push({ $match: { city: { $regex: new RegExp(`^${city}$`, "i") } } });
-    if (state) pipeline.push({ $match: { state: { $regex: new RegExp(`^${state}$`, "i") } } });
 
     // 4. Rating Calculation
     pipeline.push({

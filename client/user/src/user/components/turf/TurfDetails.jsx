@@ -126,7 +126,7 @@ const TurfDetails = () => {
   const videoId = getYouTubeID(turf.youtubeUrl);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white pt-4 pb-20">
       {/* Top Navigation Bar */}
       <div className="container mx-auto px-4 mb-8">
         <Link 

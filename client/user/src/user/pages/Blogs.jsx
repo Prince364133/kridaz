@@ -60,7 +60,7 @@ const Blogs = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-32 pb-24 px-6">
+    <div className="min-h-screen bg-black text-white pt-4 pb-24 px-6">
       <div className="max-w-7xl mx-auto">
         
         {/* Header Section */}
