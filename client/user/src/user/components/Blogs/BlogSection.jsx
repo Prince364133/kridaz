@@ -38,7 +38,7 @@ const BlogSection = () => {
 
   if (loading) {
     return (
-      <section className="py-20 px-6 max-w-7xl mx-auto">
+      <section className="py-20 px-6 max-w-screen-2xl mx-auto">
         <div className="h-12 w-64 bg-white/5 animate-pulse rounded-lg mb-8" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
@@ -52,7 +52,7 @@ const BlogSection = () => {
   if (blogs.length === 0) return null;
 
   return (
-    <section className="py-20 px-6 max-w-7xl mx-auto">
+    <section className="py-20 px-6 max-w-screen-2xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
         <div>
           <h2 className="font-display text-5xl md:text-7xl uppercase leading-none tracking-tight">
@@ -94,7 +94,7 @@ const BlogSection = () => {
             {/* Content Overlay */}
             <div className="relative z-10 flex flex-col h-full p-6">
               {/* Number Overlay */}
-              <div className="font-display text-6xl text-white/10 italic leading-none select-none">
+              <div className="font-display text-6xl text-white/10 leading-none select-none">
                 {String(idx + 1).padStart(2, '0')}
               </div>
 
@@ -105,7 +105,7 @@ const BlogSection = () => {
               </div>
 
               {/* Title */}
-              <h3 className="font-display text-2xl md:text-3xl text-white leading-[0.9] uppercase italic mb-6 group-hover:text-primary transition-colors">
+              <h3 className="font-display text-2xl md:text-3xl text-white leading-[0.9] uppercase mb-6 group-hover:text-primary transition-colors">
                 {blog.title}
               </h3>
 
