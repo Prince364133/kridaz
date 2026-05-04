@@ -3,17 +3,19 @@ import { setTurfs, setLoading, setError } from "@redux/slices/turfSlice";
 import axiosInstance from "../hooks/useAxiosInstance";
 import { useEffect } from "react";
 
-const useTurfData = () => {
+const useTurfData = (filters = {}) => {
   const dispatch = useDispatch();
   const { turfs, loading, error } = useSelector((state) => state.turf);
 
-  const fetchTurfData = async () => {
+  const fetchTurfData = async (searchParams = filters) => {
     try {
       dispatch(setLoading(true));
       dispatch(setError(null));
       
-      // Add a 10-second timeout to the request
-      const response = await axiosInstance.get("/api/user/turf/all", { timeout: 10000 });
+      const response = await axiosInstance.get("/api/user/turf/all", { 
+        params: searchParams,
+        timeout: 15000 
+      });
       
       if (response.data && response.data.turfs) {
         dispatch(setTurfs(response.data.turfs));
@@ -36,7 +38,7 @@ const useTurfData = () => {
 
   useEffect(() => {
     fetchTurfData();
-  }, []);
+  }, [JSON.stringify(filters)]);
 
   return { turfs, loading, error, refetch: fetchTurfData };
 };

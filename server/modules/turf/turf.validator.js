@@ -5,6 +5,10 @@ export const turfRegisterSchema = z.object({
     name: z.string().min(1, "Name is required"),
     description: z.string().min(1, "Description is required"),
     location: z.string().min(1, "Location is required"),
+    city: z.string().optional(),
+    state: z.string().optional(),
+    latitude: z.string().optional(),
+    longitude: z.string().optional(),
     sportTypes: z.union([z.string(), z.array(z.string())]),
     pricePerHour: z.string().refine((val) => !isNaN(Number(val)), {
       message: "Price per hour must be a number",
@@ -20,6 +24,10 @@ export const turfUpdateSchema = z.object({
     name: z.string().optional(),
     description: z.string().optional(),
     location: z.string().optional(),
+    city: z.string().optional(),
+    state: z.string().optional(),
+    latitude: z.string().optional(),
+    longitude: z.string().optional(),
     sportTypes: z.union([z.string(), z.array(z.string())]).optional(),
     pricePerHour: z.string().refine((val) => !isNaN(Number(val)), {
       message: "Price per hour must be a number",

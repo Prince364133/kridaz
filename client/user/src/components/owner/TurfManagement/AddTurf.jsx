@@ -6,6 +6,9 @@ import { setHours, setMinutes } from "date-fns";
 import { FormField } from "@components/common";
 import useAddTurf from "@hooks/owner/useAddTurf";
 import { Button } from "@components/common";
+import { useState, useEffect } from "react";
+import { fetchStates, fetchCities } from "../../../user/utils/locationService";
+
 const AddTurf = () => {
   const {
     register,
@@ -13,6 +16,7 @@ const AddTurf = () => {
     errors,
     control,
     setValue,
+    watch,
     onSubmit,
     sportTypes,
     newSportType,
@@ -37,7 +41,33 @@ const AddTurf = () => {
     toggleDay,
     toggleSlotActive,
     loading,
+    getMyLocation,
+    isLocating
   } = useAddTurf();
+
+  const [statesList, setStatesList] = useState([]);
+  const [citiesList, setCitiesList] = useState([]);
+  const selectedState = watch("state");
+
+  useEffect(() => {
+    const loadStates = async () => {
+      const data = await fetchStates();
+      setStatesList(data);
+    };
+    loadStates();
+  }, []);
+
+  useEffect(() => {
+    if (selectedState) {
+      const loadCities = async () => {
+        const data = await fetchCities(selectedState);
+        setCitiesList(data);
+      };
+      loadCities();
+    } else {
+      setCitiesList([]);
+    }
+  }, [selectedState]);
 
   const sportsOptions = ["Football", "Cricket", "Tennis", "Badminton", "Table Tennis", "Basketball", "Volleyball", "Hockey"];
   const groundTypeOptions = ["Natural Grass", "Artificial Turf", "Clay", "Hard Court", "Small Turf", "Indoor Court"];
@@ -87,13 +117,77 @@ const AddTurf = () => {
             </div>
             
             <FormField
-              label="Location"
+              label="Location (Address Line)"
               name="location"
               type="text"
               register={register}
               error={errors.location}
             />
-            
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">State</span>
+                </label>
+                <select
+                  {...register("state")}
+                  className="select bg-[#151515] border-gray-800 text-white focus:border-primary focus:outline-none text-sm h-12 rounded-xl w-full"
+                  onChange={(e) => {
+                    setValue("state", e.target.value);
+                    setValue("city", ""); // Reset city on state change
+                  }}
+                >
+                  <option value="">Select State</option>
+                  {statesList.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+                {errors.state && <span className="text-primary text-[10px] font-bold uppercase mt-1">{errors.state.message}</span>}
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">City</span>
+                </label>
+                <select
+                  {...register("city")}
+                  disabled={!selectedState}
+                  className={`select bg-[#151515] border-gray-800 text-white focus:border-primary focus:outline-none text-sm h-12 rounded-xl w-full ${!selectedState ? 'opacity-50' : ''}`}
+                >
+                  <option value="">Select City</option>
+                  {citiesList.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                {errors.city && <span className="text-primary text-[10px] font-bold uppercase mt-1">{errors.city.message}</span>}
+              </div>
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Geographical Coordinates</span>
+              </label>
+              <div className="flex gap-4">
+                <input
+                  {...register("latitude")}
+                  placeholder="Latitude"
+                  readOnly
+                  className="input bg-[#151515] border-gray-800 text-gray-500 text-xs w-full h-12 rounded-xl focus:outline-none"
+                />
+                <input
+                  {...register("longitude")}
+                  placeholder="Longitude"
+                  readOnly
+                  className="input bg-[#151515] border-gray-800 text-gray-500 text-xs w-full h-12 rounded-xl focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={getMyLocation}
+                  className={`px-6 rounded-xl bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-black transition-all flex items-center justify-center ${isLocating ? 'animate-pulse' : ''}`}
+                  title="Capture Current Location"
+                >
+                  {isLocating ? "..." : "GPS"}
+                </button>
+              </div>
+              <p className="text-[9px] text-gray-500 mt-2 uppercase tracking-tighter italic">Click GPS to capture exact coordinates for better discovery.</p>
+            </div>
+
             <FormField
               label="Hourly Rate (INR)"
               name="pricePerHour"

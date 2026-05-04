@@ -20,6 +20,10 @@ const addTurfSchema = yup.object().shape({
     .string()
     .required("Enter the location of the turf")
     .min(3, "Location must be at least 3 characters long"),
+  city: yup.string().required("City is required"),
+  state: yup.string().required("State is required"),
+  latitude: yup.string().optional(),
+  longitude: yup.string().optional(),
   pricePerHour: yup
     .number()
     .required("Enter the price per hour of the turf")
@@ -61,6 +65,7 @@ const addTurfSchema = yup.object().shape({
 
 export default function useAddTurf() {
   const [loading, setLoading] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const navigate = useNavigate();
   const {
     register,
@@ -80,6 +85,10 @@ export default function useAddTurf() {
       youtubeUrl: "",
       slotDuration: 60,
       breakTime: 0,
+      city: "",
+      state: "",
+      latitude: "",
+      longitude: "",
       availableDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
       offDays: [],
     },
@@ -258,12 +267,34 @@ export default function useAddTurf() {
     }
   };
 
+  const getMyLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setValue("latitude", position.coords.latitude.toString());
+        setValue("longitude", position.coords.longitude.toString());
+        setIsLocating(false);
+        toast.success("Coordinates captured successfully!");
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        setIsLocating(false);
+        toast.error("Unable to retrieve your location. Please check permissions.");
+      }
+    );
+  };
+
   return {
     register,
     handleSubmit,
     errors,
     control,
     setValue,
+    watch,
     onSubmit,
     sportTypes,
     newSportType,
@@ -290,5 +321,7 @@ export default function useAddTurf() {
     toggleDay,
     toggleSlotActive,
     loading,
+    getMyLocation,
+    isLocating
   };
 }

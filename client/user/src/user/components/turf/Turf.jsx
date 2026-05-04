@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import TurfCard from "./TurfCard.jsx";
 import TurfCardSkeleton from "../ui/TurfCardSkeleton.jsx";
 import useTurfData from "../../hooks/useTurfData.jsx";
@@ -6,31 +6,11 @@ import SearchTurf from "../search/SearchTurf.jsx";
 import { Trophy } from "lucide-react";
 
 const Turf = () => {
-  const { turfs, loading, error } = useTurfData();
-  const [filteredTurfs, setFilteredTurfs] = useState([]);
+  const [searchFilters, setSearchFilters] = useState({});
+  const { turfs, loading, error, refetch } = useTurfData(searchFilters);
 
-  useEffect(() => {
-    if (turfs) {
-      setFilteredTurfs(turfs);
-    }
-  }, [turfs]);
-
-  const handleSearch = ({ searchTerm, location, city, state, radius }) => {
-    const filtered = turfs.filter((turf) => {
-      // 1. Sport Match
-      const matchesSearch = !searchTerm || 
-                          turf.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          turf.sportTypes?.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      // 2. Location String Match (Fuzzy)
-      const turfLocation = turf.location?.toLowerCase() || "";
-      const matchesLocation = !location || turfLocation.includes(location.toLowerCase().split(',')[0].trim());
-      const matchesCity = !city || turfLocation.includes(city.toLowerCase().trim());
-      const matchesState = !state || turfLocation.includes(state.toLowerCase().trim());
-      
-      return matchesSearch && matchesLocation && matchesCity && matchesState;
-    });
-    setFilteredTurfs(filtered);
+  const handleSearch = (filters) => {
+    setSearchFilters(filters);
   };
 
   // if (error) {
@@ -59,7 +39,7 @@ const Turf = () => {
         {/* ── Results Grid ──────────────────────────────────────── */}
         <div className="flex items-center justify-between mb-10 border-b border-white/5 pb-6">
           <h2 className="text-sm font-black uppercase tracking-[0.3em] text-gray-400">
-            Available Slots ({filteredTurfs.length})
+            Available Slots ({turfs.length})
           </h2>
         </div>
 
@@ -69,14 +49,14 @@ const Turf = () => {
               <TurfCardSkeleton key={`skeleton-${index}`} />
             ))}
           </div>
-        ) : filteredTurfs.length > 0 ? (
+        ) : turfs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filteredTurfs.map((turf, idx) => (
+            {turfs.map((turf, idx) => (
               <div key={turf._id} className="animate-fade-in-up" style={{ animationDelay: `${idx * 100}ms` }}>
                 <TurfCard 
                   turf={turf} 
                   featured={idx === 0} 
-                  distance={`${(Math.random() * 5 + 1).toFixed(1)} km`}
+                  distance={turf.distance ? `${(turf.distance / 1000).toFixed(1)} km` : "N/A"}
                 />
               </div>
             ))}
@@ -87,7 +67,7 @@ const Turf = () => {
             <h3 className="text-2xl font-display uppercase text-gray-400 mb-2">Venues Not Found</h3>
             <p className="text-gray-600">Try adjusting your filters or search keywords.</p>
             <button 
-              onClick={() => { setFilteredTurfs(turfs); }}
+              onClick={() => { setSearchFilters({}); }}
               className="mt-8 px-10 py-3 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
             >
               Clear All Filters

@@ -5,6 +5,12 @@ const turfSchema = new mongoose.Schema(
     name: { type: String, required: true },
     description: { type: String, required: true },
     location: { type: String, required: true },
+    city: { type: String },
+    state: { type: String },
+    locationData: {
+      type: { type: String, default: "Point" },
+      coordinates: { type: [Number], index: "2dsphere" }, // [longitude, latitude]
+    },
     image: { type: String, required: true },
     images: [{ type: String }],
     sportTypes: [{ type: String, required: true }],
@@ -55,6 +61,8 @@ const turfSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+turfSchema.index({ locationData: "2dsphere" });
 
 const Turf = mongoose.model("Turf", turfSchema, "turves");
 

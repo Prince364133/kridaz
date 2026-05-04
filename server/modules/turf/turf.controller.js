@@ -11,10 +11,59 @@ import { getTurfWithAvgRating } from "./turf.service.js";
 // --- USER OPERATIONS ---
 
 export const getAllTurfs = async (req, res) => {
+  const { searchTerm, city, state, lat, lng, radius } = req.query;
   try {
-    const turfs = await Turf.find({ status: "approved", isActive: true });
-    const turfsWithRating = await Promise.all(turfs.map(getTurfWithAvgRating));
-    return res.status(200).json({ turfs: turfsWithRating });
+    let pipeline = [];
+
+    // 1. Proximity Search (Must be first if using $geoNear)
+    if (lat && lng) {
+      pipeline.push({
+        $geoNear: {
+          near: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
+          distanceField: "distance",
+          maxDistance: (parseFloat(radius) || 50) * 1000,
+          spherical: true,
+          query: { status: "approved", isActive: true }
+        }
+      });
+    } else {
+      pipeline.push({ $match: { status: "approved", isActive: true } });
+    }
+
+    // 2. Keyword Search
+    if (searchTerm) {
+      pipeline.push({
+        $match: {
+          $or: [
+            { name: { $regex: searchTerm, $options: "i" } },
+            { sportTypes: { $regex: searchTerm, $options: "i" } }
+          ]
+        }
+      });
+    }
+
+    // 3. City/State Search
+    if (city) pipeline.push({ $match: { city: { $regex: new RegExp(`^${city}$`, "i") } } });
+    if (state) pipeline.push({ $match: { state: { $regex: new RegExp(`^${state}$`, "i") } } });
+
+    // 4. Rating Calculation
+    pipeline.push({
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "turf",
+        as: "reviews"
+      }
+    }, {
+      $addFields: {
+        avgRating: { $ifNull: [{ $avg: "$reviews.rating" }, 0] }
+      }
+    }, {
+      $project: { reviews: 0 }
+    });
+
+    const turfs = await Turf.aggregate(pipeline);
+    return res.status(200).json({ turfs });
   } catch (err) {
     console.log(chalk.red("Error in getAllTurfs"), err);
     return res.status(500).json({ message: err.message });
@@ -93,7 +142,18 @@ export const turfRegister = async (req, res) => {
 
     const imageUrls = await Promise.all(uploadPromises);
 
-    const { availableDays, offDays, generatedSlots, slotDuration, breakTime, ...otherData } = req.body;
+    const { 
+      availableDays, 
+      offDays, 
+      generatedSlots, 
+      slotDuration, 
+      breakTime, 
+      city, 
+      state, 
+      latitude, 
+      longitude,
+      ...otherData 
+    } = req.body;
 
     const turf = new Turf({
       image: imageUrls[0], 
@@ -101,6 +161,12 @@ export const turfRegister = async (req, res) => {
       owner,
       status: "pending",
       ...otherData,
+      city,
+      state,
+      locationData: latitude && longitude ? {
+        type: "Point",
+        coordinates: [Number(longitude), Number(latitude)]
+      } : undefined,
       slotDuration: Number(slotDuration) || 60,
       breakTime: Number(breakTime) || 0,
       availableDays: Array.isArray(availableDays) ? availableDays : (availableDays ? [availableDays] : []),
@@ -165,6 +231,15 @@ export const editTurfById = async (req, res) => {
 
   if (req.body.slotDuration) updatedTurfData.slotDuration = Number(req.body.slotDuration);
   if (req.body.breakTime !== undefined) updatedTurfData.breakTime = Number(req.body.breakTime);
+
+  if (req.body.city) updatedTurfData.city = req.body.city;
+  if (req.body.state) updatedTurfData.state = req.body.state;
+  if (req.body.latitude && req.body.longitude) {
+    updatedTurfData.locationData = {
+      type: "Point",
+      coordinates: [Number(req.body.longitude), Number(req.body.latitude)]
+    };
+  }
 
   try {
     const turf = await Turf.findOne({ owner, _id: id });
