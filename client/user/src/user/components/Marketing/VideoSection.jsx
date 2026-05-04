@@ -41,7 +41,7 @@ export const VideoSection = ({ videos = [] }) => {
   };
 
   return (
-    <section className="py-20 bg-black overflow-hidden border-t border-white/5">
+    <section className="pt-5 pb-20 bg-black overflow-hidden border-t border-white/5">
       <div className="max-w-full mx-auto px-10 lg:px-20 mb-12 flex items-end justify-between">
         <div>
           <h2 className="font-display text-5xl md:text-7xl uppercase leading-none text-white tracking-tight">
@@ -75,10 +75,8 @@ export const VideoSection = ({ videos = [] }) => {
                 <img 
                   src={thumbUrl} 
                   alt={video.title}
-                  className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
                 />
-                
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
                 
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-16 h-16 rounded-full bg-primary/20 backdrop-blur-md border border-primary/40 flex items-center justify-center text-primary scale-90 group-hover:scale-110 transition-all duration-500 shadow-[0_0_30px_rgba(132,204,22,0.3)]">

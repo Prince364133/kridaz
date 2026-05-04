@@ -32,15 +32,16 @@ const AdminLayout = () => {
         <main
           className={`
           flex-1 
-          p-4 
-          pb-24 lg:pb-4
+          min-h-0
+          overflow-y-auto
+          overflow-x-hidden
           transition-all 
           duration-300 
           ease-in-out
           ${isMinimized ? "lg:ml-20" : "lg:ml-64"}
         `}
         >
-          <div className="container mx-auto">
+          <div className="w-full p-4 pb-24 lg:pb-10">
             <Outlet />
           </div>
         </main>

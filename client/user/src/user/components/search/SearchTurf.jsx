@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Trophy, ChevronDown, Globe, RotateCcw, Search } from "lucide-react";
+import { Trophy, ChevronDown, Globe, Search } from "lucide-react";
 import { fetchStates, fetchCities } from "../../utils/locationService";
 
 const SPORTS_LIST = [
@@ -72,14 +72,18 @@ const SearchTurf = ({ onSearch, userLocation }) => {
   // ── Debounced auto-search — fires on any filter change ─────────────
   useEffect(() => {
     const t = setTimeout(() => {
-      onSearchRef.current({
-        searchTerm: sport,
-        city,
-        state,
-        // always pass user location so backend sorts by proximity
+      const searchParams = {
+        searchTerm: sport || undefined,
+        city: city || undefined,
+        state: state || undefined,
         lat: userLocation?.lat,
         lng: userLocation?.lng,
-      });
+      };
+
+      // Remove undefined values
+      Object.keys(searchParams).forEach(key => searchParams[key] === undefined && delete searchParams[key]);
+
+      onSearchRef.current(searchParams);
     }, 400);
     return () => clearTimeout(t);
   }, [sport, city, state, userLocation]);
@@ -94,13 +98,6 @@ const SearchTurf = ({ onSearch, userLocation }) => {
     }
   }, [userLocation]);
 
-  const resetFilters = () => {
-    setSport("");
-    setState("");
-    setCity("");
-    setStateSearch("");
-    setCitySearch("");
-  };
 
   // ── Filtered lists for search-inside-dropdown ──────────────────────
   const filteredStates = stateSearch
@@ -115,37 +112,40 @@ const SearchTurf = ({ onSearch, userLocation }) => {
     <div className="w-full max-w-[1500px] mx-auto animate-fade-in-up">
       <div className="relative group">
         {/* ── Main Bar ──────────────────────────────────────────── */}
-        <div className="relative flex flex-row items-center bg-black/80 backdrop-blur-3xl border border-white/10 rounded-full p-1.5 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] transition-all duration-700 hover:border-[#84CC16]/40 overflow-x-auto no-scrollbar">
+        <div className="relative flex flex-row items-center bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl p-1.5 shadow-2xl transition-all duration-500 hover:border-[#84CC16]/30 min-h-[56px] md:min-h-[64px]">
 
           {/* ── Sport Dropdown ─────────────────────────────────── */}
-          <div className="flex-1 min-w-[90px] relative z-[100] border-r border-white/5" ref={sportDropdownRef}>
+          <div className="flex-1 min-w-[80px] relative z-[100] border-r border-white/5" ref={sportDropdownRef}>
             <button
               onClick={() => setShowSportDropdown(!showSportDropdown)}
-              className="flex items-center justify-center w-full h-full px-2 lg:px-8 py-2 lg:py-4 text-left"
+              className="flex items-center gap-3 w-full h-full px-4 py-2 transition-all hover:bg-white/5 rounded-xl group/btn"
             >
-              <Trophy className={`hidden sm:block mr-2 lg:mr-4 shrink-0 w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-500 ${showSportDropdown ? "scale-110 text-[#84CC16]" : "text-gray-500"}`} />
-              <div className="flex flex-col items-center sm:items-start text-center sm:text-left w-full">
-                <span className="text-[6px] lg:text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-0.5">Category</span>
-                <span className="text-[9px] lg:text-[13px] font-black text-white uppercase tracking-wider truncate w-full">{sport || "All"}</span>
+              <div className="p-2 bg-white/5 rounded-lg group-hover/btn:bg-[#84CC16]/10 transition-colors">
+                <Trophy size={14} className={`${showSportDropdown ? "text-[#84CC16]" : "text-gray-500"}`} />
               </div>
-              <ChevronDown className={`hidden md:block ml-auto w-3 h-3 lg:w-4 lg:h-4 text-gray-600 transition-transform duration-500 ${showSportDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
+              <div className="flex flex-col text-left">
+                <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Sport</span>
+                <span className="text-[12px] font-bold text-white uppercase tracking-tight truncate w-full">{sport || "All"}</span>
+              </div>
+              <ChevronDown size={12} className={`ml-auto text-gray-600 transition-transform duration-500 ${showSportDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
             </button>
 
             {showSportDropdown && (
-              <div className="absolute top-[115%] left-0 w-64 lg:w-72 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110]">
-                <div className="p-2 max-h-[300px] overflow-y-auto grid grid-cols-1 gap-1">
+              <div className="absolute top-full mt-2 left-0 w-64 lg:w-72 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110] animate-in slide-in-from-top-2 duration-200">
+                <div className="p-2 max-h-[300px] overflow-y-auto grid grid-cols-1 gap-1 custom-scrollbar">
                   <button
                     onClick={() => { setSport(""); setShowSportDropdown(false); }}
-                    className="flex items-center px-4 py-3 rounded-xl hover:bg-[#84CC16]/10 text-left transition-colors"
+                    className="flex items-center px-4 py-3 rounded-xl hover:bg-[#84CC16]/10 text-left transition-colors group/item"
                   >
-                    <Trophy size={14} className="mr-3 text-gray-600" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">All Sports</span>
+                    <Trophy size={14} className="mr-3 text-gray-600 group-hover/item:text-[#84CC16]" />
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">All Categories</span>
                   </button>
+                  <div className="h-px bg-white/5 my-1" />
                   {SPORTS_LIST.map((s) => (
                     <button
                       key={s}
                       onClick={() => { setSport(s); setShowSportDropdown(false); }}
-                      className={`flex items-center px-4 py-3 rounded-xl transition-all text-left ${sport === s ? "bg-[#84CC16] text-black" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+                      className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${sport === s ? "bg-[#84CC16] text-black shadow-[0_0_15px_rgba(132,204,22,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
                     >
                       <span className={`text-[11px] font-bold uppercase tracking-wider ${sport === s ? "text-black" : ""}`}>{s}</span>
                     </button>
@@ -155,50 +155,52 @@ const SearchTurf = ({ onSearch, userLocation }) => {
             )}
           </div>
 
-          {/* ── State Dropdown (with search) ───────────────────── */}
-          <div className="flex-1 min-w-[90px] relative z-[90] border-r border-white/5" ref={stateDropdownRef}>
+          {/* ── State Dropdown ─────────────────────────────────── */}
+          <div className="flex-1 min-w-[80px] relative z-[90] border-r border-white/5" ref={stateDropdownRef}>
             <button
               onClick={() => { setShowStateDropdown(!showStateDropdown); setStateSearch(""); }}
-              className="flex items-center justify-center w-full h-full px-2 lg:px-8 py-2 lg:py-4 text-left"
+              className="flex items-center gap-3 w-full h-full px-4 py-2 transition-all hover:bg-white/5 rounded-xl group/btn"
             >
-              <Globe className={`hidden sm:block mr-2 lg:mr-4 shrink-0 w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-500 ${showStateDropdown ? "scale-110 text-[#84CC16]" : "text-gray-500"}`} />
-              <div className="flex flex-col items-center sm:items-start text-center sm:text-left w-full">
-                <span className="text-[6px] lg:text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-0.5">State</span>
-                <span className="text-[9px] lg:text-[13px] font-black text-white uppercase tracking-wider truncate w-full">{state || "Select"}</span>
+              <div className="p-2 bg-white/5 rounded-lg group-hover/btn:bg-[#84CC16]/10 transition-colors">
+                <Globe size={14} className={`${showStateDropdown ? "text-[#84CC16]" : "text-gray-500"}`} />
               </div>
-              <ChevronDown className={`hidden md:block ml-auto w-3 h-3 lg:w-4 lg:h-4 text-gray-600 transition-transform duration-500 ${showStateDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
+              <div className="flex flex-col text-left">
+                <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">State</span>
+                <span className="text-[12px] font-bold text-white uppercase tracking-tight truncate w-full">{state || "Select"}</span>
+              </div>
+              <ChevronDown size={12} className={`ml-auto text-gray-600 transition-transform duration-500 ${showStateDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
             </button>
 
             {showStateDropdown && (
-              <div className="absolute top-[115%] left-1/2 -translate-x-1/2 lg:translate-x-0 lg:left-0 w-64 lg:w-72 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110]">
-                {/* Search bar inside state dropdown */}
+              <div className="absolute top-full mt-2 left-0 w-64 lg:w-72 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110] animate-in slide-in-from-top-2 duration-200">
                 <div className="p-2 border-b border-white/5">
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5">
-                    <Search size={13} className="text-gray-500 shrink-0" />
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/5 focus-within:border-[#84CC16]/30 transition-all">
+                    <Search size={12} className="text-gray-500 shrink-0" />
                     <input
                       autoFocus
                       type="text"
-                      placeholder="Search state..."
+                      placeholder="Find state..."
                       value={stateSearch}
                       onChange={(e) => setStateSearch(e.target.value)}
                       className="bg-transparent text-[11px] font-bold text-white placeholder-gray-600 outline-none w-full uppercase tracking-wider"
                     />
                   </div>
                 </div>
-                <div className="p-2 max-h-[260px] overflow-y-auto grid grid-cols-1 gap-1">
+                <div className="p-2 max-h-[260px] overflow-y-auto grid grid-cols-1 gap-1 custom-scrollbar">
                   <button
                     onClick={() => { setState(""); setShowStateDropdown(false); }}
                     className="flex items-center px-4 py-3 rounded-xl hover:bg-[#84CC16]/10 text-left transition-colors"
                   >
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">All States</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">All Locations</span>
                   </button>
+                  <div className="h-px bg-white/5 my-1" />
                   {filteredStates.length === 0 ? (
-                    <p className="text-[11px] text-gray-600 px-4 py-3 uppercase tracking-wider">No results</p>
+                    <p className="text-[10px] font-bold text-gray-600 px-4 py-3 uppercase tracking-widest text-center">No locations found</p>
                   ) : filteredStates.map((s) => (
                     <button
                       key={s}
                       onClick={() => { setState(s); setShowStateDropdown(false); setStateSearch(""); }}
-                      className={`flex items-center px-4 py-3 rounded-xl transition-all text-left ${state === s ? "bg-[#84CC16] text-black" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+                      className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${state === s ? "bg-[#84CC16] text-black shadow-[0_0_15px_rgba(132,204,22,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
                     >
                       <span className={`text-[11px] font-bold uppercase tracking-wider ${state === s ? "text-black" : ""}`}>{s}</span>
                     </button>
@@ -208,51 +210,53 @@ const SearchTurf = ({ onSearch, userLocation }) => {
             )}
           </div>
 
-          {/* ── City Dropdown (with search) ────────────────────── */}
-          <div className="flex-1 min-w-[90px] relative z-[80] border-r border-white/5" ref={cityDropdownRef}>
+          {/* ── City Dropdown ──────────────────────────────────── */}
+          <div className="flex-1 min-w-[80px] relative z-[80]" ref={cityDropdownRef}>
             <button
               onClick={() => { if (state) { setShowCityDropdown(!showCityDropdown); setCitySearch(""); } }}
               disabled={!state}
-              className={`flex items-center justify-center w-full h-full px-2 lg:px-8 py-2 lg:py-4 text-left ${!state ? "opacity-30 cursor-not-allowed" : ""}`}
+              className={`flex items-center gap-3 w-full h-full px-4 py-2 transition-all hover:bg-white/5 rounded-xl group/btn ${!state ? "opacity-20 grayscale" : ""}`}
             >
-              <Globe className={`hidden sm:block mr-2 lg:mr-4 shrink-0 w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-500 ${showCityDropdown ? "scale-110 text-[#84CC16]" : "text-gray-500"}`} />
-              <div className="flex flex-col items-center sm:items-start text-center sm:text-left w-full">
-                <span className="text-[6px] lg:text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-0.5">City</span>
-                <span className="text-[9px] lg:text-[13px] font-black text-white uppercase tracking-wider truncate w-full">{city || "Select"}</span>
+              <div className="p-2 bg-white/5 rounded-lg group-hover/btn:bg-[#84CC16]/10 transition-colors">
+                <MapPin size={14} className={`${showCityDropdown ? "text-[#84CC16]" : "text-gray-500"}`} />
               </div>
-              <ChevronDown className={`hidden md:block ml-auto w-3 h-3 lg:w-4 lg:h-4 text-gray-600 transition-transform duration-500 ${showCityDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
+              <div className="flex flex-col text-left">
+                <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">City</span>
+                <span className="text-[12px] font-bold text-white uppercase tracking-tight truncate w-full">{city || "Select"}</span>
+              </div>
+              <ChevronDown size={12} className={`ml-auto text-gray-600 transition-transform duration-500 ${showCityDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
             </button>
 
             {showCityDropdown && state && (
-              <div className="absolute top-[115%] right-0 w-64 lg:w-72 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110]">
-                {/* Search bar inside city dropdown */}
+              <div className="absolute top-full mt-2 right-0 w-64 lg:w-72 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110] animate-in slide-in-from-top-2 duration-200">
                 <div className="p-2 border-b border-white/5">
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5">
-                    <Search size={13} className="text-gray-500 shrink-0" />
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/5 focus-within:border-[#84CC16]/30 transition-all">
+                    <Search size={12} className="text-gray-500 shrink-0" />
                     <input
                       autoFocus
                       type="text"
-                      placeholder="Search city..."
+                      placeholder="Find city..."
                       value={citySearch}
                       onChange={(e) => setCitySearch(e.target.value)}
                       className="bg-transparent text-[11px] font-bold text-white placeholder-gray-600 outline-none w-full uppercase tracking-wider"
                     />
                   </div>
                 </div>
-                <div className="p-2 max-h-[260px] overflow-y-auto grid grid-cols-1 gap-1">
+                <div className="p-2 max-h-[260px] overflow-y-auto grid grid-cols-1 gap-1 custom-scrollbar">
                   <button
                     onClick={() => { setCity(""); setShowCityDropdown(false); }}
                     className="flex items-center px-4 py-3 rounded-xl hover:bg-[#84CC16]/10 text-left transition-colors"
                   >
                     <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">All Cities</span>
                   </button>
+                  <div className="h-px bg-white/5 my-1" />
                   {filteredCities.length === 0 ? (
-                    <p className="text-[11px] text-gray-600 px-4 py-3 uppercase tracking-wider">No results</p>
+                    <p className="text-[10px] font-bold text-gray-600 px-4 py-3 uppercase tracking-widest text-center">No cities found</p>
                   ) : filteredCities.map((c) => (
                     <button
                       key={c}
                       onClick={() => { setCity(c); setShowCityDropdown(false); setCitySearch(""); }}
-                      className={`flex items-center px-4 py-3 rounded-xl transition-all text-left ${city === c ? "bg-[#84CC16] text-black" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+                      className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${city === c ? "bg-[#84CC16] text-black shadow-[0_0_15px_rgba(132,204,22,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
                     >
                       <span className={`text-[11px] font-bold uppercase tracking-wider ${city === c ? "text-black" : ""}`}>{c}</span>
                     </button>
@@ -260,17 +264,6 @@ const SearchTurf = ({ onSearch, userLocation }) => {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* ── Reset Button ───────────────────────────────────── */}
-          <div className="p-1 sm:p-2 flex items-center justify-center lg:px-6">
-            <button
-              onClick={resetFilters}
-              className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-2 sm:px-4 lg:px-6 py-2 lg:py-3 rounded-full hover:bg-white/5 text-gray-600 hover:text-[#FF3B3B] transition-all group/reset whitespace-nowrap"
-            >
-              <RotateCcw className="w-3 h-3 lg:w-4 lg:h-4 group-hover/reset:rotate-[-180deg] transition-transform duration-500" />
-              <span className="text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em]">Reset</span>
-            </button>
           </div>
         </div>
       </div>

@@ -125,7 +125,7 @@ export default function Profile() {
             </div>
 
             {/* Right: Quick Stats */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto">
               {[
                 { label: "Total Bookings", value: bookings.length, icon: Calendar },
                 { label: "Amount Spent", value: `₹${totalSpent.toLocaleString()}`, icon: IndianRupee },
@@ -199,8 +199,8 @@ export default function Profile() {
                 {/* Green accent bar on hover */}
                 <div className="absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: PRI }} />
 
-                <div className="p-8">
-                  <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
+                <div className="p-5 md:p-8">
+                  <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start">
 
                     {/* QR Code */}
                     <div className="shrink-0">
@@ -232,7 +232,7 @@ export default function Profile() {
 
                       {/* Meta grid */}
                       <div
-                        className="grid grid-cols-2 md:grid-cols-3 gap-6 pt-5 border-t"
+                        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 pt-5 border-t"
                         style={{ borderColor: BDR }}
                       >
                         <div className="space-y-1">

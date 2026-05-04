@@ -146,7 +146,7 @@ export default function TurfDetails() {
     <div className="p-8 text-center">
       <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
       <h2 className="text-2xl font-bold text-white mb-2">Error Loading Arena</h2>
-      <p className="text-gray-500 mb-6">{error || "Connection failure to command center"}</p>
+      <p className="text-gray-500 mb-6">{error || "Connection failure to server"}</p>
       {error && typeof error === 'string' && error.includes("{") && (
         <pre className="text-[8px] text-gray-700 bg-black/20 p-4 rounded mb-6 max-w-md mx-auto overflow-auto text-left">
           {error}

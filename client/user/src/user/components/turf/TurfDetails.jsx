@@ -55,13 +55,30 @@ const TurfDetails = () => {
     loading: bookingLoading,
   } = useReservation();
 
-  // Auto-scroll logic
+  const getYouTubeID = (url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const videoId = getYouTubeID(turf?.youtubeUrl);
+  const mediaItems = React.useMemo(() => [
+    ...(videoId ? [{ type: "video", id: videoId }] : []),
+    ...(turf?.images && turf.images.length > 0 
+      ? turf.images.map(img => ({ type: "image", url: img }))
+      : [{ type: "image", url: turf?.image || "/banner-1.png" }])
+  ], [turf, videoId]);
+
+  // Auto-scroll logic - must be called before conditional returns
   React.useEffect(() => {
+    if (!turf || loading) return;
+    
     let interval;
-    const imagesLength = turf?.images?.length || 0;
-    if (isAutoPlaying && imagesLength > 1) {
+    const mediaLength = mediaItems.length;
+    if (isAutoPlaying && mediaLength > 1) {
       interval = setInterval(() => {
-        const nextIndex = (activeIndex + 1) % imagesLength;
+        const nextIndex = (activeIndex + 1) % mediaLength;
         setActiveIndex(nextIndex);
         if (galleryRef.current) {
           const scrollAmount = galleryRef.current.offsetWidth * nextIndex;
@@ -73,7 +90,53 @@ const TurfDetails = () => {
       }, 4000);
     }
     return () => clearInterval(interval);
-  }, [isAutoPlaying, activeIndex, turf?.images?.length]);
+  }, [isAutoPlaying, activeIndex, mediaItems.length, turf, loading]);
+
+  const handleShare = async () => {
+    const shareData = {
+      title: turf?.name || "TurfSpot Venue",
+      text: `Check out ${turf?.name} in ${turf?.location} on TurfSpot!`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard");
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error("Error sharing:", err);
+      }
+    }
+  };
+
+  const toggleFavorite = () => {
+    if (!isLoggedIn) {
+      toast.error("Please login to save favorites");
+      navigate("/login");
+      return;
+    }
+    
+    const newFavoriteState = !isFavorite;
+    setIsFavorite(newFavoriteState);
+    
+    if (newFavoriteState) {
+      toast.success(`${turf?.name} added to favorites`, {
+        icon: '❤️',
+        style: {
+          borderRadius: '1rem',
+          background: '#18181b',
+          color: '#fff',
+          border: '1px solid #27272a'
+        },
+      });
+    } else {
+      toast.success("Removed from favorites");
+    }
+  };
 
   if (loading) {
     return <TurfDetailsSkeleton />;
@@ -116,34 +179,24 @@ const TurfDetails = () => {
     }
   };
 
-  const getYouTubeID = (url) => {
-    if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
-  };
-
-  const videoId = getYouTubeID(turf.youtubeUrl);
-
   return (
     <div className="min-h-screen bg-black text-white pt-4 pb-20">
       {/* Top Navigation Bar */}
-      <div className="container mx-auto px-4 mb-8">
+      <div className="container mx-auto px-4 mb-4">
         <Link 
           to="/turfs" 
-          className="inline-flex items-center gap-2 text-zinc-400 hover:text-[#84CC16] transition-colors mb-6 group uppercase text-xs tracking-normal font-bold"
+          className="inline-flex items-center gap-2 text-zinc-400 hover:text-[#84CC16] transition-colors mb-4 group uppercase text-xs tracking-normal font-bold"
         >
           <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           Back to Search
         </Link>
 
-
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-4">
-            <h1 className="text-5xl md:text-7xl font-black uppercase leading-tight tracking-tighter animate-slide-in-left">
+            <h1 className="text-5xl md:text-7xl font-bold uppercase leading-tight animate-slide-in-left">
               {turf.name}
             </h1>
-            <div className="flex flex-wrap items-center gap-6 text-sm font-bold uppercase tracking-wide animate-fade-in">
+            <div className="flex flex-wrap items-center gap-6 text-sm font-bold uppercase animate-fade-in">
               <div className="flex items-center gap-2 text-[#84CC16]">
                 <Star className="w-5 h-5 fill-[#84CC16]" />
                 <span>{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
@@ -153,391 +206,318 @@ const TurfDetails = () => {
                 <MapPin className="w-5 h-5 text-[#84CC16]" />
                 <span>{turf.location}, Mumbai</span>
               </div>
+              {turf.openTime && turf.closeTime && (
+                <div className="flex items-center gap-2 text-zinc-300 border-l border-zinc-800 pl-6 ml-0 hidden sm:flex">
+                  <Clock className="w-5 h-5 text-[#84CC16]" />
+                  <span>{turf.openTime} — {turf.closeTime}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 border-l border-zinc-800 pl-6 ml-0 hidden md:flex">
+                <Info className="w-5 h-5 text-[#84CC16]" />
+                <button className="text-zinc-300 hover:text-[#84CC16] transition-colors">
+                  View Policies
+                </button>
+              </div>
             </div>
           </div>
           
           <div className="flex items-center gap-3 animate-fade-in">
             <button 
-              onClick={() => setIsFavorite(!isFavorite)}
-              className={`p-4 rounded-full border transition-all duration-300 ${
+              onClick={toggleFavorite}
+              className={`p-4 rounded-full border transition-all duration-300 active:scale-90 ${
                 isFavorite 
-                ? "bg-[#84CC16] border-[#84CC16] text-black" 
-                : "bg-zinc-900/50 border-zinc-800 text-white hover:border-[#84CC16]"
+                ? "bg-[#84CC16] border-[#84CC16] text-black shadow-lg shadow-[#84CC16]/20" 
+                : "bg-zinc-900/50 border-zinc-800 text-white hover:border-[#84CC16] hover:bg-zinc-900"
               }`}
             >
               <Heart className={`w-6 h-6 ${isFavorite ? "fill-current" : ""}`} />
             </button>
-            <button className="p-4 rounded-full bg-zinc-900/50 border border-zinc-800 text-white hover:border-[#84CC16] transition-all duration-300">
+            <button 
+              onClick={handleShare}
+              className="p-4 rounded-full bg-zinc-900/50 border border-zinc-800 text-white hover:border-[#84CC16] hover:bg-zinc-900 transition-all duration-300 active:scale-90"
+            >
               <Share2 className="w-6 h-6" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Hero Gallery Section */}
-      <div className="container mx-auto px-4 mb-12">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-          {/* Main Image Gallery - Scrollable & Auto-sliding */}
-          <div className={`${videoId ? 'md:col-span-8' : 'md:col-span-12'} relative aspect-video rounded-[2.5rem] overflow-hidden group border border-zinc-800 shadow-2xl bg-zinc-900`}>
+      {/* Hero Content Section: Media + Booking Row */}
+      <div className="container mx-auto px-4 mb-2">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+          {/* Unified Media Gallery (Video first, then Images) */}
+          <div className="md:col-span-7 lg:col-span-8 relative rounded-[2.5rem] overflow-hidden group border border-zinc-800 shadow-2xl bg-zinc-900 min-h-[350px] lg:h-[400px]">
             <div 
               ref={galleryRef}
-              className="flex overflow-x-auto snap-x snap-mandatory h-full scrollbar-hide scroll-smooth"
+              className="flex h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-smooth"
               onMouseEnter={() => setIsAutoPlaying(false)}
               onMouseLeave={() => setIsAutoPlaying(true)}
             >
-              {(turf.images && turf.images.length > 0 ? turf.images : [turf.image]).map((img, index) => (
+              {mediaItems.map((item, index) => (
                 <div key={index} className="flex-none w-full h-full snap-center relative">
-                  <img 
-                    src={img || "/banner-1.png"} 
-                    alt={`${turf.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                  <div className="absolute bottom-8 left-8 px-5 py-2.5 bg-black/40 backdrop-blur-xl rounded-2xl text-[10px] font-black uppercase tracking-normal border border-white/10 flex items-center gap-3">
+                  {item.type === "video" ? (
+                    <div className="w-full h-full bg-black relative">
+                      <iframe
+                        className="w-full h-full"
+                        src={`https://www.youtube.com/embed/${item.id}?autoplay=1&mute=1&loop=1&playlist=${item.id}&controls=0&modestbranding=1&rel=0&showinfo=0`}
+                        title="Venue Video"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      ></iframe>
+                      <div className="absolute top-6 left-6 px-4 py-2 bg-[#84CC16] text-black rounded-xl text-[10px] font-bold uppercase shadow-lg flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
+                        Live Feed
+                      </div>
+                    </div>
+                  ) : (
+                    <img 
+                      src={item.url} 
+                      alt={`${turf.name} ${index}`}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute bottom-8 left-8 px-5 py-2.5 bg-black/40 backdrop-blur-xl rounded-2xl text-[10px] font-bold uppercase border border-white/10 flex items-center gap-3">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#84CC16] animate-pulse" />
-                    Archive {index + 1} / {turf.images?.length || 1}
+                    Media {index + 1} / {mediaItems.length}
                   </div>
                 </div>
               ))}
             </div>
             
-            {/* Gallery Controls Overlay */}
             <div className="absolute top-8 right-8 flex gap-2">
-              <div className="px-4 py-2 bg-black/40 backdrop-blur-xl rounded-full text-[10px] font-black uppercase tracking-wider border border-white/10 text-zinc-400">
-                16:9 Tactical View
+              <div className="px-4 py-2 bg-black/40 backdrop-blur-xl rounded-full text-[10px] font-bold uppercase border border-white/10 text-zinc-400">
+                Strategic View
               </div>
             </div>
           </div>
 
-          {/* Video Column */}
-          {videoId && (
-            <div className="md:col-span-4 h-full">
-              {/* Video Slot - Full Height */}
-              <div className="h-full min-h-[300px] rounded-[2.5rem] overflow-hidden border border-zinc-800 bg-black relative group shadow-2xl">
-                <iframe
-                  className="w-full h-full"
-                  src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0`}
-                  title="Venue Video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
-                <div className="absolute top-6 left-6 px-4 py-2 bg-[#84CC16] text-black rounded-xl text-[10px] font-black uppercase tracking-normal shadow-lg flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
-                  Live Feed
+          {/* Booking Card - Moved to Hero Row */}
+          <div className="md:col-span-5 lg:col-span-4 h-full">
+            <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 p-6 rounded-[2.5rem] shadow-2xl h-full flex flex-col justify-between overflow-hidden">
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold uppercase tracking-normal text-zinc-500">Professional Booking Portal</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-[#84CC16]">₹{turf.pricePerHour}</span>
+                    <span className="text-zinc-500 font-bold text-xs">/hr</span>
+                  </div>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="absolute bottom-6 left-6 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                  <p className="text-[10px] font-black uppercase tracking-normal text-[#84CC16]">Security Protocol</p>
-                  <p className="text-white text-xs font-bold uppercase">Real-time surveillance active</p>
+
+                <div className="space-y-3">
+                  <p className="text-[10px] font-bold uppercase tracking-normal text-zinc-500">Facility Timeline</p>
+                  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                    {Array.from({ length: 7 }, (_, i) => {
+                      const date = new Date();
+                      date.setDate(date.getDate() + i);
+                      const dateStr = date.toISOString().split('T')[0];
+                      return (
+                        <button
+                          key={dateStr}
+                          onClick={() => handleDateChange(date)}
+                          className={`flex-none w-12 h-16 rounded-xl border transition-all flex flex-col items-center justify-center gap-0.5 ${
+                            selectedDate.toISOString().split('T')[0] === dateStr 
+                            ? "bg-[#84CC16] border-[#84CC16] text-black" 
+                            : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                          }`}
+                        >
+                          <span className="text-[8px] font-bold uppercase">{date.toLocaleDateString('en-US', { weekday: 'short' })}</span>
+                          <span className="text-sm font-black">{date.getDate()}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-[10px] font-bold uppercase tracking-normal text-zinc-500">Available Slots</p>
+                  <div className="grid grid-cols-2 gap-2 max-h-[160px] overflow-y-auto pr-1 scrollbar-custom">
+                    {availableTimes.length > 0 ? (
+                      availableTimes.map((time, idx) => {
+                        const isBooked = isTimeSlotBooked(time);
+                        const isSelected = selectedStartTime === time;
+                        const isAvailable = !isBooked;
+
+                        return (
+                          <button
+                            key={idx}
+                            disabled={!isAvailable}
+                            onClick={() => handleTimeSelection(time)}
+                            className={`p-2 rounded-lg border text-center transition-all ${
+                              isSelected
+                              ? "bg-[#84CC16] border-[#84CC16] text-black"
+                              : isAvailable
+                              ? "bg-zinc-900/50 border-zinc-800 text-white hover:border-[#84CC16]/50"
+                              : "bg-zinc-900/20 border-zinc-900 text-zinc-700 cursor-not-allowed opacity-50"
+                            }`}
+                          >
+                            <span className="text-[10px] font-bold">{time}</span>
+                          </button>
+                        );
+                      })
+                    ) : (
+                      <div className="col-span-2 py-4 text-center bg-zinc-900/30 rounded-2xl border border-dashed border-zinc-800">
+                        <Clock className="w-5 h-5 text-zinc-700 mx-auto mb-1" />
+                        <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-wider">No Slots Generated</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-3 py-2">
+                  <Benefit text="Flexible Cancellation" />
+                  <Benefit text="Verified Facilities" />
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-4">
+                <button 
+                  onClick={handleReservation}
+                  disabled={bookingLoading || !selectedStartTime}
+                  className="w-full bg-[#84CC16] text-black h-16 rounded-2xl font-bold uppercase tracking-normal flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed shadow-lg shadow-[#84CC16]/20"
+                >
+                  {bookingLoading ? (
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                      <span>Processing...</span>
+                    </div>
+                  ) : (
+                    <>
+                      Reserve Now
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+                <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-normal text-zinc-600">
+                  <ShieldCheck className="w-4 h-4" />
+                  Secure Checkout
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Main Content & Booking Section */}
-      <div className="container mx-auto px-4 pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Left Column: Details */}
-          <div className="lg:col-span-8 space-y-16">
-            {/* About */}
-            {turf.description && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-1.5 h-8 bg-[#84CC16] rounded-full" />
-                  <h2 className="text-2xl font-bold uppercase tracking-normal">Facility Overview</h2>
-                </div>
-                <p className="text-zinc-400 text-lg leading-relaxed max-w-3xl">
-                  {turf.description}
-                </p>
-              </div>
-            )}
-
-            {/* Operational Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Sport Arsenal */}
-              {turf.sportTypes && turf.sportTypes.length > 0 && (
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-1.5 h-6 bg-primary rounded-full" />
-                    <h2 className="text-xl font-bold uppercase tracking-tight">Sport Arsenal</h2>
+      {/* Main Content Details Section */}
+      <div className="container mx-auto px-4 pt-2 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          {/* Left Column: Details (Now optimized for density) */}
+          <div className="lg:col-span-8 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+              <div className="space-y-4">
+                {/* Consolidated Intel Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1 h-6 bg-[#84CC16] rounded-full" />
+                    <h2 className="text-xl font-bold uppercase">Venue Intelligence</h2>
                   </div>
-                  <div className="flex flex-wrap gap-3">
-                    {turf.sportTypes.map((sport, index) => (
-                      <div key={index} className="px-5 py-2.5 bg-zinc-900/50 border border-zinc-800 rounded-2xl flex items-center gap-3 group hover:border-primary/50 transition-all">
-                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                        <span className="text-xs font-black uppercase tracking-wider text-zinc-300 group-hover:text-white">{sport}</span>
-                      </div>
+                  {turf.description && (
+                    <p className="text-zinc-400 text-sm leading-relaxed max-w-lg">
+                      {turf.description}
+                    </p>
+                  )}
+                  
+                  {/* Performance Specs */}
+                  <div className="flex flex-wrap gap-2">
+                    {turf.sportTypes?.map((sport, i) => (
+                      <span key={i} className="px-2.5 py-1 bg-zinc-900/50 border border-zinc-800 rounded-lg text-[9px] font-bold uppercase text-[#84CC16] tracking-wider">{sport}</span>
+                    ))}
+                    {turf.groundTypes?.map((ground, i) => (
+                      <span key={i} className="px-2.5 py-1 bg-zinc-900/50 border border-zinc-800 rounded-lg text-[9px] font-bold uppercase text-zinc-500 tracking-wider">{ground}</span>
                     ))}
                   </div>
                 </div>
-              )}
 
-              {/* Ground Composition */}
-              {turf.groundTypes && turf.groundTypes.length > 0 && (
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-1.5 h-6 bg-primary rounded-full" />
-                    <h2 className="text-xl font-bold uppercase tracking-tight">Ground Composition</h2>
+
+              </div>
+
+              {/* High-Density Amenities */}
+              {turf.facilities && turf.facilities.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1 h-6 bg-[#84CC16] rounded-full" />
+                    <h2 className="text-xl font-bold uppercase tracking-tight">Amenities</h2>
                   </div>
-                  <div className="flex flex-wrap gap-3">
-                    {turf.groundTypes.map((ground, index) => (
-                      <div key={index} className="px-5 py-2.5 bg-zinc-900/50 border border-zinc-800 rounded-2xl flex items-center gap-3 group hover:border-primary/50 transition-all">
-                        <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                        <span className="text-xs font-black uppercase tracking-wider text-zinc-300 group-hover:text-white">{ground}</span>
-                      </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {turf.facilities.map((facility, index) => (
+                      <AmenityItem 
+                        key={index}
+                        icon={facility.toLowerCase().includes('parking') ? <Car /> : 
+                              facility.toLowerCase().includes('water') ? <Coffee /> :
+                              facility.toLowerCase().includes('washroom') ? <Users /> :
+                              facility.toLowerCase().includes('lighting') ? <Zap /> :
+                              <ShieldCheck />} 
+                        text={facility} 
+                      />
                     ))}
                   </div>
                 </div>
               )}
             </div>
-
-            {/* Operational Hours */}
-            {turf.openTime && turf.closeTime && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-1.5 h-8 bg-primary rounded-full" />
-                  <h2 className="text-2xl font-bold uppercase tracking-tight">Operational Hours</h2>
-                </div>
-                <div className="bg-zinc-900/30 border border-zinc-800 rounded-[2rem] p-8">
-                  <div className="flex items-center justify-between gap-8 flex-wrap">
-                    <div className="flex items-center gap-6">
-                      <div className="p-4 rounded-2xl bg-primary/10 text-primary">
-                        <Clock className="w-8 h-8" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-[10px] font-black uppercase tracking-normal text-zinc-500">Facility Schedule</p>
-                        <p className="text-2xl font-bold uppercase">{turf.openTime} — {turf.closeTime}</p>
-                      </div>
-                    </div>
-                    <div className="px-6 py-3 bg-primary/10 border border-primary/20 rounded-xl">
-                      <span className="text-[10px] font-black uppercase tracking-normal text-primary">Status: Operational</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Amenities */}
-            {turf.facilities && turf.facilities.length > 0 && (
-              <div className="space-y-8">
-                <h2 className="text-2xl font-bold uppercase tracking-tight">Facility Amenities</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {turf.facilities.map((facility, index) => (
-                    <AmenityItem 
-                      key={index}
-                      icon={facility.toLowerCase().includes('parking') ? <Car /> : 
-                            facility.toLowerCase().includes('water') ? <Coffee /> :
-                            facility.toLowerCase().includes('washroom') ? <Users /> :
-                            facility.toLowerCase().includes('lighting') ? <Zap /> :
-                            <ShieldCheck />} 
-                      text={facility} 
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {turf.location && (
-              <div className="space-y-8">
-                <h2 className="text-2xl font-bold uppercase tracking-tight">How to Reach</h2>
-                <div className="bg-zinc-900/30 border border-zinc-800 rounded-[2rem] p-8 space-y-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-2xl bg-[#84CC16]/10 text-[#84CC16]">
-                      <MapPin className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="text-zinc-200 font-bold mb-1">{turf.location}</p>
-                      <button className="text-[#84CC16] text-sm font-bold uppercase tracking-wider hover:underline">
-                        View on Maps
-                      </button>
-                    </div>
-                  </div>
-                  <div className="w-full h-64 bg-zinc-800/50 rounded-2xl flex flex-col items-center justify-center border border-dashed border-zinc-700">
-                    <Activity className="w-12 h-12 text-zinc-600 mb-2" />
-                    <p className="text-zinc-500 font-bold uppercase text-xs tracking-wider">Map Loading...</p>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Right Column: Booking Card */}
+          {/* Right Column (Optional info or policies) */}
           <div className="lg:col-span-4">
-            <div className="sticky top-28 space-y-6">
-              <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 p-8 rounded-[2.5rem] shadow-2xl">
-                <div className="space-y-6">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-bold uppercase tracking-normal text-zinc-500">Professional Booking Portal</p>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold">₹{turf.pricePerHour}</span>
-                      <span className="text-zinc-500 font-bold">/hr</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <p className="text-[10px] font-bold uppercase tracking-normal text-zinc-500">Facility Timeline</p>
-                    <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
-                      {Array.from({ length: 7 }, (_, i) => {
-                        const date = new Date();
-                        date.setDate(date.getDate() + i);
-                        const dateStr = date.toISOString().split('T')[0];
-                        const isSelected = selectedDate === dateStr;
-                        return (
-                          <button
-                            key={dateStr}
-                            onClick={() => handleDateChange(date)}
-                            className={`flex-none w-14 h-20 rounded-2xl border transition-all flex flex-col items-center justify-center gap-1 ${
-                              selectedDate.toISOString().split('T')[0] === dateStr 
-                              ? "bg-[#84CC16] border-[#84CC16] text-black" 
-                              : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
-                            }`}
-                          >
-                            <span className="text-[10px] font-bold uppercase">{date.toLocaleDateString('en-US', { weekday: 'short' })}</span>
-                            <span className="text-lg font-black">{date.getDate()}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-bold uppercase tracking-normal text-zinc-500">Available Slots</p>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-custom">
-                      {availableTimes.length > 0 ? (
-                        availableTimes.map((time, idx) => {
-                          const isBooked = isTimeSlotBooked(time);
-                          const isSelected = selectedStartTime === time;
-                          const isAvailable = !isBooked;
-
-                          return (
-                            <button
-                              key={idx}
-                              disabled={!isAvailable}
-                              onClick={() => handleTimeSelection(time)}
-                              className={`p-3 rounded-xl border text-center transition-all ${
-                                isSelected
-                                ? "bg-[#84CC16] border-[#84CC16] text-black"
-                                : isAvailable
-                                ? "bg-zinc-900/50 border-zinc-800 text-white hover:border-[#84CC16]/50"
-                                : "bg-zinc-900/20 border-zinc-900 text-zinc-700 cursor-not-allowed opacity-50"
-                              }`}
-                            >
-                              <span className="text-xs font-bold">{time}</span>
-                            </button>
-                          );
-                        })
-                      ) : (
-                        <div className="col-span-2 py-8 text-center bg-zinc-900/30 rounded-2xl border border-dashed border-zinc-800">
-                          <Clock className="w-8 h-8 text-zinc-700 mx-auto mb-2" />
-                          <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">No Slots Generated</p>
-                        </div>
-                      )}
-                    </div>
-
-                    {selectedStartTime && (
-                      <div className="mt-8 p-6 bg-zinc-800/50 rounded-2xl border border-white/5 space-y-4 animate-slide-in-bottom">
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-zinc-500 font-bold uppercase tracking-normal text-[10px]">Booking Summary</span>
-                          <span className="text-[#84CC16] font-bold">1 Session</span>
-                        </div>
-                        <div className="flex justify-between items-end">
-                          <div className="space-y-1">
-                            <p className="text-[10px] font-black uppercase tracking-wider text-zinc-600">Total Investment</p>
-                            <p className="text-3xl font-black">₹{pricePerHour}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-[10px] font-black uppercase tracking-wider text-zinc-600">Tax Incl.</p>
-                            <p className="text-zinc-400 text-xs font-bold">Standard Rates</p>
-                          </div>
-                        </div>
+            <div className="sticky top-28 space-y-4">
+               {turf.location && (
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold uppercase tracking-tight">How to Reach</h2>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-[1.5rem] p-6 space-y-5">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2.5 rounded-xl bg-[#84CC16]/10 text-[#84CC16]">
+                        <MapPin className="w-5 h-5" />
                       </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-4 py-4">
-                    <Benefit text="Flexible Cancellation" />
-                    <Benefit text="Verified Facilities" />
-                    <Benefit text="Digital Pass" />
-                  </div>
-
-                  <button 
-                    onClick={handleReservation}
-                    disabled={bookingLoading || !selectedStartTime}
-                    className="w-full bg-[#84CC16] text-black h-16 rounded-2xl font-bold uppercase tracking-normal flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed shadow-lg shadow-[#84CC16]/20"
-                  >
-                    {bookingLoading ? (
-                      <div className="flex items-center gap-3">
-                        <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                        <span className="animate-pulse">Processing...</span>
+                      <div>
+                        <p className="text-zinc-200 text-sm font-bold mb-0.5">{turf.location}</p>
+                        <button className="text-[#84CC16] text-[10px] font-black uppercase tracking-wider hover:underline">
+                          Launch Navigation
+                        </button>
                       </div>
-                    ) : (
-                      <>
-                        Reserve Now
-                        <ArrowRight className="w-5 h-5" />
-                      </>
-                    )}
-                  </button>
-
-                  <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-normal text-zinc-600">
-                    <ShieldCheck className="w-4 h-4" />
-                    Enterprise-Grade Secure Checkout
+                    </div>
+                    <div className="w-full h-32 bg-zinc-800/50 rounded-2xl flex flex-col items-center justify-center border border-dashed border-zinc-700">
+                      <Activity className="w-10 h-10 text-zinc-600 mb-2" />
+                      <p className="text-zinc-500 font-bold uppercase text-[9px] tracking-wider">Map Interface Secured</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              <button className="w-full bg-zinc-900/30 border border-zinc-800 p-6 rounded-[2rem] flex items-center justify-between hover:bg-zinc-900/50 transition-colors group">
-                <div className="flex items-center gap-4 text-left">
-                  <div className="p-3 rounded-xl bg-zinc-800 group-hover:bg-[#84CC16]/10 group-hover:text-[#84CC16] transition-colors">
-                    <Info className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="font-bold uppercase text-xs tracking-wider">Venue Policies</p>
-                    <p className="text-zinc-500 text-xs font-medium">Rules & Refunds</p>
-                  </div>
-                </div>
-                <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-[#84CC16] transition-colors" />
-              </button>
+
             </div>
           </div>
         </div>
 
         {/* Reviews Section */}
-        <div className="mt-32 pt-20 border-t border-zinc-900">
-          <div className="flex items-center justify-between mb-12">
-            <h2 className="text-4xl font-bold uppercase tracking-tight">Customer Reviews</h2>
-            <div className="flex items-center gap-4 text-[#84CC16] font-bold">
-              <Star className="fill-current" />
-              <span className="text-2xl">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
+        <div className="mt-16 pt-12 border-t border-zinc-900">
+          <div className="flex items-center justify-between mb-10">
+            <h2 className="text-2xl font-bold uppercase">Athlete Reviews</h2>
+            <div className="flex items-center gap-3 text-[#84CC16] font-bold">
+              <Star className="fill-current w-5 h-5" />
+              <span className="text-xl">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
               <span className="text-zinc-500">/ 5.0</span>
             </div>
           </div>
           <Reviews turfId={id} />
         </div>
-
       </div>
     </div>
   );
 };
 
 const AmenityItem = ({ icon, text }) => (
-  <div className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-900/30 border border-zinc-800 hover:border-[#84CC16]/50 transition-colors group">
-    <div className="text-[#84CC16] group-hover:scale-110 transition-transform">
-      {React.cloneElement(icon, { className: "w-5 h-5" })}
+  <div className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900/30 border border-zinc-800 hover:border-[#84CC16]/50 transition-colors group">
+    <div className="text-[#84CC16] shrink-0 group-hover:scale-110 transition-transform">
+      {React.cloneElement(icon, { className: "w-4 h-4" })}
     </div>
-    <span className="text-xs font-black uppercase tracking-normal text-zinc-300 group-hover:text-white transition-colors">{text}</span>
+    <span className="text-[10px] font-bold uppercase tracking-tight text-zinc-400 group-hover:text-white transition-colors truncate">{text}</span>
   </div>
 );
 
 const Benefit = ({ text }) => (
   <div className="flex items-center gap-3 text-zinc-400">
     <CheckCircle2 className="w-4 h-4 text-[#84CC16]" />
-    <span className="text-[10px] font-black uppercase tracking-normal">{text}</span>
+    <span className="text-[10px] font-bold uppercase">{text}</span>
   </div>
 );
 

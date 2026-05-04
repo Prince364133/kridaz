@@ -13,8 +13,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
         />
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
            <div className="px-6 py-3 bg-primary text-black font-black uppercase italic tracking-tighter rounded-xl transform translate-y-4 group-hover:translate-y-0 transition-transform flex items-center gap-2">
-              <LayoutDashboard size={16} strokeWidth={3} />
-              Open Command Center
+              View Arena Details
            </div>
         </div>
         <div className="absolute top-4 right-4 bg-primary text-black font-bold px-3 py-1 rounded-xl shadow-lg text-sm">

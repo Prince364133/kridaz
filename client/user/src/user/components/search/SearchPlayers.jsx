@@ -97,7 +97,7 @@ const SearchPlayers = ({ onSearch, userLocation }) => {
   return (
     <div className="w-full animate-fade-in">
       <div className="relative group">
-        <div className="relative flex flex-row items-center bg-black/80 backdrop-blur-3xl border border-white/10 rounded-full p-1.5 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] transition-all duration-500 hover:border-[#84CC16]/40 overflow-x-auto no-scrollbar">
+        <div className="relative flex flex-row items-center bg-black/80 backdrop-blur-3xl border border-white/10 rounded-full p-2 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] transition-all duration-500 hover:border-[#84CC16]/40 min-h-[60px] md:min-h-[70px]">
           
           {/* Sport */}
           <div className="flex-1 min-w-[90px] relative z-[100] border-r border-white/5" ref={sportDropdownRef}>
@@ -113,7 +113,7 @@ const SearchPlayers = ({ onSearch, userLocation }) => {
               <ChevronDown className={`hidden md:block ml-auto w-3 h-3 text-gray-600 transition-transform duration-500 ${showSportDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
             </button>
             {showSportDropdown && (
-              <div className="absolute top-[115%] left-0 w-64 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110]">
+              <div className="absolute top-full mt-3 left-0 w-64 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110]">
                 <div className="p-2 max-h-[250px] overflow-y-auto grid grid-cols-1 gap-1">
                   <button onClick={() => { setSport(""); setShowSportDropdown(false); }} className="w-full text-left px-4 py-2 text-[11px] font-bold text-gray-400 hover:bg-white/5 rounded-xl uppercase">All Sports</button>
                   {SPORTS_LIST.map((s) => (
@@ -138,7 +138,7 @@ const SearchPlayers = ({ onSearch, userLocation }) => {
               <ChevronDown className={`hidden md:block ml-auto w-3 h-3 text-gray-600 transition-transform duration-500 ${showStateDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
             </button>
             {showStateDropdown && (
-              <div className="absolute top-[115%] left-1/2 -translate-x-1/2 md:translate-x-0 md:left-0 w-64 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110]">
+              <div className="absolute top-full mt-3 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-0 w-64 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110]">
                 <div className="p-2 border-b border-white/5">
                   <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5">
                     <Search size={13} className="text-gray-500 shrink-0" />
@@ -156,7 +156,7 @@ const SearchPlayers = ({ onSearch, userLocation }) => {
           </div>
 
           {/* City */}
-          <div className="flex-1 min-w-[90px] relative z-[80] border-r border-white/5" ref={cityDropdownRef}>
+          <div className="flex-1 min-w-[90px] relative z-[80]" ref={cityDropdownRef}>
             <button
               onClick={() => { if (state) { setShowCityDropdown(!showCityDropdown); setCitySearch(""); } }}
               disabled={!state}
@@ -170,7 +170,7 @@ const SearchPlayers = ({ onSearch, userLocation }) => {
               <ChevronDown className={`hidden md:block ml-auto w-3 h-3 text-gray-600 transition-transform duration-500 ${showCityDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
             </button>
             {showCityDropdown && state && (
-              <div className="absolute top-[115%] right-0 w-64 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110]">
+              <div className="absolute top-full mt-3 right-0 w-64 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[110]">
                 <div className="p-2 border-b border-white/5">
                   <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5">
                     <Search size={13} className="text-gray-500 shrink-0" />
@@ -186,13 +186,6 @@ const SearchPlayers = ({ onSearch, userLocation }) => {
               </div>
             )}
           </div>
-
-          <div className="p-1 sm:p-2 flex items-center justify-center md:px-4">
-            <button onClick={resetFilters} className="p-1.5 sm:p-2 rounded-full hover:bg-white/5 text-gray-600 hover:text-[#FF3B3B] transition-all group/reset">
-              <RotateCcw className="w-3 h-3 md:w-3.5 md:h-3.5 group-hover/reset:rotate-[-180deg] transition-transform duration-500" />
-            </button>
-          </div>
-
         </div>
       </div>
     </div>

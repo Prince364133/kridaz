@@ -16,6 +16,7 @@ import UserProfile from "@user/pages/Profile";
 import UserBlogs from "@user/pages/Blogs";
 import UserBlogDetail from "@user/pages/BlogDetail";
 
+
 // Business Landing Pages (User Portal)
 import UserVenueOwnerLanding from "@user/pages/business/VenueOwnerLanding";
 import UserCoachLanding from "@user/pages/business/CoachLanding";
@@ -166,6 +167,7 @@ const router = createBrowserRouter([
       { path: "blogs", element: <UserBlogs /> },
       { path: "blogs/:id", element: <UserBlogDetail /> },
       { path: "booking-history", element: <ProtectedRoute><UserTurfBookingHistory /></ProtectedRoute> },
+
       
       // Business Landings
       { path: "business/venue", element: <UserVenueOwnerLanding /> },

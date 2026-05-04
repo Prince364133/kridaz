@@ -31,11 +31,11 @@ const socialPosts = [
 
 
 const highlights = [
-  { image: "https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=1200", span: "md:col-span-3" }, // Stadium
-  { image: "https://images.pexels.com/photos/159515/football-american-football-runner-player-159515.jpeg?auto=compress&cs=tinysrgb&w=800", span: "md:col-span-3" }, // Football Action
-  { image: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80", span: "md:col-span-2" }, // Cricket/Turf
-  { image: "https://images.unsplash.com/photo-1518605363189-cdb72b0e6bf3?w=800&q=80", span: "md:col-span-2" }, // Basketball/Football
-  { image: "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?w=800&q=80", span: "md:col-span-2" }, // Tennis
+  { image: "https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=1200", span: "col-span-3" }, // Stadium
+  { image: "https://images.pexels.com/photos/159515/football-american-football-runner-player-159515.jpeg?auto=compress&cs=tinysrgb&w=800", span: "col-span-3" }, // Football Action
+  { image: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80", span: "col-span-2" }, // Cricket/Turf
+  { image: "https://images.unsplash.com/photo-1518605363189-cdb72b0e6bf3?w=800&q=80", span: "col-span-2" }, // Basketball/Football
+  { image: "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?w=800&q=80", span: "col-span-2" }, // Tennis
 ];
 
 const comparisonFeatures = [
@@ -258,11 +258,11 @@ export default function Home() {
 
       {/* ── STATS ── */}
       <section className="border-y" style={{ borderColor: "#1A1A1A", backgroundColor: "#0A0A0A" }}>
-        <div className="max-w-screen-2xl mx-auto px-2 md:px-10 py-4 sm:py-8 grid grid-cols-4 divide-x divide-[#1A1A1A]">
+        <div className="max-w-screen-2xl mx-auto px-4 md:px-10 py-8 grid grid-cols-2 lg:grid-cols-4 gap-y-8 lg:gap-y-0 divide-x-0 lg:divide-x divide-[#1A1A1A]">
           {stats.map((s) => (
-            <div key={s.label} className="px-1 sm:px-4 md:px-8 text-center flex flex-col justify-center overflow-hidden">
-              <p className="font-display text-xl sm:text-3xl lg:text-4xl leading-none" style={{ color: PRI }}>{s.value}</p>
-              <p className="font-mono text-[8px] sm:text-[10px] lg:text-xs uppercase tracking-wider md:tracking-widest mt-1 lg:mt-2 opacity-50 truncate w-full">{s.label}</p>
+            <div key={s.label} className="px-4 md:px-8 text-center lg:text-left flex flex-col justify-center overflow-hidden group">
+              <p className="font-display text-3xl sm:text-4xl lg:text-5xl leading-none tracking-tighter group-hover:text-white transition-colors" style={{ color: PRI }}>{s.value}</p>
+              <p className="font-mono text-[8px] sm:text-[10px] uppercase tracking-[0.3em] mt-2 text-gray-500 group-hover:text-primary transition-colors">{s.label}</p>
             </div>
           ))}
         </div>
@@ -283,7 +283,11 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex gap-2 p-1 rounded-full bg-[#1A1A1A] border border-white/5">
               {[{ key: "venues", label: "🏟 VENUES" }, { key: "marketplace", label: "🛒 MARKETPLACE" }].map(tab => (
-                <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                <button
+                  key={tab.key}
+                  onClick={() => {
+                    setActiveTab(tab.key);
+                  }}
                   className={`px-8 py-2.5 rounded-full font-bold text-xs transition-all duration-300 uppercase tracking-widest ${activeTab === tab.key ? "bg-[#84CC16] text-black shadow-[0_0_20px_rgba(132,204,22,0.3)]" : "text-gray-500 hover:text-white"}`}>
                   {tab.label}
                 </button>
@@ -303,9 +307,18 @@ export default function Home() {
             {activeTab === "venues" ? (
               <SearchTurf onSearch={handleTurfSearch} userLocation={userLocation} />
             ) : (
-              <div className="relative flex-1 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#84CC16] transition-colors" size={18} />
-                <input type="text" placeholder="Search marketplace products..." className="w-full bg-[#1A1A1A] border border-white/5 rounded-full py-4 pl-12 pr-6 text-xs font-bold text-white placeholder-gray-600 outline-none focus:border-[#84CC16]/50 transition-all shadow-2xl" />
+              <div className="w-full py-20 px-6 md:px-10 rounded-[40px] border border-white/5 bg-[#0a0a0a] flex flex-col items-center justify-center text-center overflow-hidden relative group animate-fade-in">
+                {/* Glow Effect */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#84CC16]/10 blur-[120px] rounded-full pointer-events-none" />
+                
+                <ShoppingBag size={48} className="text-gray-600 mb-6 group-hover:text-[#84CC16] transition-colors duration-500" />
+                <h3 className="font-display text-4xl md:text-5xl lg:text-6xl text-white uppercase leading-tight">
+                  Marketplace <br/>
+                  <span style={{ color: PRI }}>Coming Soon</span>
+                </h3>
+                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gray-500 mt-6 max-w-md mx-auto">
+                  We're building the ultimate destination for sports gear, equipment, and exclusive TurfSpot merchandise.
+                </p>
               </div>
             )}
           </div>
@@ -325,6 +338,12 @@ export default function Home() {
             </div>
             <p className="font-display text-3xl mb-3 uppercase tracking-tight">Venues Not Found</p>
             <p className="text-gray-500 text-sm uppercase tracking-wider mb-8">Try adjusting your search or filters</p>
+            <button 
+              onClick={() => setTurfFilters({ searchTerm: "", city: "", state: "" })}
+              className="px-8 py-3 bg-[#84CC16] text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-xl hover:scale-105 transition-all shadow-[0_0_20px_rgba(132,204,22,0.2)]"
+            >
+              View All Venues
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -383,7 +402,7 @@ export default function Home() {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div className="flex flex-col gap-1">
-              <h2 className="font-display text-2xl min-[375px]:text-3xl md:text-5xl lg:text-6xl whitespace-nowrap tracking-tight uppercase leading-none">
+              <h2 className="font-display text-3xl min-[375px]:text-4xl md:text-7xl lg:text-8xl whitespace-nowrap tracking-tight uppercase leading-none">
                 Find Players <span style={{ color: PRI }}>Near You</span>
               </h2>
             </div>
@@ -409,13 +428,13 @@ export default function Home() {
                 style={{ backgroundColor: PRI }}>Join Now</Link>
             </div>
           ) : (
-            <div className="flex gap-8 overflow-x-auto pb-8 mt-10 no-scrollbar scroll-smooth px-2">
+            <div className="flex overflow-x-auto pb-8 mt-10 no-scrollbar scroll-smooth px-0 md:px-2">
               {players.map(p => {
                 const level = getLevel(p.bookingCount);
                 const initials = p.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "??";
                 const joinedYear = p.joinedAt ? new Date(p.joinedAt).getFullYear() : 2024;
                 return (
-                  <div key={p._id} className="flex flex-col items-center gap-4 group shrink-0 w-32">
+                  <div key={p._id} className="flex flex-col items-center gap-2 md:gap-4 group shrink-0 w-1/4 lg:w-32">
                     <div className="relative">
                       {/* Premium Avatar Bubble */}
                       <div className="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-[#84CC16] via-[#84CC16]/20 to-transparent transition-all duration-500 group-hover:scale-110 shadow-2xl shadow-[#84CC16]/10">
@@ -484,7 +503,7 @@ export default function Home() {
           <div className="max-w-screen-2xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 lg:mb-8">
               <div>
-                <h2 className="font-display text-[26px] sm:text-4xl md:text-6xl uppercase leading-none text-white flex items-center gap-2 md:gap-3 whitespace-nowrap">
+                <h2 className="font-display text-3xl sm:text-4xl md:text-7xl lg:text-8xl uppercase leading-none text-white flex items-center gap-2 md:gap-3 whitespace-nowrap">
                   JOIN <span style={{ color: PRI }}>GAMES NEAR YOU</span>
                 </h2>
                 <p className="font-mono text-xs uppercase tracking-widest mt-2" style={{ color: "#888" }}>
@@ -581,14 +600,14 @@ export default function Home() {
             </div>
 
             {/* Professionals Grid */}
-            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-4 md:pb-0">
+            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible no-scrollbar pb-6 md:pb-0">
               {[
                 { name: "ROGER FEDERER", exp: "20+ Years", spec: "Grand Slam Expert", price: "₹5,000/hr", img: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&q=80", rating: "5.0 (500 reviews)" },
                 { name: "SARAH WILLIAMS", exp: "10+ Years", spec: "Fitness & Conditioning", price: "₹2,500/hr", img: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80", rating: "4.9 (320 reviews)" },
                 { name: "VIRAT KOHLI", exp: "15+ Years", spec: "Masterclass Batting", price: "₹10,000/hr", img: "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?w=400&q=80", rating: "5.0 (1k+ reviews)" },
                 { name: "JOHN DOE", exp: "8+ Years", spec: "Certified Umpire", price: "₹1,000/match", img: "https://images.unsplash.com/photo-1587329310686-91414b8e3cb7?w=400&q=80", rating: "4.8 (150 reviews)" },
               ].map((pro, i) => (
-                <div key={i} className="min-w-[75vw] md:min-w-0 snap-center rounded-3xl border overflow-hidden flex flex-col group shrink-0 md:shrink" style={{ backgroundColor: "#111", borderColor: BDR }}>
+                <div key={i} className="w-[280px] md:w-full h-[480px] snap-center rounded-3xl border overflow-hidden flex flex-col group shrink-0" style={{ backgroundColor: "#111", borderColor: BDR }}>
                   {/* Image Section */}
                   <div className="relative h-[280px] overflow-hidden shrink-0">
                     <img src={pro.img} alt={pro.name} className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105" />
@@ -719,7 +738,12 @@ export default function Home() {
                   <div>
                     <h3 className="font-display text-2xl italic mb-1 leading-none uppercase">MARKETPLACE</h3>
                     <p className="text-gray-400 text-xs mb-4">Premium gear.</p>
-                    <Link to={isLoggedIn ? "/turfs" : "/login"} className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Shop Now <ArrowRight size={14} /></Link>
+                    <Link 
+                      to="/marketplace"
+                      className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors"
+                    >
+                      Shop Now <ArrowRight size={14} />
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -808,23 +832,20 @@ export default function Home() {
       <VideoSection videos={marketing.videos} />
 
       {/* ── PLAYBOOK HIGHLIGHTS (Images) ── */}
-      <section className="pt-[10px] pb-10 lg:pb-20 px-6 md:px-10 w-full">
-        <div className="max-w-screen-2xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-            {highlights.map((item, idx) => (
-              <div
-                key={idx}
-                className={`relative h-[240px] md:h-[350px] lg:h-[400px] overflow-hidden rounded-3xl group border border-white/10 backdrop-blur-sm bg-white/5 shadow-2xl transition-all duration-500 hover:border-primary/50 ${item.span}`}
-              >
-                <img
-                  src={item.image}
-                  alt="Highlight"
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-80 group-hover:opacity-100"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
-              </div>
-            ))}
-          </div>
+      <section className="w-full">
+        <div className="grid grid-cols-6 gap-0">
+          {highlights.map((item, idx) => (
+            <div
+              key={idx}
+              className={`relative h-[300px] md:h-[400px] overflow-hidden group border-white/5 bg-[#050505] transition-all duration-700 ${item.span}`}
+            >
+              <img
+                src={item.image}
+                alt="Highlight"
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+              />
+            </div>
+          ))}
         </div>
       </section>
 

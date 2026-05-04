@@ -20,7 +20,7 @@ const NewOwnerRequests = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white p-6 lg:p-10">
-      <div className="max-w-7xl mx-auto space-y-12">
+      <div className="space-y-12">
         {/* Header Section */}
         <div className="relative">
           <div className="absolute -left-4 top-0 w-1 h-12 bg-[#84CC16] rounded-full shadow-[0_0_15px_rgba(132,204,22,0.5)]"></div>

@@ -21,6 +21,10 @@ const useTransactionManagement = (initialTransactions) => {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
+  const clearFilters = () => {
+    setFilters({ search: "", minAmount: "", maxAmount: "", startDate: "", endDate: "" });
+  };
+
   const toggleSort = (field) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -83,6 +87,7 @@ const useTransactionManagement = (initialTransactions) => {
     sortDirection,
     filteredAndSortedTransactions,
     handleFilterChange,
+    clearFilters,
     toggleSort,
   };
 };

@@ -10,7 +10,7 @@ const OwnerReviews = () => {
 
   return (
     <div className="p-4 md:p-8 bg-[#0a0a0a] min-h-screen text-white">
-      <div className="max-w-7xl mx-auto">
+      <div className="space-y-12">
         <header className="mb-12 border-l-8 border-primary pl-6">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white uppercase">
             CUSTOMER <span className="text-primary">REVIEWS</span>

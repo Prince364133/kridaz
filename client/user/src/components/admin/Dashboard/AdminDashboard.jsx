@@ -43,10 +43,11 @@ export default function AdminDashboard() {
   }));
 
   return (
-    <div className="p-4 lg:p-0 space-y-6 lg:space-y-8 animate-fade-in">
+    <div className="p-4 lg:p-10 space-y-6 lg:space-y-12 animate-fade-in pt-2 pb-24 lg:pb-12 h-full custom-scrollbar">
+      {/* Header Section - High Impact */}
 
       {/* Primary Intelligence Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         <StatCard title="Total Users" value={totalUsers} icon={Users} className="p-4 lg:p-6" />
         <StatCard title="Active Venues" value={totalTurfs} icon={Landmark} className="p-4 lg:p-6" />
         <StatCard title="Total Bookings" value={totalBookings} icon={CreditCard} className="p-4 lg:p-6" />

@@ -195,7 +195,7 @@ export default function BusinessRegistration() {
               <h1 className="text-5xl md:text-6xl font-display uppercase leading-none mb-4">
                 Professional <br /> <span style={{ color: PRI }}>Registration.</span>
               </h1>
-              <p className="text-gray-400 text-lg">Tell us about your business to get verified and access the TurfSpot Command Center.</p>
+              <p className="text-gray-400 text-lg">Tell us about your business to get verified and access the TurfSpot dashboard.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">

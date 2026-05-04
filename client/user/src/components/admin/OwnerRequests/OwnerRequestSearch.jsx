@@ -5,18 +5,17 @@ import { Search } from "lucide-react";
 const OwnerRequestSearch = ({ searchTerm, handleSearch }) => {
   return (
     <div className="w-full">
-      <label className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 block">
-        Search Requests
-      </label>
-      <div className="relative group">
+      <div className="relative group flex items-center bg-[#111] border border-white/5 rounded-xl h-11 transition-all focus-within:border-[#84CC16]/50">
+        <div className="pl-4 shrink-0">
+          <Search size={14} className="text-gray-500 group-focus-within:text-[#84CC16] transition-colors" />
+        </div>
         <input
           type="text"
-          placeholder="Search by owner name or email..."
-          className="w-full bg-[#111] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-[#84CC16] focus:ring-1 focus:ring-[#84CC16]/50 transition-all placeholder:text-gray-600"
+          placeholder="SEARCH AUTHORIZATION QUEUE..."
+          className="w-full bg-transparent border-none py-2 px-4 text-[11px] font-bold text-white focus:ring-0 placeholder:text-gray-600 uppercase tracking-wider"
           value={searchTerm}
           onChange={(e) => handleSearch(e.target.value)}
         />
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-[#84CC16] transition-colors" />
       </div>
     </div>
   );

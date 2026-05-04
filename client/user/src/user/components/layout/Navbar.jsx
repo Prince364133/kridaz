@@ -35,6 +35,7 @@ const Navbar = () => {
   ] : [
     { name: "Home", path: "/" },
     { name: "Venues", path: "/turfs" },
+
     { name: "Business", path: "#" },
   ];
 
@@ -212,7 +213,7 @@ const Navbar = () => {
                               >
                                 <div className="flex items-center gap-3">
                                   <Activity size={16} className="text-[#84CC16]" />
-                                  <span className="text-xs font-bold uppercase tracking-tight">Umpire Command</span>
+                                  <span className="text-xs font-bold uppercase tracking-tight">Umpire Portal</span>
                                 </div>
                                 <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all" />
                               </Link>

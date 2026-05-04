@@ -19,7 +19,7 @@ const TurfManagement = () => {
 
   return (
     <div className="p-4 md:p-8 bg-[#0a0a0a] min-h-screen text-white">
-      <div className="max-w-7xl mx-auto">
+      <div className="space-y-12">
         <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="border-l-8 border-primary pl-6">
             <h1 className="text-4xl md:text-6xl font-display font-black italic tracking-tight text-white uppercase">

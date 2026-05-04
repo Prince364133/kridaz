@@ -20,7 +20,7 @@ export const AllTurf = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white p-6 lg:p-10">
-      <div className="max-w-7xl mx-auto space-y-12">
+      <div className="space-y-12">
         {/* Header */}
         <div className="space-y-4">
           <div className="flex items-center gap-3 text-[#84CC16] font-bold text-xs uppercase tracking-widest">

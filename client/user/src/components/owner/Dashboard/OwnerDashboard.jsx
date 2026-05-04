@@ -71,12 +71,15 @@ const OwnerDashboard = () => {
   };
 
   return (
-    <div className="p-4 lg:p-10 bg-[#000] min-h-screen text-white relative">
+    <div className="h-full custom-scrollbar">
+      <div className="p-4 lg:p-10 space-y-6 lg:space-y-12 animate-fade-in pt-2 pb-24 lg:pb-12 h-full">
       <div className="absolute inset-0 bg-gradient-to-br from-[#84CC16]/5 to-transparent pointer-events-none" />
       
-      <div className="max-w-7xl mx-auto space-y-8 lg:space-y-16 relative z-10">
+      <div className="space-y-8 lg:space-y-16 relative z-10">
+        {/* Header Section - High Impact */}
+
         {/* Stats Grid - High Impact */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
           <StatCard 
             title="TOTAL BOOKINGS" 
             value={totalBookings} 
@@ -242,7 +245,6 @@ const OwnerDashboard = () => {
            </div>
         </div>
 
-
         {/* Footer Metrics */}
         <div className="pt-8 lg:pt-16 border-t border-white/5 flex flex-col sm:flex-row gap-4 justify-between items-center pb-8 opacity-40">
           <div className="flex items-center gap-4">
@@ -253,11 +255,12 @@ const OwnerDashboard = () => {
         </div>
       </div>
     </div>
+    </div>
   );
 };
 
 const ChartCard = ({ title, subtitle, children }) => (
-  <div className="bg-[#0A0A0A] p-6 lg:p-10 rounded-[24px] lg:rounded-[32px] border border-white/10 shadow-2xl relative overflow-hidden group">
+  <div className="bg-[#0A0A0A] p-4 md:p-10 rounded-[24px] lg:rounded-[32px] border border-white/10 shadow-2xl relative overflow-hidden group">
     <div className="absolute top-0 right-0 w-40 h-40 bg-[#84CC16]/5 blur-[100px] group-hover:bg-[#84CC16]/10 transition-colors"></div>
     <div className="mb-6 lg:mb-10">
       <h2 className="text-xl lg:text-2xl font-bold text-white uppercase tracking-tight leading-none mb-3">{title}</h2>
