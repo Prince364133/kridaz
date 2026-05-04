@@ -27,7 +27,7 @@ importers:
         specifier: ^2.0.0
         version: 2.9.6
 
-  client/web:
+  client/user:
     dependencies:
       '@hookform/resolvers':
         specifier: ^3.9.0
