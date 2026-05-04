@@ -23,7 +23,7 @@ const verifyAdminToken = async (req, res, next) => {
     // Support both {id, role} and {user: {role}} or similar structures
     const role = decoded.role || (decoded.user && decoded.user.role);
     
-    if (role !== "admin") {
+    if (role !== "admin" && role !== "BMSP_ADMIN") {
       console.warn("Admin Access Denied. Token Role:", role, "Full Payload:", decoded);
       return res.status(403).json({ success: false, message: "Unauthorized: Admin privileges required" });
     }

@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
     phone:{type:String},
     gender:{type:String, enum:["Male", "Female", "Other", "Prefer not to say"]},
     location:{type:String},
+    profilePicture:{type:String},
     bookings:[{type:mongoose.Schema.Types.ObjectId, ref:'Booking'}],
  }, {timestamps: true});
 

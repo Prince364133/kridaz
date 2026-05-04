@@ -9,7 +9,8 @@ const ownerSchema = new mongoose.Schema(
     phone: { type: String },
     gender: { type: String, enum: ["Male", "Female", "Other", "Prefer not to say"] },
     location: { type: String },
-    role: { type: String, enum: ["admin", "owner", "coach", "umpire"], default: "owner" },
+    profilePicture: { type: String },
+    role: { type: String, enum: ["admin", "owner", "coach", "umpire", "BMSP_ADMIN", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"], default: "owner" },
     businessDetails: {
       businessName: String,
       registrationNumber: String,

@@ -2,7 +2,7 @@ import User from "../../models/user.model.js";
 
 export const getPublicPlayers = async (req, res) => {
   try {
-    const users = await User.find({}, { name: 1, bookings: 1, createdAt: 1 })
+    const users = await User.find({}, { name: 1, bookings: 1, createdAt: 1, profilePicture: 1, location: 1 })
       .sort({ createdAt: -1 })
       .limit(20);
 
@@ -11,6 +11,8 @@ export const getPublicPlayers = async (req, res) => {
       name: u.name,
       bookingCount: u.bookings?.length ?? 0,
       joinedAt: u.createdAt,
+      profilePicture: u.profilePicture,
+      location: u.location,
     }));
 
     return res.status(200).json({ success: true, players });

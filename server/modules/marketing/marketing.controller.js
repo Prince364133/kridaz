@@ -1,5 +1,20 @@
 import AdBanner from "../../models/adBanner.model.js";
 import Video from "../../models/video.model.js";
+import cloudinary from "../../utils/cloudinary.js";
+
+// Helper for cloudinary upload
+const uploadToCloudinary = (fileBuffer, folder) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
+    uploadStream.end(fileBuffer);
+  });
+};
 
 // Ad Banners
 export const getAdBanners = async (req, res) => {
@@ -13,7 +28,13 @@ export const getAdBanners = async (req, res) => {
 
 export const createAdBanner = async (req, res) => {
   try {
-    const banner = await AdBanner.create(req.body);
+    const bannerData = { ...req.body };
+    
+    if (req.file) {
+      bannerData.imageUrl = await uploadToCloudinary(req.file.buffer, "BookMySportz/marketing");
+    }
+
+    const banner = await AdBanner.create(bannerData);
     res.status(201).json({ success: true, banner });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -22,7 +43,13 @@ export const createAdBanner = async (req, res) => {
 
 export const updateAdBanner = async (req, res) => {
   try {
-    const banner = await AdBanner.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const bannerData = { ...req.body };
+
+    if (req.file) {
+      bannerData.imageUrl = await uploadToCloudinary(req.file.buffer, "BookMySportz/marketing");
+    }
+
+    const banner = await AdBanner.findByIdAndUpdate(req.params.id, bannerData, { new: true });
     res.status(200).json({ success: true, banner });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

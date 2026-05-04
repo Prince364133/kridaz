@@ -7,6 +7,7 @@ import OwnerRequest from "../../models/ownerRequest.model.js";
 import OTP from "../../models/otp.model.js";
 import { generateUserToken, generateOwnerToken } from "../../utils/generateJwtToken.js";
 import generateEmail from "../../utils/generateEmail.js";
+import cloudinary from "../../utils/cloudinary.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -353,28 +354,47 @@ export const ownerRequest = async (req, res) => {
 // Submit Role Upgrade Request
 export const upgradeRequest = async (req, res) => {
   const { name, email, phone, role, businessDetails, documents } = req.body;
-  const userId = req.user?.id; // Assuming user is authenticated
+  const userId = req.user?.id;
 
   try {
-    const user = await User.findById(userId);
-    const professionalRoles = ["owner", "VENUE_OWNER", "VERIFIED_VENUE_OWNER", "COACH", "UMPIRE", "admin", "BMSP_ADMIN"];
-    
-    if (user && professionalRoles.includes(user.role)) {
+    // 1. Check if user already has a professional role
+    const ownerAccount = await Owner.findOne({ email: email.toLowerCase() });
+    if (ownerAccount) {
       return res.status(400).json({ 
         success: false, 
-        message: `You already have the ${user.role} role. One account can only have one professional dashboard.` 
+        message: `Account already has a professional role (${ownerAccount.role}).` 
       });
     }
 
-    const existingRequest = await OwnerRequest.findOne({ email, status: "pending" });
+    // 2. Check for existing requests
+    const existingRequest = await OwnerRequest.findOne({ email: email.toLowerCase() });
+    
     if (existingRequest) {
-      return res.status(400).json({ success: false, message: "A pending request already exists for this email" });
+      if (existingRequest.status === "pending") {
+        return res.status(400).json({ 
+          success: false, 
+          message: "You already have a pending application. Please wait for our team to review it." 
+        });
+      }
+      
+      if (existingRequest.status === "approved") {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Your application has already been approved." 
+        });
+      }
+
+      // If rejected, we allow re-submission by deleting the old one
+      if (existingRequest.status === "rejected") {
+        await OwnerRequest.deleteOne({ _id: existingRequest._id });
+      }
     }
 
+    // 3. Create new request
     const newRequest = new OwnerRequest({
       userId,
       name,
-      email,
+      email: email.toLowerCase(),
       phone,
       role: role || "owner",
       businessDetails,
@@ -383,12 +403,108 @@ export const upgradeRequest = async (req, res) => {
     });
 
     await newRequest.save();
+    
     return res.status(201).json({
       success: true,
       message: "Your application has been submitted and is under review.",
     });
   } catch (err) {
-    console.error(chalk.red(err.message));
+    console.error(chalk.red("Upgrade Request Error:"), err);
+    
+    // Handle Mongoose duplicate key error specifically
+    if (err.code === 11000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "An application with this email already exists." 
+      });
+    }
+
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || "Internal server error" 
+    });
+  }
+};
+
+// Get Current User Profile (Auto-Login Support)
+export const getMe = async (req, res) => {
+  try {
+    // req.user is attached by user.middleware.js
+    // req.owner is attached by owner.middleware.js
+    const decoded = req.user || req.owner;
+    
+    if (!decoded) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const { id, role } = decoded;
+    let account;
+
+    if (role === "user") {
+      account = await User.findById(id).select("-password");
+    } else {
+      account = await Owner.findById(id).select("-password");
+    }
+
+    if (!account) {
+      return res.status(404).json({ success: false, message: "Account not found" });
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      user: account, 
+      role 
+    });
+  } catch (err) {
+    console.error(chalk.red("getMe Error:"), err);
     return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Update Profile Picture
+export const updateProfilePicture = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "No image file provided" });
+  }
+
+  try {
+    const decoded = req.user || req.owner;
+    if (!decoded) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const { id, role } = decoded;
+    
+    // Upload to Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: `BookMySportz/profiles/${role}` },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      uploadStream.end(req.file.buffer);
+    });
+
+    let account;
+    if (role === "user") {
+      account = await User.findByIdAndUpdate(id, { profilePicture: uploadResult.secure_url }, { new: true });
+    } else {
+      account = await Owner.findByIdAndUpdate(id, { profilePicture: uploadResult.secure_url }, { new: true });
+    }
+
+    if (!account) {
+      return res.status(404).json({ success: false, message: "Account not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile picture updated successfully",
+      profilePicture: uploadResult.secure_url
+    });
+  } catch (err) {
+    console.error(chalk.red("updateProfilePicture Error:"), err);
+    return res.status(500).json({ success: false, message: "Failed to upload profile picture" });
   }
 };

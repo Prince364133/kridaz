@@ -9,13 +9,14 @@ import {
   updateVideo,
   deleteVideo,
 } from "../../modules/marketing/marketing.controller.js";
+import upload from "../../middleware/uploads/upload.middleware.js";
 
 const router = Router();
 
 // Ad Banners
 router.get("/banners", getAdBanners);
-router.post("/banners", createAdBanner);
-router.put("/banners/:id", updateAdBanner);
+router.post("/banners", upload.single("image"), createAdBanner);
+router.put("/banners/:id", upload.single("image"), updateAdBanner);
 router.delete("/banners/:id", deleteAdBanner);
 
 // Videos

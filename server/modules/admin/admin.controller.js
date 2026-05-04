@@ -8,7 +8,7 @@ import generateEmail from "../../utils/generateEmail.js";
 
 export const getAllUsers = async (req, res) => {
   const admin = req.admin.role;
-  if (admin !== "admin") {
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   
@@ -27,7 +27,7 @@ export const getAdminDashboardData = async (req, res) => {
     console.log("Fetching counts...");
     const counts = await Promise.all([
       User.countDocuments().catch(e => { console.error("User count failed:", e); return 0; }),
-      Owner.countDocuments({ role: "owner" }).catch(e => { console.error("Owner count failed:", e); return 0; }),
+      Owner.countDocuments({ role: { $in: ["owner", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"] } }).catch(e => { console.error("Owner count failed:", e); return 0; }),
       Turf.countDocuments().catch(e => { console.error("Turf count failed:", e); return 0; }),
       Booking.countDocuments().catch(e => { console.error("Booking count failed:", e); return 0; }),
       OwnerRequest.countDocuments({ status: "pending" }).catch(e => { console.error("PendingReq count failed:", e); return 0; }),
@@ -91,7 +91,7 @@ export const getAdminDashboardData = async (req, res) => {
 
 export const getAllTransactions = async (req, res) => {
   const admin = req.admin.role;
-  if (admin !== "admin") {
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
@@ -112,11 +112,11 @@ export const getAllTransactions = async (req, res) => {
 
 export const getAllOwners = async (req, res) => {
   const admin = req.admin.role;
-  if (admin !== "admin") {
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
-    const owners = await Owner.find({ role: "owner" }, { password: 0 });
+    const owners = await Owner.find({ role: { $in: ["owner", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"] } }, { password: 0 });
     res.status(200).json({
       message: "Fetched all owners",
       owners,
@@ -130,7 +130,7 @@ export const getAllOwners = async (req, res) => {
 export const getTurfByOwnerId = async (req, res) => {
   const admin = req.admin.role;
   const { id } = req.params;
-  if (admin !== "admin") {
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
@@ -162,7 +162,7 @@ export const getTurfByOwnerId = async (req, res) => {
 
 export const getAllRequestedOwners = async (req, res) => {
   const admin = req.admin.role;
-  if (admin !== "admin") {
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
@@ -185,7 +185,7 @@ export const getAllRequestedOwners = async (req, res) => {
 export const approveOwnerRequest = async (req, res) => {
   const admin = req.admin.role;
   const { id } = req.params;
-  if (admin !== "admin") {
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
@@ -254,7 +254,7 @@ export const approveOwnerRequest = async (req, res) => {
 export const deleteOwnerRequest = async (req, res) => {
   const admin = req.admin.role;
   const { id } = req.params;
-  if (admin !== "admin") {
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
@@ -285,7 +285,7 @@ export const deleteOwnerRequest = async (req, res) => {
 export const reconsiderOwnerRequest = async (req, res) => {
   const admin = req.admin.role;
   const { id } = req.params;
-  if (admin !== "admin") {
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {

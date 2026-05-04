@@ -15,8 +15,8 @@ const blogs = [
     readTime: "2 MINS READ",
     date: "23RD JULY 2024",
     category: "Sports",
-    views: "1.2k",
-    likes: "450",
+    views: 1200,
+    likes: 450,
     order: 1
   },
   {
@@ -27,8 +27,8 @@ const blogs = [
     readTime: "3 MINS READ",
     date: "11TH JULY 2024",
     category: "Cricket",
-    views: "890",
-    likes: "312",
+    views: 890,
+    likes: 312,
     order: 2
   },
   {
@@ -39,8 +39,8 @@ const blogs = [
     readTime: "1 MIN READ",
     date: "20TH MAY 2024",
     category: "Football",
-    views: "2.4k",
-    likes: "890",
+    views: 2400,
+    likes: 890,
     order: 3
   }
 ];
