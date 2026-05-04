@@ -396,9 +396,6 @@ export default function Home() {
       </section>
 
 
-      {/* ── BLOGS & ARTICLES ── */}
-
-      <BlogSection />
 
       {/* ── AD BANNERS ── */}
       <AdBannerSection banners={marketing.banners} />
@@ -725,6 +722,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── BLOGS & ARTICLES ── */}
+      <BlogSection />
 
       {/* ── VIDEO GALLERY ── */}
       <VideoSection videos={marketing.videos} />
