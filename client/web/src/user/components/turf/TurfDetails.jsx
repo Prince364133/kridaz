@@ -243,15 +243,17 @@ const TurfDetails = () => {
           {/* Left Column: Details */}
           <div className="lg:col-span-8 space-y-16">
             {/* About */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="w-1.5 h-8 bg-[#84CC16] rounded-full" />
-                <h2 className="text-2xl font-bold uppercase tracking-normal">Facility Overview</h2>
+            {turf.description && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-1.5 h-8 bg-[#84CC16] rounded-full" />
+                  <h2 className="text-2xl font-bold uppercase tracking-normal">Facility Overview</h2>
+                </div>
+                <p className="text-zinc-400 text-lg leading-relaxed max-w-3xl">
+                  {turf.description}
+                </p>
               </div>
-              <p className="text-zinc-400 text-lg leading-relaxed max-w-3xl">
-                {turf.description || `Experience top-tier sports facilities at ${turf.name}. Our professional-grade turf and cricket pitches are designed for both casual players and professional athletes. Located in ${turf.location}, we offer a seamless booking experience with premium amenities including player lounges, showers, and a cafe area.`}
-              </p>
-            </div>
+            )}
 
             {/* Operational Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -338,27 +340,28 @@ const TurfDetails = () => {
               </div>
             )}
 
-            {/* How to Reach */}
-            <div className="space-y-8">
-              <h2 className="text-2xl font-bold uppercase tracking-tight">How to Reach</h2>
-              <div className="bg-zinc-900/30 border border-zinc-800 rounded-[2rem] p-8 space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-2xl bg-[#84CC16]/10 text-[#84CC16]">
-                    <MapPin className="w-6 h-6" />
+            {turf.location && (
+              <div className="space-y-8">
+                <h2 className="text-2xl font-bold uppercase tracking-tight">How to Reach</h2>
+                <div className="bg-zinc-900/30 border border-zinc-800 rounded-[2rem] p-8 space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-2xl bg-[#84CC16]/10 text-[#84CC16]">
+                      <MapPin className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-zinc-200 font-bold mb-1">{turf.location}</p>
+                      <button className="text-[#84CC16] text-sm font-bold uppercase tracking-wider hover:underline">
+                        View on Maps
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-zinc-200 font-bold mb-1">{turf.location}</p>
-                    <button className="text-[#84CC16] text-sm font-bold uppercase tracking-wider hover:underline">
-                      View on Maps
-                    </button>
+                  <div className="w-full h-64 bg-zinc-800/50 rounded-2xl flex flex-col items-center justify-center border border-dashed border-zinc-700">
+                    <Activity className="w-12 h-12 text-zinc-600 mb-2" />
+                    <p className="text-zinc-500 font-bold uppercase text-xs tracking-wider">Map Loading...</p>
                   </div>
-                </div>
-                <div className="w-full h-64 bg-zinc-800/50 rounded-2xl flex flex-col items-center justify-center border border-dashed border-zinc-700">
-                  <Activity className="w-12 h-12 text-zinc-600 mb-2" />
-                  <p className="text-zinc-500 font-bold uppercase text-xs tracking-wider">Map Loading...</p>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Right Column: Booking Card */}

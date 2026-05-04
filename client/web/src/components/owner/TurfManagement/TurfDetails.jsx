@@ -264,7 +264,7 @@ export default function TurfDetails() {
                 {turf.isActive ? "Visible" : "Hidden"}
              </button>
              <button 
-                onClick={() => navigate(`/partner/turf/${id}/edit`)}
+                onClick={() => navigate(`/partner/edit-turf/${id}`)}
                 className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all flex items-center gap-2"
              >
                 <Edit2 size={14} />
@@ -283,6 +283,7 @@ export default function TurfDetails() {
 
       {/* Operational Metadata */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {turf.sportTypes && turf.sportTypes.length > 0 && (
          <div className="p-6 bg-white/[0.02] border border-white/5 rounded-[32px] space-y-4">
             <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest text-primary/60">Sport Arsenal</p>
             <div className="flex flex-wrap gap-2">
@@ -293,6 +294,8 @@ export default function TurfDetails() {
                ))}
             </div>
          </div>
+      )}
+      {turf.groundTypes && turf.groundTypes.length > 0 && (
          <div className="p-6 bg-white/[0.02] border border-white/5 rounded-[32px] space-y-4">
             <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Ground Composition</p>
             <div className="flex flex-wrap gap-2">
@@ -303,6 +306,8 @@ export default function TurfDetails() {
                ))}
             </div>
          </div>
+      )}
+      {turf.facilities && turf.facilities.length > 0 && (
          <div className="p-6 bg-white/[0.02] border border-white/5 rounded-[32px] space-y-4">
             <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Facility Intelligence</p>
             <div className="flex flex-wrap gap-2">
@@ -313,6 +318,7 @@ export default function TurfDetails() {
                ))}
             </div>
          </div>
+      )}
       </div>
 
       {/* Booking Management Section */}

@@ -110,7 +110,7 @@ const router = createBrowserRouter([
       { path: "add-turf", element: <AddTurf /> },
       { path: "turfs", element: <TurfManagement /> },
       { path: "turf/:id", element: <TurfDetails /> },
-      { path: "turf/:id/edit", element: <EditTurf /> },
+      { path: "edit-turf/:id", element: <EditTurf /> },
       { path: "reviews", element: <PartnerReviews /> },
       { path: "bookings", element: <PartnerBookings /> },
       { path: "*", element: <NotFound /> },
