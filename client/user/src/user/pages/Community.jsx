@@ -424,8 +424,8 @@ const Community = () => {
         <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-4 sm:p-6 overflow-hidden">
           <h2 className="text-xs font-bold text-white/20 uppercase tracking-[0.2em] mb-4 sm:mb-6">Live Stories</h2>
           <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-2 sm:pb-4 no-scrollbar">
-            {/* Add Story Button */}
-            {user && (
+            {/* User's Story or Empty Add Button */}
+            {user && !stories.find(g => g.user._id === user._id) && (
               <button 
                 onClick={() => setShowStoryModal(true)}
                 className="flex flex-col items-center gap-2 sm:gap-3 flex-shrink-0 group w-[72px] sm:w-auto"
@@ -442,13 +442,50 @@ const Community = () => {
               </button>
             )}
 
+            {user && stories.find(g => g.user._id === user._id) && (() => {
+              const userStoryGroup = stories.find(g => g.user._id === user._id);
+              return (
+                <div className="flex flex-col items-center gap-2 sm:gap-3 flex-shrink-0 cursor-pointer group w-[72px] sm:w-auto relative">
+                  <div 
+                    onClick={() => {
+                      setSelectedStoryGroup(userStoryGroup);
+                      setCurrentStoryIndex(0);
+                    }}
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-[2px] sm:p-[3px] bg-gradient-to-tr from-[#84CC16] to-[#4ade80] group-hover:scale-105 transition-all relative"
+                  >
+                    <div className="w-full h-full rounded-full border-2 border-black overflow-hidden bg-[#1A1A1A] flex items-center justify-center">
+                      {userStoryGroup.stories[0].mediaUrl ? (
+                        <img src={userStoryGroup.stories[0].mediaUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="p-1 sm:p-2 text-[6px] sm:text-[8px] text-center line-clamp-3 leading-tight font-medium break-words">{userStoryGroup.stories[0].content}</div>
+                      )}
+                    </div>
+                    {/* Plus Icon for adding more */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowStoryModal(true);
+                      }}
+                      className="absolute bottom-0 right-0 w-5 h-5 sm:w-6 sm:h-6 bg-[#84CC16] rounded-full flex items-center justify-center border-2 border-black hover:scale-110 transition-transform"
+                    >
+                      <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />
+                    </button>
+                  </div>
+                  <span className="text-[9px] sm:text-[10px] font-bold text-white/60 uppercase truncate w-16 sm:w-20 text-center">
+                    Your Story
+                  </span>
+                </div>
+              );
+            })()}
+
             {stories.length === 0 && (
               <div className="flex items-center text-white/20 text-[10px] sm:text-xs uppercase tracking-widest px-2 sm:px-4">
                 No stories yet. Be the first!
               </div>
             )}
 
-            {stories.map((group) => (
+            {/* Other Users' Stories */}
+            {stories.filter(g => !user || g.user._id !== user._id).map((group) => (
               <div 
                 key={group.user._id} 
                 onClick={() => {
@@ -471,7 +508,7 @@ const Community = () => {
                   </div>
                 </div>
                 <span className="text-[9px] sm:text-[10px] font-bold text-white/60 uppercase truncate w-16 sm:w-20 text-center">
-                  {group.user._id === user?._id ? "You" : (group.user.username || group.user.name || "Player")}
+                  {group.user.username || group.user.name || "Player"}
                 </span>
               </div>
             ))}
