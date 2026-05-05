@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import * as argon2 from "argon2";
-import Owner from "./models/owner.model.js";
-import User from "./models/user.model.js";
-import Match from "./models/match.model.js";
-import Session from "./models/session.model.js";
+import Owner from "../models/owner.model.js";
+import User from "../models/user.model.js";
+import Match from "../models/match.model.js";
+import Session from "../models/session.model.js";
 
 dotenv.config();
 

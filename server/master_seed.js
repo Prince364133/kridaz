@@ -83,15 +83,21 @@ const seedAll = async () => {
     console.log("Connected to MongoDB...");
 
     await Blog.deleteMany({});
-    await Blog.insertMany(blogs);
+    for (const blog of blogs) {
+      await Blog.create(blog);
+    }
     console.log("Blogs seeded.");
 
     await AdBanner.deleteMany({});
-    await AdBanner.insertMany(banners);
+    for (const banner of banners) {
+      await AdBanner.create(banner);
+    }
     console.log("Banners seeded.");
 
     await Video.deleteMany({});
-    await Video.insertMany(videos);
+    for (const video of videos) {
+      await Video.create(video);
+    }
     console.log("Videos seeded.");
 
     console.log("Master seed complete!");

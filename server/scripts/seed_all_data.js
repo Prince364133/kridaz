@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import Turf from "./models/turf.model.js";
-import Owner from "./models/owner.model.js";
-import User from "./models/user.model.js";
-import Booking from "./models/booking.model.js";
-import TimeSlot from "./models/timeSlot.model.js";
+import Turf from "../models/turf.model.js";
+import Owner from "../models/owner.model.js";
+import User from "../models/user.model.js";
+import Booking from "../models/booking.model.js";
+import TimeSlot from "../models/timeSlot.model.js";
 import crypto from "crypto";
 
 dotenv.config();
@@ -39,6 +39,10 @@ const seedData = async () => {
         name: "Test Athlete",
         email: "testuser@gmail.com",
         password: "userpassword",
+        locationData: {
+          type: "Point",
+          coordinates: [78.3728, 17.4483] // Gachibowli, Hyderabad
+        }
       });
       console.log("Created user: testuser@gmail.com");
     }
@@ -55,6 +59,10 @@ const seedData = async () => {
         name: "Thunder Arena",
         description: "Premium FIFA-quality turf.",
         location: "Gachibowli, Hyderabad",
+        locationData: {
+          type: "Point",
+          coordinates: [78.3728, 17.4483]
+        },
         image: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80",
         sportTypes: ["Football"],
         pricePerHour: 1500,
@@ -66,6 +74,10 @@ const seedData = async () => {
         name: "Cricket Central",
         description: "Multi-pitch cricket facility.",
         location: "Jubilee Hills, Hyderabad",
+        locationData: {
+          type: "Point",
+          coordinates: [78.4127, 17.4326]
+        },
         image: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800&q=80",
         sportTypes: ["Cricket"],
         pricePerHour: 2000,
@@ -75,7 +87,11 @@ const seedData = async () => {
       }
     ];
 
-    const seededTurfs = await Turf.insertMany(turfsData);
+    const seededTurfs = [];
+    for (const turfData of turfsData) {
+      const turf = await Turf.create(turfData);
+      seededTurfs.push(turf);
+    }
     console.log(`${seededTurfs.length} Turfs created.`);
 
     // 5. Create TimeSlots and Bookings for each turf
