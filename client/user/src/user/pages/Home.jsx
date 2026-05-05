@@ -87,7 +87,8 @@ export default function Home() {
   const [marketing, setMarketing] = useState({ banners: [], videos: [] });
   const [loading, setLoading] = useState(true);
   const [featureFlags, setFeatureFlags] = useState({});
-  
+  const [realSocialPosts, setRealSocialPosts] = useState([]);
+
   useEffect(() => {
     if (isLoggedIn && role === 'user' && user && (!user.sportTypes || user.sportTypes.length === 0)) {
       setShowInterests(true);
@@ -147,12 +148,19 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [venuesRes, marketingRes] = await Promise.all([
+        const [venuesRes, marketingRes, communityRes] = await Promise.all([
           axiosInstance.get("/api/features"),
           axiosInstance.get("/api/features/marketing"),
+          axiosInstance.get("/api/user/community"),
         ]);
         setMarketing(marketingRes.data || { banners: [], videos: [] });
         setFeatureFlags(venuesRes.data.flagsMap || {});
+        
+        // Handle community posts
+        if (communityRes.data?.posts) {
+          const latestPosts = communityRes.data.posts.slice(0, 10);
+          setRealSocialPosts(latestPosts);
+        }
       } catch (error) {
         console.error("Error fetching generic data:", error);
       } finally {
@@ -811,19 +819,34 @@ export default function Home() {
           </div>
 
           <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x">
-            {socialPosts.map((post, idx) => (
-              <div key={idx} className="min-w-[300px] md:min-w-[350px] bg-[#0A0A0A] border rounded-3xl overflow-hidden snap-start group transition-all" style={{ borderColor: BDR }}>
+            {(realSocialPosts.length > 0 ? realSocialPosts : socialPosts).map((post, idx) => (
+              <div key={post._id || idx} className="min-w-[300px] md:min-w-[350px] bg-[#0A0A0A] border rounded-3xl overflow-hidden snap-start group transition-all" style={{ borderColor: BDR }}>
                 <div className="aspect-square relative overflow-hidden">
-                  <img src={post.image} alt="Social post" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <img 
+                    src={post.image || post.imageUrl || post.image} 
+                    alt="Social post" 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                  {post.caption && (
+                    <div className="absolute bottom-4 left-4 right-4 z-10">
+                      <p className="text-white text-sm line-clamp-2 drop-shadow-lg">{post.caption}</p>
+                    </div>
+                  )}
                 </div>
                 <div className="p-4 flex items-center justify-between border-t" style={{ borderColor: BDR, backgroundColor: "#0F0F0F" }}>
                   <div className="flex items-center gap-6">
                     <button className="flex items-center gap-2 text-gray-400 hover:text-red-500 transition-colors">
-                      <Heart size={20} /> <span className="text-xs font-bold font-mono">{post.likes}</span>
+                      <Heart size={20} className={post.likes?.length > 0 ? "fill-red-500 text-red-500" : ""} /> 
+                      <span className="text-xs font-bold font-mono">
+                        {Array.isArray(post.likes) ? post.likes.length : post.likes || 0}
+                      </span>
                     </button>
                     <button className="flex items-center gap-2 text-gray-400 hover:text-blue-500 transition-colors">
-                      <MessageCircle size={20} /> <span className="text-xs font-bold font-mono">{post.comments}</span>
+                      <MessageCircle size={20} /> 
+                      <span className="text-xs font-bold font-mono">
+                        {Array.isArray(post.comments) ? post.comments.length : post.comments || 0}
+                      </span>
                     </button>
                   </div>
                   <button className="text-gray-400 hover:text-white transition-colors">

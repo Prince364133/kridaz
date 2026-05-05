@@ -54,7 +54,9 @@ const Turf = () => {
         setLocationStatus("granted");
         
         setSearchFilters((prev) => ({ 
-          ...prev
+          ...prev,
+          lat,
+          lng
         }));
       },
       (err) => {
@@ -72,17 +74,16 @@ const Turf = () => {
       if (data.latitude && data.longitude) {
         const lat = data.latitude;
         const lng = data.longitude;
-        const city = data.city || "";
-        const state = data.region || "";
         
         const loc = { lat, lng };
         setUserLocation(loc);
         setLocationStatus("granted");
         
         setSearchFilters((prev) => ({ 
-          ...prev
+          ...prev,
+          lat,
+          lng
         }));
-        console.log("Location estimated via IP:", city);
       } else {
         setLocationStatus("denied");
       }
@@ -99,6 +100,8 @@ const Turf = () => {
   const handleSearch = (filters) => {
     setSearchFilters({
       ...filters,
+      lat: userLocation?.lat,
+      lng: userLocation?.lng,
     });
   };
 
@@ -114,53 +117,21 @@ const Turf = () => {
         {/* ── Section Header ───────────────────────────────────────── */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 border-b border-white/5 pb-6 gap-4">
           <div className="flex flex-col gap-1">
-            <h2 className="text-sm font-black uppercase tracking-[0.3em] text-gray-400 flex items-center gap-3">
-              {locationStatus === "detecting" && (
-                <>
-                  <Loader2 size={14} className="animate-spin text-[#84CC16]" />
-                  Detecting your location…
-                </>
-              )}
-              {locationStatus === "granted" && (
-                <>
-                  <MapPin size={14} className="text-[#84CC16]" />
-                  Nearest to You — {turfs.length} venue{turfs.length !== 1 ? "s" : ""}
-                </>
-              )}
-              {locationStatus === "denied" && (
-                <>
-                  <Trophy size={14} />
-                  Available Venues ({turfs.length})
-                </>
+            <h2 className="text-base md:text-lg font-bold uppercase tracking-[0.05em] text-white flex items-center gap-3 font-sans">
+              <MapPin size={18} className="text-[#84CC16]" />
+              {locationStatus === "detecting" ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin text-[#84CC16]" />
+                  DETECTING LOCATION...
+                </span>
+              ) : locationStatus === "granted" ? (
+                `NEAREST TO YOU — ${turfs.length} VENUE${turfs.length !== 1 ? "S" : ""}`
+              ) : (
+                `AVAILABLE VENUES — ${turfs.length}`
               )}
             </h2>
-            {locationStatus === "granted" && userLocation && (
-              <span className="text-[10px] text-[#84CC16] uppercase tracking-[0.2em] font-bold">
-                Sorted by distance from your current position
-              </span>
-            )}
           </div>
 
-          <div className="flex items-center gap-4">
-            {/* Manual detect button */}
-            <button
-              onClick={detectLocation}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all text-[10px] font-black uppercase tracking-widest ${
-                locationStatus === "granted" 
-                  ? "border-[#84CC16]/30 text-[#84CC16] hover:bg-[#84CC16]/10" 
-                  : "border-white/10 text-gray-400 hover:border-[#84CC16] hover:text-[#84CC16]"
-              }`}
-            >
-              <MapPin size={12} />
-              {locationStatus === "granted" ? "Update Location" : "Detect My Location"}
-            </button>
-
-            {locationStatus === "denied" && (
-              <span className="text-[10px] text-gray-600 uppercase tracking-widest hidden lg:block">
-                Enable location for better results
-              </span>
-            )}
-          </div>
         </div>
 
         {/* ── Cards Grid ───────────────────────────────────────────── */}

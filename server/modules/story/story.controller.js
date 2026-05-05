@@ -61,24 +61,35 @@ export const createStory = async (req, res) => {
 
 export const getStories = async (req, res) => {
   try {
+    const { all } = req.query;
     const userId = req.user.id;
-    let user = await User.findById(userId);
-    let following = [];
     
-    if (user) {
-      // Get users that current user follows
-      following = user.following || [];
+    let userIds = [];
+    
+    if (all === 'true') {
+      // For global community feed, we don't filter by userIds initially
     } else {
-      user = await Owner.findById(userId);
+      let user = await User.findById(userId);
+      let following = [];
+      
+      if (user) {
+        following = user.following || [];
+      } else {
+        user = await Owner.findById(userId);
+        if (user) {
+          following = user.following || [];
+        }
+      }
+      
+      userIds = [...following.map(id => id.toString()), userId];
     }
-    
-    // Include user's own stories
-    const userIds = [...following.map(id => id.toString()), userId];
 
-    let stories = await Story.find({ 
-      userId: { $in: userIds },
-      expiresAt: { $gt: new Date() }
-    }).sort({ createdAt: -1 });
+    const query = { expiresAt: { $gt: new Date() } };
+    if (all !== 'true') {
+      query.userId = { $in: userIds };
+    }
+
+    let stories = await Story.find(query).sort({ createdAt: -1 });
 
     // Manually populate userId since it could be User or Owner
     stories = await Promise.all(stories.map(async (story) => {

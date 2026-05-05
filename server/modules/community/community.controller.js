@@ -35,7 +35,8 @@ export const getPosts = async (req, res) => {
   try {
     const posts = await CommunityPost.find()
       .populate('adminId', 'name profilePicture username')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(10);
 
     const authorIds = posts.map(p => p.adminId?._id).filter(id => id);
     const activeStories = await Story.find({

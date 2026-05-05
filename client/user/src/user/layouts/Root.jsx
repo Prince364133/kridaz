@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import Navbar from "../components/layout/Navbar";
+import MobileHeader from "../components/layout/MobileHeader";
 import MobileBottomNav from "../components/layout/MobileBottomNav";
 import UserFooter from "../components/layout/UserFooter";
 import ScrollToTop from "../components/common/ScrollToTop";
@@ -29,6 +30,9 @@ const Root = () => {
       />
       {/* Scroll to top on every route change — fixes pages opening mid-scroll */}
       <ScrollToTop />
+      <MobileHeader />
+      {/* Spacer to push content down below the fixed MobileHeader */}
+      <div className="h-[73px] lg:hidden" />
       <Navbar />
       <main className="flex-grow pb-20 lg:pb-0">
         <Outlet />

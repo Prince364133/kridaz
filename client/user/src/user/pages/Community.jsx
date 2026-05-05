@@ -87,11 +87,10 @@ const Community = () => {
 
     // Fetch stories
     try {
-      const res = await axiosInstance.get('/api/user/stories/feed');
+      const res = await axiosInstance.get('/api/user/stories/feed?all=true');
       setStories(res.data.stories || []);
     } catch (error) {
       console.error("Error fetching stories:", error);
-      // Don't show toast for stories to avoid spam if one fails
     }
 
     setLoading(false);
@@ -344,7 +343,7 @@ const Community = () => {
   }, [posts]);
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-20 md:pb-12 px-4 md:px-8">
+    <div className="min-h-screen bg-black text-white pt-16 pb-20 md:pb-12 px-4 md:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Header */}
@@ -363,15 +362,7 @@ const Community = () => {
                 <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">New Post</span>
               </button>
             )}
-            {user && (
-              <button 
-                onClick={() => setShowStoryModal(true)}
-                className="p-3 bg-white/5 hover:bg-white/10 text-[#84CC16] border border-white/10 rounded-2xl flex items-center gap-2 transition-all active:scale-95"
-              >
-                <Clock size={20} />
-                <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Add Story</span>
-              </button>
-            )}
+
           </div>
         </div>
 
@@ -380,7 +371,7 @@ const Community = () => {
           <h2 className="text-xs font-bold text-white/20 uppercase tracking-[0.2em] mb-4 sm:mb-6">Live Stories</h2>
           <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-2 sm:pb-4 no-scrollbar">
             {/* Add Story Button */}
-            {!isAdmin && (
+            {user && (
               <button 
                 onClick={() => setShowStoryModal(true)}
                 className="flex flex-col items-center gap-2 sm:gap-3 flex-shrink-0 group w-[72px] sm:w-auto"
@@ -397,7 +388,7 @@ const Community = () => {
               </button>
             )}
 
-            {stories.length === 0 && !isAdmin && (
+            {stories.length === 0 && (
               <div className="flex items-center text-white/20 text-[10px] sm:text-xs uppercase tracking-widest px-2 sm:px-4">
                 No stories yet. Be the first!
               </div>
