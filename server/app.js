@@ -13,6 +13,12 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+// Request Logger
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
 const allowedOrigins = process.env.CLIENT_URLS
   ? process.env.CLIENT_URLS.split(",").map((url) => url.trim())
   : ["http://localhost:5173", "http://localhost:5174"];

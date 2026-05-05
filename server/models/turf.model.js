@@ -62,7 +62,7 @@ const turfSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-turfSchema.index({ locationData: "2dsphere" });
+// The index is already defined on the coordinates field above.
 
 const Turf = mongoose.model("Turf", turfSchema, "turves");
 

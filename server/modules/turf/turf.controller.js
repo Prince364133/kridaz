@@ -14,11 +14,10 @@ export const getAllTurfs = async (req, res) => {
   const { searchTerm, city, state, lat, lng, radius } = req.query;
   try {
     let pipeline = [];
+    const isVal = (v) => v && v !== "" && v !== "null" && v !== "undefined" && v !== "Select";
 
     // 1. Proximity Search (Must be first if using $geoNear)
     if (lat && lng) {
-      // 1. Proximity Search (Must be first if using $geoNear)
-      // We use a very large maxDistance to ensure all venues are included but sorted by proximity
       const geoNearStage = {
         $geoNear: {
           near: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
@@ -28,10 +27,10 @@ export const getAllTurfs = async (req, res) => {
         }
       };
 
-      // Add city/state filters into the geoNear query if present
-      if (city) geoNearStage.$geoNear.query.city = { $regex: new RegExp(`^${city}$`, "i") };
-      if (state) geoNearStage.$geoNear.query.state = { $regex: new RegExp(`^${state}$`, "i") };
-      if (searchTerm) {
+      // Add city/state filters into the geoNear query if present and valid
+      if (isVal(city)) geoNearStage.$geoNear.query.city = { $regex: new RegExp(`^${city}$`, "i") };
+      if (isVal(state)) geoNearStage.$geoNear.query.state = { $regex: new RegExp(`^${state}$`, "i") };
+      if (isVal(searchTerm) && searchTerm !== "All") {
         geoNearStage.$geoNear.query.$or = [
           { name: { $regex: searchTerm, $options: "i" } },
           { sportTypes: { $regex: searchTerm, $options: "i" } }
@@ -42,9 +41,9 @@ export const getAllTurfs = async (req, res) => {
     } else {
       // No location provided - normal filtering
       let matchQuery = { status: "approved", isActive: true };
-      if (city) matchQuery.city = { $regex: new RegExp(`^${city}$`, "i") };
-      if (state) matchQuery.state = { $regex: new RegExp(`^${state}$`, "i") };
-      if (searchTerm) {
+      if (isVal(city)) matchQuery.city = { $regex: new RegExp(`^${city}$`, "i") };
+      if (isVal(state)) matchQuery.state = { $regex: new RegExp(`^${state}$`, "i") };
+      if (isVal(searchTerm) && searchTerm !== "All") {
         matchQuery.$or = [
           { name: { $regex: searchTerm, $options: "i" } },
           { sportTypes: { $regex: searchTerm, $options: "i" } }

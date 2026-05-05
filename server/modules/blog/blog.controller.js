@@ -89,8 +89,15 @@ export const updateBlog = async (req, res) => {
     // Ensure order is a number if provided
     if (updates.order) updates.order = Number(updates.order);
 
-    const blog = await Blog.findByIdAndUpdate(req.params.id, updates, { new: true });
+    const blog = await Blog.findById(req.params.id);
     if (!blog) return res.status(404).json({ success: false, message: "Blog not found" });
+
+    // Update fields
+    Object.keys(updates).forEach(key => {
+      blog[key] = updates[key];
+    });
+
+    await blog.save();
     res.status(200).json({ success: true, blog });
   } catch (error) {
     console.error("[updateBlog Error]:", error);

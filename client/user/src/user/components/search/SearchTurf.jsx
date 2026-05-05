@@ -88,15 +88,7 @@ const SearchTurf = ({ onSearch, userLocation }) => {
     return () => clearTimeout(t);
   }, [sport, city, state, userLocation]);
 
-  // ── Auto-fill detected location names ──────────────────────────────
-  useEffect(() => {
-    if (userLocation?.state && !state) {
-      setState(userLocation.state);
-    }
-    if (userLocation?.city && !city) {
-      setCity(userLocation.city);
-    }
-  }, [userLocation]);
+
 
 
   // ── Filtered lists for search-inside-dropdown ──────────────────────

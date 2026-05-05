@@ -56,9 +56,7 @@ const Turf = () => {
         setSearchFilters((prev) => ({ 
           ...prev, 
           lat, 
-          lng,
-          city: prev.city || city,
-          state: prev.state || state
+          lng
         }));
       },
       (err) => {
@@ -86,9 +84,7 @@ const Turf = () => {
         setSearchFilters((prev) => ({ 
           ...prev, 
           lat, 
-          lng,
-          city: prev.city || city,
-          state: prev.state || state
+          lng
         }));
         console.log("Location estimated via IP:", city);
       } else {
