@@ -574,3 +574,55 @@ export const updateInterests = async (req, res) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+export const updateProfile = async (req, res) => {
+  const { name, username, phone, bio, gender, city, state } = req.body;
+  try {
+    const decoded = req.user || req.owner;
+    if (!decoded) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const { id, role } = decoded;
+
+    // Check if username is taken by another user
+    if (username) {
+      const existing = await User.findOne({ 
+        username: username.toLowerCase(), 
+        _id: { $ne: id } 
+      });
+      if (existing) {
+        return res.status(400).json({ success: false, message: "Username already taken" });
+      }
+    }
+
+    let account;
+    const updateData = {
+      name,
+      username: username?.toLowerCase(),
+      phone,
+      bio,
+      gender,
+      city,
+      state
+    };
+
+    if (role === "user") {
+      account = await User.findByIdAndUpdate(id, updateData, { new: true }).select("-password");
+    } else {
+      account = await Owner.findByIdAndUpdate(id, updateData, { new: true }).select("-password");
+    }
+
+    if (!account) {
+      return res.status(404).json({ success: false, message: "Account not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: account
+    });
+  } catch (err) {
+    console.error(chalk.red("updateProfile Error:"), err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};

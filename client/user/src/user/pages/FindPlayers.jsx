@@ -58,7 +58,7 @@ const FindPlayers = () => {
   const fetchFollowingStatus = async () => {
     try {
       const response = await axiosInstance.get("/api/user/players/network");
-      const ids = response.data.following.map(p => p._id);
+      const ids = (response.data.following || []).filter(p => p).map(p => p._id);
       setFollowingIds(ids);
     } catch (error) {
       console.error("Error fetching network:", error);

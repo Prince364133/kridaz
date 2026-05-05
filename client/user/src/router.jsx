@@ -170,7 +170,6 @@ const router = createBrowserRouter([
       { path: "profile/:userId?", element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
       { path: "blogs", element: <UserBlogs /> },
       { path: "blogs/:id", element: <UserBlogDetail /> },
-      { path: "booking-history", element: <ProtectedRoute><UserTurfBookingHistory /></ProtectedRoute> },
       { path: "community", element: <Community /> },
       { path: "players", element: <FindPlayers /> },
 

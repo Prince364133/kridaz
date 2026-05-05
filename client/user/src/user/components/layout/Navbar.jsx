@@ -40,9 +40,7 @@ const Navbar = () => {
     { name: "Business", path: "#" },
   ];
 
-  if (isLoggedIn && !isPartnerPortal) {
-    navLinks.push({ name: "BOOKINGS", path: "/booking-history" });
-  }
+  // Removed dedicated BOOKINGS link
 
   return (
     <nav className="relative z-50 hidden lg:flex flex-col">
@@ -236,7 +234,7 @@ const Navbar = () => {
                           </Link>
                           
                           <Link 
-                            to="/booking-history" 
+                            to="/profile?tab=bookings" 
                             className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all"
                           >
                             <Clock size={16} />

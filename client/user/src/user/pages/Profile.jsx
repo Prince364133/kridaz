@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
   User, MapPin, Clock, IndianRupee, Calendar, Zap, Activity,
@@ -14,6 +14,7 @@ import TurfBookingHistorySkeleton from "../components/ui/TurfBookingHistorySkele
 import WriteReview from "../components/reviews/WriteReview";
 import NetworkModal from "../components/modals/NetworkModal";
 import StoryViewer from "../components/StoryViewer";
+import EditProfileModal from "../components/modals/EditProfileModal";
 
 const PRI = "#84CC16";
 const BDR = "#2A2A2A";
@@ -29,6 +30,8 @@ const getMemberLevel = (count) => {
 export default function Profile() {
   const { userId } = useParams();
   const { user: currentUser, role, token } = useSelector((state) => state.auth);
+  const [searchParams] = useSearchParams();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   const isOwnProfile = !userId || (currentUser && userId === currentUser._id);
   const targetUserId = isOwnProfile ? currentUser?._id : userId;
@@ -52,7 +55,14 @@ export default function Profile() {
 
   const dispatch = useDispatch();
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState("posts"); // "posts", "stories", or "activity"
+  const [activeTab, setActiveTab] = useState("posts"); // "posts", "stories", or "bookings"
+  
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "bookings") {
+      setActiveTab("bookings");
+    }
+  }, [searchParams]);
   
   // For another user or own user we can fetch posts/stories
   const [userPosts, setUserPosts] = useState([]);
@@ -80,7 +90,7 @@ export default function Profile() {
     try {
       const response = await axiosInstance.get("/api/user/players/network");
       if (response.data.success) {
-        setMyFollowingIds(response.data.following.map(u => u._id));
+        setMyFollowingIds((response.data.following || []).filter(u => u).map(u => u._id));
       }
     } catch (error) {
       console.error("Error fetching my network:", error);
@@ -372,13 +382,13 @@ export default function Profile() {
             {/* Right: Actions */}
             <div className="shrink-0">
               {isOwnProfile ? (
-                <Link 
-                  to="/settings" 
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
                   className="p-2 md:px-4 md:py-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-white transition-all flex items-center gap-2"
                 >
                   <Edit3 size={14} />
-                  <span className="hidden md:inline text-[10px] font-bold uppercase tracking-widest">Settings</span>
-                </Link>
+                  <span className="hidden md:inline text-[10px] font-bold uppercase tracking-widest">Edit Profile</span>
+                </button>
               ) : (
                 <button
                   onClick={handleFollowToggle}
@@ -396,13 +406,18 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Network Modal */}
       <NetworkModal 
         isOpen={networkModal.isOpen}
         onClose={() => setNetworkModal({ ...networkModal, isOpen: false })}
         userId={targetUserId}
         type={networkModal.type}
         initialCount={networkModal.type === "followers" ? (profileUser?.followers?.length || 0) : (profileUser?.following?.length || 0)}
+      />
+
+      <EditProfileModal 
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        user={currentUser}
       />
 
       {/* Story Viewer */}

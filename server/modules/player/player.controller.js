@@ -106,42 +106,36 @@ export const searchPlayers = async (req, res) => {
 export const followPlayer = async (req, res) => {
   try {
     const { id } = req.params;
-    const currentUserId = req.user.id;
+    const decoded = req.user || req.owner;
+    if (!decoded) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
 
-    if (id === currentUserId) {
+    const currentUserId = decoded.id || decoded._id;
+    const role = decoded.role || "user";
+
+    if (id === currentUserId.toString()) {
       return res.status(400).json({ success: false, message: "You cannot follow yourself" });
     }
 
-    // Search in both collections for both users
-    let targetUser = await User.findById(id);
-    if (!targetUser) targetUser = await Owner.findById(id);
-
-    let currentUser = await User.findById(currentUserId);
-    if (!currentUser) currentUser = await Owner.findById(currentUserId);
-
-    if (!targetUser || !currentUser) {
-      return res.status(404).json({ 
-        success: false, 
-        message: `User not found (Target: ${!!targetUser}, Self: ${!!currentUser})` 
-      });
+    // Update current user's following list (Atomic)
+    if (role === "user") {
+      await User.findByIdAndUpdate(currentUserId, { $addToSet: { following: id } });
+    } else {
+      await Owner.findByIdAndUpdate(currentUserId, { $addToSet: { following: id } });
     }
 
-    let updated = false;
-    if (!currentUser.following.some(f => f.toString() === id)) {
-      currentUser.following.push(id);
-      await currentUser.save();
-      updated = true;
-    }
-
-    if (!targetUser.followers.some(f => f.toString() === currentUserId)) {
-      targetUser.followers.push(currentUserId);
-      await targetUser.save();
-      updated = true;
+    // Update target user's followers list (Atomic)
+    const targetInUser = await User.exists({ _id: id });
+    if (targetInUser) {
+      await User.findByIdAndUpdate(id, { $addToSet: { followers: currentUserId } });
+    } else {
+      await Owner.findByIdAndUpdate(id, { $addToSet: { followers: currentUserId } });
     }
 
     return res.status(200).json({ 
       success: true, 
-      message: updated ? "Followed successfully" : "Already following" 
+      message: "Followed successfully" 
     });
   } catch (error) {
     console.error("Follow error:", error);
@@ -152,23 +146,28 @@ export const followPlayer = async (req, res) => {
 export const unfollowPlayer = async (req, res) => {
   try {
     const { id } = req.params;
-    const currentUserId = req.user.id;
-
-    let targetUser = await User.findById(id);
-    if (!targetUser) targetUser = await Owner.findById(id);
-
-    let currentUser = await User.findById(currentUserId);
-    if (!currentUser) currentUser = await Owner.findById(currentUserId);
-
-    if (!targetUser || !currentUser) {
-      return res.status(404).json({ success: false, message: "User not found" });
+    const decoded = req.user || req.owner;
+    if (!decoded) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    currentUser.following = currentUser.following.filter(f => f.toString() !== id);
-    await currentUser.save();
+    const currentUserId = decoded.id || decoded._id;
+    const role = decoded.role || "user";
 
-    targetUser.followers = targetUser.followers.filter(f => f.toString() !== currentUserId);
-    await targetUser.save();
+    // Update current user's following list (Atomic)
+    if (role === "user") {
+      await User.findByIdAndUpdate(currentUserId, { $pull: { following: id } });
+    } else {
+      await Owner.findByIdAndUpdate(currentUserId, { $pull: { following: id } });
+    }
+
+    // Update target user's followers list (Atomic)
+    const targetInUser = await User.exists({ _id: id });
+    if (targetInUser) {
+      await User.findByIdAndUpdate(id, { $pull: { followers: currentUserId } });
+    } else {
+      await Owner.findByIdAndUpdate(id, { $pull: { followers: currentUserId } });
+    }
 
     return res.status(200).json({ success: true, message: "Unfollowed successfully" });
   } catch (error) {
@@ -196,8 +195,8 @@ export const getNetwork = async (req, res) => {
 
     return res.status(200).json({ 
       success: true, 
-      followers: user.followers,
-      following: user.following 
+      followers: (user.followers || []).filter(f => f),
+      following: (user.following || []).filter(f => f) 
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -294,8 +293,8 @@ export const getNetworkById = async (req, res) => {
 
     return res.status(200).json({ 
       success: true, 
-      followers,
-      following 
+      followers: followers.filter(f => f),
+      following: following.filter(f => f) 
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

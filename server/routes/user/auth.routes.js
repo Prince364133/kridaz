@@ -8,7 +8,8 @@ import {
   upgradeRequest,
   getMe,
   updateProfilePicture,
-  updateInterests
+  updateInterests,
+  updateProfile
 } from "../../modules/auth/auth.controller.js";
 import { 
   userRegisterSchema, 
@@ -32,5 +33,6 @@ router.post("/upgrade-request", userAuth, upgradeRequest);
 router.get("/getMe", userAuth, getMe);
 router.post("/profile-picture", userAuth, upload.single("profilePicture"), updateProfilePicture);
 router.post("/update-interests", userAuth, updateInterests);
+router.put("/updateProfile", userAuth, updateProfile);
 
 export default router;
