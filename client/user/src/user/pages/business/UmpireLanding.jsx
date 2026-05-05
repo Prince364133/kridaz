@@ -52,7 +52,7 @@ export default function UmpireLanding() {
               Turn your expertise into income. BookMySportz connects certified umpires and referees with local tournaments and leagues looking for professional officiating.
             </p>
             <Link
-              to="/business/register?role=official"
+              to="/business/register?role=umpire"
               className="inline-flex items-center gap-3 font-bold text-black rounded-full px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest"
               style={{ backgroundColor: PRI }}
             >

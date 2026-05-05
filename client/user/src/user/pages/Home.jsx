@@ -259,7 +259,7 @@ export default function Home() {
         <div className="absolute inset-0 opacity-[0.03] z-1"
           style={{ backgroundImage: `radial-gradient(${PRI} 1px, transparent 1px)`, backgroundSize: "48px 48px" }} />
 
-        <div className="relative w-full mx-auto px-4 lg:px-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center pt-4 md:pt-0">
+        <div className="relative w-full px-4 lg:px-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center pt-4 md:pt-0">
           <div className="space-y-4 lg:space-y-6 relative z-10">
             <div>
               <h1 className="font-display leading-[0.9] lg:leading-[0.85] tracking-tighter uppercase" style={{ fontSize: "clamp(2.5rem,10vw,6.5rem)" }}>
@@ -316,7 +316,7 @@ export default function Home() {
 
       {/* ── STATS ── */}
       <section className="border-y" style={{ borderColor: "#1A1A1A", backgroundColor: "#0A0A0A" }}>
-        <div className="max-w-screen-2xl mx-auto px-2 md:px-10 py-6 grid grid-cols-4 gap-2 lg:gap-0 divide-x divide-[#1A1A1A]">
+        <div className="w-full px-2 md:px-10 py-6 grid grid-cols-4 gap-2 lg:gap-0 divide-x divide-[#1A1A1A]">
           {stats.map((s) => (
             <div key={s.label} className="px-1 md:px-8 text-center flex flex-col justify-center overflow-hidden group">
               <p className="font-display text-xl sm:text-3xl lg:text-5xl leading-none tracking-tighter group-hover:text-white transition-colors" style={{ color: PRI }}>{s.value}</p>
@@ -328,7 +328,7 @@ export default function Home() {
 
 
       {/* ── FIND YOUR ARENA ── */}
-      <section className="py-10 lg:py-20 px-6 md:px-10 w-full max-w-screen-2xl mx-auto">
+      <section className="py-10 lg:py-20 px-6 md:px-10 w-full">
         <div className="text-center mb-6 lg:mb-10">
           <h2 className="font-display text-6xl md:text-7xl leading-none uppercase">
             Find Your <span style={{ color: PRI }}>Arena</span>
@@ -337,7 +337,7 @@ export default function Home() {
         </div>
 
         {/* Search & Tabs Combined Row */}
-        <div className="flex flex-col gap-8 mb-16 max-w-6xl mx-auto">
+        <div className="flex flex-col gap-8 mb-16 w-full">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex gap-2 p-1 rounded-full bg-[#1A1A1A] border border-white/5">
               {[{ key: "venues", label: "🏟 VENUES" }, { key: "marketplace", label: "🛒 MARKETPLACE" }].map(tab => (
@@ -456,7 +456,7 @@ export default function Home() {
 
       {/* ── FIND PLAYERS NEAR YOU ── */}
       <section className="py-10 lg:py-20 px-6 md:px-10" style={{ backgroundColor: "#0A0A0A" }}>
-        <div className="max-w-screen-2xl mx-auto">
+        <div className="w-full">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div className="flex flex-col gap-1">
@@ -560,7 +560,7 @@ export default function Home() {
       {/* ── JOIN GAMES NEAR YOU (Feature Flag) ── */}
       {featureFlags['join_games'] && (
         <section className="py-10 lg:py-20 px-6 md:px-10" style={{ backgroundColor: "#0A0A0A" }}>
-          <div className="max-w-screen-2xl mx-auto">
+          <div className="w-full">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 lg:mb-8">
               <div>
                 <h2 className="font-display text-3xl sm:text-4xl md:text-7xl lg:text-8xl uppercase leading-none text-white flex items-center gap-2 md:gap-3 whitespace-nowrap">
@@ -637,7 +637,7 @@ export default function Home() {
       {/* ── FIND PROFESSIONALS (Feature Flag) ── */}
       {featureFlags['find_professionals'] && (
         <section className="py-10 lg:py-20 px-6 md:px-10 border-b" style={{ backgroundColor: "#000", borderColor: "#1A1A1A" }}>
-          <div className="max-w-screen-2xl mx-auto">
+          <div className="w-full">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 lg:mb-8">
               <div>
                 <h2 className="font-display text-5xl md:text-6xl uppercase leading-none text-white">
@@ -723,7 +723,7 @@ export default function Home() {
       )}
 
       {/* ── BENTO GRID ── */}
-      <section className="py-10 lg:py-20 px-6 md:px-10 w-full max-w-screen-2xl mx-auto">
+      <section className="py-10 lg:py-20 px-6 md:px-10 w-full">
         <div className="text-center mb-8 lg:mb-14">
           <h2 className="font-display text-5xl md:text-6xl lg:text-7xl uppercase italic leading-[0.9]">
             ALL IN ONE <span className="text-gray-500">SPORTS</span><br />

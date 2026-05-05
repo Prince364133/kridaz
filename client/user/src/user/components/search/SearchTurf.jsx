@@ -110,7 +110,7 @@ const SearchTurf = ({ onSearch, userLocation }) => {
   };
 
   return (
-    <div className="w-full max-w-[1500px] mx-auto animate-fade-in-up">
+    <div className="w-full animate-fade-in-up">
       <div className="relative group">
         <div className="relative flex flex-row items-center bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl p-1.5 shadow-2xl transition-all duration-500 hover:border-[#84CC16]/30 min-h-[56px] md:min-h-[64px]">
           

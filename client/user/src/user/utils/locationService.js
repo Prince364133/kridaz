@@ -42,7 +42,10 @@ export const searchLocations = async (query) => {
     return response.data.map(item => ({
       display_name: item.display_name,
       city: item.address.city || item.address.town || item.address.village || item.address.suburb || "",
-      state: item.address.state || ""
+      state: item.address.state || "",
+      postcode: item.address.postcode || "",
+      suburb: item.address.suburb || item.address.neighbourhood || "",
+      road: item.address.road || ""
     }));
   } catch (error) {
     console.error("Error searching locations:", error);

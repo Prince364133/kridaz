@@ -14,9 +14,12 @@ import {
   FileText, 
   ChevronLeft,
   Briefcase,
-  ShieldAlert
+  ShieldAlert,
+  Loader2,
+  Navigation
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { searchLocations } from "@user/utils/locationService";
 
 const PRI = "#84CC16";
 
@@ -29,6 +32,9 @@ export default function BusinessRegistration() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -79,6 +85,39 @@ export default function BusinessRegistration() {
       setHasRoleConflict(user.role);
     }
   }, [isLoggedIn, navigate, roleFromUrl, user]);
+
+  // Debounced search for location suggestions
+  useEffect(() => {
+    const address = formData.businessDetails.address;
+    const timer = setTimeout(async () => {
+      if (address && address.length >= 3) {
+        setIsSearching(true);
+        const results = await searchLocations(address);
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
+        setIsSearching(false);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [formData.businessDetails.address]);
+
+  const handleSuggestionSelect = (suggestion) => {
+    setFormData(prev => ({
+      ...prev,
+      businessDetails: {
+        ...prev.businessDetails,
+        address: suggestion.display_name,
+        city: suggestion.city || prev.businessDetails.city,
+        state: suggestion.state || prev.businessDetails.state,
+        zipCode: suggestion.postcode || prev.businessDetails.zipCode
+      }
+    }));
+    setShowSuggestions(false);
+  };
 
   const [hasRoleConflict, setHasRoleConflict] = useState(null);
 
@@ -181,7 +220,7 @@ export default function BusinessRegistration() {
 
   return (
     <div className="min-h-screen bg-black text-white pt-4 pb-20 font-sans selection:bg-[#84CC16] selection:text-black">
-      <div className="max-w-4xl mx-auto px-6">
+      <div className="w-full px-6">
         
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-8 group">
           <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
@@ -295,10 +334,49 @@ export default function BusinessRegistration() {
                     <MapPin size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#84CC16]" />
                     <input 
                       type="text" name="businessDetails.address" required
+                      value={formData.businessDetails.address}
                       onChange={handleChange}
+                      autoComplete="off"
                       placeholder="Street name, Landmark"
-                      className="w-full bg-white/5 border border-white/5 focus:border-[#84CC16]/50 rounded-2xl h-14 pl-12 pr-5 text-white outline-none transition-all"
+                      className="w-full bg-white/5 border border-white/5 focus:border-[#84CC16]/50 rounded-2xl h-14 pl-12 pr-12 text-white outline-none transition-all"
                     />
+                    
+                    {isSearching && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                        <Loader2 className="w-4 h-4 text-[#84CC16] animate-spin" />
+                      </div>
+                    )}
+
+                    {/* Suggestions Dropdown */}
+                    {showSuggestions && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setShowSuggestions(false)} />
+                        <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-[#0A0A0A] border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl animate-in fade-in slide-in-from-top-2">
+                          <div className="p-1 max-h-[240px] overflow-y-auto custom-scrollbar">
+                            {suggestions.map((suggestion, index) => (
+                                <button
+                                  key={index}
+                                  type="button"
+                                  onClick={() => handleSuggestionSelect(suggestion)}
+                                  className="w-full flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 text-left transition-all group/item"
+                                >
+                                  <div className="p-2 bg-white/5 rounded-lg group-hover/item:bg-[#84CC16]/10 transition-colors mt-0.5">
+                                    <Navigation size={14} className="text-gray-500 group-hover/item:text-[#84CC16]" />
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="text-[11px] font-bold text-white uppercase tracking-wider truncate">
+                                      {suggestion.city || suggestion.display_name.split(',')[0]}
+                                    </span>
+                                    <span className="text-[9px] text-white/40 truncate">
+                                      {suggestion.display_name}
+                                    </span>
+                                  </div>
+                                </button>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -306,6 +384,7 @@ export default function BusinessRegistration() {
                   <div className="space-y-2">
                     <input 
                       type="text" name="businessDetails.city" required
+                      value={formData.businessDetails.city}
                       onChange={handleChange}
                       placeholder="City"
                       className="w-full bg-white/5 border border-white/5 focus:border-[#84CC16]/50 rounded-2xl h-14 px-5 text-white outline-none transition-all"
@@ -314,6 +393,7 @@ export default function BusinessRegistration() {
                   <div className="space-y-2">
                     <input 
                       type="text" name="businessDetails.state" required
+                      value={formData.businessDetails.state}
                       onChange={handleChange}
                       placeholder="State"
                       className="w-full bg-white/5 border border-white/5 focus:border-[#84CC16]/50 rounded-2xl h-14 px-5 text-white outline-none transition-all"
@@ -322,6 +402,7 @@ export default function BusinessRegistration() {
                   <div className="space-y-2">
                     <input 
                       type="text" name="businessDetails.zipCode" required
+                      value={formData.businessDetails.zipCode}
                       onChange={handleChange}
                       placeholder="Zip Code"
                       className="w-full bg-white/5 border border-white/5 focus:border-[#84CC16]/50 rounded-2xl h-14 px-5 text-white outline-none transition-all"

@@ -55,6 +55,7 @@ const useLoginForm = () => {
 
     switch (role) {
       case "BMSP_ADMIN":
+      case "admin":
         window.location.href = "/admin";
         break;
       case "VERIFIED_VENUE_OWNER":

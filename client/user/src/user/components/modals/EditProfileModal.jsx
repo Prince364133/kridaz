@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { X, User, Phone, MapPin, AlignLeft, Loader2, Check, Info } from "lucide-react";
+import { X, User, Phone, MapPin, AlignLeft, Loader2, Check, Info, Navigation } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "../../hooks/useAxiosInstance";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../../../redux/slices/authSlice";
+import { searchLocations } from "../../utils/locationService";
 
 export default function EditProfileModal({ isOpen, onClose, user }) {
   const [formData, setFormData] = useState({
@@ -16,6 +17,9 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
     state: "",
   });
   const [loading, setLoading] = useState(false);
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -34,6 +38,35 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === "city") {
+      setShowLocationSuggestions(true);
+    }
+  };
+
+  // Debounced location search
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (formData.city && formData.city.length >= 3 && showLocationSuggestions) {
+        setIsSearchingLocation(true);
+        const results = await searchLocations(formData.city);
+        setLocationSuggestions(results);
+        setIsSearchingLocation(false);
+      } else {
+        setLocationSuggestions([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [formData.city, showLocationSuggestions]);
+
+  const handleSuggestionSelect = (suggestion) => {
+    setFormData({
+      ...formData,
+      city: suggestion.city || suggestion.display_name.split(",")[0],
+      state: suggestion.state || "",
+    });
+    setShowLocationSuggestions(false);
+    setLocationSuggestions([]);
   };
 
   const handleSubmit = async (e) => {
@@ -176,7 +209,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* City */}
-            <div className="space-y-2">
+            <div className="space-y-2 relative">
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">City</label>
               <div className="relative group">
                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#84CC16] transition-colors" size={16} />
@@ -185,10 +218,50 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
                   name="city"
                   value={formData.city}
                   onChange={handleChange}
+                  autoComplete="off"
                   className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-[#84CC16] focus:ring-4 focus:ring-[#84CC16]/10 transition-all"
                   placeholder="Enter city"
                 />
+                {isSearchingLocation && (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <Loader2 size={14} className="animate-spin text-[#84CC16]" />
+                  </div>
+                )}
               </div>
+
+              {/* Suggestions Dropdown */}
+              {showLocationSuggestions && locationSuggestions.length > 0 && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-10" 
+                    onClick={() => setShowLocationSuggestions(false)}
+                  />
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#0A0A0A] border border-white/10 rounded-2xl overflow-hidden z-20 shadow-2xl animate-in fade-in slide-in-from-top-2">
+                    <div className="p-2 max-h-[200px] overflow-y-auto custom-scrollbar">
+                      {locationSuggestions.map((suggestion, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSuggestionSelect(suggestion)}
+                          className="w-full flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 text-left transition-all group/item"
+                        >
+                          <div className="p-2 bg-white/5 rounded-lg group-hover/item:bg-[#84CC16]/10 transition-colors mt-0.5">
+                            <Navigation size={12} className="text-gray-500 group-hover/item:text-[#84CC16]" />
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-[11px] font-bold text-white uppercase tracking-wider truncate">
+                              {suggestion.city || suggestion.display_name.split(",")[0]}
+                            </span>
+                            <span className="text-[9px] text-white/40 truncate">
+                              {suggestion.display_name}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* State */}

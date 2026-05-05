@@ -26,7 +26,8 @@ import {
   Search,
   CheckCircle2,
   XCircle,
-  Loader2
+  Loader2,
+  Navigation
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { Trophy } from "lucide-react";
@@ -379,20 +380,22 @@ const SignUp = () => {
                                         key={index}
                                         type="button"
                                         onClick={() => {
-                                          const display = suggestion.display_name.split(',').slice(0, 2).join(', ');
+                                          const city = suggestion.city || suggestion.display_name.split(',')[0];
+                                          const state = suggestion.state || "";
+                                          const display = [city, state].filter(Boolean).join(', ');
                                           setValue("location", display, { shouldValidate: true });
                                           setShowSuggestions(false);
                                         }}
                                         className="w-full flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 text-left transition-all group/item"
                                       >
                                         <div className="p-2 bg-white/5 rounded-lg group-hover/item:bg-[#84CC16]/10 transition-colors mt-0.5">
-                                          <MapPin size={14} className="text-gray-500 group-hover/item:text-[#84CC16]" />
+                                          <Navigation size={14} className="text-gray-500 group-hover/item:text-[#84CC16]" />
                                         </div>
                                         <div className="flex flex-col min-w-0">
                                           <span className="text-[11px] font-bold text-white uppercase tracking-wider truncate">
                                             {suggestion.city || suggestion.display_name.split(',')[0]}
                                           </span>
-                                          <span className="text-[10px] text-white/40 truncate">
+                                          <span className="text-[9px] text-white/40 truncate">
                                             {suggestion.display_name}
                                           </span>
                                         </div>
