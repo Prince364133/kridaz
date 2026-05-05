@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import useLoginForm from "@hooks/useLoginForm";
-import { GoogleLogin } from "@react-oauth/google";
+import GoogleAuthButton from "@user/components/auth/GoogleAuthButton";
 import { 
   ArrowRight, 
   ShieldCheck, 
@@ -98,15 +98,12 @@ const Login = () => {
                 ) : (
                   <>
                     {/* Google Login Button */}
-                    <div className="w-full mb-8 flex flex-col items-center justify-center">
-                      <GoogleLogin
+                    <div className="w-full mb-8">
+                      <GoogleAuthButton 
                         onSuccess={handleGoogleSuccess}
                         onError={handleGoogleError}
-                        theme="filled_black"
-                        shape="rectangular"
-                        size="large"
-                        width="100%"
-                        text="signin_with"
+                        isLoading={loading}
+                        mode="signin"
                       />
                     </div>
                     

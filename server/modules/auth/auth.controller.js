@@ -78,7 +78,7 @@ export const sendOtp = async (req, res) => {
 
 // User Registration
 export const registerUser = async (req, res) => {
-  const { name, email, password, phone, gender, location, otp, username } = req.body;
+  const { name, email, password, phone, gender, location, otp, username, sportTypes } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -102,7 +102,7 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await argon2.hash(password);
     const finalUsername = username ? username.toLowerCase() : await generateUniqueUsername(name);
 
-    const newUser = new User({ name, username: finalUsername, email, password: hashedPassword, phone, gender, location });
+    const newUser = new User({ name, username: finalUsername, email, password: hashedPassword, phone, gender, location, sportTypes });
     await newUser.save();
     await OTP.deleteOne({ _id: otpRecord._id });
 
@@ -294,14 +294,25 @@ export const login = async (req, res) => {
 
 // Google Auth
 export const googleAuth = async (req, res) => {
-  const { credential, role: requestedRole } = req.body;
+  const { credential, accessToken, role: requestedRole } = req.body;
   try {
-    const ticket = await client.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    let payload;
+
+    if (credential) {
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+    } else if (accessToken) {
+      const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`);
+      if (!response.ok) throw new Error("Failed to fetch user info from Google");
+      payload = await response.json();
+    } else {
+      return res.status(400).json({ success: false, message: "No Google credentials provided" });
+    }
     
-    const { name, email, sub: googleId } = ticket.getPayload();
+    const { name, email, sub: googleId } = payload;
 
     let owner = await Owner.findOne({ email });
     let user = await User.findOne({ email });

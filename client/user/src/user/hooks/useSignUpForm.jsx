@@ -37,6 +37,7 @@ const registerSchema = yup.object().shape({
     then: () => yup.string().required("OTP is required").min(6, "OTP must be 6 characters"),
     otherwise: () => yup.string().notRequired(),
   }),
+  sportTypes: yup.array().of(yup.string()).min(1, "Select at least one sport"),
 });
 
 const useSignUpForm = () => {
@@ -50,15 +51,19 @@ const useSignUpForm = () => {
     handleSubmit,
     setValue,
     getValues,
+    watch,
     trigger,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(registerSchema),
     context: { showOtpInput },
+    defaultValues: {
+      sportTypes: []
+    }
   });
 
   const handleSendOtp = async () => {
-    const isValid = await trigger(["name", "username", "email", "phone", "gender", "location", "password", "confirmPassword"]);
+    const isValid = await trigger(["name", "username", "email", "phone", "gender", "location", "password", "confirmPassword", "sportTypes"]);
     if (!isValid) return;
 
     setLoading(true);
@@ -101,13 +106,20 @@ const useSignUpForm = () => {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
+  const handleGoogleSuccess = async (googleResponse) => {
     setLoading(true);
     try {
-      const response = await axiosInstance.post("/api/user/auth/google-auth", {
-        credential: credentialResponse.credential,
+      const payload = {
         role: "user",
-      });
+      };
+
+      if (googleResponse.credential) {
+        payload.credential = googleResponse.credential;
+      } else if (googleResponse.access_token) {
+        payload.accessToken = googleResponse.access_token;
+      }
+
+      const response = await axiosInstance.post("/api/user/auth/google-auth", payload);
       const result = await response.data;
       toast.success("Successfully logged in with Google!");
       dispatch(login({ token: result.token, role: result.role, user: result.user }));
@@ -135,6 +147,7 @@ const useSignUpForm = () => {
     onSubmit,
     loading,
     setValue,
+    watch,
     showOtpInput,
     handleGoogleSuccess,
     handleGoogleError,

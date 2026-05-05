@@ -24,6 +24,9 @@ export const getPublicPlayers = async (req, res) => {
       if (sport) geoNearStage.$geoNear.query.sportTypes = { $regex: new RegExp(`^${sport}$`, "i") };
 
       pipeline.push(geoNearStage);
+      if (req.query.sortBy === 'newest') {
+        pipeline.push({ $sort: { createdAt: -1 } });
+      }
     } else {
       let matchQuery = {};
       if (city) matchQuery.city = { $regex: new RegExp(`^${city}$`, "i") };
@@ -61,7 +64,8 @@ export const getPublicPlayers = async (req, res) => {
       state: u.state,
       sportTypes: u.sportTypes || [],
       distance: u.distance ? (u.distance / 1000).toFixed(1) : null, // in km
-      hasActiveStory: activeStories.some(id => id.toString() === u._id.toString())
+      hasActiveStory: activeStories.some(id => id.toString() === u._id.toString()),
+      isFollowing: req.user ? u.followers?.some(f => f.toString() === req.user.id.toString()) : false
     }));
 
     return res.status(200).json({ success: true, players });

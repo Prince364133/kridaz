@@ -128,13 +128,20 @@ const useLoginForm = () => {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
+  const handleGoogleSuccess = async (googleResponse) => {
     setLoading(true);
     try {
-      const response = await axiosInstance.post("/api/user/auth/google-auth", {
-        credential: credentialResponse.credential,
+      const payload = {
         role: "user",
-      });
+      };
+
+      if (googleResponse.credential) {
+        payload.credential = googleResponse.credential;
+      } else if (googleResponse.access_token) {
+        payload.accessToken = googleResponse.access_token;
+      }
+
+      const response = await axiosInstance.post("/api/user/auth/google-auth", payload);
       const result = await response.data;
       toast.success("Successfully logged in with Google!");
       

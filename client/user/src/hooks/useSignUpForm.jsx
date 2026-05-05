@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axiosInstance from "./useAxiosInstance";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
@@ -10,6 +10,11 @@ import { login } from "../redux/slices/authSlice";
 
 const registerSchema = yup.object().shape({
   name: yup.string().required("Name is required"),
+  username: yup
+    .string()
+    .required("Username is required")
+    .min(3, "Username must be at least 3 characters")
+    .matches(/^[a-z0-9_]+$/, "Username can only contain lowercase letters, numbers, and underscores"),
   email: yup
     .string()
     .required("Enter your email")
@@ -22,6 +27,7 @@ const registerSchema = yup.object().shape({
     .required("Enter your phone number")
     .matches(/^[0-9]{10}$/, "Enter a valid 10-digit phone number"),
   gender: yup.string().required("Select your gender"),
+  sportTypes: yup.array().min(1, "Select at least one sport"),
   location: yup.string().required("Enter your location"),
   password: yup
     .string()
@@ -48,6 +54,7 @@ const useSignUpForm = (predefinedRole = "user") => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState(null); // 'checking', 'available', 'unavailable'
 
   // Determine API base path based on role
   const apiPath = predefinedRole === "user" ? "/api/user/auth" : "/api/owner/auth";
@@ -58,18 +65,53 @@ const useSignUpForm = (predefinedRole = "user") => {
     setValue,
     getValues,
     trigger,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(registerSchema),
     context: { showOtpInput },
     defaultValues: {
       role: predefinedRole,
+      sportTypes: [],
     },
   });
 
+  const username = watch("username");
+
+  // Live Username Check
+  useEffect(() => {
+    if (!username || username.length < 3) {
+      setUsernameStatus(null);
+      return;
+    }
+
+    const checkAvailability = async () => {
+      setUsernameStatus('checking');
+      try {
+        const response = await axiosInstance.get(`${apiPath}/check-username?username=${username}`);
+        if (response.data.available) {
+          setUsernameStatus('available');
+        } else {
+          setUsernameStatus('unavailable');
+        }
+      } catch (error) {
+        setUsernameStatus(null);
+      }
+    };
+
+    const timer = setTimeout(checkAvailability, 500);
+    return () => clearTimeout(timer);
+  }, [username, apiPath]);
+
   const handleSendOtp = async () => {
-    const isValid = await trigger(["name", "email", "phone", "gender", "location", "password", "confirmPassword"]);
+    const fieldsToValidate = ["name", "username", "email", "phone", "gender", "location", "password", "confirmPassword", "sportTypes"];
+    const isValid = await trigger(fieldsToValidate);
+    
     if (!isValid) return;
+    if (usernameStatus === 'unavailable') {
+      toast.error("Username is already taken");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -125,13 +167,20 @@ const useSignUpForm = (predefinedRole = "user") => {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
+  const handleGoogleSuccess = async (googleResponse) => {
     setLoading(true);
     try {
-      const response = await axiosInstance.post(`${apiPath}/google-auth`, {
-        credential: credentialResponse.credential,
+      const payload = {
         role: predefinedRole,
-      });
+      };
+
+      if (googleResponse.credential) {
+        payload.credential = googleResponse.credential;
+      } else if (googleResponse.access_token) {
+        payload.accessToken = googleResponse.access_token;
+      }
+
+      const response = await axiosInstance.post(`${apiPath}/google-auth`, payload);
       const result = await response.data;
       toast.success("Successfully logged in with Google!");
       dispatch(login({ token: result.token, role: result.role }));
@@ -168,10 +217,13 @@ const useSignUpForm = (predefinedRole = "user") => {
     loading, 
     getValues,
     setValue,
+    watch,
     showOtpInput,
     handleGoogleSuccess,
-    handleGoogleError
+    handleGoogleError,
+    usernameStatus
   };
 };
 
 export default useSignUpForm;
+

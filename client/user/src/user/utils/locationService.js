@@ -26,3 +26,26 @@ export const fetchCities = async (state) => {
     return [];
   }
 };
+
+export const searchLocations = async (query) => {
+  if (!query || query.length < 3) return [];
+  try {
+    const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
+      params: {
+        q: query,
+        format: 'json',
+        addressdetails: 1,
+        limit: 5,
+        countrycodes: 'in'
+      }
+    });
+    return response.data.map(item => ({
+      display_name: item.display_name,
+      city: item.address.city || item.address.town || item.address.village || item.address.suburb || "",
+      state: item.address.state || ""
+    }));
+  } catch (error) {
+    console.error("Error searching locations:", error);
+    return [];
+  }
+};

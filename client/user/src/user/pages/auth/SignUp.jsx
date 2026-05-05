@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useSignUpForm from "../../hooks/useSignUpForm";
-import { GoogleLogin } from "@react-oauth/google";
+import GoogleAuthButton from "@user/components/auth/GoogleAuthButton";
 import { 
   ArrowRight, 
   ShieldCheck, 
@@ -21,9 +21,20 @@ import {
   Cpu,
   MapPin,
   Locate,
-  UserSquare2
+  UserSquare2,
+  Search,
+  CheckCircle2,
+  XCircle,
+  Loader2
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { Trophy } from "lucide-react";
+import { searchLocations } from "../../utils/locationService";
+
+const SPORTS = [
+  "Cricket", "Football", "Badminton", "Tennis", "Basketball", 
+  "Table Tennis", "Volleyball", "Hockey", "Swimming", "Pickleball"
+];
 
 const SignUp = () => {
   const { 
@@ -33,16 +44,46 @@ const SignUp = () => {
     onSubmit, 
     loading, 
     setValue,
+    watch,
     showOtpInput,
     handleGoogleSuccess,
-    handleGoogleError
+    handleGoogleError,
+    usernameStatus
   } = useSignUpForm();
+  
   const [mounted, setMounted] = useState(false);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+  const [selectedSports, setSelectedSports] = useState([]);
+  const [showSportsDropdown, setShowSportsDropdown] = useState(false);
+  
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  
+  const locationValue = watch("location");
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Debounced search for location suggestions
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      // Only search if user typed something and it's not a selection
+      if (locationValue && locationValue.length >= 3 && !isFetchingLocation) {
+        setIsSearching(true);
+        const results = await searchLocations(locationValue);
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
+        setIsSearching(false);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [locationValue, isFetchingLocation]);
 
   const fetchLocation = () => {
     if (!navigator.geolocation) {
@@ -77,6 +118,14 @@ const SignUp = () => {
         toast.error("Location access denied or unavailable");
       }
     );
+  };
+
+  const toggleSport = (sport) => {
+    const newSports = selectedSports.includes(sport)
+      ? selectedSports.filter(s => s !== sport)
+      : [...selectedSports, sport];
+    setSelectedSports(newSports);
+    setValue("sportTypes", newSports, { shouldValidate: true });
   };
 
   return (
@@ -137,15 +186,12 @@ const SignUp = () => {
                 ) : (
                   <>
                     {/* Google Login Button */}
-                    <div className="w-full mb-8 flex flex-col items-center justify-center">
-                      <GoogleLogin
+                    <div className="w-full mb-8">
+                      <GoogleAuthButton 
                         onSuccess={handleGoogleSuccess}
                         onError={handleGoogleError}
-                        theme="filled_black"
-                        shape="rectangular"
-                        size="large"
-                        width="100%"
-                        text="signup_with"
+                        isLoading={loading}
+                        mode="signup"
                       />
                     </div>
                     
@@ -172,18 +218,31 @@ const SignUp = () => {
                       </div>
 
                       {/* Username */}
-                      <div className="space-y-2 group/field">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Username (Optional)</label>
+                      <div className="space-y-2 group/field relative">
+                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Username</label>
                         <div className="relative">
                           <UserSquare2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
                           <input 
                             {...register("username")}
                             type="text" 
                             placeholder="johndoe_123"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            className={`w-full bg-white/[0.03] border rounded-xl h-14 pl-12 pr-12 text-white text-sm placeholder:text-white/20 outline-none transition-all ${
+                              usernameStatus === 'available' ? 'border-green-500/50' : 
+                              usernameStatus === 'unavailable' ? 'border-red-500/50' : 
+                              'border-white/5 focus:border-[#84CC16]/50'
+                            }`}
                           />
+                          
+                          {/* Availability Indicator */}
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
+                            {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-white/20 animate-spin" />}
+                            {usernameStatus === 'available' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                            {usernameStatus === 'unavailable' && <XCircle className="w-4 h-4 text-red-500" />}
+                          </div>
                         </div>
                         {errors.username && <p className="text-xs text-red-500 mt-1 ml-1">{errors.username.message}</p>}
+                        {usernameStatus === 'available' && <p className="text-[10px] text-green-500 mt-1 ml-1 font-bold uppercase tracking-wider">Username Available</p>}
+                        {usernameStatus === 'unavailable' && <p className="text-[10px] text-red-500 mt-1 ml-1 font-bold uppercase tracking-wider">Username Taken</p>}
                       </div>
 
                       {/* Email */}
@@ -236,6 +295,59 @@ const SignUp = () => {
                         {errors.gender && <p className="text-xs text-red-500 mt-1 ml-1">{errors.gender.message}</p>}
                       </div>
 
+                      {/* Favorite Sports */}
+                      <div className="space-y-2 group/field">
+                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Favorite Sports</label>
+                        <div className="relative">
+                          <Trophy size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors z-10 pointer-events-none" />
+                          <div 
+                            className={`w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 py-3 flex items-center gap-2 cursor-pointer transition-all overflow-hidden ${showSportsDropdown ? 'border-[#84CC16]/50 ring-1 ring-[#84CC16]/20' : ''}`}
+                            onClick={() => setShowSportsDropdown(!showSportsDropdown)}
+                          >
+                            {selectedSports.length > 0 ? (
+                              <div className="flex gap-1 overflow-x-auto no-scrollbar">
+                                {selectedSports.map(sport => (
+                                  <span key={sport} className="bg-[#84CC16] text-black text-[9px] font-black px-1.5 py-0.5 rounded flex-shrink-0 uppercase tracking-tighter">
+                                    {sport}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-white/20 text-sm whitespace-nowrap">Choose sports</span>
+                            )}
+                          </div>
+                          
+                          {showSportsDropdown && (
+                            <>
+                              <div className="fixed inset-0 z-40" onClick={() => setShowSportsDropdown(false)} />
+                              <div className="absolute top-[calc(100%+8px)] right-0 w-[280px] md:w-[400px] bg-[#0A0A0A] border border-white/10 rounded-xl p-4 z-50 grid grid-cols-2 gap-2 shadow-2xl animate-in fade-in slide-in-from-top-2">
+                                {SPORTS.map(sport => {
+                                  const isSelected = selectedSports.includes(sport);
+                                  return (
+                                    <button
+                                      key={sport}
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleSport(sport);
+                                      }}
+                                      className={`flex items-center justify-between p-2 rounded-lg border transition-all text-[10px] font-bold uppercase tracking-wider ${
+                                        isSelected 
+                                          ? "bg-[#84CC16] border-[#84CC16] text-black" 
+                                          : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
+                                      }`}
+                                    >
+                                      {sport}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        {errors.sportTypes && <p className="text-xs text-red-500 mt-1 ml-1">{errors.sportTypes.message}</p>}
+                      </div>
+
                       {/* Location */}
                       <div className="space-y-2 group/field md:col-span-2">
                         <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Location</label>
@@ -245,9 +357,51 @@ const SignUp = () => {
                             <input 
                               {...register("location")}
                               type="text" 
+                              autoComplete="off"
                               placeholder="City, State"
                               className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                             />
+                            
+                            {/* Suggestions Dropdown */}
+                            {showSuggestions && (
+                              <>
+                                <div className="fixed inset-0 z-40" onClick={() => setShowSuggestions(false)} />
+                                <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-[#0A0A0A] border border-white/10 rounded-xl overflow-hidden z-50 shadow-2xl animate-in fade-in slide-in-from-top-2">
+                                  <div className="p-1 max-h-[240px] overflow-y-auto custom-scrollbar">
+                                    {suggestions.map((suggestion, index) => (
+                                      <button
+                                        key={index}
+                                        type="button"
+                                        onClick={() => {
+                                          const display = suggestion.display_name.split(',').slice(0, 2).join(', ');
+                                          setValue("location", display, { shouldValidate: true });
+                                          setShowSuggestions(false);
+                                        }}
+                                        className="w-full flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 text-left transition-all group/item"
+                                      >
+                                        <div className="p-2 bg-white/5 rounded-lg group-hover/item:bg-[#84CC16]/10 transition-colors mt-0.5">
+                                          <MapPin size={14} className="text-gray-500 group-hover/item:text-[#84CC16]" />
+                                        </div>
+                                        <div className="flex flex-col min-w-0">
+                                          <span className="text-[11px] font-bold text-white uppercase tracking-wider truncate">
+                                            {suggestion.city || suggestion.display_name.split(',')[0]}
+                                          </span>
+                                          <span className="text-[10px] text-white/40 truncate">
+                                            {suggestion.display_name}
+                                          </span>
+                                        </div>
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+
+                            {isSearching && (
+                              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                <div className="w-4 h-4 border-2 border-[#84CC16]/30 border-t-[#84CC16] rounded-full animate-spin" />
+                              </div>
+                            )}
                           </div>
                           <button 
                             type="button" 
@@ -332,3 +486,4 @@ const SignUp = () => {
 };
 
 export default SignUp;
+

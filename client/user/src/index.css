@@ -236,3 +236,8 @@ h1, h2, h3, .font-display {
 }
 
 /* ── End of Styles ───────────────────────────────────────────────── */
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

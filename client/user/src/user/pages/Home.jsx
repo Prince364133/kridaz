@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axiosInstance from "../hooks/useAxiosInstance";
 import useTurfData from "../hooks/useTurfData";
 import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 import { AdBannerSection } from "../components/Marketing/AdBannerSection";
 import { VideoSection } from "../components/Marketing/VideoSection";
 import BlogSection from "../components/Blogs/BlogSection";
@@ -155,7 +156,7 @@ export default function Home() {
         ]);
         setMarketing(marketingRes.data || { banners: [], videos: [] });
         setFeatureFlags(venuesRes.data.flagsMap || {});
-        
+
         // Handle community posts
         if (communityRes.data?.posts) {
           const latestPosts = communityRes.data.posts.slice(0, 10);
@@ -175,8 +176,7 @@ export default function Home() {
       try {
         const params = {
           ...playerFilters,
-          lat: userLocation?.lat,
-          lng: userLocation?.lng,
+          sortBy: 'newest',
         };
         const res = await axiosInstance.get("/api/user/players", { params });
         setPlayers(res.data.players || []);
@@ -195,32 +195,54 @@ export default function Home() {
     setPlayerFilters(filters);
   };
 
+  const handleFollowToggle = async (e, p) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const endpoint = `/api/user/players/${p._id}/${p.isFollowing ? 'unfollow' : 'follow'}`;
+      await axiosInstance.post(endpoint);
+      
+      setPlayers(prev => prev.map(player => 
+        player._id === p._id ? { ...player, isFollowing: !player.isFollowing } : player
+      ));
+      
+      toast.success(p.isFollowing ? `Unfollowed ${p.name}` : `Following ${p.name}`);
+    } catch (err) {
+      console.error("Follow toggle failed:", err);
+      toast.error("Failed to update follow status");
+    }
+  };
+
   return (
     <div className="min-h-screen text-white" style={{ backgroundColor: "#000" }}>
 
       {/* ── HERO ── */}
-      <section className="relative lg:min-h-screen flex items-start lg:items-center pt-16 pb-8 lg:pt-0 lg:pb-0 overflow-hidden">
-        {/* Right-Aligned Cinematic Background - Merged behind text */}
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+      {/* ── HERO ── */}
+      <section className="relative lg:min-h-screen flex items-start pt-8 lg:pt-5 pb-24 overflow-hidden">
+        {/* Further Enhanced Cinematic Background */}
+        <div className="absolute inset-y-0 right-0 w-full lg:w-[75%] z-0 pointer-events-none overflow-hidden">
           <div className="relative h-full w-full">
             <img
               src="/hero%20image.png"
               alt="Hero Background"
-              className="absolute inset-0 w-full h-full object-cover object-center lg:object-[right_center] opacity-40 lg:opacity-60 brightness-[60%] lg:brightness-[80%] transform scale-125 origin-center lg:scale-100 lg:origin-center transition-transform duration-1000"
+              className="absolute inset-0 w-full h-full object-cover object-center lg:object-[right_15%] opacity-70 brightness-[75%] transform scale-110 transition-transform duration-1000"
             />
-            {/* Complex gradient mesh to blend with text area */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent lg:via-black/20" />
+            {/* Blending Gradients */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent lg:from-black lg:via-black/30 lg:to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
           </div>
         </div>
 
+        <div className="absolute inset-0 opacity-[0.03] z-1"
+          style={{ backgroundImage: `radial-gradient(${PRI} 1px, transparent 1px)`, backgroundSize: "48px 48px" }} />
 
-        <div className="absolute inset-0 opacity-[0.05] z-1"
-          style={{ backgroundImage: `radial-gradient(${PRI} 1px, transparent 1px)`, backgroundSize: "36px 36px" }} />
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full pointer-events-none z-1" />
-
-        <div className="relative max-w-full mx-auto px-6 lg:px-20 w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center pt-4 md:pt-0">
+        <div className="relative w-full mx-auto px-4 lg:px-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center pt-4 md:pt-0">
           <div className="space-y-4 lg:space-y-6 relative z-10">
             <div>
               <h1 className="font-display leading-[0.9] lg:leading-[0.85] tracking-tighter uppercase" style={{ fontSize: "clamp(2.5rem,10vw,6.5rem)" }}>
@@ -277,11 +299,11 @@ export default function Home() {
 
       {/* ── STATS ── */}
       <section className="border-y" style={{ borderColor: "#1A1A1A", backgroundColor: "#0A0A0A" }}>
-        <div className="max-w-screen-2xl mx-auto px-4 md:px-10 py-8 grid grid-cols-2 lg:grid-cols-4 gap-y-8 lg:gap-y-0 divide-x-0 lg:divide-x divide-[#1A1A1A]">
+        <div className="max-w-screen-2xl mx-auto px-2 md:px-10 py-6 grid grid-cols-4 gap-2 lg:gap-0 divide-x divide-[#1A1A1A]">
           {stats.map((s) => (
-            <div key={s.label} className="px-4 md:px-8 text-center lg:text-left flex flex-col justify-center overflow-hidden group">
-              <p className="font-display text-3xl sm:text-4xl lg:text-5xl leading-none tracking-tighter group-hover:text-white transition-colors" style={{ color: PRI }}>{s.value}</p>
-              <p className="font-mono text-[8px] sm:text-[10px] uppercase tracking-[0.3em] mt-2 text-gray-500 group-hover:text-primary transition-colors">{s.label}</p>
+            <div key={s.label} className="px-1 md:px-8 text-center flex flex-col justify-center overflow-hidden group">
+              <p className="font-display text-xl sm:text-3xl lg:text-5xl leading-none tracking-tighter group-hover:text-white transition-colors" style={{ color: PRI }}>{s.value}</p>
+              <p className="font-mono text-[6px] sm:text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.3em] mt-1 sm:mt-2 text-gray-500 group-hover:text-primary transition-colors">{s.label}</p>
             </div>
           ))}
         </div>
@@ -329,10 +351,10 @@ export default function Home() {
               <div className="w-full py-20 px-6 md:px-10 rounded-[40px] border border-white/5 bg-[#0a0a0a] flex flex-col items-center justify-center text-center overflow-hidden relative group animate-fade-in">
                 {/* Glow Effect */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#84CC16]/10 blur-[120px] rounded-full pointer-events-none" />
-                
+
                 <ShoppingBag size={48} className="text-gray-600 mb-6 group-hover:text-[#84CC16] transition-colors duration-500" />
                 <h3 className="font-display text-4xl md:text-5xl lg:text-6xl text-white uppercase leading-tight">
-                  Marketplace <br/>
+                  Marketplace <br />
                   <span style={{ color: PRI }}>Coming Soon</span>
                 </h3>
                 <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gray-500 mt-6 max-w-md mx-auto">
@@ -357,7 +379,7 @@ export default function Home() {
             </div>
             <p className="font-display text-3xl mb-3 uppercase tracking-tight">Venues Not Found</p>
             <p className="text-gray-500 text-sm uppercase tracking-wider mb-8">Try adjusting your search or filters</p>
-            <button 
+            <button
               onClick={() => setTurfFilters({ searchTerm: "", city: "", state: "" })}
               className="px-8 py-3 bg-[#84CC16] text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-xl hover:scale-105 transition-all shadow-[0_0_20px_rgba(132,204,22,0.2)]"
             >
@@ -421,13 +443,13 @@ export default function Home() {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div className="flex flex-col gap-1">
-              <h2 className="font-display text-3xl min-[375px]:text-4xl md:text-7xl lg:text-8xl whitespace-nowrap tracking-tight uppercase leading-none">
+              <h2 className="font-display text-2xl min-[375px]:text-3xl md:text-4xl lg:text-5xl whitespace-nowrap tracking-tight uppercase leading-none">
                 Find Players <span style={{ color: PRI }}>Near You</span>
               </h2>
             </div>
-            <div className="w-full md:w-[600px]">
-              <SearchPlayers onSearch={handlePlayerSearch} userLocation={userLocation} />
-            </div>
+            <Link to="/players" className="text-sm font-bold flex items-center gap-2 hover:text-[#84CC16] transition-colors" style={{ color: "#888" }}>
+              View All Players <ChevronRight size={16} />
+            </Link>
           </div>
 
           {/* Player cards */}
@@ -453,7 +475,11 @@ export default function Home() {
                 const initials = p.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "??";
                 const joinedYear = p.joinedAt ? new Date(p.joinedAt).getFullYear() : 2024;
                 return (
-                  <div key={p._id} className="flex flex-col items-center gap-2 md:gap-4 group shrink-0 w-1/4 lg:w-32">
+                  <Link
+                    key={p._id}
+                    to={`/profile/${p._id}`}
+                    className="flex flex-col items-center gap-2 md:gap-4 group shrink-0 w-1/4 lg:w-32"
+                  >
                     <div className="relative">
                       {/* Premium Avatar Bubble */}
                       <div className="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-[#84CC16] via-[#84CC16]/20 to-transparent transition-all duration-500 group-hover:scale-110 shadow-2xl shadow-[#84CC16]/10">
@@ -474,10 +500,13 @@ export default function Home() {
                         </div>
                       </div>
 
-                      {/* Floating Plus Icon (Invite) */}
-                      <button className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[#84CC16] border-4 border-[#000] flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-125 hover:rotate-90">
-                        <Plus size={14} className="text-black font-bold" />
-                      </button>
+                      {/* Floating Plus Icon (Follow/Unfollow) */}
+                      <div 
+                        onClick={(e) => handleFollowToggle(e, p)} 
+                        className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-full border-4 border-[#000] flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-125 ${p.isFollowing ? 'bg-white text-black' : 'bg-[#84CC16] text-black'}`}
+                      >
+                        {p.isFollowing ? <Check size={14} className="font-bold" /> : <Plus size={14} className="font-bold" />}
+                      </div>
                     </div>
 
                     <div className="text-center space-y-1">
@@ -498,12 +527,8 @@ export default function Home() {
                           </p>
                         )}
                       </div>
-
-                      <p className="text-[9px] font-black text-[#84CC16] uppercase tracking-widest bg-[#84CC16]/10 px-2 py-0.5 rounded-full inline-block">
-                        Since {joinedYear}
-                      </p>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
@@ -757,7 +782,7 @@ export default function Home() {
                   <div>
                     <h3 className="font-display text-2xl italic mb-1 leading-none uppercase">MARKETPLACE</h3>
                     <p className="text-gray-400 text-xs mb-4">Premium gear.</p>
-                    <Link 
+                    <Link
                       to="/marketplace"
                       className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors"
                     >
@@ -822,10 +847,10 @@ export default function Home() {
             {(realSocialPosts.length > 0 ? realSocialPosts : socialPosts).map((post, idx) => (
               <div key={post._id || idx} className="min-w-[300px] md:min-w-[350px] bg-[#0A0A0A] border rounded-3xl overflow-hidden snap-start group transition-all" style={{ borderColor: BDR }}>
                 <div className="aspect-square relative overflow-hidden">
-                  <img 
-                    src={post.image || post.imageUrl || post.image} 
-                    alt="Social post" 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  <img
+                    src={post.image || post.imageUrl || post.image}
+                    alt="Social post"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
                   {post.caption && (
@@ -837,13 +862,13 @@ export default function Home() {
                 <div className="p-4 flex items-center justify-between border-t" style={{ borderColor: BDR, backgroundColor: "#0F0F0F" }}>
                   <div className="flex items-center gap-6">
                     <button className="flex items-center gap-2 text-gray-400 hover:text-red-500 transition-colors">
-                      <Heart size={20} className={post.likes?.length > 0 ? "fill-red-500 text-red-500" : ""} /> 
+                      <Heart size={20} className={post.likes?.length > 0 ? "fill-red-500 text-red-500" : ""} />
                       <span className="text-xs font-bold font-mono">
                         {Array.isArray(post.likes) ? post.likes.length : post.likes || 0}
                       </span>
                     </button>
                     <button className="flex items-center gap-2 text-gray-400 hover:text-blue-500 transition-colors">
-                      <MessageCircle size={20} /> 
+                      <MessageCircle size={20} />
                       <span className="text-xs font-bold font-mono">
                         {Array.isArray(post.comments) ? post.comments.length : post.comments || 0}
                       </span>
@@ -1033,9 +1058,9 @@ export default function Home() {
           ))}
         </div>
       </section>
-      <InterestsModal 
-        isOpen={showInterests} 
-        onClose={() => setShowInterests(false)} 
+      <InterestsModal
+        isOpen={showInterests}
+        onClose={() => setShowInterests(false)}
         onSaved={(sports) => {
           dispatch(updateUser({ sportTypes: sports }));
           setShowInterests(false);
