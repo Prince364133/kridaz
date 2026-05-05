@@ -12,8 +12,8 @@ const userSchema = new mongoose.Schema({
     city: { type: String },
     state: { type: String },
     locationData: {
-      type: { type: String, default: "Point" },
-      coordinates: { type: [Number], index: "2dsphere" }, // [longitude, latitude]
+      type: { type: String, enum: ["Point"] },
+      coordinates: { type: [Number] }, // [longitude, latitude]
     },
     sportTypes: [{ type: String }],
     profilePicture:{type:String},
@@ -25,8 +25,7 @@ const userSchema = new mongoose.Schema({
     bookings:[{type:mongoose.Schema.Types.ObjectId, ref:'Booking'}],
  }, {timestamps: true});
 
-userSchema.index({ locationData: "2dsphere" });
-userSchema.index({ username: 1 });
+userSchema.index({ locationData: "2dsphere" }, { sparse: true });
 
 const User = mongoose.model("User", userSchema);
 

@@ -8,8 +8,8 @@ const turfSchema = new mongoose.Schema(
     city: { type: String },
     state: { type: String },
     locationData: {
-      type: { type: String, default: "Point" },
-      coordinates: { type: [Number], index: "2dsphere" }, // [longitude, latitude]
+      type: { type: String, enum: ["Point"] },
+      coordinates: { type: [Number] }, // [longitude, latitude]
     },
     image: { type: String, required: true },
     images: [{ type: String }],
@@ -66,6 +66,8 @@ const turfSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+turfSchema.index({ locationData: "2dsphere" }, { sparse: true });
 
 // The index is already defined on the coordinates field above.
 
