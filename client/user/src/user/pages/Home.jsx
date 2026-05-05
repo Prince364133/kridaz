@@ -80,6 +80,7 @@ export default function Home() {
   const [showInterests, setShowInterests] = useState(false);
   const [activeTab, setActiveTab] = useState("venues");
   const [players, setPlayers] = useState([]);
+  const [followingIds, setFollowingIds] = useState([]);
   const [turfFilters, setTurfFilters] = useState({});
   const [playerFilters, setPlayerFilters] = useState({});
   const [userLocation, setUserLocation] = useState(null);
@@ -184,8 +185,21 @@ export default function Home() {
         console.error("Error fetching players:", error);
       }
     };
+
+    const fetchFollowingStatus = async () => {
+      if (!isLoggedIn) return;
+      try {
+        const response = await axiosInstance.get("/api/user/players/network");
+        const ids = (response.data.following || []).filter(p => p).map(p => p._id);
+        setFollowingIds(ids);
+      } catch (error) {
+        console.error("Error fetching network:", error);
+      }
+    };
+
     fetchPlayers();
-  }, [playerFilters, userLocation]);
+    fetchFollowingStatus();
+  }, [playerFilters, userLocation, isLoggedIn]);
 
   const handleTurfSearch = (filters) => {
     setTurfFilters(filters);
@@ -204,15 +218,18 @@ export default function Home() {
       return;
     }
 
+    const isFollowing = followingIds.includes(p._id);
     try {
-      const endpoint = `/api/user/players/${p._id}/${p.isFollowing ? 'unfollow' : 'follow'}`;
+      const endpoint = `/api/user/players/${p._id}/${isFollowing ? 'unfollow' : 'follow'}`;
       await axiosInstance.post(endpoint);
       
-      setPlayers(prev => prev.map(player => 
-        player._id === p._id ? { ...player, isFollowing: !player.isFollowing } : player
-      ));
-      
-      toast.success(p.isFollowing ? `Unfollowed ${p.name}` : `Following ${p.name}`);
+      if (isFollowing) {
+        setFollowingIds(prev => prev.filter(id => id !== p._id));
+        toast.success(`Unfollowed ${p.name}`);
+      } else {
+        setFollowingIds(prev => [...prev, p._id]);
+        toast.success(`Following ${p.name}`);
+      }
     } catch (err) {
       console.error("Follow toggle failed:", err);
       toast.error("Failed to update follow status");
@@ -473,7 +490,6 @@ export default function Home() {
               {players.map(p => {
                 const level = getLevel(p.bookingCount);
                 const initials = p.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "??";
-                const joinedYear = p.joinedAt ? new Date(p.joinedAt).getFullYear() : 2024;
                 return (
                   <Link
                     key={p._id}
@@ -503,9 +519,9 @@ export default function Home() {
                       {/* Floating Plus Icon (Follow/Unfollow) */}
                       <div 
                         onClick={(e) => handleFollowToggle(e, p)} 
-                        className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-full border-4 border-[#000] flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-125 ${p.isFollowing ? 'bg-white text-black' : 'bg-[#84CC16] text-black'}`}
+                        className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-full border-4 border-[#000] flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-125 ${followingIds.includes(p._id) ? 'bg-white text-black' : 'bg-[#84CC16] text-black'}`}
                       >
-                        {p.isFollowing ? <Check size={14} className="font-bold" /> : <Plus size={14} className="font-bold" />}
+                        {followingIds.includes(p._id) ? <Check size={14} className="font-bold" /> : <Plus size={14} className="font-bold" />}
                       </div>
                     </div>
 
@@ -861,13 +877,32 @@ export default function Home() {
                 </div>
                 <div className="p-4 flex items-center justify-between border-t" style={{ borderColor: BDR, backgroundColor: "#0F0F0F" }}>
                   <div className="flex items-center gap-6">
-                    <button className="flex items-center gap-2 text-gray-400 hover:text-red-500 transition-colors">
+                    <button 
+                      onClick={() => {
+                        if (!isLoggedIn) {
+                          navigate("/login");
+                          return;
+                        }
+                        // Handle like logic if needed or redirect to post
+                        navigate(`/community`);
+                      }}
+                      className="flex items-center gap-2 text-gray-400 hover:text-red-500 transition-colors"
+                    >
                       <Heart size={20} className={post.likes?.length > 0 ? "fill-red-500 text-red-500" : ""} />
                       <span className="text-xs font-bold font-mono">
                         {Array.isArray(post.likes) ? post.likes.length : post.likes || 0}
                       </span>
                     </button>
-                    <button className="flex items-center gap-2 text-gray-400 hover:text-blue-500 transition-colors">
+                    <button 
+                      onClick={() => {
+                        if (!isLoggedIn) {
+                          navigate("/login");
+                          return;
+                        }
+                        navigate(`/community`);
+                      }}
+                      className="flex items-center gap-2 text-gray-400 hover:text-blue-500 transition-colors"
+                    >
                       <MessageCircle size={20} />
                       <span className="text-xs font-bold font-mono">
                         {Array.isArray(post.comments) ? post.comments.length : post.comments || 0}

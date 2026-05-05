@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "../hooks/useAxiosInstance";
 import { 
@@ -19,6 +19,7 @@ import StoryViewer from "../components/StoryViewer";
 
 const FindPlayers = () => {
   const { user: currentUser } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -86,6 +87,10 @@ const FindPlayers = () => {
   };
 
   const handleFollowToggle = async (targetUserId) => {
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
     const isFollowing = followingIds.includes(targetUserId);
     try {
       const endpoint = isFollowing 
@@ -109,6 +114,10 @@ const FindPlayers = () => {
   };
 
   const handleAvatarClick = async (player) => {
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
     if (!player.hasActiveStory) return;
     
     try {

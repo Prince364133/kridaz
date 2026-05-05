@@ -275,77 +275,82 @@ const SignUp = () => {
                         {errors.phone && <p className="text-xs text-red-500 mt-1 ml-1">{errors.phone.message}</p>}
                       </div>
 
-                      {/* Gender */}
-                      <div className="space-y-2 group/field">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Gender</label>
-                        <div className="relative">
-                          <UserSquare2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors z-10 pointer-events-none" />
-                          <select 
-                            {...register("gender")}
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm appearance-none outline-none transition-all cursor-pointer"
-                            defaultValue=""
-                          >
-                            <option value="" disabled className="bg-black text-white/40">Select Gender</option>
-                            <option value="Male" className="bg-black text-white">Male</option>
-                            <option value="Female" className="bg-black text-white">Female</option>
-                            <option value="Other" className="bg-black text-white">Other</option>
-                            <option value="Prefer not to say" className="bg-black text-white">Prefer not to say</option>
-                          </select>
+                      {/* Gender and Sports (Side by Side) */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:col-span-2">
+                        {/* Gender */}
+                        <div className="space-y-2 group/field">
+                          <label className="text-[11px] font-black text-white/40 uppercase tracking-widest ml-1 group-focus-within/field:text-[#84CC16] transition-colors">Gender</label>
+                          <div className="relative">
+                            <UserSquare2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors z-10 pointer-events-none" />
+                            <select 
+                              {...register("gender")}
+                              className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm appearance-none outline-none transition-all cursor-pointer hover:bg-white/[0.05]"
+                              defaultValue=""
+                            >
+                              <option value="" disabled className="bg-black text-white/40">Select Gender</option>
+                              <option value="Male" className="bg-black text-white">Male</option>
+                              <option value="Female" className="bg-black text-white">Female</option>
+                              <option value="Other" className="bg-black text-white">Other</option>
+                              <option value="Prefer not to say" className="bg-black text-white">Prefer not to say</option>
+                            </select>
+                            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
+                          </div>
+                          {errors.gender && <p className="text-xs text-red-500 mt-1 ml-1">{errors.gender.message}</p>}
                         </div>
-                        {errors.gender && <p className="text-xs text-red-500 mt-1 ml-1">{errors.gender.message}</p>}
-                      </div>
 
-                      {/* Favorite Sports */}
-                      <div className="space-y-2 group/field">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Favorite Sports</label>
-                        <div className="relative">
-                          <Trophy size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors z-10 pointer-events-none" />
-                          <div 
-                            className={`w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 py-3 flex items-center gap-2 cursor-pointer transition-all overflow-hidden ${showSportsDropdown ? 'border-[#84CC16]/50 ring-1 ring-[#84CC16]/20' : ''}`}
-                            onClick={() => setShowSportsDropdown(!showSportsDropdown)}
-                          >
-                            {selectedSports.length > 0 ? (
-                              <div className="flex gap-1 overflow-x-auto no-scrollbar">
-                                {selectedSports.map(sport => (
-                                  <span key={sport} className="bg-[#84CC16] text-black text-[9px] font-black px-1.5 py-0.5 rounded flex-shrink-0 uppercase tracking-tighter">
-                                    {sport}
-                                  </span>
-                                ))}
-                              </div>
-                            ) : (
-                              <span className="text-white/20 text-sm whitespace-nowrap">Choose sports</span>
+                        {/* Favorite Sports */}
+                        <div className="space-y-2 group/field">
+                          <label className="text-[11px] font-black text-white/40 uppercase tracking-widest ml-1 group-focus-within/field:text-[#84CC16] transition-colors">Favorite Sports</label>
+                          <div className="relative">
+                            <Trophy size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors z-10 pointer-events-none" />
+                            <div 
+                              className={`w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 py-3 flex items-center gap-2 cursor-pointer transition-all overflow-hidden hover:bg-white/[0.05] ${showSportsDropdown ? 'border-[#84CC16]/50 ring-1 ring-[#84CC16]/20' : ''}`}
+                              onClick={() => setShowSportsDropdown(!showSportsDropdown)}
+                            >
+                              {selectedSports.length > 0 ? (
+                                <div className="flex gap-1 overflow-x-auto no-scrollbar">
+                                  {selectedSports.map(sport => (
+                                    <span key={sport} className="bg-[#84CC16] text-black text-[9px] font-black px-1.5 py-0.5 rounded flex-shrink-0 uppercase tracking-tighter">
+                                      {sport}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-white/20 text-sm whitespace-nowrap italic">Pick Sports</span>
+                              )}
+                            </div>
+                            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
+                            
+                            {showSportsDropdown && (
+                              <>
+                                <div className="fixed inset-0 z-40" onClick={() => setShowSportsDropdown(false)} />
+                                <div className="absolute top-[calc(100%+8px)] right-0 w-[280px] md:w-[400px] bg-[#0A0A0A] border border-white/10 rounded-xl p-4 z-50 grid grid-cols-2 gap-2 shadow-2xl animate-in fade-in slide-in-from-top-2 backdrop-blur-xl">
+                                  {SPORTS.map(sport => {
+                                    const isSelected = selectedSports.includes(sport);
+                                    return (
+                                      <button
+                                        key={sport}
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          toggleSport(sport);
+                                        }}
+                                        className={`flex items-center justify-between p-2 rounded-lg border transition-all text-[10px] font-bold uppercase tracking-wider ${
+                                          isSelected 
+                                            ? "bg-[#84CC16] border-[#84CC16] text-black" 
+                                            : "bg-white/5 border-white/10 text-white/40 hover:border-white/20 hover:text-white"
+                                        }`}
+                                      >
+                                        {sport}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </>
                             )}
                           </div>
-                          
-                          {showSportsDropdown && (
-                            <>
-                              <div className="fixed inset-0 z-40" onClick={() => setShowSportsDropdown(false)} />
-                              <div className="absolute top-[calc(100%+8px)] right-0 w-[280px] md:w-[400px] bg-[#0A0A0A] border border-white/10 rounded-xl p-4 z-50 grid grid-cols-2 gap-2 shadow-2xl animate-in fade-in slide-in-from-top-2">
-                                {SPORTS.map(sport => {
-                                  const isSelected = selectedSports.includes(sport);
-                                  return (
-                                    <button
-                                      key={sport}
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleSport(sport);
-                                      }}
-                                      className={`flex items-center justify-between p-2 rounded-lg border transition-all text-[10px] font-bold uppercase tracking-wider ${
-                                        isSelected 
-                                          ? "bg-[#84CC16] border-[#84CC16] text-black" 
-                                          : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
-                                      }`}
-                                    >
-                                      {sport}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </>
-                          )}
+                          {errors.sportTypes && <p className="text-xs text-red-500 mt-1 ml-1">{errors.sportTypes.message}</p>}
                         </div>
-                        {errors.sportTypes && <p className="text-xs text-red-500 mt-1 ml-1">{errors.sportTypes.message}</p>}
                       </div>
 
                       {/* Location */}

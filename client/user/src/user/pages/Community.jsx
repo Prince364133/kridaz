@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../hooks/useAxiosInstance";
 import { 
   Heart, 
@@ -27,10 +27,12 @@ import StoryViewer from "../components/StoryViewer";
 
 const Community = () => {
   const { user, role } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
   const isAdmin = role === 'admin' || role === 'BMSP_ADMIN';
 
   const [posts, setPosts] = useState([]);
   const [stories, setStories] = useState([]);
+  const [followingIds, setFollowingIds] = useState([]);
    const [loading, setLoading] = useState(true);
    const [isPublishing, setIsPublishing] = useState(false);
   
@@ -57,7 +59,20 @@ const Community = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+    if (user) {
+      fetchFollowingStatus();
+    }
+  }, [user]);
+
+  const fetchFollowingStatus = async () => {
+    try {
+      const response = await axiosInstance.get("/api/user/players/network");
+      const ids = (response.data.following || []).filter(p => p).map(p => p._id);
+      setFollowingIds(ids);
+    } catch (error) {
+      console.error("Error fetching network:", error);
+    }
+  };
 
   useEffect(() => {
     let timer;
@@ -97,6 +112,10 @@ const Community = () => {
   };
 
   const handleAuthorAvatarClick = async (author) => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     if (!author?.hasActiveStory) return;
     
     try {
@@ -226,6 +245,10 @@ const Community = () => {
   };
 
   const handleAddComment = async (postId) => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     if (!commentText.trim()) return;
     setIsSubmittingComment(true);
     try {
@@ -274,6 +297,10 @@ const Community = () => {
   };
 
   const handleLike = async (postId) => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     try {
       const res = await axiosInstance.post(`/api/user/community/${postId}/like`);
       if (res.data.success) {
@@ -286,6 +313,33 @@ const Community = () => {
       }
     } catch (error) {
       toast.error("Failed to like post");
+    }
+  };
+
+  const handleFollowToggle = async (targetUserId) => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    const isFollowing = followingIds.includes(targetUserId);
+    try {
+      const endpoint = isFollowing 
+        ? `/api/user/players/${targetUserId}/unfollow` 
+        : `/api/user/players/${targetUserId}/follow`;
+        
+      const response = await axiosInstance.post(endpoint);
+      if (response.data.success) {
+        if (isFollowing) {
+          setFollowingIds(followingIds.filter(id => id !== targetUserId));
+          toast.success("Unfollowed player");
+        } else {
+          setFollowingIds([...followingIds, targetUserId]);
+          toast.success("Following player");
+        }
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to update follow status";
+      toast.error(message);
     }
   };
 
@@ -398,6 +452,10 @@ const Community = () => {
               <div 
                 key={group.user._id} 
                 onClick={() => {
+                  if (!user) {
+                    navigate("/login");
+                    return;
+                  }
                   setSelectedStoryGroup(group);
                   setCurrentStoryIndex(0);
                 }}
@@ -468,6 +526,18 @@ const Community = () => {
                         <Clock size={10} /> {new Date(post.createdAt).toLocaleDateString()}
                       </p>
                     </Link>
+                    {(!user || user._id !== post.adminId?._id) && (
+                      <button 
+                        onClick={() => handleFollowToggle(post.adminId?._id)}
+                        className={`ml-2 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
+                          followingIds.includes(post.adminId?._id) 
+                            ? "bg-white/5 text-white/20 border border-white/10 hover:bg-white/10" 
+                            : "bg-[#84CC16] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(132,204,22,0.15)]"
+                        }`}
+                      >
+                        {followingIds.includes(post.adminId?._id) ? "Following" : "Follow"}
+                      </button>
+                    )}
                   </div>
                   {isAdmin && (
                     <div className="flex items-center gap-2">
