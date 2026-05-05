@@ -20,6 +20,10 @@ const editTurfSchema = yup.object().shape({
     .string()
     .required("Enter the location of the turf")
     .min(3, "Location must be at least 3 characters long"),
+  city: yup.string().required("City is required"),
+  state: yup.string().required("State is required"),
+  latitude: yup.string().optional(),
+  longitude: yup.string().optional(),
   pricePerHour: yup
     .number()
     .required("Enter the price per hour of the turf")
@@ -63,6 +67,7 @@ const editTurfSchema = yup.object().shape({
 export default function useEditTurf(turfId) {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [isLocating, setIsLocating] = useState(false);
   const navigate = useNavigate();
   
   const {
@@ -83,6 +88,10 @@ export default function useEditTurf(turfId) {
       youtubeUrl: "",
       slotDuration: 60,
       breakTime: 0,
+      city: "",
+      state: "",
+      latitude: "",
+      longitude: "",
       availableDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
       offDays: [],
     },
@@ -110,6 +119,15 @@ export default function useEditTurf(turfId) {
         setValue("name", turf.name);
         setValue("description", turf.description);
         setValue("location", turf.location);
+        setValue("city", turf.city || "");
+        setValue("state", turf.state || "");
+        
+        if (turf.locationData && turf.locationData.coordinates && turf.locationData.coordinates.length === 2) {
+          // MongoDB GeoJSON is [longitude, latitude]
+          setValue("longitude", turf.locationData.coordinates[0]?.toString() || "");
+          setValue("latitude", turf.locationData.coordinates[1]?.toString() || "");
+        }
+        
         setValue("pricePerHour", turf.pricePerHour);
         setValue("youtubeUrl", turf.youtubeUrl || "");
         
@@ -305,12 +323,34 @@ export default function useEditTurf(turfId) {
     }
   };
 
+  const getMyLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setValue("latitude", position.coords.latitude.toString());
+        setValue("longitude", position.coords.longitude.toString());
+        setIsLocating(false);
+        toast.success("Coordinates captured successfully!");
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        setIsLocating(false);
+        toast.error("Unable to retrieve your location. Please check permissions.");
+      }
+    );
+  };
+
   return {
     register,
     handleSubmit,
     errors,
     control,
     setValue,
+    watch,
     onSubmit,
     sportTypes,
     addSportType,
@@ -332,5 +372,7 @@ export default function useEditTurf(turfId) {
     toggleSlotActive,
     loading,
     fetching,
+    getMyLocation,
+    isLocating,
   };
 }

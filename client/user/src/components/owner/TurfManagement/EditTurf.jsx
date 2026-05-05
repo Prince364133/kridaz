@@ -7,7 +7,7 @@ import { setHours, setMinutes } from "date-fns";
 import { FormField, Button } from "@components/common";
 import useEditTurf from "@hooks/owner/useEditTurf";
 import DashboardSkeleton from "../Dashboard/DashboardSkeleton";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MapPin, Map, LocateFixed } from "lucide-react";
 
 const EditTurf = () => {
   const { id } = useParams();
@@ -18,6 +18,7 @@ const EditTurf = () => {
     errors,
     control,
     setValue,
+    watch,
     onSubmit,
     sportTypes,
     addSportType,
@@ -39,6 +40,8 @@ const EditTurf = () => {
     toggleSlotActive,
     loading,
     fetching,
+    getMyLocation,
+    isLocating,
   } = useEditTurf(id);
 
   const sportsOptions = ["Football", "Cricket", "Tennis", "Badminton", "Table Tennis", "Basketball", "Volleyball", "Hockey"];
@@ -99,13 +102,102 @@ const EditTurf = () => {
               )}
             </div>
             
-            <FormField
-              label="Location"
-              name="location"
-              type="text"
-              register={register}
-              error={errors.location}
-            />
+            {/* Location Section */}
+            <div className="space-y-4 pt-4 border-t border-gray-800/50">
+              <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                <MapPin size={16} className="text-primary" /> Location Details
+              </h4>
+              <FormField
+                label="Full Address (Street, Area)"
+                name="location"
+                type="text"
+                register={register}
+                error={errors.location}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  label="City"
+                  name="city"
+                  type="text"
+                  register={register}
+                  error={errors.city}
+                />
+                <FormField
+                  label="State"
+                  name="state"
+                  type="text"
+                  register={register}
+                  error={errors.state}
+                />
+              </div>
+
+              {/* Coordinates & Map Integration */}
+              <div className="p-4 bg-black/40 border border-gray-800 rounded-xl space-y-4">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                    <Map size={14} className="text-primary" /> Map Coordinates
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={getMyLocation}
+                    disabled={isLocating}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-black border border-primary/20 hover:border-primary transition-all rounded-lg text-[10px] font-bold uppercase tracking-widest disabled:opacity-50"
+                  >
+                    <LocateFixed size={12} className={isLocating ? "animate-spin" : ""} />
+                    {isLocating ? "Locating..." : "Get My Location"}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    label="Latitude (e.g., 28.7041)"
+                    name="latitude"
+                    type="text"
+                    register={register}
+                    error={errors.latitude}
+                  />
+                  <FormField
+                    label="Longitude (e.g., 77.1025)"
+                    name="longitude"
+                    type="text"
+                    register={register}
+                    error={errors.longitude}
+                  />
+                </div>
+
+                {/* Live Map Preview */}
+                {(watch("latitude") && watch("longitude")) || watch("location") ? (
+                  <div className="mt-4 rounded-xl overflow-hidden border border-gray-800 h-48 relative group bg-[#111]">
+                    {watch("latitude") && watch("longitude") ? (
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0, filter: "invert(90%) hue-rotate(180deg) contrast(100%)" }}
+                        loading="lazy"
+                        allowFullScreen
+                        src={`https://maps.google.com/maps?q=${watch("latitude")},${watch("longitude")}&z=15&output=embed`}
+                      ></iframe>
+                    ) : watch("location") && watch("city") ? (
+                       <iframe
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0, filter: "invert(90%) hue-rotate(180deg) contrast(100%)" }}
+                        loading="lazy"
+                        allowFullScreen
+                        src={`https://maps.google.com/maps?q=${encodeURIComponent(`${watch("location")}, ${watch("city")}`)}&z=15&output=embed`}
+                      ></iframe>
+                    ) : (
+                       <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs uppercase tracking-widest font-bold">
+                         <MapPin size={16} className="mr-2" /> Map Preview (Enter Address)
+                       </div>
+                    )}
+                    <div className="absolute top-2 right-2 bg-black/80 text-primary text-[9px] font-bold px-2 py-1 rounded backdrop-blur-sm border border-primary/20 uppercase">
+                      Live Preview
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </div>
             
             <FormField
               label="Hourly Rate (INR)"

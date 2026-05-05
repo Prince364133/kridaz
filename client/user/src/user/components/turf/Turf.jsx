@@ -54,9 +54,7 @@ const Turf = () => {
         setLocationStatus("granted");
         
         setSearchFilters((prev) => ({ 
-          ...prev, 
-          lat, 
-          lng
+          ...prev
         }));
       },
       (err) => {
@@ -82,9 +80,7 @@ const Turf = () => {
         setLocationStatus("granted");
         
         setSearchFilters((prev) => ({ 
-          ...prev, 
-          lat, 
-          lng
+          ...prev
         }));
         console.log("Location estimated via IP:", city);
       } else {
@@ -103,9 +99,6 @@ const Turf = () => {
   const handleSearch = (filters) => {
     setSearchFilters({
       ...filters,
-      // always carry the detected location so proximity order is maintained
-      lat: userLocation?.lat,
-      lng: userLocation?.lng,
     });
   };
 

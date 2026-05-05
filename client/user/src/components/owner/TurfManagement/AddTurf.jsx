@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Controller } from "react-hook-form";
@@ -6,7 +6,6 @@ import { setHours, setMinutes } from "date-fns";
 import { FormField } from "@components/common";
 import useAddTurf from "@hooks/owner/useAddTurf";
 import { Button } from "@components/common";
-import { useState, useEffect } from "react";
 import { fetchStates, fetchCities } from "../../../user/utils/locationService";
 
 const AddTurf = () => {
@@ -48,30 +47,41 @@ const AddTurf = () => {
   const [statesList, setStatesList] = useState([]);
   const [citiesList, setCitiesList] = useState([]);
   const selectedState = watch("state");
+  const watchedLat = watch("latitude");
+  const watchedLng = watch("longitude");
+  const watchedLocation = watch("location");
+  const watchedCity = watch("city");
 
+  // Load states on mount
   useEffect(() => {
-    const loadStates = async () => {
-      const data = await fetchStates();
-      setStatesList(data);
-    };
-    loadStates();
+    fetchStates().then(setStatesList);
   }, []);
 
+  // Load cities when state changes
   useEffect(() => {
     if (selectedState) {
-      const loadCities = async () => {
-        const data = await fetchCities(selectedState);
-        setCitiesList(data);
-      };
-      loadCities();
+      fetchCities(selectedState).then(setCitiesList);
     } else {
       setCitiesList([]);
     }
   }, [selectedState]);
 
+  // Build live map preview URL from coords or address
+  const mapPreviewUrl = React.useMemo(() => {
+    if (watchedLat && watchedLng && !isNaN(Number(watchedLat)) && !isNaN(Number(watchedLng))) {
+      return `https://maps.google.com/maps?q=${watchedLat},${watchedLng}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
+    }
+    const q = [watchedLocation, watchedCity, selectedState].filter(Boolean).join(", ");
+    if (q.length > 3) {
+      return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    }
+    return null;
+  }, [watchedLat, watchedLng, watchedLocation, watchedCity, selectedState]);
+
   const sportsOptions = ["Football", "Cricket", "Tennis", "Badminton", "Table Tennis", "Basketball", "Volleyball", "Hockey"];
   const groundTypeOptions = ["Natural Grass", "Artificial Turf", "Clay", "Hard Court", "Small Turf", "Indoor Court"];
   const facilitiesOptions = ["Parking", "Washroom", "Drinking Water", "Changing Room", "First Aid", "Locker Room", "Cafeteria", "WiFi", "Lighting", "Sitting Area"];
+
 
   return (
     <div className="p-4 md:p-8 bg-[#0a0a0a] min-h-screen text-white">
@@ -161,32 +171,74 @@ const AddTurf = () => {
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Geographical Coordinates</span>
+                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">
+                  📍 Venue Coordinates &amp; Map Preview
+                </span>
               </label>
-              <div className="flex gap-4">
+
+              {/* Coordinate inputs row */}
+              <div className="flex gap-3 mb-3">
                 <input
                   {...register("latitude")}
-                  placeholder="Latitude"
-                  readOnly
-                  className="input bg-[#151515] border-gray-800 text-gray-500 text-xs w-full h-12 rounded-xl focus:outline-none"
+                  placeholder="Latitude (e.g. 17.3850)"
+                  className="input bg-[#151515] border-gray-800 text-white text-xs w-full h-12 rounded-xl focus:outline-none focus:border-primary transition-colors"
                 />
                 <input
                   {...register("longitude")}
-                  placeholder="Longitude"
-                  readOnly
-                  className="input bg-[#151515] border-gray-800 text-gray-500 text-xs w-full h-12 rounded-xl focus:outline-none"
+                  placeholder="Longitude (e.g. 78.4867)"
+                  className="input bg-[#151515] border-gray-800 text-white text-xs w-full h-12 rounded-xl focus:outline-none focus:border-primary transition-colors"
                 />
                 <button
                   type="button"
                   onClick={getMyLocation}
-                  className={`px-6 rounded-xl bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-black transition-all flex items-center justify-center ${isLocating ? 'animate-pulse' : ''}`}
+                  className={`shrink-0 px-5 rounded-xl bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-black transition-all flex items-center gap-2 text-xs font-bold uppercase ${isLocating ? 'animate-pulse' : ''}`}
                   title="Capture Current Location"
                 >
-                  {isLocating ? "..." : "GPS"}
+                  {isLocating ? "Locating…" : "📡 GPS"}
                 </button>
               </div>
-              <p className="text-[9px] text-gray-500 mt-2 uppercase tracking-tighter italic">Click GPS to capture exact coordinates for better discovery.</p>
+              <p className="text-[9px] text-gray-500 mb-3 uppercase tracking-tighter italic">
+                Click GPS to auto-capture your device location, or type coordinates manually. The map below updates live.
+              </p>
+
+              {/* Live Map Preview */}
+              {mapPreviewUrl ? (
+                <div className="relative w-full rounded-xl overflow-hidden border border-gray-700" style={{ height: 220 }}>
+                  <iframe
+                    title="Location Preview"
+                    src={mapPreviewUrl}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0, filter: "invert(90%) hue-rotate(180deg) saturate(0.7) brightness(0.9)" }}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-black/80 backdrop-blur-sm flex items-center justify-between">
+                    <span className="text-[9px] font-bold text-primary uppercase tracking-wider">
+                      {watchedLat && watchedLng ? `📡 GPS: ${Number(watchedLat).toFixed(5)}, ${Number(watchedLng).toFixed(5)}` : "📍 Address-based preview"}
+                    </span>
+                    {watchedLat && watchedLng && (
+                      <a
+                        href={`https://www.google.com/maps?q=${watchedLat},${watchedLng}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[9px] font-bold text-gray-400 hover:text-primary uppercase tracking-wider"
+                      >
+                        Open in Maps ↗
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full rounded-xl border border-dashed border-gray-700 bg-[#0d0d0d] flex flex-col items-center justify-center py-8 gap-2">
+                  <span className="text-3xl">🗺️</span>
+                  <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">
+                    Map preview will appear here after you fill in location details
+                  </p>
+                </div>
+              )}
             </div>
+
 
             <FormField
               label="Hourly Rate (INR)"

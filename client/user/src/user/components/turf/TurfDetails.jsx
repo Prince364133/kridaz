@@ -24,7 +24,8 @@ import {
   Calendar,
   ArrowRight,
   CheckCircle2,
-  Info
+  Info,
+  ExternalLink
 } from "lucide-react";
 
 const TurfDetails = () => {
@@ -204,7 +205,7 @@ const TurfDetails = () => {
               </div>
               <div className="flex items-center gap-2 text-zinc-300">
                 <MapPin className="w-5 h-5 text-[#84CC16]" />
-                <span>{turf.location}, Mumbai</span>
+                <span>{turf.location}{turf.city ? `, ${turf.city}` : ""}</span>
               </div>
               {turf.openTime && turf.closeTime && (
                 <div className="flex items-center gap-2 text-zinc-300 border-l border-zinc-800 pl-6 ml-0 hidden sm:flex">
@@ -469,16 +470,22 @@ const TurfDetails = () => {
                         <MapPin className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-zinc-200 text-sm font-bold mb-0.5">{turf.location}</p>
-                        <button className="text-[#84CC16] text-[10px] font-black uppercase tracking-wider hover:underline">
+                        <p className="text-zinc-200 text-sm font-bold mb-0.5">
+                          {turf.location}{turf.city ? `, ${turf.city}` : ""}{turf.state ? `, ${turf.state}` : ""}
+                        </p>
+                        <a
+                          href={turf.locationData?.coordinates
+                            ? `https://www.google.com/maps?q=${turf.locationData.coordinates[1]},${turf.locationData.coordinates[0]}`
+                            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${turf.location} ${turf.city || ""} ${turf.state || ""}}`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#84CC16] text-[10px] font-black uppercase tracking-wider hover:underline"
+                        >
                           Launch Navigation
-                        </button>
+                        </a>
                       </div>
                     </div>
-                    <div className="w-full h-32 bg-zinc-800/50 rounded-2xl flex flex-col items-center justify-center border border-dashed border-zinc-700">
-                      <Activity className="w-10 h-10 text-zinc-600 mb-2" />
-                      <p className="text-zinc-500 font-bold uppercase text-[9px] tracking-wider">Map Interface Secured</p>
-                    </div>
+                    <VenueMap turf={turf} />
                   </div>
                 </div>
               )}
@@ -500,6 +507,59 @@ const TurfDetails = () => {
           </div>
           <Reviews turfId={id} />
         </div>
+      </div>
+    </div>
+  );
+};
+
+const VenueMap = ({ turf }) => {
+  const hasCoords =
+    turf?.locationData?.coordinates?.length === 2 &&
+    turf.locationData.coordinates[0] !== 0;
+
+  const lat = hasCoords ? turf.locationData.coordinates[1] : null;
+  const lng = hasCoords ? turf.locationData.coordinates[0] : null;
+
+  // Build the embed URL
+  const addressQuery = encodeURIComponent(
+    [turf.location, turf.city, turf.state].filter(Boolean).join(", ")
+  );
+
+  const embedSrc = hasCoords
+    ? `https://maps.google.com/maps?q=${lat},${lng}&t=&z=16&ie=UTF8&iwloc=&output=embed`
+    : `https://maps.google.com/maps?q=${addressQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+
+  return (
+    <div className="relative w-full rounded-2xl overflow-hidden border border-zinc-700/50" style={{ height: 220 }}>
+      <iframe
+        title="Venue Location"
+        src={embedSrc}
+        width="100%"
+        height="100%"
+        style={{ border: 0, filter: "invert(90%) hue-rotate(180deg) saturate(0.8) brightness(0.85)" }}
+        allowFullScreen
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+      {/* Bottom bar */}
+      <div className="absolute bottom-0 left-0 right-0 px-4 py-2.5 bg-black/80 backdrop-blur-sm flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <MapPin size={12} className="text-[#84CC16]" />
+          <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider truncate max-w-[160px]">
+            {turf.city || turf.location}
+          </span>
+        </div>
+        <a
+          href={hasCoords
+            ? `https://www.google.com/maps?q=${lat},${lng}`
+            : `https://www.google.com/maps/search/?api=1&query=${addressQuery}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-[#84CC16] text-[10px] font-black uppercase tracking-wider hover:underline"
+        >
+          <ExternalLink size={10} />
+          Open in Maps
+        </a>
       </div>
     </div>
   );

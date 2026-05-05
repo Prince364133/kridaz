@@ -77,7 +77,7 @@ export default function Home() {
   const [turfFilters, setTurfFilters] = useState({});
   const [playerFilters, setPlayerFilters] = useState({});
   const [userLocation, setUserLocation] = useState(null);
-  const { turfs, loading: turfLoading, error } = useTurfData({ ...turfFilters, lat: userLocation?.lat, lng: userLocation?.lng });
+  const { turfs, loading: turfLoading, error } = useTurfData(turfFilters);
   const [locationStatus, setLocationStatus] = useState("detecting");
   const [marketing, setMarketing] = useState({ banners: [], videos: [] });
   const [loading, setLoading] = useState(true);

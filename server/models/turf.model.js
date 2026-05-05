@@ -58,11 +58,44 @@ const turfSchema = new mongoose.Schema(
         isActive: { type: Boolean, default: true },
       }
     ],
+    slug: {
+      type: String,
+      unique: true,
+      trim: true,
+    },
   },
   { timestamps: true }
 );
 
 // The index is already defined on the coordinates field above.
+
+// Slugify helper
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-") // Replace spaces with -
+    .replace(/[^\w-]+/g, "") // Remove all non-word chars
+    .replace(/--+/g, "-"); // Replace multiple - with single -
+};
+
+// Pre-save hook to generate slug
+turfSchema.pre("save", async function (next) {
+  if (this.isModified("name") || !this.slug) {
+    let baseSlug = slugify(this.name);
+    let slug = baseSlug;
+    let counter = 1;
+
+    // Ensure uniqueness
+    while (await mongoose.models.Turf.findOne({ slug, _id: { $ne: this._id } })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    this.slug = slug;
+  }
+  next();
+});
 
 const Turf = mongoose.model("Turf", turfSchema, "turves");
 

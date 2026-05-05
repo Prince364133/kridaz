@@ -76,8 +76,6 @@ const SearchTurf = ({ onSearch, userLocation }) => {
         searchTerm: sport || undefined,
         city: city || undefined,
         state: state || undefined,
-        lat: userLocation?.lat,
-        lng: userLocation?.lng,
       };
 
       // Remove undefined values
@@ -86,7 +84,7 @@ const SearchTurf = ({ onSearch, userLocation }) => {
       onSearchRef.current(searchParams);
     }, 400);
     return () => clearTimeout(t);
-  }, [sport, city, state, userLocation]);
+  }, [sport, city, state]);
 
 
 
