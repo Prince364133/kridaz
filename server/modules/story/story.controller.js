@@ -8,6 +8,7 @@ export const createStory = async (req, res) => {
     const { mediaType, durationDays, content } = req.body;
     const userId = req.user.id;
 
+    const userModel = req.user?.role === 'user' ? 'User' : 'Owner';
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + parseInt(durationDays || 1));
 
@@ -18,6 +19,7 @@ export const createStory = async (req, res) => {
         const mediaUrl = await uploadToCloudinary(file.buffer, 'turfspot/stories');
         const newStory = new Story({
           userId,
+          userModel,
           mediaUrl,
           mediaType: mediaType || 'image',
           content,
@@ -31,6 +33,7 @@ export const createStory = async (req, res) => {
       const mediaUrl = await uploadToCloudinary(req.file.buffer, 'turfspot/stories');
       const newStory = new Story({
         userId,
+        userModel,
         mediaUrl,
         mediaType: mediaType || 'image',
         content,
@@ -42,6 +45,7 @@ export const createStory = async (req, res) => {
     } else {
       const newStory = new Story({
         userId,
+        userModel,
         mediaUrl: '',
         mediaType: 'text',
         content,
@@ -89,19 +93,9 @@ export const getStories = async (req, res) => {
       query.userId = { $in: userIds };
     }
 
-    let stories = await Story.find(query).sort({ createdAt: -1 });
-
-    // Manually populate userId since it could be User or Owner
-    stories = await Promise.all(stories.map(async (story) => {
-      let storyUser = await User.findById(story.userId).select('name username profilePicture');
-      if (!storyUser) {
-        storyUser = await Owner.findById(story.userId).select('name profilePicture');
-      }
-      
-      const storyObj = story.toObject();
-      storyObj.userId = storyUser || { _id: story.userId, name: 'Unknown', username: 'Unknown' };
-      return storyObj;
-    }));
+    let stories = await Story.find(query)
+      .populate('userId', 'name username profilePicture')
+      .sort({ createdAt: -1 });
 
     // Group stories by user
     const groupedStories = stories.reduce((acc, story) => {
@@ -200,20 +194,17 @@ export const viewStory = async (req, res) => {
 
 export const getAllStoriesAdmin = async (req, res) => {
   try {
-    let stories = await Story.find().sort({ createdAt: -1 });
+    let stories = await Story.find()
+      .populate('userId', 'name username email profilePicture')
+      .sort({ createdAt: -1 });
 
-    stories = await Promise.all(stories.map(async (story) => {
-      let storyUser = await User.findById(story.userId).select('name username email profilePicture');
-      if (!storyUser) {
-        storyUser = await Owner.findById(story.userId).select('name email profilePicture');
-      }
-      
+    const formattedStories = stories.map(story => {
       const storyObj = story.toObject();
-      storyObj.userId = storyUser || { _id: story.userId, name: 'Unknown', username: 'Unknown' };
+      storyObj.userId = storyObj.userId || { _id: story.userId, name: 'Unknown', username: 'Unknown' };
       return storyObj;
-    }));
+    });
 
-    res.status(200).json({ success: true, stories });
+    res.status(200).json({ success: true, stories: formattedStories });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

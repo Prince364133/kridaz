@@ -3,8 +3,14 @@ import mongoose from 'mongoose';
 const communityPostSchema = new mongoose.Schema({
   adminId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    required: true,
+    refPath: 'authorModel'
+  },
+  authorModel: {
+    type: String,
+    required: true,
+    enum: ['User', 'Owner'],
+    default: 'User'
   },
   title: {
     type: String

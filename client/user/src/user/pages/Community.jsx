@@ -480,7 +480,7 @@ const Community = () => {
 
         {/* Posts Feed */}
         <div className="space-y-6">
-          <h2 className="text-xs font-bold text-white/20 uppercase tracking-[0.2em]">Platform Updates</h2>
+          <h2 className="text-xs font-bold text-white/20 uppercase tracking-[0.2em]">Community Feed</h2>
           
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -539,7 +539,7 @@ const Community = () => {
                       </button>
                     )}
                   </div>
-                  {isAdmin && (
+                  {(isAdmin || user?._id === post.adminId?._id) && (
                     <div className="flex items-center gap-2">
                       <button 
                         onClick={() => handleEditPost(post)}
@@ -699,13 +699,13 @@ const Community = () => {
         </div>
       </div>
 
-      {/* Post Modal (Admin Only) */}
+      {/* Post Modal */}
       {showPostModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={closePostModal} />
           <div className="relative w-full max-w-xl bg-[#0A0A0A] border border-white/10 rounded-[32px] overflow-hidden">
             <div className="p-6 border-b border-white/5 flex items-center justify-between">
-              <h3 className="font-bold uppercase tracking-wider">{editingPost ? 'Edit Update' : 'Create Community Update'}</h3>
+              <h3 className="font-bold uppercase tracking-wider">{editingPost ? 'Edit Update' : 'Create Community Post'}</h3>
               <button onClick={closePostModal} className="p-2 hover:bg-white/5 rounded-full transition-colors">
                 <X size={20} />
               </button>
@@ -761,7 +761,7 @@ const Community = () => {
         </div>
       )}
 
-      {/* Story Modal (User Only) */}
+      {/* Story Modal */}
       {showStoryModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setShowStoryModal(false)} />

@@ -3,8 +3,14 @@ import mongoose from 'mongoose';
 const storySchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    required: true,
+    refPath: 'userModel'
+  },
+  userModel: {
+    type: String,
+    required: true,
+    enum: ['User', 'Owner'],
+    default: 'User'
   },
   mediaUrl: {
     type: String,

@@ -16,8 +16,11 @@ export const createPost = async (req, res) => {
       image = await uploadToCloudinary(req.file.buffer, 'turfspot/community');
     }
 
+    const authorModel = req.user?.role === 'user' ? 'User' : 'Owner';
+    
     const newPost = new CommunityPost({
-      adminId: creatorId, // adminId is the field name used in the model for the creator
+      adminId: creatorId,
+      authorModel,
       title,
       content,
       image
@@ -36,8 +39,9 @@ export const getPosts = async (req, res) => {
     const posts = await CommunityPost.find()
       .populate('adminId', 'name profilePicture username')
       .sort({ createdAt: -1 })
-      .limit(10);
+      .limit(20);
 
+    // Get active stories for authors
     const authorIds = posts.map(p => p.adminId?._id).filter(id => id);
     const activeStories = await Story.find({
       userId: { $in: authorIds },
@@ -73,7 +77,10 @@ export const updatePost = async (req, res) => {
     }
 
     // Check ownership or admin role
-    if (post.adminId.toString() !== userId && role !== 'admin' && role !== 'BMSP_ADMIN') {
+    const isAuthor = post.adminId.toString() === userId;
+    const isAdmin = role === 'admin' || role === 'BMSP_ADMIN';
+
+    if (!isAuthor && !isAdmin) {
       return res.status(403).json({ success: false, message: 'Unauthorized to update this post' });
     }
 
@@ -101,7 +108,10 @@ export const deletePost = async (req, res) => {
     }
 
     // Check ownership or admin role
-    if (post.adminId.toString() !== userId && role !== 'admin' && role !== 'BMSP_ADMIN') {
+    const isAuthor = post.adminId.toString() === userId;
+    const isAdmin = role === 'admin' || role === 'BMSP_ADMIN';
+
+    if (!isAuthor && !isAdmin) {
       return res.status(403).json({ success: false, message: 'Unauthorized to delete this post' });
     }
 
