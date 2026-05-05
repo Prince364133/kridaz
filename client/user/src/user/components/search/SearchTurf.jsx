@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Trophy, ChevronDown, Globe, Search } from "lucide-react";
+import { Trophy, ChevronDown, Globe, Search, MapPin } from "lucide-react";
 import { fetchStates, fetchCities } from "../../utils/locationService";
 
 const SPORTS_LIST = [

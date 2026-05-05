@@ -1,7 +1,7 @@
 const OwnerRequestsSkeleton = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0a] p-6 lg:p-10">
-      <div className="max-w-7xl mx-auto space-y-12">
+      <div className="space-y-12">
         <div className="relative">
           <div className="absolute -left-4 top-0 w-1 h-12 bg-gray-800 rounded-full"></div>
           <div className="h-10 w-64 bg-gray-800 rounded animate-pulse"></div>

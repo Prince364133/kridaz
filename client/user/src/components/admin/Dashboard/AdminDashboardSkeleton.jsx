@@ -12,7 +12,7 @@ import {
 const AdminDashboardSkeleton = () => {
   return (
     <div className="min-h-screen bg-base-200 p-4">
-      <div className="max-w-7xl mx-auto">
+      <div>
         <h1 className="text-4xl font-bold mb-8 text-center lg:text-left">
           Admin Dashboard
         </h1>
