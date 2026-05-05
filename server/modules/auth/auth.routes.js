@@ -4,7 +4,8 @@ import {
   registerOwner, 
   login, 
   logout,
-  ownerRequest 
+  ownerRequest,
+  checkUsername
 } from "./auth.controller.js";
 import { 
   userRegisterSchema, 
@@ -21,5 +22,6 @@ router.post("/owner/register", validate(ownerRegisterSchema), registerOwner);
 router.post("/login", validate(userLoginSchema), login);
 router.post("/logout", logout);
 router.post("/owner/request", validate(ownerRequestSchema), ownerRequest);
+router.get("/check-username", checkUsername);
 
 export default router;

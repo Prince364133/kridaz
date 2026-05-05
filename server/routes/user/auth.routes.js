@@ -7,7 +7,8 @@ import {
   googleAuth,
   upgradeRequest,
   getMe,
-  updateProfilePicture
+  updateProfilePicture,
+  updateInterests
 } from "../../modules/auth/auth.controller.js";
 import { 
   userRegisterSchema, 
@@ -30,5 +31,6 @@ router.post("/google-auth", googleAuth);
 router.post("/upgrade-request", userAuth, upgradeRequest);
 router.get("/getMe", userAuth, getMe);
 router.post("/profile-picture", userAuth, upload.single("profilePicture"), updateProfilePicture);
+router.post("/update-interests", userAuth, updateInterests);
 
 export default router;

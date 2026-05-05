@@ -10,6 +10,10 @@ import { login } from "@redux/slices/authSlice";
 
 const registerSchema = yup.object().shape({
   name: yup.string().required("Name is required"),
+  username: yup
+    .string()
+    .matches(/^[a-z0-9_]+$/, "Username can only contain lowercase letters, numbers, and underscores")
+    .min(3, "Username must be at least 3 characters"),
   email: yup
     .string()
     .required("Enter your email")
@@ -54,7 +58,7 @@ const useSignUpForm = () => {
   });
 
   const handleSendOtp = async () => {
-    const isValid = await trigger(["name", "email", "phone", "gender", "location", "password", "confirmPassword"]);
+    const isValid = await trigger(["name", "username", "email", "phone", "gender", "location", "password", "confirmPassword"]);
     if (!isValid) return;
 
     setLoading(true);
@@ -85,7 +89,7 @@ const useSignUpForm = () => {
       });
       const result = await response.data;
       toast.success(result.message);
-      dispatch(login({ token: result.token, role: result.role }));
+      dispatch(login({ token: result.token, role: result.role, user: result.user }));
       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
       navigate("/", { replace: true });
     } catch (error) {
@@ -106,7 +110,7 @@ const useSignUpForm = () => {
       });
       const result = await response.data;
       toast.success("Successfully logged in with Google!");
-      dispatch(login({ token: result.token, role: result.role }));
+      dispatch(login({ token: result.token, role: result.role, user: result.user }));
       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
       navigate("/", { replace: true });
     } catch (error) {

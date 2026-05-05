@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, LayoutDashboard, Calendar, User } from "lucide-react";
+import { Home, Search, MessageCircle, Users, User } from "lucide-react";
 import { useSelector } from "react-redux";
 
 const MobileBottomNav = () => {
@@ -17,9 +17,9 @@ const MobileBottomNav = () => {
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Venues", path: "/turfs", icon: Search },
-    { name: "Dashboard", path: getDashboardPath(), icon: LayoutDashboard, protected: true },
-    { name: "Bookings", path: "/booking-history", icon: Calendar, protected: true },
-    { name: "Profile", path: "/profile", icon: User, protected: true },
+    { name: "Arena", path: "/community", icon: MessageCircle },
+    { name: "Squads", path: "/players", icon: Users },
+    { name: "You", path: "/profile", icon: User, protected: true },
   ];
 
   // Filter items based on login status and role

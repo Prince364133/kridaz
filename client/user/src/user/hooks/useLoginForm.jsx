@@ -87,7 +87,7 @@ const useLoginForm = () => {
       if (result.token) {
         toast.success(result.message);
         const { token, role } = result;
-        dispatch(login({ token, role }));
+        dispatch(login({ token, role, user: result.user }));
         axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         handleRoleRedirect(role);
       } else {
@@ -115,7 +115,7 @@ const useLoginForm = () => {
       toast.success(result.message);
       
       const { token, role } = result;
-      dispatch(login({ token, role }));
+      dispatch(login({ token, role, user: result.user }));
       
       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       handleRoleRedirect(role);
@@ -132,14 +132,14 @@ const useLoginForm = () => {
     setLoading(true);
     try {
       const response = await axiosInstance.post("/api/user/auth/google-auth", {
-        idToken: credentialResponse.credential,
+        credential: credentialResponse.credential,
         role: "user",
       });
       const result = await response.data;
       toast.success("Successfully logged in with Google!");
       
       const { token, role } = result;
-      dispatch(login({ token, role }));
+      dispatch(login({ token, role, user: result.user }));
       
       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       handleRoleRedirect(role);

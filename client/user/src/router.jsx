@@ -15,6 +15,8 @@ import UserTurfBookingHistory from "@user/components/turf/TurfBookingHistory";
 import UserProfile from "@user/pages/Profile";
 import UserBlogs from "@user/pages/Blogs";
 import UserBlogDetail from "@user/pages/BlogDetail";
+import Community from "@user/pages/Community";
+import FindPlayers from "@user/pages/FindPlayers";
 
 
 // Business Landing Pages (User Portal)
@@ -59,6 +61,7 @@ import {
   FeatureFlags,
   MarketingManagement,
   BlogManagement,
+  CommunityManagement,
 } from "@components/admin";
 import ProtectedRoute from "@components/ProtectedRoute/ProtectedRoute";
 import { NotFound, RootRedirect, ErrorBoundary } from "@components/common";
@@ -94,6 +97,7 @@ const router = createBrowserRouter([
       { path: "features", element: <FeatureFlags /> },
       { path: "marketing", element: <MarketingManagement /> },
       { path: "blogs", element: <BlogManagement /> },
+      { path: "community", element: <CommunityManagement /> },
       { path: "*", element: <NotFound /> },
     ],
   },
@@ -163,10 +167,12 @@ const router = createBrowserRouter([
       { path: "signup", element: <UserSignUp /> },
       { path: "turfs", element: <UserTurf /> },
       { path: "turf/:id", element: <UserTurfDetails /> },
-      { path: "profile", element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
+      { path: "profile/:userId?", element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
       { path: "blogs", element: <UserBlogs /> },
       { path: "blogs/:id", element: <UserBlogDetail /> },
       { path: "booking-history", element: <ProtectedRoute><UserTurfBookingHistory /></ProtectedRoute> },
+      { path: "community", element: <Community /> },
+      { path: "players", element: <FindPlayers /> },
 
       
       // Business Landings

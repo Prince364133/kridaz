@@ -171,6 +171,21 @@ const SignUp = () => {
                         {errors.name && <p className="text-xs text-red-500 mt-1 ml-1">{errors.name.message}</p>}
                       </div>
 
+                      {/* Username */}
+                      <div className="space-y-2 group/field">
+                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Username (Optional)</label>
+                        <div className="relative">
+                          <UserSquare2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                          <input 
+                            {...register("username")}
+                            type="text" 
+                            placeholder="johndoe_123"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                          />
+                        </div>
+                        {errors.username && <p className="text-xs text-red-500 mt-1 ml-1">{errors.username.message}</p>}
+                      </div>
+
                       {/* Email */}
                       <div className="space-y-2 group/field">
                         <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Email Address</label>

@@ -13,6 +13,40 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
+const generateUniqueUsername = async (baseName) => {
+  let username = baseName ? baseName.toLowerCase().replace(/[^a-z0-9]/g, '') : "player";
+  if (!username) username = "player";
+  
+  let isUnique = false;
+  let counter = 0;
+  let finalUsername = username;
+  
+  while (!isUnique) {
+    const existing = await User.findOne({ username: finalUsername });
+    if (!existing) {
+      isUnique = true;
+    } else {
+      counter++;
+      finalUsername = `${username}${counter}`;
+    }
+  }
+  return finalUsername;
+};
+
+// Check Username Availability
+export const checkUsername = async (req, res) => {
+  try {
+    const { username } = req.query;
+    if (!username) {
+      return res.status(400).json({ success: false, message: "Username is required" });
+    }
+    const existing = await User.findOne({ username: username.toLowerCase() });
+    return res.status(200).json({ success: true, available: !existing });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // Send OTP for Registration
 export const sendOtp = async (req, res) => {
   const { email } = req.body;
@@ -44,7 +78,7 @@ export const sendOtp = async (req, res) => {
 
 // User Registration
 export const registerUser = async (req, res) => {
-  const { name, email, password, phone, gender, location, otp } = req.body;
+  const { name, email, password, phone, gender, location, otp, username } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -53,14 +87,22 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email already registered" });
     }
 
+    if (username) {
+      const existingUsername = await User.findOne({ username: username.toLowerCase() });
+      if (existingUsername) {
+        return res.status(400).json({ success: false, message: "Username already taken" });
+      }
+    }
+
     const otpRecord = await OTP.findOne({ email, otp });
     if (!otpRecord) {
       return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
     }
 
     const hashedPassword = await argon2.hash(password);
+    const finalUsername = username ? username.toLowerCase() : await generateUniqueUsername(name);
 
-    const newUser = new User({ name, email, password: hashedPassword, phone, gender, location });
+    const newUser = new User({ name, username: finalUsername, email, password: hashedPassword, phone, gender, location });
     await newUser.save();
     await OTP.deleteOne({ _id: otpRecord._id });
 
@@ -76,7 +118,7 @@ export const registerUser = async (req, res) => {
 
     return res
       .status(201)
-      .json({ success: true, message: "User created successfully", token });
+      .json({ success: true, message: "User created successfully", token, user: newUser });
   } catch (err) {
     console.log(chalk.red(err.message));
     return res.status(500).json({ success: false, message: err.message });
@@ -186,6 +228,7 @@ export const loginStep1 = async (req, res) => {
       message: "Login successful", 
       token, 
       role,
+      user: account,
       requiresOtp: false 
     });
   } catch (err) {
@@ -240,7 +283,8 @@ export const login = async (req, res) => {
       success: true, 
       message: "Login successful", 
       token, 
-      role 
+      role,
+      user: account
     });
   } catch (err) {
     console.error(chalk.red("Login error:"), err);
@@ -289,7 +333,8 @@ export const googleAuth = async (req, res) => {
         roleToReturn = owner.role;
         token = generateOwnerToken(owner);
       } else {
-        user = new User({ name, email, googleId });
+        const generatedUsername = await generateUniqueUsername(name);
+        user = new User({ name, username: generatedUsername, email, googleId });
         await user.save();
         roleToReturn = "user";
         token = generateUserToken(user._id);
@@ -307,7 +352,8 @@ export const googleAuth = async (req, res) => {
       success: true, 
       message: "Google authentication successful", 
       token, 
-      role: roleToReturn 
+      role: roleToReturn,
+      user: owner || user
     });
   } catch (error) {
     console.error(chalk.red("Google Auth Error:"), error);
@@ -506,5 +552,25 @@ export const updateProfilePicture = async (req, res) => {
   } catch (err) {
     console.error(chalk.red("updateProfilePicture Error:"), err);
     return res.status(500).json({ success: false, message: "Failed to upload profile picture" });
+  }
+};
+
+export const updateInterests = async (req, res) => {
+  const { sportTypes } = req.body;
+  try {
+    const id = req.user.id;
+    let account = await User.findByIdAndUpdate(id, { sportTypes }, { new: true });
+    
+    if (!account) {
+      account = await Owner.findByIdAndUpdate(id, { sportTypes }, { new: true });
+    }
+
+    if (!account) {
+      return res.status(404).json({ success: false, message: "Account not found" });
+    }
+    
+    return res.status(200).json({ success: true, message: "Interests updated", sportTypes: account.sportTypes });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
   }
 };

@@ -26,3 +26,6 @@ export {MarketingManagement} from "./Marketing/MarketingManagement"
 
 // Blogs
 export {BlogManagement} from "./Blogs/BlogManagement"
+
+// Community
+export {default as CommunityManagement} from "./Community/CommunityManagement"

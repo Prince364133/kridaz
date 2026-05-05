@@ -22,8 +22,11 @@ const verifyUserToken = async (req, res, next) => {
       // Invalid token
       return res.status(403).json({ message: "Forbidden: Invalid token" });
     }
-    // Attach the decoded user information to the request
-    req.user = decoded;
+    // Attach the decoded user information to the request with normalization
+    req.user = {
+      ...decoded,
+      id: decoded.id || decoded._id || (decoded.user && (decoded.user.id || decoded.user._id))
+    };
     next();
   } catch (err) {
     // Internal server error

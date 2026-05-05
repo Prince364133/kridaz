@@ -28,7 +28,15 @@ const verifyAdminToken = async (req, res, next) => {
       return res.status(403).json({ success: false, message: "Unauthorized: Admin privileges required" });
     }
 
-    req.admin = decoded;
+    // Normalize for controllers expecting req.user or specific id/role placement
+    const normalizedUser = {
+      ...decoded,
+      id: decoded.id || decoded._id || (decoded.user && (decoded.user.id || decoded.user._id)),
+      role: role
+    };
+
+    req.admin = normalizedUser;
+    req.user = normalizedUser;
     next();
   } catch (error) {
     console.error("Admin Middleware Error:", error.message);

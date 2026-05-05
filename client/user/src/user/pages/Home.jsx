@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import axiosInstance from "../hooks/useAxiosInstance";
 import useTurfData from "../hooks/useTurfData";
 import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus, Loader2 } from "lucide-react";
@@ -9,6 +9,8 @@ import { VideoSection } from "../components/Marketing/VideoSection";
 import BlogSection from "../components/Blogs/BlogSection";
 import SearchPlayers from "../components/search/SearchPlayers";
 import SearchTurf from "../components/search/SearchTurf";
+import InterestsModal from "../components/modals/InterestsModal";
+import { updateUser } from "@redux/slices/authSlice";
 
 const PRI = "#84CC16";
 const S2 = "#1A1A1A";
@@ -34,7 +36,7 @@ const highlights = [
   { image: "https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=1200", span: "col-span-3" }, // Stadium
   { image: "https://images.pexels.com/photos/159515/football-american-football-runner-player-159515.jpeg?auto=compress&cs=tinysrgb&w=800", span: "col-span-3" }, // Football Action
   { image: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80", span: "col-span-2" }, // Cricket/Turf
-  { image: "https://images.unsplash.com/photo-1518605363189-cdb72b0e6bf3?w=800&q=80", span: "col-span-2" }, // Basketball/Football
+  { image: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=800&q=80", span: "col-span-2" }, // Basketball/Football
   { image: "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?w=800&q=80", span: "col-span-2" }, // Tennis
 ];
 
@@ -60,10 +62,11 @@ const features = [
 
 
 // player skill levels based on booking count
-const getLevel = (count) => {
+const getLevel = (count = 0) => {
+  if (count >= 100) return { label: "LEGEND", color: "#F472B6" };
+  if (count >= 50) return { label: "ELITE", color: "#818CF8" };
   if (count >= 20) return { label: "PRO", color: PRI };
-  if (count >= 5) return { label: "MED", color: "#F59E0B" };
-  return { label: "BEGINNER", color: "#60A5FA" };
+  return { label: "BEGINNER", color: "#94A3B8" };
 };
 
 // initials avatar color
@@ -71,7 +74,9 @@ const avatarColors = ["#1a3300", "#001a33", "#330033", "#331a00", "#003333", "#1
 const avatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.length] || "#1a1a1a";
 
 export default function Home() {
+  const dispatch = useDispatch();
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);
+  const [showInterests, setShowInterests] = useState(false);
   const [activeTab, setActiveTab] = useState("venues");
   const [players, setPlayers] = useState([]);
   const [turfFilters, setTurfFilters] = useState({});
@@ -82,6 +87,12 @@ export default function Home() {
   const [marketing, setMarketing] = useState({ banners: [], videos: [] });
   const [loading, setLoading] = useState(true);
   const [featureFlags, setFeatureFlags] = useState({});
+  
+  useEffect(() => {
+    if (isLoggedIn && role === 'user' && user && (!user.sportTypes || user.sportTypes.length === 0)) {
+      setShowInterests(true);
+    }
+  }, [isLoggedIn, role, user]);
 
   const detectLocation = () => {
     setLocationStatus("detecting");
@@ -999,6 +1010,14 @@ export default function Home() {
           ))}
         </div>
       </section>
+      <InterestsModal 
+        isOpen={showInterests} 
+        onClose={() => setShowInterests(false)} 
+        onSaved={(sports) => {
+          dispatch(updateUser({ sportTypes: sports }));
+          setShowInterests(false);
+        }}
+      />
     </div>
   );
 }

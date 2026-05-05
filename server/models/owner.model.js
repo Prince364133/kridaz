@@ -22,6 +22,10 @@ const ownerSchema = new mongoose.Schema(
       specialization: String,
     },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    followers: [{ type: mongoose.Schema.Types.ObjectId, refPath: "role" }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, refPath: "role" }],
+    bookingCount: { type: Number, default: 0 },
+    interests: [{ type: String }],
     waitlistPosition: { type: Number },
   },
   { timestamps: true }

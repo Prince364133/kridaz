@@ -49,6 +49,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/admin/transactions", label: "TRANSACTIONS", icon: DollarSign },
     { to: "/admin/marketing", label: "MARKETING", icon: Activity },
     { to: "/admin/blogs", label: "BLOGS", icon: FileText },
+    { to: "/admin/community", label: "COMMUNITY", icon: Users },
     { to: "/admin/features", label: "FEATURES", icon: ToggleRight },
     { to: "#", label: "LOGOUT", icon: LogOut, action: "logout" },
   ];
