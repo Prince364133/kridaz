@@ -492,59 +492,73 @@ export default function Home() {
                   <Link
                     key={p._id}
                     to={`/profile/${p._id}`}
-                    className="flex flex-col items-center gap-2 md:gap-4 group shrink-0 w-1/4 lg:w-32"
+                    className="flex flex-col items-center gap-3 md:gap-5 group shrink-0 w-32 lg:w-36 transition-all duration-500"
                   >
                     <div className="relative">
-                      {/* Premium Avatar Bubble */}
-                      <div className="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-[#84CC16] via-[#84CC16]/20 to-transparent transition-all duration-500 group-hover:scale-110 shadow-2xl shadow-[#84CC16]/10">
-                        <div className="w-full h-full rounded-full border-4 border-[#000] flex items-center justify-center text-xl font-black relative overflow-hidden"
+                      {/* Premium Avatar Bubble with Glow */}
+                      <div className="relative w-24 h-24 flex items-center justify-center transition-all duration-500 group-hover:scale-110">
+                        {/* Outer Glow Ring */}
+                        <div className="absolute inset-0 rounded-full bg-[#84CC16]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        
+                        {/* Gradient Border Ring */}
+                        <div className="absolute inset-0 rounded-full p-[3px] bg-gradient-to-tr from-[#84CC16] via-[#84CC16]/50 to-white/10">
+                          <div className="w-full h-full rounded-full bg-black" />
+                        </div>
+
+                        {/* Inner Avatar */}
+                        <div className="w-[calc(100%-8px)] h-[calc(100%-8px)] rounded-full flex items-center justify-center text-2xl font-black relative overflow-hidden z-10 shadow-inner"
                           style={{
                             backgroundColor: avatarColor(p.name),
                             color: "#fff",
-                            fontFamily: "sans-serif"
+                            fontFamily: "var(--font-display, sans-serif)"
                           }}>
                           {p.profilePicture && (
                             <img 
                               src={p.profilePicture} 
                               alt={p.name} 
-                              className="w-full h-full object-cover absolute inset-0 z-10" 
+                              className="w-full h-full object-cover absolute inset-0 z-10 brightness-90 group-hover:brightness-110 transition-all duration-500" 
                               onError={(e) => {
                                 e.target.style.display = 'none';
                               }}
                             />
                           )}
-                          <span className="relative z-0">{initials}</span>
+                          <span className="relative z-0 tracking-tighter">{initials}</span>
 
-                          {/* Inner Glassy Shine */}
-                          <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none z-20" />
+                          {/* Cinematic Glass Overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none z-20" />
                         </div>
                       </div>
 
-                      {/* Floating Plus Icon (Follow/Unfollow) */}
-                      <div 
+                      {/* Premium Badge (Follow/Unfollow) */}
+                      <button 
                         onClick={(e) => handleFollowToggle(e, p)} 
-                        className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-full border-4 border-[#000] flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-125 z-30 ${followingIds.includes(p._id) ? 'bg-white text-black' : 'bg-[#84CC16] text-black'}`}
+                        className={`absolute -bottom-1 -right-1 w-9 h-9 rounded-full border-[3px] border-black flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-500 hover:scale-110 active:scale-95 z-30
+                          ${followingIds.includes(p._id) 
+                            ? 'bg-white text-black' 
+                            : 'bg-[#84CC16] text-black shadow-[#84CC16]/20'}`}
                       >
-                        {followingIds.includes(p._id) ? <Check size={14} className="font-bold" /> : <Plus size={14} className="font-bold" />}
-                      </div>
+                        {followingIds.includes(p._id) 
+                          ? <Check size={16} strokeWidth={3} /> 
+                          : <Plus size={16} strokeWidth={3} />}
+                      </button>
                     </div>
 
-                    <div className="text-center space-y-1">
-                      <p className="text-sm font-bold text-white uppercase tracking-tight line-clamp-1" style={{ fontFamily: "sans-serif" }}>
+                    <div className="text-center space-y-1.5 px-2">
+                      <p className="text-[13px] font-bold text-white uppercase tracking-wider line-clamp-1 group-hover:text-primary transition-colors" style={{ fontFamily: "var(--font-display, sans-serif)" }}>
                         {p.name || "Player"}
                       </p>
 
-                      <div className="flex flex-col items-center justify-center gap-1 opacity-60">
-                        <div className="flex items-center gap-1">
-                          <MapPin size={10} className="text-[#84CC16]" />
-                          <p className="text-[10px] font-medium text-gray-300 uppercase truncate max-w-[80px]" style={{ fontFamily: "sans-serif" }}>
+                      <div className="flex flex-col items-center justify-center gap-1">
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
+                          <MapPin size={10} style={{ color: PRI }} />
+                          <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate max-w-[80px]">
                             {p.city || p.location || "Nearby"}
                           </p>
                         </div>
                         {p.distance && (
-                          <p className="text-[9px] font-black text-[#84CC16] uppercase tracking-wider bg-[#84CC16]/5 px-1.5 py-0.5 rounded">
+                          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary/80">
                             {p.distance} km away
-                          </p>
+                          </span>
                         )}
                       </div>
                     </div>
