@@ -52,7 +52,7 @@ const BlogSection = () => {
   if (blogs.length === 0) return null;
 
   return (
-    <section className="pt-6 lg:pt-10 pb-6 lg:pb-10 px-6 max-w-screen-2xl mx-auto">
+    <section className="pt-2 lg:pt-4 pb-6 lg:pb-10 px-6 max-w-screen-2xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
         <div>
           <h2 className="font-display text-5xl md:text-7xl uppercase leading-none tracking-tight">

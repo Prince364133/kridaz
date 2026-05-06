@@ -20,7 +20,7 @@ const verifyUserToken = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded) {
       // Invalid token
-      return res.status(403).json({ message: "Forbidden: Invalid token" });
+      return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
     // Attach the decoded user information to the request with normalization
     req.user = {
@@ -29,8 +29,8 @@ const verifyUserToken = async (req, res, next) => {
     };
     next();
   } catch (err) {
-    // Internal server error
-    return res.status(500).json({ message: "Internal server error" });
+    // Return 401 on verification error (expired or malformed token)
+    return res.status(401).json({ message: "Unauthorized: Session expired or invalid" });
   }
 };
 

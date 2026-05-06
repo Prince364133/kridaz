@@ -95,8 +95,8 @@ const FindPlayers = () => {
   };
 
   const handleFollowToggle = async (targetUserId) => {
-    if (!isLoggedIn || !currentUser) {
-      console.warn("Follow toggle failed: User not logged in", { isLoggedIn, currentUser });
+    if (!isLoggedIn) {
+      console.warn("Follow toggle failed: User not logged in", { isLoggedIn });
       toast.error("Please login to follow players");
       navigate("/login");
       return;

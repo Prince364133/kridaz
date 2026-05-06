@@ -328,7 +328,7 @@ export default function Home() {
 
 
       {/* ── FIND YOUR ARENA ── */}
-      <section className="py-10 lg:py-20 px-6 md:px-10 w-full">
+      <section className="py-6 lg:py-12 px-6 md:px-10 w-full">
         <div className="text-center mb-6 lg:mb-10">
           <h2 className="font-display text-6xl md:text-7xl leading-none uppercase">
             Find Your <span style={{ color: PRI }}>Arena</span>
@@ -453,7 +453,7 @@ export default function Home() {
       </section>
 
       {/* ── FIND PLAYERS NEAR YOU ── */}
-      <section className="py-10 lg:py-20 px-6 md:px-10" style={{ backgroundColor: "#0A0A0A" }}>
+      <section className="py-6 lg:py-12 px-6 md:px-10" style={{ backgroundColor: "#0A0A0A" }}>
         <div className="w-full">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
@@ -577,7 +577,7 @@ export default function Home() {
 
       {/* ── JOIN GAMES NEAR YOU (Feature Flag) ── */}
       {featureFlags['join_games'] && (
-        <section className="py-10 lg:py-20 px-6 md:px-10" style={{ backgroundColor: "#0A0A0A" }}>
+        <section className="py-6 lg:py-12 px-6 md:px-10" style={{ backgroundColor: "#0A0A0A" }}>
           <div className="w-full">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 lg:mb-8">
               <div>
@@ -654,7 +654,7 @@ export default function Home() {
 
       {/* ── FIND PROFESSIONALS (Feature Flag) ── */}
       {featureFlags['find_professionals'] && (
-        <section className="py-10 lg:py-20 px-6 md:px-10 border-b" style={{ backgroundColor: "#000", borderColor: "#1A1A1A" }}>
+        <section className="py-6 lg:py-12 px-6 md:px-10 border-b" style={{ backgroundColor: "#000", borderColor: "#1A1A1A" }}>
           <div className="w-full">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 lg:mb-8">
               <div>
@@ -1012,7 +1012,7 @@ export default function Home() {
       {/* ── WHY CHOOSE BMSPORTZ ── */}
       {/* Hiding section as per user request */}
       {/* 
-      <section className="py-12 lg:py-24 px-6 md:px-10 w-full">
+      <section className="py-8 lg:py-16 px-6 md:px-10 w-full">
         <div className="max-w-screen-2xl mx-auto">
           <div className="text-center">
             <h2 className="text-5xl md:text-8xl font-bold uppercase leading-none tracking-tight">
@@ -1029,7 +1029,7 @@ export default function Home() {
       {/* ── FEATURES ── */}
       {/* Hiding section as per user request */}
       {/*
-      <section className="py-10 lg:py-20 px-6 md:px-10 w-full max-w-screen-2xl mx-auto">
+      <section className="py-6 lg:py-12 px-6 md:px-10 w-full max-w-screen-2xl mx-auto">
         <div className="text-center mb-8 lg:mb-14">
           <h2 className="font-display text-5xl md:text-6xl uppercase">
             ALL IN ONE <span style={{ color: PRI }}>SPORTS</span> BOOKING

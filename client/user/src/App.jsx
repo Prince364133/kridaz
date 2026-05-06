@@ -54,22 +54,16 @@ export default function App() {
           }));
         }
       } catch (error) {
-        // If it's a 401, we ensure the user is logged out locally
-        if (error.response?.status === 401) {
-          dispatch(logout());
-        }
-        console.warn("Auth initialization skip/failed:", error.message);
+        // Any error in verification should clear the local auth state
+        dispatch(logout());
+        console.warn("Auth initialization failed/expired:", error.message);
       } finally {
         setLoading(false);
       }
     };
 
-    if (!isAuthenticated) {
-      initAuth();
-    } else {
-      setLoading(false);
-    }
-  }, [dispatch, isAuthenticated]);
+    initAuth();
+  }, [dispatch]);
 
   if (loading) {
     return (
