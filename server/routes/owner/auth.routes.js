@@ -6,7 +6,8 @@ import {
   sendOtp,
   googleAuth,
   ownerRequest,
-  getMe 
+  getMe,
+  logout 
 } from "../../modules/auth/auth.controller.js";
 import { 
   ownerRegisterSchema, 
@@ -27,5 +28,6 @@ router.post("/login", validate(userLoginSchema), login);
 router.post("/google-auth", googleAuth);
 router.post("/ownerRequest", validate(ownerRequestSchema), ownerRequest);
 router.get("/getMe", ownerAuth, getMe);
+router.post("/logout", logout);
 
 export default router;

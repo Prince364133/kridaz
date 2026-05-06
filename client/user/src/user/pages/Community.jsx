@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import axiosInstance from "../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import { 
   Heart, 
   MessageCircle, 

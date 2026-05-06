@@ -1,13 +1,20 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { logout } from "@redux/slices/authSlice";
 import { useDispatch } from "react-redux";
+import axiosInstance from "../../hooks/useAxiosInstance";
 
 export default function AuthNavbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/", { replace: true });
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.post("/api/user/auth/logout");
+      dispatch(logout());
+      navigate("/", { replace: true });
+    } catch (error) {
+      dispatch(logout());
+      navigate("/", { replace: true });
+    }
   };
   return (
     <div className="navbar bg-base-100 fixed top-0 z-50 shadow-md">

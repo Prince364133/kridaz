@@ -24,6 +24,8 @@ const SearchTurf = ({ onSearch, userLocation }) => {
   ];
 
   // Sync with userLocation prop (auto-detected or from parent)
+  // Sync with userLocation prop (auto-detected or from parent) - DISABLED AS PER USER REQUEST
+  /*
   useEffect(() => {
     if (userLocation?.city && !selectedLocation) {
       const display = `${userLocation.city}${userLocation.state ? `, ${userLocation.state}` : ""}`;
@@ -37,6 +39,7 @@ const SearchTurf = ({ onSearch, userLocation }) => {
       });
     }
   }, [userLocation]);
+  */
 
   // Debounced real-time location autocomplete
   useEffect(() => {
@@ -110,7 +113,7 @@ const SearchTurf = ({ onSearch, userLocation }) => {
   };
 
   return (
-    <div className="w-full animate-fade-in-up">
+    <div className="w-full animate-fade-in-up relative z-[50]">
       <div className="relative group">
         <div className="relative flex flex-row items-center bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl p-1.5 shadow-2xl transition-all duration-500 hover:border-[#84CC16]/30 min-h-[56px] md:min-h-[64px]">
           

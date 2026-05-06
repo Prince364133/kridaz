@@ -2,6 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
+import axiosInstance from "../../hooks/useAxiosInstance";
 
 const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const dispatch = useDispatch();
@@ -9,9 +10,15 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const role = useSelector((state) => state?.auth?.role);
   const path = role === "BMSP_ADMIN" ? "/admin" : role === "COACH" ? "/coach" : role === "UMPIRE" ? "/umpire" : "/partner";
   
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/", { replace: true });
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.post("/api/user/auth/logout");
+      dispatch(logout());
+      navigate("/", { replace: true });
+    } catch (error) {
+      dispatch(logout());
+      navigate("/", { replace: true });
+    }
   };
 
   return (

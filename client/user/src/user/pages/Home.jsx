@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import axiosInstance from "../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import useTurfData from "../hooks/useTurfData";
-import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus, Loader2 } from "lucide-react";
+import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, MessageSquare, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { AdBannerSection } from "../components/Marketing/AdBannerSection";
 import { VideoSection } from "../components/Marketing/VideoSection";
@@ -143,9 +143,9 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    detectLocation();
-  }, []);
+  // useEffect(() => {
+  //   detectLocation();
+  // }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -241,7 +241,7 @@ export default function Home() {
 
       {/* ── HERO ── */}
       {/* ── HERO ── */}
-      <section className="relative lg:min-h-screen flex items-start pt-8 lg:pt-5 pb-24 overflow-hidden">
+      <section className="relative lg:min-h-screen flex items-start pt-24 lg:pt-5 pb-24 overflow-hidden">
         {/* Further Enhanced Cinematic Background */}
         <div className="absolute inset-y-0 right-0 w-full lg:w-[75%] z-0 pointer-events-none overflow-hidden">
           <div className="relative h-full w-full">
@@ -316,7 +316,7 @@ export default function Home() {
 
       {/* ── STATS ── */}
       <section className="border-y" style={{ borderColor: "#1A1A1A", backgroundColor: "#0A0A0A" }}>
-        <div className="w-full px-2 md:px-10 py-6 grid grid-cols-4 gap-2 lg:gap-0 divide-x divide-[#1A1A1A]">
+        <div className="w-full px-4 md:px-10 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-0 divide-[#1A1A1A] md:divide-x">
           {stats.map((s) => (
             <div key={s.label} className="px-1 md:px-8 text-center flex flex-col justify-center overflow-hidden group">
               <p className="font-display text-xl sm:text-3xl lg:text-5xl leading-none tracking-tighter group-hover:text-white transition-colors" style={{ color: PRI }}>{s.value}</p>
@@ -339,7 +339,7 @@ export default function Home() {
         {/* Search & Tabs Combined Row */}
         <div className="flex flex-col gap-8 mb-16 w-full">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex gap-2 p-1 rounded-full bg-[#1A1A1A] border border-white/5">
+            <div className="flex gap-2 p-1 rounded-full bg-[#1A1A1A] border border-white/5 overflow-x-auto no-scrollbar">
               {[{ key: "venues", label: "🏟 VENUES" }, { key: "marketplace", label: "🛒 MARKETPLACE" }].map(tab => (
                 <button
                   key={tab.key}
@@ -351,17 +351,15 @@ export default function Home() {
                 </button>
               ))}
             </div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gray-500 flex items-center gap-2">
-              {locationStatus === "detecting" ? (
-                <Loader2 size={10} className="animate-spin text-[#84CC16]" />
-              ) : (
-                <MapPin size={10} style={{ color: PRI }} />
-              )}
-              {userLocation ? `${userLocation.city}, ${userLocation.state}` : "Detecting Location..."}
-            </p>
+                <button 
+                  onClick={() => document.getElementById('search-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-[0.2em] hover:text-[#84CC16] transition-colors"
+                >
+                  {userLocation?.city ? `${userLocation.city}, ${userLocation.state}` : "SELECT LOCATION"}
+                </button>
           </div>
 
-          <div className="w-full animate-fade-in">
+          <div className="w-full animate-fade-in relative z-20">
             {activeTab === "venues" ? (
               <SearchTurf onSearch={handleTurfSearch} userLocation={userLocation} />
             ) : (
@@ -460,7 +458,7 @@ export default function Home() {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div className="flex flex-col gap-1">
-              <h2 className="font-display text-2xl min-[375px]:text-3xl md:text-4xl lg:text-5xl whitespace-nowrap tracking-tight uppercase leading-none">
+              <h2 className="font-display text-2xl min-[375px]:text-3xl md:text-4xl lg:text-5xl tracking-tight uppercase leading-none">
                 Find Players <span style={{ color: PRI }}>Near You</span>
               </h2>
             </div>
@@ -499,27 +497,33 @@ export default function Home() {
                     <div className="relative">
                       {/* Premium Avatar Bubble */}
                       <div className="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-[#84CC16] via-[#84CC16]/20 to-transparent transition-all duration-500 group-hover:scale-110 shadow-2xl shadow-[#84CC16]/10">
-                        <div className="w-full h-full rounded-full border-4 border-[#000] flex items-center justify-center text-xl font-black relative overflow-hidden bg-[#111]"
+                        <div className="w-full h-full rounded-full border-4 border-[#000] flex items-center justify-center text-xl font-black relative overflow-hidden"
                           style={{
-                            backgroundColor: p.profilePicture ? 'transparent' : avatarColor(p.name),
+                            backgroundColor: avatarColor(p.name),
                             color: "#fff",
                             fontFamily: "sans-serif"
                           }}>
-                          {p.profilePicture ? (
-                            <img src={p.profilePicture} alt={p.name} className="w-full h-full object-cover" />
-                          ) : (
-                            initials
+                          {p.profilePicture && (
+                            <img 
+                              src={p.profilePicture} 
+                              alt={p.name} 
+                              className="w-full h-full object-cover absolute inset-0 z-10" 
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
                           )}
+                          <span className="relative z-0">{initials}</span>
 
                           {/* Inner Glassy Shine */}
-                          <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none z-20" />
                         </div>
                       </div>
 
                       {/* Floating Plus Icon (Follow/Unfollow) */}
                       <div 
                         onClick={(e) => handleFollowToggle(e, p)} 
-                        className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-full border-4 border-[#000] flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-125 ${followingIds.includes(p._id) ? 'bg-white text-black' : 'bg-[#84CC16] text-black'}`}
+                        className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-full border-4 border-[#000] flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-125 z-30 ${followingIds.includes(p._id) ? 'bg-white text-black' : 'bg-[#84CC16] text-black'}`}
                       >
                         {followingIds.includes(p._id) ? <Check size={14} className="font-bold" /> : <Plus size={14} className="font-bold" />}
                       </div>
@@ -563,7 +567,7 @@ export default function Home() {
           <div className="w-full">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 lg:mb-8">
               <div>
-                <h2 className="font-display text-3xl sm:text-4xl md:text-7xl lg:text-8xl uppercase leading-none text-white flex items-center gap-2 md:gap-3 whitespace-nowrap">
+                <h2 className="font-display text-3xl sm:text-4xl md:text-7xl lg:text-8xl uppercase leading-none text-white flex items-center gap-2 md:gap-3">
                   JOIN <span style={{ color: PRI }}>GAMES NEAR YOU</span>
                 </h2>
                 <p className="font-mono text-xs uppercase tracking-widest mt-2" style={{ color: "#888" }}>
@@ -723,7 +727,7 @@ export default function Home() {
       )}
 
       {/* ── BENTO GRID ── */}
-      <section className="py-10 lg:py-20 px-6 md:px-10 w-full">
+      <section className="pt-10 lg:pt-20 pb-4 lg:pb-6 px-6 md:px-10 w-full">
         <div className="text-center mb-8 lg:mb-14">
           <h2 className="font-display text-5xl md:text-6xl lg:text-7xl uppercase italic leading-[0.9]">
             ALL IN ONE <span className="text-gray-500">SPORTS</span><br />
@@ -764,22 +768,56 @@ export default function Home() {
                   <div>
                     <h3 className="font-display text-4xl italic mb-1 leading-none">CHALLENGE<br />PLAYERS</h3>
                     <p className="text-gray-400 text-sm mb-4">Skill-matched opponents.</p>
-                    <Link to={isLoggedIn ? "/turfs" : "/login"} className="font-bold text-white flex items-center gap-2 hover:text-[#84CC16] transition-colors">Start Match <ArrowRight size={16} /></Link>
+                    <Link to={isLoggedIn ? "/players" : "/login"} className="font-bold text-white flex items-center gap-2 hover:text-[#84CC16] transition-colors">Start Match <ArrowRight size={16} /></Link>
                   </div>
                 </div>
               </div>
-              {/* Community */}
-              <div className="rounded-3xl p-8 relative border flex flex-col justify-between min-h-[200px] overflow-hidden group" style={{ borderColor: BDR, backgroundColor: "#000" }}>
-                <div className="absolute inset-0 bg-cover bg-center opacity-30 transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600&q=80')" }} />
-                <div className="absolute inset-0 bg-gradient-to-b from-[#1a2433]/80 to-black/90" />
-                <div className="relative z-10 flex flex-col h-full justify-between">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center border" style={{ borderColor: "rgba(255,255,255,0.1)", backgroundColor: "rgba(255,255,255,0.05)" }}>
-                    <Users size={18} className="text-[#84CC16]" />
+              {/* Community Feed / Highlights */}
+              <div className="rounded-3xl p-6 relative border flex flex-col justify-between min-h-[200px] overflow-hidden group" style={{ borderColor: BDR, backgroundColor: "#000" }}>
+                <div className="relative z-10 flex flex-col h-full">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center border" style={{ borderColor: "rgba(255,255,255,0.1)", backgroundColor: "rgba(255,255,255,0.05)" }}>
+                        <Users size={14} className="text-[#84CC16]" />
+                      </div>
+                      <h3 className="font-display text-xl italic uppercase">COMMUNITY FEED</h3>
+                    </div>
+                    <Link to="/community" className="text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest">See All</Link>
                   </div>
-                  <div>
-                    <h3 className="font-display text-4xl italic mb-1 leading-none">COMMUNITY</h3>
-                    <p className="text-gray-400 text-sm mb-4">Join tribes & share wins.</p>
-                    <Link to={isLoggedIn ? "/turfs" : "/login"} className="font-bold text-white flex items-center gap-2 hover:text-[#84CC16] transition-colors">Join Now <ArrowRight size={16} /></Link>
+
+                  <div className="flex-1 space-y-3">
+                    {realSocialPosts.length > 0 ? (
+                      realSocialPosts.slice(0, 2).map((post) => {
+                        const author = post.adminId || post.userId || post.ownerId;
+                        return (
+                          <div key={post._id} className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 group/post hover:border-[#84CC16]/30 transition-all">
+                            <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-900 shrink-0 relative">
+                              {author?.profilePicture ? (
+                                <img 
+                                  src={author.profilePicture} 
+                                  alt="" 
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => { e.target.style.display = 'none'; }}
+                                />
+                              ) : null}
+                              <div className="w-full h-full flex items-center justify-center font-bold text-[10px] uppercase text-white" style={{ backgroundColor: avatarColor(author?.name || "A") }}>
+                                {(author?.name || "A")[0]}
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-bold text-white truncate">{author?.name || "Anonymous"}</p>
+                              <p className="text-[9px] text-gray-500 truncate">{post.content || post.title || "Shared a new post"}</p>
+                            </div>
+                            <ChevronRight size={14} className="text-gray-600 group-hover/post:text-[#84CC16] transition-colors" />
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
+                        <MessageCircle size={24} className="mb-2" />
+                        <p className="text-[10px] uppercase font-bold tracking-widest">No recent posts</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -787,22 +825,27 @@ export default function Home() {
 
             {/* Marketplace, Coaches, Umpires */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {/* Marketplace */}
+              {/* Featured Community Highlight */}
               <div className="rounded-3xl p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#84CC16] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
-                <div className="absolute inset-0 bg-cover bg-center opacity-20 transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80')" }} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+                {realSocialPosts[0]?.image ? (
+                  <div className="absolute inset-0 bg-cover bg-center opacity-40 transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url(${realSocialPosts[0].image})` }} />
+                ) : (
+                  <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80')" }} />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
                 <div className="relative z-10 flex flex-col h-full justify-between">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center border" style={{ borderColor: PRI, backgroundColor: "rgba(132,204,22,0.1)" }}>
-                    <ShoppingBag size={20} style={{ color: PRI }} />
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center border" style={{ borderColor: PRI, backgroundColor: "rgba(132,204,22,0.1)" }}>
+                    <Zap size={16} style={{ color: PRI }} />
                   </div>
                   <div>
-                    <h3 className="font-display text-2xl italic mb-1 leading-none uppercase">MARKETPLACE</h3>
-                    <p className="text-gray-400 text-xs mb-4">Premium gear.</p>
+                    <span className="text-[8px] font-bold text-[#84CC16] uppercase tracking-widest mb-1 block">Trending Now</span>
+                    <h3 className="font-display text-xl italic mb-1 leading-tight uppercase truncate">{realSocialPosts[0]?.title || "SOCIAL ARENA"}</h3>
+                    <p className="text-gray-400 text-[10px] mb-4 line-clamp-1">{realSocialPosts[0]?.content || "Check out what's happening in the field."}</p>
                     <Link
-                      to="/marketplace"
-                      className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors"
+                      to="/community"
+                      className="font-bold text-white text-[10px] flex items-center gap-2 hover:text-[#84CC16] transition-colors uppercase tracking-widest"
                     >
-                      Shop Now <ArrowRight size={14} />
+                      Explore <ArrowRight size={12} />
                     </Link>
                   </div>
                 </div>
@@ -845,11 +888,11 @@ export default function Home() {
       </section>
 
       {/* ── SOCIAL ARENA ── */}
-      <section className="py-10 lg:py-20 px-6 md:px-10 w-full overflow-hidden">
+      <section className="pt-4 lg:pt-6 pb-10 lg:pb-20 px-6 md:px-10 w-full overflow-hidden">
         <div className="max-w-screen-2xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 lg:mb-10 gap-4">
             <div>
-              <h2 className="font-display text-3xl sm:text-4xl md:text-6xl uppercase flex items-center gap-2 md:gap-3 whitespace-nowrap">
+              <h2 className="font-display text-3xl sm:text-4xl md:text-6xl uppercase flex items-center gap-2 md:gap-3">
                 Your <span style={{ color: PRI }}>Social Arena</span> <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
               </h2>
               <p className="text-gray-400 mt-2 text-sm md:text-base">Swipe to see what's happening in the field</p>
@@ -860,61 +903,70 @@ export default function Home() {
           </div>
 
           <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x">
-            {(realSocialPosts.length > 0 ? realSocialPosts : socialPosts).map((post, idx) => (
-              <div key={post._id || idx} className="min-w-[300px] md:min-w-[350px] bg-[#0A0A0A] border rounded-3xl overflow-hidden snap-start group transition-all" style={{ borderColor: BDR }}>
-                <div className="aspect-square relative overflow-hidden">
-                  <img
-                    src={post.image || post.imageUrl || post.image}
-                    alt="Social post"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
-                  {post.caption && (
-                    <div className="absolute bottom-4 left-4 right-4 z-10">
-                      <p className="text-white text-sm line-clamp-2 drop-shadow-lg">{post.caption}</p>
+            {(realSocialPosts.length > 0 ? realSocialPosts : socialPosts).map((post, idx) => {
+              const author = post.adminId || post.userId || post.ownerId;
+              const isFollowing = author && followingIds.includes(author._id);
+              
+              return (
+                <div key={post._id || idx} className="w-[300px] md:w-[340px] aspect-[4/5] shrink-0 bg-[#0A0A0A] border rounded-[2rem] overflow-hidden snap-start group transition-all flex flex-col" style={{ borderColor: BDR }}>
+                  {/* Image Container */}
+                  <div className="relative flex-1 overflow-hidden">
+                    <img
+                      src={post.image || post.imageUrl || post.image}
+                      alt="Social post"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => {
+                        e.target.src = "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800&q=80"; 
+                      }}
+                    />
+                  </div>
+
+                  {/* Exact UI Action Footer */}
+                  <div className="bg-[#0D0D0D] p-4 px-5 flex items-center justify-between border-t border-white/5">
+                    <div className="flex items-center gap-5">
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (!isLoggedIn) return navigate("/login");
+                          navigate(`/community?post=${post._id}`);
+                        }}
+                        className="flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors"
+                      >
+                        <Heart size={16} className={(post.likes?.length > 0 || post.likes > 0) ? "fill-white text-white" : ""} />
+                        <span className="text-[10px] font-bold text-gray-400">
+                          {Array.isArray(post.likes) ? post.likes.length : post.likes || 0}
+                          {(Array.isArray(post.likes) ? post.likes.length : post.likes || 0) > 999 ? 'k' : ''}
+                        </span>
+                      </button>
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (!isLoggedIn) return navigate("/login");
+                          navigate(`/community?post=${post._id}`);
+                        }}
+                        className="flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors"
+                      >
+                        <MessageSquare size={16} />
+                        <span className="text-[10px] font-bold text-gray-400">
+                          {Array.isArray(post.comments) ? post.comments.length : post.comments || 0}
+                        </span>
+                      </button>
                     </div>
-                  )}
-                </div>
-                <div className="p-4 flex items-center justify-between border-t" style={{ borderColor: BDR, backgroundColor: "#0F0F0F" }}>
-                  <div className="flex items-center gap-6">
                     <button 
-                      onClick={() => {
-                        if (!isLoggedIn) {
-                          navigate("/login");
-                          return;
-                        }
-                        // Handle like logic if needed or redirect to post
-                        navigate(`/community`);
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const url = `${window.location.origin}/community?post=${post._id}`;
+                        navigator.clipboard.writeText(url);
+                        toast.success("Link copied to clipboard!");
                       }}
-                      className="flex items-center gap-2 text-gray-400 hover:text-red-500 transition-colors"
+                      className="text-gray-400 hover:text-white transition-colors"
                     >
-                      <Heart size={20} className={post.likes?.length > 0 ? "fill-red-500 text-red-500" : ""} />
-                      <span className="text-xs font-bold font-mono">
-                        {Array.isArray(post.likes) ? post.likes.length : post.likes || 0}
-                      </span>
-                    </button>
-                    <button 
-                      onClick={() => {
-                        if (!isLoggedIn) {
-                          navigate("/login");
-                          return;
-                        }
-                        navigate(`/community`);
-                      }}
-                      className="flex items-center gap-2 text-gray-400 hover:text-blue-500 transition-colors"
-                    >
-                      <MessageCircle size={20} />
-                      <span className="text-xs font-bold font-mono">
-                        {Array.isArray(post.comments) ? post.comments.length : post.comments || 0}
-                      </span>
+                      <Share2 size={16} />
                     </button>
                   </div>
-                  <button className="text-gray-400 hover:text-white transition-colors">
-                    <Share2 size={20} />
-                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

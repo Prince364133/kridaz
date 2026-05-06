@@ -4,6 +4,7 @@ import { User, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock } 
 import { useState, useEffect } from "react";
 import { logout } from "@redux/slices/authSlice";
 import toast from "react-hot-toast";
+import axiosInstance from "../../hooks/useAxiosInstance";
 
 const Navbar = () => {
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);
@@ -20,10 +21,19 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    toast.success("Logged out successfully");
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.post("/api/user/auth/logout");
+      dispatch(logout());
+      toast.success("Logged out successfully");
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if API fails, clear local state
+      dispatch(logout());
+      toast.success("Logged out successfully");
+      navigate("/");
+    }
   };
 
   const isPartnerPortal = location.pathname.startsWith("/partners");
@@ -129,23 +139,35 @@ const Navbar = () => {
               <div className="flex items-center gap-6">
                 <div className="dropdown dropdown-end group/profile">
                   <label tabIndex={0} className="relative w-10 h-10 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group overflow-hidden">
-                    {user?.profilePicture ? (
-                      <img src={user.profilePicture} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                      <User size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+                    <User size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors absolute inset-0 m-auto" />
+                    {user?.profilePicture && (
+                      <img 
+                        src={user.profilePicture} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover relative z-10" 
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
                     )}
-                    <div className="absolute inset-0 bg-[#84CC16]/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-[#84CC16]/10 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
                   </label>
                   
                   <div tabIndex={0} className="dropdown-content mt-4 w-72 bg-[#0A0A0A] border border-white/10 rounded-[24px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] overflow-hidden backdrop-blur-3xl animate-in fade-in slide-in-from-top-4 duration-300">
                     {/* User Header */}
                     <div className="p-5 border-b border-white/5 bg-gradient-to-br from-white/5 to-transparent">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden shrink-0">
-                          {user?.profilePicture ? (
-                            <img src={user.profilePicture} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <User size={24} className="text-[#84CC16]" />
+                        <div className="w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden shrink-0 relative">
+                          <User size={24} className="text-[#84CC16] absolute inset-0 m-auto opacity-40" />
+                          {user?.profilePicture && (
+                            <img 
+                              src={user.profilePicture} 
+                              alt="" 
+                              className="w-full h-full object-cover absolute inset-0 z-10" 
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">

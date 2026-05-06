@@ -6,7 +6,7 @@ import {
   ArrowRight, ShieldCheck, Trophy, Star, Camera, Edit2, MessageSquare, Heart, Edit3, Trash2, Loader2, Send
 } from "lucide-react";
 import toast from "react-hot-toast";
-import axiosInstance from "../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import { login, updateUser } from "@redux/slices/authSlice";
 import useBookingHistory from "../hooks/useBookingHistory";
 import useWriteReview from "../hooks/useWriteReview";
@@ -318,10 +318,14 @@ export default function Profile() {
                   className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center border overflow-hidden relative bg-[#111] transition-all ${profileUser?.hasActiveStory ? 'border-[#84CC16] ring-2 ring-[#84CC16]/20' : ''}`}
                   style={{ borderColor: profileUser?.hasActiveStory ? '#84CC16' : BDR }}
                 >
-                  {profileUser?.profilePicture ? (
-                    <img src={profileUser.profilePicture} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <User size={18} style={{ color: PRI }} />
+                  <User size={18} style={{ color: PRI }} className="absolute inset-0 m-auto opacity-40" />
+                  {profileUser?.profilePicture && (
+                    <img 
+                      src={profileUser.profilePicture} 
+                      alt="" 
+                      className="w-full h-full object-cover relative z-10" 
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
                   )}
                   
                   {isOwnProfile && (

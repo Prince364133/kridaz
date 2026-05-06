@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, User, Phone, MapPin, AlignLeft, Loader2, Check, Info, Navigation } from "lucide-react";
 import toast from "react-hot-toast";
-import axiosInstance from "../../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../../../redux/slices/authSlice";
 import { searchLocations } from "../../utils/locationService";

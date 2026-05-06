@@ -41,7 +41,9 @@ const MobileHeader = () => {
       );
     };
 
-    detectLocation();
+    // detectLocation(); // DISABLED for privacy (manual entry only)
+    setLocation("Set Location");
+    setLoading(false);
   }, []);
 
   return (

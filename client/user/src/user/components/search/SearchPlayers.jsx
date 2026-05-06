@@ -20,6 +20,8 @@ const SearchPlayers = ({ onSearch, userLocation }) => {
   const locationRef = useRef(null);
 
   // Sync with userLocation prop
+  // Sync with userLocation prop - DISABLED AS PER USER REQUEST
+  /*
   useEffect(() => {
     if (userLocation?.city && !selectedLocation) {
       const display = `${userLocation.city}${userLocation.state ? `, ${userLocation.state}` : ""}`;
@@ -33,6 +35,7 @@ const SearchPlayers = ({ onSearch, userLocation }) => {
       });
     }
   }, [userLocation]);
+  */
 
   // Debounced real-time location autocomplete
   useEffect(() => {

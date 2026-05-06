@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { X, Search, UserPlus, UserMinus, Loader2, MapPin, Users } from "lucide-react";
-import axiosInstance from "../../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 

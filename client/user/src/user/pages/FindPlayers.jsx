@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import axiosInstance from "../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import { 
   Search, 
   MapPin, 
@@ -18,8 +18,13 @@ import toast from "react-hot-toast";
 import StoryViewer from "../components/StoryViewer";
 
 const FindPlayers = () => {
-  const { user: currentUser } = useSelector((state) => state.auth);
+  const { user: currentUser, isLoggedIn } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+
+  // Debugging auth state
+  useEffect(() => {
+    console.log("FindPlayers Auth State:", { isLoggedIn, currentUser });
+  }, [isLoggedIn, currentUser]);
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -87,7 +92,9 @@ const FindPlayers = () => {
   };
 
   const handleFollowToggle = async (targetUserId) => {
-    if (!currentUser) {
+    if (!isLoggedIn || !currentUser) {
+      console.warn("Follow toggle failed: User not logged in", { isLoggedIn, currentUser });
+      toast.error("Please login to follow players");
       navigate("/login");
       return;
     }
@@ -216,16 +223,23 @@ const FindPlayers = () => {
                 
                 {/* Profile Icon - High Density */}
                 <div 
-                  className={`w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden bg-[#111] border transition-all ${player.hasActiveStory ? 'border-[#84CC16] ring-2 ring-[#84CC16]/10 cursor-pointer' : 'border-white/5'}`}
+                  className={`w-12 h-12 rounded-full border-2 border-[#84CC16]/20 p-1 group-hover:border-[#84CC16]/50 transition-all flex items-center justify-center relative overflow-hidden ${player.hasActiveStory ? 'cursor-pointer' : ''}`}
+                  style={{ backgroundColor: avatarColor(player.name) }}
                   onClick={() => handleAvatarClick(player)}
                 >
-                  {player.profilePicture ? (
-                    <img src={player.profilePicture} alt={player.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#84CC16]">
-                      <Users size={20} />
-                    </div>
+                  {player.profilePicture && (
+                    <img 
+                      src={player.profilePicture} 
+                      alt={player.name} 
+                      className="w-full h-full rounded-full object-cover absolute inset-0 z-10" 
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
                   )}
+                  <span className="text-white font-bold text-lg relative z-0">
+                    {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
+                  </span>
                 </div>
 
                 {/* Unified Info Row */}

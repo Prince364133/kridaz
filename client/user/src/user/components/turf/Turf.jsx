@@ -93,7 +93,7 @@ const Turf = () => {
   };
 
   useEffect(() => {
-    detectLocation();
+    // detectLocation(); // DISABLED for privacy (manual entry only)
   }, []);
 
   // ── Handle search filters from the SearchTurf bar ─────────────────

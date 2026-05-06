@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RouterProvider } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import router from "./router";
-import { login } from "./redux/slices/authSlice";
+import { login, logout } from "./redux/slices/authSlice";
 import axiosInstance from "./hooks/useAxiosInstance";
 
 // Simple JWT decoder (no verification, just payload extraction)
@@ -34,6 +34,7 @@ export default function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
   const theme = useSelector((state) => state.theme.current);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -41,34 +42,45 @@ export default function App() {
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = getCookie("auth_token");
-      if (token) {
-        try {
-          const decoded = decodeToken(token);
-          if (!decoded) return;
-
-          // Determine which endpoint to hit based on token role
-          const isProfessional = ["owner", "coach", "umpire", "admin"].includes(decoded.role);
-          const apiPath = isProfessional ? "/api/owner/auth/getMe" : "/api/user/auth/getMe";
-
-          const response = await axiosInstance.get(apiPath);
-          if (response.data.success) {
-            dispatch(login({
-              token,
-              role: response.data.role,
-              user: response.data.user
-            }));
-          }
-        } catch (error) {
-          console.error("Auto-login failed:", error.message);
+      // We rely on the /api/user/auth/getMe call to verify the session
+      // via the httpOnly cookie (auth_token). Browser sends it automatically.
+      try {
+        const response = await axiosInstance.get("/api/user/auth/getMe");
+        if (response.data.success) {
+          dispatch(login({
+            user: response.data.user,
+            role: response.data.role,
+            token: response.data.token // Backend might return it as a fallback
+          }));
         }
+      } catch (error) {
+        // If it's a 401, we ensure the user is logged out locally
+        if (error.response?.status === 401) {
+          dispatch(logout());
+        }
+        console.warn("Auth initialization skip/failed:", error.message);
+      } finally {
+        setLoading(false);
       }
     };
 
     if (!isAuthenticated) {
       initAuth();
+    } else {
+      setLoading(false);
     }
   }, [dispatch, isAuthenticated]);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[#84CC16] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-white font-mono text-xs uppercase tracking-[0.3em] animate-pulse">Initializing Arena...</p>
+        </div>
+      </div>
+    );
+  }
 
   return <RouterProvider router={router} />;
 }
