@@ -41,7 +41,7 @@ export const VideoSection = ({ videos = [] }) => {
   };
 
   return (
-    <section className="pt-5 pb-20 bg-black overflow-hidden border-t border-white/5">
+    <section className="pt-2 lg:pt-4 pb-6 lg:pb-10 bg-black overflow-hidden border-t border-white/5">
       <div className="max-w-full mx-auto px-10 lg:px-20 mb-12 flex items-end justify-between">
         <div>
           <h2 className="font-display text-5xl md:text-7xl uppercase leading-none text-white tracking-tight">

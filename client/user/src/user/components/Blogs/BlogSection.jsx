@@ -38,7 +38,7 @@ const BlogSection = () => {
 
   if (loading) {
     return (
-      <section className="py-20 px-6 max-w-screen-2xl mx-auto">
+      <section className="pt-6 lg:pt-10 pb-6 lg:pb-10 px-6 max-w-screen-2xl mx-auto">
         <div className="h-12 w-64 bg-white/5 animate-pulse rounded-lg mb-8" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
@@ -52,7 +52,7 @@ const BlogSection = () => {
   if (blogs.length === 0) return null;
 
   return (
-    <section className="py-20 px-6 max-w-screen-2xl mx-auto">
+    <section className="pt-6 lg:pt-10 pb-6 lg:pb-10 px-6 max-w-screen-2xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
         <div>
           <h2 className="font-display text-5xl md:text-7xl uppercase leading-none tracking-tight">

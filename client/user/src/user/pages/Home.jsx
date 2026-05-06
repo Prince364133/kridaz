@@ -888,7 +888,7 @@ export default function Home() {
       </section>
 
       {/* ── SOCIAL ARENA ── */}
-      <section className="pt-4 lg:pt-6 pb-10 lg:pb-20 px-6 md:px-10 w-full overflow-hidden">
+      <section className="pt-4 lg:pt-6 pb-4 lg:pb-6 px-6 md:px-10 w-full overflow-hidden">
         <div className="max-w-screen-2xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 lg:mb-10 gap-4">
             <div>
@@ -1046,7 +1046,7 @@ export default function Home() {
 
 
       {/* ── APP DOWNLOAD SECTION ── */}
-      <section className="py-12 lg:py-24 relative overflow-hidden px-0 lg:px-20">
+      <section className="pt-6 lg:pt-10 pb-12 lg:pb-24 relative overflow-hidden px-0 lg:px-20">
         <div className="max-w-full mx-auto">
           <div className="bg-gradient-to-br from-[#0D0D0D] to-black border-y lg:border lg:rounded-[3rem] p-8 md:p-24 overflow-hidden relative" style={{ borderColor: BDR }}>
             <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-16 relative z-10">
