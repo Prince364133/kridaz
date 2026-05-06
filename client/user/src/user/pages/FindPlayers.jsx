@@ -17,6 +17,9 @@ import {
 import toast from "react-hot-toast";
 import StoryViewer from "../components/StoryViewer";
 
+const avatarColors = ["#1a3300", "#001a33", "#330033", "#331a00", "#003333", "#1a0033"];
+const avatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.length] || "#1a1a1a";
+
 const FindPlayers = () => {
   const { user: currentUser, isLoggedIn } = useSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -221,25 +224,38 @@ const FindPlayers = () => {
             {players.map((player) => (
               <div key={player._id} className="bg-white/[0.01] border border-white/5 rounded-xl px-3 py-2 md:px-5 md:py-2.5 hover:bg-white/[0.03] transition-all flex items-center gap-3 md:gap-8 group">
                 
-                {/* Profile Icon - High Density */}
+                {/* Premium Profile Icon - High Density */}
                 <div 
-                  className={`w-12 h-12 rounded-full border-2 border-[#84CC16]/20 p-1 group-hover:border-[#84CC16]/50 transition-all flex items-center justify-center relative overflow-hidden ${player.hasActiveStory ? 'cursor-pointer' : ''}`}
-                  style={{ backgroundColor: avatarColor(player.name) }}
+                  className={`relative w-12 h-12 rounded-full p-[2px] transition-all duration-500 group-hover:scale-110 ${player.hasActiveStory ? 'cursor-pointer ring-2 ring-primary ring-offset-2 ring-offset-black' : ''}`}
                   onClick={() => handleAvatarClick(player)}
                 >
-                  {player.profilePicture && (
-                    <img 
-                      src={player.profilePicture} 
-                      alt={player.name} 
-                      className="w-full h-full rounded-full object-cover absolute inset-0 z-10" 
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  )}
-                  <span className="text-white font-bold text-lg relative z-0">
-                    {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
-                  </span>
+                  {/* Glowing Background */}
+                  <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                  
+                  {/* Outer Ring */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/40 to-white/10" />
+
+                  {/* Inner Container */}
+                  <div className="w-full h-full rounded-full flex items-center justify-center relative overflow-hidden z-10"
+                    style={{ backgroundColor: avatarColor(player.name) }}
+                  >
+                    {player.profilePicture && (
+                      <img 
+                        src={player.profilePicture} 
+                        alt={player.name} 
+                        className="w-full h-full rounded-full object-cover absolute inset-0 z-10 brightness-95 group-hover:brightness-110 transition-all" 
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    )}
+                    <span className="text-white font-black text-sm relative z-0 tracking-tighter">
+                      {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
+                    </span>
+                    
+                    {/* Glass Shine */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none z-20" />
+                  </div>
                 </div>
 
                 {/* Unified Info Row */}
