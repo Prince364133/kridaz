@@ -143,7 +143,7 @@ const useSignUpForm = (predefinedRole = "user") => {
       const result = response.data;
 
       // Log in the user after successful registration
-      dispatch(login({ token: result.token, role: result.role }));
+      dispatch(login({ token: result.token, role: result.role, user: result.user }));
       toast.success(`Welcome to TurfSpot, ${data.name}!`);
       
       const normalizedRole = result.role?.toLowerCase();
@@ -183,7 +183,7 @@ const useSignUpForm = (predefinedRole = "user") => {
       const response = await axiosInstance.post(`${apiPath}/google-auth`, payload);
       const result = await response.data;
       toast.success("Successfully logged in with Google!");
-      dispatch(login({ token: result.token, role: result.role }));
+      dispatch(login({ token: result.token, role: result.role, user: result.user }));
       
       if (result.role === "owner") {
         navigate("/partner");

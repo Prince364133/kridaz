@@ -33,12 +33,13 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Clear stale auth state
-      localStorage.removeItem("persist:root");
-
       // Only redirect if NOT already on login/signup pages to avoid loops
       const currentPath = window.location.pathname;
-      if (currentPath !== "/login" && currentPath !== "/signup") {
+      const isAuthPage = currentPath === "/login" || currentPath === "/signup" || currentPath.startsWith("/signup/");
+      
+      if (!isAuthPage) {
+        // We don't manually clear localStorage here because App.jsx will handle 
+        // the state sync, and aggressive clearing can cause infinite loops.
         window.location.href = "/login";
       }
     }

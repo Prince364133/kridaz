@@ -64,6 +64,7 @@ import {
   CommunityManagement,
 } from "@components/admin";
 import ProtectedRoute from "@components/ProtectedRoute/ProtectedRoute";
+import PublicRoute from "@components/ProtectedRoute/PublicRoute";
 import { NotFound, RootRedirect, ErrorBoundary } from "@components/common";
 
 const router = createBrowserRouter([
@@ -163,8 +164,8 @@ const router = createBrowserRouter([
     errorElement: <ErrorBoundary />,
     children: [
       { index: true, element: <RootRedirect /> },
-      { path: "login", element: <UserLogin /> },
-      { path: "signup", element: <UserSignUp /> },
+      { path: "login", element: <PublicRoute><UserLogin /></PublicRoute> },
+      { path: "signup", element: <PublicRoute><UserSignUp /></PublicRoute> },
       { path: "turfs", element: <UserTurf /> },
       { path: "turf/:id", element: <UserTurfDetails /> },
       { path: "profile/:userId?", element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
@@ -181,9 +182,9 @@ const router = createBrowserRouter([
       { path: "business/register", element: <BusinessRegistration /> },
       
       // Business Auth
-      { path: "signup/venue", element: <VenueOwnerSignUp /> },
-      { path: "signup/coach", element: <CoachSignUp /> },
-      { path: "signup/official", element: <UmpireSignUp /> },
+      { path: "signup/venue", element: <PublicRoute><VenueOwnerSignUp /></PublicRoute> },
+      { path: "signup/coach", element: <PublicRoute><CoachSignUp /></PublicRoute> },
+      { path: "signup/official", element: <PublicRoute><UmpireSignUp /></PublicRoute> },
       { path: "*", element: <NotFound /> },
     ],
   },
