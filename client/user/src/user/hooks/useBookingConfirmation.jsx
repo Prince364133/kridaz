@@ -1,6 +1,6 @@
 import { format, parse, set, formatISO, addHours, parseISO } from "date-fns";
 import toast from "react-hot-toast";
-import axiosInstance from "./useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import { createOrder, handlePayment } from "../config/razorpay";
 import "https://checkout.razorpay.com/v1/checkout.js";
 import { useNavigate } from "react-router-dom";
