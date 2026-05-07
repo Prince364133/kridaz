@@ -33,12 +33,28 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Clear stale auth state and redirect to login
+      // Clear stale auth state
       localStorage.removeItem("persist:root");
-      window.location.href = "/login";
+
+      // Only redirect if NOT already on login/signup pages to avoid loops
+      const currentPath = window.location.pathname;
+      if (currentPath !== "/login" && currentPath !== "/signup") {
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }
 );
 
 export default axiosInstance;
+
+
+
+
+
+
+
+
+
+
+
