@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import Turf from "./models/turf.model.js";
+import Turf from "../models/turf.model.js";
 
 dotenv.config();
 
