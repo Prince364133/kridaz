@@ -109,12 +109,16 @@ export default function useEditTurf(turfId) {
   const availableDays = watch("availableDays");
   const offDays = watch("offDays");
 
+  const [pendingUpdates, setPendingUpdates] = useState({});
+
   useEffect(() => {
     const fetchTurf = async () => {
       try {
         const response = await axiosInstance.get(`/api/owner/turf/${turfId}/details`);
         const { turf } = response.data;
         
+        setPendingUpdates(turf.pendingUpdates || {});
+
         // Populate form
         setValue("name", turf.name);
         setValue("description", turf.description);
@@ -374,5 +378,6 @@ export default function useEditTurf(turfId) {
     fetching,
     getMyLocation,
     isLocating,
+    pendingUpdates,
   };
 }

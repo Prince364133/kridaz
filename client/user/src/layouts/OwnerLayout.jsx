@@ -13,7 +13,7 @@ const PartnerLayout = () => {
   const isMinimized = !isHovered;
 
   return (
-    <div className="flex flex-col min-h-screen bg-black">
+    <div className="flex flex-col min-h-screen bg-black partner-panel">
       <ScrollToTop />
       <AuthenticatedNavbar toggleSidebar={toggleSidebar} />
       
@@ -44,7 +44,7 @@ const PartnerLayout = () => {
           ${isMinimized ? "lg:ml-20" : "lg:ml-64"}
         `}
         >
-          <div className="w-full p-4 pb-24 lg:pb-10">
+          <div className="w-full pt-0 px-4 pb-24 lg:pt-0 lg:px-8 lg:pb-10">
             <Outlet />
           </div>
         </main>

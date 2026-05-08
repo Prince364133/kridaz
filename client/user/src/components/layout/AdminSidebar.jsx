@@ -2,21 +2,20 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   X,
-  Home,
+  LayoutGrid,
   Users,
   Building,
   MapPin,
-  DollarSign,
+  IndianRupee,
   UserPlus,
   ChevronDown,
   ChevronUp,
   ToggleRight,
   Activity,
-  ShieldAlert,
   FileText,
-  LogOut,
-  Moon,
-  Sun
+  Settings,
+  HelpCircle,
+  LogOut
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
@@ -26,87 +25,89 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [ownerRequestsOpen, setOwnerRequestsOpen] = useState(false);
+  const [requestsOpen, setRequestsOpen] = useState(false);
 
   const handleLogout = () => {
     dispatch(logout());
     navigate("/", { replace: true });
   };
 
-  const navItems = [
-    { to: "/admin", label: "OVERVIEW", icon: Home },
+  const mainNavItems = [
+    { to: "/admin", label: "Dashboard", icon: LayoutGrid },
     {
-      label: "REQUESTS",
+      label: "Requests",
       icon: UserPlus,
       subItems: [
-        { to: "/admin/partner-requests/new", label: "NEW REQUESTS" },
-        { to: "/admin/partner-requests/rejected", label: "REJECTED" },
+        { to: "/admin/partner-requests/new", label: "New Requests" },
+        { to: "/admin/partner-requests/rejected", label: "Rejected" },
       ],
     },
-    { to: "/admin/users", label: "USERS", icon: Users },
-    { to: "/admin/owners", label: "OWNERS", icon: Building },
-    { to: "/admin/turfs", label: "VENUES", icon: MapPin },
-    { to: "/admin/transactions", label: "TRANSACTIONS", icon: DollarSign },
-    { to: "/admin/marketing", label: "MARKETING", icon: Activity },
-    { to: "/admin/blogs", label: "BLOGS", icon: FileText },
-    { to: "/admin/community", label: "COMMUNITY", icon: Users },
-    { to: "/admin/features", label: "FEATURES", icon: ToggleRight },
-    { to: "#", label: "LOGOUT", icon: LogOut, action: "logout" },
+    { to: "/admin/users", label: "Users", icon: Users },
+    { to: "/admin/owners", label: "Owners", icon: Building },
+    { to: "/admin/turfs", label: "Venues", icon: MapPin },
+    { to: "/admin/transactions", label: "Revenue", icon: IndianRupee },
+    { to: "/admin/marketing", label: "Marketing", icon: Activity },
+    { to: "/admin/blogs", label: "Blogs", icon: FileText },
+    { to: "/admin/community", label: "Community", icon: Users },
+    { to: "/admin/features", label: "Features", icon: ToggleRight },
   ];
 
-  const toggleOwnerRequests = () => {
-    setOwnerRequestsOpen(!ownerRequestsOpen);
-  };
+  const bottomNavItems = [
+    { to: "/admin/settings", label: "Settings", icon: Settings },
+    { to: "/admin/support", label: "Support", icon: HelpCircle },
+    { action: "logout", label: "SIGN OUT", icon: LogOut },
+  ];
 
   const renderNavItem = (item) => {
+    const isLogout = item.action === "logout";
+    const isActive = !isLogout && (item.to ? location.pathname === item.to : item.subItems?.some(sub => location.pathname === sub.to));
+    const Icon = item.icon;
+
     if (item.subItems) {
-      const hasActiveSubItem = item.subItems.some(sub => location.pathname === sub.to);
-      
       return (
         <div key={item.label} className="space-y-1">
           <button
-            onClick={() => !isMinimized && toggleOwnerRequests()}
+            onClick={() => !isMinimized && setRequestsOpen(!requestsOpen)}
             className={`flex items-center justify-between w-full px-4 py-3 group relative transition-all duration-300 ${
-              hasActiveSubItem ? "text-[#84CC16]" : "text-white/40 hover:text-white"
-            } ${isMinimized ? "justify-center" : ""}`}
-            title={isMinimized ? item.label : ""}
+              isActive ? "text-black" : "text-white/40 hover:text-white"
+            }`}
           >
+            {isActive && (
+              <div className="absolute inset-x-2 inset-y-1 bg-[#84CC16] rounded-xl -z-10 shadow-[0_0_15px_rgba(132,204,22,0.3)] transition-all duration-300" />
+            )}
+            {!isActive && (
+              <div className="absolute inset-x-2 inset-y-1 bg-white/5 rounded-xl -z-10 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+            )}
+            
             <div className="flex items-center">
-              <item.icon size={16} className={`${isMinimized ? "mr-0" : "mr-4"} transition-all duration-300 ${hasActiveSubItem ? "text-[#84CC16]" : "text-white/20 group-hover:text-[#84CC16]"}`} />
-              <span className={`font-bold text-sm tracking-wider pt-0.5 whitespace-nowrap overflow-hidden transition-all duration-300 ${isMinimized ? "max-w-0 opacity-0 ml-0" : "max-w-[200px] opacity-100"}`}>
+              <div className="flex-shrink-0 flex items-center justify-center w-6">
+                <Icon size={18} className={`transition-colors ${isActive ? "text-black" : "text-white/20 group-hover:text-[#84CC16]"}`} />
+              </div>
+              <span className={`font-medium text-sm tracking-wide ml-4 whitespace-nowrap overflow-hidden transition-all duration-300 ${isMinimized ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
                 {item.label}
               </span>
             </div>
-            <div className={`overflow-hidden transition-all duration-300 ${isMinimized ? "max-w-0 opacity-0" : "max-w-[20px] opacity-100"}`}>
-              {ownerRequestsOpen ? (
-                <ChevronUp size={14} className="opacity-40" />
-              ) : (
-                <ChevronDown size={14} className="opacity-40" />
-              )}
-            </div>
+            
+            {!isMinimized && (
+              <div className="transition-all duration-300">
+                {requestsOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </div>
+            )}
           </button>
           
-          <div className={`overflow-hidden transition-all duration-300 ${!isMinimized && ownerRequestsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
-            <div className="ml-6 space-y-1 border-l border-white/5 mt-1 mb-4">
+          <div className={`overflow-hidden transition-all duration-500 ${!isMinimized && requestsOpen ? "max-h-96 opacity-100 mb-2" : "max-h-0 opacity-0"}`}>
+            <div className="ml-10 space-y-1 border-l border-white/10 mt-1">
               {item.subItems.map((subItem) => {
                 const isSubActive = location.pathname === subItem.to;
                 return (
                   <Link
                     key={subItem.to}
                     to={subItem.to}
-                    className={`flex items-center px-4 py-2 group relative overflow-hidden transition-all duration-300 ${
-                      isSubActive ? "text-black" : "text-white/30 hover:text-white"
+                    className={`flex items-center px-4 py-2 transition-all duration-300 ${
+                      isSubActive ? "text-[#84CC16]" : "text-white/30 hover:text-white"
                     }`}
-                    onClick={() => {
-                      if (window.innerWidth < 1024) {
-                        toggleSidebar();
-                      }
-                    }}
                   >
-                    {isSubActive && (
-                      <div className="absolute inset-0 bg-[#84CC16] rounded-md -z-10 transition-all duration-300" />
-                    )}
-                    <span className={`font-bold tracking-wider pt-0.5 whitespace-nowrap ${isSubActive ? "text-[12px]" : "text-[11px]"}`}>
+                    <span className={`font-medium tracking-wide ${isSubActive ? "text-sm" : "text-xs"}`}>
                       {subItem.label}
                     </span>
                   </Link>
@@ -118,17 +119,19 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       );
     }
 
-    const isActive = location.pathname === item.to && item.to !== "#";
     return (
       <Link
-        key={item.label}
-        to={item.to}
-        className={`flex items-center px-4 py-3 group relative overflow-hidden transition-all duration-300 ${
-          item.action === 'logout' ? "text-white/40 hover:text-red-500 mt-8" : isActive ? "text-black" : "text-white/40 hover:text-white"
-        } ${isMinimized ? "justify-center px-0" : ""}`}
-        title={isMinimized ? item.label : ""}
+        key={item.to || item.label}
+        to={item.to || "#"}
+        className={`flex items-center px-4 py-3 group relative transition-all duration-300 ${
+          isLogout 
+            ? "text-white/40 hover:text-red-500" 
+            : isActive 
+              ? "text-black" 
+              : "text-white/40 hover:text-white"
+        }`}
         onClick={(e) => {
-          if (item.action === "logout") {
+          if (isLogout) {
             e.preventDefault();
             handleLogout();
             return;
@@ -138,18 +141,32 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
           }
         }}
       >
-        {isActive && item.action !== 'logout' && (
-          <div className={`absolute inset-0 bg-[#84CC16] -z-10 transition-all duration-300 scale-105 ${isMinimized ? "rounded-full m-2" : "rounded-xl"}`} />
-        )}
-        {!isActive && item.action !== 'logout' && (
-          <div className={`absolute inset-0 bg-white/5 -z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 ${isMinimized ? "rounded-full m-2" : "rounded-xl"}`} />
-        )}
-        {item.action === 'logout' && (
-          <div className={`absolute inset-0 bg-white/5 -z-10 opacity-0 group-hover:opacity-100 group-hover:bg-red-500/10 transition-all duration-300 ${isMinimized ? "rounded-full m-2" : "rounded-xl"}`} />
+        {isActive && !isLogout && (
+          <div className="absolute inset-x-2 inset-y-1 bg-[#84CC16] rounded-xl -z-10 shadow-[0_0_15px_rgba(132,204,22,0.3)] transition-all duration-300" />
         )}
         
-        <item.icon size={16} className={`${isMinimized ? "mr-0" : "mr-4"} transition-all duration-300 ${item.action === 'logout' ? "text-white/20 group-hover:text-red-500" : isActive ? "text-black" : "text-white/20 group-hover:text-[#84CC16]"}`} />
-        <span className={`font-bold text-sm tracking-wider pt-0.5 whitespace-nowrap overflow-hidden transition-all duration-300 ${isMinimized ? "max-w-0 opacity-0 ml-0" : "max-w-[200px] opacity-100"}`}>
+        {!isActive && !isLogout && (
+          <div className="absolute inset-x-2 inset-y-1 bg-white/5 rounded-xl -z-10 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+        )}
+
+        {isLogout && (
+          <div className="absolute inset-x-2 inset-y-1 bg-white/5 rounded-xl -z-10 opacity-0 group-hover:opacity-100 group-hover:bg-red-500/10 transition-all duration-300" />
+        )}
+        
+        <div className="flex-shrink-0 flex items-center justify-center w-6">
+          <Icon 
+            size={18} 
+            className={`transition-colors duration-300 ${
+              isLogout 
+                ? "text-white/20 group-hover:text-red-500" 
+                : isActive 
+                  ? "text-black" 
+                  : "text-white/20 group-hover:text-[#84CC16]"
+            }`} 
+          />
+        </div>
+
+        <span className={`font-medium text-sm tracking-wide ml-4 whitespace-nowrap overflow-hidden transition-all duration-300 ${isMinimized ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
           {item.label}
         </span>
       </Link>
@@ -158,9 +175,10 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
 
   return (
     <aside
-      className={`${className} bg-[#0a0a0a] border-r border-white/5 overflow-y-auto overflow-x-hidden fixed 
-          ${isMinimized ? "w-20" : "w-64"} transition-all duration-300 ease-in-out z-40 no-scrollbar
-          top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)]`}
+      className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#0a0a0a] border-r border-white/5 overflow-x-hidden transition-all duration-300 ease-in-out z-40 flex flex-col
+        ${isMinimized ? "lg:w-20" : "w-64"}
+        ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+        ${className || ""}`}
     >
       <div className="flex flex-col p-4 border-b border-white/5 bg-black/20 gap-4 lg:hidden">
         <div className="flex items-center justify-end">
@@ -170,16 +188,18 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         </div>
       </div>
 
-      <div className="p-4 py-8 space-y-4">
-        <div className={`px-4 mb-4 flex items-center transition-all duration-300 ${isMinimized ? "justify-center" : "justify-start"}`}>
-          <span className={`text-[9px] font-bold text-white/20 uppercase tracking-widest whitespace-nowrap overflow-hidden transition-all duration-300 ${isMinimized ? "max-w-0 opacity-0" : "max-w-[200px] opacity-100"}`}>
-            Main Modules
-          </span>
-        </div>
-        <nav className="space-y-1">{navItems.map(renderNavItem)}</nav>
+      <div className="flex-1 overflow-y-auto no-scrollbar py-6">
+        <nav className="px-2 space-y-1">
+          {mainNavItems.map(renderNavItem)}
+        </nav>
+      </div>
+
+      <div className="p-2 border-t border-white/5 space-y-1 mb-4">
+        {bottomNavItems.map(renderNavItem)}
       </div>
     </aside>
   );
 };
+
 
 export default AdminSidebar;

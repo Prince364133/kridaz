@@ -38,6 +38,11 @@ import {
   OwnerDashboard,
   OwnerReviews as PartnerReviews,
   OwnerBookings as PartnerBookings,
+  OwnerCalendar,
+  CustomerDirectory,
+  VenueIntelligence,
+  OwnerRevenue,
+  OwnerPromotions,
 } from "@components/owner";
 import CoachDashboard from "./components/coach/CoachDashboard";
 import CoachStudents from "./components/coach/CoachStudents";
@@ -63,6 +68,7 @@ import {
   BlogManagement,
   CommunityManagement,
 } from "@components/admin";
+import DashboardProfile from "@components/shared/DashboardProfile";
 import ProtectedRoute from "@components/ProtectedRoute/ProtectedRoute";
 import PublicRoute from "@components/ProtectedRoute/PublicRoute";
 import { NotFound, RootRedirect, ErrorBoundary } from "@components/common";
@@ -119,6 +125,12 @@ const router = createBrowserRouter([
       { path: "edit-turf/:id", element: <EditTurf /> },
       { path: "reviews", element: <PartnerReviews /> },
       { path: "bookings", element: <PartnerBookings /> },
+      { path: "calendar", element: <OwnerCalendar /> },
+      { path: "customers", element: <CustomerDirectory /> },
+      { path: "intelligence", element: <VenueIntelligence /> },
+      { path: "revenue", element: <OwnerRevenue /> },
+      { path: "promotions", element: <OwnerPromotions /> },
+      { path: "profile", element: <DashboardProfile /> },
       { path: "*", element: <NotFound /> },
     ],
   },

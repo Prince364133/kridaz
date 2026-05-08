@@ -1,6 +1,12 @@
+import { setDefaultResultOrder } from "dns";
+import { setServers } from "dns";
 import app from "./app.js";
 import connectDB from "./config/database.js";
 import dotenv from "dotenv";
+
+// Force Node.js to use Google DNS to resolve MongoDB Atlas SRV records
+setDefaultResultOrder("ipv4first");
+setServers(["8.8.8.8", "8.8.4.4"]);
 
 dotenv.config();
 

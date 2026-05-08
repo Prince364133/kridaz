@@ -3,105 +3,108 @@ import { Edit2, Trash2, Clock, MapPin, Tag, Star, LayoutDashboard, Zap } from "l
 
 const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
   return (
-    <div className="bg-[#111] border border-gray-800 rounded-2xl overflow-hidden group hover:border-primary transition-all duration-300 h-full flex flex-col shadow-2xl relative">
-      <Link to={`/partner/turf/${turf._id}`} className="block h-48 relative overflow-hidden">
+    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-[#CCFF00]/30 transition-all duration-500 h-full flex flex-col shadow-[var(--shadow-2)] relative">
+      <Link to={`/partner/turf/${turf._id}`} className="block h-40 relative overflow-hidden">
         <img
           src={turf.image}
           alt={turf.name}
-          className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
+          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 opacity-80 group-hover:opacity-100"
           onError={(e) => { e.target.onerror = null; e.target.src = "/banner-2.png"; }}
         />
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-           <div className="px-6 py-3 bg-primary text-black font-black uppercase italic tracking-tighter rounded-xl transform translate-y-4 group-hover:translate-y-0 transition-transform flex items-center gap-2">
-              View Arena Details
-           </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+        
+        {/* Pricing Badge */}
+        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md border border-white/10 text-white font-bold px-3 py-1 rounded-full text-[10px] tracking-tight font-outfit shadow-xl">
+          ₹{turf.pricePerHour}<span className="text-white/40 font-normal ml-0.5">/Hr</span>
         </div>
-        <div className="absolute top-4 right-4 bg-primary text-black font-bold px-3 py-1 rounded-xl shadow-lg text-sm">
-          ₹{turf.pricePerHour}/H
-        </div>
+
         {/* Visibility Badge */}
-        <div className={`absolute top-4 left-4 px-2 py-1 rounded-lg text-[8px] font-black uppercase flex items-center gap-1 ${turf.isActive ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'}`}>
-           <Zap size={8} className={turf.isActive ? "fill-white" : ""} />
+        <div className={`absolute top-3 left-3 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest flex items-center gap-1 backdrop-blur-md border ${
+          turf.isActive 
+          ? 'bg-[#CCFF00]/20 border-[#CCFF00]/30 text-[#CCFF00]' 
+          : 'bg-black/60 border-white/10 text-[#878C9F]'
+        }`}>
+           <Zap size={8} className={turf.isActive ? "fill-[#CCFF00]" : ""} />
            {turf.isActive ? "Visible" : "Hidden"}
         </div>
       </Link>
       
-      <div className="p-6 flex flex-col flex-grow">
-        <Link to={`/partner/turf/${turf._id}`} className="block group">
-           <div className="flex justify-between items-start mb-4">
-             <div>
-               <h2 className="text-2xl font-bold text-white uppercase tracking-tight group-hover:text-primary transition-colors">
-                 {turf.name}
-               </h2>
-               <div className="flex gap-2 mt-2">
-                 <div className="flex items-center text-gray-500 text-[10px] font-bold uppercase tracking-widest">
-                   <MapPin size={10} className="mr-1 text-primary" />
-                   {turf.location}
-                 </div>
-                 <div className={`px-2 py-0.5 border rounded-lg text-[8px] font-black uppercase tracking-widest ${
-                    turf.status === 'approved' ? 'bg-green-500/10 border-green-500/20 text-green-500' :
-                    turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                    'bg-yellow-500/10 border-yellow-500/20 text-yellow-500'
-                 }`}>
-                    {turf.status}
-                 </div>
-               </div>
-             </div>
-             <div className="flex items-center bg-[#1a1a1a] px-3 py-1 rounded-xl">
-               <Star size={12} className="text-primary mr-1 fill-primary" />
-               <span className="text-xs font-bold text-white">
-                 {turf.avgRating ? turf.avgRating.toFixed(1) : "NEW"}
-               </span>
-             </div>
+      <div className="p-4 flex flex-col flex-grow relative">
+        <Link to={`/partner/turf/${turf._id}`} className="block group/title">
+           <div className="flex justify-between items-start mb-3">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold text-white uppercase tracking-tight group-hover/title:text-[#CCFF00] transition-colors font-outfit">
+                  {turf.name}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <div className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest border ${
+                     turf.status === 'approved' ? 'bg-[#CCFF00]/10 border-[#CCFF00]/20 text-[#CCFF00]' :
+                     turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                     'bg-yellow-500/10 border-yellow-500/20 text-yellow-500'
+                  }`}>
+                     {turf.status}
+                  </div>
+                  <span className="text-[10px] text-[#444] font-medium uppercase tracking-widest">•</span>
+                  <div className="flex items-center text-[#878C9F] text-[9px] font-bold uppercase tracking-widest">
+                    {turf.location}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center bg-[#111] px-2 py-0.5 rounded-[4px] border border-[#2D2D2D]">
+                <Star size={9} className="text-[#CCFF00] mr-1 fill-[#CCFF00]" />
+                <span className="text-[9px] font-bold text-white font-outfit">
+                  {turf.avgRating ? turf.avgRating.toFixed(1) : "NEW"}
+                </span>
+              </div>
            </div>
         </Link>
 
-        <p className="text-gray-400 text-sm line-clamp-2 mb-6">
+        <p className="text-[#878C9F] text-[11px] leading-relaxed line-clamp-2 mb-4 opacity-60">
           {turf.description}
         </p>
 
         <div className="mt-auto space-y-4">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {turf.sportTypes.map((sport, index) => (
-              <span key={index} className="px-3 py-1 bg-[#1a1a1a] text-gray-500 border border-gray-800 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+              <span key={index} className="px-2 py-0.5 bg-[#111111] text-[#878C9F] border border-[#2D2D2D] rounded-[3px] text-[8px] font-bold uppercase tracking-[1px]">
                 {sport}
               </span>
             ))}
           </div>
 
-          <div className="flex items-center text-gray-500 text-[10px] font-bold uppercase tracking-widest">
-            <Clock size={12} className="mr-2 text-primary" />
-            {turf.openTime} - {turf.closeTime}
-          </div>
+          <div className="flex items-center justify-between pt-4 border-t border-[#2D2D2D]/50">
+            <div className="flex items-center text-[#878C9F] text-[8px] font-bold uppercase tracking-widest">
+              <Clock size={10} className="mr-1.5 text-[#CCFF00]/40" />
+              {turf.openTime} - {turf.closeTime}
+            </div>
 
-          <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-800">
-            <button
-              onClick={onEdit}
-              className="bg-[#1a1a1a] border border-gray-800 hover:border-primary text-white p-2 rounded-xl transition-all flex flex-col items-center justify-center gap-1 group/btn"
-            >
-              <Edit2 size={14} className="group-hover/btn:text-primary transition-colors" />
-              <span className="text-[8px] font-black uppercase tracking-tighter">Edit</span>
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={onEdit}
+                className="w-8 h-8 bg-[#111] border border-[#2D2D2D] hover:border-[#CCFF00]/40 text-[#878C9F] hover:text-[#CCFF00] rounded-[6px] transition-all flex items-center justify-center group/btn"
+              >
+                <Edit2 size={12} />
+              </button>
 
-            <button
-              onClick={onToggleVisibility}
-              className={`p-2 rounded-xl transition-all flex flex-col items-center justify-center gap-1 border ${
-                turf.isActive 
-                ? "bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500/20" 
-                : "bg-gray-500/10 border-gray-500/20 text-gray-400 hover:bg-gray-500/20"
-              }`}
-            >
-              <Zap size={14} className={turf.isActive ? "fill-green-500" : ""} />
-              <span className="text-[8px] font-black uppercase tracking-tighter">{turf.isActive ? "Online" : "Offline"}</span>
-            </button>
+              <button
+                onClick={onToggleVisibility}
+                className={`w-8 h-8 rounded-[6px] transition-all flex items-center justify-center border ${
+                  turf.isActive 
+                  ? "bg-[#CCFF00]/5 border-[#CCFF00]/20 text-[#CCFF00] hover:bg-[#CCFF00]/10" 
+                  : "bg-black border-[#2D2D2D] text-[#444] hover:text-white"
+                }`}
+              >
+                <Zap size={12} className={turf.isActive ? "fill-[#CCFF00]" : ""} />
+              </button>
 
-            <button
-              onClick={onDelete}
-              className="bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 p-2 rounded-xl transition-all flex flex-col items-center justify-center gap-1"
-            >
-              <Trash2 size={14} />
-              <span className="text-[8px] font-black uppercase tracking-tighter">Delete</span>
-            </button>
+              <button
+                onClick={onDelete}
+                className="w-8 h-8 bg-[#111] border border-[#2D2D2D] hover:border-red-500/40 text-[#878C9F] hover:text-red-500 rounded-[6px] transition-all flex items-center justify-center"
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
           </div>
         </div>
       </div>

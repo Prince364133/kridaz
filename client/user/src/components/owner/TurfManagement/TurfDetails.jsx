@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, Calendar, Clock, MapPin, Users, Mail, Phone, 
-  CheckCircle2, AlertCircle, Trash2, Edit2, Star, Zap, X
+  CheckCircle2, AlertCircle, Trash2, Edit2, Star, Zap, X, Activity,
+  ChevronLeft, ChevronRight
 } from "lucide-react";
 import useTurfDetails from "@hooks/owner/useTurfDetails";
 import DashboardSkeleton from "../Dashboard/DashboardSkeleton";
@@ -15,92 +16,90 @@ const BookingModal = ({ slot, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-[#0D0D0D] border border-white/10 rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
+      <div className="relative bg-[#000000] border border-[#2D2D2D] rounded-[12px] w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
         {/* Header */}
         <div className="p-8 pb-4 flex justify-between items-start">
           <div>
-            <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-2">Slot Telemetry</p>
-            <h3 className="text-2xl font-black text-white uppercase tracking-tight">
-              {typeof startTime === 'string' && startTime.includes(':') ? startTime : new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
-              {typeof endTime === 'string' && endTime.includes(':') ? endTime : new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-2">Slot Telemetry</p>
+            <h3 className="text-2xl font-semibold text-white uppercase tracking-tight font-outfit">
+              {startTime} - {endTime}
             </h3>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
-            <X size={20} className="text-gray-500" />
+          <button onClick={onClose} className="p-2 hover:bg-[#111] rounded-full transition-colors border border-transparent hover:border-[#2D2D2D]">
+            <X size={18} className="text-[#878C9F]" />
           </button>
         </div>
 
-        <div className="p-8 pt-0 space-y-6">
+        <div className="p-8 pt-0 space-y-8">
           {isBooked ? (
             <>
-              <div className="flex items-center gap-4 p-6 bg-primary/5 border border-primary/20 rounded-[24px]">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center overflow-hidden shrink-0">
+              <div className="flex items-center gap-4 p-6 bg-[#111111] border border-[#2D2D2D] rounded-[8px]">
+                <div className="w-14 h-14 rounded-[8px] bg-[#2D2D2D] border border-[#404040] flex items-center justify-center overflow-hidden shrink-0">
                   {bookingDetails.user.profileImage ? (
                     <img src={bookingDetails.user.profileImage} className="w-full h-full object-cover" />
                   ) : (
-                    <Users size={28} className="text-primary" />
+                    <Users size={24} className="text-[#CCFF00]" />
                   )}
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-xl font-black text-white uppercase tracking-tight truncate">{bookingDetails.user.name}</h4>
+                  <h4 className="text-lg font-semibold text-white uppercase tracking-tight truncate font-outfit">{bookingDetails.user.name}</h4>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className="px-2 py-0.5 bg-primary text-black text-[8px] font-black uppercase rounded">Verified</div>
-                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Athlete Profile</span>
+                    <div className="px-2 py-0.5 bg-[#CCFF00] text-black text-[8px] font-bold uppercase rounded-[2px]">Verified</div>
+                    <span className="text-[10px] text-[#878C9F] font-bold uppercase tracking-widest">Athlete Profile</span>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] px-1">Contact Intelligence</p>
-                <div className="grid grid-cols-1 gap-3">
-                  <a href={`mailto:${bookingDetails.user.email}`} className="flex items-center justify-between p-4 bg-white/[0.02] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all group">
+                <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px] px-1">Contact Intelligence</p>
+                <div className="grid grid-cols-1 gap-2">
+                  <a href={`mailto:${bookingDetails.user.email}`} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center text-gray-400 group-hover:text-primary">
-                        <Mail size={14} />
+                      <div className="w-8 h-8 bg-[#2D2D2D] rounded-[4px] flex items-center justify-center text-[#878C9F] group-hover:text-[#CCFF00]">
+                        <Mail size={12} />
                       </div>
-                      <span className="text-xs text-gray-300 font-medium">{bookingDetails.user.email}</span>
+                      <span className="text-xs text-[#878C9F] font-medium">{bookingDetails.user.email}</span>
                     </div>
-                    <ChevronRight size={14} className="text-gray-700" />
+                    <ChevronRight size={14} className="text-[#2D2D2D]" />
                   </a>
-                  <a href={`tel:${bookingDetails.user.phoneNumber}`} className="flex items-center justify-between p-4 bg-white/[0.02] hover:bg-white/[0.05] rounded-2xl border border-white/5 transition-all group">
+                  <a href={`tel:${bookingDetails.user.phoneNumber}`} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center text-gray-400 group-hover:text-primary">
-                        <Phone size={14} />
+                      <div className="w-8 h-8 bg-[#2D2D2D] rounded-[4px] flex items-center justify-center text-[#878C9F] group-hover:text-[#CCFF00]">
+                        <Phone size={12} />
                       </div>
-                      <span className="text-xs text-gray-300 font-medium">{bookingDetails.user.phoneNumber}</span>
+                      <span className="text-xs text-[#878C9F] font-medium">{bookingDetails.user.phoneNumber}</span>
                     </div>
-                    <ChevronRight size={14} className="text-gray-700" />
+                    <ChevronRight size={14} className="text-[#2D2D2D]" />
                   </a>
                 </div>
               </div>
 
-              <div className="flex justify-between items-center p-6 bg-white/[0.02] rounded-[24px] border border-white/5">
+              <div className="flex justify-between items-center p-6 bg-[#111111] rounded-[8px] border border-[#2D2D2D]">
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Revenue Impact</span>
-                  <span className="text-[8px] text-gray-600 font-bold uppercase">Settled via Platform</span>
+                  <span className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Revenue Impact</span>
+                  <span className="text-[8px] text-[#444] font-bold uppercase">Settled via Platform</span>
                 </div>
-                <span className="text-3xl font-black text-primary italic">₹{bookingDetails.totalPrice}</span>
+                <span className="text-3xl font-semibold text-[#CCFF00] font-outfit tracking-tighter">₹{bookingDetails.totalPrice}</span>
               </div>
             </>
           ) : (
-            <div className="py-12 text-center space-y-4">
-              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto border border-dashed border-white/10">
-                <Zap size={32} className="text-gray-700" />
+            <div className="py-12 text-center space-y-4 bg-[#111] rounded-[8px] border border-dashed border-[#2D2D2D]">
+              <div className="w-16 h-16 bg-[#2D2D2D] rounded-full flex items-center justify-center mx-auto">
+                <Zap size={24} className="#2D2D2D" />
               </div>
               <div>
-                <h4 className="text-lg font-bold text-white uppercase tracking-tight">Available Unit</h4>
-                <p className="text-gray-500 text-sm max-w-[200px] mx-auto mt-2">No bookings detected for this sequence. Slot is open for athlete deployment.</p>
+                <h4 className="text-base font-bold text-white uppercase tracking-tight">Available Unit</h4>
+                <p className="text-[#878C9F] text-xs max-w-[200px] mx-auto mt-2 opacity-60">No bookings detected for this sequence. Slot is open for athlete deployment.</p>
               </div>
             </div>
           )}
         </div>
 
-        {/* Action Footer */}
         <div className="p-8 pt-0">
           <button 
             onClick={onClose}
-            className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-white uppercase tracking-[0.2em] hover:bg-white/10 transition-all"
+            className="w-full py-4 bg-[#CCFF00] hover:bg-[#B3FF00] rounded-[8px] text-[11px] font-bold text-black uppercase tracking-[2px] transition-all"
           >
             Acknowledge & Close
           </button>
@@ -136,46 +135,44 @@ export default function TurfDetails() {
   };
 
   React.useEffect(() => {
-    // We'll use the current date as default
     const today = new Date().toISOString().split('T')[0];
     setSelectedDate(today);
   }, []);
 
   if (isLoading) return <DashboardSkeleton />;
   if (error) return (
-    <div className="p-8 text-center">
-      <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
-      <h2 className="text-2xl font-bold text-white mb-2">Error Loading Arena</h2>
-      <p className="text-gray-500 mb-6">{error || "Connection failure to server"}</p>
-      {error && typeof error === 'string' && error.includes("{") && (
-        <pre className="text-[8px] text-gray-700 bg-black/20 p-4 rounded mb-6 max-w-md mx-auto overflow-auto text-left">
-          {error}
-        </pre>
-      )}
-      <button onClick={() => navigate(-1)} className="px-6 py-2 bg-primary text-black font-bold rounded-xl">Go Back</button>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8 bg-black">
+      <AlertCircle className="text-red-500 mb-6" size={48} />
+      <h2 className="text-2xl font-semibold text-white mb-2 uppercase tracking-tight font-outfit">Error Synchronizing Data</h2>
+      <p className="text-[#878C9F] mb-8 max-w-md">{error || "Connection failure to server intelligence roster."}</p>
+      <button onClick={() => navigate(-1)} className="px-8 py-3 bg-[#CCFF00] text-black font-bold uppercase tracking-widest rounded-[8px] text-[11px]">Revert to Inventory</button>
     </div>
   );
 
   if (!turfData || !turfData.turf) return (
-    <div className="p-8 text-center bg-white/[0.02] border border-dashed border-white/10 rounded-[32px]">
-      <Zap size={48} className="mx-auto text-gray-700 mb-4" />
-      <h2 className="text-2xl font-bold text-white mb-2">Arena Data Not Found</h2>
-      <p className="text-gray-500 mb-6">We couldn't retrieve the operational metrics for this facility.</p>
-      <button onClick={() => navigate(-1)} className="px-6 py-2 bg-primary text-black font-bold rounded-xl">Go Back</button>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8 bg-black">
+      <Zap size={48} className="text-[#2D2D2D] mb-6" />
+      <h2 className="text-2xl font-semibold text-white mb-2 uppercase tracking-tight font-outfit">Arena Missing</h2>
+      <p className="text-[#878C9F] mb-8">We couldn't retrieve the operational metrics for this facility.</p>
+      <button onClick={() => navigate(-1)} className="px-8 py-3 bg-[#CCFF00] text-black font-bold uppercase tracking-widest rounded-[8px] text-[11px]">Revert to Inventory</button>
     </div>
   );
 
   const { turf, slots = [] } = turfData;
+  const pending = turf.pendingUpdates || {};
 
-  // Filter actual booked slots for selected date
+  const PendingBadge = ({ label = "Pending Update" }) => (
+    <span className="ml-2 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[8px] font-bold uppercase tracking-widest rounded-[2px] animate-pulse">
+      {label}
+    </span>
+  );
+
   const filteredBookings = slots.filter(slot => {
     const slotDate = new Date(slot.startTime).toISOString().split('T')[0];
     return slotDate === selectedDate;
   });
 
-  // Merge generated slots with actual bookings
   const displaySlots = (turf.generatedSlots || []).map(gs => {
-    // Find if this specific slot (by time) is booked for the selected date
     const booking = filteredBookings.find(b => {
       const bStart = new Date(b.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       return bStart === gs.startTime;
@@ -192,7 +189,6 @@ export default function TurfDetails() {
     };
   });
 
-  // Group slots by day for the calendar selector - for now just use a 7-day range from today
   const uniqueDates = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
@@ -200,8 +196,7 @@ export default function TurfDetails() {
   });
 
   return (
-    <div className="space-y-8 animate-fade-in pb-20">
-      {/* Popups */}
+    <div className="space-y-8 animate-fade-in pb-20 bg-black min-h-screen">
       {selectedSlot && (
         <BookingModal 
           slot={selectedSlot} 
@@ -209,70 +204,121 @@ export default function TurfDetails() {
         />
       )}
 
-      {/* Header */}
-      <div className="flex flex-col gap-6">
-        <button 
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-500 hover:text-primary transition-colors font-bold uppercase text-[10px] tracking-widest w-fit"
-        >
-          <ArrowLeft size={14} />
-          Back to Inventory
-        </button>
+      {/* Navigation & Header */}
+      <div className="flex flex-col gap-8">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 flex items-center justify-center bg-[#111] border border-[#2D2D2D] text-[#878C9F] hover:text-[#CCFF00] hover:border-[#CCFF00]/40 rounded-full transition-all group"
+            title="Back to Roster"
+          >
+            <ArrowLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
+          </button>
+          <div className="h-px flex-1 bg-[#2D2D2D]/50" />
+        </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b border-white/5">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 pb-8 border-b border-[#2D2D2D]">
           <div className="flex flex-col md:flex-row gap-8 items-start">
-             <div className="w-32 h-32 rounded-[24px] overflow-hidden border border-white/10 shrink-0 shadow-2xl">
-                <img src={turf.image} alt={turf.name} className="w-full h-full object-cover" />
+             <div className="w-32 h-32 rounded-[8px] overflow-hidden border border-[#2D2D2D] shrink-0 shadow-2xl relative">
+                <img src={pending.image || turf.image} alt={turf.name} className="w-full h-full object-cover opacity-80" />
+                {pending.image && <div className="absolute top-2 right-2 p-1 bg-amber-500 rounded-full animate-pulse" title="New Image Pending" />}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
              </div>
-             <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                   <h1 className="text-5xl font-black uppercase tracking-tight text-white">{turf.name}</h1>
-                    <div className={`px-3 py-1 border rounded-full flex items-center gap-1 ${
-                       turf.status === 'approved' ? 'bg-green-500/10 border-green-500/20 text-green-500' :
+             <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-4">
+                   <div className="space-y-1">
+                      <h1 className={`text-4xl font-semibold uppercase tracking-tight font-outfit ${
+                          turf.status === 'pending' ? 'text-amber-500' :
+                          turf.status === 'rejected' ? 'text-red-500' :
+                          'text-white'
+                      }`}>
+                         {turf.name}
+                      </h1>
+                      {pending.name && (
+                         <p className="text-amber-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                            <span className="opacity-40">Update to:</span> {pending.name} <PendingBadge />
+                         </p>
+                      )}
+                   </div>
+                    <div className={`px-3 py-1 border rounded-[4px] flex items-center gap-1 ${
+                       turf.status === 'approved' ? 'bg-[#CCFF00]/10 border-[#CCFF00]/20 text-[#CCFF00]' :
                        turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                       'bg-yellow-500/10 border-yellow-500/20 text-yellow-500'
+                       'bg-amber-500/10 border-amber-500/20 text-amber-500'
                     }`}>
-                       <span className="text-[10px] font-black uppercase tracking-widest">{turf.status}</span>
+                       <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                          turf.status === 'approved' ? 'bg-[#CCFF00]' :
+                          turf.status === 'rejected' ? 'bg-red-500' :
+                          'bg-amber-500'
+                       }`} />
+                       <span className="text-[9px] font-bold uppercase tracking-widest">{turf.status}</span>
                     </div>
-                   <div className="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full flex items-center gap-1">
-                      <Star size={12} className="text-primary fill-primary" />
-                      <span className="text-[10px] font-bold text-primary">{turf.avgRating?.toFixed(1) || "NEW"}</span>
+                   <div className="px-3 py-1 bg-[#111] border border-[#2D2D2D] rounded-[4px] flex items-center gap-2">
+                      <Star size={12} className="text-[#CCFF00] fill-[#CCFF00]" />
+                      <span className="text-[10px] font-bold text-white font-outfit">{turf.avgRating?.toFixed(1) || "NEW"}</span>
                    </div>
                 </div>
-                <div className="flex flex-wrap gap-4 text-gray-500 text-xs font-medium uppercase tracking-wider">
-                   <div className="flex items-center gap-1.5">
-                      <MapPin size={14} className="text-primary" />
-                      {turf.location}
+                <div className="flex flex-wrap gap-6 text-[#878C9F] text-[10px] font-bold uppercase tracking-[2px]">
+                   <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                         <MapPin size={14} className={turf.status === 'rejected' ? 'text-red-500/60' : 'text-[#CCFF00]/60'} />
+                         {turf.location}
+                      </div>
+                      {pending.location && (
+                         <p className="text-amber-500/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
+                            → {pending.location} <PendingBadge label="Loc" />
+                         </p>
+                      )}
                    </div>
-                   <div className="flex items-center gap-1.5">
-                      <Clock size={14} className="text-primary" />
-                      {turf.openTime} - {turf.closeTime}
+                   <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                         <Clock size={14} className={turf.status === 'rejected' ? 'text-red-500/60' : 'text-[#CCFF00]/60'} />
+                         {turf.openTime} - {turf.closeTime}
+                      </div>
+                      {(pending.openTime || pending.closeTime) && (
+                         <p className="text-amber-500/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
+                            → {pending.openTime || turf.openTime} - {pending.closeTime || turf.closeTime} <PendingBadge label="Time" />
+                         </p>
+                      )}
                    </div>
                 </div>
+                {turf.status !== 'approved' && (
+                   <div className={`flex items-center gap-2 p-2 px-3 rounded-[4px] border w-fit mt-2 ${
+                      turf.status === 'rejected' ? 'bg-red-500/5 border-red-500/10 text-red-500/80' : 'bg-amber-500/5 border-amber-500/10 text-amber-500/80'
+                   }`}>
+                      <AlertCircle size={12} />
+                      <span className="text-[9px] font-bold uppercase tracking-widest">
+                         {turf.status === 'rejected' ? 'Critical: Corrections Required for Deployment' : 'Intelligence Audit: Verification in Progress'}
+                      </span>
+                   </div>
+                )}
              </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
              <button 
                 onClick={handleToggleVisibility}
-                className={`px-6 py-3 border rounded-xl font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${
+                className={`px-6 py-2.5 border rounded-[8px] font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${
                   turf.isActive 
-                  ? "bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500/20" 
-                  : "bg-gray-500/10 border-gray-500/20 text-gray-500 hover:bg-gray-500/20"
+                  ? "bg-[#CCFF00]/5 border-[#CCFF00]/20 text-[#CCFF00] hover:bg-[#CCFF00]/10" 
+                  : "bg-black border-[#2D2D2D] text-[#444] hover:text-white"
                 }`}
              >
-                <Zap size={14} className={turf.isActive ? "fill-green-500" : ""} />
+                <Zap size={14} className={turf.isActive ? "fill-[#CCFF00]" : ""} />
                 {turf.isActive ? "Visible" : "Hidden"}
              </button>
              <button 
                 onClick={() => navigate(`/partner/edit-turf/${id}`)}
-                className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all flex items-center gap-2"
+                className={`px-6 py-2.5 border rounded-[8px] font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${
+                   turf.status === 'rejected' 
+                   ? "bg-red-500 text-white border-red-500 hover:bg-red-600 shadow-[0_5px_15px_rgba(239,68,68,0.2)]" 
+                   : "bg-[#111111] border-[#2D2D2D] text-[#878C9F] hover:text-white"
+                }`}
              >
                 <Edit2 size={14} />
-                Edit Arena
+                {turf.status === 'rejected' ? "Review & Re-apply" : "Edit Arena"}
              </button>
              <button 
                 onClick={handleDelete}
-                className="px-6 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 font-bold uppercase text-[10px] tracking-widest hover:bg-red-500/20 transition-all flex items-center gap-2"
+                className="px-6 py-2.5 bg-red-500/10 border border-red-500/20 rounded-[8px] text-red-500 font-bold uppercase text-[10px] tracking-widest hover:bg-red-500/20 transition-all flex items-center gap-2"
              >
                 <Trash2 size={14} />
                 Decommission
@@ -281,52 +327,199 @@ export default function TurfDetails() {
         </div>
       </div>
 
-      {/* Operational Metadata */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {turf.sportTypes && turf.sportTypes.length > 0 && (
-         <div className="p-6 bg-white/[0.02] border border-white/5 rounded-[32px] space-y-4">
-            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest text-primary/60">Sport Arsenal</p>
-            <div className="flex flex-wrap gap-2">
-               {turf.sportTypes?.map((sport, i) => (
-                  <span key={i} className="px-3 py-1 bg-primary/10 border border-primary/20 rounded-lg text-primary text-[10px] font-black uppercase">
-                     {sport}
-                  </span>
+      {/* Media Intelligence & Operational Footage */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+         {/* Gallery Scroller */}
+         <div className="lg:col-span-7 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 space-y-6 overflow-hidden">
+            <div className="flex items-center justify-between">
+               <div className="flex items-center gap-2">
+                  <div className="w-1 h-3 bg-[#CCFF00] rounded-full" />
+                  <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Arena Visual Assets</p>
+               </div>
+               <div className="flex gap-2">
+                  <button 
+                    onClick={() => {
+                      const el = document.getElementById('gallery-scroll');
+                      el.scrollBy({ left: -300, behavior: 'smooth' });
+                    }}
+                    className="w-8 h-8 flex items-center justify-center bg-[#111] border border-[#2D2D2D] rounded-full text-[#878C9F] hover:text-[#CCFF00] hover:border-[#CCFF00]/40 transition-all"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const el = document.getElementById('gallery-scroll');
+                      el.scrollBy({ left: 300, behavior: 'smooth' });
+                    }}
+                    className="w-8 h-8 flex items-center justify-center bg-[#111] border border-[#2D2D2D] rounded-full text-[#878C9F] hover:text-[#CCFF00] hover:border-[#CCFF00]/40 transition-all"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+               </div>
+            </div>
+            
+            <div 
+              id="gallery-scroll"
+              className="flex gap-4 overflow-x-auto custom-scrollbar pb-4 snap-x"
+            >
+               {(turf.images || [turf.image]).map((img, i) => (
+                  <div key={i} className="min-w-[280px] h-[180px] rounded-[6px] border border-[#2D2D2D] overflow-hidden relative group/img snap-start">
+                     <img src={img} className="w-full h-full object-cover opacity-80 group-hover/img:opacity-100 transition-opacity" />
+                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                  </div>
+               ))}
+               {pending.images && Array.from(pending.images).map((img, i) => (
+                  <div key={`p-${i}`} className="min-w-[280px] h-[180px] rounded-[6px] border-2 border-amber-500/40 overflow-hidden relative group/img snap-start">
+                     <div className="absolute top-3 left-3 z-10">
+                        <PendingBadge label="New Upload" />
+                     </div>
+                     <img src={typeof img === 'string' ? img : URL.createObjectURL(img)} className="w-full h-full object-cover opacity-90" />
+                     <div className="absolute inset-0 bg-gradient-to-t from-amber-900/20 to-transparent" />
+                  </div>
                ))}
             </div>
          </div>
-      )}
-      {turf.groundTypes && turf.groundTypes.length > 0 && (
-         <div className="p-6 bg-white/[0.02] border border-white/5 rounded-[32px] space-y-4">
-            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Ground Composition</p>
-            <div className="flex flex-wrap gap-2">
-               {turf.groundTypes?.map((ground, i) => (
-                  <span key={i} className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-gray-300 text-[10px] font-black uppercase">
-                     {ground}
-                  </span>
-               ))}
+
+         {/* Video Intelligence */}
+         <div className="lg:col-span-5 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 space-y-6">
+            <div className="flex items-center gap-2">
+               <div className="w-1 h-3 bg-red-600 rounded-full animate-pulse" />
+               <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Operational Footage (YouTube)</p>
+            </div>
+            
+            {(pending.youtubeUrl || turf.youtubeUrl) ? (
+               <div className={`relative aspect-video rounded-[6px] overflow-hidden border ${pending.youtubeUrl ? 'border-amber-500/40' : 'border-[#2D2D2D]'}`}>
+                  {pending.youtubeUrl && (
+                     <div className="absolute top-3 right-3 z-10">
+                        <PendingBadge label="Stream Update" />
+                     </div>
+                  )}
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={(pending.youtubeUrl || turf.youtubeUrl).replace("watch?v=", "embed/")}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="opacity-90"
+                  ></iframe>
+               </div>
+            ) : (
+               <div className="aspect-video bg-[#050505] rounded-[6px] border border-dashed border-[#2D2D2D] flex flex-col items-center justify-center text-center p-8">
+                  <Activity size={32} className="text-[#2D2D2D] mb-4" />
+                  <p className="text-[10px] font-bold text-[#444] uppercase tracking-widest leading-relaxed">No telemetry broadcast configured for this facility.</p>
+               </div>
+            )}
+         </div>
+      </div>
+
+      {/* Operational Pulse & Intelligence */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+         {/* Live Stats */}
+         <div className="xl:col-span-4 grid grid-cols-2 gap-4">
+            <div className="p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+               <div className="absolute top-0 right-0 p-4 opacity-10 text-[#CCFF00] group-hover:opacity-20 transition-opacity">
+                  <Activity size={40} />
+               </div>
+               <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px]">Today's Load</p>
+               <div>
+                  <h4 className="text-3xl font-semibold text-white font-outfit uppercase">
+                    {Math.round((filteredBookings.length / (turf.generatedSlots?.length || 1)) * 100)}%
+                  </h4>
+                  <p className="text-[9px] text-[#CCFF00] font-bold uppercase tracking-widest mt-1">Live Occupancy</p>
+               </div>
+            </div>
+            <div className="p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+               <div className="absolute top-0 right-0 p-4 opacity-10 text-[#CCFF00] group-hover:opacity-20 transition-opacity">
+                  <Zap size={40} />
+               </div>
+               <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px]">Revenue</p>
+               <div className="space-y-1">
+                  <h4 className="text-3xl font-semibold text-white font-outfit uppercase flex items-baseline gap-2">
+                    ₹{filteredBookings.reduce((acc, b) => acc + (b.bookingDetails?.totalPrice || 0), 0)}
+                    {pending.pricePerHour && (
+                       <span className="text-amber-500 text-sm font-bold opacity-80">→ ₹{pending.pricePerHour}/hr <PendingBadge label="Rate" /></span>
+                    )}
+                  </h4>
+                  <p className="text-[9px] text-[#CCFF00] font-bold uppercase tracking-widest mt-1">Daily Yield</p>
+               </div>
             </div>
          </div>
-      )}
-      {turf.facilities && turf.facilities.length > 0 && (
-         <div className="p-6 bg-white/[0.02] border border-white/5 rounded-[32px] space-y-4">
-            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Facility Intelligence</p>
-            <div className="flex flex-wrap gap-2">
-               {turf.facilities?.map((facility, i) => (
-                  <span key={i} className="px-3 py-1 bg-primary border border-primary rounded-lg text-black text-[10px] font-black uppercase">
-                     {facility}
-                  </span>
-               ))}
+
+         {/* Consolidated Intelligence */}
+         <div className="xl:col-span-8 p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] flex flex-col md:flex-row gap-8">
+            <div className="flex-1 space-y-4">
+               <div className="flex items-center gap-2">
+                  <div className="w-1 h-3 bg-[#CCFF00] rounded-full" />
+                  <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Facility DNA</p>
+               </div>
+               <div className="space-y-4">
+                  <div>
+                     <p className="text-[9px] text-[#444] font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
+                        Ground Composition
+                        {pending.groundTypes && <PendingBadge />}
+                     </p>
+                     <div className="flex flex-wrap gap-2">
+                        {(pending.groundTypes || turf.groundTypes || []).map((ground, i) => (
+                           <span key={i} className={`px-2 py-1 border rounded-[4px] text-[9px] font-bold uppercase tracking-wider snap-start ${
+                              pending.groundTypes ? 'bg-amber-500/5 border-amber-500/20 text-amber-500' : 'bg-[#111] border-[#2D2D2D] text-white'
+                           }`}>
+                              {ground}
+                           </span>
+                        ))}
+                     </div>
+                  </div>
+                  <div>
+                     <p className="text-[9px] text-[#444] font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
+                        Capabilities
+                        {pending.facilities && <PendingBadge />}
+                     </p>
+                     <div className="flex flex-wrap gap-2">
+                        {(pending.facilities || turf.facilities || []).map((facility, i) => (
+                           <span key={i} className={`px-2 py-1 border rounded-[4px] text-[9px] font-bold uppercase tracking-wider snap-start ${
+                              pending.facilities ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-[#CCFF00] border-[#CCFF00] text-black'
+                           }`}>
+                              {facility}
+                           </span>
+                        ))}
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div className="w-px bg-[#2D2D2D] hidden md:block" />
+
+            <div className="flex-1 space-y-4">
+               <div className="flex items-center gap-2">
+                  <div className="w-1 h-3 bg-[#CCFF00] rounded-full" />
+                  <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Sport Arsenal</p>
+               </div>
+               <div className="flex flex-wrap gap-2">
+                  {(pending.sportTypes || turf.sportTypes || []).map((sport, i) => (
+                     <div key={i} className={`flex items-center gap-3 border p-3 rounded-[6px] w-full group/sport transition-colors ${
+                        pending.sportTypes ? 'bg-amber-500/5 border-amber-500/20' : 'bg-[#111] border-[#2D2D2D] hover:border-[#CCFF00]/40'
+                     }`}>
+                        <div className={`w-2 h-2 rounded-full transition-colors ${
+                           pending.sportTypes ? 'bg-amber-500 animate-pulse' : 'bg-[#CCFF00]/20 group-hover/sport:bg-[#CCFF00]'
+                        }`} />
+                        <span className={`text-[11px] font-bold uppercase tracking-wider ${
+                           pending.sportTypes ? 'text-amber-500' : 'text-white'
+                        }`}>{sport}</span>
+                        {pending.sportTypes && <div className="ml-auto"><PendingBadge label="Add" /></div>}
+                     </div>
+                  ))}
+               </div>
             </div>
          </div>
-      )}
       </div>
 
       {/* Booking Management Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Date Selector */}
-        <div className="lg:col-span-1 space-y-4">
-           <h3 className="text-sm font-black uppercase tracking-[0.2em] text-gray-500 mb-4 flex items-center gap-2">
-              <Calendar size={16} className="text-primary" />
+        <div className="lg:col-span-3 space-y-6">
+           <h3 className="text-[11px] font-bold uppercase tracking-[3px] text-[#878C9F] flex items-center gap-3">
+              <Calendar size={14} className="text-[#CCFF00]" />
               Timeline Control
            </h3>
            <div className="flex flex-col gap-2">
@@ -335,17 +528,17 @@ export default function TurfDetails() {
                   <button
                     key={date}
                     onClick={() => setSelectedDate(date)}
-                    className={`w-full p-4 rounded-2xl border text-left transition-all duration-300 flex justify-between items-center ${
+                    className={`w-full p-5 rounded-[8px] border text-left transition-all duration-300 flex justify-between items-center ${
                       selectedDate === date 
-                      ? "bg-primary border-primary text-black scale-[1.02] shadow-lg shadow-primary/20" 
-                      : "bg-white/[0.02] border-white/5 text-gray-400 hover:border-white/20"
+                      ? "bg-[#CCFF00] border-[#CCFF00] text-black shadow-[0_10px_20px_rgba(204,255,0,0.15)]" 
+                      : "bg-[#000000] border-[#2D2D2D] text-[#878C9F] hover:border-[#CCFF00]/40"
                     }`}
                   >
                     <div className="flex flex-col">
-                       <span className="text-xs font-black uppercase tracking-tighter">
+                       <span className="text-[11px] font-bold uppercase tracking-[1px]">
                           {new Date(date).toLocaleDateString('en-US', { weekday: 'long' })}
                        </span>
-                       <span className="text-[10px] opacity-60 font-bold">
+                       <span className={`text-[10px] font-medium uppercase mt-0.5 ${selectedDate === date ? "text-black/60" : "text-[#444]"}`}>
                           {new Date(date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
                        </span>
                     </div>
@@ -353,105 +546,105 @@ export default function TurfDetails() {
                   </button>
                 ))
               ) : (
-                <div className="p-8 text-center bg-white/[0.02] border border-dashed border-white/10 rounded-2xl">
-                   <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">No Active Slots</p>
+                <div className="p-8 text-center bg-[#111] border border-dashed border-[#2D2D2D] rounded-[8px]">
+                   <p className="text-[10px] font-bold text-[#444] uppercase tracking-widest">No Active Slots</p>
                 </div>
               )}
            </div>
         </div>
 
         {/* Slots Grid */}
-        <div className="lg:col-span-3 space-y-6">
-           <div className="flex justify-between items-center">
-              <h3 className="text-sm font-black uppercase tracking-[0.2em] text-gray-500 flex items-center gap-2">
-                 <Clock size={16} className="text-primary" />
-                 Slot Manifest <span className="ml-2 px-2 py-0.5 bg-white/5 rounded text-[10px] text-primary">{displaySlots.filter(s => s.isActive).length} Active</span>
+        <div className="lg:col-span-9 space-y-8">
+           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+              <h3 className="text-[11px] font-bold uppercase tracking-[3px] text-[#878C9F] flex items-center gap-3">
+                 <Clock size={14} className="text-[#CCFF00]" />
+                 Slot Manifest <span className="ml-4 px-3 py-1 bg-[#111111] rounded-[4px] border border-[#2D2D2D] text-[10px] text-[#CCFF00]">{displaySlots.filter(s => s.isActive).length} Active Units</span>
               </h3>
-              <div className="flex gap-4">
-                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-gray-800" />
-                    <span className="text-[10px] font-bold text-gray-500 uppercase">Inactive</span>
+              <div className="flex flex-wrap gap-6">
+                 <div className="flex items-center gap-2.5">
+                    <div className="w-2 h-2 rounded-full bg-[#111] border border-[#2D2D2D]" />
+                    <span className="text-[10px] font-bold text-[#444] uppercase tracking-widest">Inactive</span>
                  </div>
-                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-white/20" />
-                    <span className="text-[10px] font-bold text-gray-500 uppercase">Available</span>
+                 <div className="flex items-center gap-2.5">
+                    <div className="w-2 h-2 rounded-full bg-white/10" />
+                    <span className="text-[10px] font-bold text-[#444] uppercase tracking-widest">Available</span>
                  </div>
-                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-primary" />
-                    <span className="text-[10px] font-bold text-gray-500 uppercase">Booked</span>
+                 <div className="flex items-center gap-2.5">
+                    <div className="w-2 h-2 rounded-full bg-[#CCFF00]" />
+                    <span className="text-[10px] font-bold text-[#444] uppercase tracking-widest">Booked</span>
                  </div>
               </div>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {displaySlots.length > 0 ? (
                 displaySlots.map((slot) => (
                   <button 
                     key={slot._id} 
                     onClick={() => slot.isBooked && setSelectedSlot(slot)}
-                    disabled={!slot.isActive || !slot.isBooked}
-                    className={`relative overflow-hidden p-6 rounded-[24px] border transition-all duration-500 group text-left ${
+                    disabled={!slot.isActive}
+                    className={`relative overflow-hidden p-6 rounded-[8px] border transition-all duration-500 group text-left flex flex-col justify-between min-h-[160px] ${
                       !slot.isActive
-                      ? "bg-black/20 border-gray-900 opacity-40 cursor-not-allowed"
+                      ? "bg-[#050505] border-[#1A1A1A] opacity-40 cursor-not-allowed"
                       : slot.isBooked 
-                      ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(132,204,22,0.1)] cursor-pointer" 
-                      : "bg-white/[0.02] border-white/10 hover:border-white/30 cursor-default"
+                      ? "bg-[#CCFF00]/5 border-[#CCFF00]/30 shadow-[0_0_20px_rgba(204,255,0,0.05)] cursor-pointer hover:border-[#CCFF00]/60" 
+                      : "bg-[#000000] border-[#2D2D2D] hover:border-[#CCFF00]/40 cursor-default"
                     }`}
                   >
-                    <div className="flex justify-between items-start mb-6">
+                    <div className="flex justify-between items-start">
                        <div className="space-y-1">
-                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Time Sequence</p>
-                          <h4 className="text-lg font-black text-white">
+                          <p className={`text-[9px] font-bold uppercase tracking-widest ${slot.isBooked ? "text-[#CCFF00]/60" : "text-[#444]"}`}>Time Sequence</p>
+                          <h4 className="text-lg font-semibold text-white font-outfit uppercase tracking-tight">
                              {slot.startTime} - {slot.endTime}
                           </h4>
                        </div>
-                       {slot.isBooked ? (
-                         <div className="px-3 py-1 bg-primary text-black rounded-full">
-                            <span className="text-[9px] font-black uppercase tracking-widest">Booked</span>
-                         </div>
-                       ) : (
-                         <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full">
-                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Available</span>
+                       {slot.isActive && (
+                         <div className={`px-2 py-0.5 rounded-[3px] text-[8px] font-bold uppercase tracking-widest border ${
+                           slot.isBooked ? "bg-[#CCFF00] border-[#CCFF00] text-black" : "bg-[#111] border-[#2D2D2D] text-[#878C9F]"
+                         }`}>
+                           {slot.isBooked ? "Booked" : "Open"}
                          </div>
                        )}
                     </div>
 
-                    {slot.isBooked ? (
-                      <div className="space-y-4">
-                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/20 flex items-center justify-center overflow-hidden">
-                               {slot.bookingDetails.user.profileImage ? (
-                                 <img src={slot.bookingDetails.user.profileImage} className="w-full h-full object-cover" />
-                               ) : (
-                                 <Users size={16} className="text-primary" />
-                               )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                               <h5 className="text-sm font-bold text-white truncate uppercase tracking-tight">{slot.bookingDetails.user.name}</h5>
-                               <p className="text-[9px] text-primary font-bold uppercase tracking-widest italic">View Details</p>
-                            </div>
-                         </div>
-                      </div>
-                    ) : (
-                      <div className="py-8 flex flex-col items-center justify-center text-center opacity-20 group-hover:opacity-60 transition-opacity">
-                         <CheckCircle2 size={32} className="text-gray-400 mb-3" />
-                         <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Open Slot</p>
-                      </div>
-                    )}
+                    <div className="relative z-10">
+                      {slot.isBooked ? (
+                        <div className="flex items-center gap-4">
+                           <div className="w-10 h-10 rounded-[6px] bg-[#111] border border-[#2D2D2D] flex items-center justify-center overflow-hidden">
+                              {slot.bookingDetails.user.profileImage ? (
+                                <img src={slot.bookingDetails.user.profileImage} className="w-full h-full object-cover" />
+                              ) : (
+                                <Users size={16} className="text-[#CCFF00]/60" />
+                              )}
+                           </div>
+                           <div className="flex-1 min-w-0">
+                              <h5 className="text-[13px] font-semibold text-white truncate uppercase tracking-tight font-outfit">{slot.bookingDetails.user.name}</h5>
+                              <p className="text-[9px] text-[#CCFF00] font-bold uppercase tracking-[2px] mt-1">View Details</p>
+                           </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3 opacity-20 group-hover:opacity-60 transition-opacity">
+                           <div className="p-1.5 bg-[#111] rounded-full"><CheckCircle2 size={12} className="text-[#878C9F]" /></div>
+                           <p className="text-[9px] font-bold text-[#878C9F] uppercase tracking-[2px]">Available Sequence</p>
+                        </div>
+                      )}
+                    </div>
 
-                    {/* Design Flourish */}
-                    {slot.isBooked && (
-                      <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-primary/10 rounded-full blur-3xl" />
+                    {/* Action Hint */}
+                    {slot.isActive && slot.isBooked && (
+                       <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Zap size={12} className="text-[#CCFF00]" />
+                       </div>
                     )}
                   </button>
                 ))
               ) : (
-                <div className="col-span-full py-20 bg-white/[0.01] border border-dashed border-white/10 rounded-[32px] flex flex-col items-center justify-center text-center">
-                   <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-6">
-                      <Zap size={24} className="text-white/20" />
+                <div className="col-span-full py-32 bg-[#000000] border border-dashed border-[#2D2D2D] rounded-[8px] flex flex-col items-center justify-center text-center">
+                   <div className="w-16 h-16 bg-[#111] rounded-full flex items-center justify-center mb-6 border border-[#2D2D2D]">
+                      <Zap size={24} className="text-[#2D2D2D]" />
                    </div>
-                   <h4 className="text-xl font-bold text-white uppercase tracking-tight mb-2">Zero Operational Data</h4>
-                   <p className="text-gray-500 text-sm max-w-xs mx-auto">No slots are configured for the selected timeline. Adjust your arena settings to deploy new sessions.</p>
+                   <h4 className="text-xl font-semibold text-white uppercase tracking-tight mb-2 font-outfit">Zero Operational Data</h4>
+                   <p className="text-[#878C9F] text-xs max-w-xs mx-auto opacity-60">No slots are configured for the selected timeline. Adjust your arena settings to deploy new sessions.</p>
                 </div>
               )}
            </div>
@@ -461,19 +654,4 @@ export default function TurfDetails() {
   );
 }
 
-const ChevronRight = ({ className, size = 16 }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    <path d="m9 18 6-6-6-6"/>
-  </svg>
-);
+

@@ -2,28 +2,31 @@ import React from "react";
 
 const BookingsSkeleton = () => {
   return (
-    <div className="p-4">
-      <div className="h-8 bg-base-300 rounded w-1/4 mb-4"></div>
-      <div className="h-10 bg-base-300 rounded w-1/3 mb-4"></div>
-      <div className="overflow-x-auto">
-        <table className="table w-full">
-          <thead>
-            <tr>
-              {["Turf", "User", "Price", "Date", "Duration"].map((header) => (
-                <th key={header} className="bg-base-300 h-8"></th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {[1, 2, 3, 4, 5].map((i) => (
-              <tr key={i}>
-                {[1, 2, 3, 4, 5].map((j) => (
-                  <td key={j} className="bg-base-300 h-6"></td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="h-full bg-[#000000] p-4 lg:px-10 lg:pt-8 space-y-8">
+      {/* Header Skeleton */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-3">
+          <div className="h-8 w-48 bg-[#2D2D2D] rounded-[4px] animate-pulse"></div>
+          <div className="h-3 w-64 bg-[#2D2D2D] rounded-[2px] animate-pulse opacity-50"></div>
+        </div>
+        <div className="h-16 w-48 bg-[#2D2D2D] rounded-[8px] animate-pulse"></div>
+      </div>
+
+      {/* Toolbar Skeleton */}
+      <div className="h-14 w-full bg-[#2D2D2D] rounded-[8px] animate-pulse"></div>
+
+      {/* Table Skeleton */}
+      <div className="bg-[#000000] rounded-[8px] border border-[#2D2D2D] overflow-hidden">
+        <div className="h-12 w-full bg-[#151617] border-b border-[#2D2D2D]"></div>
+        <div className="p-4 space-y-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="flex gap-4 items-center border-b border-[#2D2D2D]/30 pb-4">
+              <div className="h-10 w-48 bg-[#2D2D2D] rounded-[4px] animate-pulse"></div>
+              <div className="h-10 flex-1 bg-[#2D2D2D] rounded-[4px] animate-pulse opacity-70"></div>
+              <div className="h-10 w-24 bg-[#2D2D2D] rounded-[4px] animate-pulse"></div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
