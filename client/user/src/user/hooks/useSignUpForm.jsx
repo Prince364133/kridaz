@@ -34,7 +34,12 @@ const registerSchema = yup.object().shape({
     .oneOf([yup.ref("password"), null], "Passwords must match"),
   otp: yup.string().when("$showOtpInput", {
     is: true,
-    then: () => yup.string().required("OTP is required").min(6, "OTP must be 6 characters"),
+    then: () => yup.string().required("Email OTP is required").min(6, "OTP must be 6 characters"),
+    otherwise: () => yup.string().notRequired(),
+  }),
+  phoneOtp: yup.string().when("$showOtpInput", {
+    is: true,
+    then: () => yup.string().required("Phone OTP is required").min(6, "OTP must be 6 characters"),
     otherwise: () => yup.string().notRequired(),
   }),
   sportTypes: yup.array().of(yup.string()).min(1, "Select at least one sport"),
@@ -69,7 +74,8 @@ const useSignUpForm = () => {
     setLoading(true);
     try {
       const email = getValues("email");
-      const response = await axiosInstance.post("/api/user/auth/send-otp", { email });
+      const phone = getValues("phone");
+      const response = await axiosInstance.post("/api/user/auth/send-otp", { email, phone });
       toast.success(response.data.message);
       setShowOtpInput(true);
     } catch (error) {

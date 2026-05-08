@@ -67,6 +67,24 @@ export const FeatureFlags = () => {
             Control dynamic features and sections across the BookMySportz platform.
           </p>
         </div>
+        <button
+          onClick={async () => {
+            try {
+              const res = await axiosInstance.post("/api/admin/features/seed");
+              if (res.data.success) {
+                toast.success("Feature flags synced successfully");
+                setFlags(res.data.data);
+              }
+            } catch (error) {
+              console.error("Error seeding flags:", error);
+              toast.error("Failed to sync feature flags");
+            }
+          }}
+          className="flex items-center gap-2 rounded-xl bg-lime-500 px-4 py-2 text-xs font-bold uppercase text-black transition-all hover:bg-lime-400 active:scale-95"
+        >
+          <Server className="h-4 w-4" />
+          Sync Default Features
+        </button>
       </div>
 
       {/* Flags List */}

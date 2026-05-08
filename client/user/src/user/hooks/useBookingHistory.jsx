@@ -10,14 +10,8 @@ export default function useBookingHistory() {
 
   const formatBookingsData = (bookings) => {
     return bookings.map((booking) => {
-      const adjustTime = (timeString) => {
-        const date = parseISO(timeString);
-        const adjustedDate = subMinutes(subHours(date, 5), 30);
-        return adjustedDate;
-      };
-
-      const adjustedStartTime = adjustTime(booking.timeSlot.startTime);
-      const adjustedEndTime = adjustTime(booking.timeSlot.endTime);
+      const adjustedStartTime = parseISO(booking.timeSlot.startTime);
+      const adjustedEndTime = parseISO(booking.timeSlot.endTime);
 
       return {
         ...booking,

@@ -5,7 +5,8 @@ import TimeSlot from "../../models/timeSlot.model.js";
 import Booking from "../../models/booking.model.js";
 import Review from "../../models/review.model.js";
 import cloudinary from "../../utils/cloudinary.js";
-import { startOfDay } from "date-fns";
+import { startOfDay, parseISO } from "date-fns";
+import { fromZonedTime } from "date-fns-tz";
 import { getTurfWithAvgRating } from "./turf.service.js";
 
 // --- USER OPERATIONS ---
@@ -98,15 +99,17 @@ export const getTimeSlotByTurfId = async (req, res) => {
   }
 
   try {
-    const selectedDate = new Date(date);
-    const startOfSelectedDate = startOfDay(selectedDate);
+    const timeZone = process.env.TIMEZONE || "Asia/Kolkata";
+    // Parse date and set to start/end of day in the target timezone
+    const selectedDate = parseISO(date);
+    const startOfSelectedDate = fromZonedTime(startOfDay(selectedDate), timeZone);
     const endOfSelectedDate = new Date(startOfSelectedDate);
     endOfSelectedDate.setDate(endOfSelectedDate.getDate() + 1);
 
     const query = {
       turf: turfId,
       startTime: { $gte: startOfSelectedDate },
-      endTime: { $lt: endOfSelectedDate },
+      endTime: { $lte: endOfSelectedDate },
     };
 
     const bookedTime = await TimeSlot.find(query);
@@ -158,6 +161,7 @@ export const turfRegister = async (req, res) => {
       state, 
       latitude, 
       longitude,
+      managerContacts,
       ...otherData 
     } = req.body;
 
@@ -178,6 +182,7 @@ export const turfRegister = async (req, res) => {
       availableDays: Array.isArray(availableDays) ? availableDays : (availableDays ? [availableDays] : []),
       offDays: Array.isArray(offDays) ? offDays : (offDays ? [offDays] : []),
       generatedSlots: generatedSlots ? JSON.parse(generatedSlots) : [],
+      managerContacts: managerContacts ? JSON.parse(managerContacts) : [],
     });
     await turf.save();
     return res.status(201).json({ success: true, message: "Turf registered and sent for admin approval" });
@@ -233,6 +238,10 @@ export const editTurfById = async (req, res) => {
 
   if (req.body.generatedSlots) {
     updatedTurfData.generatedSlots = JSON.parse(req.body.generatedSlots);
+  }
+
+  if (req.body.managerContacts) {
+    updatedTurfData.managerContacts = JSON.parse(req.body.managerContacts);
   }
 
   if (req.body.slotDuration) updatedTurfData.slotDuration = Number(req.body.slotDuration);

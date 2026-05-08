@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { X, LayoutDashboard, Trophy, Calendar, Star, ShieldCheck, Activity, LogOut } from "lucide-react";
+import { X, LayoutDashboard, Trophy, Calendar, Star, ShieldCheck, Activity, LogOut, Clock, User } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +19,10 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/umpire", label: "OVERVIEW", icon: LayoutDashboard },
     { to: "/umpire/matches", label: "MATCHES", icon: Trophy },
     { to: "/umpire/schedule", label: "SCHEDULE", icon: Calendar },
-    { to: "/umpire/feedback", label: "RATINGS", icon: Star },
+    { to: "/umpire/availability", label: "AVAILABILITY", icon: Clock },
+    { to: "/umpire/bookings", label: "BOOKINGS", icon: Activity },
+    { to: "/umpire/reviews", label: "REVIEWS", icon: Star },
+    { to: "/umpire/profile", label: "PROFILE", icon: User },
     { action: "logout", label: "SIGN OUT", icon: LogOut },
   ];
 

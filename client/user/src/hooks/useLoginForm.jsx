@@ -86,6 +86,8 @@ const useLoginForm = () => {
 
     setLoading(true);
     try {
+      const { email } = getValues();
+      const response = await axiosInstance.post("/api/owner/auth/login-step2", { email, otp: data.otp });
       const result = response.data;
       
       dispatch(login({ token: result.token, role: result.role, user: result.user }));

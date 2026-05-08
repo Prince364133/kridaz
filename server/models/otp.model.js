@@ -1,10 +1,16 @@
 import mongoose from 'mongoose';
 
 const otpSchema = new mongoose.Schema({
-    email: { type: String, required: true },
-    otp: { type: String, required: true },
-    createdAt: { type: Date, expires: 300, default: Date.now } // Expires in 5 minutes (300 seconds)
+    email: { type: String },
+    phone: { type: String },
+    emailOtp: { type: String },
+    phoneOtp: { type: String },
+    createdAt: { type: Date, expires: 600, default: Date.now } // Increased to 10 minutes
 });
+
+// Index to find by email OR phone
+otpSchema.index({ email: 1 });
+otpSchema.index({ phone: 1 });
 
 const OTP = mongoose.model("OTP", otpSchema);
 

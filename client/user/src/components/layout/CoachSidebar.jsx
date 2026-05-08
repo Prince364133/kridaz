@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { X, Home, Users, Calendar, Video, LayoutDashboard, Target, Activity, LogOut } from "lucide-react";
+import { X, Home, Users, Calendar, Video, LayoutDashboard, Target, Activity, LogOut, Clock, MessageSquare, User } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +19,10 @@ const CoachSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/coach", label: "OVERVIEW", icon: LayoutDashboard },
     { to: "/coach/students", label: "ROSTER", icon: Users },
     { to: "/coach/sessions", label: "SESSIONS", icon: Calendar },
+    { to: "/coach/availability", label: "AVAILABILITY", icon: Clock },
+    { to: "/coach/bookings", label: "BOOKINGS", icon: Activity },
+    { to: "/coach/reviews", label: "REVIEWS", icon: MessageSquare },
+    { to: "/coach/profile", label: "PROFILE", icon: User },
     { to: "/coach/masterclass", label: "MASTERCLASS", icon: Video },
     { action: "logout", label: "SIGN OUT", icon: LogOut },
   ];

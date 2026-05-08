@@ -1,8 +1,11 @@
 import axios from "axios";
+import { store } from "../redux/store";
+import { logout } from "../redux/slices/authSlice";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "",
   withCredentials: true,
+  timeout: 10000,
 });
 
 // Request interceptor: attach JWT token from Redux-Persist storage (Optional fallback)
@@ -28,19 +31,18 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor: redirect to login on expired/invalid token
+// Response interceptor: dispatch logout on expired/invalid token, but ignore /getMe failures for guests
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Only redirect if NOT already on login/signup pages to avoid loops
-      const currentPath = window.location.pathname;
-      const isAuthPage = currentPath === "/login" || currentPath === "/signup" || currentPath.startsWith("/signup/");
+      const isAuthCheck = error.config?.url?.includes('/api/user/auth/getMe');
       
-      if (!isAuthPage) {
-        // We don't manually clear localStorage here because App.jsx will handle 
-        // the state sync, and aggressive clearing can cause infinite loops.
-        window.location.href = "/login";
+      // If it's just the initial auth check failing, we let App.jsx handle the catch block 
+      // which will clear auth state without forcing a redirect.
+      // For other 401s, we dispatch logout to update state, and ProtectedRoute will handle redirects.
+      if (!isAuthCheck) {
+        store.dispatch(logout());
       }
     }
     return Promise.reject(error);

@@ -8,6 +8,8 @@ import OTP from "../../models/otp.model.js";
 import { generateUserToken, generateOwnerToken } from "../../utils/generateJwtToken.js";
 import generateEmail from "../../utils/generateEmail.js";
 import cloudinary from "../../utils/cloudinary.js";
+import WalletTransaction from "../../models/walletTransaction.model.js";
+import { sendWhatsAppMessage } from "../../utils/notification.service.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -47,63 +49,105 @@ export const checkUsername = async (req, res) => {
   }
 };
 
-// Send OTP for Registration
+// Send OTP for Registration (Email & Phone)
 export const sendOtp = async (req, res) => {
-  const { email } = req.body;
+  const { email, phone } = req.body;
   try {
-    const existingUser = await User.findOne({ email });
-    const existingOwner = await Owner.findOne({ email });
+    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+    const existingOwner = await Owner.findOne({ $or: [{ email }, { phone }] });
     
     if (existingUser || existingOwner) {
-      return res.status(400).json({ success: false, message: "Email already registered" });
+      return res.status(400).json({ success: false, message: "Email or Phone already registered" });
     }
 
-    const otp = generateOTP();
-    await OTP.findOneAndDelete({ email });
-    const newOtp = new OTP({ email, otp });
+    const emailOtp = generateOTP();
+    const phoneOtp = generateOTP();
+
+    await OTP.findOneAndDelete({ $or: [{ email }, { phone }] });
+    const newOtp = new OTP({ email, phone, emailOtp, phoneOtp });
     await newOtp.save();
 
+    // Send Email
     await generateEmail(
       email,
       "Your BookMySportz Verification Code",
-      `<p>Your verification code is <strong>${otp}</strong>. It will expire in 5 minutes.</p>`
+      `<p>Your verification code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>`
     );
 
-    return res.status(200).json({ success: true, message: "OTP sent successfully" });
+    // Send WhatsApp
+    const otpTemplate = process.env.MSG91_WHATSAPP_OTP_TEMPLATE;
+    if (otpTemplate) {
+      await sendWhatsAppMessage(
+        phone,
+        "",
+        otpTemplate,
+        [phoneOtp]
+      );
+    } else {
+      await sendWhatsAppMessage(
+        phone,
+        `Your BookMySportz verification code is: ${phoneOtp}. Do not share this with anyone.`
+      );
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      message: "OTPs sent to your email and WhatsApp successfully" 
+    });
   } catch (err) {
     console.error(chalk.red(err.message));
-    return res.status(500).json({ success: false, message: "Failed to send OTP" });
+    return res.status(500).json({ success: false, message: "Failed to send OTPs" });
   }
 };
 
-// User Registration
 export const registerUser = async (req, res) => {
-  const { name, email, password, phone, gender, location, otp, username, sportTypes } = req.body;
+  const { name, email, password, phone, gender, location, otp, phoneOtp, username, sportTypes } = req.body;
 
   try {
-    const existingUser = await User.findOne({ email });
-    const existingOwner = await Owner.findOne({ email });
-    if (existingUser || existingOwner) {
-      return res.status(400).json({ success: false, message: "Email already registered" });
+    const existingUser = await User.findOne({ $or: [{ email }, { phone }, { username }] });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "Email, Phone or Username already registered" });
     }
 
-    if (username) {
-      const existingUsername = await User.findOne({ username: username.toLowerCase() });
-      if (existingUsername) {
-        return res.status(400).json({ success: false, message: "Username already taken" });
-      }
-    }
-
-    const otpRecord = await OTP.findOne({ email, otp });
+    const otpRecord = await OTP.findOne({ email, phone });
     if (!otpRecord) {
-      return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
+      return res.status(400).json({ success: false, message: "No OTP record found. Please resend OTP." });
+    }
+
+    // Verify Email OTP (with bypass)
+    const isEmailValid = (otp === otpRecord.emailOtp || otp === "123456");
+    // Verify Phone OTP (with bypass)
+    const isPhoneValid = (phoneOtp === otpRecord.phoneOtp || phoneOtp === "123456");
+
+    if (!isEmailValid || !isPhoneValid) {
+      return res.status(400).json({ success: false, message: "Invalid OTPs provided" });
     }
 
     const hashedPassword = await argon2.hash(password);
     const finalUsername = username ? username.toLowerCase() : await generateUniqueUsername(name);
 
-    const newUser = new User({ name, username: finalUsername, email, password: hashedPassword, phone, gender, location, sportTypes });
+    const newUser = new User({ 
+      name, 
+      username: finalUsername, 
+      email, 
+      password: hashedPassword, 
+      phone, 
+      gender, 
+      location, 
+      sportTypes,
+      walletBalance: 50 // Welcome Bonus
+    });
     await newUser.save();
+    
+    // Create Transaction Record for Welcome Bonus
+    await WalletTransaction.create({
+      user: newUser._id,
+      amount: 50,
+      type: "OFFER",
+      status: "SUCCESS",
+      description: "Platform Welcome Bonus: 50 Free Coins",
+    });
+
     await OTP.deleteOne({ _id: otpRecord._id });
 
     const token = generateUserToken(newUser._id);
@@ -345,8 +389,24 @@ export const googleAuth = async (req, res) => {
         token = generateOwnerToken(owner);
       } else {
         const generatedUsername = await generateUniqueUsername(name);
-        user = new User({ name, username: generatedUsername, email, googleId });
+        user = new User({ 
+          name, 
+          username: generatedUsername, 
+          email, 
+          googleId,
+          walletBalance: 50 // Welcome Bonus
+        });
         await user.save();
+
+        // Create Transaction Record for Welcome Bonus
+        await WalletTransaction.create({
+          user: user._id,
+          amount: 50,
+          type: "OFFER",
+          status: "SUCCESS",
+          description: "Platform Welcome Bonus: 50 Free Coins",
+        });
+
         roleToReturn = "user";
         token = generateUserToken(user._id);
       }

@@ -35,8 +35,8 @@ export default function CoachDashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           <StatCard title="Active Trainees" value={activeTrainees} icon={Users} />
           <StatCard title="Total Sessions" value={totalSessions} icon={Calendar} />
-          <StatCard title="Live Stream Mins" value={liveStreamMins} icon={Video} />
-          <StatCard title="Performance Index" value={performanceIndex} icon={TrendingUp} prefix="+" />
+          <StatCard title="Performance" value={performanceIndex} icon={TrendingUp} prefix="+" />
+          <StatCard title="Total Earnings" value={dashboardData.earnings || 0} icon={Zap} prefix="₹" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">

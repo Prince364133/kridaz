@@ -1,4 +1,5 @@
 import { Clock, MapPin, IndianRupee, Calendar, QrCode, ShieldCheck, Zap, Activity } from "lucide-react";
+import { Link } from "react-router-dom";
 import useBookingHistory from "../../hooks/useBookingHistory";
 import useWriteReview from "../../hooks/useWriteReview";
 import TurfBookingHistorySkeleton from "../../components/ui/TurfBookingHistorySkeleton";
@@ -84,13 +85,13 @@ const TurfBookingHistory = () => {
                     {/* QR Code Section */}
                     <div className="relative shrink-0 group/qr">
 
-                      <div className="relative p-4 bg-white rounded-2xl">
+                      <Link to={`/booking-pass/${booking._id}`} className="relative p-4 bg-white rounded-2xl block hover:scale-105 transition-transform">
                         <img
                           src={booking.qrCode}
                           alt="Booking QR"
                           className="w-32 h-32"
                         />
-                      </div>
+                      </Link>
                       <div className="mt-3 text-center">
                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-normal">Entry Pass</span>
                       </div>
@@ -137,7 +138,14 @@ const TurfBookingHistory = () => {
                         </div>
                       </div>
 
-                      <div className="flex justify-end pt-6">
+                      <div className="flex justify-end gap-3 pt-6">
+                        <Link
+                          to={`/booking-pass/${booking._id}`}
+                          className="flex items-center gap-2 px-8 py-2.5 bg-white/5 border border-white/10 hover:border-[#84CC16]/50 text-white hover:text-[#84CC16] rounded-xl text-[10px] font-bold uppercase tracking-normal transition-all group/btn"
+                        >
+                          View Digital Pass
+                          <QrCode size={12} className="group-hover/btn:scale-110 transition-all" />
+                        </Link>
                         <button
                           className="flex items-center gap-2 px-8 py-2.5 border border-white/10 hover:border-[#84CC16]/50 text-white hover:text-[#84CC16] rounded-xl text-[10px] font-bold uppercase tracking-normal transition-all group/btn"
                           onClick={() => openReviewModal(booking.turf._id)}
