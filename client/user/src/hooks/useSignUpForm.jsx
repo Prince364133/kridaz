@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useState, useEffect } from "react";
-import axiosInstance from "./useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -55,6 +55,8 @@ const useSignUpForm = (predefinedRole = "user") => {
   const [loading, setLoading] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState(null); // 'checking', 'available', 'unavailable'
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingUser, setOnboardingUser] = useState(null);
 
   // Determine API base path based on role
   const apiPath = predefinedRole === "user" ? "/api/user/auth" : "/api/owner/auth";
@@ -185,6 +187,17 @@ const useSignUpForm = (predefinedRole = "user") => {
       toast.success("Successfully logged in with Google!");
       dispatch(login({ token: result.token, role: result.role, user: result.user }));
       
+      // Check if onboarding is needed (missing mandatory fields)
+      const user = result.user;
+      const isMissingDetails = !user.phone || !user.gender || !user.location || !user.sportTypes || user.sportTypes.length === 0;
+
+      if (isMissingDetails && result.role === "user") {
+        setOnboardingUser(user);
+        setShowOnboarding(true);
+        // Don't navigate yet, the modal will handle completion
+        return;
+      }
+
       if (result.role === "owner") {
         navigate("/partner");
       } else if (result.role === "coach") {
@@ -221,7 +234,10 @@ const useSignUpForm = (predefinedRole = "user") => {
     showOtpInput,
     handleGoogleSuccess,
     handleGoogleError,
-    usernameStatus
+    usernameStatus,
+    showOnboarding,
+    setShowOnboarding,
+    onboardingUser
   };
 };
 

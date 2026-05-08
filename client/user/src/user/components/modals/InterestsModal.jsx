@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, Trophy, Check, Loader2 } from "lucide-react";
-import axiosInstance from "../../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 
 const SPORTS = [

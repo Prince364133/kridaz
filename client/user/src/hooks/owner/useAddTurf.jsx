@@ -4,7 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { format, isValid } from "date-fns";
 import toast from "react-hot-toast";
-import axiosInstance from "../useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import { useNavigate } from "react-router-dom";
 
 const addTurfSchema = yup.object().shape({

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axiosInstance from "../../../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import { 
   Trash2, 
   MessageSquare, 

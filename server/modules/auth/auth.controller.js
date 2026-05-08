@@ -586,7 +586,7 @@ export const updateInterests = async (req, res) => {
   }
 };
 export const updateProfile = async (req, res) => {
-  const { name, username, phone, bio, gender, city, state } = req.body;
+  const { name, username, phone, bio, gender, city, state, location, sportTypes } = req.body;
   try {
     const decoded = req.user || req.owner;
     if (!decoded) {
@@ -614,7 +614,9 @@ export const updateProfile = async (req, res) => {
       bio,
       gender,
       city,
-      state
+      state,
+      location,
+      sportTypes
     };
 
     if (role === "user") {

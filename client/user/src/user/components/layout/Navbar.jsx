@@ -4,7 +4,7 @@ import { User, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock } 
 import { useState, useEffect } from "react";
 import { logout } from "@redux/slices/authSlice";
 import toast from "react-hot-toast";
-import axiosInstance from "../../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 const Navbar = () => {
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);

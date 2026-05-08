@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useSignUpForm from "../../hooks/useSignUpForm";
 import GoogleAuthButton from "@user/components/auth/GoogleAuthButton";
+import OnboardingModal from "../../components/modals/OnboardingModal";
 import { 
   ArrowRight, 
   ShieldCheck, 
@@ -50,7 +51,10 @@ const SignUp = () => {
     showOtpInput,
     handleGoogleSuccess,
     handleGoogleError,
-    usernameStatus
+    usernameStatus,
+    showOnboarding,
+    setShowOnboarding,
+    onboardingUser
   } = useSignUpForm();
   
   const [mounted, setMounted] = useState(false);
@@ -490,6 +494,12 @@ const SignUp = () => {
       {/* AMBIENT LIGHTING */}
       <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-white/[0.01] pointer-events-none rounded-full" />
       <div className="absolute bottom-1/4 left-0 w-[600px] h-[600px] bg-white/[0.01] pointer-events-none rounded-full" />
+      {/* ONBOARDING MODAL */}
+      <OnboardingModal 
+        isOpen={showOnboarding} 
+        onClose={() => setShowOnboarding(false)} 
+        onComplete={() => navigate("/")}
+      />
     </div>
   );
 };

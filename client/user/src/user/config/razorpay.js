@@ -1,5 +1,5 @@
 import toast from "react-hot-toast";
-import axiosInstance from "../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 export const createOrder = async (totalPrice) => {
   const response = await axiosInstance.post("/api/user/booking/create-order", {

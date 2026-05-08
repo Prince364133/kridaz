@@ -3,7 +3,7 @@ import { RouterProvider } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import router from "./router";
 import { login, logout } from "./redux/slices/authSlice";
-import axiosInstance from "./hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 // Simple JWT decoder (no verification, just payload extraction)
 const decodeToken = (token) => {

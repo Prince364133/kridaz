@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import axiosInstance from "../../../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import { toast } from "react-hot-toast";
 import { Plus, Trash2, Edit2, Layout, Video, Check, X, GripVertical, Upload, Image as ImageIcon } from "lucide-react";
 

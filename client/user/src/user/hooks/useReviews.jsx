@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axiosInstance from "./useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 
 const useReviews = (turfId) => {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import axiosInstance from "../useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 const useTurfDetails = (turfId) => {
   const [turfData, setTurfData] = useState(null);

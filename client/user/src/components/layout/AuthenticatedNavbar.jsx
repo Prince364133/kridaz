@@ -2,7 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
-import axiosInstance from "../../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const dispatch = useDispatch();

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import axiosInstance from "../useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 const useOwnerBookings = () => {
   const [allBookings, setAllBookings] = useState([]);

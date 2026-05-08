@@ -9,7 +9,7 @@ import {
   addDays,
   addHours,
 } from "date-fns";
-import axiosInstance from "./useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 const useTimeSelection = (
   selectedDate,

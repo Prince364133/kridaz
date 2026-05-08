@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axiosInstance from "../useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 const useTransactionData = () => {
   const [transactions, setTransactions] = useState([]);

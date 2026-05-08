@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { setTurfs, setLoading, setError } from "@redux/slices/turfSlice";
-import axiosInstance from "../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import { useEffect } from "react";
 
 const useTurfData = (filters = {}) => {

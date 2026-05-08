@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axiosInstance from "../../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import { toast } from "react-hot-toast";
 import { Activity, ToggleLeft, ToggleRight, Server } from "lucide-react";
 

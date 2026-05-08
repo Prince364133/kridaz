@@ -1,6 +1,6 @@
 // useOwners.jsx
 import { useState, useEffect } from "react";
-import axiosInstance from "../useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 const useOwners = () => {
   const [owners, setOwners] = useState({

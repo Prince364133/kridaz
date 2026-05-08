@@ -1,7 +1,7 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { logout } from "@redux/slices/authSlice";
 import { useDispatch } from "react-redux";
-import axiosInstance from "../../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 export default function AuthNavbar() {
   const dispatch = useDispatch();
