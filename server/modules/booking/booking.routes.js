@@ -3,7 +3,8 @@ import {
   createOrder, 
   verifyPayment, 
   getUserBookings,
-  getOwnerBookings
+  getOwnerBookings,
+  getBookingById
 } from "./booking.controller.js";
 import { createOrderSchema, verifyPaymentSchema } from "./booking.validator.js";
 import { validate } from "../../middleware/validate.middleware.js";
@@ -16,6 +17,7 @@ const router = express.Router();
 router.post("/user/order", verifyUserToken, validate(createOrderSchema), createOrder);
 router.post("/user/verify", verifyUserToken, validate(verifyPaymentSchema), verifyPayment);
 router.get("/user/all", verifyUserToken, getUserBookings);
+router.get("/:id", getBookingById); // Made public for QR code access or simplified access
 
 // Owner routes
 router.get("/owner/all", verifyOwnerToken, getOwnerBookings);

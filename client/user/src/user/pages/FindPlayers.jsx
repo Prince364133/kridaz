@@ -12,16 +12,19 @@ import {
   Users,
   Trophy,
   Filter,
-  Check
+  Check,
+  MessageCircle
 } from "lucide-react";
 import toast from "react-hot-toast";
 import StoryViewer from "../components/StoryViewer";
+import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
 const avatarColors = ["#1a3300", "#001a33", "#330033", "#331a00", "#003333", "#1a0033"];
 const avatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.length] || "#1a1a1a";
 
 const FindPlayers = () => {
   const { user: currentUser, isLoggedIn } = useSelector((state) => state.auth);
+  const { gateInteraction } = useLoginOnDemand();
   const navigate = useNavigate();
 
   // Debugging auth state
@@ -95,52 +98,50 @@ const FindPlayers = () => {
   };
 
   const handleFollowToggle = async (targetUserId) => {
-    if (!isLoggedIn) {
-      console.warn("Follow toggle failed: User not logged in", { isLoggedIn });
-      toast.error("Please login to follow players");
-      navigate("/login");
-      return;
-    }
-    const isFollowing = followingIds.includes(targetUserId);
-    try {
-      const endpoint = isFollowing 
-        ? `/api/user/players/${targetUserId}/unfollow` 
-        : `/api/user/players/${targetUserId}/follow`;
+    gateInteraction(async () => {
+      const isFollowing = followingIds.includes(targetUserId);
+      try {
+        const endpoint = `/api/user/players/${targetUserId}/${isFollowing ? 'unfollow' : 'follow'}`;
+        await axiosInstance.post(endpoint);
         
-      const response = await axiosInstance.post(endpoint);
-      if (response.data.success) {
         if (isFollowing) {
-          setFollowingIds(followingIds.filter(id => id !== targetUserId));
+          setFollowingIds(prev => prev.filter(id => id !== targetUserId));
           toast.success("Unfollowed player");
         } else {
-          setFollowingIds([...followingIds, targetUserId]);
+          setFollowingIds(prev => [...prev, targetUserId]);
           toast.success("Following player");
         }
+      } catch (error) {
+        toast.error("Failed to update follow status");
       }
-    } catch (error) {
-      const message = error.response?.data?.message || "Failed to update follow status";
-      toast.error(message);
-    }
+    }, {
+      title: "Build Your Network",
+      message: "Connect with players in your city, track their progress, and challenge them to a match. Sign in to start following athletes."
+    });
   };
 
-  const handleAvatarClick = async (player) => {
-    if (!currentUser) {
-      navigate("/login");
-      return;
-    }
-    if (!player.hasActiveStory) return;
-    
-    try {
-      const res = await axiosInstance.get(`/api/user/community/user-stories/${player._id}`);
-      if (res.data.success && res.data.stories?.length > 0) {
-        setViewingStoryGroup({
-          user: player,
-          stories: res.data.stories
-        });
-      }
-    } catch (error) {
-      toast.error("Failed to load stories");
-    }
+  const handleAvatarClick = (player) => {
+    gateInteraction(() => {
+      if (!player.hasActiveStory) return;
+      
+      const fetchStories = async () => {
+        try {
+          const res = await axiosInstance.get(`/api/user/community/user-stories/${player._id}`);
+          if (res.data.success && res.data.stories?.length > 0) {
+            setViewingStoryGroup({
+              user: player,
+              stories: res.data.stories
+            });
+          }
+        } catch (error) {
+          toast.error("Failed to load stories");
+        }
+      };
+      fetchStories();
+    }, {
+      title: "Watch Stories",
+      message: "See the latest highlights, training sessions, and match updates from your favorite players. Sign in to view their stories."
+    });
   };
 
   return (
@@ -301,16 +302,30 @@ const FindPlayers = () => {
                   {/* Actions - Sticky Right */}
                   <div className="flex items-center gap-3 shrink-0">
                     {(!currentUser || currentUser._id !== player._id) && (
-                      <button 
-                        onClick={() => handleFollowToggle(player._id)}
-                        className={`px-3 md:px-5 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all ${
-                          followingIds.includes(player._id) 
-                            ? "bg-white/5 text-white/20 border border-white/10 hover:bg-white/10" 
-                            : "bg-[#84CC16] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(132,204,22,0.15)]"
-                        }`}
-                      >
-                        {followingIds.includes(player._id) ? "Following" : "Follow"}
-                      </button>
+                      <>
+                        <button
+                          onClick={() => {
+                            gateInteraction(() => navigate(`/messages?userId=${player._id}`), {
+                              title: "Start a Conversation",
+                              message: "Direct messaging allows you to coordinate matches and discuss tactics. Sign in to chat with players."
+                            });
+                          }}
+                          className="p-1.5 md:p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-[#84CC16] hover:border-[#84CC16]/30 transition-all group/msg"
+                          title="Message Player"
+                        >
+                          <MessageCircle size={14} className="group-hover/msg:scale-110 transition-transform" />
+                        </button>
+                        <button 
+                          onClick={() => handleFollowToggle(player._id)}
+                          className={`px-3 md:px-5 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all ${
+                            followingIds.includes(player._id) 
+                              ? "bg-white/5 text-white/20 border border-white/10 hover:bg-white/10" 
+                              : "bg-[#84CC16] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(132,204,22,0.15)]"
+                          }`}
+                        >
+                          {followingIds.includes(player._id) ? "Following" : "Follow"}
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>

@@ -27,8 +27,17 @@ const ownerSchema = new mongoose.Schema(
     bookingCount: { type: Number, default: 0 },
     interests: [{ type: String }],
     waitlistPosition: { type: Number },
-  },
-  { timestamps: true }
+    price: { type: Number, default: 0 },
+    gameTypes: [{ type: String }],
+    city: { type: String },
+    state: { type: String },
+    walletBalance: { type: Number, default: 0 },
+    reservedBalance: { type: Number, default: 0 },
+    certifications: [{ type: String }],
+    rating: { type: Number, default: 0 },
+    numReviews: { type: Number, default: 0 },
+ },
+ { timestamps: true }
 );
 
 export default mongoose.model("Owner", ownerSchema);

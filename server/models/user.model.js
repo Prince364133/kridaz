@@ -23,6 +23,8 @@ const userSchema = new mongoose.Schema({
     bookingCount: { type: Number, default: 0 },
     interests: [{ type: String }],
     bookings:[{type:mongoose.Schema.Types.ObjectId, ref:'Booking'}],
+    walletBalance: { type: Number, default: 0 },
+    reservedBalance: { type: Number, default: 0 },
  }, {timestamps: true});
 
 userSchema.index({ locationData: "2dsphere" }, { sparse: true });

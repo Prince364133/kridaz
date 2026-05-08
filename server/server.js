@@ -1,8 +1,10 @@
 import { setDefaultResultOrder } from "dns";
 import { setServers } from "dns";
+import dotenv from "dotenv";
 import app from "./app.js";
 import connectDB from "./config/database.js";
-import dotenv from "dotenv";
+import http from "http";
+import socketConfig from "./config/socket.js";
 
 // Force Node.js to use Google DNS to resolve MongoDB Atlas SRV records
 setDefaultResultOrder("ipv4first");
@@ -11,11 +13,14 @@ setServers(["8.8.8.8", "8.8.4.4"]);
 dotenv.config();
 
 const port = process.env.PORT || 4000;
+const server = http.createServer(app);
+
+// Initialize Socket.io
+socketConfig(server);
 
 // Function to start the server
 const startServer = () => {
-  // Start listening immediately so frontend can connect
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`[SERVER] Running on http://localhost:${port}`);
     
     // Connect to database in the background

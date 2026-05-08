@@ -5,10 +5,12 @@ import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
 import Turf from "./components/turf/Turf";
 import TurfDetails from "./components/turf/TurfDetails";
+import BookingPass from "./components/turf/BookingPass";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import TurfBookingHistory from "./components/turf/TurfBookingHistory";
 import NotFound from "./components/common/NotFound";
 import Profile from "./pages/Profile";
+import Wallet from "./pages/Wallet";
 import Blogs from "./pages/Blogs";
 import BlogDetail from "./pages/BlogDetail";
 import VenueOwnerSignUp from "./pages/auth/VenueOwnerSignUp";
@@ -19,6 +21,9 @@ import VenueOwnerLanding from "./pages/business/VenueOwnerLanding";
 import CoachLanding from "./pages/business/CoachLanding";
 import UmpireLanding from "./pages/business/UmpireLanding";
 import BusinessRegistration from "./pages/business/BusinessRegistration";
+import JoinGames from "./pages/JoinGames";
+import HostGame from "./pages/HostGame";
+import MyHostedGames from "./pages/MyHostedGames";
 
 // Owner Portal Imports (via @owner alias)
 import { AdminLayout, PartnerLayout, CoachLayout, UmpireLayout } from "@owner/layouts";
@@ -108,10 +113,15 @@ const router = createBrowserRouter([
       { path: "signup/coach", element: <CoachSignUp /> },
       { path: "signup/official", element: <UmpireSignUp /> },
       { path: "turf/:id", element: <TurfDetails /> },
+      { path: "booking-pass/:id", element: <BookingPass /> },
       { path: "profile", element: <ProtectedRoute><Profile /></ProtectedRoute> },
+      { path: "wallet", element: <ProtectedRoute><Wallet /></ProtectedRoute> },
       { path: "blogs", element: <Blogs /> },
       { path: "blogs/:id", element: <BlogDetail /> },
       { path: "booking-history", element: <ProtectedRoute><TurfBookingHistory /></ProtectedRoute> },
+      { path: "join-games", element: <ProtectedRoute><JoinGames /></ProtectedRoute> },
+      { path: "host-game", element: <ProtectedRoute><HostGame /></ProtectedRoute> },
+      { path: "my-hosted-games", element: <ProtectedRoute><MyHostedGames /></ProtectedRoute> },
     ],
   },
 

@@ -31,8 +31,8 @@ const getCookie = (name) => {
 };
 
 export default function App() {
+  console.log("App.jsx: Rendering App component...");
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
   const theme = useSelector((state) => state.theme.current);
   const [loading, setLoading] = useState(true);
 
@@ -41,28 +41,45 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
+    let isMounted = true;
+    const authTimeout = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn("App.jsx: Auth initialization timed out (5s). Forcing UI render.");
+        setLoading(false);
+      }
+    }, 5000);
+
     const initAuth = async () => {
-      // We rely on the /api/user/auth/getMe call to verify the session
-      // via the httpOnly cookie (auth_token). Browser sends it automatically.
+      console.log("App.jsx: Starting initAuth...");
       try {
         const response = await axiosInstance.get("/api/user/auth/getMe");
-        if (response.data.success) {
+        console.log("App.jsx: /getMe response status:", response.status);
+        if (isMounted && response.data.success) {
           dispatch(login({
             user: response.data.user,
             role: response.data.role,
-            token: response.data.token // Backend might return it as a fallback
+            token: response.data.token
           }));
         }
       } catch (error) {
-        // Any error in verification should clear the local auth state
-        dispatch(logout());
-        console.warn("Auth initialization failed/expired:", error.message);
+        if (isMounted) {
+          dispatch(logout());
+          console.warn("App.jsx: Auth initialization failed/expired:", error.message);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          clearTimeout(authTimeout);
+          console.log("App.jsx: initAuth complete, setting loading to false");
+          setLoading(false);
+        }
       }
     };
 
     initAuth();
+    return () => {
+      isMounted = false;
+      clearTimeout(authTimeout);
+    };
   }, [dispatch]);
 
   if (loading) {

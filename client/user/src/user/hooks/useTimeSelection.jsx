@@ -76,22 +76,8 @@ const useTimeSelection = (
 
       const formattedBookedTime = result.bookedTime.map((booking) => ({
         ...booking,
-        startTime: format(
-          addMinutes(
-            parseISO(booking.startTime),
-            parseISO(booking.startTime).getTimezoneOffset()
-          ),
-          "hh:mm a",
-          { timeZone: "UTC" }
-        ),
-        endTime: format(
-          addMinutes(
-            parseISO(booking.endTime),
-            parseISO(booking.endTime).getTimezoneOffset()
-          ),
-          "hh:mm a",
-          { timeZone: "UTC" }
-        ),
+        startTime: format(parseISO(booking.startTime), "hh:mm a"),
+        endTime: format(parseISO(booking.endTime), "hh:mm a"),
       }));
       setBookedTime(formattedBookedTime);
     } catch (error) {

@@ -1,6 +1,6 @@
  
 import { Outlet, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import Navbar from "../components/layout/Navbar";
 import MobileHeader from "../components/layout/MobileHeader";
@@ -8,10 +8,14 @@ import MobileBottomNav from "../components/layout/MobileBottomNav";
 import UserFooter from "../components/layout/UserFooter";
 import ScrollToTop from "../components/common/ScrollToTop";
 import OnboardingModal from "../components/modals/OnboardingModal";
+import LoginModal from "../components/modals/LoginModal";
+import { closeLoginModal } from "@redux/slices/uiSlice";
 
 const Root = () => {
   const location = useLocation();
+  const dispatch = useDispatch();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { loginModal } = useSelector((state) => state.ui);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
@@ -23,6 +27,13 @@ const Root = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Global Login-on-Demand Modal — rendered here so useNavigate() works inside router context */}
+      <LoginModal
+        isOpen={loginModal.isOpen}
+        onClose={() => dispatch(closeLoginModal())}
+        title={loginModal.title}
+        message={loginModal.message}
+      />
       <OnboardingModal 
         isOpen={showOnboarding} 
         onClose={() => setShowOnboarding(false)} 

@@ -1,4 +1,6 @@
+import mongoose from "mongoose";
 import Booking from "../../models/booking.model.js";
+import WalletTransaction from "../../models/walletTransaction.model.js";
 import Turf from "../../models/turf.model.js";
 import TimeSlot from "../../models/timeSlot.model.js";
 import User from "../../models/user.model.js";
@@ -8,6 +10,7 @@ import crypto from "crypto";
 import generateQRCode from "../../utils/generateQRCode.js";
 import adjustTime from "../../utils/adjustTime.js";
 import generateEmail, { generateHTMLContent } from "../../utils/generateEmail.js";
+import { generateInvoice } from "../../utils/invoiceGenerator.js";
 import { format, parseISO } from "date-fns";
 
 // --- USER OPERATIONS ---
@@ -70,7 +73,7 @@ export const verifyPayment = async (req, res) => {
     // Check User collection first, then Owner collection
     const [userResult, turf] = await Promise.all([
       User.findById(userId).then(u => u || Owner.findById(userId)),
-      Turf.findById(turfId),
+      Turf.findById(turfId).populate("owner", "email name"),
     ]);
     
     const user = userResult;
@@ -78,14 +81,25 @@ export const verifyPayment = async (req, res) => {
       return res.status(404).json({ success: false, message: "Account or Turf not found" });
     }
 
-    const QRcode = await generateQRCode(
-      totalPrice,
-      formattedStartTime,
-      formattedEndTime,
-      formattedDate,
-      turf.name,
-      turf.location
-    );
+    // Check for overlapping bookings
+    const overlappingSlot = await TimeSlot.findOne({
+      turf: turfId,
+      $or: [
+        { startTime: { $lt: adjustedEndTime, $gte: adjustedStartTime } },
+        { endTime: { $gt: adjustedStartTime, $lte: adjustedEndTime } },
+        { startTime: { $lte: adjustedStartTime }, endTime: { $gte: adjustedEndTime } }
+      ]
+    });
+
+    if (overlappingSlot) {
+      return res.status(400).json({ success: false, message: "This time slot is already booked." });
+    }
+
+    const bookingId = new mongoose.Types.ObjectId();
+    const frontendUrl = process.env.CLIENT_URLS?.split(",")[1] || "http://localhost:5174";
+    const qrUrl = `${frontendUrl}/booking-pass/${bookingId}`;
+
+    const QRcode = await generateQRCode(qrUrl);
 
     const timeSlot = await TimeSlot.create({
       turf: turfId,
@@ -94,6 +108,7 @@ export const verifyPayment = async (req, res) => {
     });
 
     const booking = await Booking.create({
+      _id: bookingId,
       user: userId,
       turf: turfId,
       timeSlot: timeSlot._id,
@@ -117,13 +132,33 @@ export const verifyPayment = async (req, res) => {
       QRcode
     );
 
-    generateEmail(user.email, "Booking Confirmation", htmlContent).catch(err => {
-      console.error("[EMAIL] Failed to send ticket:", err.message);
+    // Generate and Send Invoice (non-blocking)
+    generateInvoice(booking, turf, user).then(pdfBuffer => {
+      generateEmail(
+        user.email, 
+        "Booking Confirmation & Invoice - TurfSpot", 
+        htmlContent,
+        [
+          {
+            filename: `Invoice-TS-${booking._id.toString().slice(-6).toUpperCase()}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf'
+          }
+        ]
+      ).catch((err) => {
+        console.error("[EMAIL] Failed to send ticket with invoice:", err.message);
+      });
+    }).catch(err => {
+      console.error("[INVOICE] Failed to generate invoice:", err.message);
+      generateEmail(user.email, "Booking Confirmation", htmlContent).catch(err => {
+        console.error("[EMAIL] Failed to send ticket fallback:", err.message);
+      });
     });
 
     return res.status(200).json({
       success: true,
       message: "Booking successful, Check your email for the receipt",
+      bookingId: booking._id,
     });
   } catch (error) {
     console.error("Error in verifyPayment", error);
@@ -131,6 +166,192 @@ export const verifyPayment = async (req, res) => {
       success: false,
       message: "An error occurred while processing your booking: " + error.message,
     });
+  }
+};
+
+export const bookWithWallet = async (req, res) => {
+  const userId = req.user.id || req.user.user;
+  const { id: turfId, startTime, endTime, selectedTurfDate, totalPrice } = req.body;
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const formattedStartTime = format(parseISO(startTime), "hh:mm a");
+    const formattedEndTime = format(parseISO(endTime), "hh:mm a");
+    const formattedDate = format(parseISO(selectedTurfDate), "d MMM yyyy");
+
+    const adjustedStartTime = adjustTime(startTime, selectedTurfDate);
+    const adjustedEndTime = adjustTime(endTime, selectedTurfDate);
+
+    // 1. Check user and balance
+    let user = await User.findById(userId).session(session);
+    if (!user) {
+      user = await Owner.findById(userId).session(session);
+    }
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    if (user.walletBalance < totalPrice) {
+      throw new Error("Insufficient wallet balance. Please top up your wallet.");
+    }
+
+    const turf = await Turf.findById(turfId).populate("owner", "email name").session(session);
+    if (!turf) {
+      throw new Error("Turf not found");
+    }
+
+    // 2. Check for overlapping bookings
+    const overlappingSlot = await TimeSlot.findOne({
+      turf: turfId,
+      $or: [
+        { startTime: { $lt: adjustedEndTime, $gte: adjustedStartTime } },
+        { endTime: { $gt: adjustedStartTime, $lte: adjustedEndTime } },
+        { startTime: { $lte: adjustedStartTime }, endTime: { $gte: adjustedEndTime } }
+      ]
+    }).session(session);
+
+    if (overlappingSlot) {
+      throw new Error("This time slot is already booked. Please select another time.");
+    }
+
+    // 3. Deduct balance
+    user.walletBalance -= totalPrice;
+    await user.save({ session });
+
+    // 3. Create objects
+    const bookingId = new mongoose.Types.ObjectId();
+    const frontendUrl = process.env.CLIENT_URLS?.split(",")[1] || "http://localhost:5174";
+    const qrUrl = `${frontendUrl}/booking-pass/${bookingId}`;
+
+    const QRcode = await generateQRCode(qrUrl);
+
+    const timeSlot = await TimeSlot.create(
+      [
+        {
+          turf: turfId,
+          startTime: adjustedStartTime,
+          endTime: adjustedEndTime,
+        },
+      ],
+      { session }
+    );
+
+    const booking = await Booking.create(
+      [
+        {
+          _id: bookingId,
+          user: userId,
+          turf: turfId,
+          timeSlot: timeSlot[0]._id,
+          totalPrice,
+          qrCode: QRcode,
+          payment: {
+            orderId: "WALLET",
+            paymentId: `WAL_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+          },
+        },
+      ],
+      { session }
+    );
+
+    // 4. Update user bookings array
+    user.bookings.push(booking[0]._id);
+    await user.save({ session });
+
+    // 5. Create wallet transaction record
+    await WalletTransaction.create(
+      [
+        {
+          user: userId,
+          amount: totalPrice,
+          type: "DEBIT",
+          status: "SUCCESS",
+          description: `Booking at ${turf.name}`,
+          bookingId: booking[0]._id,
+        },
+      ],
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // 6. Send email with Invoice (non-blocking)
+    const htmlContent = generateHTMLContent(
+      turf.name,
+      turf.location,
+      formattedDate,
+      formattedStartTime,
+      formattedEndTime,
+      totalPrice,
+      QRcode
+    );
+
+    // Generate Invoice PDF
+    generateInvoice(booking[0], turf, user).then(pdfBuffer => {
+      generateEmail(
+        user.email, 
+        "Booking Confirmation & Invoice - TurfSpot", 
+        htmlContent,
+        [
+          {
+            filename: `Invoice-TS-${booking[0]._id.toString().slice(-6).toUpperCase()}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf'
+          }
+        ]
+      ).catch((err) => {
+        console.error("[EMAIL] Failed to send ticket with invoice:", err.message);
+      });
+    }).catch(err => {
+      console.error("[INVOICE] Failed to generate invoice:", err.message);
+      // Fallback: send email without invoice
+      generateEmail(user.email, "Booking Confirmation", htmlContent).catch((err) => {
+        console.error("[EMAIL] Failed to send ticket fallback:", err.message);
+      });
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking successful! Invoice sent to your email.",
+      bookingId: booking[0]._id,
+      newBalance: user.walletBalance
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Error in bookWithWallet:", error);
+    return res.status(400).json({
+      success: false,
+      message: error.message || "An error occurred during wallet booking",
+    });
+  }
+};
+
+export const getBookingById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const booking = await Booking.findById(id)
+      .populate("timeSlot", "startTime endTime")
+      .populate({
+        path: "turf",
+        select: "name location images managerContacts mapUrl owner",
+        populate: {
+          path: "owner",
+          select: "email name"
+        }
+      })
+      .populate("user", "name email");
+    
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+    
+    return res.status(200).json(booking);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };
 

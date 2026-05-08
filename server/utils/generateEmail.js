@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import chalk from "chalk";
 
-export default async function generateEmail(to, subject, html) {
+export default async function generateEmail(to, subject, html, attachments = []) {
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -16,6 +16,7 @@ export default async function generateEmail(to, subject, html) {
       to: to,
       subject: subject,
       html: html,
+      attachments: attachments, // Added for invoices
     };
     await transporter.sendMail(mailOptions);
   } catch (e) {

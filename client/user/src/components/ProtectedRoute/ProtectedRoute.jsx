@@ -9,8 +9,16 @@ export default function ProtectedRoute({ children, requiredRole }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (requiredRole && role?.toLowerCase() !== requiredRole?.toLowerCase()) {
-    return <Navigate to="/unauthorized" replace />;
+  if (requiredRole) {
+    const isAdminRole = (r) => r?.toLowerCase() === "admin" || r?.toLowerCase() === "bmsp_admin";
+    const isMatchingRole = role?.toLowerCase() === requiredRole?.toLowerCase();
+    
+    // If route requires admin, both "admin" and "BMSP_ADMIN" are allowed
+    if (requiredRole.toLowerCase() === "admin") {
+      if (!isAdminRole(role)) return <Navigate to="/unauthorized" replace />;
+    } else if (!isMatchingRole) {
+      return <Navigate to="/unauthorized" replace />;
+    }
   }
 
   return children;

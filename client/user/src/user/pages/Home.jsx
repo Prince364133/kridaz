@@ -12,6 +12,7 @@ import SearchPlayers from "../components/search/SearchPlayers";
 import SearchTurf from "../components/search/SearchTurf";
 import InterestsModal from "../components/modals/InterestsModal";
 import { updateUser } from "@redux/slices/authSlice";
+import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
 const PRI = "#84CC16";
 const S2 = "#1A1A1A";
@@ -76,7 +77,9 @@ const avatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.le
 
 export default function Home() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);
+  const { gateInteraction } = useLoginOnDemand();
   const [showInterests, setShowInterests] = useState(false);
   const [activeTab, setActiveTab] = useState("venues");
   const [players, setPlayers] = useState([]);
@@ -90,6 +93,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [featureFlags, setFeatureFlags] = useState({});
   const [realSocialPosts, setRealSocialPosts] = useState([]);
+  const [hostedGames, setHostedGames] = useState([]);
+  const [hostedGamesLoading, setHostedGamesLoading] = useState(true);
+  const [selectedGameSport, setSelectedGameSport] = useState("ALL SPORTS");
 
   useEffect(() => {
     if (isLoggedIn && role === 'user' && user && (!user.sportTypes || user.sportTypes.length === 0)) {
@@ -150,21 +156,29 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [venuesRes, marketingRes, communityRes] = await Promise.all([
+        // Fetch features and marketing in parallel
+        const results = await Promise.allSettled([
           axiosInstance.get("/api/features"),
           axiosInstance.get("/api/features/marketing"),
-          axiosInstance.get("/api/user/community"),
+          axiosInstance.get("/api/user/community")
         ]);
-        setMarketing(marketingRes.data || { banners: [], videos: [] });
-        setFeatureFlags(venuesRes.data.flagsMap || {});
 
-        // Handle community posts
-        if (communityRes.data?.posts) {
-          const latestPosts = communityRes.data.posts.slice(0, 10);
+        const [venuesRes, marketingRes, communityRes] = results;
+
+        if (marketingRes.status === 'fulfilled') {
+          setMarketing(marketingRes.value.data || { banners: [], videos: [] });
+        }
+        
+        if (venuesRes.status === 'fulfilled') {
+          setFeatureFlags(venuesRes.value.data?.flagsMap || {});
+        }
+
+        if (communityRes.status === 'fulfilled' && communityRes.value.data?.posts) {
+          const latestPosts = communityRes.value.data.posts.slice(0, 10);
           setRealSocialPosts(latestPosts);
         }
       } catch (error) {
-        console.error("Error fetching generic data:", error);
+        console.error("Home.jsx: Critical error in fetchData:", error);
       } finally {
         setLoading(false);
       }
@@ -201,6 +215,26 @@ export default function Home() {
     fetchFollowingStatus();
   }, [playerFilters, userLocation, isLoggedIn]);
 
+  useEffect(() => {
+    const fetchHostedGames = async () => {
+      try {
+        setHostedGamesLoading(true);
+        let url = "/api/hosted-game/list";
+        const params = {};
+        if (user?.city) params.city = user.city;
+        if (selectedGameSport !== "ALL SPORTS") params.gameType = selectedGameSport;
+        
+        const res = await axiosInstance.get(url, { params });
+        setHostedGames(res.data.games || []);
+      } catch (err) {
+        console.error("Error fetching hosted games:", err);
+      } finally {
+        setHostedGamesLoading(false);
+      }
+    };
+    fetchHostedGames();
+  }, [user?.city, selectedGameSport]);
+
   const handleTurfSearch = (filters) => {
     setTurfFilters(filters);
   };
@@ -213,27 +247,27 @@ export default function Home() {
     e.preventDefault();
     e.stopPropagation();
     
-    if (!isLoggedIn) {
-      navigate("/login");
-      return;
-    }
-
-    const isFollowing = followingIds.includes(p._id);
-    try {
-      const endpoint = `/api/user/players/${p._id}/${isFollowing ? 'unfollow' : 'follow'}`;
-      await axiosInstance.post(endpoint);
-      
-      if (isFollowing) {
-        setFollowingIds(prev => prev.filter(id => id !== p._id));
-        toast.success(`Unfollowed ${p.name}`);
-      } else {
-        setFollowingIds(prev => [...prev, p._id]);
-        toast.success(`Following ${p.name}`);
+    gateInteraction(async () => {
+      const isFollowing = followingIds.includes(p._id);
+      try {
+        const endpoint = `/api/user/players/${p._id}/${isFollowing ? 'unfollow' : 'follow'}`;
+        await axiosInstance.post(endpoint);
+        
+        if (isFollowing) {
+          setFollowingIds(prev => prev.filter(id => id !== p._id));
+          toast.success(`Unfollowed ${p.name}`);
+        } else {
+          setFollowingIds(prev => [...prev, p._id]);
+          toast.success(`Following ${p.name}`);
+        }
+      } catch (err) {
+        console.error("Follow toggle failed:", err);
+        toast.error("Failed to update follow status");
       }
-    } catch (err) {
-      console.error("Follow toggle failed:", err);
-      toast.error("Failed to update follow status");
-    }
+    }, { 
+      title: "Join the Network", 
+      message: "Connect with players, build your squad, and stay updated on the latest games. Sign in to follow athletes." 
+    });
   };
 
   return (
@@ -404,7 +438,7 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {(turfs || []).slice(0, 8).map((t, i) => (
-              <Link to={isLoggedIn ? `/turf/${t._id}` : "/login"} key={t._id} className="bms-card group flex flex-col no-underline bg-[#111] rounded-2xl border border-[#2a2a2a] overflow-hidden">
+              <Link to={`/turf/${t._id}`} key={t._id} className="bms-card group flex flex-col no-underline bg-[#111] rounded-2xl border border-[#2a2a2a] overflow-hidden">
                 <div className="relative overflow-hidden" style={{ height: 180 }}>
                   <img src={t.image || "/banner-1.png"}
                     onError={(e) => { e.target.onerror = null; e.target.src = "/banner-1.png"; }}
@@ -445,7 +479,7 @@ export default function Home() {
         )}
 
         <div className="text-center mt-6 lg:mt-10">
-          <Link to={isLoggedIn ? "/turfs" : "/login"} className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-full border transition-all hover:border-[#84CC16] hover:text-[#84CC16]"
+          <Link to="/turfs" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-full border transition-all hover:border-[#84CC16] hover:text-[#84CC16]"
             style={{ borderColor: BDR, color: "#888" }}>
             View All Venues <ChevronRight size={16} />
           </Link>
@@ -588,16 +622,20 @@ export default function Home() {
                   No team? No problem. Find your people. Build your network. Play together.
                 </p>
               </div>
-              <Link to={isLoggedIn ? "/turfs" : "/login"} className="text-sm font-bold flex items-center gap-2 hover:text-[#84CC16] transition-colors" style={{ color: "#888" }}>
+              <Link to="/join-games" className="text-sm font-bold flex items-center gap-2 hover:text-[#84CC16] transition-colors" style={{ color: "#888" }}>
                 View More Games <ChevronRight size={16} />
               </Link>
             </div>
 
             {/* Tabs */}
             <div className="flex gap-2 mb-8 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
-              {["ALL SPORTS", "BADMINTON", "CRICKET", "FOOTBALL", "TENNIS", "PICKLEBALL"].map((tab, i) => (
-                <button key={tab} className="px-6 py-2 rounded-full font-bold text-xs shrink-0 transition-colors border"
-                  style={i === 0 ? { backgroundColor: PRI, color: "#000", borderColor: PRI } : { backgroundColor: "transparent", color: "#888", borderColor: BDR }}>
+              {["ALL SPORTS", "BADMINTON", "CRICKET", "FOOTBALL", "TENNIS", "PICKLEBALL"].map((tab) => (
+                <button 
+                  key={tab} 
+                  onClick={() => setSelectedGameSport(tab)}
+                  className="px-6 py-2 rounded-full font-bold text-xs shrink-0 transition-colors border"
+                  style={selectedGameSport === tab ? { backgroundColor: PRI, color: "#000", borderColor: PRI } : { backgroundColor: "transparent", color: "#888", borderColor: BDR }}
+                >
                   {tab}
                 </button>
               ))}
@@ -605,48 +643,89 @@ export default function Home() {
 
             {/* Game Cards */}
             <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-4 md:pb-0">
-              {[
-                { time: "6:00-9:00 pm", status: "Joined", statusColor: "#4ADE80", name: "Sampad", sport: "CRICKET", loc: "Malakpet, Hyderabad", dist: "+ 2.1km Away", filled: 2, total: 11, img: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&q=80" },
-                { time: "6:00-9:00 pm", status: "Started", statusColor: "#F97316", name: "Sunny", sport: "FOOTBALL", loc: "Malakpet, Hyderabad", dist: "+ 3.5km Away", filled: 6, total: 12, img: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&q=80" },
-                { time: "6:00-9:00 pm", status: "Slot Full", statusColor: "#6B7280", name: "Srikar", sport: "BADMINTON", loc: "Malakpet, Hyderabad", dist: "+ 5km Away", filled: 4, total: 4, img: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=600&q=80" },
-                { time: "6:00-9:00 pm", status: "Joined", statusColor: "#4ADE80", name: "Prince", sport: "CRICKET", loc: "Malakpet, Hyderabad", dist: "+ 9km Away", filled: 2, total: 11, img: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&q=80" },
-              ].map((game, i) => (
-                <div key={i} className="min-w-[75vw] md:min-w-0 snap-center relative rounded-3xl overflow-hidden border group shrink-0 md:shrink" style={{ height: "360px", borderColor: BDR }}>
-                  <img src={game.img} alt={game.sport} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.9) 100%)" }} />
-
-                  {/* Top Badges */}
-                  <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-bold text-black" style={{ backgroundColor: PRI }}>{game.time}</span>
-                    <span className="px-3 py-1 rounded-full text-[10px] font-bold text-white backdrop-blur-md" style={{ backgroundColor: "rgba(0,0,0,0.5)", border: `1px solid ${game.statusColor}` }}>{game.status}</span>
-                  </div>
-
-                  {/* Bottom Content */}
-                  <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-3">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-display text-2xl text-white uppercase leading-none">{game.name}</h3>
-                        <span className="px-2 py-0.5 rounded border text-[9px] font-bold tracking-widest text-white backdrop-blur-md" style={{ borderColor: "rgba(255,255,255,0.2)", backgroundColor: "rgba(255,255,255,0.1)" }}>{game.sport}</span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-                        <span className="flex items-center gap-1 text-gray-300"><MapPin size={10} style={{ color: PRI }} /> {game.loc}</span>
-                        <span className="font-bold" style={{ color: PRI }}>{game.dist}</span>
-                      </div>
-                    </div>
-
-                    {/* Progress */}
-                    <div>
-                      <div className="flex justify-between text-[10px] font-bold text-gray-400 mb-1">
-                        <span className="flex items-center gap-1"><Users size={10} style={{ color: PRI }} /> {game.filled}/{game.total} Going</span>
-                        <span>{Math.round((game.filled / game.total) * 100)}%</span>
-                      </div>
-                      <div className="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full transition-all duration-1000" style={{ backgroundColor: PRI, width: `${(game.filled / game.total) * 100}%` }} />
-                      </div>
-                    </div>
-                  </div>
+              {hostedGamesLoading ? (
+                [1, 2, 3, 4].map(i => (
+                  <div key={i} className="min-w-[75vw] md:min-w-0 snap-center h-[360px] rounded-3xl bg-neutral-900 border animate-pulse" style={{ borderColor: BDR }} />
+                ))
+              ) : hostedGames.length === 0 ? (
+                <div className="col-span-full py-12 text-center border-2 border-dashed border-neutral-800 rounded-3xl">
+                  <p className="text-neutral-500 font-bold uppercase tracking-widest">No games hosted yet</p>
                 </div>
-              ))}
+              ) : (
+                hostedGames.slice(0, 4).map((g, i) => {
+                  const openSlots = g.teams.teamA.slots.filter(s => s.status === 'OPEN').length + 
+                                    g.teams.teamB.slots.filter(s => s.status === 'OPEN').length;
+                  const totalSlots = g.teams.teamA.slots.length + g.teams.teamB.slots.length;
+                  const filled = totalSlots - openSlots;
+                  
+                  let status = "Open";
+                  let statusColor = PRI;
+                  if (g.status === 'CANCELLED') {
+                    status = "Cancelled";
+                    statusColor = "#EF4444";
+                  } else if (openSlots === 0) {
+                    status = "Slot Full";
+                    statusColor = "#6B7280";
+                  } else if (g.status === 'STARTED') {
+                    status = "Started";
+                    statusColor = "#F97316";
+                  }
+
+                  const game = {
+                    time: g.time,
+                    status: status,
+                    statusColor: statusColor,
+                    name: g.host?.name || "Host",
+                    sport: g.gameType,
+                    loc: g.ground?.name || g.city || "Venue",
+                    dist: g.ground?.location || g.state || "",
+                    filled: filled,
+                    total: totalSlots,
+                    img: g.ground?.images?.[0] || "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&q=80"
+                  };
+
+                  return (
+                    <div key={i} className="min-w-[75vw] md:min-w-0 snap-center relative rounded-3xl overflow-hidden border group shrink-0 md:shrink cursor-pointer" 
+                      onClick={() => navigate('/join-games')}
+                      style={{ height: "360px", borderColor: BDR }}
+                    >
+                      <img src={game.img} alt={game.sport} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.9) 100%)" }} />
+
+                      {/* Top Badges */}
+                      <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
+                        <span className="px-3 py-1 rounded-full text-[10px] font-bold text-black" style={{ backgroundColor: PRI }}>{game.time}</span>
+                        <span className="px-3 py-1 rounded-full text-[10px] font-bold text-white backdrop-blur-md" style={{ backgroundColor: "rgba(0,0,0,0.5)", border: `1px solid ${game.statusColor}` }}>{game.status}</span>
+                      </div>
+
+                      {/* Bottom Content */}
+                      <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-3">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-display text-2xl text-white uppercase leading-none">{game.name}</h3>
+                            <span className="px-2 py-0.5 rounded border text-[9px] font-bold tracking-widest text-white backdrop-blur-md" style={{ borderColor: "rgba(255,255,255,0.2)", backgroundColor: "rgba(255,255,255,0.1)" }}>{game.sport}</span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                            <span className="flex items-center gap-1 text-gray-300"><MapPin size={10} style={{ color: PRI }} /> {game.loc}</span>
+                            <span className="font-bold truncate max-w-[100px]" style={{ color: PRI }}>{game.dist}</span>
+                          </div>
+                        </div>
+
+                        {/* Progress */}
+                        <div>
+                          <div className="flex justify-between text-[10px] font-bold text-gray-400 mb-1">
+                            <span className="flex items-center gap-1"><Users size={10} style={{ color: PRI }} /> {game.filled}/{game.total} Going</span>
+                            <span>{Math.round((game.filled / game.total) * 100)}%</span>
+                          </div>
+                          <div className="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full transition-all duration-1000" style={{ backgroundColor: PRI, width: `${(game.filled / game.total) * 100}%` }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </section>
@@ -764,7 +843,7 @@ export default function Home() {
                   <span key={t} className="px-4 py-1.5 rounded-full text-xs font-bold border" style={{ borderColor: BDR, backgroundColor: "rgba(255,255,255,0.05)" }}>{t}</span>
                 ))}
               </div>
-              <Link to={isLoggedIn ? "/turfs" : "/login"} className="inline-block bg-white text-black font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition-colors">Find Venues</Link>
+              <Link to="/turfs" className="inline-block bg-white text-black font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition-colors">Find Venues</Link>
             </div>
           </div>
 
@@ -782,7 +861,7 @@ export default function Home() {
                   <div>
                     <h3 className="font-display text-4xl italic mb-1 leading-none">CHALLENGE<br />PLAYERS</h3>
                     <p className="text-gray-400 text-sm mb-4">Skill-matched opponents.</p>
-                    <Link to={isLoggedIn ? "/players" : "/login"} className="font-bold text-white flex items-center gap-2 hover:text-[#84CC16] transition-colors">Start Match <ArrowRight size={16} /></Link>
+                    <Link to="/players" className="font-bold text-white flex items-center gap-2 hover:text-[#84CC16] transition-colors">Start Match <ArrowRight size={16} /></Link>
                   </div>
                 </div>
               </div>
@@ -876,7 +955,7 @@ export default function Home() {
                   <div>
                     <h3 className="font-display text-2xl italic mb-1 leading-none uppercase">PRO COACHES</h3>
                     <p className="text-gray-400 text-xs mb-4">Expert training.</p>
-                    <Link to={isLoggedIn ? "/turfs" : "/login"} className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Find Coach <ArrowRight size={14} /></Link>
+                    <Link to="/turfs" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Find Coach <ArrowRight size={14} /></Link>
                   </div>
                 </div>
               </div>
@@ -892,7 +971,7 @@ export default function Home() {
                   <div>
                     <h3 className="font-display text-2xl italic mb-1 leading-none uppercase">REFEREES</h3>
                     <p className="text-gray-400 text-xs mb-4">Hire officials.</p>
-                    <Link to={isLoggedIn ? "/turfs" : "/login"} className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Book Now <ArrowRight size={14} /></Link>
+                    <Link to="/turfs" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Book Now <ArrowRight size={14} /></Link>
                   </div>
                 </div>
               </div>
@@ -941,7 +1020,6 @@ export default function Home() {
                       <button 
                         onClick={(e) => {
                           e.preventDefault();
-                          if (!isLoggedIn) return navigate("/login");
                           navigate(`/community?post=${post._id}`);
                         }}
                         className="flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors"
@@ -955,7 +1033,6 @@ export default function Home() {
                       <button 
                         onClick={(e) => {
                           e.preventDefault();
-                          if (!isLoggedIn) return navigate("/login");
                           navigate(`/community?post=${post._id}`);
                         }}
                         className="flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors"

@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import FeatureFlag from "./models/featureFlag.model.js";
+import FeatureFlag from "../models/featureFlag.model.js";
 
-dotenv.config();
+dotenv.config({ path: "../.env" });
 
 const seed = async () => {
   try {

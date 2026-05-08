@@ -8,7 +8,13 @@ import {
   Video, 
   Settings, 
   HelpCircle, 
-  LogOut 
+  LogOut,
+  Home,
+  Target,
+  Activity,
+  Clock,
+  MessageSquare,
+  User
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
@@ -28,6 +34,10 @@ const CoachSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/coach", label: "Overview", icon: LayoutDashboard },
     { to: "/coach/students", label: "Roster", icon: Users },
     { to: "/coach/sessions", label: "Sessions", icon: Calendar },
+    { to: "/coach/availability", label: "Availability", icon: Clock },
+    { to: "/coach/bookings", label: "Bookings", icon: Activity },
+    { to: "/coach/reviews", label: "Reviews", icon: MessageSquare },
+    { to: "/coach/profile", label: "Profile", icon: User },
     { to: "/coach/masterclass", label: "Masterclass", icon: Video },
   ];
 

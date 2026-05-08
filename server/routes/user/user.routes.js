@@ -7,6 +7,7 @@ import blogRouter from "./blog.routes.js"
 import playerRouter from "../../modules/player/player.routes.js"
 import storyRouter from "../../modules/story/story.routes.js"
 import communityRouter from "../../modules/community/community.routes.js"
+import walletRouter from "./wallet.routes.js";
 import { getPublicPlayers } from "../../modules/player/player.controller.js"
 
 const userRouter = Router();
@@ -22,5 +23,6 @@ userRouter.get("/players", getPublicPlayers);
 userRouter.use("/players", playerRouter);
 userRouter.use("/stories", storyRouter);
 userRouter.use("/community", communityRouter);
+userRouter.use("/wallet", walletRouter);
 
 export default userRouter;

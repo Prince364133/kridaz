@@ -12,20 +12,25 @@ import { parseISO } from "date-fns";
 function adjustTime(timeString, selectedTurfDate) {
   const timeZone = process.env.TIMEZONE || "Asia/Kolkata";
 
-  // Convert UTC time to the local timezone
+  // Parse the time components from the original time string
   const originalTime = parseISO(timeString);
-  const zonedTime = toZonedTime(originalTime, timeZone);
+  const hours = originalTime.getHours();
+  const minutes = originalTime.getMinutes();
 
-  // Parse the selected date in the same timezone
+  // Parse the selected date
   const turfDate = parseISO(selectedTurfDate);
-  const zonedDate = toZonedTime(turfDate, timeZone);
 
-  // Override the date components while keeping the time components
-  zonedTime.setFullYear(zonedDate.getFullYear());
-  zonedTime.setMonth(zonedDate.getMonth());
-  zonedTime.setDate(zonedDate.getDate());
+  // Create a new date object in the target timezone with the specified date and time
+  const combinedLocalTime = new Date(
+    turfDate.getFullYear(),
+    turfDate.getMonth(),
+    turfDate.getDate(),
+    hours,
+    minutes
+  );
 
-  return zonedTime;
+  // Convert this local time to UTC for database storage
+  return fromZonedTime(combinedLocalTime, timeZone);
 }
 
 export default adjustTime;

@@ -43,6 +43,13 @@ const EditTurf = () => {
     getMyLocation,
     isLocating,
     pendingUpdates,
+    managerContacts,
+    newManagerName,
+    setNewManagerName,
+    newManagerPhone,
+    setNewManagerPhone,
+    addManagerContact,
+    removeManagerContact
   } = useEditTurf(id);
 
   const sportsOptions = ["Football", "Cricket", "Tennis", "Badminton", "Table Tennis", "Basketball", "Volleyball", "Hockey"];
@@ -321,6 +328,71 @@ const EditTurf = () => {
                     ))}
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <h3 className="text-xl font-bold text-white border-b border-gray-800 pb-2 mb-8 uppercase tracking-widest mt-12">Support & Navigation</h3>
+            
+            <FormField
+              label="Direct Google Maps URL"
+              name="mapUrl"
+              type="text"
+              placeholder="https://maps.app.goo.gl/..."
+              register={register}
+              error={errors.mapUrl}
+            />
+            <p className="text-[9px] text-gray-500 uppercase tracking-tighter italic">Provide a direct navigation link for customers to reach your venue easily.</p>
+
+            <div className="form-control space-y-4">
+              <label className="label">
+                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Venue Managers (Contacts)</span>
+              </label>
+              
+              <div className="flex flex-col md:flex-row gap-3">
+                <input
+                  type="text"
+                  placeholder="Manager Name"
+                  value={newManagerName}
+                  onChange={(e) => setNewManagerName(e.target.value)}
+                  className="input bg-[#151515] border-gray-800 text-white text-xs w-full h-12 rounded-xl focus:outline-none focus:border-primary transition-colors"
+                />
+                <input
+                  type="text"
+                  placeholder="Manager Phone (10 digits)"
+                  value={newManagerPhone}
+                  onChange={(e) => setNewManagerPhone(e.target.value)}
+                  className="input bg-[#151515] border-gray-800 text-white text-xs w-full h-12 rounded-xl focus:outline-none focus:border-primary transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={addManagerContact}
+                  className="shrink-0 px-6 rounded-xl bg-white text-black hover:bg-primary transition-all text-xs font-bold uppercase"
+                >
+                  Add
+                </button>
+              </div>
+
+              <div className="space-y-2 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
+                {managerContacts.map((manager, index) => (
+                  <div key={index} className="flex items-center justify-between bg-[#1a1a1a] p-3 rounded-xl border border-gray-800 group">
+                    <div className="flex flex-col">
+                      <span className="text-white text-xs font-bold uppercase tracking-wider">{manager.name}</span>
+                      <span className="text-gray-500 text-[10px] font-mono">{manager.phone}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeManagerContact(index)}
+                      className="text-gray-500 hover:text-primary transition-colors uppercase text-[10px] font-bold"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                {managerContacts.length === 0 && (
+                  <p className="text-gray-600 text-[10px] font-bold uppercase tracking-widest text-center py-4 border border-dashed border-gray-800 rounded-xl italic">
+                    No Managers Added Yet
+                  </p>
+                )}
               </div>
             </div>
           </div>

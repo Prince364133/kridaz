@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock } from "lucide-react";
+import { User, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { logout } from "@redux/slices/authSlice";
 import toast from "react-hot-toast";
@@ -45,7 +45,11 @@ const Navbar = () => {
   ] : [
     { name: "Home", path: "/" },
     { name: "Venues", path: "/turfs" },
+    { name: "Pros", path: "/professionals" },
+    { name: "Join Games", path: "/join-games" },
+    { name: "Host Game", path: "/host-game" },
     { name: "Community", path: "/community" },
+    { name: "Messages", path: "/messages" },
     { name: "Players", path: "/players" },
     { name: "Business", path: "#" },
   ];
@@ -53,7 +57,7 @@ const Navbar = () => {
   // Removed dedicated BOOKINGS link
 
   return (
-    <nav className="relative z-50 hidden lg:flex flex-col">
+    <nav className="relative z-50 flex flex-col">
 
       <div className={`flex justify-center transition-all duration-500 ${isScrolled ? "pt-0" : "pt-0"}`}>
         <div 
@@ -254,6 +258,14 @@ const Navbar = () => {
                             <User size={16} />
                             <span className="text-xs font-bold uppercase tracking-tight">Personal Profile</span>
                           </Link>
+
+                          <Link 
+                            to="/messages" 
+                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all"
+                          >
+                            <MessageCircle size={16} />
+                            <span className="text-xs font-bold uppercase tracking-tight">Messages</span>
+                          </Link>
                           
                           <Link 
                             to="/profile?tab=bookings" 
@@ -261,6 +273,38 @@ const Navbar = () => {
                           >
                             <Clock size={16} />
                             <span className="text-xs font-bold uppercase tracking-tight">My Bookings</span>
+                          </Link>
+                          
+                          <Link 
+                            to="/host-game" 
+                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-[#84CC16] transition-all group/host"
+                          >
+                            <Trophy size={16} className="group-hover/host:scale-110 transition-transform text-[#84CC16]" />
+                            <span className="text-xs font-bold uppercase tracking-tight">Host a Game</span>
+                          </Link>
+
+                          <Link 
+                            to="/my-hosted-games" 
+                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-[#84CC16] transition-all group/hosted"
+                          >
+                            <Target size={16} className="text-[#84CC16] group-hover/hosted:rotate-12 transition-transform" />
+                            <span className="text-xs font-bold uppercase tracking-tight">My Hosted Games</span>
+                          </Link>
+
+                          <Link 
+                            to="/my-joined-games" 
+                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-[#84CC16] transition-all group/joined"
+                          >
+                            <Trophy size={16} className="text-[#84CC16] group-hover/joined:scale-110 transition-transform" />
+                            <span className="text-xs font-bold uppercase tracking-tight">My Joined Matches</span>
+                          </Link>
+
+                          <Link 
+                            to="/wallet" 
+                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-[#84CC16] transition-all group/wallet"
+                          >
+                            <Zap size={16} className="text-[#84CC16]" />
+                            <span className="text-xs font-bold uppercase tracking-tight">My Wallet</span>
                           </Link>
                         </div>
                       </div>

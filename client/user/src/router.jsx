@@ -17,6 +17,15 @@ import UserBlogs from "@user/pages/Blogs";
 import UserBlogDetail from "@user/pages/BlogDetail";
 import Community from "@user/pages/Community";
 import FindPlayers from "@user/pages/FindPlayers";
+import UserWallet from "@user/pages/Wallet";
+import BookingPass from "@user/pages/BookingPass";
+import HostGame from "@user/pages/HostGame";
+import JoinGames from "@user/pages/JoinGames";
+import MyHostedGames from "@user/pages/MyHostedGames";
+import MyJoinedGames from "@user/pages/MyJoinedGames";
+import FindProfessionals from "@user/pages/FindProfessionals";
+import ProfessionalDetails from "@user/pages/ProfessionalDetails";
+import Messages from "@user/pages/Messages";
 
 
 // Business Landing Pages (User Portal)
@@ -53,6 +62,11 @@ import UmpireDashboard from "./components/umpire/UmpireDashboard";
 import UmpireMatches from "./components/umpire/UmpireMatches";
 import UmpireSchedule from "./components/umpire/UmpireSchedule";
 import UmpireFeedback from "./components/umpire/UmpireFeedback";
+
+import ProfessionalAvailability from "./components/professional/ProfessionalAvailability";
+import ProfessionalBookings from "./components/professional/ProfessionalBookings";
+import ProfessionalReviews from "./components/professional/ProfessionalReviews";
+import ProfessionalProfile from "./components/professional/ProfessionalProfile";
 
 import {
   UserManagement,
@@ -148,6 +162,10 @@ const router = createBrowserRouter([
       { path: "students", element: <CoachStudents /> },
       { path: "sessions", element: <CoachSessions /> },
       { path: "masterclass", element: <CoachMasterclass /> },
+      { path: "availability", element: <ProfessionalAvailability /> },
+      { path: "bookings", element: <ProfessionalBookings /> },
+      { path: "reviews", element: <ProfessionalReviews /> },
+      { path: "profile", element: <ProfessionalProfile /> },
       { path: "*", element: <NotFound /> },
     ],
   },
@@ -164,7 +182,10 @@ const router = createBrowserRouter([
       { index: true, element: <UmpireDashboard /> },
       { path: "matches", element: <UmpireMatches /> },
       { path: "schedule", element: <UmpireSchedule /> },
-      { path: "feedback", element: <UmpireFeedback /> },
+      { path: "availability", element: <ProfessionalAvailability /> },
+      { path: "bookings", element: <ProfessionalBookings /> },
+      { path: "reviews", element: <ProfessionalReviews /> },
+      { path: "profile", element: <ProfessionalProfile /> },
       { path: "*", element: <NotFound /> },
     ],
   },
@@ -185,6 +206,13 @@ const router = createBrowserRouter([
       { path: "blogs/:id", element: <UserBlogDetail /> },
       { path: "community", element: <Community /> },
       { path: "players", element: <FindPlayers /> },
+      { path: "host-game", element: <ProtectedRoute><HostGame /></ProtectedRoute> },
+      { path: "join-games", element: <JoinGames /> },
+      { path: "my-hosted-games", element: <ProtectedRoute><MyHostedGames /></ProtectedRoute> },
+      { path: "my-joined-games", element: <ProtectedRoute><MyJoinedGames /></ProtectedRoute> },
+      { path: "professionals", element: <FindProfessionals /> },
+      { path: "professionals/:id", element: <ProfessionalDetails /> },
+      { path: "messages", element: <ProtectedRoute><Messages /></ProtectedRoute> },
 
       
       // Business Landings
@@ -197,6 +225,9 @@ const router = createBrowserRouter([
       { path: "signup/venue", element: <PublicRoute><VenueOwnerSignUp /></PublicRoute> },
       { path: "signup/coach", element: <PublicRoute><CoachSignUp /></PublicRoute> },
       { path: "signup/official", element: <PublicRoute><UmpireSignUp /></PublicRoute> },
+      { path: "wallet", element: <ProtectedRoute><UserWallet /></ProtectedRoute> },
+      { path: "booking-history", element: <ProtectedRoute><UserTurfBookingHistory /></ProtectedRoute> },
+      { path: "booking-pass/:id", element: <BookingPass /> },
       { path: "*", element: <NotFound /> },
     ],
   },

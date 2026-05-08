@@ -1,9 +1,10 @@
 import { format, parse, set, formatISO, addHours, parseISO } from "date-fns";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { createOrder, handlePayment } from "../config/razorpay";
-import "https://checkout.razorpay.com/v1/checkout.js";
 import { useNavigate } from "react-router-dom";
+
+import { useDispatch } from "react-redux";
+import { updateUser } from "@redux/slices/authSlice";
 
 const useBookingConfirmation = (
   id,
@@ -14,6 +15,8 @@ const useBookingConfirmation = (
   setLoading
 ) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const confirmReservation = async () => {
     const selectedTurfDate = format(selectedDate, "yyyy-MM-dd");
     const parsedStartTime = parse(selectedStartTime, "hh:mm a", new Date());
@@ -33,11 +36,6 @@ const useBookingConfirmation = (
     try {
       setLoading(true);
 
-      const order = await createOrder(pricePerHour * duration);
-      setLoading(false);
-
-      const razorpayResponse = await handlePayment(order.order, order.user);
-      setLoading(true);
       const bookingData = {
         id,
         duration,
@@ -45,21 +43,26 @@ const useBookingConfirmation = (
         endTime: endTimeISO,
         totalPrice: pricePerHour * duration,
         selectedTurfDate,
-        paymentId: razorpayResponse.razorpay_payment_id,
-        orderId: razorpayResponse.razorpay_order_id,
-        razorpay_signature: razorpayResponse.razorpay_signature,
       };
 
       const response = await axiosInstance.post(
-        "/api/user/booking/verify-payment",
+        "/api/user/booking/book-with-wallet",
         bookingData
       );
-      const result = await response.data;
-      toast.success(result.message);
-      navigate("/booking-history");
+
+      if (response.data.success) {
+        toast.success("Booking confirmed using Wallet!");
+        dispatch(updateUser({ walletBalance: response.data.newBalance }));
+        return response.data;
+      }
     } catch (err) {
-      if (err.response) {
-        toast.error(err.response?.data?.message);
+      if (err.response?.data?.message?.includes("Insufficient")) {
+        toast.error(err.response.data.message);
+        navigate("/wallet");
+      } else if (err.response) {
+        toast.error(err.response?.data?.message || "Booking failed");
+      } else {
+        toast.error("An error occurred during booking");
       }
     } finally {
       setLoading(false);

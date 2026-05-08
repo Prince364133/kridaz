@@ -62,6 +62,13 @@ const editTurfSchema = yup.object().shape({
     .min(1, "At least one facility is required"),
   slotDuration: yup.number().required("Slot duration is required").min(30).max(240),
   breakTime: yup.number().min(0).max(60),
+  mapUrl: yup.string().url("Invalid Google Maps URL").nullable(),
+  managerContacts: yup.array().of(
+    yup.object().shape({
+      name: yup.string().required("Manager name is required"),
+      phone: yup.string().required("Manager phone is required").matches(/^\d{10}$/, "Phone must be 10 digits"),
+    })
+  ).optional(),
 });
 
 export default function useEditTurf(turfId) {
@@ -92,10 +99,16 @@ export default function useEditTurf(turfId) {
       state: "",
       latitude: "",
       longitude: "",
+      mapUrl: "",
+      managerContacts: [],
       availableDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
       offDays: [],
     },
   });
+
+  const [managerContacts, setManagerContacts] = useState([]);
+  const [newManagerName, setNewManagerName] = useState("");
+  const [newManagerPhone, setNewManagerPhone] = useState("");
 
   const [sportTypes, setSportTypes] = useState([]);
   const [groundTypes, setGroundTypes] = useState([]);
@@ -134,6 +147,12 @@ export default function useEditTurf(turfId) {
         
         setValue("pricePerHour", turf.pricePerHour);
         setValue("youtubeUrl", turf.youtubeUrl || "");
+        setValue("mapUrl", turf.mapUrl || "");
+        
+        if (turf.managerContacts) {
+          setManagerContacts(turf.managerContacts);
+          setValue("managerContacts", turf.managerContacts);
+        }
         
         setSportTypes(turf.sportTypes || []);
         setGroundTypes(turf.groundTypes || []);
@@ -191,6 +210,28 @@ export default function useEditTurf(turfId) {
   useEffect(() => {
     setValue("facilities", facilities);
   }, [facilities, setValue]);
+
+  useEffect(() => {
+    setValue("managerContacts", managerContacts);
+  }, [managerContacts, setValue]);
+
+  const addManagerContact = () => {
+    if (newManagerName && newManagerPhone) {
+      if (!/^\d{10}$/.test(newManagerPhone)) {
+        toast.error("Phone number must be 10 digits");
+        return;
+      }
+      setManagerContacts([...managerContacts, { name: newManagerName, phone: newManagerPhone }]);
+      setNewManagerName("");
+      setNewManagerPhone("");
+    } else {
+      toast.error("Please enter both manager name and phone");
+    }
+  };
+
+  const removeManagerContact = (index) => {
+    setManagerContacts(managerContacts.filter((_, i) => i !== index));
+  };
 
   const addSportType = (type) => {
     if (type && !sportTypes.includes(type)) {
@@ -300,6 +341,8 @@ export default function useEditTurf(turfId) {
         }
       } else if (key === "availableDays" || key === "offDays") {
         data[key].forEach(day => formData.append(key, day));
+      } else if (key === "managerContacts") {
+        formData.append(key, JSON.stringify(data[key]));
       } else {
         formData.append(key, data[key]);
       }
@@ -379,5 +422,12 @@ export default function useEditTurf(turfId) {
     getMyLocation,
     isLocating,
     pendingUpdates,
+    managerContacts,
+    newManagerName,
+    setNewManagerName,
+    newManagerPhone,
+    setNewManagerPhone,
+    addManagerContact,
+    removeManagerContact
   };
 }

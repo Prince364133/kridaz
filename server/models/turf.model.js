@@ -63,6 +63,13 @@ const turfSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    managerContacts: [
+      {
+        name: { type: String },
+        phone: { type: String },
+      }
+    ],
+    mapUrl: { type: String },
   },
   { timestamps: true }
 );

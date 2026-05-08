@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, MessageCircle, Users, User } from "lucide-react";
+import { Home, Search, MessageCircle, Users, User, Zap, Coins } from "lucide-react";
 import { useSelector } from "react-redux";
 
 const MobileBottomNav = () => {
@@ -17,8 +17,8 @@ const MobileBottomNav = () => {
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Venues", path: "/turfs", icon: Search },
-    { name: "Arena", path: "/community", icon: MessageCircle },
-    { name: "Squads", path: "/players", icon: Users },
+    { name: "Messages", path: "/messages", icon: MessageCircle, protected: true },
+    { name: "Wallet", path: "/wallet", icon: Coins, protected: true },
     { name: "You", path: "/profile", icon: User, protected: true },
   ];
 

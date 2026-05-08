@@ -24,9 +24,11 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import StoryViewer from "../components/StoryViewer";
+import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
 const Community = () => {
-  const { user, role } = useSelector((state) => state.auth);
+  const { user, role, isLoggedIn } = useSelector((state) => state.auth);
+  const { gateInteraction } = useLoginOnDemand();
   const navigate = useNavigate();
   const isAdmin = role === 'admin' || role === 'BMSP_ADMIN';
 
@@ -112,24 +114,25 @@ const Community = () => {
   };
 
   const handleAuthorAvatarClick = async (author) => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    if (!author?.hasActiveStory) return;
-    
-    try {
-      const res = await axiosInstance.get(`/api/user/community/user-stories/${author._id}`);
-      if (res.data.success && res.data.stories?.length > 0) {
-        setSelectedStoryGroup({
-          user: author,
-          stories: res.data.stories
-        });
-        setCurrentStoryIndex(0);
+    gateInteraction(async () => {
+      if (!author?.hasActiveStory) return;
+      
+      try {
+        const res = await axiosInstance.get(`/api/user/community/user-stories/${author._id}`);
+        if (res.data.success && res.data.stories?.length > 0) {
+          setSelectedStoryGroup({
+            user: author,
+            stories: res.data.stories
+          });
+          setCurrentStoryIndex(0);
+        }
+      } catch (error) {
+        toast.error("Failed to load stories");
       }
-    } catch (error) {
-      toast.error("Failed to load stories");
-    }
+    }, {
+      title: "Watch Stories",
+      message: "Sign in to see match highlights and updates from your favorite players."
+    });
   };
 
   const handlePostImageChange = (e) => {
@@ -245,24 +248,25 @@ const Community = () => {
   };
 
   const handleAddComment = async (postId) => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    if (!commentText.trim()) return;
-    setIsSubmittingComment(true);
-    try {
-      const res = await axiosInstance.post(`/api/user/community/${postId}/comment`, { text: commentText });
-      if (res.data.success) {
-        setPosts(posts.map(p => p._id === postId ? { ...p, comments: res.data.comments } : p));
-        setCommentText("");
-        toast.success("Comment added!");
+    gateInteraction(async () => {
+      if (!commentText.trim()) return;
+      setIsSubmittingComment(true);
+      try {
+        const res = await axiosInstance.post(`/api/user/community/${postId}/comment`, { text: commentText });
+        if (res.data.success) {
+          setPosts(posts.map(p => p._id === postId ? { ...p, comments: res.data.comments } : p));
+          setCommentText("");
+          toast.success("Comment added!");
+        }
+      } catch (error) {
+        toast.error("Failed to add comment");
+      } finally {
+        setIsSubmittingComment(false);
       }
-    } catch (error) {
-      toast.error("Failed to add comment");
-    } finally {
-      setIsSubmittingComment(false);
-    }
+    }, {
+      title: "Join the Discussion",
+      message: "Share your thoughts and connect with other athletes. Sign in to leave a comment on this post."
+    });
   };
 
   const handleUpdateComment = async (postId, commentId) => {
@@ -297,50 +301,52 @@ const Community = () => {
   };
 
   const handleLike = async (postId) => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    try {
-      const res = await axiosInstance.post(`/api/user/community/${postId}/like`);
-      if (res.data.success) {
-        setPosts(posts.map(p => p._id === postId ? { 
-          ...p, 
-          likes: res.data.isLiked 
-            ? [...(p.likes || []), user?._id] 
-            : (p.likes || []).filter(id => id !== user?._id) 
-        } : p));
+    gateInteraction(async () => {
+      try {
+        const res = await axiosInstance.post(`/api/user/community/${postId}/like`);
+        if (res.data.success) {
+          setPosts(posts.map(p => p._id === postId ? { 
+            ...p, 
+            likes: res.data.isLiked 
+              ? [...(p.likes || []), user?._id] 
+              : (p.likes || []).filter(id => id !== user?._id) 
+          } : p));
+        }
+      } catch (error) {
+        toast.error("Failed to like post");
       }
-    } catch (error) {
-      toast.error("Failed to like post");
-    }
+    }, {
+      title: "Show Some Love",
+      message: "Enjoying the content? Sign in to like this post and support the creator."
+    });
   };
 
   const handleFollowToggle = async (targetUserId) => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    const isFollowing = followingIds.includes(targetUserId);
-    try {
-      const endpoint = isFollowing 
-        ? `/api/user/players/${targetUserId}/unfollow` 
-        : `/api/user/players/${targetUserId}/follow`;
-        
-      const response = await axiosInstance.post(endpoint);
-      if (response.data.success) {
-        if (isFollowing) {
-          setFollowingIds(followingIds.filter(id => id !== targetUserId));
-          toast.success("Unfollowed player");
-        } else {
-          setFollowingIds([...followingIds, targetUserId]);
-          toast.success("Following player");
+    gateInteraction(async () => {
+      const isFollowing = followingIds.includes(targetUserId);
+      try {
+        const endpoint = isFollowing 
+          ? `/api/user/players/${targetUserId}/unfollow` 
+          : `/api/user/players/${targetUserId}/follow`;
+          
+        const response = await axiosInstance.post(endpoint);
+        if (response.data.success) {
+          if (isFollowing) {
+            setFollowingIds(followingIds.filter(id => id !== targetUserId));
+            toast.success("Unfollowed player");
+          } else {
+            setFollowingIds([...followingIds, targetUserId]);
+            toast.success("Following player");
+          }
         }
+      } catch (error) {
+        const message = error.response?.data?.message || "Failed to update follow status";
+        toast.error(message);
       }
-    } catch (error) {
-      const message = error.response?.data?.message || "Failed to update follow status";
-      toast.error(message);
-    }
+    }, {
+      title: "Follow Players",
+      message: "Want to see more from this player? Sign in to follow them and stay updated."
+    });
   };
 
   const [shareModalOpen, setShareModalOpen] = useState(null);
@@ -407,16 +413,18 @@ const Community = () => {
             <p className="text-white/40 text-sm mt-1 uppercase tracking-widest">Connect, Share, and Play</p>
           </div>
           <div className="flex items-center gap-2">
-            {user && (
-              <button 
-                onClick={() => setShowPostModal(true)}
-                className="p-3 bg-[#84CC16] hover:bg-[#a3e635] text-black rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#84CC16]/20 active:scale-95"
-              >
-                <Plus size={20} />
-                <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">New Post</span>
-              </button>
-            )}
-
+            <button 
+              onClick={() => {
+                gateInteraction(() => setShowPostModal(true), {
+                  title: "Share Your Update",
+                  message: "Tell the community about your latest game or find new teammates. Sign in to create a post."
+                });
+              }}
+              className="p-3 bg-[#84CC16] hover:bg-[#a3e635] text-black rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-[#84CC16]/20 active:scale-95"
+            >
+              <Plus size={20} />
+              <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">New Post</span>
+            </button>
           </div>
         </div>
 
@@ -424,8 +432,8 @@ const Community = () => {
         <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-4 sm:p-6 overflow-hidden">
           <h2 className="text-xs font-bold text-white/20 uppercase tracking-[0.2em] mb-4 sm:mb-6">Live Stories</h2>
           <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-2 sm:pb-4 no-scrollbar">
-            {/* Add Story Button */}
-            {user && (
+            {/* Add Story Button — only shown for logged-in users */}
+            {isLoggedIn && (
               <button 
                 onClick={() => setShowStoryModal(true)}
                 className="flex flex-col items-center gap-2 sm:gap-3 flex-shrink-0 group w-[72px] sm:w-auto"
@@ -452,10 +460,7 @@ const Community = () => {
               <div 
                 key={group.user._id} 
                 onClick={() => {
-                  if (!user) {
-                    navigate("/login");
-                    return;
-                  }
+                  // Stories are freely viewable by guests
                   setSelectedStoryGroup(group);
                   setCurrentStoryIndex(0);
                 }}
@@ -526,7 +531,8 @@ const Community = () => {
                         <Clock size={10} /> {new Date(post.createdAt).toLocaleDateString()}
                       </p>
                     </Link>
-                    {(!user || user._id !== post.adminId?._id) && (
+                    {/* Follow button — only shown for logged-in users who are not the post author */}
+                    {isLoggedIn && (!user || user._id !== post.adminId?._id) && (
                       <button 
                         onClick={() => handleFollowToggle(post.adminId?._id)}
                         className={`ml-2 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
@@ -595,28 +601,40 @@ const Community = () => {
                 {/* Discussion Section */}
                 {activeDiscussion === post._id && (
                   <div className="bg-white/[0.01] border-t border-white/5 p-6 md:p-8 space-y-6 animate-in slide-in-from-top duration-300">
-                    <div className="flex gap-4">
+                  <div className="flex gap-4">
                       <div className="w-10 h-10 rounded-xl bg-[#84CC16]/10 flex items-center justify-center border border-[#84CC16]/20 shrink-0">
                         <UserIcon size={18} className="text-[#84CC16]" />
                       </div>
-                      <div className="flex-1 space-y-3">
-                        <textarea 
-                          value={commentText}
-                          onChange={(e) => setCommentText(e.target.value)}
-                          placeholder="Add to the discussion..."
-                          className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl min-h-[80px] p-4 text-white text-xs outline-none transition-all resize-none"
-                        />
-                        <div className="flex justify-end">
-                          <button 
-                            onClick={() => handleAddComment(post._id)}
-                            disabled={isSubmittingComment || !commentText.trim()}
-                            className="bg-[#84CC16] text-black px-6 py-2 rounded-lg font-bold uppercase tracking-wider text-[10px] hover:bg-[#a3e635] transition-all disabled:opacity-50 flex items-center gap-2"
+                      {isLoggedIn ? (
+                        <div className="flex-1 space-y-3">
+                          <textarea 
+                            value={commentText}
+                            onChange={(e) => setCommentText(e.target.value)}
+                            placeholder="Add to the discussion..."
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl min-h-[80px] p-4 text-white text-xs outline-none transition-all resize-none"
+                          />
+                          <div className="flex justify-end">
+                            <button 
+                              onClick={() => handleAddComment(post._id)}
+                              disabled={isSubmittingComment || !commentText.trim()}
+                              className="bg-[#84CC16] text-black px-6 py-2 rounded-lg font-bold uppercase tracking-wider text-[10px] hover:bg-[#a3e635] transition-all disabled:opacity-50 flex items-center gap-2"
+                            >
+                              {isSubmittingComment ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
+                              Post Comment
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex-1 flex items-center gap-4 bg-white/[0.02] border border-white/5 rounded-xl p-4">
+                          <p className="text-white/30 text-xs flex-1">Sign in to join the discussion...</p>
+                          <button
+                            onClick={() => gateInteraction(() => {}, { title: "Join the Discussion", message: "Share your thoughts and connect with other athletes. Sign in to comment." })}
+                            className="px-4 py-2 bg-[#84CC16] text-black text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-[#a3e635] transition-all whitespace-nowrap"
                           >
-                            {isSubmittingComment ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
-                            Post Comment
+                            Sign In
                           </button>
                         </div>
-                      </div>
+                      )}
                     </div>
 
                     {post.comments?.length > 0 && (

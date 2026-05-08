@@ -19,3 +19,13 @@ export const verifyPaymentSchema = z.object({
     razorpay_signature: z.string().min(1, "Razorpay signature is required"),
   }),
 });
+
+export const bookWithWalletSchema = z.object({
+  body: z.object({
+    id: z.string().min(1, "Turf ID is required"),
+    startTime: z.string().min(1, "Start time is required"),
+    endTime: z.string().min(1, "End time is required"),
+    selectedTurfDate: z.string().min(1, "Selected turf date is required"),
+    totalPrice: z.number().min(1, "Total price is required"),
+  }),
+});

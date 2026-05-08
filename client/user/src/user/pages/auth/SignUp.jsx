@@ -62,6 +62,7 @@ const SignUp = () => {
   const [selectedSports, setSelectedSports] = useState([]);
   const [showSportsDropdown, setShowSportsDropdown] = useState(false);
   
+  const navigate = useNavigate();
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -163,21 +164,34 @@ const SignUp = () => {
                   <div className="space-y-6">
                     <div className="text-center mb-8">
                       <h3 className="text-xl font-semibold text-white">Enter Verification Code</h3>
-                      <p className="text-sm text-white/60 mt-2">We sent a 6-digit code to your email address.</p>
                     </div>
-                    
-                    <div className="space-y-2 group/field">
+                    <div className="space-y-4 group/field">
                       <div className="relative">
-                        <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                        <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
                         <input 
                           {...register("otp")}
                           type="text" 
-                          placeholder="000000"
+                          placeholder="Email OTP"
                           maxLength={6}
                           className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
                         />
                       </div>
                       {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
+                    </div>
+
+                    <div className="space-y-4 group/field">
+                      <div className="relative">
+                        <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                        <input 
+                          {...register("phoneOtp")}
+                          type="text" 
+                          placeholder="WhatsApp OTP"
+                          maxLength={6}
+                          className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
+                        />
+                      </div>
+                      {errors.phoneOtp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.phoneOtp.message}</p>}
+                      <p className="text-[10px] text-white/40 text-center uppercase tracking-widest">Default test OTP: 123456</p>
                     </div>
                     
                     <button 

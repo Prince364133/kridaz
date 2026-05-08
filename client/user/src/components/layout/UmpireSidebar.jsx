@@ -8,7 +8,11 @@ import {
   Star, 
   Settings, 
   HelpCircle, 
-  LogOut 
+  LogOut,
+  ShieldCheck,
+  Activity,
+  Clock,
+  User
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
@@ -28,7 +32,10 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/umpire", label: "Overview", icon: LayoutDashboard },
     { to: "/umpire/matches", label: "Matches", icon: Trophy },
     { to: "/umpire/schedule", label: "Schedule", icon: Calendar },
-    { to: "/umpire/feedback", label: "Ratings", icon: Star },
+    { to: "/umpire/availability", label: "Availability", icon: Clock },
+    { to: "/umpire/bookings", label: "Bookings", icon: Activity },
+    { to: "/umpire/reviews", label: "Ratings", icon: Star },
+    { to: "/umpire/profile", label: "Profile", icon: User },
   ];
 
   const bottomNavItems = [

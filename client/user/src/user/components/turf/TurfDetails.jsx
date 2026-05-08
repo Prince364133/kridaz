@@ -28,6 +28,9 @@ import {
   ExternalLink
 } from "lucide-react";
 
+import WriteReview from "../../components/reviews/WriteReview";
+import CoinDeductionModal from "../../components/modals/CoinDeductionModal";
+
 const TurfDetails = () => {
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);
   const { id } = useParams();
@@ -39,6 +42,8 @@ const TurfDetails = () => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const galleryRef = React.useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isCoinModalOpen, setIsCoinModalOpen] = useState(false);
+  const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
 
   const {
     selectedDate,
@@ -55,6 +60,33 @@ const TurfDetails = () => {
     pricePerHour,
     loading: bookingLoading,
   } = useReservation();
+
+  const handleBookingClick = () => {
+    gateInteraction(() => setIsCoinModalOpen(true), {
+      title: "Confirm Your Slot",
+      message: "Ready to dominate the pitch? Sign in to securely book your time slot and get instant confirmation."
+    });
+  };
+
+  const handleConfirmCoinPayment = async () => {
+    try {
+      const result = await confirmReservation();
+      if (result?.success) {
+        setIsPaymentSuccessful(true);
+        return { success: true, bookingId: result.bookingId };
+      }
+      return { success: false };
+    } catch (error) {
+      return { success: false };
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsCoinModalOpen(false);
+    if (isPaymentSuccessful) {
+      navigate("/booking-history");
+    }
+  };
 
   const getYouTubeID = (url) => {
     if (!url) return null;
@@ -162,7 +194,7 @@ const TurfDetails = () => {
     );
   }
 
-  const handleReservation = async () => {
+  const handleReservation = () => {
     if (!isLoggedIn) {
       navigate("/login");
       return;
@@ -173,15 +205,19 @@ const TurfDetails = () => {
       return;
     }
 
-    try {
-      await confirmReservation();
-    } catch (error) {
-      console.error("Reservation error:", error);
-    }
+    handleBookingClick();
   };
 
   return (
     <div className="min-h-screen bg-black text-white pt-4 pb-20">
+      <CoinDeductionModal
+        isOpen={isCoinModalOpen}
+        onClose={handleModalClose}
+        onConfirm={handleConfirmCoinPayment}
+        amount={pricePerHour * duration}
+        currentBalance={user?.walletBalance || 0}
+        description={`Confirm your booking for ${turf.name}. Coins will be deducted from your wallet.`}
+      />
       {/* Top Navigation Bar */}
       <div className="container mx-auto px-4 mb-4">
         <Link 
@@ -253,6 +289,14 @@ const TurfDetails = () => {
               className="flex h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-smooth"
               onMouseEnter={() => setIsAutoPlaying(false)}
               onMouseLeave={() => setIsAutoPlaying(true)}
+              onScroll={(e) => {
+                const scrollLeft = e.target.scrollLeft;
+                const width = e.target.offsetWidth;
+                const newIndex = Math.round(scrollLeft / width);
+                if (newIndex !== activeIndex) {
+                  setActiveIndex(newIndex);
+                }
+              }}
             >
               {mediaItems.map((item, index) => (
                 <div key={index} className="flex-none w-full h-full snap-center relative">
