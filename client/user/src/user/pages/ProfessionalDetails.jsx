@@ -134,10 +134,12 @@ export default function ProfessionalDetails() {
                         />
                       ) : null}
                       <div 
-                        className="w-full h-full flex items-center justify-center"
+                        className="w-full h-full flex items-center justify-center bg-[#1a1a1a]"
                         style={{ display: pro.profilePicture ? 'none' : 'flex' }}
                       >
-                        <User size={64} className="text-[#84CC16]" />
+                        <span className="text-[#84CC16] font-black text-5xl tracking-tighter">
+                          {pro.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
+                        </span>
                       </div>
                     </div>
                   </div>

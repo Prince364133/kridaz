@@ -186,8 +186,14 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="flex items-center gap-3 p-1.5 pr-4 bg-[#0d0d0d] border border-white/5 rounded-[8px] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 group"
             >
-              <div className="w-10 h-10 rounded-[6px] bg-[#CCFF00] flex items-center justify-center text-black shadow-lg shadow-[#CCFF00]/10 group-hover:scale-105 transition-transform">
-                <User size={22} strokeWidth={3} />
+              <div className="w-10 h-10 rounded-[6px] bg-[#CCFF00] overflow-hidden flex items-center justify-center text-black shadow-lg shadow-[#CCFF00]/10 group-hover:scale-105 transition-transform">
+                {user?.profilePicture ? (
+                  <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-[14px] font-black uppercase tracking-tighter">
+                    {user?.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "U"}
+                  </span>
+                )}
               </div>
               <div className="hidden sm:flex flex-col items-start">
                 <span className="text-[12px] font-black text-white tracking-tight uppercase leading-none mb-1">{user?.name || user?.fullName || "User"}</span>

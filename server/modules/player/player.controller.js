@@ -58,7 +58,7 @@ export const getPublicPlayers = async (req, res) => {
       username: u.username,
       bookingCount: u.bookings?.length ?? 0,
       joinedAt: u.createdAt,
-      profilePicture: u.profilePicture,
+      profilePicture: u.profilePicture || u.profileImage,
       location: u.location || u.city || "Nearby",
       city: u.city,
       state: u.state,
@@ -88,7 +88,7 @@ export const searchPlayers = async (req, res) => {
         { username: { $regex: query, $options: 'i' } }
       ],
       _id: { $ne: req.user.id }
-    }).select('name username profilePicture location bio followers following');
+    }).select('name username profilePicture profileImage location bio followers following');
 
     const userIds = players.map(u => u._id);
     const activeStories = await Story.distinct('userId', {

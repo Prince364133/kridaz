@@ -251,10 +251,12 @@ const FindPlayers = () => {
                       />
                     ) : null}
                     <div 
-                      className="w-full h-full flex items-center justify-center"
+                      className="w-full h-full flex items-center justify-center bg-[#1a1a1a]"
                       style={{ display: player.profilePicture ? 'none' : 'flex' }}
                     >
-                      <User size={20} className="text-[#84CC16]" />
+                      <span className="text-[#84CC16] font-black text-xl tracking-tighter">
+                        {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
+                      </span>
                     </div>
                     
                     {/* Glass Shine */}

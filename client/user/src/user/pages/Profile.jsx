@@ -336,10 +336,12 @@ export default function Profile() {
                   ) : null}
                   
                   <div 
-                    className="w-full h-full flex items-center justify-center"
+                    className="w-full h-full flex items-center justify-center bg-[#1a1a1a]"
                     style={{ display: profileUser?.profilePicture ? 'none' : 'flex' }}
                   >
-                    <User size={24} className="text-[#84CC16]" />
+                    <span className="text-[#84CC16] font-black text-xl tracking-tighter">
+                      {profileUser?.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "U"}
+                    </span>
                   </div>
                   
                   {isOwnProfile && (
@@ -738,9 +740,11 @@ export default function Profile() {
                           {item.postImage ? (
                             <img src={item.postImage} alt="" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-white/5">
-                              <User size={48} />
-                            </div>
+                              <div className="w-full h-full flex items-center justify-center text-[#84CC16]/20 bg-[#1a1a1a]">
+                                <span className="text-4xl font-black tracking-tighter">
+                                  {item.adminName?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
+                                </span>
+                              </div>
                           )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
                             <span className="text-[8px] font-bold text-[#84CC16] uppercase tracking-widest mb-1">{item.adminName}</span>

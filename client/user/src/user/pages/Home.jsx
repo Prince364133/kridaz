@@ -543,10 +543,12 @@ export default function Home() {
                             />
                           ) : null}
                           <div 
-                            className="relative z-10 flex items-center justify-center w-full h-full"
+                            className="relative z-10 flex items-center justify-center w-full h-full bg-[#1a1a1a]"
                             style={{ display: p.profilePicture ? 'none' : 'flex' }}
                           >
-                            <User size={40} className="text-[#84CC16]/40 group-hover:text-[#84CC16] transition-colors duration-500" />
+                            <span className="text-[#84CC16] font-black text-4xl tracking-tighter opacity-40 group-hover:opacity-100 transition-opacity duration-500">
+                              {initials}
+                            </span>
                           </div>
                         </div>
 
@@ -584,11 +586,11 @@ export default function Home() {
                         >
                           {isFollowing ? (
                             <>
-                              <CheckCircle size={14} /> Connected
+                              <CheckCircle size={14} /> Following
                             </>
                           ) : (
                             <>
-                              <Plus size={14} /> Add Player
+                              <Plus size={14} /> Follow
                             </>
                           )}
                         </button>
