@@ -195,43 +195,7 @@ export default function BusinessRegistration() {
       toast.error(errorMsg);
     } finally {
       setLoading(false);
-    }
-  };
-
-  // ── 1. Already holds a professional role ──
-  if (hasRoleConflict) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-        <div className="max-w-md w-full text-center space-y-8 p-12 rounded-[40px] border border-amber-500/20 bg-[#0A0A0A] relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-amber-500" />
-          <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <ShieldAlert size={40} className="text-amber-500" />
-          </div>
-          <h2 className="text-4xl font-display uppercase tracking-tight">
-            Role <span className="text-amber-500">Conflict</span>
-          </h2>
-          <p className="text-gray-400 leading-relaxed">
-            Your account already holds the{" "}
-            <span className="text-white font-bold uppercase tracking-widest px-2 py-1 rounded bg-white/5">
-              {existingRole}
-            </span>{" "}
-            role. TurfSpot supports only one professional role per account.
-          </p>
-          <p className="text-sm text-gray-500 italic">
-            Please use a different account if you wish to join as a <span className="capitalize">{roleFromUrl}</span>.
-          </p>
-          <button
-            onClick={() => navigate("/")}
-            className="w-full py-4 rounded-2xl border border-white/10 hover:bg-white/5 transition-colors font-bold uppercase tracking-widest text-xs"
-          >
-            Back to Home
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ── 2. Application pending review ──
+  // ── Application pending review ──
   if (isPending || submitted) {
     const displayRole = submitted ? formData.role : pendingRole;
     return (
@@ -292,6 +256,19 @@ export default function BusinessRegistration() {
               </h1>
               <p className="text-gray-400 text-lg">Tell us about your business to get verified and access the TurfSpot dashboard.</p>
             </div>
+
+            {hasRoleConflict && (
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6 flex gap-4 items-start">
+                <ShieldAlert className="text-amber-500 shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-amber-500 font-bold tracking-wide uppercase text-sm mb-1">Role Conflict</h3>
+                  <p className="text-amber-500/80 text-sm">
+                    Your account already holds the <strong className="text-amber-500 uppercase">{existingRole}</strong> role. 
+                    You can view this form, but you cannot submit a new application as TurfSpot supports only one professional role per account.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-8">
               
@@ -530,13 +507,22 @@ export default function BusinessRegistration() {
 
               <button 
                 type="submit"
-                disabled={loading}
-                className="w-full py-6 rounded-[24px] bg-[#CCFF00] hover:bg-[#a3e635] text-black font-bold text-lg uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 shadow-[0_10px_40px_-10px_rgba(132,204,22,0.3)] hover:shadow-[0_20px_60px_-10px_rgba(132,204,22,0.4)]"
+                disabled={loading || hasRoleConflict}
+                className={`w-full py-6 rounded-[24px] font-bold text-lg uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 ${
+                  hasRoleConflict 
+                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed shadow-none'
+                    : 'bg-[#CCFF00] hover:bg-[#a3e635] text-black shadow-[0_10px_40px_-10px_rgba(132,204,22,0.3)] hover:shadow-[0_20px_60px_-10px_rgba(132,204,22,0.4)]'
+                }`}
               >
                 {loading ? (
                   <>
                     <Loader2 className="animate-spin" />
                     <span>Processing Application...</span>
+                  </>
+                ) : hasRoleConflict ? (
+                  <>
+                    <ShieldAlert size={20} />
+                    <span>Cannot Apply Again</span>
                   </>
                 ) : (
                   <>
