@@ -517,7 +517,7 @@ export default function Home() {
                 style={{ backgroundColor: PRI }}>Join Now</Link>
             </div>
           ) : (
-            <div className="flex overflow-x-auto pt-8 pb-8 mt-2 no-scrollbar scroll-smooth px-0 md:px-2">
+            <div className="flex gap-4 md:gap-6 overflow-x-auto pt-8 pb-8 mt-2 no-scrollbar scroll-smooth px-0 md:px-2">
               {players.map(p => {
                 const initials = p.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "??";
                 const isFollowing = followingIds.includes(p._id);
