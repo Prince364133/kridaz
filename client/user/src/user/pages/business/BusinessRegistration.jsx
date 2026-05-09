@@ -643,3 +643,5 @@ function ShieldCheckIcon({ size, className }) {
     </svg>
   );
 }
+
+export default BusinessRegistration;
