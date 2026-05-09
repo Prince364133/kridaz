@@ -14,7 +14,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
         
         {/* Pricing Badge */}
-        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md border border-white/10 text-white font-bold px-3 py-1 rounded-full text-[10px] tracking-tight font-outfit shadow-xl">
+        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md border border-white/10 text-white font-bold px-3 py-1 rounded-full text-[10px] tracking-tight font-['Open_Sans'] shadow-xl">
           ₹{turf.pricePerHour}<span className="text-white/40 font-normal ml-0.5">/Hr</span>
         </div>
 
@@ -33,14 +33,14 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
         <Link to={`/partner/turf/${turf._id}`} className="block group/title">
            <div className="flex justify-between items-start mb-3">
               <div className="space-y-1">
-                <h2 className="text-lg font-semibold text-white uppercase tracking-tight group-hover/title:text-[#CCFF00] transition-colors font-outfit">
+                <h2 className="text-[15px] font-bold text-white uppercase tracking-widest group-hover/title:text-[#CCFF00] transition-colors font-['Open_Sans']">
                   {turf.name}
                 </h2>
                 <div className="flex items-center gap-2">
-                  <div className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest border ${
+                  <div className={`px-2 py-0.5 rounded-[4px] text-[9px] font-bold uppercase tracking-widest border ${
                      turf.status === 'approved' ? 'bg-[#CCFF00]/10 border-[#CCFF00]/20 text-[#CCFF00]' :
                      turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                     'bg-yellow-500/10 border-yellow-500/20 text-yellow-500'
+                     'bg-[#1A1A1A] border-[#2D2D2D] text-yellow-500'
                   }`}>
                      {turf.status}
                   </div>
@@ -53,21 +53,21 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
               
               <div className="flex items-center bg-[#111] px-2 py-0.5 rounded-[4px] border border-[#2D2D2D]">
                 <Star size={9} className="text-[#CCFF00] mr-1 fill-[#CCFF00]" />
-                <span className="text-[9px] font-bold text-white font-outfit">
+                <span className="text-[9px] font-bold text-white font-['Open_Sans']">
                   {turf.avgRating ? turf.avgRating.toFixed(1) : "NEW"}
                 </span>
               </div>
            </div>
         </Link>
 
-        <p className="text-[#878C9F] text-[11px] leading-relaxed line-clamp-2 mb-4 opacity-60">
+        <p className="text-[#878C9F] font-inter text-[13px] leading-relaxed line-clamp-2 mb-4">
           {turf.description}
         </p>
 
         <div className="mt-auto space-y-4">
           <div className="flex flex-wrap gap-1.5">
             {turf.sportTypes.map((sport, index) => (
-              <span key={index} className="px-2 py-0.5 bg-[#111111] text-[#878C9F] border border-[#2D2D2D] rounded-[3px] text-[8px] font-bold uppercase tracking-[1px]">
+              <span key={index} className="px-2 py-1 bg-[#1A1A1A] text-[#878C9F] border border-[#2D2D2D] rounded-[4px] text-[9px] font-bold uppercase tracking-[0.5px]">
                 {sport}
               </span>
             ))}

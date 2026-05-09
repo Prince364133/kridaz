@@ -86,63 +86,64 @@ export default function VenueIntelligence() {
   const isHeatmapSufficient = occupancyHeatmap.length > 0;
 
   return (
-    <div className="p-4 md:p-8 space-y-8 animate-fade-in text-white font-inter bg-[#050505] min-h-screen pb-20">
+    <div className="h-full custom-scrollbar bg-[#000000] text-white">
+      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
         <div>
           <div className="flex items-center gap-3">
-             <Activity className="text-[#CCFF00]" size={28} />
-             <h1 className="text-2xl md:text-3xl font-bold font-outfit tracking-tight">Venue Intelligence</h1>
+             <Activity className="text-[#CCFF00]" size={32} />
+             <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] tracking-tight uppercase">Venue Intelligence</h1>
           </div>
-          <p className="text-[#878C9F] text-sm mt-1">Deep dive into your facility's operational and financial metrics.</p>
+          <p className="text-[#878C9F] font-inter text-[20px] mt-1 ml-11">Deep dive into your facility's operational and financial metrics.</p>
         </div>
       </div>
 
       {/* Top Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6 relative overflow-hidden group hover:border-[#CCFF00]/30 transition-colors">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#CCFF00] transition-colors border border-[#CCFF00]/20">
              <TrendingUp size={20} />
           </div>
-          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Gross Revenue</p>
-          <h3 className="text-3xl font-bold font-outfit">₹{(grossRevenue).toLocaleString()}</h3>
+          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Gross Revenue</p>
+          <h3 className="text-2xl font-semibold text-white tracking-tight">₹{(grossRevenue).toLocaleString()}</h3>
         </div>
 
-        <div className="bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6 relative overflow-hidden group hover:border-[#CCFF00]/30 transition-colors">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#CCFF00] transition-colors border border-[#CCFF00]/20">
              <Zap size={20} />
           </div>
-          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Total Bookings</p>
-          <h3 className="text-3xl font-bold font-outfit">{totalBookings}</h3>
+          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Total Bookings</p>
+          <h3 className="text-2xl font-semibold text-white tracking-tight">{totalBookings}</h3>
         </div>
 
-        <div className="bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6 relative overflow-hidden group hover:border-[#CCFF00]/30 transition-colors">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#CCFF00] transition-colors border border-[#CCFF00]/20">
              <Target size={20} />
           </div>
-          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Avg. Session Time</p>
-          <h3 className="text-3xl font-bold font-outfit">{avgSessionTime} min</h3>
+          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Avg. Session Time</p>
+          <h3 className="text-2xl font-semibold text-white tracking-tight">{avgSessionTime} min</h3>
         </div>
 
-        <div className="bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6 relative overflow-hidden group hover:border-[#CCFF00]/30 transition-colors">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#CCFF00] transition-colors border border-[#CCFF00]/20">
              <Percent size={20} />
           </div>
-          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Conversion Rate</p>
-          <h3 className="text-3xl font-bold font-outfit">{conversionRate}%</h3>
+          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Conversion Rate</p>
+          <h3 className="text-2xl font-semibold text-white tracking-tight">{conversionRate}%</h3>
         </div>
       </div>
 
       {/* Main Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mt-8">
         
         {/* Revenue & Demand Forecasting */}
-        <div className="lg:col-span-2 bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6">
+        <div className="lg:col-span-2 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
            <div className="flex justify-between items-start mb-6">
               <div>
-                 <h2 className="text-xl font-bold text-white font-outfit">Revenue & Demand Forecasting</h2>
-                 <p className="text-sm text-[#878C9F]">Real-time revenue tracking across current period</p>
+                 <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Revenue & Demand Forecasting</h2>
+                 <p className="text-[#878C9F] font-inter text-[20px] mt-1">Real-time revenue tracking across current period</p>
               </div>
            </div>
            
@@ -176,9 +177,9 @@ export default function VenueIntelligence() {
         </div>
 
         {/* Venue DNA */}
-        <div className="bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6 flex flex-col items-center relative">
-           <h2 className="text-xl font-bold text-white font-outfit text-center">Venue DNA</h2>
-           <p className="text-sm text-[#878C9F] text-center mb-4">Strategic balance across 5 vectors</p>
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col items-center relative shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
+           <h2 className="text-xl font-bold font-['Open_Sans'] text-white text-center uppercase tracking-tight">Venue DNA</h2>
+           <p className="text-[#878C9F] font-inter text-[20px] text-center mb-4 mt-1">Strategic balance across 5 vectors</p>
            
            <div className={`h-[250px] w-full mt-auto ${!isDNASufficient ? 'opacity-30' : ''}`}>
              <ResponsiveContainer width="100%" height="100%">
@@ -209,12 +210,12 @@ export default function VenueIntelligence() {
       </div>
 
       {/* Secondary Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mt-8">
         
         {/* Sport Distribution */}
-        <div className="bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6 flex flex-col relative">
-           <h2 className="text-xl font-bold text-white font-outfit">Sport Distribution</h2>
-           <p className="text-sm text-[#878C9F] mb-6">Revenue contribution by category</p>
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
+           <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Sport Distribution</h2>
+           <p className="text-[#878C9F] font-inter text-[20px] mb-6 mt-1">Revenue contribution by category</p>
            
            {sportDist.length > 0 ? (
              <>
@@ -252,11 +253,11 @@ export default function VenueIntelligence() {
         </div>
 
         {/* Peak Utilization Heatmap */}
-        <div className="lg:col-span-2 bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6 flex flex-col relative">
+        <div className="lg:col-span-2 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
            <div className="flex justify-between items-start mb-6">
               <div>
-                 <h2 className="text-xl font-bold text-white font-outfit">Peak Utilization Heatmap</h2>
-                 <p className="text-sm text-[#878C9F]">Identifying profitable time blocks</p>
+                 <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Peak Utilization Heatmap</h2>
+                 <p className="text-[#878C9F] font-inter text-[20px] mt-1">Identifying profitable time blocks</p>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1.5">
@@ -318,8 +319,8 @@ export default function VenueIntelligence() {
       </div>
 
       {/* Automated Intelligence Reports */}
-      <div className="bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6 space-y-6">
-         <h2 className="text-xl font-bold text-white font-outfit">Automated Intelligence Reports</h2>
+      <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 space-y-6 shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500 mt-8">
+         <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Automated Intelligence Reports</h2>
          
          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-[#1A1A1A] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col items-start hover:border-[#CCFF00]/30 transition-colors group cursor-pointer">
@@ -349,6 +350,7 @@ export default function VenueIntelligence() {
          </div>
       </div>
 
+      </div>
     </div>
   );
 }

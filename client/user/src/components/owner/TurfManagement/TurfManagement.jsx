@@ -23,26 +23,27 @@ const TurfManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 lg:p-8 font-inter space-y-8">
+    <div className="h-full custom-scrollbar bg-[#000000] text-white">
+      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
       {/* Top Action Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
-        <div className="space-y-1">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-6 relative z-10 border-b border-[#2D2D2D] pb-6">
+        <div>
           <div className="flex items-center gap-3">
              <div className="w-1.5 h-6 bg-[#CCFF00] rounded-full" />
-             <h1 className="text-2xl font-semibold uppercase tracking-tight text-white font-outfit">Inventory Management</h1>
+             <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] tracking-tight uppercase leading-none">Inventory Management</h1>
           </div>
-          <p className="text-[#878C9F] text-[10px] font-bold uppercase tracking-[3px] ml-4.5 opacity-60">Control your multisport facility roster.</p>
+          <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">Control your multisport facility roster.</p>
         </div>
 
         <div className="flex items-center gap-4">
-           <div className="bg-[#111111] px-5 py-2.5 rounded-[10px] border border-[#2D2D2D] flex items-center gap-3">
+           <div className="bg-[#000000] px-5 py-2.5 rounded-[8px] border border-[#2D2D2D] flex items-center gap-3 shadow-[var(--shadow-2)]">
               <div className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse" />
-              <span className="text-[11px] font-bold text-white uppercase tracking-widest">{turfs.length} Active Arenas</span>
+              <span className="text-[12px] font-bold text-white uppercase tracking-widest">{turfs.length} Active Arenas</span>
            </div>
            
            <Link 
             to="/partner/add-turf"
-            className="bg-[#CCFF00] hover:bg-[#B3FF00] text-black px-8 py-3 rounded-[10px] text-[11px] font-bold uppercase tracking-widest flex items-center gap-3 transition-all shadow-[0_8px_30px_rgba(204,255,0,0.15)]"
+            className="bg-[#CCFF00] hover:bg-[#B3FF00] text-black px-8 py-3 rounded-[8px] text-[13px] font-bold uppercase tracking-widest flex items-center gap-3 transition-all shadow-[var(--shadow-2)]"
           >
             <Plus size={18} strokeWidth={3} />
             Add New Venue
@@ -69,12 +70,12 @@ const TurfManagement = () => {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-32 bg-[#000000] border border-[#2D2D2D] rounded-[16px] border-dashed">
+        <div className="flex flex-col items-center justify-center py-32 bg-[#000000] border border-[#2D2D2D] rounded-[8px] border-dashed shadow-[var(--shadow-2)]">
           <div className="w-16 h-16 bg-[#111] rounded-full flex items-center justify-center mb-6 text-[#2D2D2D]">
              <Plus size={32} />
           </div>
-          <p className="text-[#878C9F] text-[11px] font-bold uppercase tracking-[4px]">No active arenas found in your roster.</p>
-          <Link to="/partner/add-turf" className="mt-6 text-[#CCFF00] text-[10px] font-bold uppercase tracking-widest border-b border-[#CCFF00]/40 hover:border-[#CCFF00] transition-all pb-1">Initialize First Venue</Link>
+          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px]">No active arenas found in your roster.</p>
+          <Link to="/partner/add-turf" className="mt-6 text-[#CCFF00] text-[11px] font-bold uppercase tracking-widest border-b border-[#CCFF00]/40 hover:border-[#CCFF00] transition-all pb-1">Initialize First Venue</Link>
         </div>
       )}
     </div>

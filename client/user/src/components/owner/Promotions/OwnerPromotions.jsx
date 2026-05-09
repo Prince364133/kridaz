@@ -97,20 +97,21 @@ export default function OwnerPromotions() {
   const totalRedemptions = promotions.reduce((acc, curr) => acc + curr.timesUsed, 0);
 
   return (
-    <div className="p-4 md:p-8 space-y-8 animate-fade-in text-white font-inter bg-[#050505] min-h-screen pb-20">
+    <div className="h-full custom-scrollbar bg-[#000000] text-white">
+      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#2D2D2D] pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 border-b border-[#2D2D2D] pb-6">
         <div>
           <div className="flex items-center gap-3">
-             <Tag className="text-[#CCFF00]" size={28} />
-             <h1 className="text-2xl md:text-3xl font-bold font-outfit tracking-tight">Promotion Engine</h1>
+             <Tag className="text-[#CCFF00]" size={32} />
+             <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] tracking-tight uppercase">Promotion Engine</h1>
           </div>
-          <p className="text-[#878C9F] text-sm mt-1 uppercase tracking-widest text-[10px] font-bold">Generate and monitor discount campaigns</p>
+          <p className="text-[#878C9F] font-inter text-[20px] mt-1 ml-11">Generate and monitor discount campaigns</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#CCFF00] hover:bg-[#b3ff00] text-black rounded-[8px] text-sm font-bold transition-all shadow-[0_0_15px_rgba(204,255,0,0.15)]"
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-[#CCFF00] hover:bg-[#b3ff00] text-black rounded-[8px] text-[13px] font-bold uppercase tracking-widest transition-all w-full md:w-auto shadow-[0_0_15px_rgba(204,255,0,0.15)] font-[Arial]"
         >
           <Plus size={18} />
           Create Promotion
@@ -118,45 +119,45 @@ export default function OwnerPromotions() {
       </div>
 
       {/* Top Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6 relative overflow-hidden group">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-5">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
              <CheckCircle2 size={20} />
           </div>
-          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Active Campaigns</p>
-          <h3 className="text-3xl font-bold font-outfit text-[#CCFF00]">
+          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Active Campaigns</p>
+          <h3 className="text-2xl font-semibold text-[#CCFF00] tracking-tight">
              {isLoading ? "..." : activeCount}
           </h3>
         </div>
-        <div className="bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6 relative overflow-hidden group">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
              <Tag size={20} />
           </div>
-          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Total Codes Issued</p>
-          <h3 className="text-3xl font-bold font-outfit text-white">
+          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Total Codes Issued</p>
+          <h3 className="text-2xl font-semibold text-white tracking-tight">
              {isLoading ? "..." : promotions.length}
           </h3>
         </div>
-        <div className="bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6 relative overflow-hidden group">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
              <Clock size={20} />
           </div>
-          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Redemptions</p>
-          <h3 className="text-3xl font-bold font-outfit text-white">
+          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Redemptions</p>
+          <h3 className="text-2xl font-semibold text-white tracking-tight">
              {isLoading ? "..." : totalRedemptions}
           </h3>
         </div>
       </div>
 
       {/* Promotions Table */}
-      <div className="bg-[#111111] border border-[#2D2D2D] rounded-[12px] overflow-hidden">
+      <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden shadow-[var(--shadow-2)]">
         <div className="p-4 border-b border-[#2D2D2D] flex items-center gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#878C9F]" size={16} />
             <input
               type="text"
               placeholder="Search campaigns..."
-              className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white pl-10 pr-4 py-2 rounded-[8px] text-sm focus:outline-none focus:border-[#CCFF00]/50 transition-colors"
+              className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white pl-10 pr-4 py-2 rounded-[8px] text-[13px] focus:outline-none focus:border-[#CCFF00]/50 transition-colors font-inter"
             />
           </div>
         </div>
@@ -253,15 +254,15 @@ export default function OwnerPromotions() {
       {/* Create Promotion Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-[#111111] border border-[#2D2D2D] rounded-[16px] w-full max-w-md overflow-hidden shadow-2xl">
+          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] w-full max-w-md overflow-hidden shadow-[var(--shadow-2)]">
             <div className="p-6 border-b border-[#2D2D2D] flex justify-between items-center bg-[#1A1A1A]">
-              <h2 className="text-lg font-bold font-outfit text-white flex items-center gap-2">
+              <h2 className="text-lg font-bold font-['Open_Sans'] uppercase tracking-tight text-white flex items-center gap-2">
                 <Tag size={18} className="text-[#CCFF00]" />
                 Initialize Campaign
               </h2>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="text-[#878C9F] hover:text-white transition-colors"
+                className="text-[#878C9F] hover:text-[#CCFF00] transition-colors"
               >
                 <XCircle size={20} />
               </button>
@@ -275,7 +276,7 @@ export default function OwnerPromotions() {
                   required
                   value={newPromo.code}
                   onChange={(e) => setNewPromo({...newPromo, code: e.target.value.toUpperCase()})}
-                  className="w-full bg-[#050505] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[8px] text-sm focus:outline-none focus:border-[#CCFF00]/50 uppercase"
+                  className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#CCFF00]/50 uppercase"
                   placeholder="e.g. SUMMER25"
                 />
               </div>
@@ -285,7 +286,7 @@ export default function OwnerPromotions() {
                 <select 
                   value={newPromo.turfId}
                   onChange={(e) => setNewPromo({...newPromo, turfId: e.target.value})}
-                  className="w-full bg-[#050505] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[8px] text-sm focus:outline-none focus:border-[#CCFF00]/50"
+                  className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#CCFF00]/50"
                 >
                   <option value="all">Universal (All My Grounds)</option>
                   {turfs.map(t => (
@@ -300,7 +301,7 @@ export default function OwnerPromotions() {
                   <select 
                     value={newPromo.type}
                     onChange={(e) => setNewPromo({...newPromo, type: e.target.value})}
-                    className="w-full bg-[#050505] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[8px] text-sm focus:outline-none focus:border-[#CCFF00]/50"
+                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#CCFF00]/50"
                   >
                     <option value="PERCENTAGE">Percentage (%)</option>
                     <option value="FLAT">Flat Amount (₹)</option>
@@ -314,7 +315,7 @@ export default function OwnerPromotions() {
                     min="1"
                     value={newPromo.value}
                     onChange={(e) => setNewPromo({...newPromo, value: e.target.value})}
-                    className="w-full bg-[#050505] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[8px] text-sm focus:outline-none focus:border-[#CCFF00]/50"
+                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#CCFF00]/50"
                     placeholder="e.g. 25"
                   />
                 </div>
@@ -329,7 +330,7 @@ export default function OwnerPromotions() {
                     min={new Date().toISOString().split('T')[0]}
                     value={newPromo.validUntil}
                     onChange={(e) => setNewPromo({...newPromo, validUntil: e.target.value})}
-                    className="w-full bg-[#050505] border border-[#2D2D2D] text-[#878C9F] px-4 py-2.5 rounded-[8px] text-sm focus:outline-none focus:border-[#CCFF00]/50 [color-scheme:dark]"
+                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-[#878C9F] px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#CCFF00]/50 [color-scheme:dark]"
                   />
                 </div>
                 <div>
@@ -339,7 +340,7 @@ export default function OwnerPromotions() {
                     min="1"
                     value={newPromo.usageLimit}
                     onChange={(e) => setNewPromo({...newPromo, usageLimit: e.target.value})}
-                    className="w-full bg-[#050505] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[8px] text-sm focus:outline-none focus:border-[#CCFF00]/50"
+                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#CCFF00]/50"
                     placeholder="Unlimited"
                   />
                 </div>
@@ -350,14 +351,14 @@ export default function OwnerPromotions() {
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2.5 bg-[#1A1A1A] border border-[#2D2D2D] text-white rounded-[8px] text-sm font-bold hover:bg-[#2D2D2D] transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-[#1A1A1A] border border-[#2D2D2D] text-white rounded-[8px] text-[13px] uppercase tracking-widest font-bold hover:bg-[#2D2D2D] transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2.5 bg-[#CCFF00] text-black rounded-[8px] text-sm font-bold hover:bg-[#b3ff00] transition-colors shadow-[0_0_15px_rgba(204,255,0,0.15)] disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 bg-[#CCFF00] text-black rounded-[8px] text-[13px] uppercase tracking-widest font-bold hover:bg-[#b3ff00] transition-colors shadow-[0_0_15px_rgba(204,255,0,0.15)] disabled:opacity-50"
                 >
                   {isSubmitting ? "Deploying..." : "Deploy Campaign"}
                 </button>
@@ -367,6 +368,7 @@ export default function OwnerPromotions() {
         </div>
       )}
 
+      </div>
     </div>
   );
 }

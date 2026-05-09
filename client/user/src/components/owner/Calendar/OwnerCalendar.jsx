@@ -53,17 +53,18 @@ const OwnerCalendar = () => {
   }, []).sort() || [];
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 lg:p-8 font-inter overflow-x-hidden space-y-6">
+    <div className="h-full custom-scrollbar bg-[#000000] text-white">
+      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
       
       {/* Top Filter Bar - Matching Dashboard Pattern */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="bg-[#111111] p-1 rounded-[10px] flex items-center border border-[#2D2D2D]">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-6 relative z-10 border-b border-[#2D2D2D] pb-6">
+        <div className="bg-[#000000] p-1 rounded-[8px] flex items-center border border-[#2D2D2D] shadow-[var(--shadow-2)]">
           {['Month', 'Week', 'Day'].map((v) => (
             <button
               key={v}
               onClick={() => setView(v)}
-              className={`px-8 py-2 rounded-[8px] text-[11px] font-bold uppercase tracking-widest transition-all duration-300 ${
-                view === v ? 'bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.2)]' : 'text-[#878C9F] hover:text-white'
+              className={`px-8 py-2 rounded-[6px] text-[12px] font-bold uppercase tracking-widest transition-all duration-300 ${
+                view === v ? 'bg-[#CCFF00] text-black shadow-[var(--shadow-2)]' : 'text-[#878C9F] hover:text-white'
               }`}
             >
               {v}
@@ -71,11 +72,11 @@ const OwnerCalendar = () => {
           ))}
         </div>
         
-        <div className="flex items-center gap-3">
-          <button className="bg-[#111111] border border-[#2D2D2D] hover:border-[#CCFF00]/50 text-white px-6 py-2.5 rounded-[8px] text-[11px] font-bold uppercase tracking-widest flex items-center gap-3 transition-all">
+        <div className="flex items-center gap-4">
+          <button className="bg-[#000000] border border-[#2D2D2D] hover:border-[#CCFF00]/50 text-white px-6 py-2.5 rounded-[8px] text-[13px] font-bold uppercase tracking-widest flex items-center gap-3 transition-all shadow-[var(--shadow-2)]">
             Schedule Overview
           </button>
-          <button className="bg-[#CCFF00] hover:bg-[#B3FF00] text-black px-6 py-2.5 rounded-[8px] text-[11px] font-bold uppercase tracking-widest flex items-center gap-3 transition-all shadow-[0_4px_15px_rgba(204,255,0,0.15)]">
+          <button className="bg-[#CCFF00] hover:bg-[#B3FF00] text-black px-6 py-2.5 rounded-[8px] text-[13px] font-bold uppercase tracking-widest flex items-center gap-3 transition-all shadow-[var(--shadow-2)]">
             <Plus size={16} strokeWidth={3} /> Block Slots
           </button>
         </div>
@@ -87,9 +88,9 @@ const OwnerCalendar = () => {
         
         <div className="flex items-center gap-10 relative z-10">
           <div className="space-y-1">
-            <p className="text-[#CCFF00] text-[10px] font-bold uppercase tracking-[2px]">{format(selectedDate, "EEEE")}</p>
+            <p className="text-[#CCFF00] text-[12px] font-normal uppercase tracking-[0.5px]">{format(selectedDate, "EEEE")}</p>
             <div className="flex items-center gap-4">
-              <h2 className="text-3xl font-semibold text-white tracking-tight font-outfit uppercase">{format(selectedDate, "dd MMM yyyy")}</h2>
+              <h2 className="text-3xl font-bold text-white tracking-tight font-['Open_Sans'] uppercase">{format(selectedDate, "dd MMM yyyy")}</h2>
               <div className="flex items-center gap-2 ml-2">
                 <button onClick={handlePrevDay} className="w-9 h-9 flex items-center justify-center hover:bg-[#2D2D2D] rounded-[6px] text-[#999999] hover:text-white transition-all border border-[#2D2D2D]">
                   <ChevronLeft size={20} />
@@ -98,7 +99,7 @@ const OwnerCalendar = () => {
                   <ChevronRight size={20} />
                 </button>
               </div>
-              <button onClick={handleToday} className="ml-2 px-5 py-2 bg-[#2D2D2D] border border-[#404040] rounded-[6px] text-[10px] font-bold uppercase tracking-widest hover:text-[#CCFF00] transition-all">
+              <button onClick={handleToday} className="ml-2 px-5 py-2 bg-[#2D2D2D] border border-[#404040] rounded-[6px] text-[12px] font-bold uppercase tracking-widest hover:text-[#CCFF00] transition-all">
                 Today
               </button>
             </div>
@@ -119,9 +120,9 @@ const OwnerCalendar = () => {
 
           <div className="h-10 w-[1px] bg-[#2D2D2D] hidden md:block" />
 
-          <div className="flex items-center gap-3 bg-[#111111] px-5 py-2 rounded-full border border-[#2D2D2D]">
+          <div className="flex items-center gap-3 bg-[#000000] px-5 py-2 rounded-full border border-[#2D2D2D] shadow-[var(--shadow-2)]">
              <div className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse shadow-[0_0_8px_#CCFF00]" />
-             <span className="text-[11px] font-bold text-white uppercase tracking-widest">{data?.stats?.averageLoad || 0}% Load</span>
+             <span className="text-[12px] font-bold text-white uppercase tracking-widest">{data?.stats?.averageLoad || 0}% Load</span>
           </div>
         </div>
       </div>
@@ -141,14 +142,14 @@ const OwnerCalendar = () => {
         <div className="flex border-b border-[#2D2D2D]">
           <div className="w-[280px] p-6 border-r border-[#2D2D2D] shrink-0 bg-[#000000]">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#CCFF00] uppercase tracking-[3px]">Facilities</span>
+              <span className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px]">Facilities</span>
               <Filter size={14} className="text-[#878C9F] hover:text-white cursor-pointer transition-colors" />
             </div>
           </div>
           <div className="flex-1 flex overflow-x-auto no-scrollbar bg-[#111111]">
             {allTimeSlots.map((time, idx) => (
               <div key={idx} className="min-w-[130px] py-4 text-center border-r border-[#2D2D2D]/30 last:border-r-0">
-                <span className="text-[10px] font-bold text-[#878C9F] tracking-[2px] uppercase">{time}</span>
+                <span className="text-[12px] font-normal text-[#878C9F] tracking-[0.5px] uppercase">{time}</span>
               </div>
             ))}
             {allTimeSlots.length === 0 && (
@@ -242,8 +243,8 @@ const OwnerCalendar = () => {
               </div>
             </div>
             <div className="space-y-2 relative z-10">
-              <h3 className="text-[11px] font-bold text-[#878C9F] uppercase tracking-[2px]">{stat.title}</h3>
-              <div className="text-3xl font-semibold text-white tracking-tight flex items-baseline gap-1 font-outfit">
+              <h3 className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px]">{stat.title}</h3>
+              <div className="text-3xl font-bold text-white tracking-tight flex items-baseline gap-1 font-['Open_Sans']">
                 {stat.prefix && <span className="text-lg text-white/40 font-normal">{stat.prefix}</span>}
                 <CountUp end={stat.value} duration={2} separator="," decimals={stat.value % 1 === 0 ? 0 : 1} />
                 {stat.suffix && <span className="text-lg text-white/40 font-normal">{stat.suffix}</span>}

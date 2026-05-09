@@ -22,7 +22,7 @@ const BookingModal = ({ slot, onClose }) => {
         <div className="p-8 pb-4 flex justify-between items-start">
           <div>
             <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-2">Slot Telemetry</p>
-            <h3 className="text-2xl font-semibold text-white uppercase tracking-tight font-outfit">
+            <h3 className="text-2xl font-bold text-white uppercase tracking-tight font-['Open_Sans']">
               {startTime} - {endTime}
             </h3>
           </div>
@@ -43,7 +43,7 @@ const BookingModal = ({ slot, onClose }) => {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-lg font-semibold text-white uppercase tracking-tight truncate font-outfit">{bookingDetails.user.name}</h4>
+                  <h4 className="text-lg font-bold text-white uppercase tracking-tight truncate font-['Open_Sans']">{bookingDetails.user.name}</h4>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="px-2 py-0.5 bg-[#CCFF00] text-black text-[8px] font-bold uppercase rounded-[2px]">Verified</div>
                     <span className="text-[10px] text-[#878C9F] font-bold uppercase tracking-widest">Athlete Profile</span>
@@ -80,7 +80,7 @@ const BookingModal = ({ slot, onClose }) => {
                   <span className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Revenue Impact</span>
                   <span className="text-[8px] text-[#444] font-bold uppercase">Settled via Platform</span>
                 </div>
-                <span className="text-3xl font-semibold text-[#CCFF00] font-outfit tracking-tighter">₹{bookingDetails.totalPrice}</span>
+                <span className="text-3xl font-bold text-[#CCFF00] font-['Open_Sans'] tracking-tighter">₹{bookingDetails.totalPrice}</span>
               </div>
             </>
           ) : (
@@ -141,18 +141,18 @@ export default function TurfDetails() {
 
   if (isLoading) return <DashboardSkeleton />;
   if (error) return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8 bg-black">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8 bg-[#000000]">
       <AlertCircle className="text-red-500 mb-6" size={48} />
-      <h2 className="text-2xl font-semibold text-white mb-2 uppercase tracking-tight font-outfit">Error Synchronizing Data</h2>
+      <h2 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight font-['Open_Sans']">Error Synchronizing Data</h2>
       <p className="text-[#878C9F] mb-8 max-w-md">{error || "Connection failure to server intelligence roster."}</p>
       <button onClick={() => navigate(-1)} className="px-8 py-3 bg-[#CCFF00] text-black font-bold uppercase tracking-widest rounded-[8px] text-[11px]">Revert to Inventory</button>
     </div>
   );
 
   if (!turfData || !turfData.turf) return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8 bg-black">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8 bg-[#000000]">
       <Zap size={48} className="text-[#2D2D2D] mb-6" />
-      <h2 className="text-2xl font-semibold text-white mb-2 uppercase tracking-tight font-outfit">Arena Missing</h2>
+      <h2 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight font-['Open_Sans']">Arena Missing</h2>
       <p className="text-[#878C9F] mb-8">We couldn't retrieve the operational metrics for this facility.</p>
       <button onClick={() => navigate(-1)} className="px-8 py-3 bg-[#CCFF00] text-black font-bold uppercase tracking-widest rounded-[8px] text-[11px]">Revert to Inventory</button>
     </div>
@@ -196,7 +196,7 @@ export default function TurfDetails() {
   });
 
   return (
-    <div className="space-y-8 animate-fade-in pb-20 bg-black min-h-screen">
+    <div className="space-y-8 animate-fade-in pb-20 bg-[#000000] min-h-screen">
       {selectedSlot && (
         <BookingModal 
           slot={selectedSlot} 
@@ -227,7 +227,7 @@ export default function TurfDetails() {
              <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-4">
                    <div className="space-y-1">
-                      <h1 className={`text-4xl font-semibold uppercase tracking-tight font-outfit ${
+                      <h1 className={`text-4xl font-bold uppercase tracking-tight font-['Open_Sans'] ${
                           turf.status === 'pending' ? 'text-amber-500' :
                           turf.status === 'rejected' ? 'text-red-500' :
                           'text-white'
@@ -254,7 +254,7 @@ export default function TurfDetails() {
                     </div>
                    <div className="px-3 py-1 bg-[#111] border border-[#2D2D2D] rounded-[4px] flex items-center gap-2">
                       <Star size={12} className="text-[#CCFF00] fill-[#CCFF00]" />
-                      <span className="text-[10px] font-bold text-white font-outfit">{turf.avgRating?.toFixed(1) || "NEW"}</span>
+                      <span className="text-[10px] font-bold text-white font-['Open_Sans']">{turf.avgRating?.toFixed(1) || "NEW"}</span>
                    </div>
                 </div>
                 <div className="flex flex-wrap gap-6 text-[#878C9F] text-[10px] font-bold uppercase tracking-[2px]">
@@ -424,7 +424,7 @@ export default function TurfDetails() {
                </div>
                <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px]">Today's Load</p>
                <div>
-                  <h4 className="text-3xl font-semibold text-white font-outfit uppercase">
+                  <h4 className="text-3xl font-bold text-white font-['Open_Sans'] uppercase">
                     {Math.round((filteredBookings.length / (turf.generatedSlots?.length || 1)) * 100)}%
                   </h4>
                   <p className="text-[9px] text-[#CCFF00] font-bold uppercase tracking-widest mt-1">Live Occupancy</p>
@@ -436,7 +436,7 @@ export default function TurfDetails() {
                </div>
                <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px]">Revenue</p>
                <div className="space-y-1">
-                  <h4 className="text-3xl font-semibold text-white font-outfit uppercase flex items-baseline gap-2">
+                  <h4 className="text-3xl font-bold text-white font-['Open_Sans'] uppercase flex items-baseline gap-2">
                     ₹{filteredBookings.reduce((acc, b) => acc + (b.bookingDetails?.totalPrice || 0), 0)}
                     {pending.pricePerHour && (
                        <span className="text-amber-500 text-sm font-bold opacity-80">→ ₹{pending.pricePerHour}/hr <PendingBadge label="Rate" /></span>
@@ -594,7 +594,7 @@ export default function TurfDetails() {
                     <div className="flex justify-between items-start">
                        <div className="space-y-1">
                           <p className={`text-[9px] font-bold uppercase tracking-widest ${slot.isBooked ? "text-[#CCFF00]/60" : "text-[#444]"}`}>Time Sequence</p>
-                          <h4 className="text-lg font-semibold text-white font-outfit uppercase tracking-tight">
+                          <h4 className="text-lg font-bold text-white font-['Open_Sans'] uppercase tracking-tight">
                              {slot.startTime} - {slot.endTime}
                           </h4>
                        </div>
@@ -618,7 +618,7 @@ export default function TurfDetails() {
                               )}
                            </div>
                            <div className="flex-1 min-w-0">
-                              <h5 className="text-[13px] font-semibold text-white truncate uppercase tracking-tight font-outfit">{slot.bookingDetails.user.name}</h5>
+                              <h5 className="text-[13px] font-bold text-white truncate uppercase tracking-tight font-['Open_Sans']">{slot.bookingDetails.user.name}</h5>
                               <p className="text-[9px] text-[#CCFF00] font-bold uppercase tracking-[2px] mt-1">View Details</p>
                            </div>
                         </div>
@@ -643,7 +643,7 @@ export default function TurfDetails() {
                    <div className="w-16 h-16 bg-[#111] rounded-full flex items-center justify-center mb-6 border border-[#2D2D2D]">
                       <Zap size={24} className="text-[#2D2D2D]" />
                    </div>
-                   <h4 className="text-xl font-semibold text-white uppercase tracking-tight mb-2 font-outfit">Zero Operational Data</h4>
+                   <h4 className="text-xl font-bold text-white uppercase tracking-tight mb-2 font-['Open_Sans']">Zero Operational Data</h4>
                    <p className="text-[#878C9F] text-xs max-w-xs mx-auto opacity-60">No slots are configured for the selected timeline. Adjust your arena settings to deploy new sessions.</p>
                 </div>
               )}

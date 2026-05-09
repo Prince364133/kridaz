@@ -83,347 +83,367 @@ const EditTurf = () => {
   ) : null;
 
   return (
-    <div className="p-4 md:p-8 bg-black min-h-screen text-white font-inter">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Navigation & Header */}
-        <div className="space-y-6">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => navigate(-1)}
-              className="w-10 h-10 flex items-center justify-center bg-[#111] border border-[#2D2D2D] text-[#878C9F] hover:text-[#CCFF00] hover:border-[#CCFF00]/40 rounded-full transition-all group"
-              title="Cancel Changes"
-            >
-              <ArrowLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
-            </button>
-            <div className="h-px flex-1 bg-[#2D2D2D]/50" />
-          </div>
-
+    <div className="h-full custom-scrollbar bg-[#000000] text-white">
+      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
           <div className="space-y-1">
-            <div className="flex items-center gap-3">
-               <div className="w-1.5 h-6 bg-[#CCFF00] rounded-full" />
-               <h1 className="text-3xl font-semibold uppercase tracking-tight text-white font-outfit">Facility Configurator</h1>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => navigate(-1)}
+                className="w-10 h-10 flex items-center justify-center bg-[#111] border border-[#2D2D2D] text-[#878C9F] hover:text-[#CCFF00] hover:border-[#CCFF00]/40 rounded-full transition-all group"
+                title="Cancel Changes"
+              >
+                <ArrowLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-8 bg-[#CCFF00] rounded-full" />
+                <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
+                  EDIT <span className="text-[#CCFF00]">FACILITY</span>
+                </h1>
+              </div>
             </div>
-            <p className="text-[#878C9F] text-[10px] font-bold uppercase tracking-[3px] ml-4.5 opacity-60">Fine-tune your arena telemetry and operational rules.</p>
+            <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-14">
+              Update Facility Parameters | {turf?.name || "TurfSpot"}
+            </p>
           </div>
-        </div>
+        </header>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-8"
+          className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-[#000000] p-8 md:p-12 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] relative overflow-hidden"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column: General Info */}
-            <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-8 space-y-8">
-              <div className="flex items-center gap-2 border-b border-[#2D2D2D] pb-4">
-                <p className="text-[11px] font-bold text-[#CCFF00] uppercase tracking-[3px]">General Information</p>
-              </div>
-              
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">Turf Name <FieldStatus isPending={!!pendingUpdates?.name} /></label>
-                  <input
-                    {...register("name")}
-                    type="text"
-                    className={`w-full bg-[#111111] border ${pendingUpdates?.name ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none transition-all text-sm font-medium placeholder-[#333]`}
-                    placeholder="Enter arena identity..."
-                  />
-                  {errors.name && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.name.message}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">Facility Description <FieldStatus isPending={!!pendingUpdates?.description} /></label>
-                  <textarea
-                    {...register("description")}
-                    className={`w-full bg-[#111111] border ${pendingUpdates?.description ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none transition-all text-sm font-medium h-32 resize-none placeholder-[#333]`}
-                    placeholder="Describe your facility's features and amenities..."
-                  ></textarea>
-                  {errors.description && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.description.message}</p>}
-                </div>
-
-                <div className="space-y-4 pt-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest flex items-center gap-2">
-                      <MapPin size={14} className="text-[#CCFF00]/60" /> Location Details <FieldStatus isPending={!!pendingUpdates?.location} />
-                    </p>
-                    <button
-                      type="button"
-                      onClick={getMyLocation}
-                      disabled={isLocating}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-[#111] text-[#CCFF00] border border-[#CCFF00]/20 hover:border-[#CCFF00] transition-all rounded-[6px] text-[9px] font-bold uppercase tracking-widest disabled:opacity-50"
-                    >
-                      <LocateFixed size={12} className={isLocating ? "animate-spin" : ""} />
-                      {isLocating ? "Locating..." : "Auto-Detect"}
-                    </button>
-                  </div>
-
-                  <input
-                    {...register("location")}
-                    type="text"
-                    placeholder="Full Street Address..."
-                    className={`w-full bg-[#111111] border ${pendingUpdates?.location ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium placeholder-[#333]`}
-                  />
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      {...register("city")}
-                      type="text"
-                      placeholder="City"
-                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium placeholder-[#333]"
-                    />
-                    <input
-                      {...register("state")}
-                      type="text"
-                      placeholder="State"
-                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium placeholder-[#333]"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[8px] font-bold text-[#444] uppercase tracking-widest ml-1">Latitude</label>
-                      <input
-                        {...register("latitude")}
-                        type="text"
-                        className="w-full bg-[#050505] border border-[#2D2D2D] text-[#878C9F] px-4 py-2 rounded-[6px] focus:border-[#CCFF00]/40 focus:outline-none text-[11px] font-mono"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[8px] font-bold text-[#444] uppercase tracking-widest ml-1">Longitude</label>
-                      <input
-                        {...register("longitude")}
-                        type="text"
-                        className="w-full bg-[#050505] border border-[#2D2D2D] text-[#878C9F] px-4 py-2 rounded-[6px] focus:border-[#CCFF00]/40 focus:outline-none text-[11px] font-mono"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-4">
-                  <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">Hourly Rate (INR) <FieldStatus isPending={!!pendingUpdates?.pricePerHour} /></label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#CCFF00] font-bold text-sm">₹</span>
-                    <input
-                      {...register("pricePerHour")}
-                      type="number"
-                      className={`w-full bg-[#111111] border ${pendingUpdates?.pricePerHour ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white pl-10 pr-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium`}
-                    />
-                  </div>
-                  {errors.pricePerHour && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.pricePerHour.message}</p>}
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Operational Details */}
-            <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-8 space-y-8">
-              <div className="flex items-center gap-2 border-b border-[#2D2D2D] pb-4">
-                <p className="text-[11px] font-bold text-[#CCFF00] uppercase tracking-[3px]">Operational Intelligence</p>
-              </div>
-              
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">YouTube Telemetry (URL) <FieldStatus isPending={!!pendingUpdates?.youtubeUrl} /></label>
-                  <input
-                    {...register("youtubeUrl")}
-                    type="text"
-                    className={`w-full bg-[#111111] border ${pendingUpdates?.youtubeUrl ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium placeholder-[#333]`}
-                    placeholder="https://www.youtube.com/watch?v=..."
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <div className={`relative group ${pendingUpdates?.images ? 'border border-amber-500/40 p-1 rounded-[10px]' : ''}`}>
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      className="w-full bg-[#111111] border border-[#2D2D2D] text-[#444] file:bg-[#2D2D2D] file:text-white file:border-none file:px-4 file:h-12 file:mr-4 file:font-bold file:uppercase file:text-[10px] rounded-[8px] h-12 flex items-center focus:outline-none transition-all cursor-pointer"
-                      onChange={handleImageChange}
-                    />
-                  </div>
-                  
-                  {previews.length > 0 && (
-                    <div className="space-y-3">
-                      <p className="text-[8px] font-bold text-[#444] uppercase tracking-[2px] ml-1">Operational Asset Roster ({previews.length} Files)</p>
-                      <div className="grid grid-cols-5 gap-2">
-                        {previews.map((url, i) => (
-                          <div key={i} className="aspect-square rounded-[6px] border border-[#2D2D2D] overflow-hidden bg-[#050505] relative group/item">
-                            <img src={url} className="w-full h-full object-cover opacity-80 group-hover/item:opacity-100 transition-opacity" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <p className="text-[9px] text-[#444] mt-2 uppercase tracking-tight italic">Leave empty to retain existing facility imagery.</p>
-                </div>
-
-                <div className={`space-y-4 ${pendingUpdates?.sportTypes ? 'border border-amber-500/40 p-4 rounded-[10px]' : ''}`}>
-                  <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">Sport Arsenal <FieldStatus isPending={!!pendingUpdates?.sportTypes} /></label>
-                  <select
-                    className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium appearance-none"
-                    onChange={(e) => addSportType(e.target.value)}
-                    value=""
-                  >
-                    <option value="" disabled>Select Disciplines</option>
-                    {sportsOptions.map(option => (
-                      <option key={option} value={option} disabled={sportTypes.includes(option)}>{option}</option>
-                    ))}
-                  </select>
-                  <div className="flex flex-wrap gap-2">
-                    {sportTypes.map((type, index) => (
-                      <span key={index} className="px-3 py-1 bg-[#111] border border-[#2D2D2D] text-[#CCFF00] font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-wider">
-                        {type}
-                        <button type="button" onClick={() => removeSportType(type)} className="hover:text-white transition-colors">
-                          <X size={10} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={`space-y-4 ${pendingUpdates?.groundTypes ? 'border border-amber-500/40 p-4 rounded-[10px]' : ''}`}>
-                  <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">Ground Composition <FieldStatus isPending={!!pendingUpdates?.groundTypes} /></label>
-                  <select
-                    className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium appearance-none"
-                    onChange={(e) => addGroundType(e.target.value)}
-                    value=""
-                  >
-                    <option value="" disabled>Select Surface Types</option>
-                    {groundTypeOptions.map(option => (
-                      <option key={option} value={option} disabled={groundTypes.includes(option)}>{option}</option>
-                    ))}
-                  </select>
-                  <div className="flex flex-wrap gap-2">
-                    {groundTypes.map((type, index) => (
-                      <span key={index} className="px-3 py-1 bg-[#111] border border-[#2D2D2D] text-white font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-wider">
-                        {type}
-                        <button type="button" onClick={() => removeGroundType(type)} className="hover:text-[#CCFF00] transition-colors">
-                          <X size={10} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Integrated Facilities</label>
-                  <select
-                    className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium appearance-none"
-                    onChange={(e) => addFacility(e.target.value)}
-                    value=""
-                  >
-                    <option value="" disabled>Select Amenities</option>
-                    {facilitiesOptions.map(option => (
-                      <option key={option} value={option} disabled={facilities.includes(option)}>{option}</option>
-                    ))}
-                  </select>
-                  <div className="flex flex-wrap gap-2">
-                    {facilities.map((type, index) => (
-                      <span key={index} className="px-3 py-1 bg-[#CCFF00] text-black font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-wider">
-                        {type}
-                        <button type="button" onClick={() => removeFacility(type)} className="hover:text-white transition-colors">
-                          <X size={10} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <h3 className="text-xl font-bold text-white border-b border-gray-800 pb-2 mb-8 uppercase tracking-widest mt-12">Support & Navigation</h3>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#CCFF00]/5 blur-[100px] pointer-events-none" />
+          
+          <div className="space-y-8 relative z-10">
+            <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px]">General Information</h3>
             
-            <FormField
-              label="Direct Google Maps URL"
-              name="mapUrl"
-              type="text"
-              placeholder="https://maps.app.goo.gl/..."
-              register={register}
-              error={errors.mapUrl}
-            />
-            <p className="text-[9px] text-gray-500 uppercase tracking-tighter italic">Provide a direct navigation link for customers to reach your venue easily.</p>
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
+                Turf Name <FieldStatus isPending={!!pendingUpdates?.name} />
+              </label>
+              <input
+                {...register("name")}
+                type="text"
+                className={`w-full bg-[#111111] border ${pendingUpdates?.name ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none transition-all text-sm font-medium placeholder-[#333]`}
+                placeholder="Enter arena identity..."
+              />
+              {errors.name && <p className="text-[#CCFF00] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.name.message}</p>}
+            </div>
+            
+            <div className="form-control">
+              <label className="label mb-2">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
+                  Facility Description <FieldStatus isPending={!!pendingUpdates?.description} />
+                </span>
+              </label>
+              <textarea
+                {...register("description")}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.description ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-32 rounded-[8px] p-4 transition-all resize-none`}
+                placeholder="Describe your facility's features and amenities..."
+              ></textarea>
+              {errors.description && (
+                <span className="text-[#CCFF00] text-[10px] font-bold uppercase mt-2 block ml-1">
+                  {errors.description.message}
+                </span>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
+                Location (Address Line) <FieldStatus isPending={!!pendingUpdates?.location} />
+              </label>
+              <input
+                {...register("location")}
+                type="text"
+                placeholder="Full Street Address..."
+                className={`w-full bg-[#111111] border ${pendingUpdates?.location ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium placeholder-[#333]`}
+              />
+              {errors.location && <p className="text-[#CCFF00] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.location.message}</p>}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="form-control">
+                <label className="label mb-2">
+                  <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">City</span>
+                </label>
+                <input
+                  {...register("city")}
+                  type="text"
+                  placeholder="City"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium placeholder-[#333]"
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label mb-2">
+                  <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">State</span>
+                </label>
+                <input
+                  {...register("state")}
+                  type="text"
+                  placeholder="State"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium placeholder-[#333]"
+                />
+              </div>
+            </div>
+
+            <div className="form-control">
+              <label className="label mb-4">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center gap-2">
+                   📍 Venue Coordinates & Map Preview
+                </span>
+              </label>
+
+              <div className="flex gap-4 mb-4">
+                <input
+                  {...register("latitude")}
+                  placeholder="Latitude"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-xs h-12 rounded-[8px] px-4 focus:outline-none focus:border-[#CCFF00]/60 transition-all font-mono"
+                />
+                <input
+                  {...register("longitude")}
+                  placeholder="Longitude"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-xs h-12 rounded-[8px] px-4 focus:outline-none focus:border-[#CCFF00]/60 transition-all font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={getMyLocation}
+                  className={`shrink-0 px-6 rounded-[8px] bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20 hover:bg-[#CCFF00] hover:text-black transition-all flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest ${isLocating ? 'animate-pulse' : ''}`}
+                >
+                  {isLocating ? "Locating…" : "📡 GPS"}
+                </button>
+              </div>
+
+              <div className="w-full rounded-[8px] border border-[#2D2D2D] bg-[#050505] flex flex-col items-center justify-center py-10 gap-3 border-dashed">
+                <p className="text-[10px] font-bold text-[#333] uppercase tracking-[4px]">Map telemetry active</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
+                Hourly Rate (INR) <FieldStatus isPending={!!pendingUpdates?.pricePerHour} />
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#CCFF00] font-bold text-sm">₹</span>
+                <input
+                  {...register("pricePerHour")}
+                  type="number"
+                  className={`w-full bg-[#111111] border ${pendingUpdates?.pricePerHour ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white pl-10 pr-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium`}
+                />
+              </div>
+              {errors.pricePerHour && <p className="text-[#CCFF00] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.pricePerHour.message}</p>}
+            </div>
+          </div>
+
+          <div className="space-y-8 relative z-10">
+            <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px]">Operational Details</h3>
+            
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
+                YouTube Telemetry (URL) <FieldStatus isPending={!!pendingUpdates?.youtubeUrl} />
+              </label>
+              <input
+                {...register("youtubeUrl")}
+                type="text"
+                className={`w-full bg-[#111111] border ${pendingUpdates?.youtubeUrl ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium placeholder-[#333]`}
+                placeholder="https://www.youtube.com/watch?v=..."
+              />
+            </div>
+
+            <div className="form-control">
+              <label className="label mb-2">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Facility Images</span>
+              </label>
+              <div className="relative group">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-[#878C9F] file:bg-[#2D2D2D] file:text-white file:border-none file:px-6 file:h-12 file:mr-4 file:font-bold file:uppercase file:text-[10px] file:tracking-widest rounded-[8px] h-12 flex items-center focus:outline-none transition-all cursor-pointer"
+                  onChange={handleImageChange}
+                />
+              </div>
+              
+              {previews.length > 0 && (
+                <div className="mt-4 grid grid-cols-5 gap-2">
+                  {previews.map((url, i) => (
+                    <div key={i} className="aspect-square rounded-[6px] border border-[#2D2D2D] overflow-hidden bg-[#050505] relative group/item">
+                      <img src={url} className="w-full h-full object-cover opacity-80 group-hover/item:opacity-100 transition-opacity" />
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="text-[10px] text-[#444] mt-3 uppercase tracking-widest italic ml-1">Leave empty to retain current imagery.</p>
+            </div>
+
+            <div className="form-control">
+              <label className="label mb-2">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
+                  Sport Arsenal <FieldStatus isPending={!!pendingUpdates?.sportTypes} />
+                </span>
+              </label>
+              <select
+                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
+                onChange={(e) => addSportType(e.target.value)}
+                value=""
+              >
+                <option value="" disabled>Add Sport</option>
+                {sportsOptions.map(option => (
+                  <option key={option} value={option} disabled={sportTypes.includes(option)}>{option}</option>
+                ))}
+              </select>
+              <div className="mt-4 flex flex-wrap gap-2 min-h-[40px]">
+                {sportTypes.map((type, index) => (
+                  <span key={index} className="px-3 py-1.5 bg-[#CCFF00] text-black font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
+                    {type}
+                    <button type="button" onClick={() => removeSportType(type)} className="hover:text-white transition-colors">
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-control">
+              <label className="label mb-2">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
+                  Ground Composition <FieldStatus isPending={!!pendingUpdates?.groundTypes} />
+                </span>
+              </label>
+              <select
+                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
+                onChange={(e) => addGroundType(e.target.value)}
+                value=""
+              >
+                <option value="" disabled>Add Ground Type</option>
+                {groundTypeOptions.map(option => (
+                  <option key={option} value={option} disabled={groundTypes.includes(option)}>{option}</option>
+                ))}
+              </select>
+              <div className="mt-4 flex flex-wrap gap-2 min-h-[40px]">
+                {groundTypes.map((type, index) => (
+                  <span key={index} className="px-3 py-1.5 bg-[#1A1A1A] border border-[#2D2D2D] text-white font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
+                    {type}
+                    <button type="button" onClick={() => removeGroundType(type)} className="hover:text-[#CCFF00] transition-colors">
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-control">
+              <label className="label mb-2">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Integrated Facilities</span>
+              </label>
+              <select
+                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
+                onChange={(e) => addFacility(e.target.value)}
+                value=""
+              >
+                <option value="" disabled>Add Facility</option>
+                {facilitiesOptions.map(option => (
+                  <option key={option} value={option} disabled={facilities.includes(option)}>{option}</option>
+                ))}
+              </select>
+              <div className="mt-4 flex flex-wrap gap-2 min-h-[40px]">
+                {facilities.map((type, index) => (
+                  <span key={index} className="px-3 py-1.5 bg-[#1A1A1A] border border-[#2D2D2D] text-[#CCFF00] font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
+                    {type}
+                    <button type="button" onClick={() => removeFacility(type)} className="hover:text-white transition-colors">
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px] mt-12">Support & Navigation</h3>
+            
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
+                Direct Google Maps URL <FieldStatus isPending={!!pendingUpdates?.mapUrl} />
+              </label>
+              <input
+                {...register("mapUrl")}
+                type="text"
+                placeholder="https://maps.app.goo.gl/..."
+                className={`w-full bg-[#111111] border ${pendingUpdates?.mapUrl ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium`}
+              />
+            </div>
 
             <div className="form-control space-y-4">
               <label className="label">
-                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Venue Managers (Contacts)</span>
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Venue Managers</span>
               </label>
               
-              <div className="flex flex-col md:flex-row gap-3">
+              <div className="flex flex-col md:flex-row gap-4">
                 <input
                   type="text"
-                  placeholder="Manager Name"
+                  placeholder="Name"
                   value={newManagerName}
                   onChange={(e) => setNewManagerName(e.target.value)}
-                  className="input bg-[#151515] border-gray-800 text-white text-xs w-full h-12 rounded-xl focus:outline-none focus:border-primary transition-colors"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-sm h-12 rounded-[8px] px-4 focus:outline-none"
                 />
                 <input
                   type="text"
-                  placeholder="Manager Phone (10 digits)"
+                  placeholder="Phone"
                   value={newManagerPhone}
                   onChange={(e) => setNewManagerPhone(e.target.value)}
-                  className="input bg-[#151515] border-gray-800 text-white text-xs w-full h-12 rounded-xl focus:outline-none focus:border-primary transition-colors"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-sm h-12 rounded-[8px] px-4 focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={addManagerContact}
-                  className="shrink-0 px-6 rounded-xl bg-white text-black hover:bg-primary transition-all text-xs font-bold uppercase"
+                  className="shrink-0 px-8 rounded-[8px] bg-white text-black hover:bg-[#CCFF00] transition-all text-[11px] font-bold uppercase tracking-widest"
                 >
                   Add
                 </button>
               </div>
 
-              <div className="space-y-2 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
+              <div className="space-y-3 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
                 {managerContacts.map((manager, index) => (
-                  <div key={index} className="flex items-center justify-between bg-[#1a1a1a] p-3 rounded-xl border border-gray-800 group">
+                  <div key={index} className="flex items-center justify-between bg-[#111111] p-4 rounded-[8px] border border-[#2D2D2D] hover:border-[#CCFF00]/30 transition-all">
                     <div className="flex flex-col">
-                      <span className="text-white text-xs font-bold uppercase tracking-wider">{manager.name}</span>
-                      <span className="text-gray-500 text-[10px] font-mono">{manager.phone}</span>
+                      <span className="text-white text-[13px] font-bold uppercase tracking-tight">{manager.name}</span>
+                      <span className="text-[#878C9F] text-[11px] font-mono mt-0.5">{manager.phone}</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeManagerContact(index)}
-                      className="text-gray-500 hover:text-primary transition-colors uppercase text-[10px] font-bold"
-                    >
+                    <button type="button" onClick={() => removeManagerContact(index)} className="text-[#444] hover:text-[#CCFF00] transition-colors uppercase text-[10px] font-bold tracking-widest">
                       Remove
                     </button>
                   </div>
                 ))}
-                {managerContacts.length === 0 && (
-                  <p className="text-gray-600 text-[10px] font-bold uppercase tracking-widest text-center py-4 border border-dashed border-gray-800 rounded-xl italic">
-                    No Managers Added Yet
-                  </p>
-                )}
               </div>
             </div>
           </div>
 
-          {/* Slot Architecture Section */}
-          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-8 space-y-10">
-            <div className="flex items-center gap-2 border-b border-[#2D2D2D] pb-4">
-               <p className="text-[11px] font-bold text-[#CCFF00] uppercase tracking-[3px]">Slot Architecture & Scheduling</p>
-            </div>
-
+          <div className="md:col-span-2 space-y-12 pt-12 border-t border-[#2D2D2D] relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <div className="space-y-8">
+              <div className="space-y-10">
+                <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-6 uppercase tracking-[3px]">Slot Architecture</h3>
                 <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Session Duration</label>
+                  <div className="form-control">
+                    <label className="label mb-2">
+                      <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Slot Duration</span>
+                    </label>
                     <select
                       {...register("slotDuration")}
-                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium appearance-none"
+                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 appearance-none"
                     >
                       <option value={30}>30 Minutes</option>
                       <option value={60}>60 Minutes</option>
                       <option value={90}>90 Minutes</option>
-                      <option value={120}>120 Minutes (2 hrs)</option>
-                      <option value={180}>180 Minutes (3 hrs)</option>
+                      <option value={120}>120 Minutes</option>
+                      <option value={180}>180 Minutes</option>
                     </select>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Transition Break</label>
+                  <div className="form-control">
+                    <label className="label mb-2">
+                      <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Break Time</span>
+                    </label>
                     <select
                       {...register("breakTime")}
-                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium appearance-none"
+                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 appearance-none"
                     >
                       <option value={0}>No Break</option>
                       <option value={10}>10 Minutes</option>
@@ -433,28 +453,35 @@ const EditTurf = () => {
                     </select>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Opening Threshold</label>
+                  <div className="form-control">
+                    <label className="label mb-2">
+                      <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Opening Threshold</span>
+                    </label>
                     <Controller
                       name="openTime"
                       control={control}
                       render={({ field }) => (
                         <DatePicker
                           selected={field.value}
-                          onChange={(date) => { field.onChange(date); setValue("closeTime", null); }}
+                          onChange={(date) => {
+                            field.onChange(date);
+                            setValue("closeTime", null);
+                          }}
                           showTimeSelect
                           showTimeSelectOnly
                           timeIntervals={60}
                           timeCaption="Time"
                           dateFormat="h:mm aa"
-                          className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium"
+                          className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all"
                         />
                       )}
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Closing Threshold</label>
+                  <div className="form-control">
+                    <label className="label mb-2">
+                      <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Closing Threshold</span>
+                    </label>
                     <Controller
                       name="closeTime"
                       control={control}
@@ -467,7 +494,7 @@ const EditTurf = () => {
                           timeIntervals={60}
                           timeCaption="Time"
                           dateFormat="h:mm aa"
-                          className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium disabled:opacity-30"
+                          className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all disabled:opacity-30"
                           disabled={!openTime}
                         />
                       )}
@@ -475,9 +502,11 @@ const EditTurf = () => {
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Weekly Operational Sequence</label>
-                  <div className="flex flex-wrap gap-2">
+                <div className="space-y-6">
+                  <label className="label">
+                    <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Weekly Operational Sequence</span>
+                  </label>
+                  <div className="flex flex-wrap gap-3">
                     {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(day => {
                       const isActive = availableDays.includes(day);
                       return (
@@ -485,10 +514,10 @@ const EditTurf = () => {
                           key={day}
                           type="button"
                           onClick={() => toggleDay(day)}
-                          className={`px-4 py-3 rounded-[8px] text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                          className={`px-5 py-3 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all border ${
                             isActive 
-                            ? "bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_5px_15px_rgba(204,255,0,0.1)]" 
-                            : "bg-[#111] text-[#444] border-[#2D2D2D] hover:border-[#CCFF00]/40"
+                            ? "bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_5px_15px_rgba(204,255,0,0.2)]" 
+                            : "bg-[#111111] text-[#444] border-[#2D2D2D] hover:border-[#CCFF00]/40"
                           }`}
                         >
                           {day.substring(0, 3)}
@@ -499,50 +528,49 @@ const EditTurf = () => {
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-[11px] font-bold text-[#878C9F] uppercase tracking-[2px]">Matrix Projection</h3>
-                  <span className="text-[9px] font-bold text-[#CCFF00] uppercase bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-3 py-1 rounded-full">
+              <div className="space-y-10">
+                <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-3 mb-6">
+                  <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[3px]">Matrix Projection</h3>
+                  <span className="text-[10px] font-bold text-[#CCFF00] uppercase bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-4 py-1 rounded-full">
                     {generatedSlots.length} Active Slots
                   </span>
                 </div>
                 
                 {generatedSlots.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                     {generatedSlots.map((slot, index) => (
                       <button
                         key={index}
                         type="button"
                         onClick={() => toggleSlotActive(index)}
-                        className={`p-3 rounded-[8px] text-[10px] font-bold border transition-all flex flex-col items-center gap-1 ${
+                        className={`p-4 rounded-[8px] text-[11px] font-bold border transition-all flex flex-col items-center gap-1.5 ${
                           slot.isActive
-                          ? "bg-[#111] border-[#2D2D2D] text-white hover:border-[#CCFF00]/40"
-                          : "bg-[#050505] border-[#1A1A1A] text-[#222] line-through opacity-40"
+                          ? "bg-[#111111] border-[#2D2D2D] text-white hover:border-[#CCFF00]/40"
+                          : "bg-black/50 border-[#1A1A1A] text-[#222] line-through opacity-40"
                         }`}
                       >
-                        <span className="tracking-tighter font-outfit">{slot.startTime}</span>
+                        <span className="tracking-tighter">{slot.startTime}</span>
                         <div className="w-1 h-px bg-[#2D2D2D]" />
-                        <span className="tracking-tighter font-outfit opacity-60">{slot.endTime}</span>
+                        <span className="tracking-tighter opacity-60">{slot.endTime}</span>
                       </button>
                     ))}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-[200px] bg-[#050505] rounded-[8px] border border-dashed border-[#2D2D2D]">
-                    <p className="text-[#333] text-[10px] font-bold uppercase tracking-widest">Adjust thresholds to project slots</p>
+                    <p className="text-[#333] text-[10px] font-bold uppercase tracking-[4px]">Adjust thresholds to view slots</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Submit Action */}
-          <div className="pt-4 pb-12">
+          <div className="md:col-span-2 pt-12 border-t border-[#2D2D2D] relative z-10 pb-12">
             <button 
               type="submit" 
-              className={`w-full py-4 bg-[#CCFF00] text-black font-bold text-[14px] uppercase tracking-[4px] hover:bg-[#B3FF00] transition-all rounded-[8px] shadow-[0_10px_30px_rgba(204,255,0,0.15)] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full py-5 bg-[#CCFF00] text-black font-bold text-[16px] uppercase tracking-[6px] hover:bg-white transition-all transform hover:scale-[1.01] active:scale-[0.99] rounded-[8px] shadow-[0_10px_30px_rgba(204,255,0,0.15)] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={loading}
             >
-              {loading ? "Synchronizing Configuration..." : "Commit Operational Changes"}
+              {loading ? "SYNCHRONIZING..." : "COMMIT OPERATIONAL CHANGES"}
             </button>
           </div>
         </form>

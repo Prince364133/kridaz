@@ -89,25 +89,31 @@ const AddTurf = () => {
   const groundTypeOptions = ["Natural Grass", "Artificial Turf", "Clay", "Hard Court", "Small Turf", "Indoor Court"];
   const facilitiesOptions = ["Parking", "Washroom", "Drinking Water", "Changing Room", "First Aid", "Locker Room", "Cafeteria", "WiFi", "Lighting", "Sitting Area"];
 
-
   return (
-    <div className="p-4 md:p-8 bg-[#0a0a0a] min-h-screen text-white">
-      <div className="max-w-5xl mx-auto">
-        <header className="mb-12 border-l-8 border-primary pl-6">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white uppercase">
-            ADD NEW <span className="text-primary">TURF</span>
-          </h1>
-          <p className="text-gray-500 uppercase tracking-widest mt-2 text-sm">
-            Register a New Facility | BookMySportz
-          </p>
+    <div className="h-full custom-scrollbar bg-[#000000] text-white">
+      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-8 bg-[#CCFF00] rounded-full" />
+              <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
+                ADD NEW <span className="text-[#CCFF00]">TURF</span>
+              </h1>
+            </div>
+            <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
+              Register a New Facility | BookMySportz
+            </p>
+          </div>
         </header>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-[#111] p-8 md:p-12 rounded-2xl border border-gray-800 shadow-2xl"
+          className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-[#000000] p-8 md:p-12 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] relative overflow-hidden"
         >
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold text-white border-b border-gray-800 pb-2 mb-8 uppercase tracking-widest">General Information</h3>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#CCFF00]/5 blur-[100px] pointer-events-none" />
+          
+          <div className="space-y-8 relative z-10">
+            <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px]">General Information</h3>
             
             <FormField
               label="Turf Name"
@@ -115,19 +121,20 @@ const AddTurf = () => {
               type="text"
               register={register}
               error={errors.name}
+              className="bg-[#111111] border-[#2D2D2D] text-white focus:border-[#CCFF00]/60"
             />
             
             <div className="form-control">
-              <label className="label">
-                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Facility Description</span>
+              <label className="label mb-2">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Facility Description</span>
               </label>
               <textarea
                 {...register("description")}
-                className="textarea bg-[#151515] border-gray-800 text-white focus:border-primary focus:outline-none text-sm h-32 rounded-xl"
+                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-32 rounded-[8px] p-4 transition-all"
                 placeholder="Describe your facility's features and amenities..."
               ></textarea>
               {errors.description && (
-                <span className="text-primary text-[10px] font-bold uppercase mt-1">
+                <span className="text-[#CCFF00] text-[10px] font-bold uppercase mt-2 block ml-1">
                   {errors.description.message}
                 </span>
               )}
@@ -139,16 +146,17 @@ const AddTurf = () => {
               type="text"
               register={register}
               error={errors.location}
+              className="bg-[#111111] border-[#2D2D2D] text-white focus:border-[#CCFF00]/60"
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="form-control">
-                <label className="label">
-                  <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">State</span>
+                <label className="label mb-2">
+                  <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">State</span>
                 </label>
                 <select
                   {...register("state")}
-                  className="select bg-[#151515] border-gray-800 text-white focus:border-primary focus:outline-none text-sm h-12 rounded-xl w-full"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
                   onChange={(e) => {
                     setValue("state", e.target.value);
                     setValue("city", ""); // Reset city on state change
@@ -157,60 +165,60 @@ const AddTurf = () => {
                   <option value="">Select State</option>
                   {statesList.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
-                {errors.state && <span className="text-primary text-[10px] font-bold uppercase mt-1">{errors.state.message}</span>}
+                {errors.state && <span className="text-[#CCFF00] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.state.message}</span>}
               </div>
 
               <div className="form-control">
-                <label className="label">
-                  <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">City</span>
+                <label className="label mb-2">
+                  <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">City</span>
                 </label>
                 <select
                   {...register("city")}
                   disabled={!selectedState}
-                  className={`select bg-[#151515] border-gray-800 text-white focus:border-primary focus:outline-none text-sm h-12 rounded-xl w-full ${!selectedState ? 'opacity-50' : ''}`}
+                  className={`w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none ${!selectedState ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <option value="">Select City</option>
                   {citiesList.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
-                {errors.city && <span className="text-primary text-[10px] font-bold uppercase mt-1">{errors.city.message}</span>}
+                {errors.city && <span className="text-[#CCFF00] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.city.message}</span>}
               </div>
             </div>
 
             <div className="form-control">
-              <label className="label">
-                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">
-                  📍 Venue Coordinates &amp; Map Preview
+              <label className="label mb-4">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center gap-2">
+                   📍 Venue Coordinates & Map Preview
                 </span>
               </label>
 
               {/* Coordinate inputs row */}
-              <div className="flex gap-3 mb-3">
+              <div className="flex gap-4 mb-4">
                 <input
                   {...register("latitude")}
                   placeholder="Latitude (e.g. 17.3850)"
-                  className="input bg-[#151515] border-gray-800 text-white text-xs w-full h-12 rounded-xl focus:outline-none focus:border-primary transition-colors"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-xs h-12 rounded-[8px] px-4 focus:outline-none focus:border-[#CCFF00]/60 transition-all font-mono"
                 />
                 <input
                   {...register("longitude")}
                   placeholder="Longitude (e.g. 78.4867)"
-                  className="input bg-[#151515] border-gray-800 text-white text-xs w-full h-12 rounded-xl focus:outline-none focus:border-primary transition-colors"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-xs h-12 rounded-[8px] px-4 focus:outline-none focus:border-[#CCFF00]/60 transition-all font-mono"
                 />
                 <button
                   type="button"
                   onClick={getMyLocation}
-                  className={`shrink-0 px-5 rounded-xl bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-black transition-all flex items-center gap-2 text-xs font-bold uppercase ${isLocating ? 'animate-pulse' : ''}`}
+                  className={`shrink-0 px-6 rounded-[8px] bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20 hover:bg-[#CCFF00] hover:text-black transition-all flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest ${isLocating ? 'animate-pulse' : ''}`}
                   title="Capture Current Location"
                 >
                   {isLocating ? "Locating…" : "📡 GPS"}
                 </button>
               </div>
-              <p className="text-[9px] text-gray-500 mb-3 uppercase tracking-tighter italic">
-                Click GPS to auto-capture your device location, or type coordinates manually. The map below updates live.
+              <p className="text-[10px] text-[#444] mb-4 uppercase tracking-widest italic ml-1">
+                Click GPS to auto-capture your device location, or type coordinates manually.
               </p>
 
               {/* Live Map Preview */}
               {mapPreviewUrl ? (
-                <div className="relative w-full rounded-xl overflow-hidden border border-gray-700" style={{ height: 220 }}>
+                <div className="relative w-full rounded-[8px] overflow-hidden border border-[#2D2D2D] shadow-[var(--shadow-1)]" style={{ height: 220 }}>
                   <iframe
                     title="Location Preview"
                     src={mapPreviewUrl}
@@ -220,8 +228,8 @@ const AddTurf = () => {
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                   />
-                  <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-black/80 backdrop-blur-sm flex items-center justify-between">
-                    <span className="text-[9px] font-bold text-primary uppercase tracking-wider">
+                  <div className="absolute bottom-0 left-0 right-0 px-4 py-2.5 bg-black/80 backdrop-blur-sm flex items-center justify-between border-t border-[#2D2D2D]">
+                    <span className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-[2px]">
                       {watchedLat && watchedLng ? `📡 GPS: ${Number(watchedLat).toFixed(5)}, ${Number(watchedLng).toFixed(5)}` : "📍 Address-based preview"}
                     </span>
                     {watchedLat && watchedLng && (
@@ -229,7 +237,7 @@ const AddTurf = () => {
                         href={`https://www.google.com/maps?q=${watchedLat},${watchedLng}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[9px] font-bold text-gray-400 hover:text-primary uppercase tracking-wider"
+                        className="text-[10px] font-bold text-[#878C9F] hover:text-[#CCFF00] uppercase tracking-widest transition-colors"
                       >
                         Open in Maps ↗
                       </a>
@@ -237,15 +245,16 @@ const AddTurf = () => {
                   </div>
                 </div>
               ) : (
-                <div className="w-full rounded-xl border border-dashed border-gray-700 bg-[#0d0d0d] flex flex-col items-center justify-center py-8 gap-2">
-                  <span className="text-3xl">🗺️</span>
-                  <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">
-                    Map preview will appear here after you fill in location details
+                <div className="w-full rounded-[8px] border border-dashed border-[#2D2D2D] bg-[#000000] flex flex-col items-center justify-center py-10 gap-3">
+                  <div className="w-12 h-12 rounded-full bg-[#111] flex items-center justify-center border border-[#2D2D2D]">
+                     <Search size={20} className="text-[#333]" />
+                  </div>
+                  <p className="text-[10px] font-bold text-[#333] uppercase tracking-[4px]">
+                    Map preview will appear here
                   </p>
                 </div>
               )}
             </div>
-
 
             <FormField
               label="Hourly Rate (INR)"
@@ -253,11 +262,12 @@ const AddTurf = () => {
               type="number"
               register={register}
               error={errors.pricePerHour}
+              className="bg-[#111111] border-[#2D2D2D] text-white focus:border-[#CCFF00]/60"
             />
           </div>
 
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold text-white border-b border-gray-800 pb-2 mb-8 uppercase tracking-widest">Operational Details</h3>
+          <div className="space-y-8 relative z-10">
+            <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px]">Operational Details</h3>
             
             <FormField
               label="YouTube Video URL"
@@ -266,41 +276,37 @@ const AddTurf = () => {
               placeholder="https://www.youtube.com/watch?v=..."
               register={register}
               error={errors.youtubeUrl}
+              className="bg-[#111111] border-[#2D2D2D] text-white focus:border-[#CCFF00]/60"
             />
 
             <div className="form-control">
-              <label className="label">
-                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Facility Images (Up to 10)</span>
+              <label className="label mb-2">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Facility Images (Up to 10)</span>
               </label>
               <div className="relative group">
                 <input
                   type="file"
                   multiple
                   accept="image/*"
-                  className="file-input bg-[#151515] border-gray-800 text-gray-400 w-full text-[10px] font-bold uppercase h-12 rounded-xl focus:border-primary focus:outline-none transition-all"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-[#878C9F] file:bg-[#2D2D2D] file:text-white file:border-none file:px-6 file:h-12 file:mr-4 file:font-bold file:uppercase file:text-[10px] file:tracking-widest rounded-[8px] h-12 flex items-center focus:outline-none transition-all cursor-pointer"
                   onChange={(e) => {
                     const files = e.target.files;
                     setValue("images", files);
                   }}
                 />
-                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-500 group-hover:text-primary transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                  </svg>
-                </div>
               </div>
               {errors.images && (
-                <span className="text-primary text-[10px] font-bold uppercase mt-1">{errors.images.message}</span>
+                <span className="text-[#CCFF00] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.images.message}</span>
               )}
-              <p className="text-[9px] text-gray-500 mt-2 uppercase tracking-tighter italic">Select multiple files at once. Max 10 images allowed.</p>
+              <p className="text-[10px] text-[#444] mt-3 uppercase tracking-widest italic ml-1">Select multiple files at once. Max 10 images allowed.</p>
             </div>
 
             <div className="form-control">
-              <label className="label">
-                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Sport Arsenal</span>
+              <label className="label mb-2">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Sport Arsenal</span>
               </label>
               <select
-                className="select bg-[#151515] border-gray-800 text-white focus:border-primary focus:outline-none text-sm h-12 rounded-xl w-full"
+                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
                 onChange={(e) => addSportType(e.target.value)}
                 value=""
               >
@@ -311,31 +317,26 @@ const AddTurf = () => {
               </select>
               <div className="mt-4 flex flex-wrap gap-2 min-h-[40px]">
                 {sportTypes.map((type, index) => (
-                  <span key={index} className="px-3 py-1 bg-primary text-black font-bold rounded-lg text-xs flex items-center gap-2 uppercase">
+                  <span key={index} className="px-3 py-1.5 bg-[#CCFF00] text-black font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
                     {type}
                     <button
                       type="button"
                       onClick={() => removeSportType(type)}
-                      className="hover:text-white transition-colors text-lg leading-none"
+                      className="hover:text-white transition-colors"
                     >
-                      ×
+                      <Plus size={12} className="rotate-45" />
                     </button>
                   </span>
                 ))}
               </div>
-              {errors.sportTypes && (
-                <span className="text-primary text-[10px] font-bold uppercase mt-1">
-                  {errors.sportTypes.message}
-                </span>
-              )}
             </div>
 
             <div className="form-control">
-              <label className="label">
-                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Ground Composition</span>
+              <label className="label mb-2">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Ground Composition</span>
               </label>
               <select
-                className="select bg-[#151515] border-gray-800 text-white focus:border-primary focus:outline-none text-sm h-12 rounded-xl w-full"
+                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
                 onChange={(e) => addGroundType(e.target.value)}
                 value=""
               >
@@ -346,31 +347,26 @@ const AddTurf = () => {
               </select>
               <div className="mt-4 flex flex-wrap gap-2 min-h-[40px]">
                 {groundTypes.map((type, index) => (
-                  <span key={index} className="px-3 py-1 bg-white text-black font-bold rounded-lg text-xs flex items-center gap-2 uppercase">
+                  <span key={index} className="px-3 py-1.5 bg-[#1A1A1A] border border-[#2D2D2D] text-white font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
                     {type}
                     <button
                       type="button"
                       onClick={() => removeGroundType(type)}
-                      className="hover:text-primary transition-colors text-lg leading-none"
+                      className="hover:text-[#CCFF00] transition-colors"
                     >
-                      ×
+                      <Plus size={12} className="rotate-45" />
                     </button>
                   </span>
                 ))}
               </div>
-              {errors.groundTypes && (
-                <span className="text-primary text-[10px] font-bold uppercase mt-1">
-                  {errors.groundTypes.message}
-                </span>
-              )}
             </div>
 
             <div className="form-control">
-              <label className="label">
-                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Ground Facilities</span>
+              <label className="label mb-2">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Ground Facilities</span>
               </label>
               <select
-                className="select bg-[#151515] border-gray-800 text-white focus:border-primary focus:outline-none text-sm h-12 rounded-xl w-full"
+                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
                 onChange={(e) => addFacility(e.target.value)}
                 value=""
               >
@@ -381,26 +377,21 @@ const AddTurf = () => {
               </select>
               <div className="mt-4 flex flex-wrap gap-2 min-h-[40px]">
                 {facilities.map((type, index) => (
-                  <span key={index} className="px-3 py-1 bg-[#222] border border-gray-700 text-primary font-bold rounded-lg text-xs flex items-center gap-2 uppercase">
+                  <span key={index} className="px-3 py-1.5 bg-[#1A1A1A] border border-[#2D2D2D] text-[#CCFF00] font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
                     {type}
                     <button
                       type="button"
                       onClick={() => removeFacility(type)}
-                      className="hover:text-white transition-colors text-lg leading-none"
+                      className="hover:text-white transition-colors"
                     >
-                      ×
+                      <Plus size={12} className="rotate-45" />
                     </button>
                   </span>
                 ))}
               </div>
-              {errors.facilities && (
-                <span className="text-primary text-[10px] font-bold uppercase mt-1">
-                  {errors.facilities.message}
-                </span>
-              )}
             </div>
 
-            <h3 className="text-xl font-bold text-white border-b border-gray-800 pb-2 mb-8 uppercase tracking-widest mt-12">Support & Navigation</h3>
+            <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px] mt-12">Support & Navigation</h3>
             
             <FormField
               label="Direct Google Maps URL"
@@ -409,56 +400,56 @@ const AddTurf = () => {
               placeholder="https://maps.app.goo.gl/..."
               register={register}
               error={errors.mapUrl}
+              className="bg-[#111111] border-[#2D2D2D] text-white focus:border-[#CCFF00]/60"
             />
-            <p className="text-[9px] text-gray-500 uppercase tracking-tighter italic">Provide a direct navigation link for customers to reach your venue easily.</p>
 
             <div className="form-control space-y-4">
               <label className="label">
-                <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Venue Managers (Contacts)</span>
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Venue Managers (Contacts)</span>
               </label>
               
-              <div className="flex flex-col md:flex-row gap-3">
+              <div className="flex flex-col md:flex-row gap-4">
                 <input
                   type="text"
                   placeholder="Manager Name"
                   value={newManagerName}
                   onChange={(e) => setNewManagerName(e.target.value)}
-                  className="input bg-[#151515] border-gray-800 text-white text-xs w-full h-12 rounded-xl focus:outline-none focus:border-primary transition-colors"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-sm h-12 rounded-[8px] px-4 focus:outline-none focus:border-[#CCFF00]/60 transition-all"
                 />
                 <input
                   type="text"
                   placeholder="Manager Phone (10 digits)"
                   value={newManagerPhone}
                   onChange={(e) => setNewManagerPhone(e.target.value)}
-                  className="input bg-[#151515] border-gray-800 text-white text-xs w-full h-12 rounded-xl focus:outline-none focus:border-primary transition-colors"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-sm h-12 rounded-[8px] px-4 focus:outline-none focus:border-[#CCFF00]/60 transition-all"
                 />
                 <button
                   type="button"
                   onClick={addManagerContact}
-                  className="shrink-0 px-6 rounded-xl bg-white text-black hover:bg-primary transition-all text-xs font-bold uppercase"
+                  className="shrink-0 px-8 rounded-[8px] bg-white text-black hover:bg-[#CCFF00] transition-all text-[11px] font-bold uppercase tracking-widest"
                 >
                   Add
                 </button>
               </div>
 
-              <div className="space-y-2 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
+              <div className="space-y-3 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
                 {managerContacts.map((manager, index) => (
-                  <div key={index} className="flex items-center justify-between bg-[#1a1a1a] p-3 rounded-xl border border-gray-800 group">
+                  <div key={index} className="flex items-center justify-between bg-[#111111] p-4 rounded-[8px] border border-[#2D2D2D] group hover:border-[#CCFF00]/30 transition-all">
                     <div className="flex flex-col">
-                      <span className="text-white text-xs font-bold uppercase tracking-wider">{manager.name}</span>
-                      <span className="text-gray-500 text-[10px] font-mono">{manager.phone}</span>
+                      <span className="text-white text-[13px] font-bold uppercase tracking-tight">{manager.name}</span>
+                      <span className="text-[#878C9F] text-[11px] font-mono mt-0.5">{manager.phone}</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => removeManagerContact(index)}
-                      className="text-gray-500 hover:text-primary transition-colors uppercase text-[10px] font-bold"
+                      className="text-[#444] hover:text-[#CCFF00] transition-colors uppercase text-[10px] font-bold tracking-widest"
                     >
                       Remove
                     </button>
                   </div>
                 ))}
                 {managerContacts.length === 0 && (
-                  <p className="text-gray-600 text-[10px] font-bold uppercase tracking-widest text-center py-4 border border-dashed border-gray-800 rounded-xl italic">
+                  <p className="text-[#333] text-[10px] font-bold uppercase tracking-[4px] text-center py-6 border border-dashed border-[#2D2D2D] rounded-[8px] italic">
                     No Managers Added Yet
                   </p>
                 )}
@@ -466,33 +457,33 @@ const AddTurf = () => {
             </div>
           </div>
 
-          <div className="md:col-span-2 space-y-12 pt-8 border-t border-gray-800">
+          <div className="md:col-span-2 space-y-12 pt-12 border-t border-[#2D2D2D] relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <div className="space-y-8">
-                <h3 className="text-xl font-bold text-white border-b border-gray-800 pb-2 mb-4 uppercase tracking-widest">Slot Architecture</h3>
+              <div className="space-y-10">
+                <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-6 uppercase tracking-[3px]">Slot Architecture</h3>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="form-control">
-                    <label className="label">
-                      <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Slot Duration (Min)</span>
+                    <label className="label mb-2">
+                      <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Slot Duration</span>
                     </label>
                     <select
                       {...register("slotDuration")}
-                      className="select bg-[#151515] border-gray-800 text-white focus:border-primary focus:outline-none text-sm h-12 rounded-xl w-full"
+                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
                     >
                       <option value={30}>30 Minutes</option>
                       <option value={60}>60 Minutes</option>
                       <option value={90}>90 Minutes</option>
-                      <option value={120}>120 Minutes (2 hrs)</option>
-                      <option value={180}>180 Minutes (3 hrs)</option>
+                      <option value={120}>120 Minutes</option>
+                      <option value={180}>180 Minutes</option>
                     </select>
                   </div>
                   <div className="form-control">
-                    <label className="label">
-                      <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Break Time (Min)</span>
+                    <label className="label mb-2">
+                      <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Break Time</span>
                     </label>
                     <select
                       {...register("breakTime")}
-                      className="select bg-[#151515] border-gray-800 text-white focus:border-primary focus:outline-none text-sm h-12 rounded-xl w-full"
+                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
                     >
                       <option value={0}>No Break</option>
                       <option value={10}>10 Minutes</option>
@@ -503,8 +494,8 @@ const AddTurf = () => {
                   </div>
 
                   <div className="form-control">
-                    <label className="label">
-                      <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Opening Time</span>
+                    <label className="label mb-2">
+                      <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Opening Time</span>
                     </label>
                     <Controller
                       name="openTime"
@@ -522,20 +513,15 @@ const AddTurf = () => {
                           timeIntervals={60}
                           timeCaption="Time"
                           dateFormat="h:mm aa"
-                          className="input bg-[#151515] border-gray-800 text-white focus:border-primary focus:outline-none text-sm w-full h-12 rounded-xl"
+                          className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all"
                         />
                       )}
                     />
-                    {errors.openTime && (
-                      <span className="text-primary text-[10px] font-bold uppercase mt-1">
-                        {errors.openTime.message}
-                      </span>
-                    )}
                   </div>
 
                   <div className="form-control">
-                    <label className="label">
-                      <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Closing Time</span>
+                    <label className="label mb-2">
+                      <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Closing Time</span>
                     </label>
                     <Controller
                       name="closeTime"
@@ -550,24 +536,19 @@ const AddTurf = () => {
                           timeIntervals={60}
                           timeCaption="Time"
                           dateFormat="h:mm aa"
-                          className="input bg-[#151515] border-gray-800 text-white focus:border-primary focus:outline-none text-sm w-full h-12 rounded-xl"
+                          className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                           disabled={!openTime}
                           minTime={openTime || setHours(setMinutes(new Date(), 0), 0)}
                           maxTime={setHours(setMinutes(new Date(), 30), 23)}
                         />
                       )}
                     />
-                    {errors.closeTime && (
-                      <span className="text-primary text-[10px] font-bold uppercase mt-1">
-                        {errors.closeTime.message}
-                      </span>
-                    )}
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <label className="label">
-                    <span className="label-text text-gray-400 uppercase tracking-widest text-[10px] font-bold">Weekly Schedule</span>
+                    <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Weekly Operational Sequence</span>
                   </label>
                   <div className="flex flex-wrap gap-3">
                     {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(day => {
@@ -577,10 +558,10 @@ const AddTurf = () => {
                           key={day}
                           type="button"
                           onClick={() => toggleDay(day)}
-                          className={`px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                          className={`px-5 py-3 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all border ${
                             isActive 
-                            ? "bg-primary text-black border-primary shadow-[0_0_15px_rgba(132,204,22,0.3)]" 
-                            : "bg-[#151515] text-gray-500 border-gray-800 hover:border-gray-600"
+                            ? "bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_5px_15px_rgba(204,255,0,0.2)]" 
+                            : "bg-[#111111] text-[#444] border-[#2D2D2D] hover:border-[#CCFF00]/40"
                           }`}
                         >
                           {day.substring(0, 3)}
@@ -588,54 +569,53 @@ const AddTurf = () => {
                       );
                     })}
                   </div>
-                  <p className="text-[9px] text-gray-500 italic uppercase">Toggle days to mark as operational or facility closed.</p>
                 </div>
               </div>
 
-              <div className="space-y-8">
-                <div className="flex items-center justify-between border-b border-gray-800 pb-2 mb-4">
-                  <h3 className="text-xl font-bold text-white uppercase tracking-widest">Generated Slots Preview</h3>
-                  <span className="text-[10px] font-black text-primary uppercase bg-primary/10 px-3 py-1 rounded-full">
-                    {generatedSlots.length} Slots Total
+              <div className="space-y-10">
+                <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-3 mb-6">
+                  <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[3px]">Matrix Projection</h3>
+                  <span className="text-[10px] font-bold text-[#CCFF00] uppercase bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-4 py-1 rounded-full">
+                    {generatedSlots.length} Active Slots
                   </span>
                 </div>
                 
                 {generatedSlots.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                     {generatedSlots.map((slot, index) => (
                       <button
                         key={index}
                         type="button"
                         onClick={() => toggleSlotActive(index)}
-                        className={`p-3 rounded-xl text-[10px] font-bold border transition-all flex flex-col items-center gap-1 ${
+                        className={`p-4 rounded-[8px] text-[11px] font-bold border transition-all flex flex-col items-center gap-1.5 ${
                           slot.isActive
-                          ? "bg-[#1a1a1a] border-primary/30 text-white hover:border-primary"
-                          : "bg-black/50 border-gray-800 text-gray-600 opacity-50 line-through"
+                          ? "bg-[#111111] border-[#2D2D2D] text-white hover:border-[#CCFF00]/40"
+                          : "bg-black/50 border-[#1A1A1A] text-[#222] line-through opacity-40"
                         }`}
                       >
                         <span className="tracking-tighter">{slot.startTime}</span>
-                        <span className="text-[8px] opacity-40">to</span>
-                        <span className="tracking-tighter">{slot.endTime}</span>
+                        <div className="w-1 h-px bg-[#2D2D2D]" />
+                        <span className="tracking-tighter opacity-60">{slot.endTime}</span>
                       </button>
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-[200px] bg-[#151515] rounded-2xl border border-dashed border-gray-800">
-                    <p className="text-gray-600 text-[10px] font-bold uppercase tracking-widest">Set times to view slots</p>
+                  <div className="flex flex-col items-center justify-center h-[200px] bg-[#050505] rounded-[8px] border border-dashed border-[#2D2D2D]">
+                    <p className="text-[#333] text-[10px] font-bold uppercase tracking-[4px]">Set thresholds to view slots</p>
                   </div>
                 )}
-                <p className="text-[9px] text-gray-500 italic uppercase">Click a slot to enable or disable it for listing.</p>
+                <p className="text-[10px] text-[#444] italic uppercase tracking-widest text-center">Click a slot to toggle its operational availability.</p>
               </div>
             </div>
           </div>
 
-          <div className="md:col-span-2 pt-8 border-t border-gray-800">
+          <div className="md:col-span-2 pt-12 border-t border-[#2D2D2D] relative z-10 pb-12">
             <button 
               type="submit" 
-              className={`w-full py-4 bg-primary text-black font-bold text-xl uppercase tracking-widest hover:bg-white transition-all transform hover:scale-[1.01] active:scale-[0.99] rounded-xl shadow-[0_0_30px_rgba(113,179,0,0.3)] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full py-5 bg-[#CCFF00] text-black font-bold text-[16px] uppercase tracking-[6px] hover:bg-white transition-all transform hover:scale-[1.01] active:scale-[0.99] rounded-[8px] shadow-[0_10px_30px_rgba(204,255,0,0.15)] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={loading}
             >
-              {loading ? "SAVING..." : "REGISTER FACILITY"}
+              {loading ? "SYNCHRONIZING..." : "INITIALIZE FACILITY"}
             </button>
           </div>
         </form>
