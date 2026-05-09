@@ -26,6 +26,19 @@ export default function OwnerRevenue() {
   const { bookings, loading: bookingsLoading } = useOwnerBookings();
   const { walletData, withdrawals, loading: walletLoading, requestWithdrawal, submitting } = useOwnerWallet();
 
+  // Analytics Data (Moved from Banking)
+  const analyticsData = useMemo(() => {
+    return [
+      { name: 'Mon', coins: 400, lastWeek: 240 },
+      { name: 'Tue', coins: 300, lastWeek: 139 },
+      { name: 'Wed', coins: 200, lastWeek: 980 },
+      { name: 'Thu', coins: 278, lastWeek: 390 },
+      { name: 'Fri', coins: 189, lastWeek: 480 },
+      { name: 'Sat', coins: 239, lastWeek: 380 },
+      { name: 'Sun', coins: 349, lastWeek: 430 },
+    ];
+  }, []);
+
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [bankDetails, setBankDetails] = useState({
@@ -73,19 +86,6 @@ export default function OwnerRevenue() {
     status: booking.paymentStatus || "completed",
     turf: booking.turfId?.name || "Unknown Arena"
   }));
-
-  // Analytics Data (Moved from Banking)
-  const analyticsData = useMemo(() => {
-    return [
-      { name: 'Mon', coins: 400, lastWeek: 240 },
-      { name: 'Tue', coins: 300, lastWeek: 139 },
-      { name: 'Wed', coins: 200, lastWeek: 980 },
-      { name: 'Thu', coins: 278, lastWeek: 390 },
-      { name: 'Fri', coins: 189, lastWeek: 480 },
-      { name: 'Sat', coins: 239, lastWeek: 380 },
-      { name: 'Sun', coins: 349, lastWeek: 430 },
-    ];
-  }, []);
 
   return (
     <div className="h-full custom-scrollbar bg-[#000000] text-white">
