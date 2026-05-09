@@ -39,11 +39,11 @@ const OwnerBookings = () => {
           <div className="space-y-1">
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-8 bg-[#CCFF00] rounded-full" />
-              <h1 className="text-[28px] lg:text-[32px] font-semibold text-white tracking-tight leading-none uppercase">
+              <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
                 Bookings <span className="text-[#CCFF00]">Overview</span>
               </h1>
             </div>
-            <p className="text-[12px] font-normal text-[#999999] uppercase tracking-[0.2em] ml-4">
+            <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
               Venue Management Console | Operational Feed
             </p>
           </div>
