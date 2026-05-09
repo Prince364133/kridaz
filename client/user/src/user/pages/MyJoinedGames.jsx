@@ -133,9 +133,7 @@ const MyJoinedGames = () => {
                         className="w-full h-full flex items-center justify-center"
                         style={{ display: game.host?.profilePicture ? 'none' : 'flex' }}
                       >
-                        <span className="text-[#84CC16] font-black text-[10px]">
-                          {game.host?.name ? game.host.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
-                        </span>
+                        <User size={16} className="text-[#84CC16]" />
                       </div>
                    </div>
                    <div className="text-[10px]">

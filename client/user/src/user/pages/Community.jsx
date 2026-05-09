@@ -533,9 +533,7 @@ const Community = () => {
                           className="w-full h-full flex items-center justify-center"
                           style={{ display: post.adminId?.profilePicture ? 'none' : 'flex' }}
                         >
-                          <span className="text-[#84CC16] font-black text-xs">
-                            {post.adminId?.name ? post.adminId.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
-                          </span>
+                          <User size={20} className="text-[#84CC16]" />
                         </div>
                       </div>
                     </div>

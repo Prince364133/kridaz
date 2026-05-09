@@ -339,9 +339,7 @@ export default function Profile() {
                     className="w-full h-full flex items-center justify-center"
                     style={{ display: profileUser?.profilePicture ? 'none' : 'flex' }}
                   >
-                    <span className="text-[#84CC16] font-black text-xs relative z-0 tracking-tighter">
-                      {profileUser?.name ? profileUser.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
-                    </span>
+                    <User size={24} className="text-[#84CC16]" />
                   </div>
                   
                   {isOwnProfile && (

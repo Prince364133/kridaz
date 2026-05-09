@@ -137,9 +137,7 @@ export default function ProfessionalDetails() {
                         className="w-full h-full flex items-center justify-center"
                         style={{ display: pro.profilePicture ? 'none' : 'flex' }}
                       >
-                        <span className="text-[#84CC16] font-black text-4xl">
-                          {pro.name ? pro.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
-                        </span>
+                        <User size={64} className="text-[#84CC16]" />
                       </div>
                     </div>
                   </div>
