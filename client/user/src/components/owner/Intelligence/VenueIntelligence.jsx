@@ -219,8 +219,7 @@ export default function VenueIntelligence() {
 
       </div>
 
-      {/* Secondary Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mt-8">
+      <div className="grid grid-cols-1 gap-6 lg:gap-8 mt-8">
         
         {/* Venue Comparison & Sport Distribution */}
         <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
@@ -271,139 +270,10 @@ export default function VenueIntelligence() {
            )}
         </div>
 
-        {/* Peak Utilization Heatmap */}
-        <div className="lg:col-span-2 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
-           <div className="flex justify-between items-start mb-6">
-              <div>
-                 <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Peak Utilization Heatmap</h2>
-                 <p className="text-[#878C9F] font-inter text-[20px] mt-1">Identifying profitable time blocks</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-[2px] bg-[#2D2D2D]" />
-                  <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Low</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-[2px] bg-[#CCFF00]" />
-                  <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Peak</span>
-                </div>
-              </div>
-           </div>
-           
-           {isHeatmapSufficient ? (
-             <div className="overflow-x-auto no-scrollbar pt-4 flex-1 relative">
-                {/* Floating Tooltip */}
-                {hoveredHeatmap && (
-                  <div 
-                    className="absolute z-50 bg-[#111] border border-[#CCFF00]/20 p-3 rounded-[6px] shadow-2xl pointer-events-none animate-in fade-in zoom-in-95 duration-200 min-w-[150px]"
-                    style={{ left: hoveredHeatmap.x, top: hoveredHeatmap.y - 80 }}
-                  >
-                    <p className="text-[9px] font-bold text-[#CCFF00] uppercase tracking-widest mb-1">{hoveredHeatmap.day} @ {hoveredHeatmap.hour === 0 ? '12 AM' : hoveredHeatmap.hour < 12 ? `${hoveredHeatmap.hour} AM` : hoveredHeatmap.hour === 12 ? '12 PM' : `${hoveredHeatmap.hour-12} PM`}</p>
-                    <div className="space-y-1">
-                      <p className="text-[11px] font-bold text-white">{hoveredHeatmap.value} Bookings</p>
-                      {hoveredHeatmap.turfs?.length > 0 && (
-                        <div className="pt-1 border-t border-[#2D2D2D] mt-1">
-                          <p className="text-[8px] font-bold text-[#878C9F] uppercase mb-1">Active Grounds:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {hoveredHeatmap.turfs.map((t, idx) => (
-                              <span key={idx} className="px-1.5 py-0.5 bg-[#2D2D2D] rounded-[2px] text-[8px] font-bold text-white">{t}</span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-               <div className="min-w-[600px] space-y-2">
-                 <div className="flex gap-1 mb-4 ml-10">
-                   {Array.from({ length: 24 }).map((_, i) => (
-                     <div key={i} className="flex-1 text-center text-[8px] font-medium text-[#999999] uppercase tracking-wider">
-                       {i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i-12} PM`}
-                     </div>
-                   ))}
-                 </div>
-                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                   <div key={day} className="flex items-center gap-1">
-                     <div className="w-10 text-[10px] font-medium text-[#878C9F] uppercase tracking-wider">{day}</div>
-                     <div className="flex-1 flex gap-1">
-                       {Array.from({ length: 24 }).map((_, hour) => {
-                         const data = occupancyHeatmap.find(d => d.day === day && d.hour === hour);
-                         const intensity = data ? Math.min(1, data.value / 10) : 0;
-                         return (
-                           <div 
-                             key={hour} 
-                             onMouseEnter={(e) => {
-                               const rect = e.currentTarget.getBoundingClientRect();
-                               const containerRect = e.currentTarget.parentElement.parentElement.parentElement.getBoundingClientRect();
-                               setHoveredHeatmap({
-                                 day,
-                                 hour,
-                                 value: data?.value || 0,
-                                 turfs: data?.turfs || [],
-                                 x: rect.left - containerRect.left,
-                                 y: rect.top - containerRect.top
-                               });
-                             }}
-                             onMouseLeave={() => setHoveredHeatmap(null)}
-                             className="flex-1 h-8 rounded-[2px] transition-all duration-500 hover:scale-110 cursor-crosshair"
-                             style={{ 
-                               backgroundColor: intensity > 0 ? `rgba(204, 255, 0, ${0.1 + intensity * 0.9})` : 'rgba(45, 45, 45, 0.3)',
-                               boxShadow: intensity > 0.7 ? '0 0 10px rgba(204, 255, 0, 0.15)' : 'none'
-                             }}
-                           />
-                         );
-                       })}
-                     </div>
-                   </div>
-                 ))}
-               </div>
-             </div>
-           ) : (
-             <div className="flex-1 flex items-center justify-center border border-dashed border-[#2D2D2D] rounded-[8px] bg-[#050505]/50 min-h-[150px]">
-                  <div className="text-center">
-                       <AlertCircle size={24} className="text-[#444] mx-auto mb-2" />
-                       <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Heatmap Generation Unavailable</p>
-                       <p className="text-[9px] text-[#444] mt-1 max-w-[250px]">Requires an active aggregation stream for hourly slot utilization over a 14-day rolling window.</p>
-                  </div>
-             </div>
-           )}
-        </div>
 
       </div>
 
 
-      {/* Automated Intelligence Reports */}
-      <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 space-y-6 shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500 mt-8">
-         <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Automated Intelligence Reports</h2>
-         
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-[#1A1A1A] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col items-start hover:border-[#CCFF00]/30 transition-colors group cursor-pointer">
-               <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] mb-4 text-[#CCFF00]">
-                 <TrendingUp size={20} />
-               </div>
-               <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-1 group-hover:text-[#CCFF00] transition-colors">Yield Analysis</h4>
-               <p className="text-[10px] font-medium text-[#878C9F] mb-4">Review pricing efficiency against peak demand times to optimize court rent.</p>
-               <button className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest mt-auto border-b border-transparent group-hover:border-[#CCFF00] pb-1 transition-all">Generate Report</button>
-            </div>
-            <div className="bg-[#1A1A1A] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col items-start hover:border-[#CCFF00]/30 transition-colors group cursor-pointer">
-               <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] mb-4 text-[#CCFF00]">
-                 <Target size={20} />
-               </div>
-               <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-1 group-hover:text-[#CCFF00] transition-colors">Retention Metrics</h4>
-               <p className="text-[10px] font-medium text-[#878C9F] mb-4">Analyze recurring booking patterns and player drop-off rates across facilities.</p>
-               <button className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest mt-auto border-b border-transparent group-hover:border-[#CCFF00] pb-1 transition-all">Generate Report</button>
-            </div>
-            <div className="bg-[#1A1A1A] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col items-start hover:border-[#CCFF00]/30 transition-colors group cursor-pointer">
-               <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] mb-4 text-[#CCFF00]">
-                 <Activity size={20} />
-               </div>
-               <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-1 group-hover:text-[#CCFF00] transition-colors">Resource Health</h4>
-               <p className="text-[10px] font-medium text-[#878C9F] mb-4">Evaluate structural utilization to determine maintenance scheduling.</p>
-               <button className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest mt-auto border-b border-transparent group-hover:border-[#CCFF00] pb-1 transition-all">Generate Report</button>
-            </div>
-         </div>
-      </div>
 
       </div>
     </div>

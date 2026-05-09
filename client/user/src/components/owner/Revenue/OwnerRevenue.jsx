@@ -74,6 +74,19 @@ export default function OwnerRevenue() {
     turf: booking.turfId?.name || "Unknown Arena"
   }));
 
+  // Analytics Data (Moved from Banking)
+  const analyticsData = useMemo(() => {
+    return [
+      { name: 'Mon', coins: 400, lastWeek: 240 },
+      { name: 'Tue', coins: 300, lastWeek: 139 },
+      { name: 'Wed', coins: 200, lastWeek: 980 },
+      { name: 'Thu', coins: 278, lastWeek: 390 },
+      { name: 'Fri', coins: 189, lastWeek: 480 },
+      { name: 'Sat', coins: 239, lastWeek: 380 },
+      { name: 'Sun', coins: 349, lastWeek: 430 },
+    ];
+  }, []);
+
   return (
     <div className="h-full custom-scrollbar bg-[#000000] text-white">
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
@@ -88,13 +101,6 @@ export default function OwnerRevenue() {
           <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-11">Financial analytics and withdrawal management</p>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <button 
-            onClick={() => setShowWithdrawModal(true)}
-            className="flex items-center justify-center gap-2 px-8 py-3 bg-[#CCFF00] hover:bg-[#b3ff00] text-black rounded-[8px] text-[13px] font-bold uppercase tracking-widest transition-all w-full md:w-auto shadow-[0_0_20px_rgba(204,255,0,0.2)] hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <Wallet size={18} />
-            Withdraw Funds
-          </button>
           <button className="flex items-center justify-center gap-2 px-6 py-3 bg-[#000000] hover:bg-[#111111] border border-[#2D2D2D] rounded-[8px] text-[13px] font-bold uppercase tracking-widest transition-all shadow-[var(--shadow-2)] w-full md:w-auto">
             <Download size={18} />
             Statement
@@ -139,6 +145,55 @@ export default function OwnerRevenue() {
           </h3>
           <p className="text-[8px] text-[#CCFF00]/60 mt-2 uppercase font-bold tracking-widest">Successful Settlements</p>
         </div>
+      </div>
+
+      {/* Revenue Intelligence Chart (Centralized) */}
+      <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-8 shadow-[var(--shadow-2)] relative overflow-hidden group">
+         <div className="absolute top-0 right-0 w-64 h-64 bg-[#CCFF00]/5 blur-[80px] pointer-events-none group-hover:bg-[#CCFF00]/10 transition-colors" />
+         <div className="flex justify-between items-center mb-10 relative z-10">
+            <div>
+               <h3 className="text-[14px] font-bold text-white uppercase tracking-widest font-open-sans">Revenue Intelligence</h3>
+               <p className="text-[11px] text-[#878C9F] font-inter uppercase tracking-widest mt-1">Daily Coin Accrual vs Last Week</p>
+            </div>
+            <div className="flex gap-4">
+               <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-[2px] bg-[#CCFF00]" />
+                  <span className="text-[10px] font-bold text-gray-500 uppercase">This Week</span>
+               </div>
+               <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-[2px] bg-white/20" />
+                  <span className="text-[10px] font-bold text-gray-500 uppercase">Last Week</span>
+               </div>
+            </div>
+         </div>
+
+         <div className="h-[350px] w-full relative z-10">
+            <ResponsiveContainer width="100%" height="100%">
+               <AreaChart data={analyticsData}>
+                  <defs>
+                     <linearGradient id="colorCoins" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="#CCFF00" stopOpacity={0}/>
+                     </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2D2D2D" />
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{fill: '#878C9F', fontSize: 10, fontWeight: 'medium', textTransform: 'uppercase'}}
+                    dy={10}
+                  />
+                  <YAxis hide />
+                  <Tooltip 
+                    contentStyle={{backgroundColor: '#000000', border: '1px solid #2D2D2D', borderRadius: '8px', padding: '12px'}}
+                    itemStyle={{color: '#CCFF00', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '10px', fontFamily: 'Inter'}}
+                  />
+                  <Area type="monotone" dataKey="lastWeek" stroke="#2D2D2D" strokeWidth={2} fill="transparent" />
+                  <Area type="monotone" dataKey="coins" stroke="#CCFF00" strokeWidth={3} fillOpacity={1} fill="url(#colorCoins)" />
+               </AreaChart>
+            </ResponsiveContainer>
+         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mt-8">
