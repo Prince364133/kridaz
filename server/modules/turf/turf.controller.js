@@ -320,13 +320,30 @@ export const getTurfDetailsWithSlots = async (req, res) => {
 
     const slotsWithBookings = timeSlots.map(slot => {
       const booking = bookings.find(b => b.timeSlot && b.timeSlot._id.toString() === slot._id.toString());
+      
+      let userDetails = null;
+      if (booking) {
+        if (booking.user) {
+          userDetails = booking.user;
+        } else if (booking.guestDetails) {
+          userDetails = {
+            name: booking.guestDetails.name,
+            email: booking.guestDetails.email,
+            phoneNumber: booking.guestDetails.phone,
+            profileImage: null,
+            isGuest: true
+          };
+        }
+      }
+
       return {
         ...slot.toObject(),
         isBooked: !!booking,
         bookingDetails: booking ? {
-          user: booking.user,
+          user: userDetails,
           totalPrice: booking.totalPrice,
-          bookedAt: booking.createdAt
+          bookedAt: booking.createdAt,
+          bookingSource: booking.bookingSource
         } : null
       };
     });
