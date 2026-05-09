@@ -409,7 +409,7 @@ export const getOwnerBookings = async (req, res) => {
     const ownedTurfs = await Turf.find({ owner: ownerId }).select("_id");
     
     if (ownedTurfs.length === 0) {
-      return res.status(404).json({ message: "No turfs found for this owner" });
+      return res.status(200).json([]);
     }
 
     const turfIds = ownedTurfs.map((turf) => turf._id);
