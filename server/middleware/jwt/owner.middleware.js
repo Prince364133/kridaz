@@ -27,9 +27,11 @@ const verifyOwnerToken = async (req, res, next) => {
     }
     req.owner = decoded;
     
-    // Allow owner, coach, and umpire roles
-    const allowedRoles = ["owner", "coach", "umpire", "admin"];
-    if (!allowedRoles.includes(req.owner.role)) {
+    // Allow owner, coach, and umpire roles (case-insensitive and partial match)
+    const role = decoded.role?.toLowerCase() || "";
+    const isAllowed = ["owner", "coach", "umpire", "admin"].some(r => role.includes(r));
+
+    if (!isAllowed) {
         return res.status(403).json({ success: false, message: "Unauthorized role" });
     }
     next();

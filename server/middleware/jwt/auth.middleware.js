@@ -21,8 +21,10 @@ const verifyAuth = async (req, res, next) => {
     }
 
     // Determine if it's an owner or user based on the decoded payload or role field
-    // Usually, TurfSpot tokens have a 'role' field
-    if (["owner", "coach", "umpire", "admin"].includes(decoded.role)) {
+    const role = decoded.role?.toLowerCase() || "";
+    const isBusinessRole = ["owner", "coach", "umpire", "admin"].some(r => role.includes(r));
+
+    if (isBusinessRole) {
       req.owner = decoded;
       req.owner.id = decoded.id || decoded._id;
     } else {

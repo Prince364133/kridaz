@@ -123,71 +123,72 @@ export default function useEditTurf(turfId) {
   const offDays = watch("offDays");
 
   const [pendingUpdates, setPendingUpdates] = useState({});
+  const [turf, setTurf] = useState(null);
 
   useEffect(() => {
     const fetchTurf = async () => {
       try {
         const response = await axiosInstance.get(`/api/owner/turf/${turfId}/details`);
-        const { turf } = response.data;
-        
-        setPendingUpdates(turf.pendingUpdates || {});
+        const { turf: turfData } = response.data;
+        setTurf(turfData);
+        setPendingUpdates(turfData.pendingUpdates || {});
 
         // Populate form
-        setValue("name", turf.name);
-        setValue("description", turf.description);
-        setValue("location", turf.location);
-        setValue("city", turf.city || "");
-        setValue("state", turf.state || "");
+        setValue("name", turfData.name);
+        setValue("description", turfData.description);
+        setValue("location", turfData.location);
+        setValue("city", turfData.city || "");
+        setValue("state", turfData.state || "");
         
-        if (turf.locationData && turf.locationData.coordinates && turf.locationData.coordinates.length === 2) {
+        if (turfData.locationData && turfData.locationData.coordinates && turfData.locationData.coordinates.length === 2) {
           // MongoDB GeoJSON is [longitude, latitude]
-          setValue("longitude", turf.locationData.coordinates[0]?.toString() || "");
-          setValue("latitude", turf.locationData.coordinates[1]?.toString() || "");
+          setValue("longitude", turfData.locationData.coordinates[0]?.toString() || "");
+          setValue("latitude", turfData.locationData.coordinates[1]?.toString() || "");
         }
         
-        setValue("pricePerHour", turf.pricePerHour);
-        setValue("youtubeUrl", turf.youtubeUrl || "");
-        setValue("mapUrl", turf.mapUrl || "");
+        setValue("pricePerHour", turfData.pricePerHour);
+        setValue("youtubeUrl", turfData.youtubeUrl || "");
+        setValue("mapUrl", turfData.mapUrl || "");
         
-        if (turf.managerContacts) {
-          setManagerContacts(turf.managerContacts);
-          setValue("managerContacts", turf.managerContacts);
+        if (turfData.managerContacts) {
+          setManagerContacts(turfData.managerContacts);
+          setValue("managerContacts", turfData.managerContacts);
         }
         
-        setSportTypes(turf.sportTypes || []);
-        setGroundTypes(turf.groundTypes || []);
-        setFacilities(turf.facilities || []);
+        setSportTypes(turfData.sportTypes || []);
+        setGroundTypes(turfData.groundTypes || []);
+        setFacilities(turfData.facilities || []);
 
-        if (turf.openTime) {
+        if (turfData.openTime) {
             try {
-                const parsedOpen = parse(turf.openTime, "hh:mm aa", new Date());
+                const parsedOpen = parse(turfData.openTime, "hh:mm aa", new Date());
                 if (isValid(parsedOpen)) {
                     setValue("openTime", parsedOpen);
                 } else {
-                    console.warn("Invalid openTime from DB:", turf.openTime);
+                    console.warn("Invalid openTime from DB:", turfData.openTime);
                 }
             } catch (e) {
                 console.error("Error parsing openTime:", e);
             }
         }
-        if (turf.closeTime) {
+        if (turfData.closeTime) {
             try {
-                const parsedClose = parse(turf.closeTime, "hh:mm aa", new Date());
+                const parsedClose = parse(turfData.closeTime, "hh:mm aa", new Date());
                 if (isValid(parsedClose)) {
                     setValue("closeTime", parsedClose);
                 } else {
-                    console.warn("Invalid closeTime from DB:", turf.closeTime);
+                    console.warn("Invalid closeTime from DB:", turfData.closeTime);
                 }
             } catch (e) {
                 console.error("Error parsing closeTime:", e);
             }
         }
 
-        if (turf.slotDuration) setValue("slotDuration", turf.slotDuration);
-        if (turf.breakTime !== undefined) setValue("breakTime", turf.breakTime);
-        if (turf.availableDays) setValue("availableDays", turf.availableDays);
-        if (turf.offDays) setValue("offDays", turf.offDays);
-        if (turf.generatedSlots) setGeneratedSlots(turf.generatedSlots);
+        if (turfData.slotDuration) setValue("slotDuration", turfData.slotDuration);
+        if (turfData.breakTime !== undefined) setValue("breakTime", turfData.breakTime);
+        if (turfData.availableDays) setValue("availableDays", turfData.availableDays);
+        if (turfData.offDays) setValue("offDays", turfData.offDays);
+        if (turfData.generatedSlots) setGeneratedSlots(turfData.generatedSlots);
 
       } catch (err) {
         toast.error("Failed to fetch turf details");
@@ -428,6 +429,7 @@ export default function useEditTurf(turfId) {
     newManagerPhone,
     setNewManagerPhone,
     addManagerContact,
-    removeManagerContact
+    removeManagerContact,
+    turf
   };
 }

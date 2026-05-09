@@ -5,8 +5,11 @@ import {
   markAllAsRead, 
   clearNotifications 
 } from "../modules/notification/notification.controller.js";
+import verifyAuth from "../middleware/jwt/auth.middleware.js";
 
 const notificationRouter = Router();
+
+notificationRouter.use(verifyAuth);
 
 notificationRouter.get("/", getMyNotifications);
 notificationRouter.put("/mark-all-read", markAllAsRead);

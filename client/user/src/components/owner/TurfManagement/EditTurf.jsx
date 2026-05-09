@@ -49,7 +49,8 @@ const EditTurf = () => {
     newManagerPhone,
     setNewManagerPhone,
     addManagerContact,
-    removeManagerContact
+    removeManagerContact,
+    turf
   } = useEditTurf(id);
 
   const sportsOptions = ["Football", "Cricket", "Tennis", "Badminton", "Table Tennis", "Basketball", "Volleyball", "Hockey"];

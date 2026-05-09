@@ -33,28 +33,38 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
 
   const fetchTurfs = async () => {
     try {
-      const res = await axiosInstance.get("/api/owner/turfs");
-      setTurfs(res.data.turfs || []);
+      const res = await axiosInstance.get("/api/owner/turf/all");
+      setTurfs(res.data || []);
     } catch (err) {
       toast.error("Failed to load grounds");
     }
   };
 
   const fetchSlots = async () => {
+    if (!selectedTurf || !selectedDate) return;
     setLoading(true);
     try {
-      // Need a public or owner route to get slots for a date
-      // Reusing the user route if possible, or using the owner's turf details
-      const res = await axiosInstance.get(`/api/user/turf/${selectedTurf._id}`);
-      const turfData = res.data;
+      const res = await axiosInstance.get(`/api/user/turf/timeSlot?date=${selectedDate}&turfId=${selectedTurf._id}`);
+      const { timeSlots: turfDetails, bookedTime } = res.data;
       
-      // Calculate occupied slots for the date
-      // This is complex because we need to check existing bookings for that date
-      // For now, let's assume we have a simple way to get available slots
-      // In a real scenario, we'd call an endpoint like /api/turf/:id/slots?date=...
-      
-      // Temporary: using timeSlots from turf data
-      setAvailableSlots(turfData.timeSlots || []);
+      // Calculate available slots based on generatedSlots and bookedTime
+      if (turfDetails && turfDetails.generatedSlots) {
+        const slots = turfDetails.generatedSlots
+          .filter(slot => slot.isActive)
+          .map(slot => {
+            const isBooked = bookedTime.some(booking => {
+              const bStart = format(parseISO(booking.startTime), "hh:mm a");
+              return bStart === slot.startTime;
+            });
+            return {
+              ...slot,
+              isBooked
+            };
+          });
+        setAvailableSlots(slots);
+      } else {
+        setAvailableSlots([]);
+      }
     } catch (err) {
       toast.error("Failed to load slots");
     } finally {
@@ -74,7 +84,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
         startTime: selectedSlot.startTime,
         endTime: selectedSlot.endTime,
         selectedTurfDate: selectedDate,
-        totalPrice: selectedTurf.price, // Or calculate based on slot duration
+        totalPrice: selectedTurf.pricePerHour, 
         paymentMethod: customerData.paymentMethod,
         customerName: customerData.name,
         customerEmail: customerData.email,
@@ -127,7 +137,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                   <div>
                     <h3 className="font-bold text-sm uppercase tracking-tight">{turf.name}</h3>
                     <p className="text-[10px] text-gray-500 flex items-center gap-1 mt-1 uppercase font-bold"><MapPin size={10} /> {turf.location}</p>
-                    <p className="text-xs font-black text-[#CCFF00] mt-2 tracking-widest">₹{turf.price}/SLOT</p>
+                    <p className="text-xs font-black text-[#CCFF00] mt-2 tracking-widest">₹{turf.pricePerHour}/SLOT</p>
                   </div>
                 </button>
               ))}
@@ -168,10 +178,18 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                        {availableSlots.map((slot, i) => (
                           <button 
                             key={i}
+                            disabled={slot.isBooked}
                             onClick={() => setSelectedSlot(slot)}
-                            className={`py-3 rounded-lg border text-[10px] font-black tracking-widest transition-all ${selectedSlot === slot ? 'bg-[#CCFF00] text-black border-[#CCFF00]' : 'bg-white/5 border-white/10 hover:border-white/20 text-gray-400'}`}
+                            className={`py-3 rounded-lg border text-[10px] font-black tracking-widest transition-all ${
+                              selectedSlot === slot 
+                              ? 'bg-[#CCFF00] text-black border-[#CCFF00]' 
+                              : slot.isBooked 
+                              ? 'bg-red-500/10 border-red-500/20 text-red-500 cursor-not-allowed' 
+                              : 'bg-white/5 border-white/10 hover:border-white/20 text-gray-400'
+                            }`}
                           >
-                             {format(parseISO(slot.startTime), "hh:mm a")}
+                             {slot.startTime}
+                             {slot.isBooked && <span className="block text-[8px] opacity-60">BOOKED</span>}
                           </button>
                        ))}
                     </div>
@@ -259,7 +277,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
               {selectedTurf && selectedSlot && (
                  <div className="space-y-1">
                     <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Payable</p>
-                    <p className="text-xl font-black text-[#CCFF00]">₹{selectedTurf.price}</p>
+                    <p className="text-xl font-black text-[#CCFF00]">₹{selectedTurf.pricePerHour}</p>
                  </div>
               )}
            </div>

@@ -13,7 +13,8 @@ import adjustTime from "../../utils/adjustTime.js";
 import generateEmail, { generateHTMLContent } from "../../utils/generateEmail.js";
 import { generateInvoice } from "../../utils/invoiceGenerator.js";
 import { createNotification } from "../../utils/notificationHelper.js";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, parse } from "date-fns";
+import { fromZonedTime } from "date-fns-tz";
 
 // --- USER OPERATIONS ---
 
@@ -532,12 +533,36 @@ export const createManualBooking = async (req, res) => {
   } = req.body;
 
   try {
-    const formattedStartTime = format(parseISO(startTime), "hh:mm a");
-    const formattedEndTime = format(parseISO(endTime), "hh:mm a");
-    const formattedDate = format(parseISO(selectedTurfDate), "d MMM yyyy");
+    const timeZone = process.env.TIMEZONE || "Asia/Kolkata";
+    
+    // Helper to parse time whether it's ISO or "hh:mm a"
+    const parseTime = (timeStr) => {
+      if (!timeStr) return new Date();
+      if (timeStr.includes("T")) return parseISO(timeStr);
+      // For "06:00 AM" format
+      return parse(timeStr, "hh:mm a", new Date());
+    };
 
-    const adjustedStartTime = adjustTime(startTime, selectedTurfDate);
-    const adjustedEndTime = adjustTime(endTime, selectedTurfDate);
+    const turfDate = parseISO(selectedTurfDate);
+    const startTimeDate = parseTime(startTime);
+    const endTimeDate = parseTime(endTime);
+
+    const formattedStartTime = format(startTimeDate, "hh:mm a");
+    const formattedEndTime = format(endTimeDate, "hh:mm a");
+    const formattedDate = format(turfDate, "d MMM yyyy");
+
+    const combineDateAndTime = (dateObj, timeObj) => {
+      return new Date(
+        dateObj.getFullYear(),
+        dateObj.getMonth(),
+        dateObj.getDate(),
+        timeObj.getHours(),
+        timeObj.getMinutes()
+      );
+    };
+
+    const adjustedStartTime = fromZonedTime(combineDateAndTime(turfDate, startTimeDate), timeZone);
+    const adjustedEndTime = fromZonedTime(combineDateAndTime(turfDate, endTimeDate), timeZone);
 
     const turf = await Turf.findById(turfId).populate("owner", "email name");
     if (!turf) {

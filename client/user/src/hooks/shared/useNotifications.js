@@ -13,11 +13,11 @@ const useNotifications = () => {
     setLoading(true);
     try {
       // Determine base URL based on role
-      let baseUrl = '/user/notifications';
+      let baseUrl = '/api/user/notifications';
       if (user.role === 'admin' || user.role === 'BMSP_ADMIN') {
-        baseUrl = '/admin/notifications';
+        baseUrl = '/api/admin/notifications';
       } else if (user.role === 'owner' || user.role === 'VERIFIED_VENUE_OWNER' || user.role === 'BMSP_OWNER' || user.role === 'coach' || user.role === 'umpire') {
-        baseUrl = '/owner/notifications';
+        baseUrl = '/api/owner/notifications';
       }
 
       const response = await axiosInstance.get(baseUrl);
@@ -34,9 +34,9 @@ const useNotifications = () => {
 
   const markRead = async (id) => {
     try {
-      let baseUrl = '/user/notifications';
-      if (user.role === 'admin' || user.role === 'BMSP_ADMIN') baseUrl = '/admin/notifications';
-      else if (user.role !== 'user') baseUrl = '/owner/notifications';
+      let baseUrl = '/api/user/notifications';
+      if (user.role === 'admin' || user.role === 'BMSP_ADMIN') baseUrl = '/api/admin/notifications';
+      else if (user.role !== 'user') baseUrl = '/api/owner/notifications';
 
       await axiosInstance.put(`${baseUrl}/${id}/mark-read`);
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
@@ -48,9 +48,9 @@ const useNotifications = () => {
 
   const markAllRead = async () => {
     try {
-      let baseUrl = '/user/notifications';
-      if (user.role === 'admin' || user.role === 'BMSP_ADMIN') baseUrl = '/admin/notifications';
-      else if (user.role !== 'user') baseUrl = '/owner/notifications';
+      let baseUrl = '/api/user/notifications';
+      if (user.role === 'admin' || user.role === 'BMSP_ADMIN') baseUrl = '/api/admin/notifications';
+      else if (user.role !== 'user') baseUrl = '/api/owner/notifications';
 
       await axiosInstance.put(`${baseUrl}/mark-all-read`);
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
@@ -62,9 +62,9 @@ const useNotifications = () => {
 
   const clearAll = async () => {
     try {
-      let baseUrl = '/user/notifications';
-      if (user.role === 'admin' || user.role === 'BMSP_ADMIN') baseUrl = '/admin/notifications';
-      else if (user.role !== 'user') baseUrl = '/owner/notifications';
+      let baseUrl = '/api/user/notifications';
+      if (user.role === 'admin' || user.role === 'BMSP_ADMIN') baseUrl = '/api/admin/notifications';
+      else if (user.role !== 'user') baseUrl = '/api/owner/notifications';
 
       await axiosInstance.delete(`${baseUrl}/clear`);
       setNotifications([]);
