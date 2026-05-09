@@ -137,7 +137,11 @@ const HostGame = () => {
         setShowCoinAnim(true);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to create game");
+      const errorMsg = err.response?.data?.message || "Failed to create game";
+      toast.error(errorMsg);
+      if (errorMsg.toLowerCase().includes("insufficient coins") || errorMsg.toLowerCase().includes("insufficient wallet balance")) {
+        navigate("/wallet");
+      }
     } finally {
       setLoading(false);
     }

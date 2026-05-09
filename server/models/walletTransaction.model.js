@@ -6,7 +6,7 @@ const walletTransactionSchema = new mongoose.Schema(
     amount: { type: Number, required: true },
     type: {
       type: String,
-      enum: ["TOPUP", "DEBIT", "REFUND", "OFFER", "HOST_GAME", "JOIN_GAME"],
+      enum: ["TOPUP", "DEBIT", "REFUND", "OFFER", "HOST_GAME", "JOIN_GAME", "REVENUE", "WITHDRAWAL"],
       required: true,
     },
     status: {

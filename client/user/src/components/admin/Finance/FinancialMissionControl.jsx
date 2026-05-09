@@ -29,7 +29,7 @@ const FinancialMissionControl = () => {
     stats, 
     kycQueue, 
     loading: finLoading, 
-    updatePayoutDay, 
+    updatePayoutSettings, 
     verifyKYC,
     refresh: refreshFin
   } = useAdminFinance();
@@ -407,7 +407,7 @@ const FinancialMissionControl = () => {
                       {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
                         <button
                           key={day}
-                          onClick={() => updatePayoutDay(day)}
+                          onClick={() => updatePayoutSettings({ ...payoutSettings, payoutDay: day })}
                           className={`py-3.5 rounded-[6px] text-[11px] font-black uppercase tracking-widest transition-all border ${
                             payoutSettings?.payoutDay === day 
                               ? "bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_0_15px_rgba(204,255,0,0.15)]" 
@@ -435,18 +435,66 @@ const FinancialMissionControl = () => {
                       <p className="font-mono text-[#CCFF00] text-xl font-black italic">₹5,000</p>
                     </div>
 
-                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] opacity-40 cursor-not-allowed grayscale">
+                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#CCFF00]/20 transition-all">
                       <div className="flex items-center gap-4">
-                        <div className="p-2 bg-white/5 rounded-[6px] text-gray-500">
-                          <Zap size={18} />
+                        <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] group-hover:scale-110 transition-transform">
+                           <Zap size={18} />
                         </div>
                         <div>
-                          <p className="text-[13px] font-bold text-white uppercase tracking-tight">Instant Settlements</p>
-                          <p className="text-[10px] text-[#878C9F] uppercase tracking-widest mt-0.5">Real-time IMPS/UPI routing</p>
+                          <p className="text-[13px] font-bold text-white uppercase tracking-tight">Platform Service Fee</p>
+                          <p className="text-[10px] text-[#878C9F] uppercase tracking-widest mt-0.5">Deducted from each slot booking</p>
                         </div>
                       </div>
-                      <div className="w-10 h-5 bg-white/10 rounded-full relative">
-                        <div className="absolute left-1 top-1/2 -translate-y-1/2 w-3 h-3 bg-white/20 rounded-full" />
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="number"
+                          value={payoutSettings?.platformFeePercentage || 5}
+                          onChange={(e) => updatePayoutSettings({ ...payoutSettings, platformFeePercentage: Number(e.target.value) })}
+                          className="w-16 bg-black/40 border border-[#2D2D2D] rounded-[4px] px-2 py-1 text-[#CCFF00] font-mono text-lg font-black text-center focus:outline-none focus:border-[#CCFF00]"
+                        />
+                        <span className="text-[#CCFF00] font-black">%</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#CCFF00]/20 transition-all">
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] group-hover:scale-110 transition-transform">
+                           <ShieldCheck size={18} />
+                        </div>
+                        <div>
+                          <p className="text-[13px] font-bold text-white uppercase tracking-tight">GST (Goods & Services Tax)</p>
+                          <p className="text-[10px] text-[#878C9F] uppercase tracking-widest mt-0.5">Tax on total booking amount</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="number"
+                          value={payoutSettings?.gstPercentage || 18}
+                          onChange={(e) => updatePayoutSettings({ ...payoutSettings, gstPercentage: Number(e.target.value) })}
+                          className="w-16 bg-black/40 border border-[#2D2D2D] rounded-[4px] px-2 py-1 text-[#CCFF00] font-mono text-lg font-black text-center focus:outline-none focus:border-[#CCFF00]"
+                        />
+                        <span className="text-[#CCFF00] font-black">%</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#CCFF00]/20 transition-all">
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] group-hover:scale-110 transition-transform">
+                           <ExternalLink size={18} />
+                        </div>
+                        <div>
+                          <p className="text-[13px] font-bold text-white uppercase tracking-tight">Payment Gateway Fee</p>
+                          <p className="text-[10px] text-[#878C9F] uppercase tracking-widest mt-0.5">Razorpay/Transaction costs</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="number"
+                          value={payoutSettings?.gatewayFeePercentage || 2}
+                          onChange={(e) => updatePayoutSettings({ ...payoutSettings, gatewayFeePercentage: Number(e.target.value) })}
+                          className="w-16 bg-black/40 border border-[#2D2D2D] rounded-[4px] px-2 py-1 text-[#CCFF00] font-mono text-lg font-black text-center focus:outline-none focus:border-[#CCFF00]"
+                        />
+                        <span className="text-[#CCFF00] font-black">%</span>
                       </div>
                     </div>
                   </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useTurfData from "../../hooks/useTurfData";
@@ -7,6 +7,7 @@ import Reviews from "../reviews/Reviews";
 import TurfDetailsSkeleton from "../ui/TurfDetailsSkeleton";
 import useReservation from "../../hooks/useReservation";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { 
   MapPin, 
@@ -30,7 +31,7 @@ import {
 } from "lucide-react";
 
 import WriteReview from "../../components/reviews/WriteReview";
-import CoinDeductionModal from "../../components/modals/CoinDeductionModal";
+// import CoinDeductionModal from "../../components/modals/CoinDeductionModal";
 
 const TurfDetails = () => {
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);
@@ -38,14 +39,28 @@ const TurfDetails = () => {
   const navigate = useNavigate();
   const { loading, turfs } = useTurfData();
   const { averageRating, reviews } = useReviews(id);
+  const { gateInteraction } = useLoginOnDemand();
   const turf = turfs.find((t) => t._id === id);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const galleryRef = React.useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isCoinModalOpen, setIsCoinModalOpen] = useState(false);
+  const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
   const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
-  const { gateInteraction } = useLoginOnDemand();
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axiosInstance.get("/api/admin/settings/payout");
+        setSettings(response.data.payoutSettings);
+      } catch (err) {
+        console.error("Failed to fetch payout settings:", err);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const {
     selectedDate,
@@ -60,19 +75,31 @@ const TurfDetails = () => {
     isDurationAvailable,
     confirmReservation,
     pricePerHour,
+    totalPrice,
     loading: bookingLoading,
   } = useReservation();
 
   const handleBookingClick = () => {
-    gateInteraction(() => setIsCoinModalOpen(true), {
+    gateInteraction(() => {
+      navigate(`/checkout/${turf._id}`, {
+        state: {
+          turfName: turf.name,
+          selectedDate: selectedDate.toISOString(),
+          startTime: selectedStartTime,
+          duration,
+          amount: totalPrice,
+          location: turf.location
+        }
+      });
+    }, {
       title: "Confirm Your Slot",
       message: "Ready to dominate the pitch? Sign in to securely book your time slot and get instant confirmation."
     });
   };
 
-  const handleConfirmCoinPayment = async (couponCode = null) => {
+  const handleConfirmCoinPayment = async (couponCode = null, paymentData = {}) => {
     try {
-      const result = await confirmReservation(couponCode);
+      const result = await confirmReservation(couponCode, paymentData);
       if (result?.success) {
         setIsPaymentSuccessful(true);
         return { success: true, bookingId: result.bookingId };
@@ -207,15 +234,7 @@ const TurfDetails = () => {
 
   return (
     <div className="min-h-screen bg-black text-white pt-4 pb-20">
-      <CoinDeductionModal
-        isOpen={isCoinModalOpen}
-        onClose={handleModalClose}
-        onConfirm={handleConfirmCoinPayment}
-        amount={(pricePerHour || turf.pricePerHour || 0) * duration}
-        currentBalance={user?.walletBalance || 0}
-        description={`Confirm your booking for ${turf.name}. Coins will be deducted from your wallet.`}
-        turfId={turf._id}
-      />
+      {/* Removed Modal - Using Dedicated Checkout Page */}
       {/* Top Navigation Bar */}
       <div className="container mx-auto px-4 mb-4">
         <Link 
@@ -247,9 +266,12 @@ const TurfDetails = () => {
                   <span>{turf.openTime} — {turf.closeTime}</span>
                 </div>
               )}
-              <div className="flex items-center gap-2 border-l border-zinc-800 pl-6 ml-0 hidden md:flex">
+              <div className="flex items-center gap-2 md:border-l border-zinc-800 md:pl-6">
                 <Info className="w-5 h-5 text-[#CCFF00]" />
-                <button className="text-zinc-300 hover:text-[#CCFF00] transition-colors">
+                <button 
+                  onClick={() => setIsPolicyModalOpen(true)}
+                  className="text-zinc-300 hover:text-[#CCFF00] transition-colors"
+                >
                   View Policies
                 </button>
               </div>
@@ -377,7 +399,9 @@ const TurfDetails = () => {
                   <p className="text-[10px] font-bold uppercase tracking-normal text-zinc-500">Available Slots</p>
                   <div className="grid grid-cols-2 gap-2 max-h-[160px] overflow-y-auto pr-1 scrollbar-custom">
                     {availableTimes.length > 0 ? (
-                      availableTimes.map((time, idx) => {
+                      availableTimes.map((slot, idx) => {
+                        const time = slot.startTime;
+                        const price = slot.price;
                         const isBooked = isTimeSlotBooked(time);
                         const isSelected = selectedStartTime === time;
                         const isAvailable = !isBooked;
@@ -387,15 +411,16 @@ const TurfDetails = () => {
                             key={idx}
                             disabled={!isAvailable}
                             onClick={() => handleTimeSelection(time)}
-                            className={`p-2 rounded-lg border text-center transition-all ${
+                            className={`p-3 rounded-xl border transition-all flex flex-col items-center gap-1 ${
                               isSelected
-                              ? "bg-[#CCFF00] border-[#CCFF00] text-black"
+                              ? "bg-[#CCFF00] border-[#CCFF00] text-black shadow-[0_5px_15px_rgba(204,255,0,0.3)]"
                               : isAvailable
                               ? "bg-zinc-900/50 border-zinc-800 text-white hover:border-[#CCFF00]/50"
                               : "bg-zinc-900/20 border-zinc-900 text-zinc-700 cursor-not-allowed opacity-50"
                             }`}
                           >
-                            <span className="text-[10px] font-bold">{time}</span>
+                            <span className={`text-[10px] font-black uppercase tracking-tight ${isSelected ? "text-black" : "text-zinc-400"}`}>{time}</span>
+                            <span className={`text-[9px] font-bold ${isSelected ? "text-black/70" : "text-[#CCFF00]"}`}>₹{price}</span>
                           </button>
                         );
                       })
@@ -415,8 +440,16 @@ const TurfDetails = () => {
               </div>
 
               <div className="space-y-4 pt-4">
+                {selectedStartTime && (
+                  <div className="bg-zinc-900/40 p-4 rounded-2xl border border-zinc-800/50 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white">Total Payable</span>
+                      <span className="text-xl font-black text-[#CCFF00]">₹{totalPrice}</span>
+                    </div>
+                  </div>
+                )}
                 <button 
-                  onClick={handleReservation}
+                  onClick={handleBookingClick}
                   disabled={bookingLoading || !selectedStartTime}
                   className="w-full bg-[#CCFF00] text-black h-16 rounded-2xl font-bold uppercase tracking-normal flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed shadow-lg shadow-[#CCFF00]/20"
                 >
@@ -427,7 +460,7 @@ const TurfDetails = () => {
                     </div>
                   ) : (
                     <>
-                      Reserve Now
+                      {selectedStartTime ? `Pay ₹${totalPrice} & Reserve` : "Select a Slot"}
                       <ArrowRight className="w-5 h-5" />
                     </>
                   )}
@@ -550,6 +583,59 @@ const TurfDetails = () => {
           <Reviews turfId={id} />
         </div>
       </div>
+      {/* Policy Modal */}
+      {isPolicyModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setIsPolicyModalOpen(false)} />
+          <div className="bg-zinc-900 border border-zinc-800 w-full max-w-2xl rounded-[2.5rem] overflow-hidden shadow-2xl relative z-10 animate-scale-in">
+            <div className="p-8 md:p-12 space-y-8">
+              <header className="flex items-center justify-between border-b border-zinc-800 pb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-1.5 h-8 bg-[#CCFF00] rounded-full" />
+                  <div>
+                    <h2 className="text-2xl font-bold uppercase tracking-tight">Venue Policies</h2>
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[3px] mt-1">Rules & Regulations</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsPolicyModalOpen(false)}
+                  className="p-3 rounded-full bg-zinc-800/50 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
+                >
+                  <ChevronLeft className="w-5 h-5 rotate-180" />
+                </button>
+              </header>
+
+              <div className="max-h-[400px] overflow-y-auto pr-4 custom-scrollbar">
+                <div className="space-y-6">
+                  {turf.policies ? (
+                    <div className="text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap font-medium">
+                      {turf.policies}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
+                      <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center">
+                        <ShieldCheck className="w-8 h-8 text-zinc-600" />
+                      </div>
+                      <p className="text-zinc-500 font-bold uppercase tracking-widest text-[11px]">
+                        Standard facility rules apply at this venue.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-zinc-800 flex justify-end">
+                <button 
+                  onClick={() => setIsPolicyModalOpen(false)}
+                  className="bg-[#CCFF00] text-black px-10 py-4 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:scale-105 transition-transform"
+                >
+                  I Understand
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

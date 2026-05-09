@@ -55,9 +55,18 @@ const turfSchema = new mongoose.Schema(
       {
         startTime: String,
         endTime: String,
+        price: { type: Number },
         isActive: { type: Boolean, default: true },
       }
     ],
+    slotsConfigDuration: { 
+      type: String, 
+      enum: ["Until Changed", "Fixed Weeks"],
+      default: "Until Changed"
+    },
+    slotsConfigWeeks: { type: Number },
+    slotsConfigExpiry: { type: Date },
+    slotsNeedsUpdate: { type: Boolean, default: false },
     slug: {
       type: String,
       unique: true,
@@ -80,6 +89,10 @@ const turfSchema = new mongoose.Schema(
       type: Map,
       of: mongoose.Schema.Types.Mixed,
       default: {}
+    },
+    policies: {
+      type: String,
+      default: "",
     },
   },
   { timestamps: true }

@@ -9,6 +9,17 @@ import { startOfDay, parseISO } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
 import { getTurfWithAvgRating } from "./turf.service.js";
 
+// --- HELPERS ---
+const checkTurfExpiry = async (turf) => {
+  if (turf.slotsConfigDuration === "Fixed Weeks" && turf.slotsConfigExpiry && new Date() > turf.slotsConfigExpiry) {
+    if (!turf.slotsNeedsUpdate) {
+      turf.slotsNeedsUpdate = true;
+      await turf.save();
+    }
+  }
+  return turf;
+};
+
 // --- USER OPERATIONS ---
 
 export const getAllTurfs = async (req, res) => {
@@ -70,7 +81,15 @@ export const getAllTurfs = async (req, res) => {
     });
 
     const turfs = await Turf.aggregate(pipeline);
-    return res.status(200).json({ turfs });
+    
+    // Check for expiry on each turf
+    const processedTurfs = await Promise.all(turfs.map(async (t) => {
+      const turfDoc = await Turf.findById(t._id);
+      if (turfDoc) await checkTurfExpiry(turfDoc);
+      return { ...t, slotsNeedsUpdate: turfDoc ? turfDoc.slotsNeedsUpdate : t.slotsNeedsUpdate };
+    }));
+
+    return res.status(200).json({ turfs: processedTurfs });
   } catch (err) {
     console.log(chalk.red("Error in getAllTurfs"), err);
     return res.status(500).json({ message: err.message });
@@ -84,6 +103,9 @@ export const getTurfById = async (req, res) => {
     if (!turf) {
       return res.status(404).json({ message: "Turf not found" });
     }
+    
+    await checkTurfExpiry(turf);
+    
     const turfWithRating = await getTurfWithAvgRating(turf);
     return res.status(200).json({ turf: turfWithRating });
   } catch (error) {
@@ -119,8 +141,37 @@ export const getTimeSlotByTurfId = async (req, res) => {
       "pricePerHour",
       "generatedSlots",
       "availableDays",
-      "offDays"
+      "offDays",
+      "slotsNeedsUpdate",
+      "slotsConfigDuration",
+      "slotsConfigExpiry"
     ]);
+
+    if (!turfDetails) {
+      return res.status(404).json({ message: "Turf not found" });
+    }
+
+    // Run expiry check just in case
+    await checkTurfExpiry(turfDetails);
+
+    // If configuration needs update (current date > expiry), block all slots
+    if (turfDetails.slotsNeedsUpdate) {
+      return res.status(200).json({ 
+        timeSlots: { ...turfDetails.toObject(), generatedSlots: [] }, 
+        bookedTime: [],
+        message: "This venue's configuration has expired and needs a review by the owner."
+      });
+    }
+
+    // NEW: Check if the SELECTED DATE is beyond the configuration expiry
+    if (turfDetails.slotsConfigDuration === "Fixed Weeks" && turfDetails.slotsConfigExpiry && startOfSelectedDate > turfDetails.slotsConfigExpiry) {
+      return res.status(200).json({ 
+        timeSlots: { ...turfDetails.toObject(), generatedSlots: [] }, 
+        bookedTime: [],
+        message: "Reservations for this date are not yet open. The venue configuration only covers the upcoming weeks."
+      });
+    }
+
     return res.status(200).json({ timeSlots: turfDetails, bookedTime });
   } catch (error) {
     console.log(chalk.red("Error in getTimeSlotByTurfId"), error);
@@ -162,8 +213,16 @@ export const turfRegister = async (req, res) => {
       latitude, 
       longitude,
       managerContacts,
+      slotsConfigDuration,
+      slotsConfigWeeks,
       ...otherData 
     } = req.body;
+
+    let configExpiry = null;
+    if (slotsConfigDuration === "Fixed Weeks" && slotsConfigWeeks) {
+      configExpiry = new Date();
+      configExpiry.setDate(configExpiry.getDate() + (Number(slotsConfigWeeks) * 7));
+    }
 
     const turf = new Turf({
       image: imageUrls[0], 
@@ -183,6 +242,10 @@ export const turfRegister = async (req, res) => {
       offDays: Array.isArray(offDays) ? offDays : (offDays ? [offDays] : []),
       generatedSlots: generatedSlots ? JSON.parse(generatedSlots) : [],
       managerContacts: managerContacts ? JSON.parse(managerContacts) : [],
+      slotsConfigDuration: slotsConfigDuration || "Until Changed",
+      slotsConfigWeeks: Number(slotsConfigWeeks) || 1,
+      slotsConfigExpiry: configExpiry,
+      slotsNeedsUpdate: false
     });
     await turf.save();
     return res.status(201).json({ success: true, message: "Turf registered and sent for admin approval" });
@@ -196,6 +259,10 @@ export const getTurfByOwner = async (req, res) => {
   const ownerId = req.owner.id;
   try {
     const turfs = await Turf.find({ owner: ownerId });
+    
+    // Check for expiry on each turf
+    await Promise.all(turfs.map(t => checkTurfExpiry(t)));
+    
     const turfsWithRating = await Promise.all(turfs.map(getTurfWithAvgRating));
     return res.status(200).json(turfsWithRating);
   } catch (err) {
@@ -255,6 +322,20 @@ export const editTurfById = async (req, res) => {
       coordinates: [Number(req.body.longitude), Number(req.body.latitude)]
     };
   }
+
+  if (req.body.slotsConfigDuration) updatedTurfData.slotsConfigDuration = req.body.slotsConfigDuration;
+  if (req.body.slotsConfigWeeks) updatedTurfData.slotsConfigWeeks = Number(req.body.slotsConfigWeeks);
+  
+  if (req.body.slotsConfigDuration === "Fixed Weeks" && req.body.slotsConfigWeeks) {
+    const configExpiry = new Date();
+    configExpiry.setDate(configExpiry.getDate() + (Number(req.body.slotsConfigWeeks) * 7));
+    updatedTurfData.slotsConfigExpiry = configExpiry;
+  } else if (req.body.slotsConfigDuration === "Until Changed") {
+    updatedTurfData.slotsConfigExpiry = null;
+  }
+  
+  // Reset the update flag since the owner is explicitly updating now
+  updatedTurfData.slotsNeedsUpdate = false;
 
   try {
     const turf = await Turf.findOne({ owner, _id: id });

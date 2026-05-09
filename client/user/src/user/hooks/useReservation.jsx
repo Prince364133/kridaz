@@ -3,10 +3,11 @@ import useDateSelection from "./useDateSelection";
 import useTimeSelection from "./useTimeSelection";
 import useDurationSelection from "./useDurationSelection";
 import useBookingConfirmation from "./useBookingConfirmation";
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 
 const useReservation = () => {
-  const { id } = useParams();
+  const { id, turfId: paramTurfId } = useParams();
+  const turfId = id || paramTurfId;
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
@@ -31,7 +32,7 @@ const useReservation = () => {
   const { availableTimes, handleTimeSelection, isTimeSlotBooked } =
     useTimeSelection(
       selectedDate,
-      id,
+      turfId,
       setSelectedStartTime,
       setBookedTime,
       setTimeSlots,
@@ -49,13 +50,31 @@ const useReservation = () => {
   );
 
   const { confirmReservation } = useBookingConfirmation(
-    id,
+    turfId,
     selectedDate,
     selectedStartTime,
     duration,
     pricePerHour,
     setLoading
   );
+
+  const totalPrice = useMemo(() => {
+    if (!selectedStartTime || !timeSlots?.generatedSlots) return 0;
+    
+    const startIndex = timeSlots.generatedSlots.findIndex(s => s.startTime === (typeof selectedStartTime === 'object' ? selectedStartTime.startTime : selectedStartTime));
+    if (startIndex === -1) return 0;
+    
+    let sum = 0;
+    for (let i = 0; i < duration; i++) {
+      const slot = timeSlots.generatedSlots[startIndex + i];
+      if (slot) {
+        sum += slot.price || timeSlots.pricePerHour || 0;
+      } else {
+        sum += timeSlots.pricePerHour || 0;
+      }
+    }
+    return sum;
+  }, [selectedStartTime, duration, timeSlots]);
 
   return {
     selectedDate,
@@ -70,6 +89,7 @@ const useReservation = () => {
     isDurationAvailable,
     confirmReservation,
     pricePerHour,
+    totalPrice,
     loading,
   };
 };

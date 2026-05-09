@@ -5,7 +5,8 @@ import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
 import Turf from "./components/turf/Turf";
 import TurfDetails from "./components/turf/TurfDetails";
-import BookingPass from "./components/turf/BookingPass";
+import BookingPass from "./pages/BookingPass";
+import BookingInvoice from "./pages/BookingInvoice";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import TurfBookingHistory from "./components/turf/TurfBookingHistory";
 import NotFound from "./components/common/NotFound";
@@ -101,6 +102,8 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <NotFound />,
     children: [
+      { path: "booking-pass/:id", element: <BookingPass /> },
+      { path: "booking-invoice/:id", element: <BookingInvoice /> },
       { index: true, element: <Home /> },
       { path: "login", element: <Login /> },
       { path: "signup", element: <SignUp /> },
@@ -113,7 +116,6 @@ const router = createBrowserRouter([
       { path: "signup/coach", element: <CoachSignUp /> },
       { path: "signup/official", element: <UmpireSignUp /> },
       { path: "turf/:id", element: <TurfDetails /> },
-      { path: "booking-pass/:id", element: <BookingPass /> },
       { path: "profile", element: <ProtectedRoute><Profile /></ProtectedRoute> },
       { path: "wallet", element: <ProtectedRoute><Wallet /></ProtectedRoute> },
       { path: "blogs", element: <Blogs /> },
@@ -122,6 +124,7 @@ const router = createBrowserRouter([
       { path: "join-games", element: <ProtectedRoute><JoinGames /></ProtectedRoute> },
       { path: "host-game", element: <ProtectedRoute><HostGame /></ProtectedRoute> },
       { path: "my-hosted-games", element: <ProtectedRoute><MyHostedGames /></ProtectedRoute> },
+      { path: "*", element: <NotFound /> },
     ],
   },
 

@@ -25,18 +25,30 @@ const verifyOwnerToken = async (req, res, next) => {
           message: "Invalid token , authorization denied",
         });
     }
-    req.owner = decoded;
-    
-    // Allow owner, coach, and umpire roles (case-insensitive and partial match)
+
+    // Support both {id, role} and {user: {role}} or similar structures
     const role = decoded.role?.toLowerCase() || "";
     const isAllowed = ["owner", "coach", "umpire", "admin"].some(r => role.includes(r));
 
     if (!isAllowed) {
         return res.status(403).json({ success: false, message: "Unauthorized role" });
     }
+
+    // Normalize for controllers expecting req.user or req.owner
+    const normalizedUser = {
+      id: decoded.id,
+      userId: decoded.id, // Alias for clarity
+      ownerId: decoded.ownerId,
+      role: role,
+      ...decoded
+    };
+
+    req.owner = normalizedUser;
+    req.user = normalizedUser;
+    
     next();
   } catch (err) {
-    console.error("JWT Verification Error:", err.message);
+    console.error("Partner Middleware Error:", err.message);
     return res.status(401).json({ success: false, message: "Unauthorized: " + err.message });
   }
 };

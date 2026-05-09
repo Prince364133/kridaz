@@ -20,16 +20,25 @@ const verifyAuth = async (req, res, next) => {
       return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
 
-    // Determine if it's an owner or user based on the decoded payload or role field
     const role = decoded.role?.toLowerCase() || "";
+    
+    // Check if it's a partner/business role
     const isBusinessRole = ["owner", "coach", "umpire", "admin"].some(r => role.includes(r));
 
+    // Unified Identity: Always use 'id' as User ID, and 'ownerId' for business document reference
+    const normalizedUser = {
+      id: decoded.id,
+      userId: decoded.id, // Alias for clarity
+      ownerId: decoded.ownerId,
+      role: role,
+      ...decoded
+    };
+
+    // Attach to request
+    req.user = normalizedUser;
+    
     if (isBusinessRole) {
-      req.owner = decoded;
-      req.owner.id = decoded.id || decoded._id;
-    } else {
-      req.user = decoded;
-      req.user.id = decoded.id || decoded._id;
+      req.owner = normalizedUser;
     }
 
     next();

@@ -17,7 +17,7 @@ const useBookingConfirmation = (
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const confirmReservation = async (couponCode = null) => {
+  const confirmReservation = async (couponCode = null, paymentData = {}) => {
     const selectedTurfDate = format(selectedDate, "yyyy-MM-dd");
     const parsedStartTime = parse(selectedStartTime, "hh:mm a", new Date());
 
@@ -43,7 +43,8 @@ const useBookingConfirmation = (
         endTime: endTimeISO,
         totalPrice: pricePerHour * duration,
         selectedTurfDate,
-        ...(couponCode && { couponCode })
+        ...(couponCode && { couponCode }),
+        ...paymentData
       };
 
       const response = await axiosInstance.post(

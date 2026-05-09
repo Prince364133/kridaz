@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axiosInstance from "../../hooks/useAxiosInstance";
-import { Calendar, Clock, MapPin, User, IndianRupee, ChevronLeft, Download, ShieldCheck, Share2 } from "lucide-react";
+import { Calendar, Clock, MapPin, User, IndianRupee, ChevronLeft, Download, ShieldCheck, Share2, Wallet, CreditCard, Zap, Copy, FileText } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import toast from "react-hot-toast";
-import { Copy } from "lucide-react";
 
 const BookingPass = () => {
   const { id } = useParams();
@@ -50,7 +49,7 @@ const BookingPass = () => {
     );
   }
 
-  const { turf, timeSlot, user, totalPrice, qrCode, createdAt } = booking;
+  const { turf, timeSlot, user, totalPrice, qrCode, createdAt, paymentMethod, cashback } = booking;
 
   return (
     <div className="min-h-screen bg-[#000] pb-20 pt-6">
@@ -123,11 +122,25 @@ const BookingPass = () => {
             </div>
 
             <div className="space-y-1">
+              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Payment Mode</p>
+              <div className="flex items-center gap-2 text-white">
+                {paymentMethod === "WALLET" ? <Wallet size={16} className="text-[#84CC16]" /> : <CreditCard size={16} className="text-[#84CC16]" />}
+                <span className="font-bold uppercase tracking-tight text-sm">{paymentMethod || "ONLINE"}</span>
+              </div>
+            </div>
+
+            <div className="space-y-1">
               <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Total Paid</p>
               <div className="flex items-center gap-1 text-[#84CC16]">
                 <IndianRupee size={16} className="font-bold" />
                 <span className="font-black text-xl">{totalPrice}</span>
               </div>
+              {cashback > 0 && (
+                <p className="text-[9px] font-black text-[#84CC16] uppercase tracking-tighter mt-1 flex items-center gap-1">
+                  <Zap size={10} className="fill-[#84CC16]" />
+                  ₹{cashback} Cashback Applied
+                </p>
+              )}
             </div>
           </div>
 
@@ -225,7 +238,16 @@ const BookingPass = () => {
           </div>
 
           {/* Bottom Action Bar */}
-          <div className="p-8 pt-6 grid grid-cols-2 gap-4">
+          <div className="p-8 pt-6 space-y-4">
+            <Link 
+              to={`/booking-invoice/${id}`}
+              className="flex items-center justify-center gap-2 bg-[#CCFF00] hover:bg-[#b8e600] rounded-2xl py-4 text-black text-sm font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(204,255,0,0.2)]"
+            >
+              <FileText size={18} />
+              View Invoice
+            </Link>
+            
+            <div className="grid grid-cols-2 gap-4">
             <button 
               onClick={() => window.print()}
               className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl py-3 text-white text-xs font-bold uppercase tracking-wider transition-all"
@@ -253,8 +275,9 @@ const BookingPass = () => {
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Security Badge */}
+      {/* Security Badge */}
         <div className="mt-8 flex items-center justify-center gap-2 text-zinc-600">
           <ShieldCheck size={16} />
           <span className="text-[10px] font-bold uppercase tracking-widest">Verified Digital Entry Pass</span>

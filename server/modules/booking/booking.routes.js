@@ -4,12 +4,14 @@ import {
   verifyPayment, 
   getUserBookings,
   getOwnerBookings,
-  getBookingById
+  getBookingById,
+  downloadInvoice
 } from "./booking.controller.js";
 import { createOrderSchema, verifyPaymentSchema } from "./booking.validator.js";
 import { validate } from "../../middleware/validate.middleware.js";
 import verifyUserToken from "../../middleware/jwt/user.middleware.js";
 import verifyOwnerToken from "../../middleware/jwt/owner.middleware.js";
+import verifyAuth from "../../middleware/jwt/auth.middleware.js";
 
 const router = express.Router();
 
@@ -18,6 +20,7 @@ router.post("/user/order", verifyUserToken, validate(createOrderSchema), createO
 router.post("/user/verify", verifyUserToken, validate(verifyPaymentSchema), verifyPayment);
 router.get("/user/all", verifyUserToken, getUserBookings);
 router.get("/:id", getBookingById); // Made public for QR code access or simplified access
+router.get("/user/invoice/:id", downloadInvoice); // Public for direct access via link as per request
 
 // Owner routes
 router.get("/owner/all", verifyOwnerToken, getOwnerBookings);

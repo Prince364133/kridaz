@@ -11,19 +11,32 @@ export const getPayoutSettings = async (req, res) => {
           payoutDay: 6, // 0 = Sunday, 6 = Saturday
           settlementTimeHrs: 48,
           minPayoutAmount: 500,
-          coinConversionRate: 1
+          coinConversionRate: 1,
+          platformFeePercentage: 5,
+          gstPercentage: 18,
+          gatewayFeePercentage: 2,
+          cashbackPercentage: 5
         },
         description: "Global payout configuration"
       });
     }
-    res.status(200).json({ success: true, settings: settings.value });
+    res.status(200).json({ success: true, settings: settings.value, payoutSettings: settings.value });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 export const updatePayoutSettings = async (req, res) => {
-  const { payoutDay, settlementTimeHrs, minPayoutAmount } = req.body;
+  const { 
+    payoutDay, 
+    settlementTimeHrs, 
+    minPayoutAmount, 
+    platformFeePercentage,
+    gstPercentage,
+    gatewayFeePercentage,
+    cashbackPercentage 
+  } = req.body;
+  
   try {
     const settings = await SystemSetting.findOneAndUpdate(
       { key: "PAYOUT_CONFIG" },
@@ -32,7 +45,11 @@ export const updatePayoutSettings = async (req, res) => {
           payoutDay, 
           settlementTimeHrs, 
           minPayoutAmount,
-          coinConversionRate: 1 
+          coinConversionRate: 1,
+          platformFeePercentage,
+          gstPercentage,
+          gatewayFeePercentage,
+          cashbackPercentage
         },
         updatedBy: req.user.id
       },

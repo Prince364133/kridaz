@@ -1,28 +1,18 @@
 import Notification from "../../models/notification.model.js";
 
+const getRecipient = (req) => {
+  const { ownerId, id } = req.user;
+  // If ownerId exists in the token, this is a partner/admin notification stream
+  if (ownerId) {
+    return { recipientId: ownerId, recipientModel: 'Owner' };
+  }
+  // Otherwise, it's a general user notification stream
+  return { recipientId: id, recipientModel: 'User' };
+};
+
 export const getMyNotifications = async (req, res) => {
   try {
-    // Determine recipient from req.user, req.owner, or req.admin
-    let recipientId;
-    let recipientModel;
-
-    if (req.user) {
-      recipientId = req.user.id;
-      recipientModel = 'User';
-    } else if (req.owner) {
-      recipientId = req.owner.id;
-      recipientModel = 'Owner';
-    } else if (req.admin) {
-      // Admin might also be stored in Owner model or a separate Admin model
-      // Looking at previous sessions, Admin seems to have req.admin
-      // If there's no Admin model, we might use Owner model with role 'admin'
-      recipientId = req.admin.id;
-      recipientModel = 'Owner'; 
-    }
-
-    if (!recipientId) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
-    }
+    const { recipientId, recipientModel } = getRecipient(req);
 
     const notifications = await Notification.find({ 
       recipient: recipientId, 
@@ -47,8 +37,7 @@ export const markAsRead = async (req, res) => {
 
 export const markAllAsRead = async (req, res) => {
   try {
-    let recipientId = req.user?.id || req.owner?.id || req.admin?.id;
-    let recipientModel = req.user ? 'User' : 'Owner';
+    const { recipientId, recipientModel } = getRecipient(req);
 
     await Notification.updateMany(
       { recipient: recipientId, recipientModel, isRead: false },
@@ -62,8 +51,7 @@ export const markAllAsRead = async (req, res) => {
 
 export const clearNotifications = async (req, res) => {
   try {
-    let recipientId = req.user?.id || req.owner?.id || req.admin?.id;
-    let recipientModel = req.user ? 'User' : 'Owner';
+    const { recipientId, recipientModel } = getRecipient(req);
 
     await Notification.deleteMany({ recipient: recipientId, recipientModel });
     res.status(200).json({ success: true, message: "Notifications cleared" });

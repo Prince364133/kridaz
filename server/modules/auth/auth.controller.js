@@ -194,7 +194,21 @@ export const registerOwner = async (req, res) => {
       waitlistPosition = count + 1;
     }
 
+    // Every owner MUST have a corresponding User document for unified identity
+    const newUser = new User({
+      name,
+      email,
+      phone,
+      password: hashedPassword,
+      role: role || "owner",
+      gender,
+      location,
+      isEmailVerified: true
+    });
+    await newUser.save();
+
     const newOwner = new Owner({
+      userId: newUser._id,
       name,
       email,
       phone,
@@ -205,9 +219,14 @@ export const registerOwner = async (req, res) => {
       waitlistPosition,
     });
     await newOwner.save();
+    
+    // Link owner back to user
+    newUser.ownerDetails = newOwner._id;
+    await newUser.save();
+
     await OTP.deleteOne({ _id: otpRecord._id });
 
-    const token = generateOwnerToken(newOwner);
+    const token = generateOwnerToken(newUser._id, newOwner.role, newOwner._id);
 
     // Set cookie for shared auth between portals
     res.cookie("auth_token", token, {
@@ -222,6 +241,7 @@ export const registerOwner = async (req, res) => {
       message: waitlistPosition ? "You've been added to the waitlist!" : "Account created successfully",
       token,
       role: newOwner.role,
+      user: newUser,
       waitlistNumber: waitlistPosition,
     });
   } catch (err) {
@@ -254,7 +274,8 @@ export const loginStep1 = async (req, res) => {
     let token;
     if (owner) {
       role = owner.role;
-      token = generateOwnerToken(owner);
+      // Use userId as primary identity if available, fallback to owner._id for legacy compatibility
+      token = generateOwnerToken(owner.userId || owner._id, role, owner._id);
     } else {
       role = "user";
       token = generateUserToken(account._id);
@@ -366,7 +387,7 @@ export const googleAuth = async (req, res) => {
 
     if (owner) {
       roleToReturn = owner.role;
-      token = generateOwnerToken(owner);
+      token = generateOwnerToken(owner.userId || owner._id, owner.role, owner._id);
     } else if (user) {
       roleToReturn = "user";
       token = generateUserToken(user._id);
@@ -387,7 +408,7 @@ export const googleAuth = async (req, res) => {
         });
         await owner.save();
         roleToReturn = owner.role;
-        token = generateOwnerToken(owner);
+        token = generateOwnerToken(owner.userId || owner._id, owner.role, owner._id);
       } else {
         const generatedUsername = await generateUniqueUsername(name);
         user = new User({ 

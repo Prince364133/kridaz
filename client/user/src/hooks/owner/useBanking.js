@@ -21,11 +21,8 @@ const useBanking = () => {
       setWalletBalance(bankingRes.data.walletBalance || 0);
       setPayoutSettings(settingsRes.data.settings);
 
-      // Check if today is payout day
-      const today = new Date().getDay();
-      if (today === settingsRes.data.settings.payoutDay) {
-        setIsPayoutDay(true);
-      }
+      // Payout button is now always active as per request
+      setIsPayoutDay(true); 
     } catch (err) {
       console.error(err);
       toast.error("Failed to load banking info");

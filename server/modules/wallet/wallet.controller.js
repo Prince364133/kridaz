@@ -6,8 +6,15 @@ import razorpay from "../../config/razorpay.js";
 import crypto from "crypto";
 import { notifyAdmins } from "../../utils/notificationHelper.js";
 
-const getModelByRole = (role) => {
-  return (role === "user") ? User : Owner;
+const getAccount = async (req) => {
+  const { id, role, ownerId } = req.user;
+  if (role === "user") {
+    return await User.findById(id);
+  }
+  if (ownerId) {
+    return await Owner.findById(ownerId);
+  }
+  return await Owner.findOne({ userId: id });
 };
 
 export const createTopupOrder = async (req, res) => {
@@ -81,19 +88,24 @@ export const verifyTopup = async (req, res) => {
     }
 
     // Atomic update using session
-    const Model = getModelByRole(req.user.role);
+    const account = await getAccount(req);
+    if (!account) {
+      return res.status(404).json({ success: false, message: "Account not found" });
+    }
+
+    const Model = (req.user.role === "user") ? User : Owner;
     const session = await Model.startSession();
     let updatedBalance;
     try {
       await session.withTransaction(async () => {
-        const account = await Model.findByIdAndUpdate(
-          userId,
+        const updatedAccount = await Model.findByIdAndUpdate(
+          account._id,
           { $inc: { walletBalance: transaction.amount } },
           { new: true, session }
         );
 
-        if (!account) throw new Error("Account not found");
-        updatedBalance = account.walletBalance;
+        if (!updatedAccount) throw new Error("Failed to update balance");
+        updatedBalance = updatedAccount.walletBalance;
 
         transaction.status = "SUCCESS";
         transaction.razorpayPaymentId = razorpay_payment_id;
@@ -115,10 +127,9 @@ export const verifyTopup = async (req, res) => {
 };
 
 export const getWalletData = async (req, res) => {
-  const userId = req.user.id || req.user.user;
-  const Model = getModelByRole(req.user.role);
+  const userId = req.user.id;
   try {
-    const account = await Model.findById(userId).select("walletBalance reservedBalance");
+    const account = await getAccount(req);
     const transactions = await WalletTransaction.find({ user: userId })
       .sort({ createdAt: -1 })
       .limit(20);
@@ -126,6 +137,7 @@ export const getWalletData = async (req, res) => {
     return res.status(200).json({
       balance: account?.walletBalance || 0,
       reservedBalance: account?.reservedBalance || 0,
+      pendingBalance: account?.pendingBalance || 0,
       usableBalance: (account?.walletBalance || 0) - (account?.reservedBalance || 0),
       transactions,
     });
@@ -191,7 +203,14 @@ export const requestWithdrawal = async (req, res) => {
       return res.status(400).json({ message: "Minimum withdrawal amount is ₹500" });
     }
 
-    const owner = await Owner.findById(ownerId);
+    if (amount > 100000) {
+      return res.status(400).json({ message: "Maximum withdrawal amount is ₹1,00,000" });
+    }
+
+    const owner = req.user.ownerId 
+      ? await Owner.findById(req.user.ownerId) 
+      : await Owner.findOne({ userId: req.user.id });
+
     if (!owner) {
       return res.status(404).json({ message: "Account not found" });
     }
@@ -203,7 +222,7 @@ export const requestWithdrawal = async (req, res) => {
 
     // 1. Create withdrawal request
     const request = await WithdrawalRequest.create({
-      owner: ownerId,
+      owner: owner._id,
       amount,
       bankDetails,
       status: "PENDING"
@@ -233,9 +252,15 @@ export const requestWithdrawal = async (req, res) => {
 };
 
 export const getOwnerWithdrawals = async (req, res) => {
-  const ownerId = req.user.id || req.user.user;
   try {
-    const requests = await WithdrawalRequest.find({ owner: ownerId }).sort({ createdAt: -1 });
+    const owner = req.user.ownerId 
+      ? await Owner.findById(req.user.ownerId) 
+      : await Owner.findOne({ userId: req.user.id });
+
+    if (!owner) {
+      return res.status(404).json({ success: false, message: "Partner account not found" });
+    }
+    const requests = await WithdrawalRequest.find({ owner: owner._id }).sort({ createdAt: -1 });
     return res.status(200).json({ success: true, requests });
   } catch (error) {
     return res.status(500).json({ message: error.message });

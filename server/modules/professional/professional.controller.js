@@ -130,7 +130,8 @@ export const bookProfessional = async (req, res) => {
 
 // Update availability (Set slots)
 export const updateAvailability = async (req, res) => {
-  const professionalId = req.user.id || req.user.user;
+  const professionalId = req.user.ownerId;
+  if (!professionalId) return res.status(403).json({ message: "Only partners can set availability" });
   const { date, slots } = req.body;
 
   try {
@@ -147,7 +148,8 @@ export const updateAvailability = async (req, res) => {
 
 // Get professional bookings (Requests)
 export const getMyBookings = async (req, res) => {
-  const professionalId = req.user.id || req.user.user;
+  const professionalId = req.user.ownerId;
+  if (!professionalId) return res.status(403).json({ message: "Only partners can view their bookings" });
   try {
     const bookings = await ProfessionalBooking.find({ professional: professionalId })
       .populate("user", "name phone email profilePicture")
@@ -160,7 +162,8 @@ export const getMyBookings = async (req, res) => {
 
 // Handle booking request (Accept/Reject)
 export const handleBookingRequest = async (req, res) => {
-  const professionalId = req.user.id || req.user.user;
+  const professionalId = req.user.ownerId;
+  if (!professionalId) return res.status(403).json({ message: "Unauthorized" });
   const { bookingId, status, rejectionReason } = req.body;
 
   try {
@@ -272,7 +275,8 @@ export const addProfessionalReview = async (req, res) => {
 };
 
 export const replyToReview = async (req, res) => {
-  const professionalId = req.user.id || req.user.user;
+  const professionalId = req.user.ownerId;
+  if (!professionalId) return res.status(403).json({ message: "Unauthorized" });
   const { reviewId, reply } = req.body;
   try {
     const review = await Review.findById(reviewId);
@@ -293,7 +297,8 @@ export const replyToReview = async (req, res) => {
 };
 
 export const updateProfessionalProfile = async (req, res) => {
-  const professionalId = req.user.id || req.user.user;
+  const professionalId = req.user.ownerId;
+  if (!professionalId) return res.status(403).json({ message: "Unauthorized" });
   const { 
     name, bio, hourlyPrice, gameTypes, city, state, 
     specialization, experience, certifications 

@@ -167,6 +167,29 @@ const AddTurf = () => {
                 </span>
               )}
             </div>
+
+            <div className="form-control">
+              <label className="label mb-2">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Venue Policies and Rules</span>
+              </label>
+              <textarea
+                {...register("policies")}
+                maxLength={1000}
+                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-48 rounded-[8px] p-4 transition-all"
+                placeholder="Define your facility's rules, cancellation policies, and safety guidelines (Minimum 200 characters)..."
+              ></textarea>
+              <div className="flex justify-between mt-2 ml-1">
+                {errors.policies ? (
+                  <span className="text-[#CCFF00] text-[10px] font-bold uppercase">
+                    {errors.policies.message}
+                  </span>
+                ) : (
+                  <span className="text-[#444] text-[10px] font-bold uppercase tracking-widest">
+                    {watch("policies")?.length || 0} / 1000 max characters (200 min)
+                  </span>
+                )}
+              </div>
+            </div>
             
             <FormField
               label="Location (Address Line)"
@@ -609,41 +632,119 @@ const AddTurf = () => {
               </div>
 
               <div className="space-y-10">
+                <div className="space-y-6 pt-6 border-t border-[#2D2D2D]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1 h-4 bg-[#CCFF00] rounded-full" />
+                    <h4 className="text-[11px] font-bold text-white uppercase tracking-widest">Configuration Lifespan</h4>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="form-control">
+                      <label className="label mb-2">
+                        <span className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Duration Strategy</span>
+                      </label>
+                      <select
+                        {...register("slotsConfigDuration")}
+                        className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-xs h-11 rounded-[6px] px-4 transition-all appearance-none"
+                      >
+                        <option value="Until Changed">Infinite (Until Manual Change)</option>
+                        <option value="Fixed Weeks">Fixed Duration (Weekly Basis)</option>
+                      </select>
+                    </div>
+
+                    {watch("slotsConfigDuration") === "Fixed Weeks" && (
+                      <div className="form-control animate-fade-in">
+                        <label className="label mb-2">
+                          <span className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Active Duration (Weeks)</span>
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="number"
+                            {...register("slotsConfigWeeks")}
+                            className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-xs h-11 rounded-[6px] px-4 transition-all"
+                            placeholder="e.g. 4"
+                          />
+                          <span className="text-[10px] font-bold text-[#444] uppercase tracking-widest">Weeks</span>
+                        </div>
+                        {errors.slotsConfigWeeks && <span className="text-[#CCFF00] text-[9px] font-bold uppercase mt-2 block">{errors.slotsConfigWeeks.message}</span>}
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[9px] text-[#444] uppercase tracking-widest italic ml-1 leading-relaxed">
+                    * After the selected duration, slots will be marked as "Needs Update" and booking will be blocked until pricing/timing is reviewed.
+                  </p>
+                </div>
+
                 <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-3 mb-6">
-                  <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[3px]">Matrix Projection</h3>
+                  <div className="space-y-1">
+                    <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[3px]">Matrix Projection</h3>
+                    <p className="text-[9px] text-[#878C9F] font-bold uppercase tracking-widest italic">Set individual slot pricing below</p>
+                  </div>
                   <div className="flex items-center gap-2">
                     <div className="flex flex-col items-end">
                       <span className="text-[8px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Max Daily Revenue</span>
                       <span className="text-[11px] font-bold text-black uppercase bg-[#CCFF00] px-4 py-1.5 rounded-[4px] shadow-[0_2px_10px_rgba(204,255,0,0.2)]">
-                        ₹ {totalDailyEarnings.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="flex flex-col items-end ml-2 border-l border-[#2D2D2D] pl-4">
-                      <span className="text-[8px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Capacity</span>
-                      <span className="text-[11px] font-bold text-[#CCFF00] uppercase bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-4 py-1.5 rounded-[4px]">
-                        {activeSlotsCount} Slots
+                        ₹ {generatedSlots.reduce((acc, s) => acc + (s.isActive ? Number(s.price) : 0), 0).toFixed(2)}
                       </span>
                     </div>
                   </div>
                 </div>
                 
                 {generatedSlots.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                     {generatedSlots.map((slot, index) => (
-                      <button
+                      <div 
                         key={index}
-                        type="button"
-                        onClick={() => toggleSlotActive(index)}
-                        className={`p-4 rounded-[8px] text-[11px] font-bold border transition-all flex flex-col items-center gap-1.5 ${
+                        className={`flex items-center gap-4 p-3 rounded-[8px] border transition-all ${
                           slot.isActive
-                          ? "bg-[#111111] border-[#2D2D2D] text-white hover:border-[#CCFF00]/40"
-                          : "bg-black/50 border-[#1A1A1A] text-[#222] line-through opacity-40"
+                          ? "bg-[#111111] border-[#2D2D2D] group hover:border-[#CCFF00]/30"
+                          : "bg-black/50 border-[#1A1A1A] opacity-40 grayscale"
                         }`}
                       >
-                        <span className="tracking-tighter">{slot.startTime}</span>
-                        <div className="w-1 h-px bg-[#2D2D2D]" />
-                        <span className="tracking-tighter opacity-60">{slot.endTime}</span>
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleSlotActive(index)}
+                          className={`w-10 h-10 shrink-0 rounded-[6px] border flex items-center justify-center transition-all ${
+                            slot.isActive 
+                            ? "bg-[#CCFF00]/10 border-[#CCFF00]/20 text-[#CCFF00]" 
+                            : "bg-[#1A1A1A] border-[#2D2D2D] text-[#444]"
+                          }`}
+                        >
+                          <span className="text-[10px] font-black">{index + 1}</span>
+                        </button>
+
+                        <div className="flex flex-col shrink-0 min-w-[120px]">
+                          <span className="text-[13px] font-bold text-white tracking-tighter">{slot.startTime} - {slot.endTime}</span>
+                          <span className="text-[9px] font-black text-[#878C9F] uppercase tracking-widest mt-0.5">
+                            {slot.isActive ? "Operational" : "Inactive"}
+                          </span>
+                        </div>
+
+                        <div className="flex-1 flex items-center gap-3 justify-end">
+                          <div className="flex flex-col items-end">
+                            <span className="text-[8px] font-black text-[#878C9F] uppercase tracking-[2px] mb-1">Slot Price (INR)</span>
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-[#444]">₹</span>
+                              <input 
+                                type="number"
+                                value={slot.price}
+                                onChange={(e) => updateSlotPrice(index, e.target.value)}
+                                disabled={!slot.isActive}
+                                className="w-24 bg-black/50 border border-[#2D2D2D] text-white text-[11px] font-bold h-9 pl-6 pr-3 rounded-[4px] focus:outline-none focus:border-[#CCFF00]/60 transition-all disabled:opacity-30"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="w-px h-8 bg-[#2D2D2D] mx-1" />
+
+                          <div className="flex flex-col items-end min-w-[80px]">
+                            <span className="text-[8px] font-black text-[#CCFF00] uppercase tracking-[2px] mb-1">Your Net</span>
+                            <span className="text-[13px] font-black text-[#CCFF00] font-mono tracking-tight italic">
+                              ₹{(slot.price * 0.95).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 ) : (

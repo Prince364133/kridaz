@@ -139,34 +139,44 @@ export const generateInvoice = async (booking, turf, user) => {
          .text('Summary', 350, summaryTop, { bold: true });
 
       doc.fontSize(10)
-         .text('Subtotal:', 350, summaryTop + 20)
+         .text('Total Amount:', 350, summaryTop + 20)
          .text(`${booking.totalPrice} Coins`, 480, summaryTop + 20, { align: 'right' });
-
-      doc.text('Tax (0%):', 350, summaryTop + 35)
-         .text('0 Coins', 480, summaryTop + 35, { align: 'right' });
 
       doc.fontSize(12)
          .fillColor(primaryColor)
-         .text('Total:', 350, summaryTop + 55, { bold: true })
-         .text(`${booking.totalPrice} Coins`, 480, summaryTop + 55, { align: 'right', bold: true });
+         .text('Advance Paid:', 350, summaryTop + 40, { bold: true })
+         .text(`${booking.advanceAmount || booking.totalPrice} Coins`, 480, summaryTop + 40, { align: 'right', bold: true });
+
+      doc.fontSize(12)
+         .fillColor('#F97316') // Orange
+         .text('Venue Balance:', 350, summaryTop + 60, { bold: true })
+         .text(`${booking.balanceAmount || 0} Coins`, 480, summaryTop + 60, { align: 'right', bold: true });
+
+      // Payment Status Badge
+      const statusX = 350;
+      const statusY = summaryTop + 85;
+      doc.rect(statusX, statusY, 200, 20).fill(booking.paymentType === "PARTIAL" ? '#FEF3C7' : '#DCFCE7');
+      doc.fillColor(booking.paymentType === "PARTIAL" ? '#92400E' : '#166534')
+         .fontSize(9)
+         .text(booking.paymentType === "PARTIAL" ? 'PARTIAL PAYMENT RECEIVED' : 'FULL PAYMENT RECEIVED', statusX + 10, statusY + 6, { bold: true });
 
       // Support & Contacts Section (Right Side)
       doc.fillColor(darkColor)
          .fontSize(10)
-         .text('SUPPORT CONTACTS', 350, summaryTop + 85, { bold: true });
+         .text('SUPPORT CONTACTS', 350, summaryTop + 115, { bold: true });
 
       doc.fontSize(9)
          .fillColor(grayColor)
-         .text(`Platform: support@turfspot.com`, 350, summaryTop + 100)
-         .text(`Venue: ${turf.owner?.email || 'N/A'}`, 350, summaryTop + 112);
+         .text(`Platform: support@turfspot.com`, 350, summaryTop + 130)
+         .text(`Venue: ${turf.owner?.email || 'N/A'}`, 350, summaryTop + 142);
 
       // Manager Contacts (Left Side)
       if (turf.managerContacts && turf.managerContacts.length > 0) {
         doc.fillColor(darkColor)
            .fontSize(10)
-           .text('VENUE MANAGERS', 50, summaryTop + 135, { bold: true });
+           .text('VENUE MANAGERS', 50, summaryTop + 165, { bold: true });
         
-        let contactY = summaryTop + 150;
+        let contactY = summaryTop + 180;
         turf.managerContacts.forEach((contact, index) => {
           if (index < 3) { // Limit to 3 on invoice to avoid overflow
             doc.fontSize(9)

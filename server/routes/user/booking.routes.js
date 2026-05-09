@@ -6,6 +6,7 @@ import {
   getUserBookings,
   getBookingById,
   validateCoupon,
+  downloadInvoice,
 } from "../../modules/booking/booking.controller.js";
 import verifyToken from "../../middleware/jwt/user.middleware.js";
 import { createOrderSchema, verifyPaymentSchema, bookWithWalletSchema } from "../../modules/booking/booking.validator.js";
@@ -18,6 +19,7 @@ bookingRouter.post("/verify-payment", verifyToken, validate(verifyPaymentSchema)
 bookingRouter.post("/book-with-wallet", verifyToken, validate(bookWithWalletSchema), bookWithWallet);
 bookingRouter.post("/validate-coupon", verifyToken, validateCoupon);
 bookingRouter.get("/get-bookings", verifyToken, getUserBookings);
+bookingRouter.get("/invoice/:id", downloadInvoice);
 bookingRouter.get("/:id", getBookingById);
 
 export default bookingRouter;

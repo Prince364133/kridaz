@@ -45,9 +45,8 @@ export const updateBankingDetails = async (req, res) => {
 
 export const getPayoutConfig = async (req, res) => {
   try {
-    const SystemSetting = (await import("../../models/systemSetting.model.js")).default;
-    const settings = await SystemSetting.findOne({ key: "PAYOUT_CONFIG" });
-    res.status(200).json({ success: true, settings: settings?.value || { payoutDay: 6 } });
+    // Friday is the fixed payout day (5)
+    res.status(200).json({ success: true, settings: { payoutDay: 5 } });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

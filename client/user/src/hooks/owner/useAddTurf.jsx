@@ -16,6 +16,11 @@ const addTurfSchema = yup.object().shape({
     .string()
     .required("Enter the description of the turf")
     .min(3, "Description must be at least 3 characters long"),
+  policies: yup
+    .string()
+    .required("Venue policies and rules are required")
+    .min(200, "Policies must be at least 200 characters long")
+    .max(10000, "Policies must be at most 10,000 characters long"),
   location: yup
     .string()
     .required("Enter the location of the turf")
@@ -61,6 +66,12 @@ const addTurfSchema = yup.object().shape({
     .min(1, "At least one facility is required"),
   slotDuration: yup.number().required("Slot duration is required").min(30).max(240),
   breakTime: yup.number().min(0).max(60),
+  slotsConfigDuration: yup.string().oneOf(["Until Changed", "Fixed Weeks"]).required("Configuration duration is required"),
+  slotsConfigWeeks: yup.number().when("slotsConfigDuration", {
+    is: "Fixed Weeks",
+    then: (schema) => schema.required("Number of weeks is required").min(1).max(52),
+    otherwise: (schema) => schema.optional(),
+  }),
   mapUrl: yup.string().url("Invalid Google Maps URL").nullable(),
   managerContacts: yup.array().of(
     yup.object().shape({
@@ -90,6 +101,7 @@ export default function useAddTurf() {
       openTime: null,
       closeTime: null,
       youtubeUrl: "",
+      policies: "",
       slotDuration: 60,
       breakTime: 0,
       city: "",
@@ -100,6 +112,8 @@ export default function useAddTurf() {
       managerContacts: [],
       availableDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
       offDays: [],
+      slotsConfigDuration: "Until Changed",
+      slotsConfigWeeks: 1,
     },
   });
 
@@ -207,17 +221,20 @@ export default function useAddTurf() {
     }
   };
 
+  const pricePerHour = watch("pricePerHour") || 0;
+
   useEffect(() => {
     if (openTime && isValid(openTime) && closeTime && isValid(closeTime) && slotDuration) {
       const slots = [];
       let current = new Date(openTime);
       let end = new Date(closeTime);
       
-      // Handle case where closeTime is on the next day (e.g. 12:00 AM)
       if (end <= current) {
         end.setDate(end.getDate() + 1);
       }
       
+      const defaultSlotPrice = (Number(pricePerHour) * (Number(slotDuration) / 60)).toFixed(2);
+
       while (current < end) {
         const slotStart = new Date(current);
         const slotEnd = new Date(current.getTime() + slotDuration * 60000);
@@ -226,7 +243,8 @@ export default function useAddTurf() {
           slots.push({
             startTime: format(slotStart, "hh:mm aa"),
             endTime: format(slotEnd, "hh:mm aa"),
-            isActive: true
+            isActive: true,
+            price: Number(defaultSlotPrice)
           });
         }
         
@@ -234,7 +252,13 @@ export default function useAddTurf() {
       }
       setGeneratedSlots(slots);
     }
-  }, [openTime, closeTime, slotDuration, breakTime]);
+  }, [openTime, closeTime, slotDuration, breakTime, pricePerHour]);
+
+  const updateSlotPrice = (index, price) => {
+    const newSlots = [...generatedSlots];
+    newSlots[index].price = Number(price);
+    setGeneratedSlots(newSlots);
+  };
 
   const toggleSlotActive = (index) => {
     const newSlots = [...generatedSlots];
@@ -366,6 +390,7 @@ export default function useAddTurf() {
     newManagerPhone,
     setNewManagerPhone,
     addManagerContact,
-    removeManagerContact
+    removeManagerContact,
+    updateSlotPrice
   };
 }

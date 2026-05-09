@@ -16,6 +16,7 @@ export const turfRegisterSchema = z.object({
     openTime: z.string().optional(),
     closeTime: z.string().optional(),
     facilities: z.union([z.string(), z.array(z.string())]).optional(),
+    policies: z.string().min(200, "Venue policies must be at least 200 characters long"),
   }),
 });
 
@@ -35,5 +36,6 @@ export const turfUpdateSchema = z.object({
     openTime: z.string().optional(),
     closeTime: z.string().optional(),
     facilities: z.union([z.string(), z.array(z.string())]).optional(),
+    policies: z.string().min(200, "Venue policies must be at least 200 characters long").optional(),
   }),
 });

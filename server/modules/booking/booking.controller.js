@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import SystemSetting from "../../models/systemSetting.model.js";
 import Booking from "../../models/booking.model.js";
 import WalletTransaction from "../../models/walletTransaction.model.js";
 import Turf from "../../models/turf.model.js";
@@ -53,6 +54,9 @@ export const verifyPayment = async (req, res) => {
     endTime,
     selectedTurfDate,
     totalPrice,
+    advanceAmount,
+    balanceAmount,
+    paymentType,
     paymentId,
     orderId,
     razorpay_signature,
@@ -73,16 +77,33 @@ export const verifyPayment = async (req, res) => {
     const adjustedStartTime = adjustTime(startTime, selectedTurfDate);
     const adjustedEndTime = adjustTime(endTime, selectedTurfDate);
 
-    // Check User collection first, then Owner collection
-    const [userResult, turf] = await Promise.all([
+    const [userResult, turf, settingsDoc] = await Promise.all([
       User.findById(userId).then(u => u || Owner.findById(userId)),
       Turf.findById(turfId).populate("owner", "email name"),
+      SystemSetting.findOne({ key: "PAYOUT_CONFIG" })
     ]);
-    
+
     const user = userResult;
     if (!user || !turf) {
       return res.status(404).json({ success: false, message: "Account or Turf not found" });
     }
+
+    const settings = settingsDoc?.value || {};
+    const gstPercentage = typeof settings.gstPercentage !== 'undefined' ? Number(settings.gstPercentage) : 0;
+    const platformFeePercentage = typeof settings.platformFeePercentage !== 'undefined' ? Number(settings.platformFeePercentage) : 5;
+
+    // Check if the SELECTED DATE is beyond the configuration expiry
+    const startOfSelectedDate = new Date(selectedTurfDate);
+    startOfSelectedDate.setHours(0, 0, 0, 0);
+
+    if (turf.slotsConfigDuration === "Fixed Weeks" && turf.slotsConfigExpiry && startOfSelectedDate > turf.slotsConfigExpiry) {
+      return res.status(400).json({ success: false, message: "This slot is no longer available as the venue configuration has expired." });
+    }
+
+    const gstAmountCalc = Math.round(totalPrice * (gstPercentage / (100 + gstPercentage)));
+    const baseAmount = totalPrice - gstAmountCalc;
+    const platformFee = Math.round(baseAmount * (platformFeePercentage / 100));
+    const ownerRevenue = baseAmount - platformFee;
 
     // Check for overlapping bookings
     const overlappingSlot = await TimeSlot.findOne({
@@ -116,9 +137,21 @@ export const verifyPayment = async (req, res) => {
       turf: turfId,
       timeSlot: timeSlot._id,
       totalPrice,
+      advanceAmount: advanceAmount || totalPrice,
+      balanceAmount: balanceAmount || 0,
+      paymentType: paymentType || "FULL",
       qrCode: QRcode,
       payment: { orderId, paymentId },
+      paymentMethod: req.body.paymentMethod || "ONLINE",
+      revenueStatus: "PENDING",
+      platformFee,
+      gstAmount: gstAmountCalc,
+      ownerRevenue
     });
+
+    // Update Owner's pending balance (only the amount PAID online goes to pending)
+    const amountPaidOnline = advanceAmount || totalPrice;
+    await Owner.findByIdAndUpdate(turf.owner._id, { $inc: { pendingBalance: amountPaidOnline } });
 
     // If it's a regular user, update their bookings array
     if (user.constructor.modelName === "User") {
@@ -232,14 +265,38 @@ export const bookWithWallet = async (req, res) => {
       }
     }
 
-    if (user.walletBalance < finalPrice) {
+    const { advanceAmount, balanceAmount, paymentType } = req.body;
+    const amountToDeduct = advanceAmount || finalPrice;
+
+    if (user.walletBalance < amountToDeduct) {
       throw new Error("Insufficient wallet balance. Please top up your wallet.");
     }
 
-    const turf = await Turf.findById(turfId).populate("owner", "email name").session(session);
+    const [turf, settingsDoc] = await Promise.all([
+      Turf.findById(turfId).populate("owner", "email name").session(session),
+      SystemSetting.findOne({ key: "PAYOUT_CONFIG" }).session(session)
+    ]);
+
     if (!turf) {
       throw new Error("Turf not found");
     }
+
+    const settings = settingsDoc?.value || {};
+    const gstPercentage = typeof settings.gstPercentage !== 'undefined' ? Number(settings.gstPercentage) : 0;
+    const platformFeePercentage = typeof settings.platformFeePercentage !== 'undefined' ? Number(settings.platformFeePercentage) : 5;
+
+    // Check if the SELECTED DATE is beyond the configuration expiry
+    const startOfSelectedDate = new Date(selectedTurfDate);
+    startOfSelectedDate.setHours(0, 0, 0, 0);
+
+    if (turf.slotsConfigDuration === "Fixed Weeks" && turf.slotsConfigExpiry && startOfSelectedDate > turf.slotsConfigExpiry) {
+      throw new Error("This slot is no longer available as the venue configuration has expired.");
+    }
+
+    const gstAmountCalc = Math.round(finalPrice * (gstPercentage / (100 + gstPercentage)));
+    const baseAmount = finalPrice - gstAmountCalc;
+    const platformFee = Math.round(baseAmount * (platformFeePercentage / 100));
+    const ownerRevenue = baseAmount - platformFee;
 
     // 2. Check for overlapping bookings
     const overlappingSlot = await TimeSlot.findOne({
@@ -256,7 +313,7 @@ export const bookWithWallet = async (req, res) => {
     }
 
     // 3. Deduct balance
-    user.walletBalance -= finalPrice;
+    user.walletBalance -= amountToDeduct;
     await user.save({ session });
 
     // 3. Create objects
@@ -285,26 +342,64 @@ export const bookWithWallet = async (req, res) => {
           turf: turfId,
           timeSlot: timeSlot[0]._id,
           totalPrice: finalPrice,
+          advanceAmount: amountToDeduct,
+          balanceAmount: balanceAmount || (finalPrice - amountToDeduct),
+          paymentType: paymentType || (amountToDeduct < finalPrice ? "PARTIAL" : "FULL"),
           qrCode: QRcode,
           payment: {
             orderId: "WALLET",
             paymentId: `WAL_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
           },
+          paymentMethod: "WALLET",
+          revenueStatus: "PENDING",
+          platformFee,
+          gstAmount: gstAmountCalc,
+          ownerRevenue
         },
       ],
       { session }
     );
 
+    // Update Owner's pending balance (only the amount PAID online goes to pending)
+    await Owner.findByIdAndUpdate(turf.owner._id, { $inc: { pendingBalance: amountToDeduct } }).session(session);
+
     // 4. Update user bookings array
     user.bookings.push(booking[0]._id);
     await user.save({ session });
 
-    // 5. Create wallet transaction record
+    // 5. Calculate Dynamic Cashback
+    const cashbackPercentage = settings.cashbackPercentage || 5;
+    const cashbackAmount = Math.round(finalPrice * (cashbackPercentage / 100));
+    if (cashbackAmount > 0) {
+      user.walletBalance += cashbackAmount;
+      await user.save({ session });
+      
+      // Create cashback transaction
+      await WalletTransaction.create(
+        [
+          {
+            user: userId,
+            amount: cashbackAmount,
+            type: "OFFER",
+            status: "SUCCESS",
+            description: `${cashbackPercentage}% Cashback for booking #${booking[0]._id.toString().slice(-6).toUpperCase()}`,
+            bookingId: booking[0]._id,
+          },
+        ],
+        { session }
+      );
+      
+      // Update booking with cashback info
+      booking[0].cashback = cashbackAmount;
+      await booking[0].save({ session });
+    }
+
+    // 6. Create wallet transaction record for the debit
     await WalletTransaction.create(
       [
         {
           user: userId,
-          amount: finalPrice,
+          amount: amountToDeduct,
           type: "DEBIT",
           status: "SUCCESS",
           description: `Booking at ${turf.name}`,
@@ -673,5 +768,45 @@ export const createManualBooking = async (req, res) => {
       success: false,
       message: "Internal server error: " + error.message,
     });
+  }
+};
+export const downloadInvoice = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const booking = await Booking.findById(id).populate("user").populate("timeSlot");
+    
+    if (!booking) {
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+
+    const turf = await Turf.findById(booking.turf).populate("owner");
+    
+    // Determine the customer info
+    const customerInfo = booking.user || {
+      name: booking.guestDetails?.name || "Guest Customer",
+      email: booking.guestDetails?.email || "N/A",
+      phone: booking.guestDetails?.phone || "N/A"
+    };
+    if (!turf) {
+      return res.status(404).json({ success: false, message: "Turf not found" });
+    }
+
+    // Pass necessary fields for the invoice generator if they are missing in the simple find
+    const invoiceBooking = {
+      ...booking._doc,
+      selectedTurfDate: format(new Date(booking.timeSlot?.startTime || booking.createdAt), "d MMM yyyy"),
+      startTime: format(new Date(booking.timeSlot?.startTime || booking.createdAt), "hh:mm a"),
+      endTime: format(new Date(booking.timeSlot?.endTime || booking.createdAt), "hh:mm a"),
+      duration: booking.timeSlot ? Math.ceil((new Date(booking.timeSlot.endTime) - new Date(booking.timeSlot.startTime)) / (1000 * 60 * 60)) : 1
+    };
+
+    const pdfBuffer = await generateInvoice(invoiceBooking, turf, customerInfo);
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename=Invoice-${id.slice(-6).toUpperCase()}.pdf`);
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error("Error generating invoice:", error);
+    res.status(500).json({ success: false, message: "Error generating invoice: " + error.message });
   }
 };

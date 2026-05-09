@@ -20,6 +20,7 @@ import Community from "@user/pages/Community";
 import FindPlayers from "@user/pages/FindPlayers";
 import UserWallet from "@user/pages/Wallet";
 import BookingPass from "@user/pages/BookingPass";
+import BookingInvoice from "@user/pages/BookingInvoice";
 import HostGame from "@user/pages/HostGame";
 import JoinGames from "@user/pages/JoinGames";
 import MyHostedGames from "@user/pages/MyHostedGames";
@@ -27,6 +28,7 @@ import MyJoinedGames from "@user/pages/MyJoinedGames";
 import FindProfessionals from "@user/pages/FindProfessionals";
 import ProfessionalDetails from "@user/pages/ProfessionalDetails";
 import Messages from "@user/pages/Messages";
+import CheckoutPage from "@user/pages/checkout/CheckoutPage";
 
 
 // Business Landing Pages (User Portal)
@@ -251,7 +253,9 @@ const router = createBrowserRouter([
       { path: "signup/official", element: <PublicRoute><UmpireSignUp /></PublicRoute> },
       { path: "wallet", element: <ProtectedRoute><UserWallet /></ProtectedRoute> },
       { path: "booking-history", element: <ProtectedRoute><UserTurfBookingHistory /></ProtectedRoute> },
+      { path: "checkout/:turfId", element: <ProtectedRoute><CheckoutPage /></ProtectedRoute> },
       { path: "booking-pass/:id", element: <BookingPass /> },
+      { path: "booking-invoice/:id", element: <BookingInvoice /> },
       { path: "*", element: <NotFound /> },
     ],
   },

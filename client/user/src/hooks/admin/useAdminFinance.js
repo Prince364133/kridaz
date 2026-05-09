@@ -34,11 +34,11 @@ const useAdminFinance = () => {
     }
   };
 
-  const updatePayoutDay = async (day) => {
+  const updatePayoutSettingsConfig = async (newSettings) => {
     try {
-      await axiosInstance.put("/api/admin/settings/payout", { ...payoutSettings, payoutDay: day });
-      setPayoutSettings(prev => ({ ...prev, payoutDay: day }));
-      toast.success("Payout day updated");
+      await axiosInstance.put("/api/admin/settings/payout", newSettings);
+      setPayoutSettings(newSettings);
+      toast.success("Settings updated successfully");
     } catch (err) {
       toast.error("Failed to update settings");
     }
@@ -58,7 +58,7 @@ const useAdminFinance = () => {
     fetchData();
   }, []);
 
-  return { payoutRequests, kycQueue, payoutSettings, stats, loading, updatePayoutDay, verifyKYC, refresh: fetchData };
+  return { payoutRequests, kycQueue, payoutSettings, stats, loading, updatePayoutSettings: updatePayoutSettingsConfig, verifyKYC, refresh: fetchData };
 };
 
 export default useAdminFinance;

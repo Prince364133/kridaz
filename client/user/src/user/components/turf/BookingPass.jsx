@@ -149,6 +149,46 @@ const BookingPass = () => {
                 </div>
               </div>
 
+              {/* Financial Breakdown Section */}
+              <div className="p-5 bg-white/5 border border-white/5 rounded-3xl space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="space-y-0.5">
+                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-tight">Total Value</p>
+                    <p className="text-sm font-black text-white">₹{totalPrice}</p>
+                  </div>
+                  <div className="text-right space-y-0.5">
+                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-tight">Status</p>
+                    <p className={`text-[10px] font-black uppercase ${booking.paymentType === "PARTIAL" ? "text-orange-400" : "text-[#84CC16]"}`}>
+                        {booking.paymentType === "PARTIAL" ? "Partial Paid" : "Fully Paid"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-[#84CC16] uppercase tracking-tighter">
+                      <ShieldCheck size={10} />
+                      <span>Advance Paid</span>
+                    </div>
+                    <p className="text-lg font-black text-white leading-none">₹{booking.advanceAmount || totalPrice}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-orange-400 uppercase tracking-tighter">
+                      <Clock size={10} />
+                      <span>Balance at Venue</span>
+                    </div>
+                    <p className="text-lg font-black text-white leading-none">₹{booking.balanceAmount || 0}</p>
+                  </div>
+                </div>
+
+                {booking.paymentType === "PARTIAL" && (
+                    <div className="flex items-center gap-2 p-2 bg-orange-400/10 rounded-xl">
+                        <Info size={12} className="text-orange-400" />
+                        <p className="text-[8px] font-bold text-orange-400 uppercase leading-none">Please pay balance at venue before playing</p>
+                    </div>
+                )}
+              </div>
+
               {/* Contacts Section */}
               <div className="space-y-4">
                 <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">On-Ground Support</p>
@@ -222,13 +262,26 @@ const BookingPass = () => {
             </div>
 
             {/* Bottom Footer Accent */}
-            <div className="p-6 bg-[#84CC16] text-black flex justify-between items-center">
-               <div className="flex items-center gap-2">
-                  <Zap size={16} fill="currentColor" />
-                  <span className="text-xs font-black uppercase italic tracking-tighter">Powered by TurfSpot</span>
+            <div className="p-6 bg-[#84CC16] text-black flex flex-col sm:flex-row justify-between items-center gap-4">
+               <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <Zap size={16} fill="currentColor" />
+                    <span className="text-xs font-black uppercase italic tracking-tighter">Powered by TurfSpot</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] font-bold uppercase opacity-80">
+                    <span>Payment: {booking.paymentMethod}</span>
+                    {booking.cashback > 0 && (
+                        <>
+                            <span className="w-1 h-1 bg-black rounded-full" />
+                            <span>₹{booking.cashback} Cashback</span>
+                        </>
+                    )}
+                  </div>
                </div>
                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-black uppercase">Paid:</span>
+                  <span className="text-[10px] font-black uppercase">
+                    {booking.paymentType === "PARTIAL" ? "Booking Value:" : "Total Paid:"}
+                  </span>
                   <span className="text-lg font-black italic">₹{totalPrice}</span>
                </div>
             </div>

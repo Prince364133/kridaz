@@ -33,6 +33,7 @@ const ownerSchema = new mongoose.Schema(
     state: { type: String },
     walletBalance: { type: Number, default: 0 },
     reservedBalance: { type: Number, default: 0 },
+    pendingBalance: { type: Number, default: 0 },
     certifications: [{ type: String }],
     rating: { type: Number, default: 0 },
     numReviews: { type: Number, default: 0 },

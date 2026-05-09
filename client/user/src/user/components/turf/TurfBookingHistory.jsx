@@ -1,4 +1,4 @@
-import { Clock, MapPin, IndianRupee, Calendar, QrCode, ShieldCheck, Zap, Activity } from "lucide-react";
+import { Clock, MapPin, IndianRupee, Calendar, QrCode, ShieldCheck, Zap, Activity, Wallet, CreditCard, FileText, Ticket } from "lucide-react";
 import { Link } from "react-router-dom";
 import useBookingHistory from "../../hooks/useBookingHistory";
 import useWriteReview from "../../hooks/useWriteReview";
@@ -114,7 +114,7 @@ const TurfBookingHistory = () => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8 border-t border-white/5">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-white/5">
                         <div className="space-y-1.5">
                           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-normal">Booking Date</p>
                           <div className="flex items-center gap-2 text-white font-bold">
@@ -130,28 +130,54 @@ const TurfBookingHistory = () => {
                           </div>
                         </div>
                         <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-normal">Amount Paid</p>
-                          <div className="flex items-center gap-1 text-[#84CC16] font-bold text-xl">
-                             <IndianRupee size={16} />
-                             <span>{booking.totalPrice}</span>
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-normal">Payment Mode</p>
+                          <div className="flex items-center gap-2 text-white font-bold uppercase text-[10px]">
+                             {booking.paymentMethod === "WALLET" ? <Wallet size={12} className="text-[#84CC16]" /> : <CreditCard size={12} className="text-[#84CC16]" />}
+                             <span className="tracking-widest">{booking.paymentMethod}</span>
+                          </div>
+                          {booking.cashback > 0 && (
+                            <div className="flex items-center gap-1 text-[#84CC16] text-[8px] font-black uppercase mt-1">
+                                <Zap size={8} fill="currentColor" />
+                                <span>₹{booking.cashback} Cashback</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-normal">Payment Summary</p>
+                          <div className="space-y-2">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-bold text-white uppercase tracking-tight">Paid: ₹{booking.advanceAmount || booking.totalPrice}</span>
+                                <span className={`text-[9px] font-black uppercase tracking-tighter ${booking.paymentType === "PARTIAL" ? "text-orange-400" : "text-[#84CC16]"}`}>
+                                    {booking.paymentType === "PARTIAL" ? `Balance: ₹${booking.balanceAmount}` : "Fully Paid"}
+                                </span>
+                            </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex justify-end gap-3 pt-6">
+                      <div className="flex flex-wrap justify-end gap-3 pt-6">
                         <Link
                           to={`/booking-pass/${booking._id}`}
-                          className="flex items-center gap-2 px-8 py-2.5 bg-white/5 border border-white/10 hover:border-[#84CC16]/50 text-white hover:text-[#84CC16] rounded-xl text-[10px] font-bold uppercase tracking-normal transition-all group/btn"
+                          className="flex items-center gap-2 px-6 py-2.5 bg-[#84CC16] border border-[#84CC16] text-black hover:bg-[#a3e635] rounded-xl text-[10px] font-black uppercase tracking-wider transition-all group/btn shadow-[0_0_20px_rgba(132,204,22,0.2)]"
                         >
-                          View Digital Pass
-                          <QrCode size={12} className="group-hover/btn:scale-110 transition-all" />
+                          <Ticket size={12} className="group-hover/btn:rotate-12 transition-all" />
+                          Open Ticket
                         </Link>
+                        
+                        <Link
+                          to={`/booking-invoice/${booking._id}`}
+                          className="flex items-center gap-2 px-6 py-2.5 bg-white/5 border border-white/10 hover:border-white/30 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all group/btn"
+                        >
+                          <FileText size={12} className="group-hover/btn:scale-110 transition-all" />
+                          See Invoice
+                        </Link>
+
                         <button
-                          className="flex items-center gap-2 px-8 py-2.5 border border-white/10 hover:border-[#84CC16]/50 text-white hover:text-[#84CC16] rounded-xl text-[10px] font-bold uppercase tracking-normal transition-all group/btn"
+                          className="flex items-center gap-2 px-6 py-2.5 border border-white/10 hover:border-[#84CC16]/50 text-white hover:text-[#84CC16] rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all group/btn"
                           onClick={() => openReviewModal(booking.turf._id)}
                         >
-                          Write a Review
                           <Zap size={12} className="group-hover/btn:fill-[#84CC16] transition-all" />
+                          Write a Review
                         </button>
                       </div>
                     </div>

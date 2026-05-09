@@ -5,6 +5,7 @@ import app from "./app.js";
 import connectDB from "./config/database.js";
 import http from "http";
 import socketConfig from "./config/socket.js";
+import { initSettlementWorker } from "./utils/settlementWorker.js";
 
 // Force Node.js to use Google DNS to resolve MongoDB Atlas SRV records
 setDefaultResultOrder("ipv4first");
@@ -26,6 +27,7 @@ const startServer = () => {
     // Connect to database in the background
     connectDB().then(() => {
       console.log("[DATABASE] Connection established successfully.");
+      initSettlementWorker();
     }).catch(err => {
       console.error("[DATABASE] Background connection error:", err.message);
     });

@@ -325,6 +325,7 @@ export const approveOwnerRequest = async (req, res) => {
       }
 
       owner = new Owner({
+        userId: ownerRequest.userId,
         name: ownerRequest.name,
         email: ownerRequest.email,
         phone: ownerRequest.phone,
@@ -340,9 +341,18 @@ export const approveOwnerRequest = async (req, res) => {
         }
       });
       await owner.save();
+
+      // Update User document to point to the new Owner document
+      if (ownerRequest.userId) {
+        await User.findByIdAndUpdate(ownerRequest.userId, { 
+          ownerDetails: owner._id,
+          role: ownerRequest.role // Sync role
+        });
+      }
     } else {
       // Update existing owner's role
       owner.role = ownerRequest.role;
+      if (!owner.userId && ownerRequest.userId) owner.userId = ownerRequest.userId;
       owner.verificationDocuments = ownerRequest.documents;
       owner.approvalDetails = {
         adminName,
@@ -350,6 +360,14 @@ export const approveOwnerRequest = async (req, res) => {
         approvedAt: new Date()
       };
       await owner.save();
+
+      // Update User document to point to the Owner document if needed
+      if (ownerRequest.userId) {
+        await User.findByIdAndUpdate(ownerRequest.userId, { 
+          ownerDetails: owner._id,
+          role: ownerRequest.role // Sync role
+        });
+      }
     }
 
     ownerRequest.status = "approved";

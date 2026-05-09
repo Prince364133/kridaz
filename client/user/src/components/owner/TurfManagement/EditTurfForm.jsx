@@ -10,6 +10,9 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Name is required"),
     description: Yup.string(),
+    policies: Yup.string()
+      .required("Policies are required")
+      .min(200, "Policies must be at least 200 characters long"),
     pricePerHour: Yup.number()
       .required("Price per Hour is required")
       .positive("Price per Hour must be a positive number")
@@ -110,6 +113,23 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                   errors.description ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#CCFF00]/50'
                 }`}
               ></textarea>
+            </InputWrapper>
+
+            <InputWrapper label="Venue Policies & Rules" error={errors.policies?.message}>
+              <textarea
+                {...register('policies')}
+                maxLength={1000}
+                placeholder="Rules, cancellation terms, safety... (Min 200 chars)"
+                rows={6}
+                className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all resize-none ${
+                  errors.policies ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#CCFF00]/50'
+                }`}
+              ></textarea>
+              {!errors.policies && (
+                <p className="text-[9px] font-bold text-[#444] uppercase tracking-widest ml-1 mt-1">
+                  {watch('policies')?.length || 0} / 1000 max characters (200 min)
+                </p>
+              )}
             </InputWrapper>
 
             <div className="grid grid-cols-2 gap-4">

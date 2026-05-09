@@ -50,7 +50,9 @@ const EditTurf = () => {
     setNewManagerPhone,
     addManagerContact,
     removeManagerContact,
-    turf
+    updateSlotPrice,
+    turf,
+    settings
   } = useEditTurf(id);
 
   const sportsOptions = ["Football", "Cricket", "Tennis", "Badminton", "Table Tennis", "Basketball", "Volleyball", "Hockey"];
@@ -147,6 +149,31 @@ const EditTurf = () => {
                   {errors.description.message}
                 </span>
               )}
+            </div>
+
+            <div className="form-control">
+              <label className="label mb-2">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
+                  Venue Policies and Rules <FieldStatus isPending={!!pendingUpdates?.policies} />
+                </span>
+              </label>
+              <textarea
+                {...register("policies")}
+                maxLength={1000}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.policies ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-48 rounded-[8px] p-4 transition-all resize-none`}
+                placeholder="Define your facility's rules, cancellation policies, and safety guidelines (Minimum 200 characters)..."
+              ></textarea>
+              <div className="flex justify-between mt-2 ml-1">
+                {errors.policies ? (
+                  <span className="text-[#CCFF00] text-[10px] font-bold uppercase">
+                    {errors.policies.message}
+                  </span>
+                ) : (
+                  <span className="text-[#444] text-[10px] font-bold uppercase tracking-widest">
+                    {watch("policies")?.length || 0} / 1000 max characters (200 min)
+                  </span>
+                )}
+              </div>
             </div>
             
             <div className="space-y-2">
@@ -531,30 +558,124 @@ const EditTurf = () => {
 
               <div className="space-y-10">
                 <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-3 mb-6">
-                  <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[3px] font-open-sans">Matrix Projection</h3>
+                  <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[3px] font-open-sans">Configuration Lifespan</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="form-control">
+                    <label className="label mb-2">
+                      <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Update Frequency</span>
+                    </label>
+                    <select
+                      {...register("slotsConfigDuration")}
+                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 appearance-none"
+                    >
+                      <option value="Until Changed">Until Manual Update</option>
+                      <option value="Fixed Weeks">Fixed Duration (Weekly)</option>
+                    </select>
+                  </div>
+
+                  {watch("slotsConfigDuration") === "Fixed Weeks" && (
+                    <>
+                      <div className="form-control">
+                        <label className="label mb-2">
+                          <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Active Duration (Weeks)</span>
+                        </label>
+                        <input
+                          {...register("slotsConfigWeeks")}
+                          type="number"
+                          min="1"
+                          max="52"
+                          className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#CCFF00]/60 focus:outline-none text-sm font-medium"
+                        />
+                      </div>
+                      
+                      <div className="md:col-span-2 mt-4 p-4 bg-[#CCFF00]/5 border border-[#CCFF00]/20 rounded-[8px] space-y-2">
+                        <div className="flex items-center gap-2 text-[#CCFF00]">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#CCFF00] animate-pulse" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest">Availability Expiry Preview</span>
+                        </div>
+                        <p className="text-[13px] text-white/90 font-medium">
+                          Your venue slots will be bookable until <span className="text-[#CCFF00] font-bold underline decoration-wavy underline-offset-4">
+                            {(() => {
+                              const weeks = watch("slotsConfigWeeks") || 1;
+                              const date = new Date();
+                              date.setDate(date.getDate() + (weeks * 7));
+                              return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+                            })()}
+                          </span>
+                        </p>
+                        <p className="text-[9px] text-[#878C9F] uppercase tracking-wider leading-relaxed">
+                          After this date, all slots will be automatically blocked to prevent overbooking beyond your planned schedule.
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-3 mb-6 mt-12">
+                  <div className="space-y-1">
+                    <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[3px] font-open-sans">Matrix Projection</h3>
+                    <p className="text-[9px] text-[#444] uppercase tracking-widest font-bold">Override individual slot pricing below</p>
+                  </div>
                   <span className="text-[10px] font-bold text-[#CCFF00] uppercase bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-4 py-1 rounded-full">
                     {generatedSlots.length} Active Slots
                   </span>
                 </div>
                 
                 {generatedSlots.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                    {generatedSlots.map((slot, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        onClick={() => toggleSlotActive(index)}
-                        className={`p-4 rounded-[8px] text-[11px] font-bold border transition-all flex flex-col items-center gap-1.5 ${
-                          slot.isActive
-                          ? "bg-[#111111] border-[#2D2D2D] text-white hover:border-[#CCFF00]/40"
-                          : "bg-black/50 border-[#1A1A1A] text-[#222] line-through opacity-40"
-                        }`}
-                      >
-                        <span className="tracking-tighter">{slot.startTime}</span>
-                        <div className="w-1 h-px bg-[#2D2D2D]" />
-                        <span className="tracking-tighter opacity-60">{slot.endTime}</span>
-                      </button>
-                    ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
+                    {generatedSlots.map((slot, index) => {
+                      const platformFeePercent = settings?.platformFeePercentage || 5;
+                      const platformFee = platformFeePercent / 100;
+                      const netRevenue = (slot.price * (1 - platformFee)).toFixed(2);
+
+                      return (
+                        <div
+                          key={index}
+                          className={`p-4 rounded-[8px] border transition-all flex flex-col gap-4 ${
+                            slot.isActive
+                            ? "bg-[#111111] border-[#2D2D2D] hover:border-[#CCFF00]/20"
+                            : "bg-black/50 border-[#1A1A1A] opacity-40"
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <button
+                              type="button"
+                              onClick={() => toggleSlotActive(index)}
+                              className="flex items-center gap-2 group"
+                            >
+                              <div className={`w-3 h-3 rounded-full border border-[#2D2D2D] ${slot.isActive ? 'bg-[#CCFF00]' : 'bg-[#111]'}`} />
+                              <span className={`text-[11px] font-bold tracking-widest uppercase ${slot.isActive ? 'text-white' : 'text-[#444] line-through'}`}>
+                                {slot.startTime} - {slot.endTime}
+                              </span>
+                            </button>
+                            {slot.isActive && (
+                              <span className="text-[9px] font-black text-[#CCFF00] uppercase tracking-tighter bg-[#CCFF00]/5 px-2 py-0.5 rounded">Active</span>
+                            )}
+                          </div>
+
+                          {slot.isActive && (
+                            <div className="space-y-3 pt-2 border-t border-[#1A1A1A]">
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#CCFF00] font-bold text-[10px]">₹</span>
+                                <input
+                                  type="number"
+                                  value={slot.price}
+                                  onChange={(e) => updateSlotPrice(index, e.target.value)}
+                                  className="w-full bg-black border border-[#1A1A1A] text-white text-xs py-2 pl-7 pr-3 rounded focus:outline-none focus:border-[#CCFF00]/40 transition-all font-mono"
+                                  placeholder="Slot Price"
+                                />
+                              </div>
+                              <div className="flex justify-between items-center px-1">
+                                <span className="text-[8px] font-bold text-[#444] uppercase tracking-widest">Est. Payout (After {platformFeePercent}%)</span>
+                                <span className="text-[10px] font-bold text-[#CCFF00] font-mono">₹{netRevenue}</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-[200px] bg-[#050505] rounded-[8px] border border-dashed border-[#2D2D2D]">

@@ -50,6 +50,15 @@ const OwnerDashboard = () => {
   const [timeFilter, setTimeFilter] = useState("Month");
   const [revenueFilter, setRevenueFilter] = useState("Month");
 
+  const [currentTime, setCurrentTime] = React.useState(new Date());
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   if (loading) return <DashboardSkeleton />;
   if (error) {
     return (
@@ -142,7 +151,7 @@ const OwnerDashboard = () => {
   };
 
   const getTimeGreeting = () => {
-    const hour = new Date().getHours();
+    const hour = currentTime.getHours();
     if (hour < 12) return "Good Morning";
     if (hour < 17) return "Good Afternoon";
     return "Good Evening";
@@ -151,9 +160,33 @@ const OwnerDashboard = () => {
   return (
     <div className="h-full custom-scrollbar bg-[#000000]">
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 lg:space-y-10 animate-fade-in pt-0 pb-24 h-full relative">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
         <div className="space-y-8 lg:space-y-10 relative z-10">
+          
+          {/* Dashboard Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-white/5">
+            <div className="space-y-1">
+              <h1 className="text-3xl lg:text-4xl font-black text-white uppercase tracking-tight">
+                Dashboard <span className="text-[#CCFF00]">Overview</span>
+              </h1>
+              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em]">
+                {getTimeGreeting()}, {user?.name || 'Partner'} • Your venue's heartbeat
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-2xl backdrop-blur-xl">
+              <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-xl flex items-center justify-center text-[#CCFF00]">
+                <Calendar size={24} />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-white text-lg font-black leading-none">
+                  {currentTime.toLocaleDateString('en-US', { day: '2-digit', month: 'long', year: 'numeric' })}
+                </p>
+                <p className="text-[#CCFF00] text-[10px] font-black uppercase tracking-widest opacity-80">
+                  {currentTime.toLocaleDateString('en-US', { weekday: 'long' })} • {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* New Stats Grid - 6 Cards */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-5">

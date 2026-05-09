@@ -69,7 +69,8 @@ const PayoutBanking = () => {
   }, [dashboardData]);
 
   // Deriving numbers to prevent string comparison issues
-  const numericTotalCoins = Number(walletBalance || 0);
+  const numericTotalCoins = Number(walletData?.balance || 0);
+  const numericPendingCoins = Number(walletData?.pendingBalance || 0);
   const numericWithdrawAmount = Number(withdrawAmount);
 
   // Initialize withdraw amount when modal opens
@@ -138,14 +139,14 @@ const PayoutBanking = () => {
   };
 
   const handlePayoutRequest = async () => {
-    if (numericWithdrawAmount < 5000) {
-      toast.error("Minimum withdrawal is 5000 coins", {
+    if (numericWithdrawAmount < 500) {
+      toast.error("Minimum withdrawal is 500 coins", {
         style: { background: "#000", color: "#fff", border: "1px solid #ff4d4d", fontSize: "10px", fontWeight: "black" }
       });
       return;
     }
-    if (numericWithdrawAmount > 300000) {
-      toast.error("Maximum withdrawal limit is 300,000 coins", {
+    if (numericWithdrawAmount > 100000) {
+      toast.error("Maximum withdrawal limit is 100,000 coins", {
         style: { background: "#000", color: "#fff", border: "1px solid #ff4d4d", fontSize: "10px", fontWeight: "black" }
       });
       return;
@@ -189,10 +190,14 @@ const PayoutBanking = () => {
                    </div>
                </div>
                
-               <div className="flex flex-wrap gap-4 pt-4">
-                  <div className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl">
-                     <p className="text-[10px] text-gray-500 font-bold uppercase mb-1">Available Coins</p>
+                <div className="flex flex-wrap gap-4 pt-4">
+                  <div className="bg-[#CCFF00]/5 border border-[#CCFF00]/20 px-6 py-3 rounded-2xl">
+                     <p className="text-[10px] text-[#CCFF00] font-bold uppercase mb-1">Confirmed Revenue</p>
                      <p className="text-2xl font-black text-white">{numericTotalCoins.toLocaleString()} <span className="text-xs text-[#CCFF00] ml-1 uppercase">Coins</span></p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl">
+                     <p className="text-[10px] text-gray-500 font-bold uppercase mb-1">Pending Revenue</p>
+                     <p className="text-2xl font-black text-white">{numericPendingCoins.toLocaleString()} <span className="text-xs text-gray-400 ml-1 uppercase">Upcoming</span></p>
                   </div>
                   <div className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl">
                      <p className="text-[10px] text-gray-500 font-bold uppercase mb-1">Lifetime Earnings</p>
@@ -203,33 +208,21 @@ const PayoutBanking = () => {
 
             {/* Payout Trigger Area */}
              <div className="w-full lg:w-auto">
-                {isPayoutDay ? (
-                  <div className="bg-[#000000] border border-[#CCFF00]/30 p-8 rounded-[8px] space-y-5 shadow-[0_0_50px_rgba(204,255,0,0.05)] relative overflow-hidden group">
-                     <div className="absolute inset-0 bg-[#CCFF00]/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                     <div className="flex items-center gap-2 relative z-10">
-                        <ShieldCheck className="text-[#CCFF00]" size={16} />
-                        <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">Payout Window Active</span>
-                     </div>
-                     <h3 className="text-xl font-bold relative z-10 uppercase tracking-tight">Total Settlement: <span className="text-[#CCFF00]">{dashboardData?.settlementRevenue || 0}</span> Coins</h3>
-                     <button 
-                       onClick={handleOpenPayoutModal}
-                       className="w-full py-4 bg-[#CCFF00] text-black rounded-[6px] font-black uppercase tracking-[0.2em] text-[10px] hover:bg-[#b3ff00] transition-all shadow-[0_10px_30px_rgba(204,255,0,0.2)] relative z-10"
-                     >
-                        Get Your Total Payout
-                     </button>
-                     <p className="text-[9px] text-gray-500 text-center font-bold uppercase relative z-10 tracking-widest">Processing time: ~48 hrs</p>
-                  </div>
-                ) : (
-                  <div className="bg-[#000000] border border-[#2D2D2D] p-8 rounded-[8px] space-y-5 opacity-40 shadow-[var(--shadow-2)]">
-                     <div className="flex items-center gap-2">
-                        <Lock className="text-gray-500" size={16} />
-                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Next Payout: {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][payoutSettings?.payoutDay || 6]}</span>
-                     </div>
-                     <button disabled className="w-full py-4 bg-white/5 text-gray-500 rounded-[6px] border border-white/10 font-black uppercase tracking-[0.2em] text-[10px] cursor-not-allowed">
-                        Payout Window Closed
-                     </button>
-                  </div>
-                )}
+                 <div className="bg-[#000000] border border-[#CCFF00]/30 p-8 rounded-[8px] space-y-5 shadow-[0_0_50px_rgba(204,255,0,0.05)] relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-[#CCFF00]/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                    <div className="flex items-center gap-2 relative z-10">
+                       <ShieldCheck className="text-[#CCFF00]" size={16} />
+                       <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">Withdrawal Active</span>
+                    </div>
+                    <h3 className="text-xl font-bold relative z-10 uppercase tracking-tight">Confirmed Balance: <span className="text-[#CCFF00]">{numericTotalCoins.toLocaleString()}</span></h3>
+                    <button 
+                      onClick={handleOpenPayoutModal}
+                      className="w-full py-4 bg-[#CCFF00] text-black rounded-[6px] font-black uppercase tracking-[0.2em] text-[10px] hover:bg-[#b3ff00] transition-all shadow-[0_10px_30px_rgba(204,255,0,0.2)] relative z-10"
+                    >
+                       Request Settlement
+                    </button>
+                    <p className="text-[9px] text-gray-500 text-center font-bold uppercase relative z-10 tracking-widest">Next Scheduled Payout: Friday</p>
+                 </div>
              </div>
          </div>
       </div>
@@ -542,7 +535,7 @@ const PayoutBanking = () => {
                                   className="w-full bg-transparent border-none text-3xl font-black text-white focus:outline-none p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                   value={withdrawAmount === 0 ? "" : withdrawAmount}
                                   onChange={(e) => setWithdrawAmount(e.target.value === "" ? 0 : Number(e.target.value))}
-                                  min="5000"
+                                  min="500"
                                   placeholder="0"
                                   autoFocus
                                 />
@@ -557,10 +550,10 @@ const PayoutBanking = () => {
                                    ₹ {(numericTotalCoins - withdrawAmount).toLocaleString()}
                                 </p>
                              </div>
-                             <div className="flex gap-2">
-                                <p className="text-[9px] text-white/30 font-black uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded border border-white/10">Min: 5K</p>
-                                <p className="text-[9px] text-white/30 font-black uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded border border-white/10">Max: 3L</p>
-                             </div>
+                              <div className="flex gap-2">
+                                 <p className="text-[9px] text-white/30 font-black uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded border border-white/10">Min: ₹500</p>
+                                 <p className="text-[9px] text-white/30 font-black uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded border border-white/10">Max: ₹1L</p>
+                              </div>
                           </div>
                        </div>
                        <button 

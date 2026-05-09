@@ -16,6 +16,11 @@ const bookingSchema = new mongoose.Schema(
       enum: ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"], 
       default: "CONFIRMED" 
     },
+    revenueStatus: {
+      type: String,
+      enum: ["PENDING", "CONFIRMED", "CANCELLED"],
+      default: "PENDING"
+    },
     bookingSource: { 
       type: String, 
       enum: ["USER", "PARTNER_MANUAL"], 
@@ -23,9 +28,20 @@ const bookingSchema = new mongoose.Schema(
     },
     paymentMethod: { 
       type: String, 
-      enum: ["ONLINE", "WALLET", "CASH"], 
+      enum: ["ONLINE", "WALLET", "CASH", "UPI", "CARD", "NETBANKING"], 
       default: "ONLINE" 
     },
+    cashback: { type: Number, default: 0 },
+    advanceAmount: { type: Number, default: 0 },
+    balanceAmount: { type: Number, default: 0 },
+    paymentType: { 
+      type: String, 
+      enum: ["PARTIAL", "FULL"], 
+      default: "FULL" 
+    },
+    platformFee: { type: Number, default: 0 },
+    gstAmount: { type: Number, default: 0 },
+    ownerRevenue: { type: Number, default: 0 },
     guestDetails: {
       name: String,
       phone: String,

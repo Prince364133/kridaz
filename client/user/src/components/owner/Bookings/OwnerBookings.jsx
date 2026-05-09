@@ -1,7 +1,8 @@
+import { Link } from "react-router-dom";
 import useOwnerBookings from "@hooks/owner/useOwnerBookings";
 import BookingsSkeleton from "./BookingsSkeleton";
 import { format, subHours, subMinutes } from "date-fns";
-import { ArrowUpDown, Calendar, Clock, User, IndianRupee, Filter, Download } from "lucide-react";
+import { ArrowUpDown, Calendar, Clock, User, IndianRupee, Filter, Download, Ticket, FileText } from "lucide-react";
 import Avatar from "react-avatar";
 
 const OwnerBookings = () => {
@@ -136,6 +137,7 @@ const OwnerBookings = () => {
                       Price <ArrowUpDown size={12} className={getSortDirection("totalPrice") ? "text-[#CCFF00]" : "opacity-30"} />
                     </div>
                   </th>
+                  <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#2D2D2D]/30">
@@ -192,6 +194,28 @@ const OwnerBookings = () => {
                       <span className="text-[16px] font-semibold text-white tracking-tight">
                         ₹{booking.totalPrice.toLocaleString()}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          to={`/booking-pass/${booking.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 bg-[#2D2D2D] hover:bg-[#CCFF00] hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
+                          title="Open Ticket"
+                        >
+                          <Ticket size={14} className="group-hover/btn:scale-110 transition-transform" />
+                        </Link>
+                        <Link
+                          to={`/booking-invoice/${booking.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 bg-[#2D2D2D] hover:bg-[#CCFF00] hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
+                          title="See Invoice"
+                        >
+                          <FileText size={14} className="group-hover/btn:scale-110 transition-transform" />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}

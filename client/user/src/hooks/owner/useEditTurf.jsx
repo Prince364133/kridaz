@@ -62,7 +62,18 @@ const editTurfSchema = yup.object().shape({
     .min(1, "At least one facility is required"),
   slotDuration: yup.number().required("Slot duration is required").min(30).max(240),
   breakTime: yup.number().min(0).max(60),
+  slotsConfigDuration: yup.string().oneOf(["Until Changed", "Fixed Weeks"]).required("Configuration duration is required"),
+  slotsConfigWeeks: yup.number().when("slotsConfigDuration", {
+    is: "Fixed Weeks",
+    then: (schema) => schema.required("Number of weeks is required").min(1).max(52),
+    otherwise: (schema) => schema.optional(),
+  }),
   mapUrl: yup.string().url("Invalid Google Maps URL").nullable(),
+  policies: yup
+    .string()
+    .required("Enter the venue policies and rules")
+    .min(200, "Policies must be at least 200 characters long")
+    .max(10000, "Policies cannot exceed 10000 characters"),
   managerContacts: yup.array().of(
     yup.object().shape({
       name: yup.string().required("Manager name is required"),
@@ -74,6 +85,7 @@ const editTurfSchema = yup.object().shape({
 export default function useEditTurf(turfId) {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [turf, setTurf] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
   const navigate = useNavigate();
   
@@ -103,6 +115,9 @@ export default function useEditTurf(turfId) {
       managerContacts: [],
       availableDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
       offDays: [],
+      slotsConfigDuration: "Until Changed",
+      slotsConfigWeeks: 1,
+      policies: "",
     },
   });
 
@@ -123,7 +138,19 @@ export default function useEditTurf(turfId) {
   const offDays = watch("offDays");
 
   const [pendingUpdates, setPendingUpdates] = useState({});
-  const [turf, setTurf] = useState(null);
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axiosInstance.get("/api/admin/settings/payout");
+        setSettings(response.data.payoutSettings);
+      } catch (err) {
+        console.error("Failed to fetch payout settings:", err);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     const fetchTurf = async () => {
@@ -149,6 +176,7 @@ export default function useEditTurf(turfId) {
         setValue("pricePerHour", turfData.pricePerHour);
         setValue("youtubeUrl", turfData.youtubeUrl || "");
         setValue("mapUrl", turfData.mapUrl || "");
+        setValue("policies", turfData.policies || "");
         
         if (turfData.managerContacts) {
           setManagerContacts(turfData.managerContacts);
@@ -189,6 +217,8 @@ export default function useEditTurf(turfId) {
         if (turfData.availableDays) setValue("availableDays", turfData.availableDays);
         if (turfData.offDays) setValue("offDays", turfData.offDays);
         if (turfData.generatedSlots) setGeneratedSlots(turfData.generatedSlots);
+        if (turfData.slotsConfigDuration) setValue("slotsConfigDuration", turfData.slotsConfigDuration);
+        if (turfData.slotsConfigWeeks) setValue("slotsConfigWeeks", turfData.slotsConfigWeeks);
 
       } catch (err) {
         toast.error("Failed to fetch turf details");
@@ -279,17 +309,20 @@ export default function useEditTurf(turfId) {
     }
   };
 
+  const pricePerHour = watch("pricePerHour") || 0;
+
   useEffect(() => {
     if (openTime && isValid(openTime) && closeTime && isValid(closeTime) && slotDuration) {
       const slots = [];
       let current = new Date(openTime);
       let end = new Date(closeTime);
       
-      // Handle case where closeTime is on the next day (e.g. 12:00 AM)
       if (end <= current) {
         end.setDate(end.getDate() + 1);
       }
       
+      const defaultSlotPrice = (Number(pricePerHour) * (Number(slotDuration) / 60)).toFixed(2);
+
       while (current < end) {
         const slotStart = new Date(current);
         const slotEnd = new Date(current.getTime() + slotDuration * 60000);
@@ -303,7 +336,8 @@ export default function useEditTurf(turfId) {
           slots.push({
             startTime: sTime,
             endTime: eTime,
-            isActive: existing ? existing.isActive : true
+            isActive: existing ? existing.isActive : true,
+            price: existing ? existing.price : Number(defaultSlotPrice)
           });
         }
         
@@ -311,7 +345,13 @@ export default function useEditTurf(turfId) {
       }
       setGeneratedSlots(slots);
     }
-  }, [openTime, closeTime, slotDuration, breakTime]);
+  }, [openTime, closeTime, slotDuration, breakTime, pricePerHour]);
+
+  const updateSlotPrice = (index, price) => {
+    const newSlots = [...generatedSlots];
+    newSlots[index].price = Number(price);
+    setGeneratedSlots(newSlots);
+  };
 
   const toggleSlotActive = (index) => {
     const newSlots = [...generatedSlots];
@@ -430,6 +470,8 @@ export default function useEditTurf(turfId) {
     setNewManagerPhone,
     addManagerContact,
     removeManagerContact,
-    turf
+    updateSlotPrice,
+    turf,
+    settings
   };
 }

@@ -1,49 +1,87 @@
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { motion } from "framer-motion";
-import { IndianRupee, ShieldCheck, X, Zap, Tag, Check, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  IndianRupee, 
+  ShieldCheck, 
+  X, 
+  Zap, 
+  Tag, 
+  Check, 
+  Loader2, 
+  ChevronRight, 
+  Wallet, 
+  CreditCard, 
+  Smartphone, 
+  PlusCircle,
+  Clock,
+  ArrowRight
+} from "lucide-react";
 import CountUp from "react-countup";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
+import { format } from "date-fns";
+import { handlePayment, createOrder } from "../../config/razorpay";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const CoinDeductionModal = ({ 
   isOpen, 
   onClose, 
   onConfirm, 
   amount, 
-  currentBalance,
+  currentBalance: initialBalance,
   title = "Confirm Payment",
-  description = "Are you sure you want to spend coins for this booking?",
-  turfId
+  description = "Ready to secure your pitch?",
+  turfId,
+  turfName,
+  selectedDate,
+  startTime,
+  duration
 }) => {
+  const { user } = useSelector((state) => state.auth);
+  const [step, setStep] = useState(0); // 0: Selection/Summary, 1: Confirmation, 2: Recharge
+  const [paymentMode, setPaymentMode] = useState("WALLET");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showAnimation, setShowAnimation] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [bookingId, setBookingId] = useState(null);
+  const [currentBalance, setCurrentBalance] = useState(initialBalance);
   
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [isValidating, setIsValidating] = useState(false);
   
-  const coinRef = useRef(null);
-  const modalRef = useRef(null);
-  const deductionRef = useRef(null);
+  // Recharge state
+  const [rechargeAmount, setRechargeAmount] = useState(500);
+  const [isRecharging, setIsRecharging] = useState(false);
+  
+  const [paymentPercentage, setPaymentPercentage] = useState(100); // 30, 50, 100
 
-  const finalAmount = appliedCoupon ? appliedCoupon.finalAmount : amount;
+  const modalRef = useRef(null);
+
+  // Detailed Calculation
+  const venueCharges = amount;
+  const platformFee = 0; // Can be added if needed
+  const subtotal = venueCharges + platformFee;
+  const discount = appliedCoupon ? appliedCoupon.discount : 0;
+  const total = subtotal - discount;
 
   useEffect(() => {
     if (isOpen) {
+      setStep(0);
       setIsSuccess(false);
-      setShowAnimation(false);
       setIsProcessing(false);
       setCouponCode("");
       setAppliedCoupon(null);
+      setPaymentMode("WALLET");
+      setCurrentBalance(initialBalance);
+      
       gsap.fromTo(modalRef.current, 
-        { opacity: 0, scale: 0.9, y: 20 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }
+        { opacity: 0, scale: 0.95, y: 10 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: "power2.out" }
       );
     }
-  }, [isOpen]);
+  }, [isOpen, initialBalance]);
 
   const handleApplyCoupon = async () => {
     if (!couponCode) return;
@@ -66,242 +104,457 @@ const CoinDeductionModal = ({
     }
   };
 
-  const handleRemoveCoupon = () => {
-    setCouponCode("");
-    setAppliedCoupon(null);
-  };
-
   const handleConfirm = async () => {
     setIsProcessing(true);
+    const advanceAmount = Math.round(total * (paymentPercentage / 100));
+    const balanceAmount = total - advanceAmount;
+    const paymentType = paymentPercentage === 100 ? "FULL" : "PARTIAL";
+
     try {
-      const result = await onConfirm(appliedCoupon?.code); // pass couponCode
-      if (result && result.success) {
-        setBookingId(result.bookingId);
-        startAnimation();
+      if (paymentMode === "WALLET") {
+        const result = await onConfirm(appliedCoupon?.code, {
+            advanceAmount,
+            balanceAmount,
+            paymentType,
+            paymentPercentage
+        });
+        if (result && result.success) {
+          setBookingId(result.bookingId);
+          setIsSuccess(true);
+        }
       } else {
-        setIsProcessing(false);
+        // Direct Payment Logic
+        const { order } = await createOrder(advanceAmount);
+        const paymentResult = await handlePayment(order, user);
+        
+        // Finalize booking with direct payment info
+        const res = await axiosInstance.post("/api/user/booking/verify-payment", {
+          id: turfId,
+          startTime: new Date(new Date(selectedDate).setHours(parseInt(startTime), 0, 0, 0)).toISOString(),
+          endTime: new Date(new Date(selectedDate).setHours(parseInt(startTime) + duration, 0, 0, 0)).toISOString(),
+          selectedTurfDate: selectedDate.toISOString(),
+          totalPrice: total,
+          advanceAmount,
+          balanceAmount,
+          paymentType,
+          paymentId: paymentResult.razorpay_payment_id,
+          orderId: paymentResult.razorpay_order_id,
+          razorpay_signature: paymentResult.razorpay_signature,
+          paymentMethod: paymentMode // UPI, CARD, etc.
+        });
+
+        if (res.data.success) {
+          setBookingId(res.data.bookingId);
+          setIsSuccess(true);
+        }
       }
     } catch (error) {
+      console.error("Payment failed:", error);
+      toast.error(error.message || "Payment failed");
+    } finally {
       setIsProcessing(false);
     }
   };
 
-  const startAnimation = () => {
-    setShowAnimation(true);
-    
-    // Coin 3D Spin and Jump
-    const tl = gsap.timeline({
-      onComplete: () => {
-        setIsSuccess(true);
-        setShowAnimation(false);
-      }
-    });
-
-    tl.to(coinRef.current, {
-      rotationY: 1080,
-      y: -150,
-      scale: 1.5,
-      duration: 1.5,
-      ease: "power2.out"
-    })
-    .to(deductionRef.current, {
-      opacity: 1,
-      y: -20,
-      duration: 0.5,
-    }, "-=0.8")
-    .to(coinRef.current, {
-      opacity: 0,
-      scale: 0.5,
-      y: -200,
-      duration: 0.5,
-      ease: "power2.in"
-    });
+  const handleInstantRecharge = async () => {
+    setIsRecharging(true);
+    try {
+      const response = await axiosInstance.post("/api/user/wallet/topup", { amount: rechargeAmount });
+      const order = response.data.order;
+      
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: "TurfSpot Wallet",
+        description: "Wallet Instant Recharge",
+        order_id: order.id,
+        handler: async (response) => {
+          try {
+            const verifyRes = await axiosInstance.post("/api/user/wallet/topup/verify", {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            
+            if (verifyRes.data.success) {
+              setCurrentBalance(verifyRes.data.balance);
+              toast.success("Recharge successful!");
+              setStep(0); // Go back to summary
+            }
+          } catch (err) {
+            toast.error("Recharge verification failed");
+          }
+        },
+        prefill: {
+          name: user?.name,
+          email: user?.email,
+        },
+        theme: { color: "#84CC16" }
+      };
+      
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Recharge failed");
+    } finally {
+      setIsRecharging(false);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-colors duration-500 ${showAnimation ? 'bg-black/40 backdrop-blur-sm' : 'bg-black/80 backdrop-blur-md'}`}>
-      {!showAnimation && !isSuccess ? (
-        <div 
-          ref={modalRef}
-          className="bg-[#0A0A0A] border border-white/10 w-full max-w-sm rounded-[32px] overflow-hidden shadow-2xl"
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div 
+        ref={modalRef}
+        className="bg-[#0A0A0A] border border-white/10 w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl relative"
+      >
+        <button 
+          onClick={onClose}
+          className="absolute top-6 right-6 p-2 rounded-full bg-white/5 text-zinc-500 hover:text-white transition-colors z-10"
         >
-          {/* Header */}
-          <div className="p-8 text-center space-y-4">
-            <div className="w-16 h-16 bg-[#84CC16]/10 rounded-2xl flex items-center justify-center mx-auto text-[#84CC16]">
-              <Zap size={32} fill="currentColor" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-2xl font-bold text-white uppercase tracking-tight">{title}</h3>
-              <p className="text-zinc-500 text-xs font-medium">{description}</p>
-            </div>
-          </div>
+          <X size={20} />
+        </button>
 
-          {/* Amount Section */}
-          <div className="px-8 py-6 bg-white/5 border-y border-white/5 flex flex-col items-center gap-2">
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Amount to Deduct</p>
-            {appliedCoupon ? (
-              <div className="flex flex-col items-center">
-                <span className="text-zinc-500 line-through text-sm flex items-center"><IndianRupee size={12}/>{amount}</span>
-                <div className="flex items-center gap-2 text-[#84CC16]">
-                  <IndianRupee size={24} className="font-bold" />
-                  <span className="text-4xl font-black">{finalAmount}</span>
-                </div>
-                <span className="text-[#84CC16] text-[10px] font-bold mt-1 bg-[#84CC16]/10 px-2 py-0.5 rounded-full uppercase tracking-wider">You save ₹{appliedCoupon.discount}</span>
+        <AnimatePresence mode="wait">
+          {!isSuccess ? (
+            <motion.div
+              key="payment-flow"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col"
+            >
+              {/* Header */}
+              <div className="p-8 pb-4">
+                <p className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest mb-1">Secure Checkout</p>
+                <h3 className="text-2xl font-black text-white uppercase tracking-tight">{title}</h3>
+                <p className="text-zinc-500 text-xs font-medium mt-1">{description}</p>
               </div>
-            ) : (
-              <div className="flex items-center gap-2 text-[#84CC16]">
-                <IndianRupee size={24} className="font-bold" />
-                <span className="text-4xl font-black">{amount}</span>
-              </div>
-            )}
-          </div>
 
-          {/* Coupon Section */}
-          <div className="px-8 pt-6 pb-2">
-            {!appliedCoupon ? (
-              <div className="flex items-center gap-2 bg-black border border-white/10 rounded-xl p-1.5 focus-within:border-[#84CC16]/50 transition-colors">
-                <div className="pl-3 text-zinc-500">
-                  <Tag size={16} />
+              {step === 0 && (
+                <div className="p-8 pt-0 space-y-6">
+                  {/* Summary Section */}
+                  <div className="bg-white/5 rounded-3xl p-5 space-y-4 border border-white/5">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{turfName}</p>
+                        <div className="flex items-center gap-2 text-white">
+                          <Clock size={14} className="text-[#84CC16]" />
+                          <span className="text-sm font-bold">{startTime} ({duration} hr)</span>
+                        </div>
+                        <p className="text-[10px] font-medium text-zinc-500">{format(new Date(selectedDate), "EEEE, d MMM yyyy")}</p>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-white/5 space-y-2">
+                      <div className="flex justify-between text-[11px] font-medium">
+                        <span className="text-zinc-500 uppercase tracking-wider">Venue Charges</span>
+                        <span className="text-zinc-300">₹{venueCharges}</span>
+                      </div>
+                      <div className="flex justify-between text-[11px] font-medium">
+                        <span className="text-zinc-500 uppercase tracking-wider">Platform Fee</span>
+                        <span className="text-zinc-300">₹{platformFee}</span>
+                      </div>
+                      {appliedCoupon && (
+                        <div className="flex justify-between text-[11px] font-medium text-[#84CC16]">
+                          <span className="uppercase tracking-wider">Coupon Discount ({appliedCoupon.code})</span>
+                          <span>-₹{discount}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-base font-black pt-2">
+                        <span className="text-white uppercase tracking-tighter">Total Payable</span>
+                        <span className="text-[#84CC16]">₹{total}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Type Selection */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Select Payment Plan</p>
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#84CC16] uppercase">
+                        <ShieldCheck size={12} />
+                        <span>Flexible Secure Pay</span>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-3">
+                      {[30, 50, 100].map((pct) => (
+                        <button
+                          key={pct}
+                          onClick={() => setPaymentPercentage(pct)}
+                          className={`relative py-4 px-2 rounded-2xl border-2 transition-all flex flex-col items-center gap-1 group ${
+                            paymentPercentage === pct 
+                            ? "bg-[#84CC16]/10 border-[#84CC16] text-[#84CC16]" 
+                            : "bg-white/5 border-white/10 text-white hover:border-white/20"
+                          }`}
+                        >
+                          <span className={`text-sm font-black ${paymentPercentage === pct ? "text-[#84CC16]" : "text-white"}`}>
+                            {pct}%
+                          </span>
+                          <span className={`text-[8px] font-bold uppercase tracking-tighter ${paymentPercentage === pct ? "text-[#84CC16]/60" : "text-zinc-500"}`}>
+                            {pct === 100 ? "Full Pay" : "Advance"}
+                          </span>
+                          {paymentPercentage === pct && (
+                            <motion.div 
+                              layoutId="pct-active"
+                              className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#84CC16] rounded-full flex items-center justify-center text-black shadow-lg"
+                            >
+                              <Check size={10} strokeWidth={4} />
+                            </motion.div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Payment Summary for Selection */}
+                  <div className="space-y-2 p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                      <span>Total Booking Value</span>
+                      <span className="text-white">₹{total}</span>
+                    </div>
+                    {paymentPercentage < 100 && (
+                      <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-[#84CC16]">
+                        <span>Payable Now ({paymentPercentage}%)</span>
+                        <span className="font-black text-sm">₹{Math.round(total * (paymentPercentage / 100))}</span>
+                      </div>
+                    )}
+                    {paymentPercentage < 100 && (
+                      <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-orange-400">
+                        <span>Balance at Venue</span>
+                        <span className="font-black">₹{total - Math.round(total * (paymentPercentage / 100))}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Payment Mode Selection */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between px-1">
+                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Select Payment Mode</p>
+                        {paymentMode === "WALLET" && (
+                            <div className="flex items-center gap-1.5 px-2 py-1 bg-[#84CC16]/10 rounded-full">
+                                <Zap size={10} className="text-[#84CC16] fill-[#84CC16]" />
+                                <span className="text-[8px] font-black text-[#84CC16] uppercase">5% Cashback</span>
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-2">
+                      {/* Wallet Option */}
+                      <button 
+                        onClick={() => setPaymentMode("WALLET")}
+                        className={`group relative flex items-center justify-between p-4 rounded-2xl border transition-all ${paymentMode === "WALLET" ? "bg-[#84CC16]/10 border-[#84CC16]" : "bg-white/5 border-white/10 hover:border-white/20"}`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`p-3 rounded-xl ${paymentMode === "WALLET" ? "bg-[#84CC16] text-black" : "bg-white/5 text-zinc-500"}`}>
+                            <Wallet size={20} />
+                          </div>
+                          <div className="text-left">
+                            <p className={`text-xs font-bold uppercase tracking-tight ${paymentMode === "WALLET" ? "text-white" : "text-zinc-400"}`}>TurfSpot Wallet</p>
+                            <p className="text-[10px] font-medium text-zinc-500">Balance: ₹{currentBalance}</p>
+                          </div>
+                        </div>
+                        {paymentMode === "WALLET" && <Check size={16} className="text-[#84CC16]" />}
+                      </button>
+
+                      {/* UPI Option */}
+                      <button 
+                        onClick={() => setPaymentMode("UPI")}
+                        className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${paymentMode === "UPI" ? "bg-[#84CC16]/10 border-[#84CC16]" : "bg-white/5 border-white/10 hover:border-white/20"}`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`p-3 rounded-xl ${paymentMode === "UPI" ? "bg-[#84CC16] text-black" : "bg-white/5 text-zinc-500"}`}>
+                            <Smartphone size={20} />
+                          </div>
+                          <div className="text-left">
+                            <p className={`text-xs font-bold uppercase tracking-tight ${paymentMode === "UPI" ? "text-white" : "text-zinc-400"}`}>Instant UPI</p>
+                            <p className="text-[10px] font-medium text-zinc-500">G-Pay, PhonePe, Paytm</p>
+                          </div>
+                        </div>
+                        {paymentMode === "UPI" && <Check size={16} className="text-[#84CC16]" />}
+                      </button>
+
+                      {/* Card Option */}
+                      <button 
+                        onClick={() => setPaymentMode("CARD")}
+                        className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${paymentMode === "CARD" ? "bg-[#84CC16]/10 border-[#84CC16]" : "bg-white/5 border-white/10 hover:border-white/20"}`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`p-3 rounded-xl ${paymentMode === "CARD" ? "bg-[#84CC16] text-black" : "bg-white/5 text-zinc-500"}`}>
+                            <CreditCard size={20} />
+                          </div>
+                          <div className="text-left">
+                            <p className={`text-xs font-bold uppercase tracking-tight ${paymentMode === "CARD" ? "text-white" : "text-zinc-400"}`}>Credit / Debit Card</p>
+                            <p className="text-[10px] font-medium text-zinc-500">Visa, Mastercard, RuPay</p>
+                          </div>
+                        </div>
+                        {paymentMode === "CARD" && <Check size={16} className="text-[#84CC16]" />}
+                      </button>
+
+                      <button 
+                        onClick={() => setPaymentMode("UPI")}
+                        className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${paymentMode === "UPI" ? "bg-[#84CC16]/10 border-[#84CC16]" : "bg-white/5 border-white/10 hover:border-white/20"}`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`p-3 rounded-xl ${paymentMode === "UPI" ? "bg-[#84CC16] text-black" : "bg-white/5 text-zinc-500"}`}>
+                            <Smartphone size={20} />
+                          </div>
+                          <div className="text-left">
+                            <p className={`text-xs font-bold uppercase tracking-tight ${paymentMode === "UPI" ? "text-white" : "text-zinc-400"}`}>UPI Payment</p>
+                            <p className="text-[10px] font-medium text-zinc-500">Google Pay, PhonePe, Paytm</p>
+                          </div>
+                        </div>
+                        {paymentMode === "UPI" && <Check size={16} className="text-[#84CC16]" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    {paymentMode === "WALLET" && currentBalance < Math.round(total * (paymentPercentage / 100)) ? (
+                      <div className="space-y-3">
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
+                            <p className="text-[10px] font-bold text-red-500 uppercase text-center tracking-widest">Insufficient Wallet Balance</p>
+                            <p className="text-[9px] text-red-500/60 text-center uppercase tracking-tighter mt-1">Required: ₹{Math.round(total * (paymentPercentage / 100))}</p>
+                        </div>
+                        <button
+                            onClick={() => setStep(2)}
+                            className="w-full bg-[#84CC16] text-black h-14 rounded-2xl font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                        >
+                            <PlusCircle size={18} />
+                            Instant Recharge Wallet
+                        </button>
+                        <p className="text-[9px] font-medium text-zinc-500 text-center uppercase tracking-widest">Get 5% Cashback on Wallet Payments</p>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleConfirm}
+                        disabled={isProcessing}
+                        className="w-full bg-[#84CC16] text-black h-14 rounded-2xl font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                      >
+                        {isProcessing ? <Loader2 className="animate-spin" /> : (
+                          <>
+                            Confirm & Pay ₹{Math.round(total * (paymentPercentage / 100))}
+                            <ArrowRight size={16} />
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <input 
-                  type="text"
-                  placeholder="Enter Coupon Code"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  className="bg-transparent text-white text-xs font-bold uppercase tracking-widest w-full outline-none placeholder:text-zinc-700"
-                />
-                <button
-                  onClick={handleApplyCoupon}
-                  disabled={!couponCode || isValidating}
-                  className="bg-[#84CC16] text-black px-4 py-2 rounded-[8px] text-[10px] font-bold uppercase tracking-wider disabled:opacity-50 transition-colors"
+              )}
+
+              {step === 2 && (
+                <div className="p-8 pt-0 space-y-6">
+                  <div className="bg-[#84CC16]/10 border border-[#84CC16]/20 rounded-3xl p-6 text-center">
+                    <div className="w-12 h-12 bg-[#84CC16] text-black rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Wallet size={24} />
+                    </div>
+                    <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest mb-1">Instant Recharge</p>
+                    <p className="text-white text-sm font-bold mb-6">Select amount to add</p>
+                    
+                    <div className="grid grid-cols-3 gap-2 mb-6">
+                      {[500, 1000, 2000].map(amt => (
+                        <button
+                          key={amt}
+                          onClick={() => setRechargeAmount(amt)}
+                          className={`py-3 rounded-xl border text-xs font-black transition-all ${rechargeAmount === amt ? "bg-[#84CC16] text-black border-[#84CC16]" : "bg-white/5 border-white/10 text-zinc-400 hover:border-white/20"}`}
+                        >
+                          ₹{amt}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="relative mb-6">
+                      <IndianRupee size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+                      <input 
+                        type="number"
+                        placeholder="Custom amount"
+                        value={rechargeAmount}
+                        onChange={(e) => setRechargeAmount(parseInt(e.target.value) || 0)}
+                        className="w-full bg-black border border-white/10 rounded-xl py-4 pl-10 pr-4 text-white text-sm font-bold focus:border-[#84CC16]/50 outline-none transition-colors"
+                      />
+                    </div>
+
+                    <div className="bg-white/5 border border-white/5 rounded-2xl p-4 mb-6">
+                        <div className="flex items-center justify-center gap-2 text-[#84CC16]">
+                            <Tag size={14} />
+                            <span className="text-[10px] font-black uppercase tracking-widest italic">Wallet Exclusive Offer</span>
+                        </div>
+                        <p className="text-[10px] text-zinc-500 font-medium mt-1 uppercase">Pay through wallet and save 5% on every booking!</p>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      <button
+                        onClick={handleInstantRecharge}
+                        disabled={isRecharging || rechargeAmount < 100}
+                        className="w-full bg-[#84CC16] text-black h-14 rounded-2xl font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                      >
+                        {isRecharging ? <Loader2 className="animate-spin" /> : "Confirm Recharge"}
+                      </button>
+                      <button
+                        onClick={() => setStep(0)}
+                        className="w-full bg-white/5 text-zinc-500 h-14 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="success-screen"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-8 text-center"
+            >
+              <div className="w-20 h-20 bg-[#84CC16] rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(132,204,22,0.4)]">
+                <Check size={40} className="text-black" />
+              </div>
+              <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-2">Booking Successful!</h3>
+              <p className="text-zinc-500 text-[11px] mb-8 font-bold uppercase tracking-wider">Your entry pass is ready for download.</p>
+              
+              {paymentMode === "WALLET" && (
+                <div className="bg-[#84CC16]/10 border border-[#84CC16]/20 rounded-3xl p-5 mb-8 relative overflow-hidden group">
+                  <div className="absolute -right-4 -top-4 w-16 h-16 bg-[#84CC16]/20 rounded-full blur-xl transition-all group-hover:scale-150" />
+                  <div className="flex items-center justify-center gap-4 relative z-10">
+                    <div className="p-3 bg-[#84CC16] rounded-xl text-black">
+                        <Zap size={20} fill="currentColor" />
+                    </div>
+                    <div className="text-left">
+                        <p className="text-[10px] font-black text-[#84CC16] uppercase tracking-[0.2em]">Cashback Reward</p>
+                        <p className="text-white text-sm font-black">₹{Math.round(total * 0.05)} added to wallet</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <Link 
+                  to={`/booking-pass/${bookingId}`}
+                  className="w-full bg-[#84CC16] text-black h-14 rounded-2xl font-bold uppercase text-xs tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
                 >
-                  {isValidating ? <Loader2 size={12} className="animate-spin" /> : 'Apply'}
+                  Download Digital Pass
+                </Link>
+                <button 
+                  onClick={onClose}
+                  className="w-full bg-white/5 text-zinc-400 h-14 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all"
+                >
+                  Back to Turf Details
                 </button>
               </div>
-            ) : (
-              <div className="flex items-center justify-between bg-[#84CC16]/10 border border-[#84CC16]/20 rounded-xl p-3">
-                <div className="flex items-center gap-2 text-[#84CC16]">
-                  <Check size={16} />
-                  <span className="text-xs font-bold uppercase tracking-widest">{appliedCoupon.code}</span>
-                </div>
-                <button onClick={handleRemoveCoupon} className="text-zinc-400 hover:text-white transition-colors">
-                  <X size={16} />
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Balance Section */}
-          <div className="p-8 space-y-6 pt-4">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-zinc-500 font-bold uppercase">Your Balance</span>
-              <span className="text-white font-bold">{currentBalance} Coins</span>
-            </div>
-            
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={handleConfirm}
-                disabled={isProcessing || currentBalance < finalAmount}
-                className="w-full bg-[#84CC16] text-black h-14 rounded-2xl font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
-              >
-                {isProcessing ? (
-                  <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                ) : currentBalance < finalAmount ? (
-                  "Insufficient Balance"
-                ) : (
-                  "Confirm & Pay"
-                )}
-              </button>
-              <button
-                onClick={onClose}
-                disabled={isProcessing}
-                className="w-full bg-white/5 text-zinc-400 h-14 rounded-2xl font-bold uppercase text-xs tracking-wider hover:bg-white/10 transition-all"
-              >
-                Cancel
-              </button>
-            </div>
-
-            <div className="flex items-center justify-center gap-2 text-[9px] font-bold text-zinc-600 uppercase">
-              <ShieldCheck size={12} />
-              Secure Coin Transaction
-            </div>
-          </div>
-        </div>
-      ) : isSuccess ? (
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-[#0A0A0A] border border-[#84CC16]/30 w-full max-w-sm rounded-[32px] p-8 text-center shadow-[0_0_50px_rgba(132,204,22,0.1)]"
-        >
-          <div className="w-20 h-20 bg-[#84CC16] rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(132,204,22,0.4)]">
-            <ShieldCheck size={40} className="text-black" />
-          </div>
-          <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-2">Booking Confirmed!</h3>
-          <p className="text-zinc-500 text-sm mb-8 font-medium">Your match is ready. Check your digital pass for entry details.</p>
-          
-          <div className="space-y-3">
-            <a 
-              href={`/booking-pass/${bookingId}`}
-              className="w-full bg-[#84CC16] text-black h-14 rounded-2xl font-bold uppercase text-xs tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
-            >
-              View Booking Pass
-            </a>
-            <button 
-              onClick={onClose}
-              className="w-full bg-white/5 text-white h-14 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all"
-            >
-              Done
-            </button>
-          </div>
-        </motion.div>
-      ) : (
-        /* The Animation Overlay - Transparent */
-        <div className="relative flex flex-col items-center justify-center">
-          {/* Deducted Amount Float */}
-          <div 
-            ref={deductionRef}
-            className="absolute top-[-120px] opacity-0 text-[#84CC16] font-black text-6xl italic drop-shadow-[0_0_20px_rgba(132,204,22,0.5)]"
-          >
-            -{finalAmount}
-          </div>
-
-          {/* 3D Spinning Coin */}
-          <div 
-            ref={coinRef}
-            className="w-40 h-40 relative preserve-3d"
-            style={{ transformStyle: "preserve-3d", perspective: "1000px" }}
-          >
-            {/* Front of Coin */}
-            <div className="absolute inset-0 rounded-full bg-[#84CC16] border-[6px] border-[#a3e635] flex items-center justify-center shadow-[0_0_50px_rgba(132,204,22,0.6)]">
-              <IndianRupee size={64} className="text-black font-black" />
-            </div>
-            {/* Back of Coin */}
-            <div 
-              className="absolute inset-0 rounded-full bg-[#65a30d] border-[6px] border-[#84CC16] flex items-center justify-center"
-              style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}
-            >
-              <Zap size={64} className="text-black" />
-            </div>
-          </div>
-
-          {/* New Balance Text */}
-          <div className="mt-16 text-center space-y-2">
-            <p className="text-zinc-400 font-bold uppercase tracking-[0.2em] text-[10px] opacity-70">Updating Wallet</p>
-            <div className="text-white text-6xl font-black italic">
-              <CountUp 
-                start={currentBalance} 
-                end={currentBalance - finalAmount} 
-                duration={2} 
-                separator=","
-              />
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
 
+
 export default CoinDeductionModal;
+
