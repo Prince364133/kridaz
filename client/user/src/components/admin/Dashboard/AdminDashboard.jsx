@@ -33,7 +33,11 @@ export default function AdminDashboard() {
     totalTurfs = 0,
     totalBookings = 0,
     pendingRequests = 0,
+    totalCoaches = 0,
+    totalUmpires = 0,
+    totalPayouts = 0,
     bookingHistory = [],
+    platformHealth = {}
   } = dashboardData || {};
 
   // Map history to chart format
@@ -50,8 +54,8 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         <StatCard title="Total Users" value={totalUsers} icon={Users} className="p-4 lg:p-6" />
         <StatCard title="Active Venues" value={totalTurfs} icon={Landmark} className="p-4 lg:p-6" />
-        <StatCard title="Total Bookings" value={totalBookings} icon={CreditCard} className="p-4 lg:p-6" />
-        <StatCard title="Pending Verifications" value={pendingRequests} icon={ShieldCheck} className="p-4 lg:p-6" />
+        <StatCard title="Coaches & Umpires" value={totalCoaches + totalUmpires} icon={Users} className="p-4 lg:p-6" />
+        <StatCard title="Total Payouts" value={`₹${totalPayouts.toLocaleString()}`} icon={CreditCard} className="p-4 lg:p-6" />
       </div>
 
       {/* Advanced Telemetry Section */}
@@ -107,10 +111,10 @@ export default function AdminDashboard() {
           <h2 className="text-lg lg:text-xl font-bold uppercase tracking-tight text-white mb-6">System Status</h2>
           <div className="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar max-h-[300px] lg:max-h-none">
             {[
-              { id: 'SEC-01', msg: 'Core Services Online', status: 'optimal' },
-              { id: 'SEC-02', msg: 'Database Sync Active', status: 'optimal' },
-              { id: 'SEC-03', msg: 'API Gateway Secured', status: 'optimal' },
-              { id: 'SEC-04', msg: 'Auth Provider Validated', status: 'optimal' },
+              { id: 'SYS-01', msg: 'Core Services Online', status: platformHealth?.uptime || 'Optimal' },
+              { id: 'SYS-02', msg: 'Marketplace Sync', status: platformHealth?.syncStatus || 'Active' },
+              { id: 'SYS-03', msg: 'Pending Requests', status: `${pendingRequests} Actionable` },
+              { id: 'SYS-04', msg: 'Professional Growth', status: platformHealth?.professionalGrowth || 'Stable' },
             ].map((log, i) => (
               <div key={i} className="group border-l-2 border-[#84CC16]/30 pl-4 py-3 bg-white/[0.02] rounded-r-lg">
                 <div className="flex justify-between items-center mb-1">

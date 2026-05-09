@@ -1,6 +1,7 @@
 import WalletTransaction from "../../models/walletTransaction.model.js";
 import User from "../../models/user.model.js";
 import Owner from "../../models/owner.model.js";
+import WithdrawalRequest from "../../models/withdrawalRequest.model.js";
 import razorpay from "../../config/razorpay.js";
 import crypto from "crypto";
 
@@ -172,6 +173,62 @@ export const checkPaymentStatus = async (req, res) => {
     return res.status(200).json({ success: false, message: "No successful payment found for this order." });
   } catch (error) {
     console.error("Error in checkPaymentStatus:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const requestWithdrawal = async (req, res) => {
+  const ownerId = req.user.id || req.user.user;
+  const { amount, bankDetails } = req.body;
+
+  try {
+    if (req.user.role === "user") {
+      return res.status(403).json({ message: "Only partners can request withdrawals" });
+    }
+
+    if (!amount || amount < 500) {
+      return res.status(400).json({ message: "Minimum withdrawal amount is ₹500" });
+    }
+
+    const owner = await Owner.findById(ownerId);
+    if (!owner) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    const usableBalance = owner.walletBalance - owner.reservedBalance;
+    if (usableBalance < amount) {
+      return res.status(400).json({ message: "Insufficient usable balance" });
+    }
+
+    // 1. Create withdrawal request
+    const request = await WithdrawalRequest.create({
+      owner: ownerId,
+      amount,
+      bankDetails,
+      status: "PENDING"
+    });
+
+    // 2. Reserve the amount
+    owner.reservedBalance += amount;
+    await owner.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Withdrawal request submitted successfully",
+      request
+    });
+  } catch (error) {
+    console.error("Error in requestWithdrawal:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const getOwnerWithdrawals = async (req, res) => {
+  const ownerId = req.user.id || req.user.user;
+  try {
+    const requests = await WithdrawalRequest.find({ owner: ownerId }).sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, requests });
+  } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };

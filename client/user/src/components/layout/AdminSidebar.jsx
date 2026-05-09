@@ -25,27 +25,56 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [requestsOpen, setRequestsOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState("");
 
   const handleLogout = () => {
     dispatch(logout());
     navigate("/", { replace: true });
   };
 
+  const toggleMenu = (label) => {
+    setOpenMenu(openMenu === label ? "" : label);
+  };
+
   const mainNavItems = [
     { to: "/admin", label: "Dashboard", icon: LayoutGrid },
     {
-      label: "Requests",
+      label: "Venue Requests",
       icon: UserPlus,
       subItems: [
         { to: "/admin/partner-requests/new", label: "New Requests" },
         { to: "/admin/partner-requests/rejected", label: "Rejected" },
       ],
     },
+    {
+      label: "Professionals",
+      icon: Building,
+      subItems: [
+        { to: "/admin/professionals/coaches", label: "Coaches" },
+        { to: "/admin/professionals/umpires", label: "Umpires" },
+        { to: "/admin/professionals/requests", label: "Verification Queue" },
+      ],
+    },
     { to: "/admin/users", label: "Users", icon: Users },
     { to: "/admin/owners", label: "Owners", icon: Building },
     { to: "/admin/turfs", label: "Venues", icon: MapPin },
-    { to: "/admin/transactions", label: "Revenue", icon: IndianRupee },
+    {
+      label: "Finance",
+      icon: IndianRupee,
+      subItems: [
+        { to: "/admin/transactions", label: "Revenue" },
+        { to: "/admin/withdrawals", label: "Withdrawals" },
+      ],
+    },
+    {
+      label: "Resolution",
+      icon: HelpCircle,
+      subItems: [
+        { to: "/admin/support", label: "Tickets" },
+        { to: "/admin/disputes", label: "Disputes" },
+      ],
+    },
+    { to: "/admin/audit", label: "Audit Logs", icon: Shield },
     { to: "/admin/marketing", label: "Marketing", icon: Activity },
     { to: "/admin/blogs", label: "Blogs", icon: FileText },
     { to: "/admin/community", label: "Community", icon: Users },
@@ -62,12 +91,13 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     const isLogout = item.action === "logout";
     const isActive = !isLogout && (item.to ? location.pathname === item.to : item.subItems?.some(sub => location.pathname === sub.to));
     const Icon = item.icon;
+    const isMenuOpen = openMenu === item.label;
 
     if (item.subItems) {
       return (
         <div key={item.label} className="space-y-1">
           <button
-            onClick={() => !isMinimized && setRequestsOpen(!requestsOpen)}
+            onClick={() => !isMinimized && toggleMenu(item.label)}
             className={`flex items-center justify-between w-full px-4 py-3 group relative transition-all duration-300 ${
               isActive ? "text-black" : "text-white/40 hover:text-white"
             }`}
@@ -90,12 +120,12 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
             
             {!isMinimized && (
               <div className="transition-all duration-300">
-                {requestsOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                {isMenuOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
               </div>
             )}
           </button>
           
-          <div className={`overflow-hidden transition-all duration-500 ${!isMinimized && requestsOpen ? "max-h-96 opacity-100 mb-2" : "max-h-0 opacity-0"}`}>
+          <div className={`overflow-hidden transition-all duration-500 ${!isMinimized && isMenuOpen ? "max-h-96 opacity-100 mb-2" : "max-h-0 opacity-0"}`}>
             <div className="ml-10 space-y-1 border-l border-white/10 mt-1">
               {item.subItems.map((subItem) => {
                 const isSubActive = location.pathname === subItem.to;

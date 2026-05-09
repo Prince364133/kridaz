@@ -29,3 +29,17 @@ export {BlogManagement} from "./Blogs/BlogManagement"
 
 // Community
 export {default as CommunityManagement} from "./Community/CommunityManagement"
+
+// Professional Management
+export {default as ProfessionalManagement} from "./ProfessionalManagement/ProfessionalManagement"
+export {default as ProfessionalRequests} from "./ProfessionalManagement/ProfessionalRequests"
+
+// Withdrawals
+export {default as WithdrawalManagement} from "./Withdrawals/WithdrawalManagement"
+
+// Resolution
+export {default as SupportCenter} from "./Resolution/SupportCenter"
+export {default as DisputeManager} from "./Resolution/DisputeManager"
+
+// Audit
+export {default as AuditLogs} from "./Audit/AuditLogs"

@@ -7,7 +7,12 @@ import Session from "../../models/session.model.js";
 
 export const getDashboardData = async (req, res) => {
   const ownerId = req.owner.id;
-  console.log("DEBUG: Fetching main dashboard data for ownerId:", ownerId);
+  const role = req.owner.role;
+  console.log(`DEBUG: Fetching main dashboard data for ${role} (ID: ${ownerId})`);
+
+  // Redirect based on role
+  if (role === "coach") return getCoachDashboardData(req, res);
+  if (role === "umpire") return getUmpireDashboardData(req, res);
 
   try {
     console.log("DEBUG: Querying Turf model...");
@@ -214,6 +219,7 @@ export const getCoachDashboardData = async (req, res) => {
     const responseData = {
       activeTrainees: detailedTrainees.length,
       totalSessions: sessions.length,
+      totalRevenue: sessions.length * 1000, // Placeholder revenue logic for coaches
       liveStreamMins: 0, 
       performanceIndex: 0, 
       studentProgress: [],
@@ -260,6 +266,7 @@ export const getUmpireDashboardData = async (req, res) => {
       upcomingMatches,
       officialRating: 0,
       earnings: matchesOfficiated * 500,
+      totalRevenue: matchesOfficiated * 500,
       matchEngagement: [],
       matches: matches,
       upcomingAssignments: matches.filter(m => m.status === "upcoming").slice(0, 5).map(m => ({

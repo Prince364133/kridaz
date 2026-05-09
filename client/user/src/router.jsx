@@ -82,7 +82,14 @@ import {
   MarketingManagement,
   BlogManagement,
   CommunityManagement,
+  ProfessionalManagement,
+  ProfessionalRequests,
+  WithdrawalManagement,
+  SupportCenter,
+  DisputeManager,
+  AuditLogs,
 } from "@components/admin";
+import PartnerSupport from "@components/owner/Support/PartnerSupport";
 import DashboardProfile from "@components/shared/DashboardProfile";
 import ProtectedRoute from "@components/ProtectedRoute/ProtectedRoute";
 import PublicRoute from "@components/ProtectedRoute/PublicRoute";
@@ -106,6 +113,14 @@ const router = createBrowserRouter([
           { path: "rejected", element: <RejectedPartnerRequests /> },
         ],
       },
+      {
+        path: "professionals",
+        children: [
+          { path: "coaches", element: <ProfessionalManagement role="coach" /> },
+          { path: "umpires", element: <ProfessionalManagement role="umpire" /> },
+          { path: "requests", element: <ProfessionalRequests /> },
+        ],
+      },
       { path: "users", element: <UserManagement /> },
       {
         path: "owners",
@@ -116,6 +131,10 @@ const router = createBrowserRouter([
       },
       { path: "turfs", element: <AllTurf /> },
       { path: "transactions", element: <TransactionSection /> },
+      { path: "withdrawals", element: <WithdrawalManagement /> },
+      { path: "support", element: <SupportCenter /> },
+      { path: "disputes", element: <DisputeManager /> },
+      { path: "audit", element: <AuditLogs /> },
       { path: "features", element: <FeatureFlags /> },
       { path: "marketing", element: <MarketingManagement /> },
       { path: "blogs", element: <BlogManagement /> },
@@ -145,6 +164,7 @@ const router = createBrowserRouter([
       { path: "intelligence", element: <VenueIntelligence /> },
       { path: "revenue", element: <OwnerRevenue /> },
       { path: "promotions", element: <OwnerPromotions /> },
+      { path: "support", element: <PartnerSupport /> },
       { path: "profile", element: <DashboardProfile /> },
       { path: "*", element: <NotFound /> },
     ],
@@ -166,6 +186,8 @@ const router = createBrowserRouter([
       { path: "availability", element: <ProfessionalAvailability /> },
       { path: "bookings", element: <ProfessionalBookings /> },
       { path: "reviews", element: <ProfessionalReviews /> },
+      { path: "revenue", element: <OwnerRevenue /> },
+      { path: "support", element: <PartnerSupport /> },
       { path: "profile", element: <ProfessionalProfile /> },
       { path: "*", element: <NotFound /> },
     ],
@@ -186,6 +208,8 @@ const router = createBrowserRouter([
       { path: "availability", element: <ProfessionalAvailability /> },
       { path: "bookings", element: <ProfessionalBookings /> },
       { path: "reviews", element: <ProfessionalReviews /> },
+      { path: "revenue", element: <OwnerRevenue /> },
+      { path: "support", element: <PartnerSupport /> },
       { path: "profile", element: <ProfessionalProfile /> },
       { path: "*", element: <NotFound /> },
     ],

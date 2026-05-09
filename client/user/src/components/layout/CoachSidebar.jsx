@@ -37,6 +37,7 @@ const CoachSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/coach/availability", label: "Availability", icon: Clock },
     { to: "/coach/bookings", label: "Bookings", icon: Activity },
     { to: "/coach/reviews", label: "Reviews", icon: MessageSquare },
+    { to: "/coach/revenue", label: "Earnings", icon: IndianRupee },
     { to: "/coach/profile", label: "Profile", icon: User },
     { to: "/coach/masterclass", label: "Masterclass", icon: Video },
   ];

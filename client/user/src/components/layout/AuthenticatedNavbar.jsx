@@ -95,7 +95,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
             <Menu size={24} />
           </button>
           <Link to="/" className="flex items-center gap-4 group">
-            <div className="w-24 h-12 sm:w-44 sm:h-16 bg-transparent flex items-center justify-center overflow-hidden">
+            <div className="w-20 h-10 sm:w-32 sm:h-12 bg-transparent flex items-center justify-center overflow-hidden">
                <img src="/logo.png" alt="BookMySportz Logo" className="w-full h-full object-contain" />
             </div>
           </Link>
@@ -128,11 +128,6 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
 
         {/* Right Section: Actions */}
         <div className="flex items-center gap-3 sm:gap-5 lg:min-w-[200px] justify-end">
-          
-          <button className="hidden sm:flex items-center gap-2 px-6 py-3 bg-[#CCFF00] text-black rounded-[8px] font-black text-xs uppercase tracking-widest hover:bg-[#a3e635] hover:shadow-[0_0_20px_rgba(132,204,22,0.4)] transition-all active:scale-95 group">
-            <Plus size={18} strokeWidth={3} className="group-hover:rotate-90 transition-transform duration-300" />
-            <span>New Booking</span>
-          </button>
 
           {/* Notifications */}
           <div className="relative" ref={notificationRef}>

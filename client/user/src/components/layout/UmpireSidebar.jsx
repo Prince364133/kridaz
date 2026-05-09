@@ -35,6 +35,7 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/umpire/availability", label: "Availability", icon: Clock },
     { to: "/umpire/bookings", label: "Bookings", icon: Activity },
     { to: "/umpire/reviews", label: "Ratings", icon: Star },
+    { to: "/umpire/revenue", label: "Earnings", icon: IndianRupee },
     { to: "/umpire/profile", label: "Profile", icon: User },
   ];
 
