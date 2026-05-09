@@ -5,7 +5,7 @@ import Turf from "../../models/turf.model.js";
 export const createPromotion = async (req, res) => {
   try {
     const { code, discountType, discountValue, validUntil, usageLimit, turfId } = req.body;
-    const ownerId = req.user.id;
+    const ownerId = req.owner.id;
 
     // Check if code already exists
     const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
@@ -42,7 +42,7 @@ export const createPromotion = async (req, res) => {
 // Get all promotions for the logged-in owner
 export const getPromotions = async (req, res) => {
   try {
-    const ownerId = req.user.id;
+    const ownerId = req.owner.id;
     const coupons = await Coupon.find({ ownerId }).populate("turfId", "name").sort({ createdAt: -1 });
     
     // Format the response for the frontend
@@ -69,7 +69,7 @@ export const getPromotions = async (req, res) => {
 export const deletePromotion = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerId = req.user.id;
+    const ownerId = req.owner.id;
 
     const coupon = await Coupon.findOneAndDelete({ _id: id, ownerId });
     if (!coupon) {
@@ -87,7 +87,7 @@ export const deletePromotion = async (req, res) => {
 export const togglePromotionStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerId = req.user.id;
+    const ownerId = req.owner.id;
 
     const coupon = await Coupon.findOne({ _id: id, ownerId });
     if (!coupon) {

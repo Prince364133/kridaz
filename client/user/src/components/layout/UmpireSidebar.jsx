@@ -11,6 +11,8 @@ import {
   LogOut,
   ShieldCheck,
   Activity,
+  IndianRupee,
+  Landmark,
   Clock,
   User
 } from "lucide-react";
@@ -34,16 +36,13 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/umpire/schedule", label: "Schedule", icon: Calendar },
     { to: "/umpire/availability", label: "Availability", icon: Clock },
     { to: "/umpire/bookings", label: "Bookings", icon: Activity },
-    { to: "/umpire/reviews", label: "Ratings", icon: Star },
     { to: "/umpire/revenue", label: "Earnings", icon: IndianRupee },
+    { to: "/umpire/banking", label: "Payout & Banking", icon: Landmark },
     { to: "/umpire/profile", label: "Profile", icon: User },
+    { to: "/umpire/support", label: "Docs & Support", icon: HelpCircle },
   ];
 
-  const bottomNavItems = [
-    { to: "/umpire/settings", label: "Settings", icon: Settings },
-    { to: "/umpire/support", label: "Support", icon: HelpCircle },
-    { action: "logout", label: "SIGN OUT", icon: LogOut },
-  ];
+  const bottomNavItems = [];
 
   const renderNavItem = (item) => {
     const isLogout = item.action === "logout";

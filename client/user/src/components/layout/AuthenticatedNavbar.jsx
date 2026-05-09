@@ -8,32 +8,41 @@ import {
   CheckCircle, 
   Clock, 
   Search, 
-  Cloud, 
   Plus,
   Command,
   User,
-  Settings,
-  ChevronDown
+  ChevronDown,
+  CreditCard,
+  MessageSquare,
+  AlertTriangle,
+  History,
+  ShieldAlert
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import axiosInstance from "@hooks/useAxiosInstance";
+import ManualBookingModal from "../owner/ManualBookingModal";
+import useNotifications from "../../hooks/shared/useNotifications";
+import { formatDistanceToNow } from 'date-fns';
 
 const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [isManualBookingOpen, setIsManualBookingOpen] = useState(false);
   const notificationRef = useRef(null);
   const profileRef = useRef(null);
   
   const user = useSelector((state) => state?.auth?.user);
   const role = useSelector((state) => state?.auth?.role);
 
+  const { notifications, loading, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
+
   const getBasePath = () => {
     const r = role?.toLowerCase();
-    if (r === "admin") return "/admin";
-    if (r === "owner" || r === "bmsp_owner") return "/partner";
+    if (r === "admin" || r === "bmsp_admin") return "/admin";
+    if (r === "owner" || r === "bmsp_owner" || r === "verified_venue_owner" || r === "venue_owner") return "/partner";
     if (r === "coach" || r === "bmsp_coach") return "/coach";
     if (r === "umpire" || r === "bmsp_umpire") return "/umpire";
     return "";
@@ -42,13 +51,6 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const handleProfileClick = () => {
     navigate(`${getBasePath()}/profile`);
   };
-
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: "New Booking", message: "Pitch 1 booked for 6:00 PM", time: "5m ago", type: "booking" },
-    { id: 2, title: "Payment Received", message: "Received ₹1200 for Booking #452", time: "1h ago", type: "payment" },
-    { id: 3, title: "Review Alert", message: "Rahul G. gave you a 5-star review!", time: "2h ago", type: "review" },
-    { id: 4, title: "System Update", message: "Dashboard maintenance tonight at 2 AM", time: "5h ago", type: "system" },
-  ]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -74,15 +76,30 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
     }
   };
 
-  const clearNotifications = () => {
-    setNotifications([]);
-  };
-
   const getTimeGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
     if (hour < 17) return "Good Afternoon";
     return "Good Evening";
+  };
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'BOOKING': return <History size={14} className="text-[#CCFF00]" />;
+      case 'PAYMENT': return <CreditCard size={14} className="text-green-500" />;
+      case 'SUPPORT': return <MessageSquare size={14} className="text-blue-500" />;
+      case 'WITHDRAWAL': return <AlertTriangle size={14} className="text-orange-500" />;
+      case 'REVIEW': return <ShieldAlert size={14} className="text-yellow-500" />;
+      default: return <Bell size={14} className="text-[#CCFF00]" />;
+    }
+  };
+
+  const handleNotificationClick = (notif) => {
+    markRead(notif._id);
+    if (notif.link) {
+      navigate(notif.link);
+    }
+    setShowNotifications(false);
   };
 
   return (
@@ -128,6 +145,23 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
 
         {/* Right Section: Actions */}
         <div className="flex items-center gap-3 sm:gap-5 lg:min-w-[200px] justify-end">
+          
+          {/* Manual Booking Button (For Owners) */}
+          {["owner", "venue_owner", "verified_venue_owner", "bmsp_owner"].includes(role?.toLowerCase()) && (
+            <>
+              <button 
+                onClick={() => setIsManualBookingOpen(true)}
+                className="hidden md:flex items-center gap-2 bg-[#CCFF00] text-black px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-[#b3ff00] transition-all shadow-[0_0_20px_rgba(204,255,0,0.2)]"
+              >
+                <Plus size={14} strokeWidth={3} />
+                <span>Manual Booking</span>
+              </button>
+              <ManualBookingModal 
+                isOpen={isManualBookingOpen} 
+                onClose={() => setIsManualBookingOpen(false)} 
+              />
+            </>
+          )}
 
           {/* Notifications */}
           <div className="relative" ref={notificationRef}>
@@ -138,31 +172,48 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
               }`}
             >
               <Bell size={20} />
-              {notifications.length > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-[#000000]" />}
+              {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#000000] flex items-center justify-center" />}
             </button>
 
             {showNotifications && (
               <div className="absolute right-0 mt-4 w-80 sm:w-96 bg-[#000000] border border-[#2D2D2D] rounded-[8px] shadow-[var(--shadow-4)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 <div className="p-4 border-b border-[#2D2D2D] flex items-center justify-between bg-[#151617]">
-                  <h3 className="font-semibold text-white tracking-wide text-sm uppercase">Notifications</h3>
-                  {notifications.length > 0 && (
-                    <button onClick={clearNotifications} className="text-[10px] font-normal uppercase tracking-widest text-red-500 hover:text-red-400 transition-colors flex items-center gap-1.5 font-[Arial]">
-                      <Trash2 size={12} /> Clear All
-                    </button>
-                  )}
+                   <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-white tracking-wide text-sm uppercase">Vault Updates</h3>
+                      {unreadCount > 0 && <span className="bg-[#CCFF00] text-black text-[9px] font-black px-1.5 py-0.5 rounded-full">{unreadCount}</span>}
+                   </div>
+                  <div className="flex gap-3">
+                     <button onClick={markAllRead} className="text-[9px] font-black uppercase tracking-widest text-[#CCFF00] hover:text-white transition-colors flex items-center gap-1">
+                        <CheckCircle size={10} /> Mark All
+                     </button>
+                     <button onClick={clearAll} className="text-[9px] font-black uppercase tracking-widest text-red-500 hover:text-red-400 transition-colors flex items-center gap-1 font-[Arial]">
+                        <Trash2 size={10} /> Clear
+                     </button>
+                  </div>
                 </div>
                 <div className="max-h-[400px] overflow-y-auto no-scrollbar">
                   {notifications.length > 0 ? (
                     notifications.map((notif) => (
-                      <div key={notif.id} className="p-4 border-b border-[#2D2D2D]/30 hover:bg-[#2D2D2D]/20 transition-colors cursor-pointer group">
+                      <div 
+                        key={notif._id} 
+                        onClick={() => handleNotificationClick(notif)}
+                        className={`p-4 border-b border-[#2D2D2D]/30 transition-colors cursor-pointer group ${notif.isRead ? 'opacity-60' : 'bg-[#CCFF00]/[0.02]'}`}
+                      >
                         <div className="flex gap-3">
-                          <div className="mt-1 p-2 rounded-[4px] bg-[#CCFF00]/10 text-[#CCFF00]"><CheckCircle size={14} /></div>
+                          <div className={`mt-1 p-2 rounded-[4px] ${notif.isRead ? 'bg-[#2D2D2D] text-[#999999]' : 'bg-[#CCFF00]/10 text-[#CCFF00]'}`}>
+                             {getNotificationIcon(notif.type)}
+                          </div>
                           <div className="flex-1 space-y-1">
                             <div className="flex justify-between items-start">
-                              <h4 className="text-[13px] font-semibold text-white group-hover:text-[#CCFF00] transition-colors uppercase tracking-tight">{notif.title}</h4>
-                              <span className="text-[10px] text-[#878C9F] font-medium flex items-center gap-1"><Clock size={10} />{notif.time}</span>
+                              <h4 className={`text-[12px] font-black group-hover:text-[#CCFF00] transition-colors uppercase tracking-tight ${notif.isRead ? 'text-gray-400' : 'text-white'}`}>
+                                {notif.title}
+                              </h4>
+                              <span className="text-[9px] text-[#878C9F] font-medium flex items-center gap-1">
+                                 <Clock size={10} />
+                                 {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true }).replace('about ', '')}
+                              </span>
                             </div>
-                            <p className="text-[12px] text-[#999999] leading-relaxed">{notif.message}</p>
+                            <p className={`text-[11px] leading-relaxed ${notif.isRead ? 'text-gray-500' : 'text-[#999999]'}`}>{notif.message}</p>
                           </div>
                         </div>
                       </div>
@@ -170,7 +221,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
                   ) : (
                     <div className="p-12 text-center flex flex-col items-center gap-4">
                       <div className="w-16 h-16 rounded-full bg-[#2D2D2D] flex items-center justify-center text-[#999999]"><Bell size={32} /></div>
-                      <p className="text-sm text-[#999999] font-medium tracking-wide">No new notifications</p>
+                      <p className="text-sm text-[#999999] font-medium tracking-wide uppercase">Vault is empty</p>
                     </div>
                   )}
                 </div>

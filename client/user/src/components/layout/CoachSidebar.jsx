@@ -14,7 +14,9 @@ import {
   Activity,
   Clock,
   MessageSquare,
-  User
+  User,
+  IndianRupee,
+  Landmark
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
@@ -36,17 +38,14 @@ const CoachSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/coach/sessions", label: "Sessions", icon: Calendar },
     { to: "/coach/availability", label: "Availability", icon: Clock },
     { to: "/coach/bookings", label: "Bookings", icon: Activity },
-    { to: "/coach/reviews", label: "Reviews", icon: MessageSquare },
     { to: "/coach/revenue", label: "Earnings", icon: IndianRupee },
+    { to: "/coach/banking", label: "Payout & Banking", icon: Landmark },
     { to: "/coach/profile", label: "Profile", icon: User },
     { to: "/coach/masterclass", label: "Masterclass", icon: Video },
+    { to: "/coach/support", label: "Docs & Support", icon: HelpCircle },
   ];
 
-  const bottomNavItems = [
-    { to: "/coach/settings", label: "Settings", icon: Settings },
-    { to: "/coach/support", label: "Support", icon: HelpCircle },
-    { action: "logout", label: "SIGN OUT", icon: LogOut },
-  ];
+  const bottomNavItems = [];
 
   const renderNavItem = (item) => {
     const isLogout = item.action === "logout";

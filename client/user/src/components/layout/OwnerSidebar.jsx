@@ -15,7 +15,8 @@ import {
   Bell, 
   Settings, 
   HelpCircle, 
-  LogOut 
+  LogOut,
+  Landmark
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
@@ -39,8 +40,10 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/partner/customers", label: "Customers", icon: Users },
     { to: "/partner/intelligence", label: "Intelligence", icon: BarChart3 },
     { to: "/partner/revenue", label: "Revenue", icon: IndianRupee },
+    { to: "/partner/banking", label: "Payout & Banking", icon: Landmark },
     { to: "/partner/reviews", label: "Reviews", icon: Star },
     { to: "/partner/promotions", label: "Promotions", icon: Tag },
+    { to: "/partner/support", label: "Docs & Support", icon: HelpCircle },
   ];
 
 

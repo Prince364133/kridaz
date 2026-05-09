@@ -59,7 +59,17 @@ export const getDashboardData = async (req, res) => {
       Review.find({ turf: { $in: turfIds } }).select("rating").lean(),
       Booking.aggregate([
         { $match: { turf: { $in: turfIds } } },
-        { $group: { _id: null, total: { $sum: "$totalPrice" } } },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: "$totalPrice" },
+            settlementRevenue: {
+              $sum: {
+                $cond: [{ $eq: ["$bookingSource", "PARTNER_MANUAL"] }, 0, "$totalPrice"]
+              }
+            }
+          }
+        },
       ]),
       // Bookings Per Turf - DAY
       Booking.aggregate([
@@ -151,7 +161,8 @@ export const getDashboardData = async (req, res) => {
       totalBookings,
       totalReviews,
       averageRating,
-      totalRevenue: totalRevenueData[0]?.total || 0,
+      totalRevenue: totalRevenueData[0]?.totalRevenue || 0,
+      settlementRevenue: totalRevenueData[0]?.settlementRevenue || 0,
       totalTurfs: turfs.length,
       bookingsPerTurfDay,
       bookingsPerTurfWeek,
@@ -368,5 +379,116 @@ export const getOwnerCalendarData = async (req, res) => {
   } catch (error) {
     console.error("Error in getOwnerCalendarData:", error);
     res.status(500).json({ success: false, message: "Error fetching calendar data" });
+  }
+};
+
+export const getDetailedOccupancyStats = async (req, res) => {
+  const ownerId = req.owner.id;
+  const { filter = 'week' } = req.query; // week, month, year, day
+  
+  try {
+    const turfs = await Turf.find({ owner: ownerId }).select("_id");
+    const turfIds = turfs.map(t => t._id);
+
+    // 1. Weekly Occupancy Grid (For the Heatmap)
+    // We'll fetch all bookings for the current week
+    const now = new Date();
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+    startOfWeek.setHours(0,0,0,0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+    const weeklyBookings = await Booking.find({ 
+      turf: { $in: turfIds },
+      createdAt: { $gte: startOfWeek, $lte: endOfWeek } 
+    })
+    .populate("user", "name email phone")
+    .populate("turf", "name")
+    .populate("timeSlot", "startTime endTime")
+    .lean();
+
+    // Format for heatmap: { dayIndex, hour, bookings: [] }
+    // dayIndex: 0 (Sun) to 6 (Sat)
+    const heatmapData = [];
+    for (let d = 0; d < 7; d++) {
+      for (let h = 0; h < 24; h++) {
+        const slotsInThisHour = weeklyBookings.filter(b => {
+          const bDate = new Date(b.timeSlot?.startTime || b.createdAt);
+          return bDate.getDay() === d && bDate.getHours() === h;
+        });
+
+        heatmapData.push({
+          day: d,
+          hour: h,
+          count: slotsInThisHour.length,
+          details: slotsInThisHour.map(b => ({
+            id: b._id,
+            user: b.user?.name || "Guest",
+            email: b.user?.email,
+            phone: b.user?.phone,
+            turf: b.turf?.name,
+            amount: b.totalPrice,
+            time: b.timeSlot ? 
+              `${new Date(b.timeSlot.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(b.timeSlot.endTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}` : 
+              "N/A"
+          }))
+        });
+      }
+    }
+
+    // 2. Peak Hours Distribution (For the Graph)
+    // Group by hour of day
+    let dateFilter = {};
+    const today = new Date();
+    if (filter === 'day') {
+      dateFilter = { createdAt: { $gte: new Date(today.setHours(0,0,0,0)) } };
+    } else if (filter === 'week') {
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      dateFilter = { createdAt: { $gte: weekAgo } };
+    } else if (filter === 'month') {
+      const monthAgo = new Date();
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+      dateFilter = { createdAt: { $gte: monthAgo } };
+    } else if (filter === 'year') {
+      const yearAgo = new Date();
+      yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+      dateFilter = { createdAt: { $gte: yearAgo } };
+    }
+
+    const peakHoursRaw = await Booking.aggregate([
+      { $match: { turf: { $in: turfIds }, ...dateFilter } },
+      {
+        $group: {
+          _id: { $hour: "$createdAt" },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
+
+    // Fill in missing hours
+    const peakHours = Array.from({ length: 24 }, (_, i) => {
+      const found = peakHoursRaw.find(p => p._id === i);
+      return {
+        hour: i,
+        time: `${i % 12 || 12}${i < 12 ? 'AM' : 'PM'}`,
+        count: found ? found.count : 0
+      };
+    });
+
+    res.json({
+      success: true,
+      heatmap: heatmapData,
+      peakHours,
+      summary: {
+        totalWeeklyBookings: weeklyBookings.length,
+        peakTime: peakHours.reduce((prev, current) => (prev.count > current.count) ? prev : current).time
+      }
+    });
+
+  } catch (error) {
+    console.error("Error in getDetailedOccupancyStats:", error);
+    res.status(500).json({ success: false, message: "Error fetching occupancy stats" });
   }
 };

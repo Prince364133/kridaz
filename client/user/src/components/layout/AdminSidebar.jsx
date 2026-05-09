@@ -15,6 +15,7 @@ import {
   FileText,
   Settings,
   HelpCircle,
+  Shield,
   LogOut
 } from "lucide-react";
 import { useDispatch } from "react-redux";
@@ -63,6 +64,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       icon: IndianRupee,
       subItems: [
         { to: "/admin/transactions", label: "Revenue" },
+        { to: "/admin/finance", label: "Settlement Hub" },
         { to: "/admin/withdrawals", label: "Withdrawals" },
       ],
     },
@@ -79,13 +81,10 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/admin/blogs", label: "Blogs", icon: FileText },
     { to: "/admin/community", label: "Community", icon: Users },
     { to: "/admin/features", label: "Features", icon: ToggleRight },
+    { to: "/admin/support", label: "Docs & Support", icon: HelpCircle },
   ];
 
-  const bottomNavItems = [
-    { to: "/admin/settings", label: "Settings", icon: Settings },
-    { to: "/admin/support", label: "Support", icon: HelpCircle },
-    { action: "logout", label: "SIGN OUT", icon: LogOut },
-  ];
+  const bottomNavItems = [];
 
   const renderNavItem = (item) => {
     const isLogout = item.action === "logout";

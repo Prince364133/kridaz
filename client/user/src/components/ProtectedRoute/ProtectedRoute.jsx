@@ -10,13 +10,19 @@ export default function ProtectedRoute({ children, requiredRole }) {
   }
 
   if (requiredRole) {
-    const isAdminRole = (r) => r?.toLowerCase() === "admin" || r?.toLowerCase() === "bmsp_admin";
-    const isMatchingRole = role?.toLowerCase() === requiredRole?.toLowerCase();
+    const isAdminRole = (r) => r?.toLowerCase().includes("admin");
+    const isOwnerRole = (r) => r?.toLowerCase().includes("owner") || r?.toLowerCase().includes("venue");
     
-    // If route requires admin, both "admin" and "BMSP_ADMIN" are allowed
+    let isMatchingRole = false;
     if (requiredRole.toLowerCase() === "admin") {
-      if (!isAdminRole(role)) return <Navigate to="/unauthorized" replace />;
-    } else if (!isMatchingRole) {
+      isMatchingRole = isAdminRole(role);
+    } else if (requiredRole.toLowerCase() === "owner") {
+      isMatchingRole = isOwnerRole(role);
+    } else {
+      isMatchingRole = role?.toLowerCase() === requiredRole?.toLowerCase();
+    }
+    
+    if (!isMatchingRole) {
       return <Navigate to="/unauthorized" replace />;
     }
   }

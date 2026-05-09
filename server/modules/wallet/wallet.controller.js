@@ -4,6 +4,7 @@ import Owner from "../../models/owner.model.js";
 import WithdrawalRequest from "../../models/withdrawalRequest.model.js";
 import razorpay from "../../config/razorpay.js";
 import crypto from "crypto";
+import { notifyAdmins } from "../../utils/notificationHelper.js";
 
 const getModelByRole = (role) => {
   return (role === "user") ? User : Owner;
@@ -211,6 +212,14 @@ export const requestWithdrawal = async (req, res) => {
     // 2. Reserve the amount
     owner.reservedBalance += amount;
     await owner.save();
+
+    // 3. Notify Admin
+    await notifyAdmins({
+      title: "Withdrawal Requested",
+      message: `Partner ${owner.name} requested a withdrawal of ₹${amount}.`,
+      type: "WITHDRAWAL",
+      link: "/admin/withdrawals"
+    });
 
     return res.status(201).json({
       success: true,
