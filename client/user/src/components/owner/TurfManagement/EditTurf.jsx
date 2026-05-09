@@ -98,7 +98,7 @@ const EditTurf = () => {
               </button>
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-8 bg-[#CCFF00] rounded-full" />
-                <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
+                <h1 className="text-[28px] lg:text-[32px] font-bold font-open-sans text-white tracking-tight leading-none uppercase">
                   EDIT <span className="text-[#CCFF00]">FACILITY</span>
                 </h1>
               </div>
@@ -116,7 +116,7 @@ const EditTurf = () => {
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#CCFF00]/5 blur-[100px] pointer-events-none" />
           
           <div className="space-y-8 relative z-10">
-            <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px]">General Information</h3>
+            <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px] font-open-sans">General Information</h3>
             
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
@@ -237,7 +237,7 @@ const EditTurf = () => {
           </div>
 
           <div className="space-y-8 relative z-10">
-            <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px]">Operational Details</h3>
+            <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px] font-open-sans">Operational Details</h3>
             
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
@@ -359,7 +359,7 @@ const EditTurf = () => {
               </div>
             </div>
 
-            <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px] mt-12">Support & Navigation</h3>
+            <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px] font-open-sans mt-12">Support & Navigation</h3>
             
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
@@ -421,7 +421,7 @@ const EditTurf = () => {
           <div className="md:col-span-2 space-y-12 pt-12 border-t border-[#2D2D2D] relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               <div className="space-y-10">
-                <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-6 uppercase tracking-[3px]">Slot Architecture</h3>
+                <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-6 uppercase tracking-[3px] font-open-sans">Slot Architecture</h3>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="form-control">
                     <label className="label mb-2">
@@ -531,7 +531,7 @@ const EditTurf = () => {
 
               <div className="space-y-10">
                 <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-3 mb-6">
-                  <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[3px]">Matrix Projection</h3>
+                  <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[3px] font-open-sans">Matrix Projection</h3>
                   <span className="text-[10px] font-bold text-[#CCFF00] uppercase bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-4 py-1 rounded-full">
                     {generatedSlots.length} Active Slots
                   </span>
@@ -568,7 +568,7 @@ const EditTurf = () => {
           <div className="md:col-span-2 pt-12 border-t border-[#2D2D2D] relative z-10 pb-12">
             <button 
               type="submit" 
-              className={`w-full py-5 bg-[#CCFF00] text-black font-bold text-[16px] uppercase tracking-[6px] hover:bg-white transition-all transform hover:scale-[1.01] active:scale-[0.99] rounded-[8px] shadow-[0_10px_30px_rgba(204,255,0,0.15)] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full py-5 bg-[#CCFF00] text-black font-bold text-[16px] uppercase tracking-[6px] font-open-sans hover:bg-white transition-all transform hover:scale-[1.01] active:scale-[0.99] rounded-[8px] shadow-[0_10px_30px_rgba(204,255,0,0.15)] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={loading}
             >
               {loading ? "SYNCHRONIZING..." : "COMMIT OPERATIONAL CHANGES"}

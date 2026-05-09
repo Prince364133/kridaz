@@ -282,10 +282,19 @@ export const editTurfById = async (req, res) => {
       updatedTurfData.images = imageUrls;
     }
 
-    // Reset status to pending on edit
-    updatedTurfData.status = "pending";
+    // Instead of overwriting live data immediately, store changes in pendingUpdates
+    // if the turf is already approved. If it's still pending/rejected, we can overwrite.
+    if (turf.status === "approved") {
+      turf.pendingUpdates = updatedTurfData;
+      turf.status = "pending"; // Set back to pending for review
+      await turf.save();
+    } else {
+      // Overwrite main fields if not yet approved
+      Object.assign(turf, updatedTurfData);
+      turf.status = "pending";
+      await turf.save();
+    }
 
-    const updatedTurf = await Turf.findOneAndUpdate({ owner, _id: id }, updatedTurfData, { new: true });
     const allTurfs = await Turf.find({ owner });
     return res.status(200).json({ success: true, message: "Changes saved and sent for admin review", allTurfs });
   } catch (err) {
@@ -311,13 +320,30 @@ export const getTurfDetailsWithSlots = async (req, res) => {
 
     const slotsWithBookings = timeSlots.map(slot => {
       const booking = bookings.find(b => b.timeSlot && b.timeSlot._id.toString() === slot._id.toString());
+      
+      let userDetails = null;
+      if (booking) {
+        if (booking.user) {
+          userDetails = booking.user;
+        } else if (booking.guestDetails) {
+          userDetails = {
+            name: booking.guestDetails.name,
+            email: booking.guestDetails.email,
+            phoneNumber: booking.guestDetails.phone,
+            profileImage: null,
+            isGuest: true
+          };
+        }
+      }
+
       return {
         ...slot.toObject(),
         isBooked: !!booking,
         bookingDetails: booking ? {
-          user: booking.user,
+          user: userDetails,
           totalPrice: booking.totalPrice,
-          bookedAt: booking.createdAt
+          bookedAt: booking.createdAt,
+          bookingSource: booking.bookingSource
         } : null
       };
     });
@@ -349,16 +375,28 @@ export const adminApproveTurf = async (req, res) => {
   const { id } = req.params;
   const { name, designation } = req.body;
   try {
-    const turf = await Turf.findByIdAndUpdate(id, { 
-      status: "approved",
-      verificationData: {
-        adminName: name,
-        adminDesignation: designation,
-        verifiedAt: new Date(),
-        action: "approved"
-      }
-    }, { new: true });
-    return res.status(200).json({ success: true, message: "Turf approved", turf });
+    const turf = await Turf.findById(id);
+    if (!turf) return res.status(404).json({ success: false, message: "Turf not found" });
+
+    // Record verification metadata
+    turf.verificationData = {
+      adminName: name,
+      adminDesignation: designation,
+      verifiedAt: new Date(),
+      action: "approved"
+    };
+
+    // Merge pending updates if any (from sunny branch logic)
+    if (turf.pendingUpdates && turf.pendingUpdates.size > 0) {
+      const updates = Object.fromEntries(turf.pendingUpdates);
+      Object.assign(turf, updates);
+      turf.pendingUpdates = {}; // Clear pending updates
+    }
+
+    turf.status = "approved";
+    await turf.save();
+
+    return res.status(200).json({ success: true, message: "Turf approved and changes merged", turf });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }

@@ -36,17 +36,23 @@ const BookingModal = ({ slot, onClose }) => {
             <>
               <div className="flex items-center gap-4 p-6 bg-[#111111] border border-[#2D2D2D] rounded-[8px]">
                 <div className="w-14 h-14 rounded-[8px] bg-[#2D2D2D] border border-[#404040] flex items-center justify-center overflow-hidden shrink-0">
-                  {bookingDetails.user.profileImage ? (
+                  {bookingDetails.user?.profileImage ? (
                     <img src={bookingDetails.user.profileImage} className="w-full h-full object-cover" />
                   ) : (
                     <Users size={24} className="text-[#CCFF00]" />
                   )}
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-lg font-bold text-white uppercase tracking-tight truncate font-['Open_Sans']">{bookingDetails.user.name}</h4>
+                  <h4 className="text-lg font-bold text-white uppercase tracking-tight truncate font-['Open_Sans']">
+                    {bookingDetails.user?.name || "Guest Player"}
+                  </h4>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className="px-2 py-0.5 bg-[#CCFF00] text-black text-[8px] font-bold uppercase rounded-[2px]">Verified</div>
-                    <span className="text-[10px] text-[#878C9F] font-bold uppercase tracking-widest">Athlete Profile</span>
+                    <div className={`px-2 py-0.5 text-black text-[8px] font-bold uppercase rounded-[2px] ${bookingDetails.user?.isGuest ? 'bg-[#878C9F]' : 'bg-[#CCFF00]'}`}>
+                      {bookingDetails.user?.isGuest ? 'Manual' : 'Verified'}
+                    </div>
+                    <span className="text-[10px] text-[#878C9F] font-bold uppercase tracking-widest">
+                      {bookingDetails.user?.isGuest ? 'Offline Record' : 'Athlete Profile'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -54,21 +60,21 @@ const BookingModal = ({ slot, onClose }) => {
               <div className="space-y-3">
                 <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px] px-1">Contact Intelligence</p>
                 <div className="grid grid-cols-1 gap-2">
-                  <a href={`mailto:${bookingDetails.user.email}`} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
+                  <a href={bookingDetails.user?.email ? `mailto:${bookingDetails.user.email}` : "#"} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-[#2D2D2D] rounded-[4px] flex items-center justify-center text-[#878C9F] group-hover:text-[#CCFF00]">
                         <Mail size={12} />
                       </div>
-                      <span className="text-xs text-[#878C9F] font-medium">{bookingDetails.user.email}</span>
+                      <span className="text-xs text-[#878C9F] font-medium">{bookingDetails.user?.email || "No Email Provided"}</span>
                     </div>
                     <ChevronRight size={14} className="text-[#2D2D2D]" />
                   </a>
-                  <a href={`tel:${bookingDetails.user.phoneNumber}`} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
+                  <a href={bookingDetails.user?.phoneNumber ? `tel:${bookingDetails.user.phoneNumber}` : "#"} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-[#2D2D2D] rounded-[4px] flex items-center justify-center text-[#878C9F] group-hover:text-[#CCFF00]">
                         <Phone size={12} />
                       </div>
-                      <span className="text-xs text-[#878C9F] font-medium">{bookingDetails.user.phoneNumber}</span>
+                      <span className="text-xs text-[#878C9F] font-medium">{bookingDetails.user?.phoneNumber || "No Phone Provided"}</span>
                     </div>
                     <ChevronRight size={14} className="text-[#2D2D2D]" />
                   </a>
@@ -611,14 +617,16 @@ export default function TurfDetails() {
                       {slot.isBooked ? (
                         <div className="flex items-center gap-4">
                            <div className="w-10 h-10 rounded-[6px] bg-[#111] border border-[#2D2D2D] flex items-center justify-center overflow-hidden">
-                              {slot.bookingDetails.user.profileImage ? (
+                              {slot.bookingDetails.user?.profileImage ? (
                                 <img src={slot.bookingDetails.user.profileImage} className="w-full h-full object-cover" />
                               ) : (
                                 <Users size={16} className="text-[#CCFF00]/60" />
                               )}
                            </div>
                            <div className="flex-1 min-w-0">
-                              <h5 className="text-[13px] font-bold text-white truncate uppercase tracking-tight font-['Open_Sans']">{slot.bookingDetails.user.name}</h5>
+                              <h5 className="text-[13px] font-bold text-white truncate uppercase tracking-tight font-['Open_Sans']">
+                                {slot.bookingDetails.user?.name || "Guest Player"}
+                              </h5>
                               <p className="text-[9px] text-[#CCFF00] font-bold uppercase tracking-[2px] mt-1">View Details</p>
                            </div>
                         </div>

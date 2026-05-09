@@ -75,7 +75,12 @@ const turfSchema = new mongoose.Schema(
       adminDesignation: { type: String },
       verifiedAt: { type: Date },
       action: { type: String, enum: ["approved", "rejected"] }
-    }
+    },
+    pendingUpdates: {
+      type: Map,
+      of: mongoose.Schema.Types.Mixed,
+      default: {}
+    },
   },
   { timestamps: true }
 );

@@ -152,7 +152,19 @@ const OwnerBookings = () => {
                         <div className="w-8 h-8 rounded-[4px] bg-[#2D2D2D] flex items-center justify-center text-[12px] font-semibold text-white uppercase border border-[#404040]">
                           {booking.userName[0]}
                         </div>
-                        <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{booking.userName}</p>
+                        <div className="flex flex-col">
+                           <div className="flex items-center gap-2">
+                             <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{booking.userName}</p>
+                             {booking.bookingSource === "PARTNER_MANUAL" && (
+                               <span className="px-1.5 py-0.5 bg-[#CCFF00]/10 border border-[#CCFF00]/20 text-[#CCFF00] text-[8px] font-bold uppercase tracking-widest rounded-[2px]">
+                                 Manual
+                               </span>
+                             )}
+                           </div>
+                           {booking.bookingSource === "PARTNER_MANUAL" && (
+                             <p className="text-[9px] text-[#878C9F] font-medium uppercase tracking-[0.05em] mt-0.5">Partner Generated</p>
+                           )}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
