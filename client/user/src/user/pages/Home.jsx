@@ -503,10 +503,9 @@ export default function Home() {
 
           {/* Player cards */}
           {loading ? (
-            <div className="flex gap-4 overflow-x-auto py-4">
+            <div className="flex gap-4 md:gap-6 overflow-x-auto pt-8 pb-8 mt-2 no-scrollbar scroll-smooth">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="shrink-0 w-52 h-48 rounded-2xl border animate-pulse"
-                  style={{ backgroundColor: "#111", borderColor: BDR }} />
+                <div key={i} className="shrink-0 w-[180px] md:w-[220px] h-[300px] md:h-[360px] rounded-[32px] border border-white/5 animate-pulse bg-white/5" />
               ))}
             </div>
           ) : players.length === 0 ? (
@@ -520,37 +519,23 @@ export default function Home() {
           ) : (
             <div className="flex overflow-x-auto pt-8 pb-8 mt-2 no-scrollbar scroll-smooth px-0 md:px-2">
               {players.map(p => {
-                const level = getLevel(p.bookingCount);
                 const initials = p.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "??";
+                const isFollowing = followingIds.includes(p._id);
+                
                 return (
-                  <Link
+                  <div
                     key={p._id}
-                    to={`/profile/${p._id}`}
-                    className="flex flex-col items-center gap-3 md:gap-5 group shrink-0 w-32 lg:w-36 transition-all duration-500"
+                    className="shrink-0 w-[180px] md:w-[220px] group transition-all duration-500"
                   >
-                    <div className="relative">
-                      {/* Premium Avatar Bubble with Glow */}
-                      <div className="relative w-24 h-24 flex items-center justify-center transition-all duration-500 group-hover:scale-110">
-                        {/* Outer Glow Ring */}
-                        <div className="absolute inset-0 rounded-full bg-[#84CC16]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        
-                        {/* Gradient Border Ring */}
-                        <div className="absolute inset-0 rounded-full p-[3px] bg-gradient-to-tr from-[#84CC16] via-[#84CC16]/50 to-white/10">
-                          <div className="w-full h-full rounded-full bg-black" />
-                        </div>
-
-                        {/* Inner Avatar */}
-                        <div className="w-[calc(100%-8px)] h-[calc(100%-8px)] rounded-full flex items-center justify-center text-2xl font-black relative overflow-hidden z-10 shadow-inner"
-                          style={{
-                            backgroundColor: avatarColor(p.name),
-                            color: "#fff",
-                            fontFamily: "var(--font-display, sans-serif)"
-                          }}>
+                    <div className="relative bg-[#111] rounded-[32px] border border-white/5 overflow-hidden hover:border-[#84CC16]/30 transition-all duration-500 h-full flex flex-col">
+                      {/* Card Image Section */}
+                      <Link to={`/profile/${p._id}`} className="relative aspect-[4/5] overflow-hidden block">
+                        <div className="w-full h-full bg-[#84CC16]/5 flex items-center justify-center">
                           {p.profilePicture ? (
                             <img 
                               src={p.profilePicture} 
                               alt={p.name} 
-                              className="w-full h-full object-cover absolute inset-0 z-10 brightness-90 group-hover:brightness-110 transition-all duration-500" 
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                               onError={(e) => {
                                 e.target.style.display = 'none';
                                 if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
@@ -561,48 +546,55 @@ export default function Home() {
                             className="relative z-10 flex items-center justify-center w-full h-full"
                             style={{ display: p.profilePicture ? 'none' : 'flex' }}
                           >
-                            <User size={32} className="text-[#84CC16]" />
+                            <User size={48} className="text-[#84CC16]/40 group-hover:text-[#84CC16] transition-colors duration-500" />
                           </div>
-                          
-                          {/* Glass Shine */}
-                          <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none z-20" />
                         </div>
-                      </div>
 
-                      {/* Premium Badge (Follow/Unfollow) */}
-                      <button 
-                        onClick={(e) => handleFollowToggle(e, p)} 
-                        className={`absolute -bottom-1 -right-1 w-9 h-9 rounded-full border-[3px] border-black flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-500 hover:scale-110 active:scale-95 z-30
-                          ${followingIds.includes(p._id) 
-                            ? 'bg-white text-black' 
-                            : 'bg-[#84CC16] text-black shadow-[#84CC16]/20'}`}
-                      >
-                        {followingIds.includes(p._id) 
-                          ? <Check size={16} strokeWidth={3} /> 
-                          : <Plus size={16} strokeWidth={3} />}
-                      </button>
-                    </div>
+                        {/* Top Gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        
+                        {/* Dismiss Button (Like photo) */}
+                        <button className="absolute top-3 right-3 w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/60 transition-all z-20">
+                          <X size={14} />
+                        </button>
+                      </Link>
 
-                    <div className="text-center space-y-1.5 px-2">
-                      <p className="text-[13px] font-bold text-white uppercase tracking-wider line-clamp-1 group-hover:text-primary transition-colors" style={{ fontFamily: "var(--font-display, sans-serif)" }}>
-                        {p.name || "Player"}
-                      </p>
-
-                      <div className="flex flex-col items-center justify-center gap-1">
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
-                          <MapPin size={10} style={{ color: PRI }} />
-                          <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest truncate max-w-[80px]">
-                            {p.city || p.location || "Nearby"}
-                          </p>
-                        </div>
-                        {p.distance && (
-                          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary/80">
-                            {p.distance} km away
+                      {/* Card Info Section */}
+                      <div className="p-4 flex flex-col flex-grow">
+                        <Link to={`/profile/${p._id}`} className="block mb-1">
+                          <h3 className="text-white font-bold text-[14px] md:text-base tracking-tight truncate group-hover:text-[#84CC16] transition-colors">
+                            {p.name || "Player"}
+                          </h3>
+                        </Link>
+                        
+                        <div className="flex items-center gap-1.5 text-white/40 mb-5">
+                          <MapPin size={10} className="text-[#84CC16]" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest truncate">
+                            {p.city || "Nearby"}
                           </span>
-                        )}
+                        </div>
+
+                        {/* Follow Button */}
+                        <button 
+                          onClick={(e) => handleFollowToggle(e, p)}
+                          className={`w-full py-3 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.15em] transition-all duration-300 mt-auto
+                            ${isFollowing 
+                              ? 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10' 
+                              : 'bg-[#84CC16]/10 border border-[#84CC16]/20 text-[#84CC16] hover:bg-[#84CC16] hover:text-black hover:scale-[1.02]'}`}
+                        >
+                          {isFollowing ? (
+                            <>
+                              <CheckCircle size={14} /> Connected
+                            </>
+                          ) : (
+                            <>
+                              <Plus size={14} /> Add Player
+                            </>
+                          )}
+                        </button>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>
