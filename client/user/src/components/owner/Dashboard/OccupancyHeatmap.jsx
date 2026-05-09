@@ -5,16 +5,37 @@ import axiosInstance from '@hooks/useAxiosInstance';
 const OccupancyHeatmap = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [turfs, setTurfs] = useState([]);
+  const [selectedTurf, setSelectedTurf] = useState('');
   const [selectedSlot, setSelectedSlot] = useState(null);
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   useEffect(() => {
-    fetchData();
+    fetchTurfs();
   }, []);
 
-  const fetchData = async () => {
+  const fetchTurfs = async () => {
     try {
-      const res = await axiosInstance.get('/api/owner/dashboard/occupancy');
+      const res = await axiosInstance.get('/api/owner/turf/all');
+      setTurfs(res.data);
+      if (res.data.length > 0) {
+        setSelectedTurf(res.data[0]._id);
+      }
+    } catch (error) {
+      console.error("Error fetching turfs:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedTurf) {
+      fetchData();
+    }
+  }, [selectedTurf]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const res = await axiosInstance.get(`/api/owner/dashboard/occupancy?turfId=${selectedTurf}`);
       if (res.data.success) {
         setData(res.data.heatmap);
       }
@@ -39,13 +60,26 @@ const OccupancyHeatmap = () => {
           <p className="text-[10px] font-normal text-[#878C9F] uppercase tracking-widest mt-1">Real-time weekly booking density</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-[2px] bg-[#2D2D2D]" />
-            <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Empty</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-[2px] bg-[#CCFF00]" />
-            <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Booked</span>
+          <select 
+            value={selectedTurf} 
+            onChange={(e) => setSelectedTurf(e.target.value)}
+            className="bg-[#151617] border border-[#2D2D2D] text-white text-[10px] font-bold uppercase tracking-widest rounded-[6px] px-3 py-1.5 focus:outline-none focus:border-[#CCFF00]/50 transition-all cursor-pointer hover:border-[#CCFF00]/30"
+          >
+            <option value="" disabled>Select Facility</option>
+            {turfs.map(turf => (
+              <option key={turf._id} value={turf._id}>{turf.name}</option>
+            ))}
+          </select>
+
+          <div className="flex items-center gap-4 ml-2">
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-[2px] bg-[#2D2D2D]" />
+              <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Empty</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-[2px] bg-[#CCFF00]" />
+              <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Booked</span>
+            </div>
           </div>
         </div>
       </div>

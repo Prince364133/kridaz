@@ -304,9 +304,9 @@ const PartnerSupport = () => {
                   >
                     {loading ? 'SYNCHRONIZING...' : 'Initialize Ticket'}
                   </button>
-                </>
-              )}
-            </form>
+                </form>
+              </>
+            )}
           </div>
 
           {/* Ticket History */}

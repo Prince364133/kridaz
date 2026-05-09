@@ -17,17 +17,37 @@ import axiosInstance from '@hooks/useAxiosInstance';
 const PeakHoursChart = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [turfs, setTurfs] = useState([]);
+  const [selectedTurf, setSelectedTurf] = useState('');
   const [filter, setFilter] = useState('week'); // day, week, month, year
   const [summary, setSummary] = useState({ totalWeeklyBookings: 0, peakTime: 'N/A' });
 
   useEffect(() => {
-    fetchData();
-  }, [filter]);
+    fetchTurfs();
+  }, []);
+
+  const fetchTurfs = async () => {
+    try {
+      const res = await axiosInstance.get('/api/owner/turf/all');
+      setTurfs(res.data);
+      if (res.data.length > 0) {
+        setSelectedTurf(res.data[0]._id);
+      }
+    } catch (error) {
+      console.error("Error fetching turfs:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedTurf) {
+      fetchData();
+    }
+  }, [filter, selectedTurf]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axiosInstance.get(`/api/owner/dashboard/occupancy?filter=${filter}`);
+      const res = await axiosInstance.get(`/api/owner/dashboard/occupancy?filter=${filter}&turfId=${selectedTurf}`);
       if (res.data.success) {
         setData(res.data.peakHours);
         setSummary(res.data.summary);
@@ -65,20 +85,33 @@ const PeakHoursChart = () => {
           <p className="text-[10px] font-normal text-[#878C9F] uppercase tracking-widest">Time distribution analysis</p>
         </div>
 
-        <div className="flex items-center gap-2 bg-[#151617] p-1 rounded-[8px] border border-[#2D2D2D]">
-          {['day', 'week', 'month', 'year'].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-[6px] transition-all ${
-                filter === f 
-                  ? 'bg-[#CCFF00] text-black shadow-lg shadow-[#CCFF00]/10' 
-                  : 'text-[#999999] hover:text-white hover:bg-[#2D2D2D]'
-              }`}
-            >
-              {f}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-3">
+          <select 
+            value={selectedTurf} 
+            onChange={(e) => setSelectedTurf(e.target.value)}
+            className="bg-[#151617] border border-[#2D2D2D] text-white text-[10px] font-bold uppercase tracking-widest rounded-[6px] px-3 py-1.5 focus:outline-none focus:border-[#CCFF00]/50 transition-all cursor-pointer hover:border-[#CCFF00]/30"
+          >
+            <option value="" disabled>Select Facility</option>
+            {turfs.map(turf => (
+              <option key={turf._id} value={turf._id}>{turf.name}</option>
+            ))}
+          </select>
+
+          <div className="flex items-center gap-2 bg-[#151617] p-1 rounded-[8px] border border-[#2D2D2D]">
+            {['day', 'week', 'month', 'year'].map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-[6px] transition-all ${
+                  filter === f 
+                    ? 'bg-[#CCFF00] text-black shadow-lg shadow-[#CCFF00]/10' 
+                    : 'text-[#999999] hover:text-white hover:bg-[#2D2D2D]'
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

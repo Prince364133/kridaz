@@ -1,9 +1,11 @@
+import mongoose from "mongoose";
 import Booking from "../../models/booking.model.js";
 import Review from "../../models/review.model.js";
 import Turf from "../../models/turf.model.js";
 import User from "../../models/user.model.js";
 import Match from "../../models/match.model.js";
 import Session from "../../models/session.model.js";
+import WalletTransaction from "../../models/walletTransaction.model.js";
 
 export const getDashboardData = async (req, res) => {
   const ownerId = req.owner.id;
@@ -244,12 +246,43 @@ export const getCoachDashboardData = async (req, res) => {
       console.log(`DEBUG: Found ${detailedTrainees.length} detailed trainees`);
     }
 
-    // 4. Assemble response
+    // 4. Fetch Real Revenue from Wallet
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const [revenueData, revenueOverTimeRaw] = await Promise.all([
+      WalletTransaction.aggregate([
+        { $match: { user: coachId, status: "SUCCESS", type: { $ne: "DEBIT" } } },
+        { $group: { _id: null, total: { $sum: "$amount" } } }
+      ]),
+      WalletTransaction.aggregate([
+        { 
+          $match: { 
+            user: coachId, 
+            status: "SUCCESS", 
+            type: { $ne: "DEBIT" },
+            createdAt: { $gte: sevenDaysAgo }
+          } 
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            revenue: { $sum: "$amount" },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ])
+    ]);
+
+    const totalRevenue = revenueData[0]?.total || 0;
+
+    // 5. Assemble response
     console.log("DEBUG: Assembling coach dashboard response...");
     const responseData = {
       activeTrainees: detailedTrainees.length,
       totalSessions: sessions.length,
-      totalRevenue: sessions.length * 1000, // Placeholder revenue logic for coaches
+      totalRevenue,
+      revenueOverTimeRaw,
       liveStreamMins: 0, 
       performanceIndex: 0, 
       studentProgress: [],
@@ -291,12 +324,43 @@ export const getUmpireDashboardData = async (req, res) => {
     const matchesOfficiated = matches.filter(m => m.status === "completed").length;
     const upcomingMatches = matches.filter(m => m.status === "upcoming").length;
 
+    // Fetch Real Revenue from Wallet
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const [revenueData, revenueOverTimeRaw] = await Promise.all([
+      WalletTransaction.aggregate([
+        { $match: { user: umpireId, status: "SUCCESS", type: { $ne: "DEBIT" } } },
+        { $group: { _id: null, total: { $sum: "$amount" } } }
+      ]),
+      WalletTransaction.aggregate([
+        { 
+          $match: { 
+            user: umpireId, 
+            status: "SUCCESS", 
+            type: { $ne: "DEBIT" },
+            createdAt: { $gte: sevenDaysAgo }
+          } 
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            revenue: { $sum: "$amount" },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ])
+    ]);
+
+    const totalRevenue = revenueData[0]?.total || 0;
+
     const responseData = {
       matchesOfficiated,
       upcomingMatches,
       officialRating: 0,
-      earnings: matchesOfficiated * 500,
-      totalRevenue: matchesOfficiated * 500,
+      earnings: totalRevenue,
+      totalRevenue,
+      revenueOverTimeRaw,
       matchEngagement: [],
       matches: matches,
       upcomingAssignments: matches.filter(m => m.status === "upcoming").slice(0, 5).map(m => ({
@@ -421,11 +485,16 @@ export const getOwnerCalendarData = async (req, res) => {
 
 export const getDetailedOccupancyStats = async (req, res) => {
   const ownerId = req.owner.id;
-  const { filter = 'week' } = req.query; // week, month, year, day
-  
-  try {
-    const turfs = await Turf.find({ owner: ownerId }).select("_id");
-    const turfIds = turfs.map(t => t._id);
+    const { filter = 'week', turfId } = req.query; // week, month, year, day
+    
+    try {
+      let turfIds = [];
+      if (turfId) {
+        turfIds = [new mongoose.Types.ObjectId(turfId)];
+      } else {
+        const turfs = await Turf.find({ owner: ownerId }).select("_id");
+        turfIds = turfs.map(t => t._id);
+      }
 
     // 1. Weekly Occupancy Grid (For the Heatmap)
     // We'll fetch all bookings for the current week

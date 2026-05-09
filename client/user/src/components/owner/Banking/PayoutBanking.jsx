@@ -10,11 +10,13 @@ import {
 } from 'recharts';
 import useBanking from "../../../hooks/owner/useBanking";
 import useOwnerDashboard from "../../../hooks/owner/useOwnerDashboard";
+import useOwnerWallet from "../../../hooks/owner/useOwnerWallet";
 import toast from "react-hot-toast";
 
 const PayoutBanking = () => {
-  const { bankingDetails, walletBalance, payoutSettings, loading, isPayoutDay, updateBanking, requestPayout } = useBanking();
-  const { dashboardData } = useOwnerDashboard();
+  const { bankingDetails, walletBalance, payoutSettings, loading: bankingLoading, isPayoutDay, updateBanking, requestPayout } = useBanking();
+  const { dashboardData, loading: dashboardLoading } = useOwnerDashboard();
+  const { walletData, withdrawals, loading: walletLoading, refresh: refreshWallet } = useOwnerWallet();
   const [isEditingBank, setIsEditingBank] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [withdrawStep, setWithdrawStep] = useState(0); // 0: Password, 1: Balance, 2: Amount
@@ -45,18 +47,26 @@ const PayoutBanking = () => {
     }
   }, [bankingDetails]);
 
-  // Derived Analytics (Simulated logic for multi-series)
+  // Derived Analytics (Real data from Dashboard)
   const analyticsData = useMemo(() => {
-    return [
-      { name: 'Mon', coins: 400, lastWeek: 240 },
-      { name: 'Tue', coins: 300, lastWeek: 139 },
-      { name: 'Wed', coins: 200, lastWeek: 980 },
-      { name: 'Thu', coins: 278, lastWeek: 390 },
-      { name: 'Fri', coins: 189, lastWeek: 480 },
-      { name: 'Sat', coins: 239, lastWeek: 380 },
-      { name: 'Sun', coins: 349, lastWeek: 430 },
-    ];
-  }, [bankingDetails]);
+    if (!dashboardData?.revenueOverTimeRaw || dashboardData.revenueOverTimeRaw.length === 0) {
+      return [
+        { name: 'Mon', coins: 0, lastWeek: 0 },
+        { name: 'Tue', coins: 0, lastWeek: 0 },
+        { name: 'Wed', coins: 0, lastWeek: 0 },
+        { name: 'Thu', coins: 0, lastWeek: 0 },
+        { name: 'Fri', coins: 0, lastWeek: 0 },
+        { name: 'Sat', coins: 0, lastWeek: 0 },
+        { name: 'Sun', coins: 0, lastWeek: 0 },
+      ];
+    }
+    
+    return dashboardData.revenueOverTimeRaw.map(item => ({
+      name: new Date(item._id).toLocaleDateString('en-US', { weekday: 'short' }),
+      coins: item.revenue,
+      lastWeek: item.revenue * 0.8 // Simulated comparison since we only fetch 7 days
+    }));
+  }, [dashboardData]);
 
   // Deriving numbers to prevent string comparison issues
   const numericTotalCoins = Number(walletBalance || 0);
@@ -156,7 +166,7 @@ const PayoutBanking = () => {
     }
   };
 
-  if (loading) return <div className="p-10 text-center animate-pulse text-gray-500">Initializing Secure Banking...</div>;
+  if (bankingLoading || dashboardLoading || walletLoading) return <div className="p-10 text-center animate-pulse text-gray-500">Initializing Secure Banking...</div>;
 
   return (
     <div className="h-full custom-scrollbar bg-[#000000]">
@@ -186,7 +196,7 @@ const PayoutBanking = () => {
                   </div>
                   <div className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl">
                      <p className="text-[10px] text-gray-500 font-bold uppercase mb-1">Lifetime Earnings</p>
-                     <p className="text-2xl font-black text-white">{(numericTotalCoins * 1.4).toFixed(0)}</p>
+                     <p className="text-2xl font-black text-white">{(dashboardData?.totalRevenue || 0).toLocaleString()}</p>
                   </div>
                </div>
             </div>
@@ -246,23 +256,35 @@ const PayoutBanking = () => {
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-[#2D2D2D]/30">
-                        {[1,2,3,4,5].map(i => (
-                          <tr key={i} className="hover:bg-[#2D2D2D]/20 transition-colors group">
-                             <td className="px-8 py-6">
-                                <div className="flex items-center gap-4">
-                                   <div className="w-10 h-10 rounded-[6px] bg-[#2D2D2D] flex items-center justify-center border border-[#404040] group-hover:border-[#CCFF00]/50 transition-all">
-                                      <TrendingUp size={16} className="text-[#CCFF00]" />
-                                   </div>
-                                   <div>
-                                      <p className="text-sm font-bold uppercase tracking-tight">Booking Settlement #BMS-{i}920</p>
-                                      <p className="text-[10px] text-[#878C9F] font-bold uppercase tracking-widest mt-1">Turf Booking • Pre-paid</p>
-                                   </div>
-                                </div>
-                             </td>
-                             <td className="px-8 py-6 text-[11px] text-[#878C9F] font-bold uppercase tracking-widest">May 0{i}, 2026</td>
-                             <td className="px-8 py-6 text-right font-black text-[#CCFF00] tracking-tight">+ {(Math.random() * 1000).toFixed(0)} Coins</td>
-                          </tr>
-                        ))}
+                        {walletData.transactions && walletData.transactions.length > 0 ? (
+                           walletData.transactions.map((tx, idx) => (
+                              <tr key={tx._id || idx} className="hover:bg-[#2D2D2D]/20 transition-colors group">
+                                 <td className="px-8 py-6">
+                                    <div className="flex items-center gap-4">
+                                       <div className={`w-10 h-10 rounded-[6px] bg-[#2D2D2D] flex items-center justify-center border border-[#404040] group-hover:border-[#CCFF00]/50 transition-all ${tx.type === 'DEBIT' ? 'text-red-500' : 'text-[#CCFF00]'}`}>
+                                          {tx.type === 'DEBIT' ? <ArrowUpRight size={16} /> : <TrendingUp size={16} />}
+                                       </div>
+                                       <div>
+                                          <p className="text-sm font-bold uppercase tracking-tight">{tx.description || `Transaction #${tx._id?.slice(-6).toUpperCase()}`}</p>
+                                          <p className="text-[10px] text-[#878C9F] font-bold uppercase tracking-widest mt-1">{tx.type} • {tx.status}</p>
+                                       </div>
+                                    </div>
+                                 </td>
+                                 <td className="px-8 py-6 text-[11px] text-[#878C9F] font-bold uppercase tracking-widest">
+                                    {new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
+                                 </td>
+                                 <td className={`px-8 py-6 text-right font-black tracking-tight ${tx.type === 'DEBIT' ? 'text-red-500' : 'text-[#CCFF00]'}`}>
+                                    {tx.type === 'DEBIT' ? '-' : '+'} {Number(tx.amount).toLocaleString()} Coins
+                                 </td>
+                              </tr>
+                           ))
+                        ) : (
+                           <tr>
+                              <td colSpan="3" className="px-8 py-10 text-center text-gray-500 font-bold uppercase tracking-widest text-[10px]">
+                                 No transactions found in this node
+                              </td>
+                           </tr>
+                        )}
                      </tbody>
                   </table>
                </div>
@@ -399,23 +421,38 @@ const PayoutBanking = () => {
             {/* Payout History Snapshot */}
             <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-8 shadow-[var(--shadow-2)]">
                <h3 className="text-lg font-bold uppercase tracking-tight mb-6 font-open-sans">Recent Settlements</h3>
-               <div className="space-y-4">
-                  {[1,2].map(i => (
-                    <div key={i} className="flex justify-between items-center p-5 bg-[#151617] rounded-[8px] border border-[#2D2D2D] hover:border-[#CCFF00]/30 transition-all group">
-                       <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-[6px] bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
-                             <CheckCircle size={14} />
-                          </div>
-                          <div>
-                             <p className="text-sm font-black text-white tracking-tight">₹ 12,400.00</p>
-                             <p className="text-[10px] text-[#878C9F] font-bold uppercase tracking-widest mt-1">Apr 2{i}, 2026</p>
-                          </div>
-                       </div>
-                       <button className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest flex items-center gap-1.5 hover:text-white transition-colors">
-                          Logs <Download size={12} />
-                       </button>
-                    </div>
-                  ))}
+                <div className="space-y-4">
+                  {withdrawals && withdrawals.length > 0 ? (
+                     withdrawals.slice(0, 3).map((withdrawal, i) => (
+                        <div key={withdrawal._id || i} className="flex justify-between items-center p-5 bg-[#151617] rounded-[8px] border border-[#2D2D2D] hover:border-[#CCFF00]/30 transition-all group">
+                           <div className="flex items-center gap-4">
+                              <div className={`w-10 h-10 rounded-[6px] flex items-center justify-center border transition-all ${
+                                 withdrawal.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
+                                 withdrawal.status === 'PENDING' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' :
+                                 'bg-red-500/10 text-red-500 border-red-500/20'
+                              }`}>
+                                 {withdrawal.status === 'SUCCESS' ? <CheckCircle size={14} /> : <History size={14} />}
+                              </div>
+                              <div>
+                                 <p className="text-sm font-black text-white tracking-tight">₹ {Number(withdrawal.amount).toLocaleString()}</p>
+                                 <p className="text-[10px] text-[#878C9F] font-bold uppercase tracking-widest mt-1">
+                                    {new Date(withdrawal.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit' })}
+                                 </p>
+                              </div>
+                           </div>
+                           <span className={`text-[9px] font-black uppercase tracking-widest ${
+                              withdrawal.status === 'SUCCESS' ? 'text-emerald-500' : 
+                              withdrawal.status === 'PENDING' ? 'text-orange-500' : 'text-red-500'
+                           }`}>
+                              {withdrawal.status}
+                           </span>
+                        </div>
+                     ))
+                  ) : (
+                     <div className="p-8 text-center bg-[#151617] rounded-[8px] border border-[#2D2D2D]">
+                        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">No recent settlements</p>
+                     </div>
+                  )}
                </div>
             </div>
          </div>

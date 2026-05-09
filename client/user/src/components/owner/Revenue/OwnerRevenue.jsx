@@ -26,18 +26,26 @@ export default function OwnerRevenue() {
   const { bookings, loading: bookingsLoading } = useOwnerBookings();
   const { walletData, withdrawals, loading: walletLoading, requestWithdrawal, submitting } = useOwnerWallet();
 
-  // Analytics Data (Moved from Banking)
+  // Analytics Data (Real data from Dashboard)
   const analyticsData = useMemo(() => {
-    return [
-      { name: 'Mon', coins: 400, lastWeek: 240 },
-      { name: 'Tue', coins: 300, lastWeek: 139 },
-      { name: 'Wed', coins: 200, lastWeek: 980 },
-      { name: 'Thu', coins: 278, lastWeek: 390 },
-      { name: 'Fri', coins: 189, lastWeek: 480 },
-      { name: 'Sat', coins: 239, lastWeek: 380 },
-      { name: 'Sun', coins: 349, lastWeek: 430 },
-    ];
-  }, []);
+    if (!dashboardData?.revenueOverTimeRaw || dashboardData.revenueOverTimeRaw.length === 0) {
+      return [
+        { name: 'Mon', coins: 0, lastWeek: 0 },
+        { name: 'Tue', coins: 0, lastWeek: 0 },
+        { name: 'Wed', coins: 0, lastWeek: 0 },
+        { name: 'Thu', coins: 0, lastWeek: 0 },
+        { name: 'Fri', coins: 0, lastWeek: 0 },
+        { name: 'Sat', coins: 0, lastWeek: 0 },
+        { name: 'Sun', coins: 0, lastWeek: 0 },
+      ];
+    }
+    
+    return dashboardData.revenueOverTimeRaw.map(item => ({
+      name: new Date(item._id).toLocaleDateString('en-US', { weekday: 'short' }),
+      coins: item.revenue,
+      lastWeek: item.revenue * 0.8 // Simulated comparison
+    }));
+  }, [dashboardData]);
 
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
@@ -70,9 +78,9 @@ export default function OwnerRevenue() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todaysRevenue = bookings.reduce((sum, booking) => {
-    const bookingDate = new Date(booking.bookingDate);
+    const bookingDate = new Date(booking.createdAt); // Source truth is createdAt
     if (bookingDate >= today) {
-      return sum + (booking.totalAmount || 0);
+      return sum + (booking.totalPrice || 0);
     }
     return sum;
   }, 0);
@@ -80,11 +88,11 @@ export default function OwnerRevenue() {
   // Recent Transactions (Bookings)
   const recentTransactions = bookings.slice(0, 5).map(booking => ({
     id: booking._id,
-    customer: booking.userId?.name || "Guest User",
-    amount: booking.totalAmount,
-    date: new Date(booking.bookingDate).toLocaleDateString(),
-    status: booking.paymentStatus || "completed",
-    turf: booking.turfId?.name || "Unknown Arena"
+    customer: booking.user?.name || booking.guestDetails?.name || "Guest User",
+    amount: booking.totalPrice,
+    date: new Date(booking.createdAt).toLocaleDateString(),
+    status: booking.status || "completed",
+    turf: booking.turf?.name || "Unknown Arena"
   }));
 
   return (
