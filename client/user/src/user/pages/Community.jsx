@@ -533,7 +533,7 @@ const Community = () => {
                           className="w-full h-full flex items-center justify-center"
                           style={{ display: post.adminId?.profilePicture ? 'none' : 'flex' }}
                         >
-                          <User size={20} className="text-[#84CC16]" />
+                          <UserIcon size={20} className="text-[#84CC16]" />
                         </div>
                       </div>
                     </div>

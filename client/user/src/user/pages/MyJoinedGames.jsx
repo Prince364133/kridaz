@@ -4,7 +4,7 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { 
   Users, LogOut, Clock, MapPin, 
-  Trophy, Info, Calendar, Coins
+  Trophy, Info, Calendar, Coins, User
 } from 'lucide-react';
 
 const MyJoinedGames = () => {
