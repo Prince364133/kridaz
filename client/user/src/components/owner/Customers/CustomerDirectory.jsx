@@ -67,22 +67,25 @@ export default function CustomerDirectory() {
     <div className="h-full custom-scrollbar bg-[#000000] text-white">
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
         {/* Header */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
-          <div className="space-y-1">
-            <h1 className="text-2xl md:text-3xl font-bold font-['Open_Sans'] tracking-tight uppercase">Customer Directory</h1>
-            <p className="text-[#878C9F] font-inter text-[20px] mt-1">Monitor player engagement and lifetime value</p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 border-b border-[#2D2D2D] pb-6">
+          <div>
+            <div className="flex items-center gap-3">
+              <User className="text-[#CCFF00]" size={32} />
+              <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] tracking-tight uppercase leading-none">Customer Directory</h1>
+            </div>
+            <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-11">Monitor player engagement and lifetime value.</p>
           </div>
           <div className="flex items-center gap-3 w-full md:w-auto">
-            <button className="flex items-center justify-center gap-2 px-4 py-2 bg-[#000000] hover:bg-[#111111] border border-[#2D2D2D] rounded-[8px] text-[13px] font-normal uppercase tracking-widest transition-all shadow-[var(--shadow-2)] w-full md:w-auto font-[Arial]">
+            <button className="flex items-center justify-center gap-2 px-4 py-2 bg-[#000000] hover:bg-[#111111] border border-[#2D2D2D] rounded-[8px] text-[13px] font-bold uppercase tracking-widest transition-all shadow-[var(--shadow-2)] w-full md:w-auto font-inter">
               <Download size={16} />
               Export CSV
             </button>
-            <button className="flex items-center justify-center gap-2 px-4 py-2 bg-[#CCFF00] hover:bg-[#b3ff00] text-black rounded-[8px] text-[13px] font-bold uppercase tracking-widest transition-all w-full md:w-auto shadow-[0_0_15px_rgba(204,255,0,0.15)] font-[Arial]">
+            <button className="flex items-center justify-center gap-2 px-4 py-2 bg-[#CCFF00] hover:bg-[#b3ff00] text-black rounded-[8px] text-[13px] font-bold uppercase tracking-widest transition-all w-full md:w-auto shadow-[0_0_15px_rgba(204,255,0,0.15)] font-inter">
               <Plus size={18} />
               Add Customer
             </button>
           </div>
-        </header>
+        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">

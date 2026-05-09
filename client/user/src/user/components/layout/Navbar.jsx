@@ -144,16 +144,25 @@ const Navbar = () => {
                 <div className="dropdown dropdown-end group/profile">
                   <label tabIndex={0} className="relative w-10 h-10 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group overflow-hidden">
                     <User size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors absolute inset-0 m-auto" />
-                    {user?.profilePicture && (
+                    {user?.profilePicture ? (
                       <img 
                         src={user.profilePicture} 
                         alt="Profile" 
                         className="w-full h-full object-cover relative z-10" 
                         onError={(e) => {
                           e.target.style.display = 'none';
+                          if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
                         }}
                       />
-                    )}
+                    ) : null}
+                    <div 
+                      className="w-full h-full flex items-center justify-center relative z-10"
+                      style={{ display: user?.profilePicture ? 'none' : 'flex' }}
+                    >
+                      <span className="text-[#84CC16] font-black text-xs">
+                        {user?.name ? user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : <User size={20} />}
+                      </span>
+                    </div>
                     <div className="absolute inset-0 bg-[#84CC16]/10 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
                   </label>
                   
@@ -163,16 +172,25 @@ const Navbar = () => {
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden shrink-0 relative">
                           <User size={24} className="text-[#84CC16] absolute inset-0 m-auto opacity-40" />
-                          {user?.profilePicture && (
+                          {user?.profilePicture ? (
                             <img 
                               src={user.profilePicture} 
                               alt="" 
                               className="w-full h-full object-cover absolute inset-0 z-10" 
                               onError={(e) => {
                                 e.target.style.display = 'none';
+                                if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
                               }}
                             />
-                          )}
+                          ) : null}
+                          <div 
+                            className="w-full h-full flex items-center justify-center absolute inset-0 z-10"
+                            style={{ display: user?.profilePicture ? 'none' : 'flex' }}
+                          >
+                            <span className="text-[#84CC16] font-black text-sm">
+                              {user?.name ? user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : <User size={24} />}
+                            </span>
+                          </div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-white truncate">{user?.name || "User Account"}</p>

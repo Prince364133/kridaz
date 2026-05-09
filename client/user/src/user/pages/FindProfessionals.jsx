@@ -145,11 +145,27 @@ export default function FindProfessionals() {
               >
                 {/* Image Section */}
                 <div className="relative h-64 overflow-hidden">
-                  <img 
-                    src={pro.profilePicture || "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800&q=80"} 
-                    alt={pro.name} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
+                  <div className="w-full h-full bg-[#84CC16]/10 flex items-center justify-center overflow-hidden">
+                    {pro.profilePicture ? (
+                      <img 
+                        src={pro.profilePicture} 
+                        alt={pro.name} 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div 
+                      className="w-full h-full flex items-center justify-center"
+                      style={{ display: pro.profilePicture ? 'none' : 'flex' }}
+                    >
+                      <span className="text-[#84CC16] font-black text-5xl">
+                        {pro.name ? pro.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
+                      </span>
+                    </div>
+                  </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30" />
                   
                   {/* Badges */}

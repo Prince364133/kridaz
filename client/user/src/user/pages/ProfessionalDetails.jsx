@@ -121,11 +121,27 @@ export default function ProfessionalDetails() {
               <div className="flex flex-col md:flex-row gap-8 items-start">
                 <div className="relative">
                   <div className="w-32 h-32 md:w-48 md:h-48 rounded-[32px] overflow-hidden border-4 border-[#84CC16]/20">
-                    <img 
-                      src={pro.profilePicture || "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800&q=80"} 
-                      alt={pro.name} 
-                      className="w-full h-full object-cover"
-                    />
+                    <div className="w-full h-full bg-[#84CC16]/10 flex items-center justify-center overflow-hidden">
+                      {pro.profilePicture ? (
+                        <img 
+                          src={pro.profilePicture} 
+                          alt={pro.name} 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div 
+                        className="w-full h-full flex items-center justify-center"
+                        style={{ display: pro.profilePicture ? 'none' : 'flex' }}
+                      >
+                        <span className="text-[#84CC16] font-black text-4xl">
+                          {pro.name ? pro.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                   <div className="absolute -bottom-2 -right-2 bg-[#84CC16] p-2 rounded-xl shadow-xl">
                     <Shield size={20} className="text-black" />
@@ -194,7 +210,26 @@ export default function ProfessionalDetails() {
                       <div key={i} className="border-b border-neutral-800 pb-4 last:border-0 last:pb-0">
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center gap-2">
-                            <img src={review.user?.profilePicture} className="w-6 h-6 rounded-full" />
+                            <div className="w-6 h-6 rounded-full border border-white/10 overflow-hidden bg-[#84CC16]/10 flex items-center justify-center shrink-0">
+                              {review.user?.profilePicture ? (
+                                <img 
+                                  src={review.user.profilePicture} 
+                                  className="w-full h-full object-cover" 
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div 
+                                className="w-full h-full flex items-center justify-center"
+                                style={{ display: review.user?.profilePicture ? 'none' : 'flex' }}
+                              >
+                                <span className="text-[#84CC16] font-black text-[8px]">
+                                  {review.user?.name ? review.user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
+                                </span>
+                              </div>
+                            </div>
                             <span className="text-xs font-bold">{review.user?.name}</span>
                           </div>
                           <div className="flex items-center gap-0.5">

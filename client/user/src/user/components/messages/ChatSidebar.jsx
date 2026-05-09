@@ -13,10 +13,46 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup }) => {
     return otherUser ? otherUser.name : "Unknown User";
   };
 
-  const getChatImage = (chat) => {
-    if (chat.isGroupChat) return "https://cdn-icons-png.flaticon.com/512/166/166258.png";
-    const otherUser = chat.users.find((u) => u._id !== user?._id);
-    return otherUser?.profilePicture || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+  const getChatOtherUser = (chat) => {
+    if (chat.isGroupChat) return null;
+    return chat.users.find((u) => u._id !== user?._id);
+  };
+
+  const renderAvatar = (chat) => {
+    if (chat.isGroupChat) {
+      return (
+        <div className="w-12 h-12 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#84CC16]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </div>
+      );
+    }
+
+    const otherUser = getChatOtherUser(chat);
+    return (
+      <div className="w-12 h-12 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center overflow-hidden">
+        {otherUser?.profilePicture ? (
+          <img 
+            src={otherUser.profilePicture} 
+            alt={otherUser.name} 
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div 
+          className="w-full h-full flex items-center justify-center"
+          style={{ display: otherUser?.profilePicture ? 'none' : 'flex' }}
+        >
+          <span className="text-[#84CC16] font-black text-sm">
+            {otherUser?.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
+          </span>
+        </div>
+      </div>
+    );
   };
 
   const handleRespond = async (chatId, status) => {
@@ -98,7 +134,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup }) => {
                 }`}
               >
                 <div className="relative">
-                  <img src={getChatImage(chat)} alt={getChatName(chat)} className="w-12 h-12 rounded-full border border-white/10" />
+                  {renderAvatar(chat)}
                   {chat.isGroupChat && (
                     <div className="absolute -bottom-1 -right-1 bg-primary text-black text-[10px] px-1 rounded-sm font-bold">GP</div>
                   )}

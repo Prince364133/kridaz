@@ -518,7 +518,7 @@ export default function Home() {
                 style={{ backgroundColor: PRI }}>Join Now</Link>
             </div>
           ) : (
-            <div className="flex overflow-x-auto pb-8 mt-10 no-scrollbar scroll-smooth px-0 md:px-2">
+            <div className="flex overflow-x-auto pt-8 pb-8 mt-2 no-scrollbar scroll-smooth px-0 md:px-2">
               {players.map(p => {
                 const level = getLevel(p.bookingCount);
                 const initials = p.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "??";
@@ -546,20 +546,26 @@ export default function Home() {
                             color: "#fff",
                             fontFamily: "var(--font-display, sans-serif)"
                           }}>
-                          {p.profilePicture && (
+                          {p.profilePicture ? (
                             <img 
                               src={p.profilePicture} 
                               alt={p.name} 
                               className="w-full h-full object-cover absolute inset-0 z-10 brightness-90 group-hover:brightness-110 transition-all duration-500" 
                               onError={(e) => {
                                 e.target.style.display = 'none';
+                                if (e.target.nextSibling) e.target.nextSibling.style.display = 'block';
                               }}
                             />
-                          )}
-                          <span className="relative z-0 tracking-tighter">{initials}</span>
-
-                          {/* Cinematic Glass Overlay */}
-                          <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none z-20" />
+                          ) : null}
+                          <span 
+                            className="relative z-10 tracking-tighter"
+                            style={{ display: p.profilePicture ? 'none' : 'block' }}
+                          >
+                            {initials}
+                          </span>
+                          
+                          {/* Glass Shine */}
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none z-20" />
                         </div>
                       </div>
 
@@ -889,11 +895,20 @@ export default function Home() {
                                 <img 
                                   src={author.profilePicture} 
                                   alt="" 
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => { e.target.style.display = 'none'; }}
+                                  className="w-full h-full object-cover relative z-10"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                  }}
                                 />
                               ) : null}
-                              <div className="w-full h-full flex items-center justify-center font-bold text-[10px] uppercase text-white" style={{ backgroundColor: avatarColor(author?.name || "A") }}>
+                              <div 
+                                className="w-full h-full flex items-center justify-center font-bold text-[10px] uppercase text-white absolute inset-0 z-0" 
+                                style={{ 
+                                  backgroundColor: avatarColor(author?.name || "A"),
+                                  display: author?.profilePicture ? 'none' : 'flex'
+                                }}
+                              >
                                 {(author?.name || "A")[0]}
                               </div>
                             </div>

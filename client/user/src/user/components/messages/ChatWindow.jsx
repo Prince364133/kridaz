@@ -119,12 +119,34 @@ const ChatWindow = ({ chat }) => {
     <div className="flex-1 flex flex-col h-full bg-black/40 relative">
       {/* Header */}
       <div className="p-4 border-b border-white/10 flex items-center gap-3 bg-black/60 backdrop-blur-md sticky top-0 z-10">
-        <div className="relative">
-          <img 
-            src={chat.isGroupChat ? "https://cdn-icons-png.flaticon.com/512/166/166258.png" : chat.users.find(u => u._id !== user?._id)?.profilePicture || "https://cdn-icons-png.flaticon.com/512/149/149071.png"} 
-            className="w-10 h-10 rounded-full border border-white/20" 
-            alt={getChatName()}
-          />
+        <div className="relative w-10 h-10 rounded-full border border-white/20 overflow-hidden bg-[#84CC16]/10 flex items-center justify-center shrink-0">
+          {chat.isGroupChat ? (
+            <svg className="w-5 h-5 text-[#84CC16]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          ) : (
+            <>
+              {chat.users.find(u => u._id !== user?._id)?.profilePicture ? (
+                <img 
+                  src={chat.users.find(u => u._id !== user?._id).profilePicture} 
+                  alt={getChatName()}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div 
+                className="w-full h-full flex items-center justify-center"
+                style={{ display: chat.users.find(u => u._id !== user?._id)?.profilePicture ? 'none' : 'flex' }}
+              >
+                <span className="text-[#84CC16] font-black text-xs">
+                  {chat.users.find(u => u._id !== user?._id)?.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
+                </span>
+              </div>
+            </>
+          )}
         </div>
         <div>
           <h3 className="text-white font-bold">{getChatName()}</h3>

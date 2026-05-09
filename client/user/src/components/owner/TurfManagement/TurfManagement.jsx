@@ -25,6 +25,8 @@ const TurfManagement = () => {
   return (
     <div className="h-full custom-scrollbar bg-[#000000] text-white">
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
       {/* Top Action Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-6 relative z-10 border-b border-[#2D2D2D] pb-6">
         <div>
@@ -78,6 +80,7 @@ const TurfManagement = () => {
           <Link to="/partner/add-turf" className="mt-6 text-[#CCFF00] text-[11px] font-bold uppercase tracking-widest border-b border-[#CCFF00]/40 hover:border-[#CCFF00] transition-all pb-1">Initialize First Venue</Link>
         </div>
       )}
+      </div>
     </div>
   );
 };

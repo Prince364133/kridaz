@@ -235,8 +235,26 @@ const JoinGames = () => {
 
               <div className="px-5 pb-5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center text-[10px] border border-neutral-600 font-black">
-                    {game.host?.name ? game.host.name[0].toUpperCase() : '?'}
+                  <div className="w-8 h-8 rounded-full border border-white/20 overflow-hidden bg-[#84CC16]/10 flex items-center justify-center shrink-0">
+                    {game.host?.profilePicture ? (
+                      <img 
+                        src={game.host.profilePicture} 
+                        alt="" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div 
+                      className="w-full h-full flex items-center justify-center"
+                      style={{ display: game.host?.profilePicture ? 'none' : 'flex' }}
+                    >
+                      <span className="text-[#84CC16] font-black text-[10px]">
+                        {game.host?.name ? game.host.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
+                      </span>
+                    </div>
                   </div>
                   <div className="text-[10px]">
                     <p className="text-neutral-500">HOSTED BY</p>

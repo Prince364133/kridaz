@@ -122,12 +122,24 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                   <div className="flex items-center gap-3 overflow-hidden">
                     <Link to={`/profile/${user._id}`} onClick={onClose} className="shrink-0 w-10 h-10 rounded-xl overflow-hidden bg-white/5 border border-white/10">
                       {user.profilePicture ? (
-                        <img src={user.profilePicture} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-[#84CC16]/10">
-                          <Users size={16} className="text-[#84CC16]" />
-                        </div>
-                      )}
+                        <img 
+                          src={user.profilePicture} 
+                          alt="" 
+                          className="w-full h-full object-cover" 
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div 
+                        className="w-full h-full flex items-center justify-center bg-[#84CC16]/10"
+                        style={{ display: user.profilePicture ? 'none' : 'flex' }}
+                      >
+                        <span className="text-[#84CC16] font-black text-[10px]">
+                          {user.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
+                        </span>
+                      </div>
                     </Link>
                     <div className="overflow-hidden">
                       <Link to={`/profile/${user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#84CC16] transition-colors truncate">

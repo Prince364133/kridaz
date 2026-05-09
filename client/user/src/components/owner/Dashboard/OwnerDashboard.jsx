@@ -16,10 +16,10 @@ import {
   Cell,
   Legend
 } from "recharts";
-import { 
-  Calendar, 
-  Star, 
-  TrendingUp, 
+import {
+  Calendar,
+  Star,
+  TrendingUp,
   Building,
   Users,
   ChevronRight,
@@ -56,7 +56,7 @@ const OwnerDashboard = () => {
       <div className="flex flex-col justify-center items-center min-h-[60vh] text-white">
         <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mb-4"></div>
         <p className="font-bold text-xl uppercase tracking-wider text-red-500">Connection Interrupted</p>
-        <button 
+        <button
           onClick={() => window.location.reload()}
           className="mt-6 px-8 py-3 border border-red-500/50 text-red-500 font-bold uppercase rounded-xl hover:bg-red-500/10 transition-all"
         >
@@ -114,9 +114,9 @@ const OwnerDashboard = () => {
       { date: "18:00", revenue: 0 },
       { date: "21:00", revenue: 0 },
     ],
-    Week: revenueOverTimeRaw.length > 0 ? revenueOverTimeRaw.map(i => ({ 
-      date: new Date(i._id).toLocaleDateString('en-US', { weekday: 'short' }), 
-      revenue: i.revenue 
+    Week: revenueOverTimeRaw.length > 0 ? revenueOverTimeRaw.map(i => ({
+      date: new Date(i._id).toLocaleDateString('en-US', { weekday: 'short' }),
+      revenue: i.revenue
     })) : [
       { date: "Mon", revenue: 0 },
       { date: "Tue", revenue: 0 },
@@ -151,44 +151,45 @@ const OwnerDashboard = () => {
   return (
     <div className="h-full custom-scrollbar bg-[#000000]">
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 lg:space-y-10 animate-fade-in pt-0 pb-24 h-full relative">
-        
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
         <div className="space-y-8 lg:space-y-10 relative z-10">
-          
+
           {/* New Stats Grid - 6 Cards */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-5">
-            <StatsCard 
+            <StatsCard
               title="Total Bookings"
               value={totalBookings}
               icon={Calendar}
               trend="+12.5%"
             />
-            <StatsCard 
+            <StatsCard
               title="Total Revenue"
               value={totalRevenue}
               prefix="₹"
               icon={TrendingUp}
               trend="+8.2%"
             />
-            <StatsCard 
+            <StatsCard
               title="Utilization Rate"
               value={utilization || 78}
               suffix="%"
               icon={Activity}
               trend="+4.1%"
             />
-            <StatsCard 
+            <StatsCard
               title="Active Grounds"
               value={totalTurfs || 1}
               icon={MapPin}
               trend="Stable"
             />
-            <StatsCard 
+            <StatsCard
               title="Average Rating"
               value={averageRating || 4.9}
               icon={Star}
               trend="+0.2"
             />
-            <StatsCard 
+            <StatsCard
               title="Repeat Customers"
               value={42}
               suffix="%"
@@ -200,11 +201,11 @@ const OwnerDashboard = () => {
 
           {/* Main Analytics Row: 3 Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-            
+
             {/* Booking Performance */}
             <div className="lg:col-span-6">
-              <ChartCard 
-                title="Booking Performance" 
+              <ChartCard
+                title="Booking Performance"
                 subtitle="Weekly operational trends"
                 action={
                   <div className="flex items-center gap-2 bg-[#2D2D2D] p-1 rounded-[6px]">
@@ -212,11 +213,10 @@ const OwnerDashboard = () => {
                       <button
                         key={filter}
                         onClick={() => setRevenueFilter(filter === "Weekly" ? "Week" : "Month")}
-                        className={`px-4 py-1.5 rounded-[4px] text-[11px] font-normal uppercase tracking-wider transition-all font-[Arial] ${
-                          (revenueFilter === "Week" && filter === "Weekly") || (revenueFilter === "Month" && filter === "Monthly")
-                            ? "bg-[#CCFF00] text-black" 
+                        className={`px-4 py-1.5 rounded-[4px] text-[11px] font-normal uppercase tracking-wider transition-all font-inter ${(revenueFilter === "Week" && filter === "Weekly") || (revenueFilter === "Month" && filter === "Monthly")
+                            ? "bg-[#CCFF00] text-black"
                             : "text-[#999999] hover:text-[#FFFFFF]"
-                        }`}
+                          }`}
                       >
                         {filter}
                       </button>
@@ -228,14 +228,14 @@ const OwnerDashboard = () => {
                   <AreaChart data={revenueDataMap[revenueFilter]}>
                     <defs>
                       <linearGradient id="colorPerf" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="#CCFF00" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="#CCFF00" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" vertical={false} />
                     <XAxis dataKey="date" stroke="#999999" fontSize={10} tickLine={false} axisLine={false} />
                     <YAxis stroke="#999999" fontSize={10} tickLine={false} axisLine={false} />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ backgroundColor: '#151617', border: '1px solid #2D2D2D', borderRadius: '8px', padding: '12px' }}
                       itemStyle={{ color: '#CCFF00', fontSize: '12px', textTransform: 'uppercase', fontFamily: 'Inter' }}
                     />
@@ -266,17 +266,17 @@ const OwnerDashboard = () => {
                         dataKey="value"
                         stroke="none"
                       >
-                        {(revenueByCategory.length > 0 ? revenueByCategory : [{},{},{},{}]).map((entry, index) => (
+                        {(revenueByCategory.length > 0 ? revenueByCategory : [{}, {}, {}, {}]).map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={index === 0 ? "#CCFF00" : index === 1 ? "#BFFF00" : index === 2 ? "#ADEB00" : "#878C9F"} />
                         ))}
                       </Pie>
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ backgroundColor: '#151617', border: '1px solid #2D2D2D', borderRadius: '8px' }}
                         itemStyle={{ textTransform: 'uppercase', fontSize: '10px', color: '#CCFF00', fontFamily: 'Inter' }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
-                  
+
                   <div className="grid grid-cols-1 gap-2 mt-4 w-full px-2">
                     {(revenueByCategory.length > 0 ? revenueByCategory.slice(0, 4) : [
                       { name: "Football", value: 36 },
@@ -298,8 +298,8 @@ const OwnerDashboard = () => {
             </div>
 
             <div className="lg:col-span-4 h-full">
-              <ChartCard 
-                title="Venue Health" 
+              <ChartCard
+                title="Venue Health"
                 subtitle="Optimization Score"
                 action={
                   <div className="w-8 h-8 bg-[#CCFF00]/10 text-[#CCFF00] rounded-[6px] flex items-center justify-center border border-[#CCFF00]/20">
@@ -312,16 +312,16 @@ const OwnerDashboard = () => {
                     <div className="relative w-32 h-32 flex items-center justify-center">
                       <svg className="w-full h-full transform -rotate-90">
                         <circle cx="64" cy="64" r="54" fill="none" stroke="currentColor" strokeWidth="10" className="text-[#1A1A1A]" />
-                        <circle 
-                          cx="64" 
-                          cy="64" 
-                          r="54" 
-                          fill="none" 
-                          stroke="currentColor" 
-                          strokeWidth="10" 
-                          strokeDasharray={340} 
-                          strokeDashoffset={340 - (340 * (venueHealth.score || 82)) / 100} 
-                          className="text-[#CCFF00] transition-all duration-1000 ease-out" 
+                        <circle
+                          cx="64"
+                          cy="64"
+                          r="54"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="10"
+                          strokeDasharray={340}
+                          strokeDashoffset={340 - (340 * (venueHealth.score || 82)) / 100}
+                          className="text-[#CCFF00] transition-all duration-1000 ease-out"
                           strokeLinecap="round"
                           style={{ filter: 'drop-shadow(0 0 8px rgba(204, 255, 0, 0.4))' }}
                         />
@@ -359,120 +359,170 @@ const OwnerDashboard = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
             <div className="lg:col-span-8">
-               <OccupancyHeatmap />
+              <OccupancyHeatmap />
             </div>
             <div className="lg:col-span-4">
-               <PeakHoursChart />
-            </div>
-          </div>
-
-          {/* Row: Bookings and Insights */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-            
-            <div className="lg:col-span-8">
-              <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)]">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <h2 className="text-xl font-semibold text-white uppercase tracking-tight">Recent Bookings</h2>
-                    <p className="text-[12px] font-normal text-[#999999] uppercase tracking-widest mt-1">Manage active sessions</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]" size={14} />
-                      <input 
-                        type="text" 
-                        placeholder="Filter player..." 
-                        className="bg-[#2D2D2D] border border-[#404040] rounded-[6px] py-2 pl-9 pr-4 text-[14px] text-white focus:outline-none focus:border-[#CCFF00] transition-all font-inter"
-                      />
-                    </div>
+<<<<<<< HEAD
+  <PeakHoursChart />
+=======
+              
+              {/* Live Feed */}
+              <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] h-full">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider">Live Feed</h2>
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] rounded-full text-[10px] font-medium uppercase tracking-widest animate-pulse border border-[#CCFF00]/20">
+                    <span className="w-1 h-1 bg-[#CCFF00] rounded-full" /> Live
                   </div>
                 </div>
-
-                <div className="overflow-x-auto no-scrollbar">
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="border-b border-[#2D2D2D]">
-                        <th className="pb-4 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Player</th>
-                        <th className="pb-4 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Sport / Ground</th>
-                        <th className="pb-4 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Timing</th>
-                        <th className="pb-4 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Status</th>
-                        <th className="pb-4 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Payment</th>
-                        <th className="pb-4 text-[12px] font-medium text-[#999999] uppercase tracking-wider text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#2D2D2D]/30">
-                      {(recentBookings.length > 0 ? recentBookings.slice(0, 5) : [{},{},{},{},{}]).map((booking, i) => (
-                        <tr key={i} className="group hover:bg-[#2D2D2D]/20 transition-colors">
-                          <td className="py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-[4px] bg-[#2D2D2D] flex items-center justify-center text-[12px] font-semibold text-white uppercase border border-[#404040]">
-                                {booking?.user?.name?.[0] || booking?.guestDetails?.name?.[0] || "U"}
-                              </div>
-                              <div>
-                                <p className="text-[14px] font-semibold text-white uppercase tracking-tight">
-                                  {booking?.user?.name || booking?.guestDetails?.name || "Player Name"}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4">
-                            <div>
-                              <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{booking?.turf?.category || "Football"}</p>
-                              <p className="text-[12px] font-normal text-[#999999] uppercase">{booking?.turf?.name || "Ground Name"}</p>
-                            </div>
-                          </td>
-                          <td className="py-4">
-                            <p className="text-[14px] font-semibold text-white tracking-tight">18:00 - 19:00</p>
-                          </td>
-                          <td className="py-4">
-                            <span className="px-3 py-1 bg-[#4CAF50]/15 text-[#4CAF50] text-[12px] font-medium uppercase tracking-wider rounded-[12px] border border-[#4CAF50]/30">Confirmed</span>
-                          </td>
-                          <td className="py-4">
-                            <p className="text-[14px] font-semibold text-white tracking-tight">₹{booking?.totalPrice || "0"}</p>
-                          </td>
-                          <td className="py-4 text-right">
-                            <button className="p-2 text-[#878C9F] hover:text-[#CCFF00] transition-colors"><ExternalLink size={16} /></button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-4">
-              <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] relative overflow-hidden h-full">
-                <div className="flex items-center gap-3 mb-6 relative z-10">
-                  <div className="p-2 bg-[#CCFF00]/10 text-[#CCFF00] rounded-[6px] border border-[#CCFF00]/20"><Zap size={20} /></div>
-                  <div>
-                    <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider">Smart Insights</h2>
-                    <p className="text-[10px] font-normal text-[#878C9F] uppercase tracking-widest">AI Powered Recommendations</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4 relative z-10">
+                
+                <div className="space-y-6">
                   {[
-                    { icon: TrendingUp, title: "Offer weekday discounts", desc: "Boost Monday-Thursday morning bookings by 20% with a 'Early Bird' promo." },
-                    { icon: Activity, title: "Boost Ground 3 visibility", desc: "This ground has 40% lower occupancy than others this month." },
+                    { icon: Zap, title: "New booking received", desc: "Arjun K booked Ground 1 for 2 hours.", time: "2 mins ago", color: "text-[#CCFF00]" },
+                    { icon: Info, title: "Ground 2 at capacity", desc: "90% occupancy reached for evening slots.", time: "15 mins ago", color: "text-[#0000EE]" },
+                    { icon: CheckCircle2, title: "Payment successful", desc: "₹2,400 received for Booking #8003.", time: "45 mins ago", color: "text-[#4CAF50]" },
                   ].map((item, i) => (
-                    <div key={i} className="bg-[#2D2D2D]/20 p-4 rounded-[6px] border border-[#2D2D2D] hover:bg-[#2D2D2D]/40 transition-all group">
-                      <div className="flex items-start gap-4">
-                        <div className="mt-1 p-2 rounded-[6px] bg-[#CCFF00]/10 text-[#CCFF00]"><item.icon size={14} /></div>
-                        <div className="flex-1">
-                          <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{item.title}</p>
-                          <p className="text-[12px] text-[#999999] mt-1 leading-relaxed">{item.desc}</p>
-                        </div>
+                    <div key={i} className="flex gap-4 group cursor-pointer">
+                      <div className={`mt-1 p-2 rounded-[6px] bg-[#2D2D2D] ${item.color} group-hover:scale-110 transition-transform`}><item.icon size={14} /></div>
+                      <div>
+                        <p className="text-[14px] font-semibold text-white uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">{item.title}</p>
+                        <p className="text-[12px] text-[#999999] mt-0.5">{item.desc}</p>
+                        <p className="text-[10px] font-medium text-[#878C9F] uppercase mt-1 flex items-center gap-1"><Clock size={10} /> {item.time}</p>
                       </div>
                     </div>
                   ))}
                 </div>
+                
+                <button className="w-full mt-8 py-3 bg-transparent border border-[#2D2D2D] hover:bg-[#CCFF00]/10 hover:text-[#CCFF00] text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter">
+                  View Full Activity History
+                </button>
               </div>
+>>>>>>> 01016f4 (Standardized avatar rendering system across all user-facing components)
+            </div >
+          </div >
+
+  {/* Row: Bookings and Insights */ }
+  < div className = "grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start" >
+
+    <div className="lg:col-span-8">
+      <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)]">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-xl font-semibold text-white uppercase tracking-tight">Recent Bookings</h2>
+            <p className="text-[12px] font-normal text-[#999999] uppercase tracking-widest mt-1">Manage active sessions</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]" size={14} />
+              <input
+                type="text"
+                placeholder="Filter player..."
+                className="bg-[#2D2D2D] border border-[#404040] rounded-[6px] py-2 pl-9 pr-4 text-[14px] text-white focus:outline-none focus:border-[#CCFF00] transition-all font-inter"
+              />
             </div>
           </div>
         </div>
+
+        <div className="overflow-x-auto no-scrollbar">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-[#2D2D2D]">
+                <th className="pb-4 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Player</th>
+                <th className="pb-4 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Sport / Ground</th>
+                <th className="pb-4 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Timing</th>
+                <th className="pb-4 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Status</th>
+                <th className="pb-4 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Payment</th>
+                <th className="pb-4 text-[12px] font-medium text-[#999999] uppercase tracking-wider text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#2D2D2D]/30">
+              {(recentBookings.length > 0 ? recentBookings.slice(0, 5) : [{}, {}, {}, {}, {}]).map((booking, i) => (
+                <tr key={i} className="group hover:bg-[#2D2D2D]/20 transition-colors">
+                  <td className="py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-[4px] bg-[#2D2D2D] flex items-center justify-center text-[12px] font-semibold text-white uppercase border border-[#404040]">
+                        {booking?.user?.name?.[0] || booking?.guestDetails?.name?.[0] || "U"}
+                      </div>
+                      <div>
+                        <p className="text-[14px] font-semibold text-white uppercase tracking-tight">
+                          {booking?.user?.name || booking?.guestDetails?.name || "Player Name"}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4">
+                    <div>
+                      <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{booking?.turf?.category || "Football"}</p>
+                      <p className="text-[12px] font-normal text-[#999999] uppercase">{booking?.turf?.name || "Ground Name"}</p>
+                    </div>
+                  </td>
+                  <td className="py-4">
+                    <p className="text-[14px] font-semibold text-white tracking-tight">18:00 - 19:00</p>
+                  </td>
+                  <td className="py-4">
+                    <span className="px-3 py-1 bg-[#4CAF50]/15 text-[#4CAF50] text-[12px] font-medium uppercase tracking-wider rounded-[12px] border border-[#4CAF50]/30">Confirmed</span>
+                  </td>
+                  <td className="py-4">
+                    <p className="text-[14px] font-semibold text-white tracking-tight">₹{booking?.totalPrice || "0"}</p>
+                  </td>
+                  <td className="py-4 text-right">
+                    <button className="p-2 text-[#878C9F] hover:text-[#CCFF00] transition-colors"><ExternalLink size={16} /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+<<<<<<< HEAD
+=======
+                
+                <div className="mt-8 pt-6 border-t border-[#2D2D2D] flex items-center justify-between">
+                  <p className="text-[12px] font-normal text-[#999999] uppercase tracking-widest">Showing 5 of {totalBookings} bookings</p>
+                  <button className="text-[13px] font-normal text-[#CCFF00] uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-all font-inter">
+                    View All Transactions <ChevronRight size={14} />
+                  </button>
+                </div>
+>>>>>>> 01016f4 (Standardized avatar rendering system across all user-facing components)
+              </div >
+            </div >
+
+  <div className="lg:col-span-4">
+    <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] relative overflow-hidden h-full">
+      <div className="flex items-center gap-3 mb-6 relative z-10">
+        <div className="p-2 bg-[#CCFF00]/10 text-[#CCFF00] rounded-[6px] border border-[#CCFF00]/20"><Zap size={20} /></div>
+        <div>
+          <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider">Smart Insights</h2>
+          <p className="text-[10px] font-normal text-[#878C9F] uppercase tracking-widest">AI Powered Recommendations</p>
+        </div>
       </div>
-    </div>
+
+      <div className="space-y-4 relative z-10">
+        {[
+          { icon: TrendingUp, title: "Offer weekday discounts", desc: "Boost Monday-Thursday morning bookings by 20% with a 'Early Bird' promo." },
+          { icon: Activity, title: "Boost Ground 3 visibility", desc: "This ground has 40% lower occupancy than others this month." },
+        ].map((item, i) => (
+          <div key={i} className="bg-[#2D2D2D]/20 p-4 rounded-[6px] border border-[#2D2D2D] hover:bg-[#2D2D2D]/40 transition-all group">
+            <div className="flex items-start gap-4">
+              <div className="mt-1 p-2 rounded-[6px] bg-[#CCFF00]/10 text-[#CCFF00]"><item.icon size={14} /></div>
+              <div className="flex-1">
+                <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{item.title}</p>
+                <p className="text-[12px] text-[#999999] mt-1 leading-relaxed">{item.desc}</p>
+<<<<<<< HEAD
+=======
+                          <button className="mt-3 text-[12px] font-normal text-[#CCFF00] uppercase tracking-widest flex items-center gap-1.5 hover:text-white transition-colors font-inter">
+                            {item.action} <ChevronRight size={12} />
+                          </button>
+>>>>>>> 01016f4 (Standardized avatar rendering system across all user-facing components)
+                        </div >
+                      </div >
+                    </div >
+                  ))}
+                </div >
+              </div >
+            </div >
+          </div >
+        </div >
+      </div >
+    </div >
   );
 };
 
@@ -485,10 +535,9 @@ const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend, 
         <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] flex items-center justify-center transition-all shadow-sm">
           <Icon size={20} />
         </div>
-        <div className={`px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider flex items-center gap-1 ${
-          trend === 'Stable' ? 'bg-blue-500/10 text-blue-400' : 
-          trendNegative ? 'bg-red-500/10 text-red-400' : 'bg-[#CCFF00]/10 text-[#CCFF00]'
-        }`}>
+        <div className={`px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider flex items-center gap-1 ${trend === 'Stable' ? 'bg-blue-500/10 text-blue-400' :
+            trendNegative ? 'bg-red-500/10 text-red-400' : 'bg-[#CCFF00]/10 text-[#CCFF00]'
+          }`}>
           {trend}
         </div>
       </div>
