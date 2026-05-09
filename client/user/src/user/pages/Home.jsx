@@ -553,16 +553,16 @@ export default function Home() {
                               className="w-full h-full object-cover absolute inset-0 z-10 brightness-90 group-hover:brightness-110 transition-all duration-500" 
                               onError={(e) => {
                                 e.target.style.display = 'none';
-                                if (e.target.nextSibling) e.target.nextSibling.style.display = 'block';
+                                if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
                               }}
                             />
                           ) : null}
-                          <span 
-                            className="relative z-10 tracking-tighter"
-                            style={{ display: p.profilePicture ? 'none' : 'block' }}
+                          <div 
+                            className="relative z-10 flex items-center justify-center w-full h-full"
+                            style={{ display: p.profilePicture ? 'none' : 'flex' }}
                           >
-                            {initials}
-                          </span>
+                            <User size={32} className="text-[#84CC16]" />
+                          </div>
                           
                           {/* Glass Shine */}
                           <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none z-20" />

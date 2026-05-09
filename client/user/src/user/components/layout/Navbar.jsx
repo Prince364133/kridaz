@@ -159,9 +159,7 @@ const Navbar = () => {
                       className="w-full h-full flex items-center justify-center relative z-10"
                       style={{ display: user?.profilePicture ? 'none' : 'flex' }}
                     >
-                      <span className="text-[#84CC16] font-black text-xs">
-                        {user?.name ? user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : <User size={20} />}
-                      </span>
+                      <User size={20} className="text-[#84CC16]" />
                     </div>
                     <div className="absolute inset-0 bg-[#84CC16]/10 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
                   </label>
