@@ -195,6 +195,9 @@ export default function BusinessRegistration() {
       toast.error(errorMsg);
     } finally {
       setLoading(false);
+    }
+  };
+
   // ── Application pending review ──
   if (isPending || submitted) {
     const displayRole = submitted ? formData.role : pendingRole;
