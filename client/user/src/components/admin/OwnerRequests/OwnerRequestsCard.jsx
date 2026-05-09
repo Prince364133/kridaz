@@ -1,121 +1,150 @@
 import React from "react";
-import { format } from "date-fns";
-import {
-  User,
-  Mail,
-  Calendar,
-  CheckCircle,
-  XCircle,
-  RefreshCw,
-} from "lucide-react";
+import { Clock, ShieldX, Fingerprint, Briefcase, Mail, MapPin, ChevronRight, RotateCcw, AlertTriangle, Phone, Award } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const OwnerRequestCard = ({
-  request,
-  onAccept,
-  onReject,
-  onReconsider,
-  isProcessing,
-  isRejected,
-}) => {
+const OwnerRequestsCard = ({ request, onAccept, onReject, onReconsider, onViewDetail, isProcessing, type = "pending" }) => {
+  const navigate = useNavigate();
+  const isRejected = type === "rejected";
+  
+  // Extract real data from businessDetails
+  const businessName = request.businessDetails?.businessName || "Pending Verification";
+  const registrationId = request.businessDetails?.registrationNumber || "Not Provided";
+  const experience = request.businessDetails?.experience || "Verification Required";
+  const role = request.role || "owner";
+  const location = request.businessDetails?.city ? `${request.businessDetails.city}, ${request.businessDetails.state}` : "Unknown Origin";
+
   return (
-    <div className="group relative bg-[#111] rounded-2xl border border-white/10 p-6 space-y-6 transition-all duration-300 hover:border-[#84CC16]/30 shadow-2xl overflow-hidden">
-      {/* Decorative Glow */}
-      <div className="absolute top-0 right-0 w-24 h-24 bg-[#84CC16]/5 blur-[50px] group-hover:bg-[#84CC16]/10 transition-colors"></div>
-      
-      <div className="relative space-y-4">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <p className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest">{request.role || 'Venue Owner'}</p>
-            <h3 className="text-2xl font-bold uppercase text-white tracking-tight truncate">
-              {request.name}
-            </h3>
-          </div>
-          {request.role && (
-            <div className="px-2 py-1 rounded bg-[#84CC16]/10 border border-[#84CC16]/20 text-[10px] font-bold text-[#84CC16] uppercase">
-              Upgrade
-            </div>
+    <div className={`bg-[#000000] border ${isRejected ? 'border-red-500/20' : 'border-[#2D2D2D]'} rounded-[8px] p-6 flex flex-col relative overflow-hidden group hover:border-[#CCFF00]/30 transition-all duration-500 shadow-[var(--shadow-2)] h-full`}>
+      {/* Background Icon Watermark */}
+      <Fingerprint className="absolute -right-6 -top-6 w-32 h-32 text-white/[0.02] group-hover:text-white/[0.04] transition-colors rotate-12" />
+
+      {/* Header: User Info */}
+      <div 
+        onClick={() => {
+          const uId = typeof request.userId === 'object' ? request.userId?._id : request.userId;
+          if(uId) navigate(`/profile/${uId}`);
+        }}
+        className="flex items-center gap-4 mb-6 pb-6 border-b border-[#2D2D2D]/30 relative z-10 cursor-pointer group/profile"
+      >
+        <div className={`w-12 h-12 rounded-[4px] bg-[#2D2D2D] flex items-center justify-center overflow-hidden text-[16px] font-bold ${isRejected ? 'text-red-500' : 'text-[#CCFF00]'} uppercase border border-[#404040] group-hover/profile:border-[#CCFF00] transition-colors`}>
+          {request.userId?.profilePicture ? (
+            <img src={request.userId.profilePicture} alt="" className="w-full h-full object-cover" />
+          ) : (
+            request.name?.[0] || "U"
           )}
         </div>
-
-        <div className="space-y-3 bg-white/5 p-4 rounded-xl border border-white/5">
-           {request.businessDetails?.businessName && (
-             <div className="space-y-1">
-               <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Business Name</p>
-               <p className="text-sm font-semibold text-white">{request.businessDetails.businessName}</p>
-             </div>
-           )}
-           {request.businessDetails?.registrationNumber && (
-             <div className="space-y-1">
-               <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Reg Number</p>
-               <p className="text-sm font-semibold text-white">{request.businessDetails.registrationNumber}</p>
-             </div>
-           )}
-           {request.businessDetails?.specialization && (
-             <div className="space-y-1">
-               <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Specialization</p>
-               <p className="text-sm font-semibold text-white">{request.businessDetails.specialization}</p>
-             </div>
-           )}
-           {request.businessDetails?.experience && (
-             <div className="space-y-1">
-               <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Experience</p>
-               <p className="text-sm font-semibold text-white">{request.businessDetails.experience}</p>
-             </div>
-           )}
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center gap-3 text-gray-400 text-xs font-medium">
-            <Mail size={14} className="text-[#84CC16]" />
-            <span className="truncate">{request.email}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className="text-[14px] font-semibold text-white uppercase tracking-tight truncate group-hover/profile:text-[#CCFF00] transition-colors">
+              {request.name}
+            </h3>
+            <span className={`px-1.5 py-0.5 rounded-[2px] text-[8px] font-bold uppercase tracking-wider ${isRejected ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20'}`}>
+              {role}
+            </span>
           </div>
-          <div className="flex items-center gap-3 text-gray-400 text-xs font-medium">
-            <Calendar size={14} className="text-[#84CC16]" />
-            <span>Submitted: {format(new Date(request.createdAt), "dd MMM yyyy")}</span>
+          <div className="flex flex-col gap-1 mt-1">
+            <div className="flex items-center gap-2 text-[10px] font-normal text-[#999999] uppercase tracking-widest truncate">
+              <Mail size={10} className={isRejected ? 'text-red-500/50' : 'text-[#CCFF00]/50'} />
+              <span className="truncate">{request.email}</span>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] font-normal text-[#999999] uppercase tracking-widest truncate">
+              <Phone size={10} className={isRejected ? 'text-red-500/50' : 'text-[#CCFF00]/50'} />
+              <span className="truncate">{request.phone}</span>
+            </div>
           </div>
         </div>
+        {isRejected && (
+          <div className="px-2 py-1 bg-red-500/10 border border-red-500/20 rounded-[4px]">
+             <AlertTriangle size={14} className="text-red-500" />
+          </div>
+        )}
       </div>
 
-      <div className="relative pt-4 border-t border-white/10 flex gap-3">
+      {/* Body: Business Dossier */}
+      <div className="space-y-4 flex-1 relative z-10">
+        <div className="flex items-center justify-between mb-2">
+           <span className="text-[9px] font-medium text-[#878C9F] uppercase tracking-[2px]">Verification Dossier</span>
+           <div className={`flex items-center gap-1.5 px-2 py-0.5 ${isRejected ? 'bg-red-500/5 border-red-500/10' : 'bg-[#CCFF00]/5 border-[#CCFF00]/10'} border rounded-full`}>
+              <div className={`w-1 h-1 rounded-full ${isRejected ? 'bg-red-500' : 'bg-[#CCFF00]'} animate-pulse`} />
+              <span className={`text-[8px] font-bold ${isRejected ? 'text-red-500' : 'text-[#CCFF00]'} uppercase tracking-widest`}>
+                {isRejected ? 'Access Revoked' : 'Awaiting Scan'}
+              </span>
+           </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-2">
+           <InfoRow icon={Briefcase} label="Entity Name" value={businessName} />
+           <InfoRow icon={Award} label="Identity Ref" value={registrationId} />
+           <InfoRow icon={Clock} label="Operational Tenure" value={experience} />
+           <InfoRow icon={MapPin} label="Deployment Zone" value={location} />
+        </div>
+
+        {isRejected && request.rejectionReason && (
+          <div className="mt-4 p-3 bg-red-500/5 border border-red-500/10 rounded-[6px]">
+            <p className="text-[8px] font-bold text-red-500 uppercase tracking-widest mb-1">Rejection Basis</p>
+            <p className="text-[11px] text-gray-400 italic">"{request.rejectionReason}"</p>
+          </div>
+        )}
+      </div>
+
+      {/* Footer: Actions */}
+      <div className="mt-8 relative z-10">
         {isRejected ? (
           <button
             onClick={() => onReconsider(request._id)}
-            className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold uppercase text-xs rounded-xl transition-all disabled:opacity-50"
             disabled={isProcessing}
+            className="w-full py-3 bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:bg-[#CCFF00]/5 text-white hover:text-[#CCFF00] text-[11px] font-bold uppercase tracking-[0.2em] rounded-[6px] transition-all flex items-center justify-center gap-2 group/btn disabled:opacity-50"
           >
-            {isProcessing ? (
-               <span className="flex items-center justify-center gap-2">
-                <RefreshCw size={14} className="animate-spin" />
-                Processing...
-              </span>
-            ) : "Reconsider"}
+            {isProcessing ? "..." : "Reconsider Request"}
+            {!isProcessing && <RotateCcw size={14} className="group-hover/btn:rotate-180 transition-transform duration-500" />}
           </button>
         ) : (
-          <>
-            <button
-              onClick={() => onAccept(request._id)}
-              className="flex-1 py-3 bg-[#84CC16] hover:scale-[1.02] active:scale-[0.98] text-black font-bold uppercase text-xs rounded-xl transition-all disabled:opacity-50 shadow-[0_0_20px_rgba(132,204,22,0.2)]"
-              disabled={isProcessing}
-            >
-              {isProcessing ? (
-                <span className="flex items-center justify-center gap-2">
-                  <RefreshCw size={14} className="animate-spin" />
-                  Approving...
-                </span>
-              ) : "Approve"}
-            </button>
+          <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => onReject(request._id)}
-              className="flex-1 py-3 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 font-bold uppercase text-xs rounded-xl transition-all disabled:opacity-50"
               disabled={isProcessing}
+              className="py-2.5 bg-transparent border border-[#FF3B3B]/30 hover:border-[#FF3B3B] hover:bg-[#FF3B3B]/5 text-[#FF3B3B] text-[11px] font-medium uppercase tracking-[0.15em] rounded-[6px] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {isProcessing ? "Rejecting..." : "Reject"}
+              {isProcessing ? "..." : "Decline"}
             </button>
-          </>
+            <button
+              onClick={() => onAccept(request._id)}
+              disabled={isProcessing}
+              className="py-2.5 bg-[#CCFF00] hover:bg-[#DFFF00] text-black text-[11px] font-bold uppercase tracking-[0.15em] rounded-[6px] transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(204,255,0,0.2)] disabled:opacity-50 group/btn"
+            >
+              {isProcessing ? "..." : "Authorize"}
+              {!isProcessing && <ChevronRight size={12} className="group-hover/btn:translate-x-1 transition-transform" />}
+            </button>
+          </div>
         )}
+
+        {/* View Detailed Button */}
+        <button
+          onClick={() => onViewDetail(request)}
+          className="w-full mt-3 py-3 bg-[#1A1A1A] border border-[#2D2D2D] hover:border-[#CCFF00]/50 text-gray-400 hover:text-[#CCFF00] text-[9px] font-black uppercase tracking-[0.3em] rounded-[6px] transition-all flex items-center justify-center gap-2 group/dossier"
+        >
+          <Fingerprint size={12} className="group-hover/dossier:scale-110 transition-transform" />
+          Scan Full Dossier
+        </button>
       </div>
+
+      {/* Edge Accents */}
+      <div className={`absolute top-0 left-0 w-[1px] h-0 group-hover:h-full bg-gradient-to-b ${isRejected ? 'from-red-500' : 'from-[#CCFF00]'} to-transparent transition-all duration-700`} />
+      <div className={`absolute bottom-0 right-0 w-0 group-hover:w-full h-[1px] bg-gradient-to-l ${isRejected ? 'from-red-500' : 'from-[#CCFF00]'} to-transparent transition-all duration-700`} />
     </div>
   );
 };
 
-export default OwnerRequestCard;
+const InfoRow = ({ icon: Icon, label, value }) => (
+  <div className="bg-[#151617] p-3 rounded-[6px] border border-[#2D2D2D]/50 flex items-center gap-3 hover:border-[#CCFF00]/10 transition-colors">
+    <div className="p-1.5 bg-[#CCFF00]/5 rounded-[4px] text-[#CCFF00]">
+      <Icon size={12} />
+    </div>
+    <div className="min-w-0">
+      <p className="text-[8px] font-normal text-[#878C9F] uppercase tracking-widest mb-0.5">{label}</p>
+      <p className="text-[12px] font-semibold text-white uppercase tracking-tight truncate max-w-[140px]">{value}</p>
+    </div>
+  </div>
+);
+
+export default OwnerRequestsCard;

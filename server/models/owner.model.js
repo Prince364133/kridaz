@@ -51,6 +51,17 @@ const ownerSchema = new mongoose.Schema(
       },
       payoutMode: { type: String, enum: ["BANK", "UPI"], default: "BANK" }
     },
+    approvalDetails: {
+      adminName: String,
+      adminDesignation: String,
+      approvedAt: Date
+    },
+    verificationDocuments: [
+      {
+        name: String,
+        url: String,
+      },
+    ],
  },
  { timestamps: true }
 );

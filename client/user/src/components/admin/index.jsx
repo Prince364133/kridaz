@@ -2,8 +2,7 @@
 export {default as UserManagement} from "./UserManagement/UserPage";
 
 //  Owner Requests
-export {default as NewOwnerRequests} from "./OwnerRequests/NewOwnerRequests";
-export {default as RejectedOwnerRequests} from "./OwnerRequests/RejectedOwnerRequests"
+export {default as VerificationCenter} from "./OwnerRequests/VerificationCenter";
 
 // Dashboard
 export {default as AdminDashboard} from "./Dashboard/AdminDashboard"
@@ -14,6 +13,7 @@ export {default as OwnerViewer} from "./OwnerManagement/OwnerViewer"
 // Turf
 export {default as TurfList} from "./Turf/TurfList"
 export {default as AllTurf} from "./Turf/AllTurf"
+export {default as VenueApprovalDetail} from "./Turf/VenueApprovalDetail"
 
 // Transactions
 export {default as TransactionSection} from "./Transactions/TransactionSection"
@@ -32,10 +32,6 @@ export {default as CommunityManagement} from "./Community/CommunityManagement"
 
 // Professional Management
 export {default as ProfessionalManagement} from "./ProfessionalManagement/ProfessionalManagement"
-export {default as ProfessionalRequests} from "./ProfessionalManagement/ProfessionalRequests"
-
-// Withdrawals
-export {default as WithdrawalManagement} from "./Withdrawals/WithdrawalManagement"
 
 // Resolution
 export {default as SupportCenter} from "./Resolution/SupportCenter"

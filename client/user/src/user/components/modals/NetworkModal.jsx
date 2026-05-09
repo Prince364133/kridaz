@@ -68,8 +68,9 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
   };
 
   const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.username?.toLowerCase().includes(searchQuery.toLowerCase())
+    user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user?.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user?.businessDetails?.businessName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
@@ -146,7 +147,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                         {user.name}
                       </Link>
                       <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase tracking-widest truncate">
-                        <span>@{user.username || "player"}</span>
+                        <span>@{user.username || user.businessDetails?.businessName || "player"}</span>
                         {followingIds.includes(user._id) && (
                           <>
                             <span className="text-white/20">•</span>

@@ -70,6 +70,12 @@ const turfSchema = new mongoose.Schema(
       }
     ],
     mapUrl: { type: String },
+    verificationData: {
+      adminName: { type: String },
+      adminDesignation: { type: String },
+      verifiedAt: { type: Date },
+      action: { type: String, enum: ["approved", "rejected"] }
+    }
   },
   { timestamps: true }
 );

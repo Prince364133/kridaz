@@ -1,12 +1,22 @@
 import React from "react";
-import { Users, Landmark, CreditCard, Activity, ShieldCheck, Zap, AlertCircle, RefreshCw } from "lucide-react";
-import StatCard from "./StatCard";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { 
+  Users, Landmark, CreditCard, Activity, ShieldCheck, Zap, 
+  AlertCircle, RefreshCw, MessageSquare, ShieldAlert, Share2, 
+  Trophy, BookOpen, Wallet, ChevronRight, ArrowUpRight, Clock,
+  MapPin
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import CountUp from "react-countup";
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
+  ResponsiveContainer, PieChart, Pie, Cell 
+} from 'recharts';
 import useDashboardData from "@hooks/admin/useDashboardData";
 import DashboardSkeleton from "../../owner/Dashboard/DashboardSkeleton";
 
 export default function AdminDashboard() {
   const { data: dashboardData, loading, error } = useDashboardData();
+  const navigate = useNavigate();
 
   if (loading) return <DashboardSkeleton />;
 
@@ -14,8 +24,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex flex-col justify-center items-center min-h-[60vh] text-white">
         <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-        <p className="font-bold text-xl uppercase tracking-wider text-red-500">Dashboard Link Failure</p>
-        <p className="text-gray-500 text-sm mt-2 font-medium">Verify your administrative credentials and try again.</p>
+        <p className="font-bold text-xl uppercase tracking-wider text-red-500">Telemetry Link Failure</p>
         <button 
           onClick={() => window.location.reload()}
           className="mt-8 px-10 py-4 bg-white/5 border border-red-500/50 text-red-500 font-bold uppercase rounded-2xl hover:bg-red-500/10 transition-all flex items-center gap-3"
@@ -29,142 +38,209 @@ export default function AdminDashboard() {
 
   const {
     totalUsers = 0,
-    totalOwners = 0,
     totalTurfs = 0,
+    pendingTurfs = 0,
     totalBookings = 0,
-    pendingRequests = 0,
-    totalCoaches = 0,
-    totalUmpires = 0,
     totalPayouts = 0,
-    bookingHistory = [],
-    platformHealth = {}
+    openTickets = 0,
+    pendingDisputes = 0,
+    totalCommunityPosts = 0,
+    totalHostedGames = 0,
+    publishedBlogs = 0,
+    totalUserWalletBalance = 0,
+    recentAuditLogs = [],
+    bookingHistory = []
   } = dashboardData || {};
 
-  // Map history to chart format
   const chartData = bookingHistory.map(item => ({
     name: new Date(item.date).toLocaleDateString(undefined, { weekday: 'short' }),
-    bookings: item.amount,
+    amount: item.amount,
   }));
 
+  const COLORS = ["#CCFF00", "#10B981", "#3B82F6", "#6366F1"];
+
   return (
-    <div className="p-4 lg:p-10 space-y-6 lg:space-y-12 animate-fade-in pt-2 pb-24 lg:pb-12 h-full custom-scrollbar">
-      {/* Header Section - High Impact */}
-
-      {/* Primary Intelligence Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-        <StatCard title="Total Users" value={totalUsers} icon={Users} className="p-4 lg:p-6" />
-        <StatCard title="Active Venues" value={totalTurfs} icon={Landmark} className="p-4 lg:p-6" />
-        <StatCard title="Coaches & Umpires" value={totalCoaches + totalUmpires} icon={Users} className="p-4 lg:p-6" />
-        <StatCard title="Total Payouts" value={`₹${totalPayouts.toLocaleString()}`} icon={CreditCard} className="p-4 lg:p-6" />
+    <div className="p-4 lg:p-10 space-y-8 lg:space-y-12 animate-fade-in pt-2 pb-24 lg:pb-12 bg-[#000000] relative">
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
+      
+      {/* High-Level Command Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-5 relative z-10">
+        <StatsCard title="Total Users" value={totalUsers} icon={Users} trend="+4.2%" />
+        <StatsCard 
+          title="Active Venues" 
+          value={totalTurfs} 
+          icon={Landmark} 
+          trend="Live" 
+          onClick={() => navigate("/admin/turfs")}
+        />
+        <StatsCard 
+          title="Pending Approvals" 
+          value={pendingTurfs} 
+          icon={Clock} 
+          trend={pendingTurfs > 0 ? "Action Required" : "Cleared"} 
+          trendNegative={pendingTurfs > 0}
+          onClick={() => navigate("/admin/turfs")}
+        />
+        <StatsCard title="Marketplace Volume" value={totalBookings} icon={Activity} trend="+12%" />
+        <StatsCard 
+          title="Total Payouts" 
+          value={totalPayouts} 
+          prefix="₹" 
+          icon={CreditCard} 
+          trend="+8.5%"
+          onClick={() => navigate("/admin/withdrawals")}
+        />
+        <StatsCard 
+          title="Support Load" 
+          value={openTickets} 
+          icon={MessageSquare} 
+          trend={openTickets > 10 ? "High" : "Low"} 
+          trendNegative={openTickets > 10}
+          onClick={() => navigate("/admin/support")}
+        />
       </div>
 
-      {/* Advanced Telemetry Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chart Card */}
-        <div className="lg:col-span-2 p-6 lg:p-8 bg-[#0A0A0A] rounded-2xl border border-white/10 relative group overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#84CC16]/0 via-[#84CC16]/40 to-[#84CC16]/0" />
-          <div className="flex justify-between items-center mb-10">
-            <div>
-              <h2 className="text-lg lg:text-xl font-bold uppercase tracking-tight text-white mb-1">Platform Activity</h2>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">30-Day Financial Metrics</p>
-            </div>
-            <div className="flex gap-2">
-               <div className="w-3 h-3 rounded-sm bg-[#84CC16]/20 border border-[#84CC16]/50" />
-               <div className="w-3 h-3 rounded-sm bg-white/5 border border-white/10" />
-            </div>
-          </div>
-          
-          <div className="h-[300px] lg:h-[350px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#84CC16" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#84CC16" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff05" />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{fill: '#9CA3AF', fontSize: 10}}
-                  dy={10}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{fill: '#9CA3AF', fontSize: 10}}
-                />
-                <Tooltip 
-                  contentStyle={{backgroundColor: '#0A0A0A', border: '1px solid #222', borderRadius: '12px'}}
-                  itemStyle={{color: '#84CC16', fontWeight: 'bold', textTransform: 'uppercase'}}
-                />
-                <Area type="monotone" dataKey="bookings" stroke="#84CC16" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Security / System Logs Panel */}
-        <div className="p-6 lg:p-8 bg-[#0A0A0A] rounded-2xl border border-white/10 flex flex-col">
-          <h2 className="text-lg lg:text-xl font-bold uppercase tracking-tight text-white mb-6">System Status</h2>
-          <div className="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar max-h-[300px] lg:max-h-none">
-            {[
-              { id: 'SYS-01', msg: 'Core Services Online', status: platformHealth?.uptime || 'Optimal' },
-              { id: 'SYS-02', msg: 'Marketplace Sync', status: platformHealth?.syncStatus || 'Active' },
-              { id: 'SYS-03', msg: 'Pending Requests', status: `${pendingRequests} Actionable` },
-              { id: 'SYS-04', msg: 'Professional Growth', status: platformHealth?.professionalGrowth || 'Stable' },
-            ].map((log, i) => (
-              <div key={i} className="group border-l-2 border-[#84CC16]/30 pl-4 py-3 bg-white/[0.02] rounded-r-lg">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{log.id}</span>
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#84CC16]" />
-                </div>
-                <p className="text-sm font-bold text-white tracking-tight">{log.msg}</p>
-                <p className="text-[10px] text-gray-500 font-bold uppercase mt-1">Status: {log.status}</p>
-              </div>
-            ))}
-          </div>
-          <button className="mt-8 w-full py-4 bg-white/5 hover:bg-[#84CC16] hover:text-black rounded-2xl border border-white/10 transition-all duration-500 font-bold uppercase text-[10px] tracking-widest group">
-            Security Overview <ShieldCheck className="w-3 h-3 inline ml-2 group-hover:scale-110 transition-transform" />
-          </button>
-        </div>
-      </div>
-
-      {/* Operator Quick View */}
-      <div className="p-6 lg:p-10 bg-[#0A0A0A] rounded-2xl lg:rounded-[32px] border border-white/10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#84CC16]/5 blur-[100px]" />
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10 relative z-10">
-           <div>
-              <h2 className="text-xl lg:text-2xl font-bold uppercase tracking-tight text-white mb-1">Infrastructure Load</h2>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em]">Hardware & Network Telemetry</p>
-            </div>
-            <div className="flex items-center gap-3">
-               <div className="w-2 h-2 rounded-full bg-[#84CC16] animate-pulse" />
-               <span className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest">Real-time monitoring active</span>
-            </div>
-        </div>
+      {/* Analytics Command Center */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 relative z-10">
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 relative z-10">
-           {[
-             { label: 'CPU LOAD', val: '12%', color: '#84CC16' },
-             { label: 'MEM USAGE', val: '45%', color: '#84CC16' },
-             { label: 'NETWORK', val: '0.8ms', color: '#84CC16' }
-           ].map((metric, i) => (
-             <div key={i} className="p-4 lg:p-6 border border-white/5 bg-white/[0.01] rounded-2xl group hover:border-[#84CC16]/20 transition-all">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">{metric.label}</p>
-                <div className="flex items-end justify-between">
-                  <span className="text-2xl lg:text-3xl font-black text-white group-hover:text-[#84CC16] transition-colors">{metric.val}</span>
-                  <Activity className="w-5 h-5 text-gray-600 group-hover:text-[#84CC16] transition-colors" />
+        {/* Main Throughput Chart */}
+        <div className="lg:col-span-8">
+          <ChartCard 
+            title="Marketplace Throughput" 
+            subtitle="30-Day Financial Performance Telemetry"
+            action={
+              <div className="flex items-center gap-2 bg-[#2D2D2D] p-1 rounded-[6px]">
+                <span className="px-3 py-1 bg-[#CCFF00] text-black text-[10px] font-bold uppercase rounded-[4px]">Live</span>
+              </div>
+            }
+          >
+            <div className="h-[300px] w-full mt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#CCFF00" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff05" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 10}} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 10}} />
+                  <Tooltip 
+                    contentStyle={{backgroundColor: '#0A0A0A', border: '1px solid #2D2D2D', borderRadius: '12px'}}
+                    itemStyle={{color: '#CCFF00', fontWeight: 'bold', textTransform: 'uppercase'}}
+                  />
+                  <Area type="monotone" dataKey="amount" stroke="#CCFF00" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </ChartCard>
+        </div>
+
+        {/* Governance & Moderation Sidebar */}
+        <div className="lg:col-span-4 space-y-6">
+          <ChartCard title="Moderation Queue" subtitle="Pending Content Approvals">
+            <div className="space-y-4 mt-2">
+              <ModerationItem icon={BookOpen} label="Blogs" count={publishedBlogs} onClick={() => navigate("/admin/blogs")} />
+              <ModerationItem icon={Share2} label="Community Posts" count={totalCommunityPosts} onClick={() => navigate("/admin/community")} />
+              <ModerationItem icon={Trophy} label="Hosted Games" count={totalHostedGames} />
+              <ModerationItem icon={ShieldAlert} label="Active Disputes" count={pendingDisputes} color="text-red-500" onClick={() => navigate("/admin/disputes")} />
+            </div>
+            <button 
+              onClick={() => navigate("/admin/marketing")}
+              className="w-full mt-6 py-3 bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:bg-[#CCFF00]/5 text-white hover:text-[#CCFF00] rounded-xl transition-all font-bold uppercase text-[10px] tracking-widest group"
+            >
+              Open CMS Hub <ChevronRight className="w-3 h-3 inline ml-2 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </ChartCard>
+
+          {/* Governance Feed */}
+          <div className="p-6 bg-[#000000] rounded-[8px] border border-[#2D2D2D] relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[#CCFF00]/5 blur-[40px]" />
+            <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider mb-6 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-[#CCFF00]" />
+              Governance Stream
+            </h2>
+            <div className="space-y-4 pr-2">
+              {recentAuditLogs.map((log, i) => (
+                <div 
+                  key={i} 
+                  onClick={() => navigate("/admin/audit")}
+                  className="border-l border-[#2D2D2D] pl-4 py-1 relative cursor-pointer hover:bg-white/[0.02] transition-colors"
+                >
+                  <div className="absolute top-0 left-[-4.5px] w-2 h-2 rounded-full bg-[#CCFF00]/50" />
+                  <p className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-tight">{log.action}</p>
+                  <p className="text-[11px] text-white/80 mt-0.5">{log.details?.email || log.module}</p>
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-[9px] text-gray-500 font-medium">By {log.admin?.name || "Admin"}</span>
+                    <span className="text-[9px] text-gray-500">{new Date(log.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                  </div>
                 </div>
-                <div className="mt-6 h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                   <div className="h-full bg-[#84CC16] transition-all duration-1000" style={{ width: metric.val.includes('%') ? metric.val : '20%' }} />
-                </div>
-             </div>
-           ))}
+              ))}
+            </div>
+          </div>
         </div>
       </div>
+
     </div>
   );
 }
+
+const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend, trendNegative, onClick }) => (
+  <div 
+    onClick={onClick}
+    className={`bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#CCFF00]/30 transition-all duration-500 min-h-[140px] shadow-2xl ${onClick ? 'cursor-pointer' : ''}`}
+  >
+    <Icon className="absolute -right-4 -bottom-4 w-20 h-20 text-white/[0.02] group-hover:text-white/[0.04] transition-colors" />
+    <div className="flex items-center justify-between mb-5 relative z-10">
+      <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] flex items-center justify-center border border-[#CCFF00]/20 shadow-sm">
+        <Icon size={20} />
+      </div>
+      <div className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+        trend === 'Stable' || trend === 'Optimal' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+        trendNegative ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20'
+      }`}>
+        {trend}
+      </div>
+    </div>
+    <div className="space-y-2 relative z-10">
+      <h3 className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[1px]">{title}</h3>
+      <div className="text-2xl font-bold text-white tracking-tighter flex items-baseline gap-1">
+        {prefix && <span className="text-sm text-white/40 font-normal">{prefix}</span>}
+        <CountUp end={value} duration={2.5} separator="," decimals={value % 1 === 0 ? 0 : 1} />
+        {suffix && <span className="text-sm text-white/40 font-normal">{suffix}</span>}
+      </div>
+    </div>
+  </div>
+);
+
+const ChartCard = ({ title, subtitle, children, action }) => (
+  <div className="bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-2xl relative overflow-hidden group flex flex-col h-full">
+    <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px] group-hover:bg-[#CCFF00]/10 transition-colors pointer-events-none"></div>
+    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 relative z-10 shrink-0">
+      <div>
+        <h2 className="text-[14px] font-bold text-white uppercase tracking-wider leading-none mb-2">{title}</h2>
+        <p className="text-[10px] text-[#999999] uppercase tracking-widest">{subtitle}</p>
+      </div>
+      {action && <div className="z-20">{action}</div>}
+    </div>
+    <div className="flex-1 relative z-10">{children}</div>
+  </div>
+);
+
+const ModerationItem = ({ icon: Icon, label, count, color = "text-white", onClick }) => (
+  <div 
+    onClick={onClick}
+    className={`flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:border-[#CCFF00]/30 transition-all ${onClick ? 'cursor-pointer hover:bg-[#CCFF00]/5' : ''}`}
+  >
+    <div className="flex items-center gap-3">
+      <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+        <Icon className="w-4 h-4 text-[#CCFF00]" />
+      </div>
+      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-tight">{label}</span>
+    </div>
+    <span className={`text-sm font-black ${color}`}>{count}</span>
+  </div>
+);
+
+

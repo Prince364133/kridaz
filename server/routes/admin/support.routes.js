@@ -3,6 +3,7 @@ import {
   getAllTickets,
   updateTicketStatus,
   replyToTicket,
+  toggleAgentStatus,
   getAllDisputes,
   resolveDispute
 } from "../../modules/admin/support.controller.js";
@@ -14,6 +15,7 @@ const supportRouter = Router();
 supportRouter.get("/tickets", verifyAdminToken, getAllTickets);
 supportRouter.put("/tickets/:ticketId/status", verifyAdminToken, updateTicketStatus);
 supportRouter.post("/tickets/:ticketId/reply", verifyAdminToken, replyToTicket);
+supportRouter.put("/tickets/:ticketId/agent-status", verifyAdminToken, toggleAgentStatus);
 
 // Disputes
 supportRouter.get("/disputes", verifyAdminToken, getAllDisputes);

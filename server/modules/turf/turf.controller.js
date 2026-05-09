@@ -347,8 +347,17 @@ export const adminGetAllTurfs = async (req, res) => {
 
 export const adminApproveTurf = async (req, res) => {
   const { id } = req.params;
+  const { name, designation } = req.body;
   try {
-    const turf = await Turf.findByIdAndUpdate(id, { status: "approved" }, { new: true });
+    const turf = await Turf.findByIdAndUpdate(id, { 
+      status: "approved",
+      verificationData: {
+        adminName: name,
+        adminDesignation: designation,
+        verifiedAt: new Date(),
+        action: "approved"
+      }
+    }, { new: true });
     return res.status(200).json({ success: true, message: "Turf approved", turf });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -357,8 +366,17 @@ export const adminApproveTurf = async (req, res) => {
 
 export const adminRejectTurf = async (req, res) => {
   const { id } = req.params;
+  const { name, designation } = req.body;
   try {
-    const turf = await Turf.findByIdAndUpdate(id, { status: "rejected" }, { new: true });
+    const turf = await Turf.findByIdAndUpdate(id, { 
+      status: "rejected",
+      verificationData: {
+        adminName: name,
+        adminDesignation: designation,
+        verifiedAt: new Date(),
+        action: "rejected"
+      }
+    }, { new: true });
     return res.status(200).json({ success: true, message: "Turf rejected", turf });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -392,8 +410,10 @@ export const deleteTurf = async (req, res) => {
     const turf = await Turf.findOneAndDelete({ owner, _id: id });
     if (!turf) return res.status(404).json({ success: false, message: "Turf not found or unauthorized" });
     
-    // Also delete associated time slots
+    // Also delete all associated data
     await TimeSlot.deleteMany({ turf: id });
+    await Booking.deleteMany({ turf: id });
+    await Review.deleteMany({ turf: id });
     
     return res.status(200).json({ success: true, message: "Arena decommissioned successfully" });
   } catch (err) {

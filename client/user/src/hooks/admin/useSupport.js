@@ -47,6 +47,19 @@ const useSupport = () => {
     }
   };
 
+  const handleToggleAgentStatus = async (id, isOnline) => {
+    setProcessingId(id);
+    try {
+      await axiosInstance.put(`/api/admin/support/tickets/${id}/agent-status`, { isOnline });
+      toast.success(isOnline ? "You are now ONLINE" : "You are now OFFLINE");
+      fetchTickets();
+    } catch (err) {
+      toast.error("Status toggle failed");
+    } finally {
+      setProcessingId("");
+    }
+  };
+
   useEffect(() => {
     fetchTickets();
   }, []);
@@ -57,6 +70,7 @@ const useSupport = () => {
     processingId,
     handleUpdateStatus,
     handleReply,
+    handleToggleAgentStatus,
     refresh: fetchTickets
   };
 };

@@ -7,7 +7,7 @@ import OwnerRequest from "../../models/ownerRequest.model.js";
 import OTP from "../../models/otp.model.js";
 import { generateUserToken, generateOwnerToken } from "../../utils/generateJwtToken.js";
 import generateEmail from "../../utils/generateEmail.js";
-import cloudinary from "../../utils/cloudinary.js";
+import cloudinary, { uploadToCloudinary } from "../../utils/cloudinary.js";
 import WalletTransaction from "../../models/walletTransaction.model.js";
 import { sendWhatsAppMessage } from "../../utils/notification.service.js";
 import { notifyAdmins } from "../../utils/notificationHelper.js";
@@ -445,7 +445,7 @@ export const logout = async (req, res) => {
 
 // Owner Request (Waitlist/Inquiry)
 export const ownerRequest = async (req, res) => {
-  const { name, email, phone, role } = req.body;
+  const { name, email, phone, role, businessDetails, documents } = req.body;
   try {
     const existingRequest = await OwnerRequest.findOne({ email });
     if (existingRequest) {
@@ -458,6 +458,8 @@ export const ownerRequest = async (req, res) => {
       email,
       phone,
       role: role || "owner",
+      businessDetails,
+      documents
     });
     await newOwnerRequest.save();
 
@@ -480,11 +482,21 @@ export const ownerRequest = async (req, res) => {
 
 // Submit Role Upgrade Request
 export const upgradeRequest = async (req, res) => {
-  const { name, email, phone, role, businessDetails, documents } = req.body;
+  const { name, email, phone, role } = req.body;
   const userId = req.user?.id;
 
   try {
-    // 1. Check if user already has a professional role
+    // 1. Parse businessDetails if it's a string (from FormData)
+    let businessDetails = req.body.businessDetails;
+    if (typeof businessDetails === "string") {
+      try {
+        businessDetails = JSON.parse(businessDetails);
+      } catch (e) {
+        console.error("Failed to parse businessDetails", e);
+      }
+    }
+
+    // 2. Check if user already has a professional role
     const ownerAccount = await Owner.findOne({ email: email.toLowerCase() });
     if (ownerAccount) {
       return res.status(400).json({ 
@@ -493,7 +505,7 @@ export const upgradeRequest = async (req, res) => {
       });
     }
 
-    // 2. Check for existing requests
+    // 3. Check for existing requests
     const existingRequest = await OwnerRequest.findOne({ email: email.toLowerCase() });
     
     if (existingRequest) {
@@ -511,13 +523,37 @@ export const upgradeRequest = async (req, res) => {
         });
       }
 
-      // If rejected, we allow re-submission by deleting the old one
       if (existingRequest.status === "rejected") {
         await OwnerRequest.deleteOne({ _id: existingRequest._id });
       }
     }
 
-    // 3. Create new request
+    // 4. Handle File Uploads
+    const documents = [];
+    
+    console.log("[UPGRADE] User ID:", req.user._id);
+    console.log("[UPGRADE] Request Files:", req.files ? `Count: ${req.files.length}` : "UNDEFINED");
+    
+    if (req.files && req.files.length > 0) {
+      console.log(`[UPGRADE] Uploading ${req.files.length} documents to Cloudinary...`);
+      for (const file of req.files) {
+        try {
+          console.log(`[UPGRADE] Processing file: ${file.originalname} (${file.size} bytes)`);
+          const url = await uploadToCloudinary(file.buffer, "turfspot/verification");
+          console.log(`[UPGRADE] Successfully uploaded ${file.originalname} to ${url}`);
+          documents.push({
+            name: file.originalname,
+            url: url
+          });
+        } catch (uploadErr) {
+          console.error(`[UPGRADE] Error uploading ${file.originalname}:`, uploadErr);
+        }
+      }
+    } else {
+      console.warn("[UPGRADE] No files found in req.files. Check if frontend field name matches 'documents'");
+    }
+
+    // 5. Create new request
     const newRequest = new OwnerRequest({
       userId,
       name,
@@ -531,7 +567,7 @@ export const upgradeRequest = async (req, res) => {
 
     await newRequest.save();
 
-    // Notify Admin
+    // 6. Notify Admin
     await notifyAdmins({
       title: "Role Upgrade Request",
       message: `User ${name} requested upgrade to ${role || "owner"}`,
@@ -541,7 +577,7 @@ export const upgradeRequest = async (req, res) => {
     
     return res.status(201).json({
       success: true,
-      message: "Your application has been submitted and is under review.",
+      message: "Your application has been submitted and is under review. Our team will verify your documents shortly.",
     });
   } catch (err) {
     console.error(chalk.red("Upgrade Request Error:"), err);

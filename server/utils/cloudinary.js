@@ -17,7 +17,7 @@ cloudinary.config({
 export const uploadToCloudinary = (buffer, folder = "turfspot") => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: "image" },
+      { folder, resource_type: "auto" },
       (error, result) => {
         if (error) return reject(error);
         resolve(result.secure_url);

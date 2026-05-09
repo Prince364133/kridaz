@@ -47,7 +47,7 @@ export const viewReviewsByTurf = async (req, res) => {
   try {
     const reviews = await Review.find({ turf: id })
       .sort({ createdAt: -1 })
-      .populate("user", "name");
+      .populate("user", "name profilePicture _id");
       
     const averageRating = reviews.length > 0
       ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
@@ -74,7 +74,7 @@ export const getOwnerTurfReviews = async (req, res) => {
 
     const turfIds = turfs.map((turf) => turf._id);
     const reviews = await Review.find({ turf: { $in: turfIds } })
-      .populate("user", "name")
+      .populate("user", "name profilePicture _id")
       .lean();
 
     const turfsWithReviews = turfs.map((turf) => {
@@ -91,7 +91,8 @@ export const getOwnerTurfReviews = async (req, res) => {
         avgRating: parseFloat(avgRating.toFixed(1)),
         reviews: turfReviews.map((review) => ({
           id: review._id,
-          userName: review.user ? review.user.name : "Partner/Other",
+          user: review.user,
+          userName: review.user ? review.user.name : "Anonymous Player",
           rating: review.rating,
           comment: review.comment,
           createdAt: review.createdAt,

@@ -186,7 +186,7 @@ const TurfDetails = () => {
           <p className="text-zinc-400 mb-6">The venue you're looking for might have been moved or removed.</p>
           <Link 
             to="/turfs" 
-            className="inline-flex items-center gap-2 bg-[#84CC16] text-black px-6 py-3 rounded-full font-bold hover:scale-105 transition-transform"
+            className="inline-flex items-center gap-2 bg-[#CCFF00] text-black px-6 py-3 rounded-full font-bold hover:scale-105 transition-transform"
           >
             <ChevronLeft className="w-5 h-5" />
             Back to Discovery
@@ -220,7 +220,7 @@ const TurfDetails = () => {
       <div className="container mx-auto px-4 mb-4">
         <Link 
           to="/turfs" 
-          className="inline-flex items-center gap-2 text-zinc-400 hover:text-[#84CC16] transition-colors mb-4 group uppercase text-xs tracking-normal font-bold"
+          className="inline-flex items-center gap-2 text-zinc-400 hover:text-[#CCFF00] transition-colors mb-4 group uppercase text-xs tracking-normal font-bold"
         >
           <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           Back to Search
@@ -232,24 +232,24 @@ const TurfDetails = () => {
               {turf.name}
             </h1>
             <div className="flex flex-wrap items-center gap-6 text-sm font-bold uppercase animate-fade-in">
-              <div className="flex items-center gap-2 text-[#84CC16]">
-                <Star className="w-5 h-5 fill-[#84CC16]" />
+              <div className="flex items-center gap-2 text-[#CCFF00]">
+                <Star className="w-5 h-5 fill-[#CCFF00]" />
                 <span>{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
                 <span className="text-zinc-500">({reviews?.length || 0} Verified Reviews)</span>
               </div>
               <div className="flex items-center gap-2 text-zinc-300">
-                <MapPin className="w-5 h-5 text-[#84CC16]" />
+                <MapPin className="w-5 h-5 text-[#CCFF00]" />
                 <span>{turf.location}{turf.city ? `, ${turf.city}` : ""}</span>
               </div>
               {turf.openTime && turf.closeTime && (
                 <div className="flex items-center gap-2 text-zinc-300 border-l border-zinc-800 pl-6 ml-0 hidden sm:flex">
-                  <Clock className="w-5 h-5 text-[#84CC16]" />
+                  <Clock className="w-5 h-5 text-[#CCFF00]" />
                   <span>{turf.openTime} — {turf.closeTime}</span>
                 </div>
               )}
               <div className="flex items-center gap-2 border-l border-zinc-800 pl-6 ml-0 hidden md:flex">
-                <Info className="w-5 h-5 text-[#84CC16]" />
-                <button className="text-zinc-300 hover:text-[#84CC16] transition-colors">
+                <Info className="w-5 h-5 text-[#CCFF00]" />
+                <button className="text-zinc-300 hover:text-[#CCFF00] transition-colors">
                   View Policies
                 </button>
               </div>
@@ -261,15 +261,15 @@ const TurfDetails = () => {
               onClick={toggleFavorite}
               className={`p-4 rounded-full border transition-all duration-300 active:scale-90 ${
                 isFavorite 
-                ? "bg-[#84CC16] border-[#84CC16] text-black shadow-lg shadow-[#84CC16]/20" 
-                : "bg-zinc-900/50 border-zinc-800 text-white hover:border-[#84CC16] hover:bg-zinc-900"
+                ? "bg-[#CCFF00] border-[#CCFF00] text-black shadow-lg shadow-[#CCFF00]/20" 
+                : "bg-zinc-900/50 border-zinc-800 text-white hover:border-[#CCFF00] hover:bg-zinc-900"
               }`}
             >
               <Heart className={`w-6 h-6 ${isFavorite ? "fill-current" : ""}`} />
             </button>
             <button 
               onClick={handleShare}
-              className="p-4 rounded-full bg-zinc-900/50 border border-zinc-800 text-white hover:border-[#84CC16] hover:bg-zinc-900 transition-all duration-300 active:scale-90"
+              className="p-4 rounded-full bg-zinc-900/50 border border-zinc-800 text-white hover:border-[#CCFF00] hover:bg-zinc-900 transition-all duration-300 active:scale-90"
             >
               <Share2 className="w-6 h-6" />
             </button>
@@ -308,7 +308,7 @@ const TurfDetails = () => {
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                       ></iframe>
-                      <div className="absolute top-6 left-6 px-4 py-2 bg-[#84CC16] text-black rounded-xl text-[10px] font-bold uppercase shadow-lg flex items-center gap-2">
+                      <div className="absolute top-6 left-6 px-4 py-2 bg-[#CCFF00] text-black rounded-xl text-[10px] font-bold uppercase shadow-lg flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
                         Live Feed
                       </div>
@@ -322,7 +322,7 @@ const TurfDetails = () => {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute bottom-8 left-8 px-5 py-2.5 bg-black/40 backdrop-blur-xl rounded-2xl text-[10px] font-bold uppercase border border-white/10 flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#84CC16] animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#CCFF00] animate-pulse" />
                     Media {index + 1} / {mediaItems.length}
                   </div>
                 </div>
@@ -343,7 +343,7 @@ const TurfDetails = () => {
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold uppercase tracking-normal text-zinc-500">Professional Booking Portal</p>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-[#84CC16]">₹{turf.pricePerHour}</span>
+                    <span className="text-3xl font-bold text-[#CCFF00]">₹{turf.pricePerHour}</span>
                     <span className="text-zinc-500 font-bold text-xs">/hr</span>
                   </div>
                 </div>
@@ -361,7 +361,7 @@ const TurfDetails = () => {
                           onClick={() => handleDateChange(date)}
                           className={`flex-none w-12 h-16 rounded-xl border transition-all flex flex-col items-center justify-center gap-0.5 ${
                             selectedDate.toISOString().split('T')[0] === dateStr 
-                            ? "bg-[#84CC16] border-[#84CC16] text-black" 
+                            ? "bg-[#CCFF00] border-[#CCFF00] text-black" 
                             : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
                           }`}
                         >
@@ -389,9 +389,9 @@ const TurfDetails = () => {
                             onClick={() => handleTimeSelection(time)}
                             className={`p-2 rounded-lg border text-center transition-all ${
                               isSelected
-                              ? "bg-[#84CC16] border-[#84CC16] text-black"
+                              ? "bg-[#CCFF00] border-[#CCFF00] text-black"
                               : isAvailable
-                              ? "bg-zinc-900/50 border-zinc-800 text-white hover:border-[#84CC16]/50"
+                              ? "bg-zinc-900/50 border-zinc-800 text-white hover:border-[#CCFF00]/50"
                               : "bg-zinc-900/20 border-zinc-900 text-zinc-700 cursor-not-allowed opacity-50"
                             }`}
                           >
@@ -418,7 +418,7 @@ const TurfDetails = () => {
                 <button 
                   onClick={handleReservation}
                   disabled={bookingLoading || !selectedStartTime}
-                  className="w-full bg-[#84CC16] text-black h-16 rounded-2xl font-bold uppercase tracking-normal flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed shadow-lg shadow-[#84CC16]/20"
+                  className="w-full bg-[#CCFF00] text-black h-16 rounded-2xl font-bold uppercase tracking-normal flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed shadow-lg shadow-[#CCFF00]/20"
                 >
                   {bookingLoading ? (
                     <div className="flex items-center gap-3">
@@ -452,7 +452,7 @@ const TurfDetails = () => {
                 {/* Consolidated Intel Section */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-1 h-6 bg-[#84CC16] rounded-full" />
+                    <div className="w-1 h-6 bg-[#CCFF00] rounded-full" />
                     <h2 className="text-xl font-bold uppercase">Venue Intelligence</h2>
                   </div>
                   {turf.description && (
@@ -464,7 +464,7 @@ const TurfDetails = () => {
                   {/* Performance Specs */}
                   <div className="flex flex-wrap gap-2">
                     {turf.sportTypes?.map((sport, i) => (
-                      <span key={i} className="px-2.5 py-1 bg-zinc-900/50 border border-zinc-800 rounded-lg text-[9px] font-bold uppercase text-[#84CC16] tracking-wider">{sport}</span>
+                      <span key={i} className="px-2.5 py-1 bg-zinc-900/50 border border-zinc-800 rounded-lg text-[9px] font-bold uppercase text-[#CCFF00] tracking-wider">{sport}</span>
                     ))}
                     {turf.groundTypes?.map((ground, i) => (
                       <span key={i} className="px-2.5 py-1 bg-zinc-900/50 border border-zinc-800 rounded-lg text-[9px] font-bold uppercase text-zinc-500 tracking-wider">{ground}</span>
@@ -479,7 +479,7 @@ const TurfDetails = () => {
               {turf.facilities && turf.facilities.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-1 h-6 bg-[#84CC16] rounded-full" />
+                    <div className="w-1 h-6 bg-[#CCFF00] rounded-full" />
                     <h2 className="text-xl font-bold uppercase tracking-tight">Amenities</h2>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -508,7 +508,7 @@ const TurfDetails = () => {
                   <h2 className="text-xl font-bold uppercase tracking-tight">How to Reach</h2>
                   <div className="bg-zinc-900/30 border border-zinc-800 rounded-[1.5rem] p-6 space-y-5">
                     <div className="flex items-start gap-3">
-                      <div className="p-2.5 rounded-xl bg-[#84CC16]/10 text-[#84CC16]">
+                      <div className="p-2.5 rounded-xl bg-[#CCFF00]/10 text-[#CCFF00]">
                         <MapPin className="w-5 h-5" />
                       </div>
                       <div>
@@ -521,7 +521,7 @@ const TurfDetails = () => {
                             : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${turf.location} ${turf.city || ""} ${turf.state || ""}}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[#84CC16] text-[10px] font-black uppercase tracking-wider hover:underline"
+                          className="text-[#CCFF00] text-[10px] font-black uppercase tracking-wider hover:underline"
                         >
                           Launch Navigation
                         </a>
@@ -541,7 +541,7 @@ const TurfDetails = () => {
         <div className="mt-16 pt-12 border-t border-zinc-900">
           <div className="flex items-center justify-between mb-10">
             <h2 className="text-2xl font-bold uppercase">Athlete Reviews</h2>
-            <div className="flex items-center gap-3 text-[#84CC16] font-bold">
+            <div className="flex items-center gap-3 text-[#CCFF00] font-bold">
               <Star className="fill-current w-5 h-5" />
               <span className="text-xl">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
               <span className="text-zinc-500">/ 5.0</span>
@@ -586,7 +586,7 @@ const VenueMap = ({ turf }) => {
       {/* Bottom bar */}
       <div className="absolute bottom-0 left-0 right-0 px-4 py-2.5 bg-black/80 backdrop-blur-sm flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MapPin size={12} className="text-[#84CC16]" />
+          <MapPin size={12} className="text-[#CCFF00]" />
           <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider truncate max-w-[160px]">
             {turf.city || turf.location}
           </span>
@@ -597,7 +597,7 @@ const VenueMap = ({ turf }) => {
             : `https://www.google.com/maps/search/?api=1&query=${addressQuery}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-[#84CC16] text-[10px] font-black uppercase tracking-wider hover:underline"
+          className="flex items-center gap-1.5 text-[#CCFF00] text-[10px] font-black uppercase tracking-wider hover:underline"
         >
           <ExternalLink size={10} />
           Open in Maps
@@ -608,8 +608,8 @@ const VenueMap = ({ turf }) => {
 };
 
 const AmenityItem = ({ icon, text }) => (
-  <div className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900/30 border border-zinc-800 hover:border-[#84CC16]/50 transition-colors group">
-    <div className="text-[#84CC16] shrink-0 group-hover:scale-110 transition-transform">
+  <div className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900/30 border border-zinc-800 hover:border-[#CCFF00]/50 transition-colors group">
+    <div className="text-[#CCFF00] shrink-0 group-hover:scale-110 transition-transform">
       {React.cloneElement(icon, { className: "w-4 h-4" })}
     </div>
     <span className="text-[10px] font-bold uppercase tracking-tight text-zinc-400 group-hover:text-white transition-colors truncate">{text}</span>
@@ -618,7 +618,7 @@ const AmenityItem = ({ icon, text }) => (
 
 const Benefit = ({ text }) => (
   <div className="flex items-center gap-3 text-zinc-400">
-    <CheckCircle2 className="w-4 h-4 text-[#84CC16]" />
+    <CheckCircle2 className="w-4 h-4 text-[#CCFF00]" />
     <span className="text-[10px] font-bold uppercase">{text}</span>
   </div>
 );

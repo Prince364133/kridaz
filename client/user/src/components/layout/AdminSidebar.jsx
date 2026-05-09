@@ -16,6 +16,7 @@ import {
   Settings,
   HelpCircle,
   Shield,
+  ShieldCheck,
   LogOut
 } from "lucide-react";
 import { useDispatch } from "react-redux";
@@ -39,33 +40,24 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
 
   const mainNavItems = [
     { to: "/admin", label: "Dashboard", icon: LayoutGrid },
+    { to: "/admin/verification-center", label: "Verification Center", icon: ShieldCheck },
     {
-      label: "Venue Requests",
-      icon: UserPlus,
+      label: "Roles",
+      icon: Users,
       subItems: [
-        { to: "/admin/partner-requests/new", label: "New Requests" },
-        { to: "/admin/partner-requests/rejected", label: "Rejected" },
-      ],
-    },
-    {
-      label: "Professionals",
-      icon: Building,
-      subItems: [
+        { to: "/admin/owners", label: "Venue Owners" },
         { to: "/admin/professionals/coaches", label: "Coaches" },
         { to: "/admin/professionals/umpires", label: "Umpires" },
-        { to: "/admin/professionals/requests", label: "Verification Queue" },
+        { to: "/admin/users", label: "General Users" },
       ],
     },
-    { to: "/admin/users", label: "Users", icon: Users },
-    { to: "/admin/owners", label: "Owners", icon: Building },
     { to: "/admin/turfs", label: "Venues", icon: MapPin },
     {
       label: "Finance",
       icon: IndianRupee,
       subItems: [
         { to: "/admin/transactions", label: "Revenue" },
-        { to: "/admin/finance", label: "Settlement Hub" },
-        { to: "/admin/withdrawals", label: "Withdrawals" },
+        { to: "/admin/finance", label: "Mission Control" },
       ],
     },
     {
@@ -102,7 +94,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
             }`}
           >
             {isActive && (
-              <div className="absolute inset-x-2 inset-y-1 bg-[#84CC16] rounded-xl -z-10 shadow-[0_0_15px_rgba(132,204,22,0.3)] transition-all duration-300" />
+              <div className="absolute inset-x-2 inset-y-1 bg-[#CCFF00] rounded-xl -z-10 shadow-[0_0_15px_rgba(204,255,0,0.3)] transition-all duration-300" />
             )}
             {!isActive && (
               <div className="absolute inset-x-2 inset-y-1 bg-white/5 rounded-xl -z-10 opacity-0 group-hover:opacity-100 transition-all duration-300" />
@@ -110,7 +102,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
             
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center justify-center w-6">
-                <Icon size={18} className={`transition-colors ${isActive ? "text-black" : "text-white/20 group-hover:text-[#84CC16]"}`} />
+                <Icon size={18} className={`transition-colors ${isActive ? "text-black" : "text-white/20 group-hover:text-[#CCFF00]"}`} />
               </div>
               <span className={`font-medium text-sm tracking-wide ml-4 whitespace-nowrap overflow-hidden transition-all duration-300 ${isMinimized ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
                 {item.label}
@@ -133,7 +125,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
                     key={subItem.to}
                     to={subItem.to}
                     className={`flex items-center px-4 py-2 transition-all duration-300 ${
-                      isSubActive ? "text-[#84CC16]" : "text-white/30 hover:text-white"
+                      isSubActive ? "text-[#CCFF00]" : "text-white/30 hover:text-white"
                     }`}
                   >
                     <span className={`font-medium tracking-wide ${isSubActive ? "text-sm" : "text-xs"}`}>
@@ -171,7 +163,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         }}
       >
         {isActive && !isLogout && (
-          <div className="absolute inset-x-2 inset-y-1 bg-[#84CC16] rounded-xl -z-10 shadow-[0_0_15px_rgba(132,204,22,0.3)] transition-all duration-300" />
+          <div className="absolute inset-x-2 inset-y-1 bg-[#CCFF00] rounded-xl -z-10 shadow-[0_0_15px_rgba(204,255,0,0.3)] transition-all duration-300" />
         )}
         
         {!isActive && !isLogout && (
@@ -190,7 +182,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
                 ? "text-white/20 group-hover:text-red-500" 
                 : isActive 
                   ? "text-black" 
-                  : "text-white/20 group-hover:text-[#84CC16]"
+                  : "text-white/20 group-hover:text-[#CCFF00]"
             }`} 
           />
         </div>

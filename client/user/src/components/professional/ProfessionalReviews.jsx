@@ -3,6 +3,7 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import { Star, MessageSquare, Send, User, Loader2, Calendar, Reply } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 export default function ProfessionalReviews() {
   const [reviews, setReviews] = useState([]);
@@ -10,6 +11,7 @@ export default function ProfessionalReviews() {
   const [replyText, setReplyText] = useState("");
   const [replyingTo, setReplyingTo] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchReviews();
@@ -70,10 +72,30 @@ export default function ProfessionalReviews() {
               <div className="p-8">
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex gap-4">
-                    <img src={review.user?.profilePicture} className="w-12 h-12 rounded-xl" />
+                    <div 
+                      onClick={() => review.user?._id && navigate(`/profile/${review.user._id}`)}
+                      className="w-12 h-12 rounded-xl border border-white/10 overflow-hidden cursor-pointer hover:border-primary transition-all"
+                    >
+                      {review.user?.profilePicture ? (
+                        <img src={review.user.profilePicture} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-white/5 flex items-center justify-center text-[10px] font-black text-gray-500">
+                          {review.user?.name?.charAt(0)}
+                        </div>
+                      )}
+                    </div>
                     <div>
-                      <h4 className="text-lg font-black text-white uppercase tracking-tight">{review.user?.name}</h4>
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{format(new Date(review.createdAt), 'MMMM dd, yyyy')}</p>
+                      <h4 
+                        onClick={() => review.user?._id && navigate(`/profile/${review.user._id}`)}
+                        className="text-lg font-black text-white uppercase tracking-tight cursor-pointer hover:text-primary transition-colors"
+                      >
+                        {review.user?.name}
+                      </h4>
+                      <div className="flex items-center gap-2">
+                         <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Verified Player</p>
+                         <span className="text-[8px] text-gray-500">•</span>
+                         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{format(new Date(review.createdAt), 'MMMM dd, yyyy')}</p>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">

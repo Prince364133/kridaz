@@ -43,6 +43,22 @@ const registerSchema = yup.object().shape({
     otherwise: () => yup.string().notRequired(),
   }),
   role: yup.string().required("Role is required"),
+  businessDetails: yup.object().shape({
+    businessName: yup.string().optional(),
+    registrationNumber: yup.string().optional(),
+    address: yup.string().optional(),
+    city: yup.string().optional(),
+    state: yup.string().optional(),
+    zipCode: yup.string().optional(),
+    experience: yup.string().optional(),
+    specialization: yup.string().optional(),
+  }),
+  documents: yup.array().of(
+    yup.object().shape({
+      name: yup.string().required(),
+      url: yup.string().required(),
+    })
+  ).optional(),
 });
 
 /**
@@ -57,6 +73,7 @@ const useSignUpForm = (predefinedRole = "user") => {
   const [usernameStatus, setUsernameStatus] = useState(null); // 'checking', 'available', 'unavailable'
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingUser, setOnboardingUser] = useState(null);
+  const [currentStep, setCurrentStep] = useState(1);
 
   // Determine API base path based on role
   const apiPath = predefinedRole === "user" ? "/api/user/auth" : "/api/owner/auth";
@@ -75,6 +92,8 @@ const useSignUpForm = (predefinedRole = "user") => {
     defaultValues: {
       role: predefinedRole,
       sportTypes: [],
+      businessDetails: {},
+      documents: [],
     },
   });
 
@@ -106,7 +125,7 @@ const useSignUpForm = (predefinedRole = "user") => {
   }, [username, apiPath]);
 
   const handleSendOtp = async () => {
-    const fieldsToValidate = ["name", "username", "email", "phone", "gender", "location", "password", "confirmPassword", "sportTypes"];
+    const fieldsToValidate = ["name", "username", "email", "phone", "gender", "location", "password", "confirmPassword"];
     const isValid = await trigger(fieldsToValidate);
     
     if (!isValid) return;
@@ -133,37 +152,41 @@ const useSignUpForm = (predefinedRole = "user") => {
   };
 
   const onSubmit = async (data) => {
+    // If partner role, we use ownerRequest flow
+    if (predefinedRole !== "user") {
+      return handlePartnerSubmission(data);
+    }
+
     if (!showOtpInput) {
       return handleSendOtp();
     }
 
     setLoading(true);
-    // Always use the predefined role, ignoring any form tampering
     const payload = { ...data, role: predefinedRole };
     try {
       const response = await axiosInstance.post(`${apiPath}/register`, payload);
       const result = response.data;
 
-      // Log in the user after successful registration
       dispatch(login({ token: result.token, role: result.role, user: result.user }));
       toast.success(`Welcome to TurfSpot, ${data.name}!`);
-      
-      const normalizedRole = result.role?.toLowerCase();
-      if (normalizedRole === "owner") {
-        navigate("/partner");
-      } else if (normalizedRole === "coach") {
-        navigate("/coach");
-      } else if (normalizedRole === "umpire") {
-        navigate("/umpire");
-      } else {
-        navigate("/");
-      }
+      navigate("/");
     } catch (error) {
-      if (error.response) {
-        toast.error(`${error.response.data.message || "Registration failed"}`);
-      } else {
-        toast.error(`Error: ${error.message}`);
-      }
+      toast.error(error.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePartnerSubmission = async (data) => {
+    // For partners, we don't necessarily need OTP if it's a request flow
+    // but the user might want it. Let's stick to simple request for now as requested.
+    setLoading(true);
+    try {
+      const response = await axiosInstance.post(`${apiPath}/ownerRequest`, data);
+      toast.success("Application submitted successfully! Our team will review it shortly.");
+      navigate("/partners");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Application failed");
     } finally {
       setLoading(false);
     }
@@ -184,35 +207,26 @@ const useSignUpForm = (predefinedRole = "user") => {
 
       const response = await axiosInstance.post(`${apiPath}/google-auth`, payload);
       const result = await response.data;
-      toast.success("Successfully logged in with Google!");
-      dispatch(login({ token: result.token, role: result.role, user: result.user }));
       
-      // Check if onboarding is needed (missing mandatory fields)
+      // If partner role, we might need to handle it differently 
+      // but for now let's allow them to log in if they exist, 
+      // or redirect to finish application if they don't.
+      
+      dispatch(login({ token: result.token, role: result.role, user: result.user }));
+      toast.success("Successfully logged in with Google!");
+
       const user = result.user;
-      const isMissingDetails = !user.phone || !user.gender || !user.location || !user.sportTypes || user.sportTypes.length === 0;
+      const isMissingDetails = !user.phone || !user.gender || !user.location;
 
       if (isMissingDetails && result.role === "user") {
         setOnboardingUser(user);
         setShowOnboarding(true);
-        // Don't navigate yet, the modal will handle completion
         return;
       }
 
-      if (result.role === "owner") {
-        navigate("/partner");
-      } else if (result.role === "coach") {
-        navigate("/coach");
-      } else if (result.role === "umpire") {
-        navigate("/umpire");
-      } else {
-        navigate("/");
-      }
+      navigate(result.role === "owner" ? "/partner" : result.role === "coach" ? "/coach" : result.role === "umpire" ? "/umpire" : "/");
     } catch (error) {
-      if (error.response) {
-        toast.error(error.response?.data?.message || "Google authentication failed");
-      } else {
-        toast.error("Google authentication failed");
-      }
+      toast.error(error.response?.data?.message || "Google authentication failed");
     } finally {
       setLoading(false);
     }
@@ -231,13 +245,16 @@ const useSignUpForm = (predefinedRole = "user") => {
     getValues,
     setValue,
     watch,
+    trigger,
     showOtpInput,
     handleGoogleSuccess,
     handleGoogleError,
     usernameStatus,
     showOnboarding,
     setShowOnboarding,
-    onboardingUser
+    onboardingUser,
+    currentStep,
+    setCurrentStep
   };
 };
 

@@ -1,12 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MessageSquare, Clock, CheckCircle, AlertCircle, Search, Filter, Send, User, ChevronRight } from "lucide-react";
 import useSupport from "../../../hooks/admin/useSupport";
 
 const SupportCenter = () => {
-  const { tickets, loading, processingId, handleUpdateStatus, handleReply } = useSupport();
+  const { tickets, loading, processingId, handleUpdateStatus, handleReply, handleToggleAgentStatus } = useSupport();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [replyText, setReplyText] = useState("");
+
+  // Sync selected ticket with tickets list
+  useEffect(() => {
+    if (selectedTicket) {
+      const updated = tickets.find(t => t._id === selectedTicket._id);
+      if (updated) setSelectedTicket(updated);
+    }
+  }, [tickets]);
 
   const filteredTickets = tickets.filter(ticket => 
     ticket.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -131,6 +139,21 @@ const SupportCenter = () => {
                         >
                            Close
                         </button>
+
+                        <div className="flex items-center gap-2 bg-white/5 p-1 rounded-lg border border-white/10 ml-2">
+                          <button
+                            onClick={() => handleToggleAgentStatus(selectedTicket._id, true)}
+                            className={`px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${selectedTicket.isAgentOnline ? 'bg-[#84CC16] text-black shadow-[0_0_10px_rgba(132,204,22,0.4)]' : 'text-gray-500 hover:text-white'}`}
+                          >
+                            Online
+                          </button>
+                          <button
+                            onClick={() => handleToggleAgentStatus(selectedTicket._id, false)}
+                            className={`px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${!selectedTicket.isAgentOnline ? 'bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]' : 'text-gray-500 hover:text-white'}`}
+                          >
+                            Offline
+                          </button>
+                        </div>
                      </div>
                   </div>
 

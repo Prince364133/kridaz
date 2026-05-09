@@ -5,6 +5,12 @@ import OwnerRequest from "../../models/ownerRequest.model.js";
 import Owner from "../../models/owner.model.js";
 import Review from "../../models/review.model.js";
 import WithdrawalRequest from "../../models/withdrawalRequest.model.js";
+import SupportTicket from "../../models/supportTicket.model.js";
+import Dispute from "../../models/dispute.model.js";
+import CommunityPost from "../../models/communityPost.model.js";
+import HostedGame from "../../models/hostedGame.model.js";
+import AuditLog from "../../models/auditLog.model.js";
+import Blog from "../../models/blog.model.js";
 import generateEmail from "../../utils/generateEmail.js";
 import { logAdminAction } from "../../utils/auditLogger.js";
 
@@ -24,38 +30,53 @@ export const getAllUsers = async (req, res) => {
 };
 
 export const getAdminDashboardData = async (req, res) => {
-  console.log("Starting getAdminDashboardData fetch...");
   try {
-    console.log("Fetching counts...");
     const counts = await Promise.all([
-      User.countDocuments().catch(e => { console.error("User count failed:", e); return 0; }),
-      Owner.countDocuments({ role: { $in: ["owner", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"] } }).catch(e => { console.error("Owner count failed:", e); return 0; }),
-      Turf.countDocuments().catch(e => { console.error("Turf count failed:", e); return 0; }),
-      Booking.countDocuments().catch(e => { console.error("Booking count failed:", e); return 0; }),
-      OwnerRequest.countDocuments({ status: "pending" }).catch(e => { console.error("PendingReq count failed:", e); return 0; }),
-      OwnerRequest.countDocuments({ status: "rejected" }).catch(e => { console.error("RejectedReq count failed:", e); return 0; }),
+      User.countDocuments().catch(e => 0),
+      Owner.countDocuments({ role: { $in: ["owner", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"] } }).catch(e => 0),
+      Turf.countDocuments().catch(e => 0),
+      Turf.countDocuments({ status: "pending" }).catch(e => 0),
+      Booking.countDocuments().catch(e => 0),
+      OwnerRequest.countDocuments({ status: "pending" }).catch(e => 0),
       Owner.countDocuments({ role: "coach" }).catch(e => 0),
       Owner.countDocuments({ role: "umpire" }).catch(e => 0),
       WithdrawalRequest.aggregate([{ $match: { status: "COMPLETED" } }, { $group: { _id: null, total: { $sum: "$amount" } } }]).catch(e => []),
+      SupportTicket.countDocuments({ status: "OPEN" }).catch(e => 0),
+      Dispute.countDocuments({ status: "PENDING" }).catch(e => 0),
+      CommunityPost.countDocuments().catch(e => 0),
+      HostedGame.countDocuments().catch(e => 0),
+      Blog.countDocuments({ status: "published" }).catch(e => 0),
+      User.aggregate([{ $group: { _id: null, total: { $sum: "$walletBalance" } } }]).catch(e => []),
     ]);
     
     const [
       totalUsers, 
       totalOwners, 
       totalTurfs, 
+      pendingTurfs,
       totalBookings, 
       pendingRequests, 
-      rejectedRequests,
       totalCoaches,
       totalUmpires,
-      payoutData
+      payoutData,
+      openTickets,
+      pendingDisputes,
+      totalCommunityPosts,
+      totalHostedGames,
+      publishedBlogs,
+      userWalletData
     ] = counts;
-    console.log("Counts fetched successfully:", { totalUsers, totalOwners, totalTurfs });
+
+    const recentAuditLogs = await AuditLog.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate('admin', 'name')
+      .lean()
+      .catch(e => []);
 
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
-    console.log("Running booking aggregation...");
     let bookingHistory = [];
     try {
       bookingHistory = await Booking.aggregate([
@@ -75,9 +96,7 @@ export const getAdminDashboardData = async (req, res) => {
           },
         },
       ]);
-      console.log("Aggregation completed. Results:", bookingHistory?.length || 0);
     } catch (aggErr) {
-      console.warn("Aggregation failed (possibly empty collection):", aggErr.message);
       bookingHistory = [];
     }
 
@@ -85,12 +104,19 @@ export const getAdminDashboardData = async (req, res) => {
       totalUsers,
       totalOwners,
       totalTurfs,
+      pendingTurfs,
       totalBookings,
       pendingRequests,
-      rejectedRequests,
       totalCoaches,
       totalUmpires,
       totalPayouts: payoutData[0]?.total || 0,
+      openTickets,
+      pendingDisputes,
+      totalCommunityPosts,
+      totalHostedGames,
+      publishedBlogs,
+      totalUserWalletBalance: userWalletData[0]?.total || 0,
+      recentAuditLogs,
       bookingHistory: bookingHistory || [],
       platformHealth: {
         uptime: "99.9%",
@@ -99,15 +125,13 @@ export const getAdminDashboardData = async (req, res) => {
       }
     };
     
-    console.log("Dashboard data ready. Sending response.");
     return res.status(200).json(responseData);
   } catch (err) {
     console.error("CRITICAL ERROR in getAdminDashboardData:", err);
     return res.status(500).json({ 
       success: false, 
       message: "Error getting dashboard", 
-      error: err.message,
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      error: err.message
     });
   }
 };
@@ -158,6 +182,8 @@ export const getTurfByOwnerId = async (req, res) => {
   }
   try {
     const turfs = await Turf.find({ owner: id }).lean();
+    const owner = await Owner.findById(id).select("-password").lean();
+
     const turfsWithAvgRating = await Promise.all(
       turfs.map(async (turf) => {
         const reviews = await Review.find({ turf: turf._id });
@@ -174,8 +200,9 @@ export const getTurfByOwnerId = async (req, res) => {
     );
 
     return res.status(200).json({
-      message: "Fetched turf",
+      message: "Fetched turf and owner",
       turfs: turfsWithAvgRating,
+      owner
     });
   } catch (error) {
     console.error("Error in getTurfByOwnerId: ", error);
@@ -189,11 +216,11 @@ export const getAllRequestedOwners = async (req, res) => {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
-    const ownerRequests = await OwnerRequest.find({ status: "pending", role: "owner" });
+    const ownerRequests = await OwnerRequest.find({ status: "pending", role: "owner" }).populate("userId", "profilePicture name");
     const ownerRejectedRequests = await OwnerRequest.find({
       status: "rejected",
       role: "owner"
-    });
+    }).populate("userId", "profilePicture name");
     res.status(200).json({
       success: true,
       message: "success",
@@ -232,11 +259,11 @@ export const getAllRequestedProfessionals = async (req, res) => {
     const professionalRequests = await OwnerRequest.find({ 
       status: "pending", 
       role: { $in: ["coach", "umpire"] } 
-    });
+    }).populate("userId", "profilePicture name");
     const professionalRejectedRequests = await OwnerRequest.find({
       status: "rejected",
       role: { $in: ["coach", "umpire"] }
-    });
+    }).populate("userId", "profilePicture name");
     res.status(200).json({
       success: true,
       message: "success",
@@ -249,9 +276,30 @@ export const getAllRequestedProfessionals = async (req, res) => {
   }
 };
 
+export const getAllVerificationRequests = async (req, res) => {
+  const admin = req.admin.role;
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized access denied" });
+  }
+  try {
+    const pendingRequests = await OwnerRequest.find({ status: "pending" }).populate("userId", "profilePicture name").sort({ createdAt: -1 });
+    const rejectedRequests = await OwnerRequest.find({ status: "rejected" }).populate("userId", "profilePicture name").sort({ createdAt: -1 });
+    
+    res.status(200).json({
+      success: true,
+      pendingRequests,
+      rejectedRequests,
+    });
+  } catch (err) {
+    console.error("Error in getAllVerificationRequests: ", err);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
 export const approveOwnerRequest = async (req, res) => {
   const admin = req.admin.role;
   const { id } = req.params;
+  const { adminName, adminDesignation } = req.body;
   if (admin !== "admin" && admin !== "BMSP_ADMIN") {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
@@ -283,13 +331,24 @@ export const approveOwnerRequest = async (req, res) => {
         password: password,
         googleId: googleId,
         role: ownerRequest.role,
-        businessDetails: ownerRequest.businessDetails, // We should add this to Owner model too if needed
+        businessDetails: ownerRequest.businessDetails,
+        verificationDocuments: ownerRequest.documents,
+        approvalDetails: {
+          adminName,
+          adminDesignation,
+          approvedAt: new Date()
+        }
       });
       await owner.save();
     } else {
       // Update existing owner's role
       owner.role = ownerRequest.role;
-      // owner.businessDetails = ownerRequest.businessDetails;
+      owner.verificationDocuments = ownerRequest.documents;
+      owner.approvalDetails = {
+        adminName,
+        adminDesignation,
+        approvedAt: new Date()
+      };
       await owner.save();
     }
 
@@ -399,7 +458,7 @@ export const getAllWithdrawalRequests = async (req, res) => {
   }
   try {
     const requests = await WithdrawalRequest.find()
-      .populate("owner", "name email role walletBalance reservedBalance")
+      .populate("owner", "name email role walletBalance reservedBalance profilePicture")
       .sort({ createdAt: -1 });
     
     res.status(200).json({

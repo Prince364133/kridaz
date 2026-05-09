@@ -2,9 +2,11 @@ import React from "react";
 import { Star, MessageSquare, ThumbsUp, ThumbsDown, MessageCircleReply, Activity } from "lucide-react";
 import useOwnerReviews from "@hooks/owner/useOwnerReviews";
 import ReviewsSkeleton from "./ReviewSkeleton";
+import { useNavigate } from "react-router-dom";
 
 const OwnerReviews = () => {
   const { turfs, selectedTurf, setSelectedTurf, loading, error } = useOwnerReviews();
+  const navigate = useNavigate();
 
   if (loading) return <ReviewsSkeleton />;
   if (error) return <div className="text-red-500 p-4 font-bold uppercase tracking-wider">{error}</div>;
@@ -118,11 +120,34 @@ const OwnerReviews = () => {
                     reviews.map((review) => (
                       <div key={review.id} className="bg-[#1A1A1A] border border-[#2D2D2D] p-5 rounded-[8px] hover:border-[#CCFF00]/30 transition-colors group">
                         <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h3 className="text-[13px] font-bold text-white uppercase tracking-widest">
-                              {review.userName}
-                            </h3>
-                            <p className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest mt-0.5">Verified Booking</p>
+                          <div className="flex items-center gap-3">
+                            <div 
+                              onClick={() => review.user?._id && navigate(`/profile/${review.user._id}`)}
+                              className="w-10 h-10 rounded-full border border-white/10 overflow-hidden cursor-pointer hover:border-[#CCFF00] transition-all"
+                            >
+                               {review.user?.profilePicture ? (
+                                 <img src={review.user.profilePicture} alt={review.userName} className="w-full h-full object-cover" />
+                               ) : (
+                                 <div className="w-full h-full bg-white/5 flex items-center justify-center text-[10px] font-black text-gray-400">
+                                   {review.userName.charAt(0)}
+                                 </div>
+                               )}
+                            </div>
+                            <div>
+                              <h3 
+                                onClick={() => review.user?._id && navigate(`/profile/${review.user._id}`)}
+                                className="text-[13px] font-bold text-white uppercase tracking-widest cursor-pointer hover:text-[#CCFF00] transition-colors"
+                              >
+                                {review.userName}
+                              </h3>
+                              <div className="flex items-center gap-2">
+                                <p className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest">Verified Booking</p>
+                                <span className="text-[8px] text-gray-500">•</span>
+                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                  {new Date(review.createdAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
                           </div>
                           <div className="flex items-center gap-1 bg-[#111] px-2 py-1 rounded-[4px] border border-[#2D2D2D]">
                              {[...Array(5)].map((_, i) => (

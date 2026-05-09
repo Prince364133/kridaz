@@ -26,9 +26,9 @@ const useTurfData = () => {
     fetchTurfData();
   }, []);
 
-  const approveTurf = async (id) => {
+  const approveTurf = async (id, adminData) => {
     try {
-      await axiosInstance.put(`/api/admin/turfs/${id}/approve`);
+      await axiosInstance.put(`/api/admin/turfs/${id}/approve`, adminData);
       await fetchTurfData();
       return true;
     } catch (err) {
@@ -37,9 +37,9 @@ const useTurfData = () => {
     }
   };
 
-  const rejectTurf = async (id) => {
+  const rejectTurf = async (id, adminData) => {
     try {
-      await axiosInstance.put(`/api/admin/turfs/${id}/reject`);
+      await axiosInstance.put(`/api/admin/turfs/${id}/reject`, adminData);
       await fetchTurfData();
       return true;
     } catch (err) {

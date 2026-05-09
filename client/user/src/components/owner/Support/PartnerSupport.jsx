@@ -18,10 +18,37 @@ const PartnerSupport = () => {
     images: []
   });
   const [uploading, setUploading] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [replyText, setReplyText] = useState("");
 
   useEffect(() => {
     fetchTickets();
   }, []);
+
+  // Update selected ticket data when tickets list changes
+  useEffect(() => {
+    if (selectedTicket) {
+      const updated = tickets.find(t => t._id === selectedTicket._id);
+      if (updated) setSelectedTicket(updated);
+    }
+  }, [tickets]);
+
+  const handleReply = async () => {
+    if (!replyText.trim() || !selectedTicket) return;
+    setLoading(true);
+    try {
+      const res = await axiosInstance.post(`/api/owner/support/tickets/${selectedTicket._id}/reply`, {
+        message: replyText
+      });
+      setReplyText("");
+      toast.success("Message sent");
+      fetchTickets();
+    } catch (err) {
+      toast.error("Failed to send message");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchTickets = async () => {
     setFetching(true);
@@ -43,22 +70,31 @@ const PartnerSupport = () => {
 
     setUploading(true);
     try {
+      console.log("PartnerSupport.jsx: Starting image upload for", files.length, "files");
       const uploadPromises = files.map(async (file) => {
         const data = new FormData();
         data.append("file", file);
-        data.append("upload_preset", "bms_preset");
-        const res = await fetch("https://api.cloudinary.com/v1_1/dx1iwkw0h/image/upload", {
-          method: "POST",
-          body: data
+        data.append("folder", "turfspot/support");
+        
+        console.log(`PartnerSupport.jsx: Uploading ${file.name} (${file.size} bytes)...`);
+        const res = await axiosInstance.post("/api/upload", data, {
+          headers: { "Content-Type": "multipart/form-data" }
         });
-        const fileData = await res.json();
-        return fileData.secure_url;
+        
+        if (res.data.success) {
+          console.log(`PartnerSupport.jsx: Successfully uploaded ${file.name}. URL:`, res.data.url);
+          return res.data.url;
+        } else {
+          throw new Error(res.data.message || "Upload failed");
+        }
       });
 
       const urls = await Promise.all(uploadPromises);
       setFormData(prev => ({ ...prev, images: [...prev.images, ...urls] }));
+      toast.success(`Successfully uploaded ${urls.length} image(s)`);
     } catch (err) {
-      toast.error("Image upload failed");
+      console.error("PartnerSupport.jsx: Upload error details:", err);
+      toast.error(err.response?.data?.message || err.message || "Image upload failed");
     } finally {
       setUploading(false);
     }
@@ -165,16 +201,104 @@ const PartnerSupport = () => {
               ))}
             </div>
           ) : (
-            <div className="bg-[#111] border border-white/10 rounded-3xl overflow-hidden">
-              <div className="p-6 border-b border-white/5">
-                <h3 className="text-sm font-black uppercase tracking-widest">Active Conversations</h3>
+            <div className="bg-[#111] border border-white/10 rounded-3xl overflow-hidden flex flex-col min-h-[600px]">
+              <div className="p-6 border-b border-white/5 flex justify-between items-center">
+                <h3 className="text-sm font-black uppercase tracking-widest">
+                  {selectedTicket ? `Ticket: ${selectedTicket.subject}` : "Active Conversations"}
+                </h3>
+                {selectedTicket && (
+                  <button 
+                    onClick={() => setSelectedTicket(null)}
+                    className="text-[10px] font-black uppercase tracking-widest text-[#CCFF00] hover:underline"
+                  >
+                    Back to List
+                  </button>
+                )}
               </div>
+              
               {fetching ? (
-                <div className="p-20 text-center text-gray-500 uppercase font-black text-[10px] tracking-widest">Fetching Updates...</div>
+                <div className="flex-1 flex items-center justify-center text-gray-500 uppercase font-black text-[10px] tracking-widest">Fetching Updates...</div>
+              ) : selectedTicket ? (
+                <div className="flex-1 flex flex-col h-full overflow-hidden">
+                  {/* Messages Section */}
+                  <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar max-h-[500px]">
+                    {/* Initial Message */}
+                    <div className="flex flex-col items-start max-w-[85%]">
+                      <div className="bg-[#1a1a1a] p-4 rounded-2xl rounded-tl-none border border-white/5">
+                        <p className="text-xs font-bold text-[#CCFF00] mb-2 uppercase tracking-widest">YOU (Initial Request)</p>
+                        <p className="text-[13px] leading-relaxed text-white/90">{selectedTicket.message}</p>
+                        {selectedTicket.images?.length > 0 && (
+                          <div className="grid grid-cols-2 gap-2 mt-3">
+                            {selectedTicket.images.map((img, i) => (
+                              <img key={i} src={img} alt="" className="rounded-lg border border-white/10 w-full h-24 object-cover" />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-[8px] text-gray-600 mt-2 font-bold uppercase">{new Date(selectedTicket.createdAt).toLocaleString()}</span>
+                    </div>
+
+                    {/* Replies */}
+                    {selectedTicket.replies?.map((reply, idx) => (
+                      <div key={idx} className={`flex flex-col ${reply.sender === 'OWNER' ? 'items-start' : 'items-end'} max-w-full`}>
+                        <div className={`p-4 rounded-2xl border ${reply.sender === 'OWNER' 
+                          ? 'bg-[#1a1a1a] border-white/5 rounded-tl-none max-w-[85%]' 
+                          : 'bg-[#CCFF00]/10 border-[#CCFF00]/20 rounded-tr-none max-w-[85%]'}`}>
+                          <p className={`text-[10px] font-black uppercase tracking-widest mb-2 ${reply.sender === 'OWNER' ? 'text-gray-500' : 'text-[#CCFF00]'}`}>
+                            {reply.sender === 'OWNER' ? 'YOU' : 'SUPPORT AGENT'}
+                          </p>
+                          <p className="text-[13px] leading-relaxed text-white/90">{reply.message}</p>
+                        </div>
+                        <span className="text-[8px] text-gray-600 mt-2 font-bold uppercase">{new Date(reply.createdAt).toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Input Area */}
+                  <div className="p-4 border-t border-white/5 bg-white/[0.01]">
+                    {selectedTicket.status === 'CLOSED' ? (
+                       <div className="p-4 text-center bg-red-500/10 border border-red-500/20 rounded-xl">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-red-500">This ticket has been closed</p>
+                       </div>
+                    ) : !selectedTicket.isAgentOnline ? (
+                      <div className="p-4 text-center bg-orange-500/10 border border-orange-500/20 rounded-xl">
+                         <div className="flex items-center justify-center gap-2 mb-1">
+                            <Clock size={14} className="text-orange-500" />
+                            <p className="text-[10px] font-black uppercase tracking-widest text-orange-500">Support Agent is currently Offline</p>
+                         </div>
+                         <p className="text-[9px] text-gray-500 uppercase font-bold tracking-widest animate-pulse">Wait till they come online to get real-time assistance.</p>
+                      </div>
+                    ) : null}
+
+                    {selectedTicket.status !== 'CLOSED' && (
+                      <div className="mt-4 flex gap-2">
+                        <input 
+                          type="text"
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder={selectedTicket.isAgentOnline ? "Type your message..." : "Agent is offline - you can still reply..."}
+                          className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#CCFF00] font-medium"
+                          onKeyPress={(e) => e.key === 'Enter' && handleReply()}
+                        />
+                        <button 
+                          onClick={handleReply}
+                          disabled={!replyText.trim() || loading}
+                          className="bg-[#CCFF00] text-black px-6 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-[#b3ff00] transition-all disabled:opacity-50"
+                        >
+                          Send
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               ) : tickets.length > 0 ? (
-                <div className="divide-y divide-white/5 max-h-[700px] overflow-y-auto no-scrollbar">
+                <div className="divide-y divide-white/5 no-scrollbar max-h-[600px] overflow-y-auto">
                   {tickets.map(ticket => (
-                    <div key={ticket._id} className="p-6 hover:bg-white/[0.02] transition-all cursor-pointer group">
+                    <div 
+                      key={ticket._id} 
+                      onClick={() => setSelectedTicket(ticket)}
+                      className="p-6 hover:bg-white/[0.02] transition-all cursor-pointer group"
+                    >
                       <div className="flex justify-between items-start mb-3">
                         <div className="space-y-1">
                           <div className="flex items-center gap-3">
@@ -185,6 +309,17 @@ const PartnerSupport = () => {
                               {ticket.status}
                             </span>
                             <span className="text-[9px] font-black text-gray-700 uppercase tracking-widest">REF: {ticket._id.slice(-6)}</span>
+                            {ticket.isAgentOnline ? (
+                              <span className="flex items-center gap-1 text-[8px] font-black text-[#CCFF00] uppercase tracking-widest animate-pulse">
+                                <span className="w-1.5 h-1.5 bg-[#CCFF00] rounded-full"></span>
+                                Agent Online
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1 text-[8px] font-black text-orange-500 uppercase tracking-widest">
+                                <span className="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+                                Agent Offline
+                              </span>
+                            )}
                           </div>
                           <h4 className="text-sm font-black uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">{ticket.subject}</h4>
                         </div>
@@ -199,8 +334,8 @@ const PartnerSupport = () => {
                   ))}
                 </div>
               ) : (
-                <div className="p-20 text-center">
-                  <AlertCircle className="mx-auto text-gray-800 mb-4" size={40} />
+                <div className="flex-1 flex flex-col items-center justify-center p-20">
+                  <AlertCircle className="text-gray-800 mb-4" size={40} />
                   <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">No Support History</p>
                 </div>
               )}

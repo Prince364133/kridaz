@@ -1,25 +1,38 @@
 import React from "react";
 import OwnerCard from "./OwnerCard";
+import { Building, ShieldAlert } from "lucide-react";
 
 const OwnerList = ({ owners }) => {
   return (
-    <> 
-      {owners.length === 0 && (
-        <div className="alert alert-info shadow-lg w-full">
-          <div>
-            <span>No owners at the moment.</span>
+    <div className="relative">
+      {owners.length === 0 ? (
+        <div className="bg-[#000000] p-20 rounded-[8px] border border-[#2D2D2D] text-center relative overflow-hidden group min-h-[400px] flex items-center justify-center">
+          <div className="absolute inset-0 bg-[#CCFF00]/5 opacity-100 transition-opacity blur-[80px]" />
+          <div className="relative z-10 space-y-4">
+             <div className="w-16 h-16 mx-auto rounded-full bg-[#2D2D2D] flex items-center justify-center text-gray-500 border border-[#404040]">
+               <Building size={24} />
+             </div>
+             <div>
+               <h2 className="text-xl font-semibold text-white uppercase tracking-tight">
+                 Database Empty
+               </h2>
+               <p className="text-[12px] font-normal text-[#999999] uppercase tracking-widest mt-1">
+                 No verified venue owners found in the master ledger.
+               </p>
+             </div>
           </div>
         </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          {owners.map((owner) => (
+            <div key={owner._id} className="animate-fade-in-up">
+              <OwnerCard owner={owner} />
+            </div>
+          ))}
+        </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {owners.map((owner) => (
-          <OwnerCard key={owner._id} owner={owner} />
-        ))}
-      </div>
-    </>
+    </div>
   );
 };
 
 export default OwnerList;
-
-

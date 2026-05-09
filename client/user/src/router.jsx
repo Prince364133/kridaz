@@ -72,20 +72,18 @@ import ProfessionalProfile from "./components/professional/ProfessionalProfile";
 
 import {
   UserManagement,
-  NewOwnerRequests as NewPartnerRequests,
-  RejectedOwnerRequests as RejectedPartnerRequests,
+  VerificationCenter,
   AdminDashboard,
   OwnerViewer as PartnerViewer,
   TurfList,
   AllTurf,
+  VenueApprovalDetail,
   TransactionSection,
   FeatureFlags,
   MarketingManagement,
   BlogManagement,
   CommunityManagement,
   ProfessionalManagement,
-  ProfessionalRequests,
-  WithdrawalManagement,
   SupportCenter,
   DisputeManager,
   AuditLogs,
@@ -109,18 +107,14 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <AdminDashboard /> },
       {
-        path: "partner-requests",
-        children: [
-          { path: "new", element: <NewPartnerRequests /> },
-          { path: "rejected", element: <RejectedPartnerRequests /> },
-        ],
+        path: "verification-center",
+        element: <VerificationCenter />,
       },
       {
         path: "professionals",
         children: [
           { path: "coaches", element: <ProfessionalManagement role="coach" /> },
           { path: "umpires", element: <ProfessionalManagement role="umpire" /> },
-          { path: "requests", element: <ProfessionalRequests /> },
         ],
       },
       { path: "users", element: <UserManagement /> },
@@ -132,8 +126,8 @@ const router = createBrowserRouter([
         ],
       },
       { path: "turfs", element: <AllTurf /> },
+      { path: "turfs/:id", element: <VenueApprovalDetail /> },
       { path: "transactions", element: <TransactionSection /> },
-      { path: "withdrawals", element: <WithdrawalManagement /> },
       { path: "support", element: <SupportCenter /> },
       { path: "disputes", element: <DisputeManager /> },
       { path: "audit", element: <AuditLogs /> },

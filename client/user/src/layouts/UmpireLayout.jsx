@@ -32,8 +32,6 @@ const UmpireLayout = () => {
         <main
           className={`
           flex-1 
-          min-h-0
-          overflow-y-auto
           overflow-x-hidden
           transition-all 
           duration-300 

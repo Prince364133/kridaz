@@ -109,6 +109,30 @@ export const replyToTicket = async (req, res) => {
   }
 };
 
+export const toggleAgentStatus = async (req, res) => {
+  const { ticketId } = req.params;
+  const { isOnline } = req.body;
+  try {
+    const ticket = await SupportTicket.findById(ticketId);
+    if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+
+    ticket.isAgentOnline = isOnline;
+    await ticket.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: `Agent is now ${isOnline ? 'online' : 'offline'}`, 
+      isAgentOnline: ticket.isAgentOnline 
+    });
+
+    await logAdminAction(req, "TOGGLE_SUPPORT_AGENT_STATUS", "RESOLUTION", ticket._id, {
+      isOnline
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // --- Dispute Controllers ---
 
 export const getAllDisputes = async (req, res) => {

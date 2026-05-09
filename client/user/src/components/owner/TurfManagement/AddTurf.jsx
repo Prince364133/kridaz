@@ -59,6 +59,14 @@ const AddTurf = () => {
   const watchedLng = watch("longitude");
   const watchedLocation = watch("location");
   const watchedCity = watch("city");
+  const watchedPricePerHour = watch("pricePerHour");
+  const watchedSlotDuration = watch("slotDuration") || 60;
+  const watchedFacilityCategory = watch("facilityCategory") || "Turf";
+
+  // Calculate projected earnings
+  const activeSlotsCount = generatedSlots.filter(s => s.isActive).length;
+  const perSlotPrice = (Number(watchedPricePerHour) || 0) * (Number(watchedSlotDuration) / 60);
+  const totalDailyEarnings = activeSlotsCount * perSlotPrice;
 
   // Load states on mount
   useEffect(() => {
@@ -98,7 +106,7 @@ const AddTurf = () => {
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-8 bg-[#CCFF00] rounded-full" />
               <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
-                ADD NEW <span className="text-[#CCFF00]">TURF</span>
+                ADD NEW <span className="text-[#CCFF00]">{watchedFacilityCategory.toUpperCase()}</span>
               </h1>
             </div>
             <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
@@ -116,8 +124,27 @@ const AddTurf = () => {
           <div className="space-y-8 relative z-10">
             <h3 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px]">General Information</h3>
             
+            <div className="form-control">
+              <label className="label mb-2">
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Facility Category</span>
+              </label>
+              <select
+                {...register("facilityCategory", { required: "Please select a facility category" })}
+                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
+              >
+                <option value="">Select Category (e.g. Turf, Ground)</option>
+                <option value="Turf">Turf</option>
+                <option value="Ground">Ground</option>
+                <option value="Court">Court</option>
+                <option value="Stadium">Stadium</option>
+                <option value="Arena">Arena</option>
+                <option value="Studio">Studio</option>
+              </select>
+              {errors.facilityCategory && <span className="text-[#CCFF00] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.facilityCategory.message}</span>}
+            </div>
+
             <FormField
-              label="Turf Name"
+              label={`${watchedFacilityCategory} Name`}
               name="name"
               type="text"
               register={register}
@@ -334,14 +361,14 @@ const AddTurf = () => {
 
             <div className="form-control">
               <label className="label mb-2">
-                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Ground Composition</span>
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">{watchedFacilityCategory} Composition</span>
               </label>
               <select
                 className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
                 onChange={(e) => addGroundType(e.target.value)}
                 value=""
               >
-                <option value="" disabled>Select Ground Types</option>
+                <option value="" disabled>Select {watchedFacilityCategory} Types</option>
                 {groundTypeOptions.map(option => (
                   <option key={option} value={option} disabled={groundTypes.includes(option)}>{option}</option>
                 ))}
@@ -364,7 +391,7 @@ const AddTurf = () => {
 
             <div className="form-control">
               <label className="label mb-2">
-                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Ground Facilities</span>
+                <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">{watchedFacilityCategory} Facilities</span>
               </label>
               <select
                 className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
@@ -503,19 +530,23 @@ const AddTurf = () => {
                       control={control}
                       rules={{ required: "Opening time is required" }}
                       render={({ field }) => (
-                        <DatePicker
-                          selected={field.value}
-                          onChange={(date) => {
-                            field.onChange(date);
-                            setValue("closeTime", null);
-                          }}
-                          showTimeSelect
-                          showTimeSelectOnly
-                          timeIntervals={60}
-                          timeCaption="Time"
-                          dateFormat="h:mm aa"
-                          className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all"
-                        />
+                        <div className="relative datepicker-dark">
+                          <DatePicker
+                            selected={field.value}
+                            onChange={(date) => {
+                              field.onChange(date);
+                              setValue("closeTime", null);
+                            }}
+                            showTimeSelect
+                            showTimeSelectOnly
+                            timeIntervals={60}
+                            timeCaption="Time"
+                            dateFormat="h:mm aa"
+                            portalId="root"
+                            popperPlacement="bottom-start"
+                            className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all"
+                          />
+                        </div>
                       )}
                     />
                   </div>
@@ -529,19 +560,23 @@ const AddTurf = () => {
                       control={control}
                       rules={{ required: "Closing time is required" }}
                       render={({ field }) => (
-                        <DatePicker
-                          selected={field.value}
-                          onChange={field.onChange}
-                          showTimeSelect
-                          showTimeSelectOnly
-                          timeIntervals={60}
-                          timeCaption="Time"
-                          dateFormat="h:mm aa"
-                          className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                          disabled={!openTime}
-                          minTime={openTime || setHours(setMinutes(new Date(), 0), 0)}
-                          maxTime={setHours(setMinutes(new Date(), 30), 23)}
-                        />
+                        <div className="relative datepicker-dark">
+                          <DatePicker
+                            selected={field.value}
+                            onChange={field.onChange}
+                            showTimeSelect
+                            showTimeSelectOnly
+                            timeIntervals={60}
+                            timeCaption="Time"
+                            dateFormat="h:mm aa"
+                            portalId="root"
+                            popperPlacement="top-start"
+                            className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                            disabled={!openTime}
+                            minTime={openTime || setHours(setMinutes(new Date(), 0), 0)}
+                            maxTime={setHours(setMinutes(new Date(), 30), 23)}
+                          />
+                        </div>
                       )}
                     />
                   </div>
@@ -576,9 +611,20 @@ const AddTurf = () => {
               <div className="space-y-10">
                 <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-3 mb-6">
                   <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[3px]">Matrix Projection</h3>
-                  <span className="text-[10px] font-bold text-[#CCFF00] uppercase bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-4 py-1 rounded-full">
-                    {generatedSlots.length} Active Slots
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-end">
+                      <span className="text-[8px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Max Daily Revenue</span>
+                      <span className="text-[11px] font-bold text-black uppercase bg-[#CCFF00] px-4 py-1.5 rounded-[4px] shadow-[0_2px_10px_rgba(204,255,0,0.2)]">
+                        ₹ {totalDailyEarnings.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end ml-2 border-l border-[#2D2D2D] pl-4">
+                      <span className="text-[8px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Capacity</span>
+                      <span className="text-[11px] font-bold text-[#CCFF00] uppercase bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-4 py-1.5 rounded-[4px]">
+                        {activeSlotsCount} Slots
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 
                 {generatedSlots.length > 0 ? (
@@ -616,7 +662,7 @@ const AddTurf = () => {
               className={`w-full py-5 bg-[#CCFF00] text-black font-bold text-[16px] uppercase tracking-[6px] hover:bg-white transition-all transform hover:scale-[1.01] active:scale-[0.99] rounded-[8px] shadow-[0_10px_30px_rgba(204,255,0,0.15)] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={loading}
             >
-              {loading ? "SYNCHRONIZING..." : "INITIALIZE FACILITY"}
+              {loading ? "SYNCHRONIZING..." : `INITIALIZE ${watchedFacilityCategory.toUpperCase()}`}
             </button>
           </div>
         </form>

@@ -32,7 +32,7 @@ router.post("/register", validate(userRegisterSchema), registerUser);
 router.post("/login-step1", validate(loginStep1Schema), loginStep1);
 router.post("/login", validate(userLoginSchema), login);
 router.post("/google-auth", googleAuth);
-router.post("/upgrade-request", userAuth, upgradeRequest);
+router.post("/upgrade-request", userAuth, upload.array("documents", 10), upgradeRequest);
 router.get("/getMe", userAuth, getMe);
 router.post("/logout", logout);
 router.post("/profile-picture", userAuth, upload.single("profilePicture"), updateProfilePicture);

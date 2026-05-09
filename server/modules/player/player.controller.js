@@ -183,24 +183,34 @@ export const unfollowPlayer = async (req, res) => {
 export const getNetwork = async (req, res) => {
   try {
     const currentUserId = req.user.id;
-    let user = await User.findById(currentUserId)
-      .populate('followers', 'name username profilePicture location bio')
-      .populate('following', 'name username profilePicture location bio');
+    let user = await User.findById(currentUserId).lean();
 
     if (!user) {
-      user = await Owner.findById(currentUserId)
-        .populate('followers', 'name username profilePicture location bio')
-        .populate('following', 'name username profilePicture location bio');
+      user = await Owner.findById(currentUserId).lean();
     }
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
+    const fetchUsersAndOwners = async (ids) => {
+      const users = await User.find({ _id: { $in: ids } }).select('name username profilePicture location bio').lean();
+      const owners = await Owner.find({ _id: { $in: ids } }).select('name businessDetails profilePicture location bio').lean();
+      
+      const mappedOwners = owners.map(o => ({
+        ...o,
+        username: o.businessDetails?.businessName || o.name
+      }));
+      return [...users, ...mappedOwners];
+    };
+
+    const followers = await fetchUsersAndOwners(user.followers || []);
+    const following = await fetchUsersAndOwners(user.following || []);
+
     return res.status(200).json({ 
       success: true, 
-      followers: (user.followers || []).filter(f => f),
-      following: (user.following || []).filter(f => f) 
+      followers,
+      following 
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -261,24 +271,32 @@ export const getNetworkById = async (req, res) => {
     const currentUserId = req.user?.id;
 
     // Try User first
-    let user = await User.findById(id)
-      .populate('followers', 'name username profilePicture location bio')
-      .populate('following', 'name username profilePicture location bio');
+    let user = await User.findById(id).lean();
 
-    // If not found, try Owner (Owners don't have followers/following yet in schema, but we should handle gracefully)
+    // If not found, try Owner
     if (!user) {
-      user = await Owner.findById(id);
-      if (user) {
-        return res.status(200).json({ success: true, followers: [], following: [] });
+      user = await Owner.findById(id).lean();
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
       }
-      return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    let followers = user.followers || [];
-    let following = user.following || [];
+    const fetchUsersAndOwners = async (ids) => {
+      const users = await User.find({ _id: { $in: ids } }).select('name username profilePicture location bio').lean();
+      const owners = await Owner.find({ _id: { $in: ids } }).select('name businessDetails profilePicture location bio').lean();
+      
+      const mappedOwners = owners.map(o => ({
+        ...o,
+        username: o.businessDetails?.businessName || o.name
+      }));
+      return [...users, ...mappedOwners];
+    };
+
+    let followers = await fetchUsersAndOwners(user.followers || []);
+    let following = await fetchUsersAndOwners(user.following || []);
 
     if (currentUserId) {
-      const currentUser = await User.findById(currentUserId);
+      const currentUser = await User.findById(currentUserId).lean();
       const myFollowing = currentUser ? currentUser.following.map(fid => fid.toString()) : [];
 
       const sortWithCommon = (list) => {
@@ -297,8 +315,8 @@ export const getNetworkById = async (req, res) => {
 
     return res.status(200).json({ 
       success: true, 
-      followers: followers.filter(f => f),
-      following: following.filter(f => f) 
+      followers,
+      following 
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
