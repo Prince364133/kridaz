@@ -51,6 +51,9 @@ const useSignUpForm = () => {
   const [loading, setLoading] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
 
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingUser, setOnboardingUser] = useState(null);
+
   const {
     register,
     handleSubmit,
@@ -127,10 +130,20 @@ const useSignUpForm = () => {
 
       const response = await axiosInstance.post("/api/user/auth/google-auth", payload);
       const result = await response.data;
-      toast.success("Successfully logged in with Google!");
-      dispatch(login({ token: result.token, role: result.role, user: result.user }));
+      
       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
-      navigate("/", { replace: true });
+      dispatch(login({ token: result.token, role: result.role, user: result.user }));
+
+      const isProfileIncomplete = !result.user.phone || !result.user.gender || !result.user.location || !result.user.sportTypes || result.user.sportTypes.length === 0;
+
+      if (isProfileIncomplete) {
+        setOnboardingUser(result.user);
+        setShowOnboarding(true);
+        // Do not navigate yet, wait for onboarding to complete
+      } else {
+        toast.success("Successfully logged in with Google!");
+        navigate("/", { replace: true });
+      }
     } catch (error) {
       if (error.response) {
         toast.error(error.response?.data?.message);
@@ -157,6 +170,9 @@ const useSignUpForm = () => {
     showOtpInput,
     handleGoogleSuccess,
     handleGoogleError,
+    showOnboarding,
+    setShowOnboarding,
+    onboardingUser,
   };
 };
 

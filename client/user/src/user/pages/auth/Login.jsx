@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import useLoginForm from "@hooks/useLoginForm";
 import GoogleAuthButton from "@user/components/auth/GoogleAuthButton";
+import OnboardingModal from "../../components/modals/OnboardingModal";
 import { 
   ArrowRight, 
   ShieldCheck, 
@@ -31,7 +32,10 @@ const Login = () => {
     loading,
     showOtpInput,
     handleGoogleSuccess,
-    handleGoogleError
+    handleGoogleError,
+    showOnboarding,
+    setShowOnboarding,
+    onboardingUser
   } = useLoginForm();
   const [mounted, setMounted] = useState(false);
   const dispatch = useDispatch(); // for quick demo button
@@ -40,7 +44,7 @@ const Login = () => {
   
   useEffect(() => {
     setMounted(true);
-    if (isLoggedIn) {
+    if (isLoggedIn && !showOnboarding) {
       const normalizedRole = role?.toLowerCase();
       if (normalizedRole === "admin" || normalizedRole === "bmsp_admin") navigate("/admin");
       else if (normalizedRole === "owner") navigate("/partner");
@@ -48,7 +52,7 @@ const Login = () => {
       else if (normalizedRole === "umpire") navigate("/umpire");
       else navigate("/");
     }
-  }, [isLoggedIn, role, navigate]);
+  }, [isLoggedIn, role, navigate, showOnboarding]);
 
   return (
     <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-start pt-4 lg:pt-10 pb-12 font-sans">
@@ -200,6 +204,12 @@ const Login = () => {
 
       {/* AMBIENT LIGHTING */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/[0.01] pointer-events-none rounded-full" />
+      {/* ONBOARDING MODAL */}
+      <OnboardingModal 
+        isOpen={showOnboarding} 
+        onClose={() => setShowOnboarding(false)} 
+        onComplete={() => navigate("/")}
+      />
     </div>
   );
 };

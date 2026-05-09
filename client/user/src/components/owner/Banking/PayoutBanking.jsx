@@ -403,17 +403,22 @@ const PayoutBanking = () => {
                        </div>
                     </div>
 
-                    {/* KYC Indicator */}
-                    <div className="p-5 bg-orange-500/5 border border-orange-500/20 rounded-[8px] space-y-3">
-                       <div className="flex items-center gap-2">
-                          <AlertCircle className="text-orange-500" size={14} />
-                          <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest">KYC Verification</span>
-                       </div>
-                       <p className="text-[10px] text-[#878C9F] font-bold uppercase tracking-widest leading-relaxed">Identity verification required for settlements.</p>
-                       <button className="w-full py-3 bg-[#000000] text-white text-[10px] font-black uppercase tracking-widest rounded-[6px] border border-[#2D2D2D] hover:bg-[#CCFF00]/10 hover:text-[#CCFF00] hover:border-[#CCFF00]/30 transition-all flex items-center justify-center gap-2">
-                          <Upload size={14} /> Submit KYC Docs
-                       </button>
-                    </div>
+                    {/* KYC Indicator - Show until banking info is complete */}
+                    {!isBankingInfoComplete && (
+                      <div className="p-5 bg-orange-500/5 border border-orange-500/20 rounded-[8px] space-y-3 mt-4">
+                        <div className="flex items-center gap-2">
+                           <AlertCircle className="text-orange-500" size={14} />
+                           <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest">KYC Verification Pending</span>
+                        </div>
+                        <p className="text-[10px] text-[#878C9F] font-bold uppercase tracking-widest leading-relaxed">Identity verification required for settlements. Please complete your banking info to proceed.</p>
+                        <button 
+                          onClick={() => setIsEditingBank(true)}
+                          className="w-full py-3 bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-black uppercase tracking-widest rounded-[6px] border border-[#CCFF00]/20 hover:bg-[#CCFF00] hover:text-black transition-all flex items-center justify-center gap-2 shadow-[0_5px_15px_rgba(204,255,0,0.05)]"
+                        >
+                           <ShieldCheck size={14} /> COMPLETE NOW
+                        </button>
+                      </div>
+                    )}
                  </div>
                )}
             </div>

@@ -33,6 +33,9 @@ const useLoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
 
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingUser, setOnboardingUser] = useState(null);
+
   const {
     register,
     handleSubmit,
@@ -144,13 +147,21 @@ const useLoginForm = () => {
 
       const response = await axiosInstance.post("/api/user/auth/google-auth", payload);
       const result = await response.data;
-      toast.success("Successfully logged in with Google!");
       
       const { token, role } = result;
-      dispatch(login({ token, role, user: result.user }));
-      
       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      handleRoleRedirect(role);
+      dispatch(login({ token, role, user: result.user }));
+
+      const isProfileIncomplete = !result.user.phone || !result.user.gender || !result.user.location || !result.user.sportTypes || result.user.sportTypes.length === 0;
+
+      if (isProfileIncomplete) {
+        setOnboardingUser(result.user);
+        setShowOnboarding(true);
+        // Do not redirect yet
+      } else {
+        toast.success("Successfully logged in with Google!");
+        handleRoleRedirect(role);
+      }
     } catch (error) {
       if (error.response) {
         toast.error(error.response?.data?.message);
@@ -175,6 +186,9 @@ const useLoginForm = () => {
     showOtpInput,
     handleGoogleSuccess,
     handleGoogleError,
+    showOnboarding,
+    setShowOnboarding,
+    onboardingUser,
   };
 };
 

@@ -57,7 +57,7 @@ const Navbar = () => {
   // Removed dedicated BOOKINGS link
 
   return (
-    <nav className="relative z-50 flex flex-col">
+    <nav className="relative z-[100] flex flex-col">
 
       <div className={`flex justify-center transition-all duration-500 ${isScrolled ? "pt-0" : "pt-0"}`}>
         <div 
@@ -88,7 +88,7 @@ const Navbar = () => {
                       {link.name}
                       <span className={`absolute -bottom-2 left-0 h-[2px] bg-primary transition-all duration-300 ${location.pathname.startsWith("/partners") ? "w-full" : "w-0 group-hover/link:w-full"}`} />
                     </label>
-                    <ul tabIndex={0} className="dropdown-content mt-4 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-xl w-48 overflow-hidden backdrop-blur-xl">
+                    <ul tabIndex={0} className="dropdown-content z-[100] mt-4 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-xl w-48 overflow-hidden backdrop-blur-xl">
                       <li>
                         <Link to="/business/venue" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
                           Venue Owner
