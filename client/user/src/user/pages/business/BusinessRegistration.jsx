@@ -647,4 +647,4 @@ function ShieldCheckIcon({ size, className }) {
   );
 }
 
-export default BusinessRegistration;
+
