@@ -32,7 +32,7 @@ const TurfManagement = () => {
         <div>
           <div className="flex items-center gap-3">
              <div className="w-1.5 h-6 bg-[#CCFF00] rounded-full" />
-             <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] tracking-tight uppercase leading-none">Inventory Management</h1>
+             <h1 className="text-[28px] lg:text-[32px] font-bold font-open-sans tracking-tight uppercase leading-none">Inventory Management</h1>
           </div>
           <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">Control your multisport facility roster.</p>
         </div>

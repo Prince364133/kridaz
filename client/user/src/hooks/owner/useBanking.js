@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 
 const useBanking = () => {
   const [bankingDetails, setBankingDetails] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(0);
   const [payoutSettings, setPayoutSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isPayoutDay, setIsPayoutDay] = useState(false);
@@ -17,6 +18,7 @@ const useBanking = () => {
       ]);
 
       setBankingDetails(bankingRes.data.bankingDetails);
+      setWalletBalance(bankingRes.data.walletBalance || 0);
       setPayoutSettings(settingsRes.data.settings);
 
       // Check if today is payout day
@@ -44,11 +46,43 @@ const useBanking = () => {
     }
   };
 
+  const requestPayout = async (amount, password) => {
+    try {
+      const res = await axiosInstance.post("/api/owner/banking/payout", { amount, password });
+      toast.success(res.data.message);
+      return true;
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Payout request failed");
+      return false;
+    }
+  };
+
+  const verifyPassword = async (password) => {
+    try {
+      await axiosInstance.post("/api/owner/banking/verify-password", { password });
+      toast.success("Identity Verified");
+      return true;
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Verification failed");
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
 
-  return { bankingDetails, payoutSettings, loading, isPayoutDay, updateBanking, refresh: fetchData };
+  return { 
+    bankingDetails, 
+    walletBalance,
+    payoutSettings, 
+    loading, 
+    isPayoutDay, 
+    updateBanking, 
+    requestPayout, 
+    verifyPassword,
+    refresh: fetchData 
+  };
 };
 
 export default useBanking;

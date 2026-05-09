@@ -35,7 +35,7 @@ const OccupancyHeatmap = () => {
     <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)]">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider">Occupancy Heatmap</h2>
+          <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider">Weekly Occupancy Calendar</h2>
           <p className="text-[10px] font-normal text-[#878C9F] uppercase tracking-widest mt-1">Real-time weekly booking density</p>
         </div>
         <div className="flex items-center gap-4">
@@ -55,8 +55,8 @@ const OccupancyHeatmap = () => {
           {/* Hours Header */}
           <div className="flex gap-1 mb-4 ml-10">
             {Array.from({ length: 24 }).map((_, i) => (
-              <div key={i} className="flex-1 text-center text-[8px] font-medium text-[#999999] uppercase tracking-wider">
-                {i.toString().padStart(2, '0')}
+              <div key={i} className="flex-1 text-center text-[7px] font-medium text-[#999999] uppercase tracking-tighter">
+                {i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i-12} PM`}
               </div>
             ))}
           </div>
@@ -95,7 +95,7 @@ const OccupancyHeatmap = () => {
             <div className="p-6 border-b border-[#2D2D2D] flex items-center justify-between bg-black/40">
               <div>
                 <h3 className="text-xl font-black text-white uppercase tracking-tight">
-                  {days[selectedSlot.day]} @ {selectedSlot.hour}:00
+                  {days[selectedSlot.day]} @ {selectedSlot.hour === 0 ? '12 AM' : selectedSlot.hour < 12 ? `${selectedSlot.hour} AM` : selectedSlot.hour === 12 ? '12 PM' : `${selectedSlot.hour-12} PM`}
                 </h3>
                 <p className="text-sm text-[#CCFF00] font-medium uppercase tracking-widest mt-1">
                   {selectedSlot.count} ACTIVE BOOKINGS
@@ -158,9 +158,6 @@ const OccupancyHeatmap = () => {
                       <p className="text-white font-bold uppercase tracking-widest">No Bookings</p>
                       <p className="text-sm text-[#999999] mt-1">This slot is currently available for booking.</p>
                    </div>
-                   <button className="mt-4 px-6 py-2 bg-[#CCFF00] text-black text-[11px] font-black uppercase tracking-widest rounded-full hover:bg-white transition-all">
-                      Add Manual Booking
-                   </button>
                 </div>
               )}
             </div>

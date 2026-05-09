@@ -1,49 +1,7 @@
 import React, { useState } from "react";
-import { Search, Filter, Download, Plus, Phone, Mail, ExternalLink, User } from "lucide-react";
-
-// Mock Data
-const customers = [
-  {
-    id: 1,
-    name: "Aditya Verma",
-    joined: "Joined Oct 2025",
-    status: "ELITE",
-    sessions: "24 sessions",
-    revenue: "₹36,000",
-    lastActive: "Today",
-    avatarColor: "bg-orange-500",
-  },
-  {
-    id: 2,
-    name: "Sarah D'Souza",
-    joined: "Joined Oct 2025",
-    status: "GOLD",
-    sessions: "18 sessions",
-    revenue: "₹22,400",
-    lastActive: "2 days ago",
-    avatarColor: "bg-emerald-500",
-  },
-  {
-    id: 3,
-    name: "Rohan Mehta",
-    joined: "Joined Oct 2025",
-    status: "SILVER",
-    sessions: "12 sessions",
-    revenue: "₹18,500",
-    lastActive: "1 week ago",
-    avatarColor: "bg-blue-400",
-  },
-  {
-    id: 4,
-    name: "Priya Singh",
-    joined: "Joined Oct 2025",
-    status: "PLATINUM",
-    sessions: "42 sessions",
-    revenue: "₹64,200",
-    lastActive: "Today",
-    avatarColor: "bg-rose-500",
-  },
-];
+import { Search, Filter, Download, Plus, Phone, Mail, ExternalLink, User, Loader2 } from "lucide-react";
+import useCustomers from "../../../hooks/owner/useCustomers";
+import { Link } from "react-router-dom";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -62,6 +20,22 @@ const getStatusColor = (status) => {
 
 export default function CustomerDirectory() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { customers, stats, loading, error } = useCustomers();
+
+  const filteredCustomers = customers.filter(c => 
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.phone.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center bg-[#000] text-[#CCFF00] gap-4">
+        <Loader2 className="animate-spin" size={48} />
+        <p className="text-xs font-bold uppercase tracking-[0.3em]">Synchronizing Player Data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full custom-scrollbar bg-[#000000] text-white">
@@ -71,7 +45,7 @@ export default function CustomerDirectory() {
           <div>
             <div className="flex items-center gap-3">
               <User className="text-[#CCFF00]" size={32} />
-              <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] tracking-tight uppercase leading-none">Customer Directory</h1>
+              <h1 className="text-[28px] lg:text-[32px] font-bold font-open-sans tracking-tight uppercase leading-none">Customer Directory</h1>
             </div>
             <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-11">Monitor player engagement and lifetime value.</p>
           </div>
@@ -80,53 +54,37 @@ export default function CustomerDirectory() {
               <Download size={16} />
               Export CSV
             </button>
-            <button className="flex items-center justify-center gap-2 px-4 py-2 bg-[#CCFF00] hover:bg-[#b3ff00] text-black rounded-[8px] text-[13px] font-bold uppercase tracking-widest transition-all w-full md:w-auto shadow-[0_0_15px_rgba(204,255,0,0.15)] font-inter">
-              <Plus size={18} />
-              Add Customer
-            </button>
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
-          {/* Total Players */}
           <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
             <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-3">Total Players</p>
             <div className="flex items-end justify-between">
-              <h3 className="text-2xl font-semibold text-white tracking-tight">1,482</h3>
-              <span className="px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-medium uppercase tracking-wider rounded-full">
-                +12.5%
-              </span>
+              <h3 className="text-2xl font-semibold text-white tracking-tight">{stats.totalPlayers.toLocaleString()}</h3>
+              <span className="px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-medium uppercase tracking-wider rounded-full">Active</span>
             </div>
           </div>
-          {/* Active Users */}
           <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
             <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-3">Active Users</p>
             <div className="flex items-end justify-between">
-              <h3 className="text-2xl font-semibold text-white tracking-tight">842</h3>
-              <span className="px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-medium uppercase tracking-wider rounded-full">
-                +4.2%
-              </span>
+              <h3 className="text-2xl font-semibold text-white tracking-tight">{stats.activeUsers.toLocaleString()}</h3>
+              <span className="px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-medium uppercase tracking-wider rounded-full">30D</span>
             </div>
           </div>
-          {/* Avg. LTV */}
           <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
             <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-3">Avg. LTV</p>
             <div className="flex items-end justify-between">
-              <h3 className="text-2xl font-semibold text-white tracking-tight">₹4,280</h3>
-              <span className="px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-medium uppercase tracking-wider rounded-full">
-                +18.1%
-              </span>
+              <h3 className="text-2xl font-semibold text-white tracking-tight">₹{stats.avgLtv.toLocaleString()}</h3>
+              <span className="px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-medium uppercase tracking-wider rounded-full">Per Player</span>
             </div>
           </div>
-          {/* Retention */}
-          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-red-500/30 transition-all duration-500">
+          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
             <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-3">Retention</p>
             <div className="flex items-end justify-between">
-              <h3 className="text-2xl font-semibold text-white tracking-tight">64%</h3>
-              <span className="px-2 py-0.5 bg-red-500/10 text-red-500 text-[10px] font-medium uppercase tracking-wider rounded-full">
-                -2.1%
-              </span>
+              <h3 className="text-2xl font-semibold text-white tracking-tight">{stats.retentionRate}%</h3>
+              <span className="px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-medium uppercase tracking-wider rounded-full">Returning</span>
             </div>
           </div>
         </div>
@@ -142,7 +100,7 @@ export default function CustomerDirectory() {
                 placeholder="Search by name, email, or phone..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-[#2D2D2D] border border-[#404040] text-white pl-10 pr-4 py-2 rounded-[6px] text-[14px] focus:outline-none focus:border-[#CCFF00] transition-colors"
+                className="w-full bg-[#2D2D2D] border border-[#404040] text-white pl-10 pr-4 py-2 rounded-[6px] text-[14px] focus:outline-none focus:border-[#CCFF00] transition-colors font-inter"
               />
             </div>
             <button className="p-2 bg-[#2D2D2D] border border-[#404040] text-[#878C9F] rounded-[6px] hover:text-white transition-colors">
@@ -155,57 +113,86 @@ export default function CustomerDirectory() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-[#2D2D2D] bg-[#151617]/50">
-                  <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Customer</th>
-                  <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Bookings</th>
-                  <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Revenue Contribution</th>
-                  <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Last Active</th>
-                  <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider text-right">Actions</th>
+                  <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider font-open-sans">Customer</th>
+                  <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider font-open-sans">Status</th>
+                  <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider font-open-sans">Bookings</th>
+                  <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider font-open-sans">Revenue Contribution</th>
+                  <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider font-open-sans">Last Active</th>
+                  <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider text-right font-open-sans">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#2D2D2D]/30">
-                {customers.map((customer) => (
-                  <tr key={customer.id} className="group hover:bg-[#2D2D2D]/20 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0 ${customer.avatarColor}`}>
-                          <User size={16} className="text-white/80" />
+                {filteredCustomers.length > 0 ? (
+                  filteredCustomers.map((customer) => (
+                    <tr key={customer.id} className="group hover:bg-[#2D2D2D]/20 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0 ${customer.isRegistered ? 'bg-[#CCFF00]/20' : 'bg-[#2D2D2D]'}`}>
+                            <User size={16} className={customer.isRegistered ? "text-[#CCFF00]" : "text-white/40"} />
+                          </div>
+                          <div>
+                            <p className="text-[14px] font-semibold text-white tracking-tight group-hover:text-[#CCFF00] transition-colors font-inter">{customer.name}</p>
+                            <p className="text-[11px] font-normal text-[#878C9F] uppercase tracking-widest mt-0.5 font-inter">{customer.joinedFormatted}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[14px] font-semibold text-white tracking-tight group-hover:text-[#CCFF00] transition-colors">{customer.name}</p>
-                          <p className="text-[11px] font-normal text-[#878C9F] uppercase tracking-widest mt-0.5">{customer.joined}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-1 text-[10px] font-medium uppercase tracking-widest rounded-[4px] border ${getStatusColor(customer.status)} font-inter`}>
+                          {customer.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[13px] font-medium text-[#999999] uppercase tracking-widest font-inter">{customer.bookingCount} Sessions</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[16px] font-semibold text-white tracking-tight font-inter">₹{customer.totalRevenue.toLocaleString()}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[13px] font-medium text-[#999999] uppercase tracking-widest font-inter">{customer.lastActiveFormatted}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-end gap-3 text-[#878C9F]">
+                          <a 
+                            href={`tel:${customer.phone}`}
+                            className="p-1.5 hover:text-white hover:bg-[#2D2D2D] rounded-[4px] transition-colors group/action relative" 
+                            title={`Call: ${customer.phone}`}
+                          >
+                            <Phone size={16} />
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#111] border border-[#2D2D2D] text-[10px] text-white whitespace-nowrap opacity-0 group-hover/action:opacity-100 transition-opacity pointer-events-none rounded shadow-xl z-50">
+                               {customer.phone}
+                            </div>
+                          </a>
+                          <a 
+                            href={`mailto:${customer.email}`}
+                            className="p-1.5 hover:text-white hover:bg-[#2D2D2D] rounded-[4px] transition-colors group/action relative" 
+                            title={`Email: ${customer.email}`}
+                          >
+                            <Mail size={16} />
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#111] border border-[#2D2D2D] text-[10px] text-white whitespace-nowrap opacity-0 group-hover/action:opacity-100 transition-opacity pointer-events-none rounded shadow-xl z-50">
+                               {customer.email}
+                            </div>
+                          </a>
+                          <Link 
+                            to={customer.isRegistered ? `/profile/${customer.userId}` : "#"}
+                            className={`p-1.5 hover:text-white hover:bg-[#2D2D2D] rounded-[4px] transition-colors group/action relative ${!customer.isRegistered ? 'opacity-30 cursor-not-allowed' : ''}`} 
+                            title={customer.isRegistered ? "View Platform Profile" : "Guest Player (No Profile)"}
+                          >
+                            <ExternalLink size={16} />
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#111] border border-[#2D2D2D] text-[10px] text-white whitespace-nowrap opacity-0 group-hover/action:opacity-100 transition-opacity pointer-events-none rounded shadow-xl z-50">
+                               {customer.isRegistered ? "View Player Details" : "Guest Record"}
+                            </div>
+                          </Link>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 text-[10px] font-medium uppercase tracking-widest rounded-[4px] border ${getStatusColor(customer.status)}`}>
-                        {customer.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[13px] font-medium text-[#999999] uppercase tracking-widest">{customer.sessions}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[16px] font-semibold text-white tracking-tight">{customer.revenue}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[13px] font-medium text-[#999999] uppercase tracking-widest">{customer.lastActive}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-3 text-[#878C9F]">
-                        <button className="p-1.5 hover:text-white hover:bg-[#2D2D2D] rounded-[4px] transition-colors" title="Call">
-                          <Phone size={16} />
-                        </button>
-                        <button className="p-1.5 hover:text-white hover:bg-[#2D2D2D] rounded-[4px] transition-colors" title="Email">
-                          <Mail size={16} />
-                        </button>
-                        <button className="p-1.5 hover:text-white hover:bg-[#2D2D2D] rounded-[4px] transition-colors" title="View Profile">
-                          <ExternalLink size={16} />
-                        </button>
-                      </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-20 text-center text-[#878C9F] font-inter uppercase tracking-[0.2em] text-xs">
+                       No players found matching your criteria.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

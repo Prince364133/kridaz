@@ -14,6 +14,7 @@ import DashboardSkeleton from "../Dashboard/DashboardSkeleton";
 export default function VenueIntelligence() {
   const { dashboardData, loading: dashboardLoading } = useOwnerDashboard();
   const { bookings, loading: bookingsLoading } = useOwnerBookings();
+  const [hoveredHeatmap, setHoveredHeatmap] = useState(null);
 
   if (dashboardLoading || bookingsLoading) return <DashboardSkeleton />;
 
@@ -52,8 +53,9 @@ export default function VenueIntelligence() {
     ];
   }
 
-  // 3. Sport Distribution
+  // 3. Sport & Venue Distribution
   const revenueByCategory = dashboardData?.revenueByCategory || [];
+  const revenueByVenue = dashboardData?.revenueByVenue || [];
   const colors = ["bg-[#CCFF00]", "bg-blue-500", "bg-orange-500", "bg-red-500", "bg-purple-500"];
   
   const sportDist = revenueByCategory.length > 0 
@@ -61,6 +63,14 @@ export default function VenueIntelligence() {
         name: cat.name,
         value: cat.value,
         color: colors[i % colors.length]
+      }))
+    : [];
+
+  const venueCompare = revenueByVenue.length > 0
+    ? revenueByVenue.map((venue, i) => ({
+        name: venue.name,
+        value: venue.value,
+        color: colors[(i + 2) % colors.length]
       }))
     : [];
 
@@ -209,146 +219,61 @@ export default function VenueIntelligence() {
 
       </div>
 
-      {/* Secondary Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mt-8">
+      <div className="grid grid-cols-1 gap-6 lg:gap-8 mt-8">
         
-        {/* Sport Distribution */}
+        {/* Venue Comparison & Sport Distribution */}
         <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
-           <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Sport Distribution</h2>
-           <p className="text-[#878C9F] font-inter text-[20px] mb-6 mt-1">Revenue contribution by category</p>
-           
-           {sportDist.length > 0 ? (
-             <>
-               <div className="space-y-4 flex-1">
-                 {sportDist.map((sport) => (
-                   <div key={sport.name} className="space-y-1">
-                     <div className="flex justify-between text-xs font-bold text-white">
-                       <span>{sport.name}</span>
-                     </div>
-                     <div className="w-full bg-[#1A1A1A] rounded-full h-8 overflow-hidden relative">
-                       <div 
-                         className={`h-full ${sport.color} rounded-r-full`} 
-                         style={{ width: `${sport.value}%` }} 
-                       />
-                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-white mix-blend-difference">{sport.name}</span>
-                     </div>
-                   </div>
-                 ))}
-               </div>
-               <div className="grid grid-cols-2 gap-3 mt-6">
-                 {sportDist.map((sport) => (
-                   <div key={sport.name} className="bg-[#1A1A1A] p-3 rounded-[8px] border border-[#2D2D2D]">
-                     <p className="text-[9px] font-bold text-[#878C9F] uppercase tracking-wider">{sport.name}</p>
-                     <p className="text-lg font-bold text-white mt-1">{sport.value}%</p>
-                   </div>
-                 ))}
-               </div>
-             </>
-           ) : (
-             <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-[#2D2D2D] rounded-[8px] bg-[#050505]/50">
-                <AlertCircle size={24} className="text-[#444] mb-2" />
-                <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">No Category Data</p>
-             </div>
-           )}
-        </div>
-
-        {/* Peak Utilization Heatmap */}
-        <div className="lg:col-span-2 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
-           <div className="flex justify-between items-start mb-6">
-              <div>
-                 <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Peak Utilization Heatmap</h2>
-                 <p className="text-[#878C9F] font-inter text-[20px] mt-1">Identifying profitable time blocks</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-[2px] bg-[#2D2D2D]" />
-                  <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Low</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-[2px] bg-[#CCFF00]" />
-                  <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Peak</span>
-                </div>
-              </div>
+           <div className="flex justify-between items-center mb-1">
+              <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Revenue Comparison</h2>
            </div>
+           <p className="text-[#878C9F] font-inter text-[20px] mb-6 mt-1">Cross-venue performance benchmark</p>
            
-           {isHeatmapSufficient ? (
-             <div className="overflow-x-auto no-scrollbar pt-4 flex-1">
-               <div className="min-w-[600px] space-y-2">
-                 <div className="flex gap-1 mb-4 ml-10">
-                   {Array.from({ length: 24 }).map((_, i) => (
-                     <div key={i} className="flex-1 text-center text-[8px] font-medium text-[#999999] uppercase tracking-wider">
-                       {i.toString().padStart(2, '0')}
-                     </div>
-                   ))}
-                 </div>
-                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                   <div key={day} className="flex items-center gap-1">
-                     <div className="w-10 text-[10px] font-medium text-[#878C9F] uppercase tracking-wider">{day}</div>
-                     <div className="flex-1 flex gap-1">
-                       {Array.from({ length: 24 }).map((_, hour) => {
-                         const data = occupancyHeatmap.find(d => d.day === day && d.hour === hour);
-                         const intensity = data ? Math.min(1, data.value / 10) : 0;
-                         return (
-                           <div 
-                             key={hour} 
-                             className="flex-1 h-8 rounded-[2px] transition-all duration-500 hover:scale-110 cursor-pointer"
-                             style={{ 
-                               backgroundColor: intensity > 0 ? `rgba(204, 255, 0, ${0.1 + intensity * 0.9})` : 'rgba(45, 45, 45, 0.3)',
-                               boxShadow: intensity > 0.7 ? '0 0 10px rgba(204, 255, 0, 0.15)' : 'none'
-                             }}
-                             title={`${day}, ${hour}:00 - ${data?.value || 0} Bookings`}
-                           />
-                         );
-                       })}
-                     </div>
-                   </div>
-                 ))}
+           {venueCompare.length > 0 ? (
+             <div className="space-y-6 flex-1">
+               {/* Venue-wise Revenue */}
+               <div className="space-y-4">
+                  <p className="text-[10px] font-bold text-[#444] uppercase tracking-[2px] mb-2">Venue Performance</p>
+                  {venueCompare.map((venue) => (
+                    <div key={venue.name} className="space-y-1">
+                      <div className="flex justify-between text-[11px] font-bold text-white">
+                        <span>{venue.name}</span>
+                        <span className="text-[#CCFF00]">₹{venue.value.toLocaleString()}</span>
+                      </div>
+                      <div className="w-full bg-[#1A1A1A] rounded-[4px] h-6 overflow-hidden relative">
+                        <div 
+                          className={`h-full ${venue.color} opacity-80`} 
+                          style={{ width: `${Math.min(100, (venue.value / grossRevenue) * 100)}%` }} 
+                        />
+                      </div>
+                    </div>
+                  ))}
+               </div>
+
+               {/* Sport Distribution */}
+               <div className="space-y-4 pt-4 border-t border-[#2D2D2D]">
+                  <p className="text-[10px] font-bold text-[#444] uppercase tracking-[2px] mb-2">Category Contribution</p>
+                  <div className="flex flex-wrap gap-2">
+                    {sportDist.map((sport) => (
+                      <div key={sport.name} className="px-3 py-2 bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] flex-1 min-w-[100px]">
+                        <p className="text-[9px] font-bold text-[#878C9F] uppercase tracking-wider">{sport.name}</p>
+                        <p className="text-lg font-bold text-white mt-0.5">{sport.value}%</p>
+                      </div>
+                    ))}
+                  </div>
                </div>
              </div>
            ) : (
-             <div className="flex-1 flex items-center justify-center border border-dashed border-[#2D2D2D] rounded-[8px] bg-[#050505]/50 min-h-[150px]">
-                  <div className="text-center">
-                      <AlertCircle size={24} className="text-[#444] mx-auto mb-2" />
-                      <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Heatmap Generation Unavailable</p>
-                      <p className="text-[9px] text-[#444] mt-1 max-w-[250px]">Requires an active aggregation stream for hourly slot utilization over a 14-day rolling window.</p>
-                  </div>
+             <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-[#2D2D2D] rounded-[8px] bg-[#050505]/50 min-h-[200px]">
+                <AlertCircle size={24} className="text-[#444] mb-2" />
+                <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">No Comparison Data</p>
              </div>
            )}
         </div>
 
+
       </div>
 
-      {/* Automated Intelligence Reports */}
-      <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 space-y-6 shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500 mt-8">
-         <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Automated Intelligence Reports</h2>
-         
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-[#1A1A1A] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col items-start hover:border-[#CCFF00]/30 transition-colors group cursor-pointer">
-               <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] mb-4 text-[#CCFF00]">
-                 <TrendingUp size={20} />
-               </div>
-               <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-1 group-hover:text-[#CCFF00] transition-colors">Yield Analysis</h4>
-               <p className="text-[10px] font-medium text-[#878C9F] mb-4">Review pricing efficiency against peak demand times to optimize court rent.</p>
-               <button className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest mt-auto border-b border-transparent group-hover:border-[#CCFF00] pb-1 transition-all">Generate Report</button>
-            </div>
-            <div className="bg-[#1A1A1A] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col items-start hover:border-[#CCFF00]/30 transition-colors group cursor-pointer">
-               <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] mb-4 text-[#CCFF00]">
-                 <Target size={20} />
-               </div>
-               <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-1 group-hover:text-[#CCFF00] transition-colors">Retention Metrics</h4>
-               <p className="text-[10px] font-medium text-[#878C9F] mb-4">Analyze recurring booking patterns and player drop-off rates across facilities.</p>
-               <button className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest mt-auto border-b border-transparent group-hover:border-[#CCFF00] pb-1 transition-all">Generate Report</button>
-            </div>
-            <div className="bg-[#1A1A1A] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col items-start hover:border-[#CCFF00]/30 transition-colors group cursor-pointer">
-               <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] mb-4 text-[#CCFF00]">
-                 <Activity size={20} />
-               </div>
-               <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-1 group-hover:text-[#CCFF00] transition-colors">Resource Health</h4>
-               <p className="text-[10px] font-medium text-[#878C9F] mb-4">Evaluate structural utilization to determine maintenance scheduling.</p>
-               <button className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest mt-auto border-b border-transparent group-hover:border-[#CCFF00] pb-1 transition-all">Generate Report</button>
-            </div>
-         </div>
-      </div>
+
 
       </div>
     </div>

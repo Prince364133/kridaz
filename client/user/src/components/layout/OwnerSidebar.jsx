@@ -35,7 +35,6 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   const mainNavItems = [
     { to: "/partner", label: "Dashboard", icon: LayoutGrid },
     { to: "/partner/bookings", label: "Bookings", icon: BookOpen },
-    { to: "/partner/calendar", label: "Calendar", icon: Calendar },
     { to: "/partner/turfs", label: "Grounds", icon: MapPin },
     { to: "/partner/customers", label: "Customers", icon: Users },
     { to: "/partner/intelligence", label: "Intelligence", icon: BarChart3 },

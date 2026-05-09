@@ -16,7 +16,6 @@ import CountUp from "react-countup";
 
 const OwnerCalendar = () => {
   const axiosInstance = useAxiosInstance();
-  const [view, setView] = useState('Day');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,216 +43,175 @@ const OwnerCalendar = () => {
   const handleNextDay = () => setSelectedDate(prev => addDays(prev, 1));
   const handleToday = () => setSelectedDate(new Date());
 
-  // Generate timeline headers based on all unique slot times across all facilities
-  const allTimeSlots = data?.facilities?.reduce((acc, fac) => {
-    fac.slots.forEach(slot => {
-      if (!acc.includes(slot.startTime)) acc.push(slot.startTime);
-    });
-    return acc;
-  }, []).sort() || [];
+  // Hours range for the header
+  const hours = Array.from({ length: 16 }, (_, i) => {
+    const h = i + 6; // Start from 06:00 to 21:00
+    return `${h.toString().padStart(2, '0')}:00`;
+  });
 
   return (
-    <div className="h-full custom-scrollbar bg-[#000000] text-white">
-      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
-      {/* Top Filter Bar - Matching Dashboard Pattern */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-6 relative z-10 border-b border-[#2D2D2D] pb-6">
-        <div className="bg-[#000000] p-1 rounded-[8px] flex items-center border border-[#2D2D2D] shadow-[var(--shadow-2)]">
-          {['Month', 'Week', 'Day'].map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className={`px-8 py-2 rounded-[6px] text-[12px] font-bold uppercase tracking-widest transition-all duration-300 ${
-                view === v ? 'bg-[#CCFF00] text-black shadow-[var(--shadow-2)]' : 'text-[#878C9F] hover:text-white'
-              }`}
-            >
-              {v}
-            </button>
-          ))}
-        </div>
+    <div className="h-full custom-scrollbar bg-[#0D0D0D] text-white font-inter">
+      <div className="p-6 lg:px-10 lg:pt-10 space-y-10 pb-32">
         
-        <div className="flex items-center gap-4">
-          <button className="bg-[#000000] border border-[#2D2D2D] hover:border-[#CCFF00]/50 text-white px-6 py-2.5 rounded-[8px] text-[13px] font-bold uppercase tracking-widest flex items-center gap-3 transition-all shadow-[var(--shadow-2)]">
-            Schedule Overview
-          </button>
-          <button className="bg-[#CCFF00] hover:bg-[#B3FF00] text-black px-6 py-2.5 rounded-[8px] text-[13px] font-bold uppercase tracking-widest flex items-center gap-3 transition-all shadow-[var(--shadow-2)]">
-            <Plus size={16} strokeWidth={3} /> Block Slots
-          </button>
-        </div>
-      </div>
-
-      {/* Control Strip - Now Styled as a Dashboard Card */}
-      <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden shadow-[var(--shadow-2)]">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#CCFF00]/5 blur-[100px] pointer-events-none" />
-        
-        <div className="flex items-center gap-10 relative z-10">
-          <div className="space-y-1">
-            <p className="text-[#CCFF00] text-[12px] font-normal uppercase tracking-[0.5px]">{format(selectedDate, "EEEE")}</p>
-            <div className="flex items-center gap-4">
-              <h2 className="text-3xl font-bold text-white tracking-tight font-['Open_Sans'] uppercase">{format(selectedDate, "dd MMM yyyy")}</h2>
-              <div className="flex items-center gap-2 ml-2">
-                <button onClick={handlePrevDay} className="w-9 h-9 flex items-center justify-center hover:bg-[#2D2D2D] rounded-[6px] text-[#999999] hover:text-white transition-all border border-[#2D2D2D]">
-                  <ChevronLeft size={20} />
-                </button>
-                <button onClick={handleNextDay} className="w-9 h-9 flex items-center justify-center hover:bg-[#2D2D2D] rounded-[6px] text-[#999999] hover:text-white transition-all border border-[#2D2D2D]">
-                  <ChevronRight size={20} />
-                </button>
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+           <div className="flex items-center gap-12">
+              <div className="space-y-1">
+                 <p className="text-[#CCFF00] text-[12px] font-black uppercase tracking-[4px]">{format(selectedDate, "EEEE")}</p>
+                 <div className="flex items-baseline gap-3">
+                    <span className="text-5xl font-black text-white tracking-tighter">{format(selectedDate, "dd")}</span>
+                    <span className="text-4xl font-bold text-[#444] tracking-tighter uppercase">{format(selectedDate, "MMM yyyy")}</span>
+                 </div>
               </div>
-              <button onClick={handleToday} className="ml-2 px-5 py-2 bg-[#2D2D2D] border border-[#404040] rounded-[6px] text-[12px] font-bold uppercase tracking-widest hover:text-[#CCFF00] transition-all">
-                Today
-              </button>
-            </div>
-          </div>
+
+              <div className="flex items-center gap-2">
+                 <button onClick={handlePrevDay} className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] hover:bg-[#252525] rounded-[8px] border border-[#2D2D2D] transition-all">
+                    <ChevronLeft size={20} className="text-[#888]" />
+                 </button>
+                 <button onClick={handleNextDay} className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] hover:bg-[#252525] rounded-[8px] border border-[#2D2D2D] transition-all">
+                    <ChevronRight size={20} className="text-[#888]" />
+                 </button>
+                 <button onClick={handleToday} className="ml-4 px-6 py-2 bg-[#1A1A1A] border border-[#2D2D2D] rounded-[8px] text-[12px] font-black uppercase tracking-[3px] hover:text-[#CCFF00] transition-all">
+                    Today
+                 </button>
+              </div>
+           </div>
+
+           <div className="flex items-center gap-12">
+              <div className="flex items-center gap-8">
+                 <div className="flex items-center gap-3">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#CCFF00]" />
+                    <span className="text-[10px] font-black text-[#888] uppercase tracking-[2px]">Confirmed</span>
+                 </div>
+                 <div className="flex items-center gap-3">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#3B82F6]" />
+                    <span className="text-[10px] font-black text-[#888] uppercase tracking-[2px]">Internal</span>
+                 </div>
+                 <div className="flex items-center gap-3">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
+                    <span className="text-[10px] font-black text-[#888] uppercase tracking-[2px]">Restricted</span>
+                 </div>
+              </div>
+
+              <div className="px-5 py-2 bg-[#1A1A1A] border border-[#2D2D2D] rounded-full flex items-center gap-3">
+                 <div className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse" />
+                 <span className="text-[11px] font-black text-white uppercase tracking-[2px]">{data?.stats?.averageLoad || 0}% Load</span>
+              </div>
+           </div>
         </div>
 
-        <div className="flex items-center gap-8 relative z-10">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#CCFF00]" />
-              <span className="text-[11px] font-medium text-[#999999] uppercase tracking-wider">Confirmed</span>
+        {/* Matrix Container */}
+        <div className="bg-[#111] border border-[#2D2D2D] rounded-[12px] overflow-hidden flex flex-col shadow-2xl relative min-h-[600px]">
+          {loading && (
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+               <Loader2 className="w-8 h-8 text-[#CCFF00] animate-spin" />
             </div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#2D2D2D] border border-[#444444]" />
-              <span className="text-[11px] font-medium text-[#999999] uppercase tracking-wider">Available</span>
+          )}
+
+          {/* Grid Header */}
+          <div className="flex border-b border-[#2D2D2D] bg-[#0A0A0A]">
+            <div className="w-[320px] p-8 border-r border-[#2D2D2D] shrink-0">
+               <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-black text-[#555] uppercase tracking-[3px]">Facilities</span>
+                  <Filter size={14} className="text-[#555]" />
+               </div>
+            </div>
+            <div className="flex-1 flex overflow-x-auto no-scrollbar">
+               {hours.map((time) => (
+                 <div key={time} className="min-w-[150px] py-6 text-center border-r border-[#2D2D2D]/50 text-[11px] font-bold text-[#555] tracking-widest">
+                    {time}
+                 </div>
+               ))}
             </div>
           </div>
 
-          <div className="h-10 w-[1px] bg-[#2D2D2D] hidden md:block" />
+          {/* Grid Rows */}
+          <div className="flex-1 flex flex-col overflow-y-auto no-scrollbar">
+            {data?.facilities?.map((facility) => (
+              <div key={facility.id} className="flex border-b border-[#2D2D2D]/50 last:border-b-0 min-h-[180px] hover:bg-white/[0.01] transition-colors">
+                 {/* Facility Column */}
+                 <div className="w-[320px] p-8 border-r border-[#2D2D2D] shrink-0 flex flex-col justify-center">
+                    <div className="flex items-center gap-3 mb-2">
+                       <h3 className="text-lg font-black text-white tracking-tight uppercase">{facility.name}</h3>
+                       <div className="w-2 h-2 rounded-full bg-[#CCFF00]" />
+                    </div>
+                    <div className="flex items-center gap-3">
+                       <span className="px-3 py-1 bg-[#222] text-[9px] font-black text-[#888] uppercase tracking-[2px] rounded-[4px] border border-[#333]">{facility.category}</span>
+                       <span className="text-[9px] font-medium text-[#444] uppercase tracking-wider">HD Quality Turf</span>
+                    </div>
+                 </div>
 
-          <div className="flex items-center gap-3 bg-[#000000] px-5 py-2 rounded-full border border-[#2D2D2D] shadow-[var(--shadow-2)]">
-             <div className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse shadow-[0_0_8px_#CCFF00]" />
-             <span className="text-[12px] font-bold text-white uppercase tracking-widest">{data?.stats?.averageLoad || 0}% Load</span>
-          </div>
-        </div>
-      </div>
+                 {/* Slots Column */}
+                 <div className="flex-1 flex overflow-x-auto no-scrollbar relative bg-[#0D0D0D]/50">
+                    {hours.map((time) => {
+                      const slot = facility.slots.find(s => s.startTime === time);
+                      const isBooked = slot?.isBooked;
+                      const source = slot?.bookingDetails?.bookingSource;
+                      
+                      const getStatusColor = () => {
+                         if (source === 'PARTNER_MANUAL') return 'border-[#EF4444]'; // Using Red for manual as per "Restricted" visual
+                         return 'border-[#CCFF00]';
+                      };
 
-      {/* Main Grid Container - Dashboard Card Style */}
-      <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden flex flex-col shadow-[var(--shadow-2)] relative min-h-[500px]">
-        {loading && (
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="w-8 h-8 text-[#CCFF00] animate-spin" />
-              <p className="text-[#CCFF00] text-[9px] font-bold uppercase tracking-[4px]">Synchronizing Matrix</p>
-            </div>
-          </div>
-        )}
-
-        {/* Grid Header */}
-        <div className="flex border-b border-[#2D2D2D]">
-          <div className="w-[280px] p-6 border-r border-[#2D2D2D] shrink-0 bg-[#000000]">
-            <div className="flex items-center justify-between">
-              <span className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px]">Facilities</span>
-              <Filter size={14} className="text-[#878C9F] hover:text-white cursor-pointer transition-colors" />
-            </div>
-          </div>
-          <div className="flex-1 flex overflow-x-auto no-scrollbar bg-[#111111]">
-            {allTimeSlots.map((time, idx) => (
-              <div key={idx} className="min-w-[130px] py-4 text-center border-r border-[#2D2D2D]/30 last:border-r-0">
-                <span className="text-[12px] font-normal text-[#878C9F] tracking-[0.5px] uppercase">{time}</span>
+                      return (
+                        <div key={time} className="min-w-[150px] border-r border-[#2D2D2D]/30 flex items-center justify-center p-4">
+                           {isBooked ? (
+                             <div className={`w-full h-full bg-[#1A1A1A] border-l-4 ${getStatusColor()} rounded-r-[12px] p-4 flex flex-col justify-between group cursor-pointer hover:bg-[#222] transition-all`}>
+                                <div className="space-y-1">
+                                   <h4 className="text-[13px] font-black text-white uppercase tracking-tight truncate">
+                                      {slot.bookingDetails?.userName?.split(' ')[0]} ...
+                                   </h4>
+                                   <p className="text-[9px] font-bold text-[#888] uppercase tracking-widest">
+                                      {source === 'PARTNER_MANUAL' ? 'Direct Entry' : 'Premium Member'}
+                                   </p>
+                                </div>
+                                <div className="flex items-center gap-2 text-[#555] group-hover:text-[#CCFF00] transition-colors">
+                                   <Clock size={12} />
+                                   <span className="text-[10px] font-black uppercase tracking-widest">1 hr</span>
+                                </div>
+                             </div>
+                           ) : (
+                             <div className="w-full h-full rounded-[12px] border border-dashed border-[#2D2D2D]/50 flex items-center justify-center group cursor-pointer hover:border-[#CCFF00]/30 transition-all">
+                                <div className="w-2 h-2 rounded-full bg-[#1A1A1A] group-hover:bg-[#CCFF00]/20" />
+                             </div>
+                           )}
+                        </div>
+                      );
+                    })}
+                 </div>
               </div>
             ))}
-            {allTimeSlots.length === 0 && (
-               <div className="flex-1 py-4 px-6 text-[10px] text-[#444] uppercase tracking-widest italic">No operational slots detected for this date</div>
+
+            {(!data?.facilities || data.facilities.length === 0) && !loading && (
+               <div className="flex-1 flex flex-col items-center justify-center py-40">
+                  <CalendarIcon size={48} className="text-[#222] mb-6" />
+                  <p className="text-[11px] font-black text-[#444] uppercase tracking-[8px]">No Facilities Registered</p>
+               </div>
             )}
           </div>
         </div>
 
-        {/* Grid Rows */}
-        <div className="flex-1 flex flex-col max-h-[600px] overflow-y-auto no-scrollbar">
-          {data?.facilities?.map((facility) => (
-            <div key={facility.id} className="flex border-b border-[#2D2D2D]/30 last:border-b-0 min-h-[140px] group transition-colors">
-              {/* Facility Info Column */}
-              <div className="w-[280px] p-6 border-r border-[#2D2D2D] shrink-0 flex flex-col justify-center bg-[#000000] group-hover:bg-[#111111] transition-all relative">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-10 bg-transparent group-hover:bg-[#CCFF00] transition-all" />
-                <h3 className="text-sm font-semibold text-white mb-1.5 uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">{facility.name}</h3>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 bg-[#2D2D2D] rounded text-[9px] font-bold text-[#878C9F] uppercase tracking-wider border border-[#404040]">{facility.category}</span>
+        {/* Footer Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+           {[
+             { label: 'Confirmed Slots', value: data?.stats?.confirmedSlots || 0, trend: '+12%', icon: Activity, color: '#CCFF00' },
+             { label: 'Utilized Revenue', value: `₹${(data?.stats?.totalRevenue || 0).toLocaleString()}`, trend: '+₹1.2k', icon: Zap, color: '#3B82F6' },
+             { label: 'Average Load', value: `${data?.stats?.averageLoad || 0}%`, trend: 'Stable', icon: Clock, color: '#CCFF00' },
+           ].map((stat, i) => (
+             <div key={i} className="bg-[#111] border border-[#2D2D2D] p-8 rounded-[12px] flex flex-col justify-between relative overflow-hidden group hover:border-[#CCFF00]/30 transition-all">
+                <div className="relative z-10">
+                   <p className="text-[11px] font-black text-[#555] uppercase tracking-[3px] mb-4">{stat.label}</p>
+                   <h3 className="text-4xl font-black text-white tracking-tighter">{stat.value}</h3>
                 </div>
-              </div>
-
-              {/* Timeline Cells */}
-              <div className="flex-1 relative bg-[#000000] overflow-x-auto no-scrollbar flex">
-                {allTimeSlots.map((time, idx) => {
-                  const slot = facility.slots.find(s => s.startTime === time);
-                  const isBooked = slot?.isBooked;
-                  
-                  return (
-                    <div key={idx} className="min-w-[130px] h-full border-r border-[#2D2D2D]/20 last:border-r-0 flex items-center justify-center p-3">
-                      {slot ? (
-                        <div 
-                          className={`w-full h-full rounded-[6px] flex flex-col justify-between p-3 border transition-all ${
-                            isBooked 
-                              ? "bg-[#CCFF00]/5 border-[#CCFF00]/20 shadow-sm" 
-                              : "bg-transparent border-dashed border-[#2D2D2D] opacity-20 hover:opacity-100 hover:bg-[#111111] hover:border-solid"
-                          } cursor-pointer group/slot`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className={`text-[9px] font-bold uppercase tracking-tighter ${isBooked ? "text-[#CCFF00]" : "text-[#444444]"}`}>
-                              {isBooked ? "Active" : "Open"}
-                            </span>
-                          </div>
-                          
-                          <div className="space-y-0.5">
-                            <p className={`text-[12px] font-semibold uppercase tracking-tight truncate ${isBooked ? "text-white" : "text-[#333]"}`}>
-                              {isBooked ? (slot.bookingDetails?.userName || "Booked") : "Slot Vacant"}
-                            </p>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 mt-1">
-                             <Clock size={10} className={isBooked ? "text-[#CCFF00]/60" : "text-[#222]"} />
-                             <span className={`text-[9px] font-bold uppercase tracking-tight ${isBooked ? "text-[#CCFF00]/80" : "text-[#222]"}`}>
-                               1 Hr
-                             </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#1A1A1A]" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-          
-          {(!data?.facilities || data.facilities.length === 0) && !loading && (
-            <div className="flex-1 flex flex-col items-center justify-center py-32 bg-[#000000]">
-               <CalendarIcon size={40} className="text-[#2D2D2D] mb-6" />
-               <p className="text-[#999999] text-[10px] font-bold uppercase tracking-[5px] opacity-40">No Facilities Registered</p>
-            </div>
-          )}
+                <div className="mt-8 flex items-center justify-between relative z-10">
+                   <div className={`px-3 py-1 bg-white/[0.03] border border-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-[${stat.color}]`}>
+                      {stat.trend}
+                   </div>
+                   <stat.icon className="text-[#222] group-hover:text-[#CCFF00]/20 transition-colors" size={32} />
+                </div>
+             </div>
+           ))}
         </div>
-      </div>
-
-      {/* Footer Stats Strip - Styled as Dashboard StatsCards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-        {[
-          { title: "Average Load", value: data?.stats?.averageLoad || 0, suffix: "%", icon: Clock, trend: "Stable" },
-          { title: "Confirmed Slots", value: data?.stats?.confirmedSlots || 0, icon: Activity, trend: "+12%" },
-          { title: "Est. Daily Revenue", value: data?.stats?.totalRevenue || 0, prefix: "₹", icon: Zap, trend: "+₹1.2k" },
-        ].map((stat, idx) => (
-          <div key={idx} className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative overflow-hidden group hover:border-[#CCFF00]/30 transition-all duration-500 shadow-[var(--shadow-2)]">
-            <stat.icon className="absolute -right-4 -bottom-4 w-20 h-20 text-white/[0.02] group-hover:text-white/[0.04] transition-colors" />
-            <div className="flex items-center justify-between mb-6 relative z-10">
-              <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] flex items-center justify-center transition-all border border-[#CCFF00]/20">
-                <stat.icon size={20} />
-              </div>
-              <div className="px-2 py-0.5 rounded-full bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-bold uppercase tracking-wider border border-[#CCFF00]/20">
-                {stat.trend}
-              </div>
-            </div>
-            <div className="space-y-2 relative z-10">
-              <h3 className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px]">{stat.title}</h3>
-              <div className="text-3xl font-bold text-white tracking-tight flex items-baseline gap-1 font-['Open_Sans']">
-                {stat.prefix && <span className="text-lg text-white/40 font-normal">{stat.prefix}</span>}
-                <CountUp end={stat.value} duration={2} separator="," decimals={stat.value % 1 === 0 ? 0 : 1} />
-                {stat.suffix && <span className="text-lg text-white/40 font-normal">{stat.suffix}</span>}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
 
       </div>
     </div>
