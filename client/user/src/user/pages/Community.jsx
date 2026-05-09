@@ -517,12 +517,26 @@ const Community = () => {
                         }
                       }}
                     >
-                      <div className={`w-10 h-10 rounded-xl bg-[#84CC16]/10 flex items-center justify-center border overflow-hidden transition-all ${post.adminId?.hasActiveStory ? 'border-[#84CC16] ring-2 ring-[#84CC16]/20' : 'border-[#84CC16]/20'}`}>
+                      <div className={`w-10 h-10 rounded-xl border overflow-hidden bg-[#84CC16]/10 flex items-center justify-center shrink-0 transition-all ${post.adminId?.hasActiveStory ? 'border-[#84CC16] ring-2 ring-[#84CC16]/20' : 'border-[#84CC16]/20'}`}>
                         {post.adminId?.profilePicture ? (
-                          <img src={post.adminId.profilePicture} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <Trophy size={16} className="text-[#84CC16]" />
-                        )}
+                          <img 
+                            src={post.adminId.profilePicture} 
+                            alt="" 
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className="w-full h-full flex items-center justify-center"
+                          style={{ display: post.adminId?.profilePicture ? 'none' : 'flex' }}
+                        >
+                          <span className="text-[#84CC16] font-black text-xs">
+                            {post.adminId?.name ? post.adminId.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <Link to={`/profile/${post.adminId?._id}`} className="hover:opacity-80 transition-opacity">
@@ -641,14 +655,26 @@ const Community = () => {
                       <div className="space-y-6 pt-4">
                         {post.comments.map((comment, idx) => (
                           <div key={idx} className="flex gap-4 group">
-                            <div className="w-8 h-8 rounded-lg bg-white/5 overflow-hidden shrink-0 border border-white/5">
+                            <div className="w-8 h-8 rounded-lg bg-[#84CC16]/10 overflow-hidden shrink-0 border border-white/5 flex items-center justify-center">
                               {comment.userImage ? (
-                                <img src={comment.userImage} alt="" className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-white/20">
-                                  <UserIcon size={14} />
-                                </div>
-                              )}
+                                <img 
+                                  src={comment.userImage} 
+                                  alt="" 
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div 
+                                className="w-full h-full flex items-center justify-center"
+                                style={{ display: comment.userImage ? 'none' : 'flex' }}
+                              >
+                                <span className="text-[#84CC16] font-black text-[10px]">
+                                  {comment.userName ? comment.userName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
+                                </span>
+                              </div>
                             </div>
                             <div className="flex-1">
                               <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 relative group">

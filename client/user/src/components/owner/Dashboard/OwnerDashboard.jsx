@@ -149,7 +149,8 @@ const OwnerDashboard = () => {
   return (
     <div className="h-full custom-scrollbar bg-[#000000]">
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 lg:space-y-10 animate-fade-in pt-0 pb-24 h-full relative">
-        
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
         <div className="space-y-8 lg:space-y-10 relative z-10">
           
           {/* New Stats Grid - 6 Cards */}
@@ -210,7 +211,7 @@ const OwnerDashboard = () => {
                       <button
                         key={filter}
                         onClick={() => setRevenueFilter(filter === "Weekly" ? "Week" : "Month")}
-                        className={`px-4 py-1.5 rounded-[4px] text-[11px] font-normal uppercase tracking-wider transition-all font-[Arial] ${
+                        className={`px-4 py-1.5 rounded-[4px] text-[11px] font-normal uppercase tracking-wider transition-all font-inter ${
                           (revenueFilter === "Week" && filter === "Weekly") || (revenueFilter === "Month" && filter === "Monthly")
                             ? "bg-[#CCFF00] text-black" 
                             : "text-[#999999] hover:text-[#FFFFFF]"
@@ -448,7 +449,7 @@ const OwnerDashboard = () => {
                   ))}
                 </div>
                 
-                <button className="w-full mt-8 py-3 bg-transparent border border-[#2D2D2D] hover:bg-[#CCFF00]/10 hover:text-[#CCFF00] text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-[Arial]">
+                <button className="w-full mt-8 py-3 bg-transparent border border-[#2D2D2D] hover:bg-[#CCFF00]/10 hover:text-[#CCFF00] text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter">
                   View Full Activity History
                 </button>
               </div>
@@ -537,7 +538,7 @@ const OwnerDashboard = () => {
                 
                 <div className="mt-8 pt-6 border-t border-[#2D2D2D] flex items-center justify-between">
                   <p className="text-[12px] font-normal text-[#999999] uppercase tracking-widest">Showing 5 of {totalBookings} bookings</p>
-                  <button className="text-[13px] font-normal text-[#CCFF00] uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-all font-[Arial]">
+                  <button className="text-[13px] font-normal text-[#CCFF00] uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-all font-inter">
                     View All Transactions <ChevronRight size={14} />
                   </button>
                 </div>
@@ -567,7 +568,7 @@ const OwnerDashboard = () => {
                         <div className="flex-1">
                           <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{item.title}</p>
                           <p className="text-[12px] text-[#999999] mt-1 leading-relaxed">{item.desc}</p>
-                          <button className="mt-3 text-[12px] font-normal text-[#CCFF00] uppercase tracking-widest flex items-center gap-1.5 hover:text-white transition-colors font-[Arial]">
+                          <button className="mt-3 text-[12px] font-normal text-[#CCFF00] uppercase tracking-widest flex items-center gap-1.5 hover:text-white transition-colors font-inter">
                             {item.action} <ChevronRight size={12} />
                           </button>
                         </div>

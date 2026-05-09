@@ -148,8 +148,25 @@ const MyHostedGames = () => {
                       slot.status === 'PENDING' && (
                         <div key={`${teamKey}-${sIdx}`} className="flex items-center justify-between p-4 bg-neutral-900 rounded-2xl border border-neutral-800 group hover:border-yellow-500/30 transition-all">
                           <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-neutral-800 rounded-full flex items-center justify-center border border-neutral-700">
-                              {slot.user?.profilePicture ? <img src={slot.user.profilePicture} className="w-full h-full rounded-full" /> : <Users size={20} />}
+                            <div className="w-12 h-12 bg-[#84CC16]/10 rounded-full flex items-center justify-center border border-white/10 overflow-hidden shrink-0">
+                              {slot.user?.profilePicture ? (
+                                <img 
+                                  src={slot.user.profilePicture} 
+                                  className="w-full h-full object-cover" 
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div 
+                                className="w-full h-full flex items-center justify-center"
+                                style={{ display: slot.user?.profilePicture ? 'none' : 'flex' }}
+                              >
+                                <span className="text-[#84CC16] font-black text-sm">
+                                  {slot.user?.name ? slot.user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
+                                </span>
+                              </div>
                             </div>
                             <div>
                               <p className="font-black uppercase tracking-tighter">{slot.user?.name}</p>

@@ -21,7 +21,8 @@ const OwnerReviews = () => {
   return (
     <div className="h-full custom-scrollbar bg-[#000000] text-white">
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
-      
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 border-b border-[#2D2D2D] pb-6">
         <div>
@@ -164,6 +165,7 @@ const OwnerReviews = () => {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

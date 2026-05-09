@@ -221,7 +221,7 @@ const FindPlayers = () => {
               <p className="text-white/20 text-sm uppercase tracking-widest">No players found matching your criteria.</p>
             </div>
           ) : (
-          <div className="flex flex-col gap-1.5 md:gap-2">
+          <div className="flex flex-col gap-3 md:gap-4 py-6 px-2">
             {players.map((player) => (
               <div key={player._id} className="bg-white/[0.01] border border-white/5 rounded-xl px-3 py-2 md:px-5 md:py-2.5 hover:bg-white/[0.03] transition-all flex items-center gap-3 md:gap-8 group">
                 
@@ -237,22 +237,26 @@ const FindPlayers = () => {
                   <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/40 to-white/10" />
 
                   {/* Inner Container */}
-                  <div className="w-full h-full rounded-full flex items-center justify-center relative overflow-hidden z-10"
-                    style={{ backgroundColor: avatarColor(player.name) }}
-                  >
-                    {player.profilePicture && (
+                  <div className="w-full h-full rounded-full flex items-center justify-center relative overflow-hidden z-10 bg-[#84CC16]/10 border border-white/10 shrink-0">
+                    {player.profilePicture ? (
                       <img 
                         src={player.profilePicture} 
                         alt={player.name} 
                         className="w-full h-full rounded-full object-cover absolute inset-0 z-10 brightness-95 group-hover:brightness-110 transition-all" 
                         onError={(e) => {
                           e.target.style.display = 'none';
+                          if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
                         }}
                       />
-                    )}
-                    <span className="text-white font-black text-sm relative z-0 tracking-tighter">
-                      {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
-                    </span>
+                    ) : null}
+                    <div 
+                      className="w-full h-full flex items-center justify-center"
+                      style={{ display: player.profilePicture ? 'none' : 'flex' }}
+                    >
+                      <span className="text-[#84CC16] font-black text-sm relative z-0 tracking-tighter">
+                        {player.name ? player.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
+                      </span>
+                    </div>
                     
                     {/* Glass Shine */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none z-20" />

@@ -78,7 +78,7 @@ const OwnerBookings = () => {
               </div>
               <span className="text-[12px] font-medium text-[#999999] uppercase tracking-widest">Timeframe:</span>
               <select
-                className="bg-[#2D2D2D] border border-[#404040] text-white text-[13px] font-normal rounded-[6px] px-4 py-1.5 focus:outline-none focus:border-[#CCFF00] transition-all font-[Arial] uppercase tracking-wider"
+                className="bg-[#2D2D2D] border border-[#404040] text-white text-[13px] font-normal rounded-[6px] px-4 py-1.5 focus:outline-none focus:border-[#CCFF00] transition-all font-inter uppercase tracking-wider"
                 value={filterDays}
                 onChange={(e) => setFilterDays(Number(e.target.value))}
               >
