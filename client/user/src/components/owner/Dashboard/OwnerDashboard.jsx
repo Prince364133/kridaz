@@ -364,11 +364,11 @@ const OwnerDashboard = () => {
             </div>
             <div className="lg:col-span-4">
               <PeakHoursChart />
-            </div >
-          </div >
+            </div>
+          </div>
 
-  {/* Row: Bookings and Insights */ }
-  < div className = "grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start" >
+  {/* Row: Bookings and Insights */}
+  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
 
     <div className="lg:col-span-8">
       <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)]">
@@ -467,7 +467,9 @@ const OwnerDashboard = () => {
           ].map((item, i) => (
             <div key={i} className="bg-[#2D2D2D]/20 p-4 rounded-[6px] border border-[#2D2D2D] hover:bg-[#2D2D2D]/40 transition-all group">
               <div className="flex items-start gap-4">
-                <div className="mt-1 p-2 rounded-[6px] bg-[#CCFF00]/10 text-[#CCFF00] group-hover:scale-110 transition-transform"><item.icon size={14} /></div>
+                <div className="mt-1 p-2 rounded-[6px] bg-[#CCFF00]/10 text-[#CCFF00] group-hover:scale-110 transition-transform">
+                  <item.icon size={14} />
+                </div>
                 <div className="flex-1">
                   <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{item.title}</p>
                   <p className="text-[12px] text-[#999999] mt-1 leading-relaxed">{item.desc}</p>
@@ -491,6 +493,9 @@ const OwnerDashboard = () => {
       <span className="text-[10px] font-medium uppercase tracking-widest">Business Intelligence Platform</span>
     </div>
   </div>
+</div>
+</div>
+</div>
   );
 };
 

@@ -335,6 +335,7 @@ export default function Profile() {
                     />
                   ) : null}
                   
+                  <div 
                     className="w-full h-full flex items-center justify-center bg-[#1a1a1a]"
                     style={{ display: profileUser?.profilePicture ? 'none' : 'flex' }}
                   >
