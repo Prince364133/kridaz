@@ -610,15 +610,34 @@ export const getMe = async (req, res) => {
 
     const { id, role } = decoded;
     let account;
+    let applicationStatus = null;
+    let applicationRole = null;
 
     if (role === "user") {
-      account = await User.findById(id).select("-password");
+      account = await User.findById(id).select("-password").lean();
+      if (account) {
+        // Query by userId (most reliable) and get any active application
+        const existingRequest = await OwnerRequest.findOne({ userId: id })
+          .sort({ createdAt: -1 }) // get the most recent application
+          .lean();
+
+        if (existingRequest && existingRequest.status !== "rejected") {
+          applicationStatus = existingRequest.status;   // "pending" | "approved"
+          applicationRole = existingRequest.role;       // "owner" | "coach" | "umpire"
+        }
+      }
     } else {
-      account = await Owner.findById(id).select("-password");
+      account = await Owner.findById(id).select("-password").lean();
     }
 
     if (!account) {
       return res.status(404).json({ success: false, message: "Account not found" });
+    }
+
+    // Attach application info to account object if it exists
+    if (applicationStatus) {
+      account.applicationStatus = applicationStatus;
+      account.applicationRole = applicationRole;
     }
 
     const token = req.cookies.auth_token || req.headers.authorization?.split(" ")[1];

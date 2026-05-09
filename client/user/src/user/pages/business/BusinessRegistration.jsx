@@ -67,6 +67,27 @@ export default function BusinessRegistration() {
     setFiles(prev => ({ ...prev, [type]: file }));
   };
 
+  const [hasRoleConflict, setHasRoleConflict] = useState(false);
+  const [existingRole, setExistingRole] = useState(null);
+  const [isPending, setIsPending] = useState(false);
+  const [pendingRole, setPendingRole] = useState(null);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
   useEffect(() => {
     if (!isLoggedIn) {
       // If guest, redirect to specific professional signup pages based on the role
@@ -93,10 +114,17 @@ export default function BusinessRegistration() {
       }));
     }
 
+    // Check for pending application status from Redux state
+    if (user?.applicationStatus === "pending") {
+      setIsPending(true);
+      setPendingRole(user.applicationRole || roleFromUrl);
+    }
+
     // Check if user already has a professional role
     const professionalRoles = ["owner", "VENUE_OWNER", "VERIFIED_VENUE_OWNER", "COACH", "UMPIRE", "admin", "BMSP_ADMIN"];
     if (user?.role && professionalRoles.includes(user.role)) {
-      setHasRoleConflict(user.role);
+      setHasRoleConflict(true);
+      setExistingRole(user.role);
     }
   }, [isLoggedIn, navigate, roleFromUrl, user]);
 
@@ -133,26 +161,10 @@ export default function BusinessRegistration() {
     setShowSuggestions(false);
   };
 
-  const [hasRoleConflict, setHasRoleConflict] = useState(null);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name.includes(".")) {
-      const [parent, child] = name.split(".");
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
-        }
-      }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (hasRoleConflict || isPending) return;
+    
     setLoading(true);
     
     const data = new FormData();
@@ -186,58 +198,77 @@ export default function BusinessRegistration() {
     }
   };
 
+  // ── 1. Already holds a professional role ──
   if (hasRoleConflict) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-        <div className="max-w-md w-full text-center space-y-8 p-12 rounded-[40px] border border-red-500/10 bg-[#0A0A0A] relative overflow-hidden">
-           <div className="absolute top-0 left-0 w-full h-1 bg-red-500" />
-           <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-             <ShieldAlert size={40} className="text-red-500" />
-           </div>
-           <h2 className="text-4xl font-display uppercase tracking-tight">Role <span className="text-red-500">Conflict</span></h2>
-           <p className="text-gray-400 leading-relaxed">
-             You already have the <span className="text-white font-bold uppercase tracking-widest px-2 py-1 rounded bg-white/5">{hasRoleConflict}</span> role assigned to this account.
-           </p>
-           <p className="text-sm text-gray-500 italic">
-             To ensure focus and security, TurfSpot supports only one professional dashboard per account. Please use a different account if you wish to join as a {roleFromUrl}.
-           </p>
-           <button onClick={() => navigate("/")} className="w-full py-4 rounded-2xl border border-white/10 hover:bg-white/5 transition-colors font-bold uppercase tracking-widest text-xs">
-             Back to Home
-           </button>
+        <div className="max-w-md w-full text-center space-y-8 p-12 rounded-[40px] border border-amber-500/20 bg-[#0A0A0A] relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-amber-500" />
+          <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <ShieldAlert size={40} className="text-amber-500" />
+          </div>
+          <h2 className="text-4xl font-display uppercase tracking-tight">
+            Role <span className="text-amber-500">Conflict</span>
+          </h2>
+          <p className="text-gray-400 leading-relaxed">
+            Your account already holds the{" "}
+            <span className="text-white font-bold uppercase tracking-widest px-2 py-1 rounded bg-white/5">
+              {existingRole}
+            </span>{" "}
+            role. TurfSpot supports only one professional role per account.
+          </p>
+          <p className="text-sm text-gray-500 italic">
+            Please use a different account if you wish to join as a <span className="capitalize">{roleFromUrl}</span>.
+          </p>
+          <button
+            onClick={() => navigate("/")}
+            className="w-full py-4 rounded-2xl border border-white/10 hover:bg-white/5 transition-colors font-bold uppercase tracking-widest text-xs"
+          >
+            Back to Home
+          </button>
         </div>
       </div>
     );
   }
 
-  if (submitted) {
+  // ── 2. Application pending review ──
+  if (isPending || submitted) {
+    const displayRole = submitted ? formData.role : pendingRole;
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center space-y-8 p-12 rounded-[40px] border border-white/5 bg-[#0A0A0A] relative overflow-hidden">
-           <div className="absolute top-0 left-0 w-full h-1 bg-[#CCFF00]" />
-           <div className="w-20 h-20 bg-[#CCFF00]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-             <Clock size={40} className="text-[#CCFF00] animate-pulse" />
-           </div>
-           <h2 className="text-4xl font-display uppercase tracking-tight">Application <span className="text-[#CCFF00]">Pending</span></h2>
-           <p className="text-gray-400 leading-relaxed">
-             Thank you for applying to be a {formData.role}. Our admin team is currently reviewing your registration details and documents.
-           </p>
-           <div className="bg-white/5 rounded-2xl p-6 text-sm text-left space-y-4">
-             <div className="flex items-center gap-3 text-gray-300">
-               <CheckCircle2 size={18} className="text-[#CCFF00]" />
-               <span>Application Received</span>
-             </div>
-             <div className="flex items-center gap-3 text-gray-300">
-               <div className="w-[18px] h-[18px] border-2 border-[#CCFF00]/30 border-t-[#CCFF00] rounded-full animate-spin" />
-               <span>Document Verification In-Progress</span>
-             </div>
-             <div className="flex items-center gap-3 text-white/20">
-               <div className="w-[18px] h-[18px] border-2 border-white/10 rounded-full" />
-               <span>Final Approval & Access</span>
-             </div>
-           </div>
-           <button onClick={() => navigate("/")} className="w-full py-4 rounded-2xl border border-white/10 hover:bg-white/5 transition-colors font-bold uppercase tracking-widest text-xs">
-             Back to Home
-           </button>
+          <div className="absolute top-0 left-0 w-full h-1 bg-[#CCFF00]" />
+          <div className="w-20 h-20 bg-[#CCFF00]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Clock size={40} className="text-[#CCFF00] animate-pulse" />
+          </div>
+          <h2 className="text-4xl font-display uppercase tracking-tight">
+            Application <span className="text-[#CCFF00]">Pending</span>
+          </h2>
+          <p className="text-gray-400 leading-relaxed">
+            Thank you for applying to be a{" "}
+            <span className="text-white capitalize font-semibold">{displayRole}</span>. Our admin
+            team is reviewing your registration details and documents.
+          </p>
+          <div className="bg-white/5 rounded-2xl p-6 text-sm text-left space-y-4">
+            <div className="flex items-center gap-3 text-gray-300">
+              <CheckCircle2 size={18} className="text-[#CCFF00]" />
+              <span>Application Received</span>
+            </div>
+            <div className="flex items-center gap-3 text-gray-300">
+              <div className="w-[18px] h-[18px] border-2 border-[#CCFF00]/30 border-t-[#CCFF00] rounded-full animate-spin" />
+              <span>Document Verification In-Progress</span>
+            </div>
+            <div className="flex items-center gap-3 text-white/20">
+              <div className="w-[18px] h-[18px] border-2 border-white/10 rounded-full" />
+              <span>Final Approval &amp; Access</span>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/")}
+            className="w-full py-4 rounded-2xl border border-white/10 hover:bg-white/5 transition-colors font-bold uppercase tracking-widest text-xs"
+          >
+            Back to Home
+          </button>
         </div>
       </div>
     );
