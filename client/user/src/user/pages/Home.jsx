@@ -529,7 +529,7 @@ export default function Home() {
                   >
                     <div className="relative bg-[#111] rounded-[32px] border border-white/5 overflow-hidden hover:border-[#84CC16]/30 transition-all duration-500 h-full flex flex-col">
                       {/* Card Image Section */}
-                      <Link to={`/profile/${p._id}`} className="relative aspect-[4/5] overflow-hidden block">
+                      <Link to={`/profile/${p._id}`} className="relative aspect-square overflow-hidden block">
                         <div className="w-full h-full bg-[#84CC16]/5 flex items-center justify-center">
                           {p.profilePicture ? (
                             <img 
@@ -546,7 +546,7 @@ export default function Home() {
                             className="relative z-10 flex items-center justify-center w-full h-full"
                             style={{ display: p.profilePicture ? 'none' : 'flex' }}
                           >
-                            <User size={48} className="text-[#84CC16]/40 group-hover:text-[#84CC16] transition-colors duration-500" />
+                            <User size={40} className="text-[#84CC16]/40 group-hover:text-[#84CC16] transition-colors duration-500" />
                           </div>
                         </div>
 
@@ -560,16 +560,16 @@ export default function Home() {
                       </Link>
 
                       {/* Card Info Section */}
-                      <div className="p-4 flex flex-col flex-grow">
-                        <Link to={`/profile/${p._id}`} className="block mb-1">
-                          <h3 className="text-white font-bold text-[14px] md:text-base tracking-tight truncate group-hover:text-[#84CC16] transition-colors">
+                      <div className="p-3.5 flex flex-col flex-grow">
+                        <Link to={`/profile/${p._id}`} className="block mb-0.5">
+                          <h3 className="text-white font-bold text-[13px] md:text-[15px] tracking-tight truncate group-hover:text-[#84CC16] transition-colors">
                             {p.name || "Player"}
                           </h3>
                         </Link>
                         
-                        <div className="flex items-center gap-1.5 text-white/40 mb-5">
-                          <MapPin size={10} className="text-[#84CC16]" />
-                          <span className="text-[10px] font-bold uppercase tracking-widest truncate">
+                        <div className="flex items-center gap-1.5 text-white/40 mb-3.5">
+                          <MapPin size={9} className="text-[#84CC16]" />
+                          <span className="text-[9px] font-bold uppercase tracking-widest truncate">
                             {p.city || "Nearby"}
                           </span>
                         </div>
