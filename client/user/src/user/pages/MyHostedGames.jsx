@@ -4,7 +4,7 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { 
   Users, Check, X, Clock, MapPin, 
-  ChevronRight, Trophy, Info, AlertCircle, Calendar
+  ChevronRight, Trophy, Info, AlertCircle, Calendar, User
 } from 'lucide-react';
 
 const MyHostedGames = () => {

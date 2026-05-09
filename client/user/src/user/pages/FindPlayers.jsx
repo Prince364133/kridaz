@@ -13,7 +13,8 @@ import {
   Trophy,
   Filter,
   Check,
-  MessageCircle
+  MessageCircle,
+  User
 } from "lucide-react";
 import toast from "react-hot-toast";
 import StoryViewer from "../components/StoryViewer";
