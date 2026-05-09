@@ -5,6 +5,7 @@ import Turf from "../../models/turf.model.js";
 import TimeSlot from "../../models/timeSlot.model.js";
 import User from "../../models/user.model.js";
 import Owner from "../../models/owner.model.js";
+import Coupon from "../../models/coupon.model.js";
 import razorpay from "../../config/razorpay.js";
 import crypto from "crypto";
 import generateQRCode from "../../utils/generateQRCode.js";
@@ -171,7 +172,7 @@ export const verifyPayment = async (req, res) => {
 
 export const bookWithWallet = async (req, res) => {
   const userId = req.user.id || req.user.user;
-  const { id: turfId, startTime, endTime, selectedTurfDate, totalPrice } = req.body;
+  const { id: turfId, startTime, endTime, selectedTurfDate, totalPrice: originalPrice, couponCode } = req.body;
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -193,7 +194,33 @@ export const bookWithWallet = async (req, res) => {
       throw new Error("User not found");
     }
 
-    if (user.walletBalance < totalPrice) {
+    let finalPrice = originalPrice;
+    let appliedCoupon = null;
+
+    if (couponCode) {
+      appliedCoupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true }).session(session);
+      if (appliedCoupon) {
+        if (new Date() > new Date(appliedCoupon.validUntil)) {
+          throw new Error("Coupon has expired");
+        }
+        if (appliedCoupon.turfId && appliedCoupon.turfId.toString() !== turfId.toString()) {
+          throw new Error("Coupon is not valid for this ground");
+        }
+        if (appliedCoupon.usageLimit > 0 && appliedCoupon.timesUsed >= appliedCoupon.usageLimit) {
+          throw new Error("Coupon usage limit reached");
+        }
+
+        let discount = 0;
+        if (appliedCoupon.discountType === "PERCENTAGE") {
+          discount = originalPrice * (appliedCoupon.discountValue / 100);
+        } else {
+          discount = appliedCoupon.discountValue;
+        }
+        finalPrice = Math.max(0, originalPrice - discount);
+      }
+    }
+
+    if (user.walletBalance < finalPrice) {
       throw new Error("Insufficient wallet balance. Please top up your wallet.");
     }
 
@@ -217,7 +244,7 @@ export const bookWithWallet = async (req, res) => {
     }
 
     // 3. Deduct balance
-    user.walletBalance -= totalPrice;
+    user.walletBalance -= finalPrice;
     await user.save({ session });
 
     // 3. Create objects
@@ -245,7 +272,7 @@ export const bookWithWallet = async (req, res) => {
           user: userId,
           turf: turfId,
           timeSlot: timeSlot[0]._id,
-          totalPrice,
+          totalPrice: finalPrice,
           qrCode: QRcode,
           payment: {
             orderId: "WALLET",
@@ -265,7 +292,7 @@ export const bookWithWallet = async (req, res) => {
       [
         {
           user: userId,
-          amount: totalPrice,
+          amount: finalPrice,
           type: "DEBIT",
           status: "SUCCESS",
           description: `Booking at ${turf.name}`,
@@ -274,6 +301,11 @@ export const bookWithWallet = async (req, res) => {
       ],
       { session }
     );
+
+    if (appliedCoupon) {
+      appliedCoupon.timesUsed += 1;
+      await appliedCoupon.save({ session });
+    }
 
     await session.commitTransaction();
     session.endSession();
@@ -285,7 +317,7 @@ export const bookWithWallet = async (req, res) => {
       formattedDate,
       formattedStartTime,
       formattedEndTime,
-      totalPrice,
+      finalPrice,
       QRcode
     );
 
@@ -414,5 +446,51 @@ export const getOwnerBookings = async (req, res) => {
   } catch (error) {
     console.error("Error in getOwnerBookings:", error);
     res.status(500).json({ message: "Error fetching bookings", error: error.message });
+  }
+};
+
+export const validateCoupon = async (req, res) => {
+  try {
+    const { code, turfId, amount } = req.body;
+    if (!code || !turfId || !amount) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const coupon = await Coupon.findOne({ code: code.toUpperCase(), isActive: true });
+    
+    if (!coupon) {
+      return res.status(404).json({ message: "Invalid or inactive coupon code" });
+    }
+
+    if (new Date() > new Date(coupon.validUntil)) {
+      return res.status(400).json({ message: "This coupon has expired" });
+    }
+
+    if (coupon.turfId && coupon.turfId.toString() !== turfId.toString()) {
+      return res.status(400).json({ message: "This coupon is not valid for this ground" });
+    }
+
+    if (coupon.usageLimit > 0 && coupon.timesUsed >= coupon.usageLimit) {
+      return res.status(400).json({ message: "This coupon's usage limit has been reached" });
+    }
+
+    let discount = 0;
+    if (coupon.discountType === "PERCENTAGE") {
+      discount = amount * (coupon.discountValue / 100);
+    } else {
+      discount = coupon.discountValue;
+    }
+
+    const finalAmount = Math.max(0, amount - discount);
+
+    res.status(200).json({
+      success: true,
+      discount,
+      finalAmount,
+      message: "Coupon applied successfully"
+    });
+  } catch (error) {
+    console.error("Error validating coupon:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

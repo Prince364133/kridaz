@@ -22,6 +22,7 @@ import {
 import { FormField } from "@components/common";
 
 const Login = () => {
+  const navigate = useNavigate();
   const { 
     register, 
     handleSubmit, 
@@ -35,9 +36,19 @@ const Login = () => {
   const [mounted, setMounted] = useState(false);
   const dispatch = useDispatch(); // for quick demo button
 
+  const { isLoggedIn, role } = useSelector((state) => state.auth);
+  
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (isLoggedIn) {
+      const normalizedRole = role?.toLowerCase();
+      if (normalizedRole === "admin" || normalizedRole === "bmsp_admin") navigate("/admin");
+      else if (normalizedRole === "owner") navigate("/partner");
+      else if (normalizedRole === "coach") navigate("/coach");
+      else if (normalizedRole === "umpire") navigate("/umpire");
+      else navigate("/");
+    }
+  }, [isLoggedIn, role, navigate]);
 
   return (
     <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-start pt-4 lg:pt-10 pb-12 font-sans">

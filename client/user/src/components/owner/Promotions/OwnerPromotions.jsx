@@ -1,81 +1,100 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Tag, Plus, Calendar, Clock, Percent, 
   IndianRupee, CheckCircle2, XCircle, Search, Trash2 
 } from "lucide-react";
+import axiosInstance from "@hooks/useAxiosInstance";
+import toast from "react-hot-toast";
+import useTurfManagement from "@hooks/owner/useTurfManagement";
 
 export default function OwnerPromotions() {
-  const [promotions, setPromotions] = useState([
-    {
-      id: 1,
-      code: "SUMMER25",
-      type: "percentage",
-      value: 25,
-      validUntil: "2026-08-31",
-      status: "active",
-      usageLimit: 100,
-      usedCount: 45
-    },
-    {
-      id: 2,
-      code: "WEEKEND150",
-      type: "flat",
-      value: 150,
-      validUntil: "2026-05-15",
-      status: "active",
-      usageLimit: 50,
-      usedCount: 50
-    },
-    {
-      id: 3,
-      code: "WELCOME10",
-      type: "percentage",
-      value: 10,
-      validUntil: "2026-12-31",
-      status: "inactive",
-      usageLimit: null,
-      usedCount: 120
+  const [promotions, setPromotions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { turfs, fetchTurfs } = useTurfManagement();
+
+  useEffect(() => {
+    fetchPromotions();
+    fetchTurfs();
+  }, []);
+
+  const fetchPromotions = async () => {
+    try {
+      const res = await axiosInstance.get("/api/owner/promotions");
+      setPromotions(res.data);
+    } catch (error) {
+      toast.error("Failed to fetch promotions");
+    } finally {
+      setIsLoading(false);
     }
-  ]);
+  };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newPromo, setNewPromo] = useState({
     code: "",
-    type: "percentage",
+    type: "PERCENTAGE",
     value: "",
     validUntil: "",
-    usageLimit: ""
+    usageLimit: "",
+    turfId: "all"
   });
 
-  const handleCreatePromo = (e) => {
+  const handleCreatePromo = async (e) => {
     e.preventDefault();
-    const promo = {
-      id: Date.now(),
-      code: newPromo.code.toUpperCase(),
-      type: newPromo.type,
-      value: Number(newPromo.value),
-      validUntil: newPromo.validUntil,
-      status: "active",
-      usageLimit: newPromo.usageLimit ? Number(newPromo.usageLimit) : null,
-      usedCount: 0
-    };
-    setPromotions([promo, ...promotions]);
-    setIsModalOpen(false);
-    setNewPromo({ code: "", type: "percentage", value: "", validUntil: "", usageLimit: "" });
+    if (newPromo.type === "PERCENTAGE" && Number(newPromo.value) > 100) {
+      return toast.error("Percentage discount cannot exceed 100%");
+    }
+
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        code: newPromo.code,
+        discountType: newPromo.type,
+        discountValue: Number(newPromo.value),
+        validUntil: newPromo.validUntil,
+        usageLimit: newPromo.usageLimit ? Number(newPromo.usageLimit) : 0,
+        turfId: newPromo.turfId
+      };
+      await axiosInstance.post("/api/owner/promotions", payload);
+      toast.success("Campaign deployed successfully");
+      setIsModalOpen(false);
+      setNewPromo({ code: "", type: "PERCENTAGE", value: "", validUntil: "", usageLimit: "", turfId: "all" });
+      fetchPromotions();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to deploy campaign");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const deletePromo = (id) => {
-    setPromotions(promotions.filter(p => p.id !== id));
+  const deletePromo = async (id) => {
+    if (!window.confirm("Delete this campaign?")) return;
+    try {
+      await axiosInstance.delete(`/api/owner/promotions/${id}`);
+      setPromotions(promotions.filter(p => p._id !== id));
+      toast.success("Campaign deleted");
+    } catch (error) {
+      toast.error("Failed to delete campaign");
+    }
   };
 
-  const toggleStatus = (id) => {
-    setPromotions(promotions.map(p => {
-      if (p.id === id) {
-        return { ...p, status: p.status === "active" ? "inactive" : "active" };
-      }
-      return p;
-    }));
+  const toggleStatus = async (id) => {
+    try {
+      const res = await axiosInstance.patch(`/api/owner/promotions/${id}/toggle`);
+      setPromotions(promotions.map(p => {
+        if (p._id === id) {
+          return { ...p, isActive: res.data.isActive };
+        }
+        return p;
+      }));
+      toast.success("Status updated");
+    } catch (error) {
+      toast.error("Failed to toggle status");
+    }
   };
+
+  const activeCount = promotions.filter(p => p.isActive).length;
+  const totalRedemptions = promotions.reduce((acc, curr) => acc + curr.timesUsed, 0);
 
   return (
     <div className="p-4 md:p-8 space-y-8 animate-fade-in text-white font-inter bg-[#050505] min-h-screen pb-20">
@@ -106,7 +125,7 @@ export default function OwnerPromotions() {
           </div>
           <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Active Campaigns</p>
           <h3 className="text-3xl font-bold font-outfit text-[#CCFF00]">
-             {promotions.filter(p => p.status === "active").length}
+             {isLoading ? "..." : activeCount}
           </h3>
         </div>
         <div className="bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6 relative overflow-hidden group">
@@ -115,7 +134,7 @@ export default function OwnerPromotions() {
           </div>
           <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Total Codes Issued</p>
           <h3 className="text-3xl font-bold font-outfit text-white">
-             {promotions.length}
+             {isLoading ? "..." : promotions.length}
           </h3>
         </div>
         <div className="bg-[#111111] border border-[#2D2D2D] rounded-[12px] p-6 relative overflow-hidden group">
@@ -124,7 +143,7 @@ export default function OwnerPromotions() {
           </div>
           <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Redemptions</p>
           <h3 className="text-3xl font-bold font-outfit text-white">
-             {promotions.reduce((acc, curr) => acc + curr.usedCount, 0)}
+             {isLoading ? "..." : totalRedemptions}
           </h3>
         </div>
       </div>
@@ -147,6 +166,7 @@ export default function OwnerPromotions() {
             <thead>
               <tr className="bg-[#1A1A1A] border-b border-[#2D2D2D]">
                 <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Code</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Ground</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Discount</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Usage</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Validity</th>
@@ -155,27 +175,32 @@ export default function OwnerPromotions() {
               </tr>
             </thead>
             <tbody>
-              {promotions.map((promo) => (
-                <tr key={promo.id} className="border-b border-[#2D2D2D] hover:bg-[#1A1A1A]/50 transition-colors">
+              {isLoading ? (
+                 <tr><td colSpan="7" className="text-center py-8 text-[#878C9F]">Loading campaigns...</td></tr>
+              ) : promotions.map((promo) => (
+                <tr key={promo._id} className="border-b border-[#2D2D2D] hover:bg-[#1A1A1A]/50 transition-colors">
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#2D2D2D] rounded-[4px] text-sm font-bold tracking-wider text-white">
                       {promo.code}
                     </span>
                   </td>
                   <td className="px-6 py-4">
+                    <span className="text-xs text-[#878C9F]">{promo.turfName || "All Grounds"}</span>
+                  </td>
+                  <td className="px-6 py-4">
                     <div className="flex items-center gap-1.5 text-sm font-bold text-[#CCFF00]">
-                      {promo.type === 'percentage' ? <Percent size={14} /> : <IndianRupee size={14} />}
-                      {promo.value}{promo.type === 'percentage' ? '%' : ' OFF'}
+                      {promo.discountType === 'PERCENTAGE' ? <Percent size={14} /> : <IndianRupee size={14} />}
+                      {promo.discountValue}{promo.discountType === 'PERCENTAGE' ? '%' : ' OFF'}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col gap-1">
-                       <span className="text-sm font-bold text-white">{promo.usedCount} <span className="text-[#878C9F] text-xs font-normal">redemptions</span></span>
-                       {promo.usageLimit && (
+                       <span className="text-sm font-bold text-white">{promo.timesUsed} <span className="text-[#878C9F] text-xs font-normal">redemptions</span></span>
+                       {promo.usageLimit > 0 && (
                          <div className="w-24 h-1.5 bg-[#2D2D2D] rounded-full overflow-hidden">
                             <div 
-                              className={`h-full ${promo.usedCount >= promo.usageLimit ? 'bg-red-500' : 'bg-[#CCFF00]'}`} 
-                              style={{ width: `${Math.min((promo.usedCount / promo.usageLimit) * 100, 100)}%` }} 
+                              className={`h-full ${promo.timesUsed >= promo.usageLimit ? 'bg-red-500' : 'bg-[#CCFF00]'}`} 
+                              style={{ width: `${Math.min((promo.timesUsed / promo.usageLimit) * 100, 100)}%` }} 
                             />
                          </div>
                        )}
@@ -189,19 +214,19 @@ export default function OwnerPromotions() {
                   </td>
                   <td className="px-6 py-4">
                     <button 
-                      onClick={() => toggleStatus(promo.id)}
+                      onClick={() => toggleStatus(promo._id)}
                       className={`px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider rounded-[4px] border transition-colors ${
-                        promo.status === 'active' 
+                        promo.isActive 
                           ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20" 
                           : "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
                       }`}
                     >
-                      {promo.status}
+                      {promo.isActive ? 'ACTIVE' : 'INACTIVE'}
                     </button>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <button 
-                      onClick={() => deletePromo(promo.id)}
+                      onClick={() => deletePromo(promo._id)}
                       className="p-2 text-[#878C9F] hover:text-red-500 hover:bg-red-500/10 rounded-[6px] transition-all"
                       title="Delete Campaign"
                     >
@@ -210,9 +235,9 @@ export default function OwnerPromotions() {
                   </td>
                 </tr>
               ))}
-              {promotions.length === 0 && (
+              {!isLoading && promotions.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center">
+                  <td colSpan="7" className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center justify-center">
                       <Tag size={32} className="text-[#333] mb-3" />
                       <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">No Active Campaigns</p>
@@ -254,6 +279,20 @@ export default function OwnerPromotions() {
                   placeholder="e.g. SUMMER25"
                 />
               </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-2">Target Ground</label>
+                <select 
+                  value={newPromo.turfId}
+                  onChange={(e) => setNewPromo({...newPromo, turfId: e.target.value})}
+                  className="w-full bg-[#050505] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[8px] text-sm focus:outline-none focus:border-[#CCFF00]/50"
+                >
+                  <option value="all">Universal (All My Grounds)</option>
+                  {turfs.map(t => (
+                     <option key={t._id} value={t._id}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -263,8 +302,8 @@ export default function OwnerPromotions() {
                     onChange={(e) => setNewPromo({...newPromo, type: e.target.value})}
                     className="w-full bg-[#050505] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[8px] text-sm focus:outline-none focus:border-[#CCFF00]/50"
                   >
-                    <option value="percentage">Percentage (%)</option>
-                    <option value="flat">Flat Amount (₹)</option>
+                    <option value="PERCENTAGE">Percentage (%)</option>
+                    <option value="FLAT">Flat Amount (₹)</option>
                   </select>
                 </div>
                 <div>
@@ -287,6 +326,7 @@ export default function OwnerPromotions() {
                   <input 
                     type="date" 
                     required
+                    min={new Date().toISOString().split('T')[0]}
                     value={newPromo.validUntil}
                     onChange={(e) => setNewPromo({...newPromo, validUntil: e.target.value})}
                     className="w-full bg-[#050505] border border-[#2D2D2D] text-[#878C9F] px-4 py-2.5 rounded-[8px] text-sm focus:outline-none focus:border-[#CCFF00]/50 [color-scheme:dark]"
@@ -309,15 +349,17 @@ export default function OwnerPromotions() {
                 <button 
                   type="button"
                   onClick={() => setIsModalOpen(false)}
+                  disabled={isSubmitting}
                   className="flex-1 px-4 py-2.5 bg-[#1A1A1A] border border-[#2D2D2D] text-white rounded-[8px] text-sm font-bold hover:bg-[#2D2D2D] transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 px-4 py-2.5 bg-[#CCFF00] text-black rounded-[8px] text-sm font-bold hover:bg-[#b3ff00] transition-colors shadow-[0_0_15px_rgba(204,255,0,0.15)]"
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2.5 bg-[#CCFF00] text-black rounded-[8px] text-sm font-bold hover:bg-[#b3ff00] transition-colors shadow-[0_0_15px_rgba(204,255,0,0.15)] disabled:opacity-50"
                 >
-                  Deploy Campaign
+                  {isSubmitting ? "Deploying..." : "Deploy Campaign"}
                 </button>
               </div>
             </form>

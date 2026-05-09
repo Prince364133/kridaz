@@ -36,6 +36,7 @@ const ownerSchema = new mongoose.Schema(
     certifications: [{ type: String }],
     rating: { type: Number, default: 0 },
     numReviews: { type: Number, default: 0 },
+    bookings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Booking' }],
  },
  { timestamps: true }
 );

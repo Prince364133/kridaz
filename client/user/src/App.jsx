@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { RouterProvider } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import router from "./router";
-import { login, logout } from "./redux/slices/authSlice";
+import { login, logout, restoreAuth } from "./redux/slices/authSlice";
 import axiosInstance from "@hooks/useAxiosInstance";
 
 // Simple JWT decoder (no verification, just payload extraction)
@@ -55,10 +55,10 @@ export default function App() {
         const response = await axiosInstance.get("/api/user/auth/getMe");
         console.log("App.jsx: /getMe response status:", response.status);
         if (isMounted && response.data.success) {
-          dispatch(login({
+          dispatch(restoreAuth({
             user: response.data.user,
             role: response.data.role,
-            token: response.data.token
+            token: response.data.token // Backend now returns this, but if missing, restoreAuth preserves old one
           }));
         }
       } catch (error) {

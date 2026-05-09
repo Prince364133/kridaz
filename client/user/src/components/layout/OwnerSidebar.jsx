@@ -43,11 +43,7 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/partner/promotions", label: "Promotions", icon: Tag },
   ];
 
-  const bottomNavItems = [
-    { to: "/partner/settings", label: "Settings", icon: Settings },
-    { to: "/partner/support", label: "Support", icon: HelpCircle },
-    { action: "logout", label: "Logout", icon: LogOut },
-  ];
+
 
   const renderNavItem = (item) => {
     const isLogout = item.action === "logout";
@@ -111,9 +107,6 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         </nav>
       </div>
 
-      <div className="p-2 border-t border-[#2D2D2D] space-y-1 mb-4">
-        {bottomNavItems.map(renderNavItem)}
-      </div>
     </aside>
   );
 };

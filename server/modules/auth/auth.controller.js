@@ -567,10 +567,13 @@ export const getMe = async (req, res) => {
       return res.status(404).json({ success: false, message: "Account not found" });
     }
 
+    const token = req.cookies.auth_token || req.headers.authorization?.split(" ")[1];
+
     return res.status(200).json({ 
       success: true, 
       user: account, 
-      role 
+      role,
+      token
     });
   } catch (err) {
     console.error(chalk.red("getMe Error:"), err);
@@ -696,6 +699,62 @@ export const updateProfile = async (req, res) => {
     });
   } catch (err) {
     console.error(chalk.red("updateProfile Error:"), err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const forgotPasswordOtp = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const existingUser = await User.findOne({ email });
+    const existingOwner = await Owner.findOne({ email });
+
+    if (!existingUser && !existingOwner) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await OTP.findOneAndDelete({ email });
+    const newOtp = new OTP({ email, emailOtp, phone: '0000000000', phoneOtp: '000000' });
+    await newOtp.save();
+
+    await generateEmail(
+      email,
+      'Your Password Reset Code',
+      `<p>Your password reset code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>`
+    );
+
+    return res.status(200).json({ success: true, message: 'OTP sent to your email' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+  try {
+    const otpRecord = await OTP.findOne({ email });
+    if (!otpRecord || otpRecord.emailOtp !== otp) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
+    }
+
+    const hashedPassword = await argon2.hash(newPassword);
+
+    let userUpdated = await User.findOneAndUpdate({ email }, { password: hashedPassword });
+    let ownerUpdated = false;
+    if (!userUpdated) {
+      ownerUpdated = await Owner.findOneAndUpdate({ email }, { password: hashedPassword });
+    }
+
+    if (!userUpdated && !ownerUpdated) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    await OTP.findOneAndDelete({ email });
+
+    return res.status(200).json({ success: true, message: 'Password reset successful' });
+  } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
 };

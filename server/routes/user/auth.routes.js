@@ -10,7 +10,9 @@ import {
   logout,
   updateProfilePicture,
   updateInterests,
-  updateProfile
+  updateProfile,
+  forgotPasswordOtp,
+  resetPassword
 } from "../../modules/auth/auth.controller.js";
 import { 
   userRegisterSchema, 
@@ -36,5 +38,7 @@ router.post("/logout", logout);
 router.post("/profile-picture", userAuth, upload.single("profilePicture"), updateProfilePicture);
 router.post("/update-interests", userAuth, updateInterests);
 router.put("/updateProfile", userAuth, updateProfile);
+router.post("/forgot-password-otp", forgotPasswordOtp);
+router.post("/reset-password", resetPassword);
 
 export default router;

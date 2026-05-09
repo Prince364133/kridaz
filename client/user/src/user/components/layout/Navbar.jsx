@@ -184,7 +184,7 @@ const Navbar = () => {
                     {/* Navigation Groups */}
                     <div className="p-2 space-y-1">
                       {/* DASHBOARDS SECTION */}
-                      {["BMSP_ADMIN", "admin", "owner", "VENUE_OWNER", "VERIFIED_VENUE_OWNER", "COACH", "coach", "UMPIRE", "umpire"].includes(role) && (
+                      {["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire"].includes(role?.toLowerCase()) && (
                         <div className="px-3 py-2">
                           <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-2">Management</p>
                           <div className="space-y-1">
@@ -203,7 +203,7 @@ const Navbar = () => {
                             )}
 
                             {/* Partner Dashboard */}
-                            {["owner", "VENUE_OWNER", "VERIFIED_VENUE_OWNER"].includes(role) && (
+                            {["owner", "venue_owner", "verified_venue_owner"].includes(role?.toLowerCase()) && (
                               <Link 
                                 to="/partner"
                                 className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-[#84CC16] transition-all group/item"
@@ -217,7 +217,7 @@ const Navbar = () => {
                             )}
 
                             {/* Coach Dashboard */}
-                            {["COACH", "coach"].includes(role) && (
+                            {["coach"].includes(role?.toLowerCase()) && (
                               <Link 
                                 to="/coach"
                                 className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-[#84CC16] transition-all group/item"
@@ -231,7 +231,7 @@ const Navbar = () => {
                             )}
 
                             {/* Umpire Dashboard */}
-                            {["UMPIRE", "umpire"].includes(role) && (
+                            {["umpire"].includes(role?.toLowerCase()) && (
                               <Link 
                                 to="/umpire"
                                 className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-[#84CC16] transition-all group/item"

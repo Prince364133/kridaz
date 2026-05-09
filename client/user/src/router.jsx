@@ -9,6 +9,7 @@ import UserRoot from "@user/layouts/Root";
 import UserHome from "@user/pages/Home";
 import UserLogin from "@user/pages/auth/Login";
 import UserSignUp from "@user/pages/auth/SignUp";
+import ForgotPassword from "@user/pages/auth/ForgotPassword";
 import UserTurf from "@user/components/turf/Turf";
 import UserTurfDetails from "@user/components/turf/TurfDetails";
 import UserTurfBookingHistory from "@user/components/turf/TurfBookingHistory";
@@ -199,6 +200,7 @@ const router = createBrowserRouter([
       { index: true, element: <RootRedirect /> },
       { path: "login", element: <PublicRoute><UserLogin /></PublicRoute> },
       { path: "signup", element: <PublicRoute><UserSignUp /></PublicRoute> },
+      { path: "forgot-password", element: <PublicRoute><ForgotPassword /></PublicRoute> },
       { path: "turfs", element: <UserTurf /> },
       { path: "turf/:id", element: <UserTurfDetails /> },
       { path: "profile/:userId?", element: <ProtectedRoute><UserProfile /></ProtectedRoute> },

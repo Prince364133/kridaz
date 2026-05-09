@@ -25,6 +25,14 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.isLoggedIn = false;
     },
+    restoreAuth: (state, action) => {
+      // Used by App.jsx to restore state from /getMe without requiring a new token
+      state.user = action.payload.user || state.user;
+      state.role = action.payload.role || state.role;
+      state.token = action.payload.token || state.token;
+      state.isAuthenticated = true;
+      state.isLoggedIn = true;
+    },
     updateUser: (state, action) => {
       state.user = { ...state.user, ...action.payload };
     },
@@ -32,5 +40,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { login, logout, updateUser } = authSlice.actions;
+export const { login, logout, updateUser, restoreAuth } = authSlice.actions;
 export default authSlice.reducer;

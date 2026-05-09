@@ -1,8 +1,93 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700;800;900&family=Space+Mono&family=Bayon&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Design Tokens ──────────────────────────────────────────────── */
+:root {
+  /* Unified Primary - Main Branch Official */
+  --primary:       #84CC16;
+  --primary-glow:  rgba(132, 204, 22, 0.4);
+  --primary-dark:  #5F9300;
+  
+  /* Legacy/Sunny specific names pointing to unified color */
+  --action-green:  #84CC16;
+  --neon-lime:     #BFFF00;
+  
+  /* Backgrounds & Surfaces */
+  --bg-base:       #000000;
+  --surface:       #0A0A0A;
+  --surface-2:     #111111;
+  --charcoal:      #1A1A1A;
+  --deep-black:    #000000;
+  
+  /* Borders */
+  --border:        rgba(255, 255, 255, 0.05);
+  --border-glow:   rgba(132, 204, 22, 0.2);
+  --card-border:   #2D2D2D;
+  
+  /* Foregrounds */
+  --fg:            #FFFFFF;
+  --muted:         #A0A0A0;
+  --medium-gray:   #999999;
+  --hover-gray:    #878C9F;
+
+  /* Shadow Levels */
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-3: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-4: 0 8px 24px rgba(0, 0, 0, 0.6);
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+/* ── Typography ──────────────────────────────────────────────────── */
+h1, h2, h3, .font-display {
+  font-family: "Bebas Neue", sans-serif !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.font-script {
+  font-family: "Dancing Script", cursive !important;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.font-secondary {
+  font-family: "Bayon", sans-serif !important;
+}
+
+.font-mono {
+  font-family: "Space Mono", monospace !important;
+}
+
+.font-inter {
+  font-family: "Inter", sans-serif !important;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background-color: var(--bg-base);
+  color: var(--fg);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── Base Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+*:focus {
+  outline: none !important;
+}
 
 /* Hide scrollbar but keep scrollable */
 .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -11,107 +96,46 @@
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-:root {
-  /* Primary Colors */
-  --action-green: #CCFF00;
-  --neon-lime: #BFFF00;
-  --action-active: #ADEB00;
-  
-  /* Accent Colors */
-  --electric-blue: #0000EE;
-  
-  /* Neutral Scale */
-  --deep-black: #000000;
-  --charcoal: #2D2D2D;
-  --medium-gray: #999999;
-  --light-gray: #F5F5F5;
-  --off-black: #151617;
-  --hover-gray: #878C9F;
-  
-  /* Component Specific */
-  --card-border: #2D2D2D;
-  --input-border: #404040;
-  --sidebar-active-bg: #1A8917;
-  
-  /* Shadow Levels */
-  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-3: 0 4px 12px rgba(0, 0, 0, 0.5);
-  --shadow-4: 0 8px 24px rgba(0, 0, 0, 0.6);
-  --shadow-5: 0 12px 32px rgba(0, 0, 0, 0.7);
-  
-  /* Border Radius */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-}
-
-body {
-  margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--deep-black);
-  color: #FFFFFF;
-}
-
-.partner-panel {
-  font-family: 'Inter', sans-serif;
-}
-
-.partner-panel h1, 
-.partner-panel h2, 
-.partner-panel h3,
-.partner-panel h4 {
-  font-family: 'Inter', sans-serif !important;
-  text-transform: none !important;
-  letter-spacing: -0.02em !important;
-}
-
-.partner-panel button {
-  font-family: Arial, sans-serif !important;
-}
-
-/* ── Base ────────────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; }
-
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--deep-black);
+  background: var(--bg-base);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--charcoal);
+  background: var(--surface-2);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--action-green);
+  background: var(--primary);
 }
+
+/* ── Component Systems ───────────────────────────────────────────── */
+
+/* Button System */
 .btn-bms {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background-color: var(--action-green);
+  background-color: var(--primary);
   color: #000;
-  font-family: Arial, sans-serif;
-  font-weight: 400;
-  font-size: 13px;
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 14px;
   text-transform: uppercase;
-  border-radius: var(--radius-md);
-  padding: 12px 24px;
+  border-radius: 12px;
+  padding: 12px 28px;
   border: none;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-3);
+  box-shadow: 0 4px 12px rgba(132, 204, 22, 0.1);
 }
 .btn-bms:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.05);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(204, 255, 0, 0.35);
+  box-shadow: 0 8px 24px var(--primary-glow);
 }
 
 .btn-bms-ghost {
@@ -120,55 +144,57 @@ body {
   justify-content: center;
   gap: 8px;
   background-color: transparent;
-  color: var(--medium-gray);
-  font-family: Arial, sans-serif;
-  font-weight: 400;
-  font-size: 13px;
+  color: var(--fg);
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 14px;
   text-transform: uppercase;
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  border: none;
+  border-radius: 12px;
+  padding: 11px 28px;
+  border: 1.5px solid var(--border);
   cursor: pointer;
   transition: all 0.2s;
 }
 .btn-bms-ghost:hover { 
-  color: var(--action-green); 
-  background-color: rgba(204, 255, 0, 0.08); 
+  border-color: var(--primary); 
+  color: var(--primary); 
+  background-color: rgba(132, 204, 22, 0.05); 
 }
 
 /* DaisyUI overrides */
 .btn-primary {
-  background-color: var(--action-green) !important;
-  border-color: var(--action-green) !important;
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
   color: #000 !important;
-  border-radius: var(--radius-md) !important;
-  font-family: Arial, sans-serif !important;
-  font-weight: 400 !important;
-  text-transform: uppercase !important;
+  border-radius: 9999px !important;
+  font-family: "Bebas Neue", sans-serif !important;
+  font-weight: 900 !important;
+  font-style: italic !important;
 }
 
-/* ── Card System ─────────────────────────────────────────────────── */
+/* Card System */
 .bms-card {
-  background-color: var(--charcoal);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-lg);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
   overflow: hidden;
-  transition: border-color 0.3s, transform 0.3s;
+  transition: all 0.3s;
 }
-.bms-card:hover { border-color: var(--action-green); transform: translateY(-2px); }
+.bms-card:hover { 
+  border-color: var(--primary); 
+  transform: translateY(-2px); 
+}
 
-.card { border-radius: var(--radius-lg) !important; }
-
-/* ── Badge System ────────────────────────────────────────────────── */
+/* Badge System */
 .badge-featured {
-  background-color: var(--action-green);
+  background-color: var(--primary);
   color: #000;
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  border-radius: var(--radius-xl);
-  padding: 4px 12px;
+  border-radius: 9999px;
+  padding: 3px 10px;
 }
 
 .badge-distance {
@@ -179,53 +205,6 @@ body {
   font-size: 10px;
   border-radius: 9999px;
   padding: 3px 10px;
-}
-
-.badge-sport {
-  background-color: var(--surface-2);
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  border-radius: 9999px;
-  padding: 3px 10px;
-}
-
-/* ── Search Bar ──────────────────────────────────────────────────── */
-.bms-search {
-  background-color: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 9999px;
-  color: var(--fg);
-  font-size: 14px;
-  padding: 14px 20px 14px 44px;
-  outline: none;
-  transition: border-color 0.2s;
-  width: 100%;
-}
-.bms-search:focus { border-color: var(--primary); }
-.bms-search::placeholder { color: var(--muted); }
-
-/* ── Tab Toggle ──────────────────────────────────────────────────── */
-.tab-toggle-active {
-  background-color: var(--primary);
-  color: #000;
-  border-radius: 9999px;
-  font-weight: 700;
-}
-.tab-toggle-inactive {
-  background-color: transparent;
-  color: var(--fg);
-  border: 1.5px solid var(--border);
-  border-radius: 9999px;
-}
-
-/* ── Sidebar nav ─────────────────────────────────────────────────── */
-.nav-item-active {
-  background-color: rgba(132,204,22,0.1);
-  color: var(--primary);
-  border-left: 2px solid var(--primary);
 }
 
 /* ── Animations ──────────────────────────────────────────────────── */
@@ -241,17 +220,15 @@ body {
 }
 .animate-fadeInUp { animation: fadeInUp 0.6s ease-out both; }
 
-@keyframes progress {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(0); }
-}
-.animate-progress {
-  animation: progress linear forwards;
-}
-
-/* ── End of Styles ───────────────────────────────────────────────── */
-
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
+
+/* ── Utility Classes ─────────────────────────────────────────────── */
+.text-primary  { color: var(--primary) !important; }
+.bg-primary    { background-color: var(--primary) !important; }
+.border-primary{ border-color: var(--primary) !important; }

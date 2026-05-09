@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { motion } from "framer-motion";
-import { IndianRupee, ShieldCheck, X, Zap } from "lucide-react";
+import { IndianRupee, ShieldCheck, X, Zap, Tag, Check, Loader2 } from "lucide-react";
 import CountUp from "react-countup";
+import axiosInstance from "@hooks/useAxiosInstance";
+import toast from "react-hot-toast";
 
 const CoinDeductionModal = ({ 
   isOpen, 
@@ -11,21 +13,31 @@ const CoinDeductionModal = ({
   amount, 
   currentBalance,
   title = "Confirm Payment",
-  description = "Are you sure you want to spend coins for this booking?"
+  description = "Are you sure you want to spend coins for this booking?",
+  turfId
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showAnimation, setShowAnimation] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [bookingId, setBookingId] = useState(null);
+  
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [isValidating, setIsValidating] = useState(false);
+  
   const coinRef = useRef(null);
   const modalRef = useRef(null);
   const deductionRef = useRef(null);
+
+  const finalAmount = appliedCoupon ? appliedCoupon.finalAmount : amount;
 
   useEffect(() => {
     if (isOpen) {
       setIsSuccess(false);
       setShowAnimation(false);
       setIsProcessing(false);
+      setCouponCode("");
+      setAppliedCoupon(null);
       gsap.fromTo(modalRef.current, 
         { opacity: 0, scale: 0.9, y: 20 },
         { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }
@@ -33,10 +45,36 @@ const CoinDeductionModal = ({
     }
   }, [isOpen]);
 
+  const handleApplyCoupon = async () => {
+    if (!couponCode) return;
+    setIsValidating(true);
+    try {
+      const res = await axiosInstance.post("/api/user/booking/validate-coupon", {
+        code: couponCode,
+        turfId,
+        amount
+      });
+      if (res.data.success) {
+        setAppliedCoupon({ code: couponCode, discount: res.data.discount, finalAmount: res.data.finalAmount });
+        toast.success("Coupon applied!");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Invalid coupon code");
+      setAppliedCoupon(null);
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponCode("");
+    setAppliedCoupon(null);
+  };
+
   const handleConfirm = async () => {
     setIsProcessing(true);
     try {
-      const result = await onConfirm(); // Expecting { success: true, bookingId: '...' }
+      const result = await onConfirm(appliedCoupon?.code); // pass couponCode
       if (result && result.success) {
         setBookingId(result.bookingId);
         startAnimation();
@@ -103,14 +141,60 @@ const CoinDeductionModal = ({
           {/* Amount Section */}
           <div className="px-8 py-6 bg-white/5 border-y border-white/5 flex flex-col items-center gap-2">
             <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Amount to Deduct</p>
-            <div className="flex items-center gap-2 text-[#84CC16]">
-              <IndianRupee size={24} className="font-bold" />
-              <span className="text-4xl font-black">{amount}</span>
-            </div>
+            {appliedCoupon ? (
+              <div className="flex flex-col items-center">
+                <span className="text-zinc-500 line-through text-sm flex items-center"><IndianRupee size={12}/>{amount}</span>
+                <div className="flex items-center gap-2 text-[#84CC16]">
+                  <IndianRupee size={24} className="font-bold" />
+                  <span className="text-4xl font-black">{finalAmount}</span>
+                </div>
+                <span className="text-[#84CC16] text-[10px] font-bold mt-1 bg-[#84CC16]/10 px-2 py-0.5 rounded-full uppercase tracking-wider">You save ₹{appliedCoupon.discount}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-[#84CC16]">
+                <IndianRupee size={24} className="font-bold" />
+                <span className="text-4xl font-black">{amount}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Coupon Section */}
+          <div className="px-8 pt-6 pb-2">
+            {!appliedCoupon ? (
+              <div className="flex items-center gap-2 bg-black border border-white/10 rounded-xl p-1.5 focus-within:border-[#84CC16]/50 transition-colors">
+                <div className="pl-3 text-zinc-500">
+                  <Tag size={16} />
+                </div>
+                <input 
+                  type="text"
+                  placeholder="Enter Coupon Code"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  className="bg-transparent text-white text-xs font-bold uppercase tracking-widest w-full outline-none placeholder:text-zinc-700"
+                />
+                <button
+                  onClick={handleApplyCoupon}
+                  disabled={!couponCode || isValidating}
+                  className="bg-[#84CC16] text-black px-4 py-2 rounded-[8px] text-[10px] font-bold uppercase tracking-wider disabled:opacity-50 transition-colors"
+                >
+                  {isValidating ? <Loader2 size={12} className="animate-spin" /> : 'Apply'}
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between bg-[#84CC16]/10 border border-[#84CC16]/20 rounded-xl p-3">
+                <div className="flex items-center gap-2 text-[#84CC16]">
+                  <Check size={16} />
+                  <span className="text-xs font-bold uppercase tracking-widest">{appliedCoupon.code}</span>
+                </div>
+                <button onClick={handleRemoveCoupon} className="text-zinc-400 hover:text-white transition-colors">
+                  <X size={16} />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Balance Section */}
-          <div className="p-8 space-y-6">
+          <div className="p-8 space-y-6 pt-4">
             <div className="flex justify-between items-center text-xs">
               <span className="text-zinc-500 font-bold uppercase">Your Balance</span>
               <span className="text-white font-bold">{currentBalance} Coins</span>
@@ -119,11 +203,13 @@ const CoinDeductionModal = ({
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleConfirm}
-                disabled={isProcessing}
-                className="w-full bg-[#84CC16] text-black h-14 rounded-2xl font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                disabled={isProcessing || currentBalance < finalAmount}
+                className="w-full bg-[#84CC16] text-black h-14 rounded-2xl font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
               >
                 {isProcessing ? (
                   <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                ) : currentBalance < finalAmount ? (
+                  "Insufficient Balance"
                 ) : (
                   "Confirm & Pay"
                 )}
@@ -178,7 +264,7 @@ const CoinDeductionModal = ({
             ref={deductionRef}
             className="absolute top-[-120px] opacity-0 text-[#84CC16] font-black text-6xl italic drop-shadow-[0_0_20px_rgba(132,204,22,0.5)]"
           >
-            -{amount}
+            -{finalAmount}
           </div>
 
           {/* 3D Spinning Coin */}
@@ -206,7 +292,7 @@ const CoinDeductionModal = ({
             <div className="text-white text-6xl font-black italic">
               <CountUp 
                 start={currentBalance} 
-                end={currentBalance - amount} 
+                end={currentBalance - finalAmount} 
                 duration={2} 
                 separator=","
               />

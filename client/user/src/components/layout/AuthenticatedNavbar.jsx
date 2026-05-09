@@ -55,6 +55,9 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
       if (notificationRef.current && !notificationRef.current.contains(event.target)) {
         setShowNotifications(false);
       }
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -101,33 +104,33 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
         {/* Center Section: Search & Greeting */}
         <div className="hidden xl:flex flex-1 items-center justify-center gap-6 max-w-4xl px-8">
           <div className="relative flex-1 group">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#999999] group-focus-within:text-[#CCFF00] transition-colors">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-white/40 group-focus-within:text-[#CCFF00] transition-colors">
               <Search size={18} />
             </div>
             <input 
               type="text" 
               placeholder="Search bookings, players, or reports..."
-              className="w-full bg-[#2D2D2D] border border-[#404040] rounded-[6px] py-2.5 pl-12 pr-16 text-sm text-white placeholder:text-[#999999] focus:outline-none focus:border-[#CCFF00] transition-all font-inter"
+              className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-12 pr-16 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#CCFF00]/50 transition-all font-inter shadow-inner"
             />
             <div className="absolute inset-y-0 right-4 flex items-center gap-1.5">
-              <div className="flex items-center justify-center w-5 h-5 rounded bg-white/10 text-[10px] text-white/40"><Command size={10} /></div>
-              <div className="flex items-center justify-center w-5 h-5 rounded bg-white/10 text-[10px] text-white/40 font-bold">K</div>
+              <div className="flex items-center justify-center w-5 h-5 rounded bg-white/5 text-[10px] text-white/30 border border-white/5"><Command size={10} /></div>
+              <div className="flex items-center justify-center w-5 h-5 rounded bg-white/5 text-[10px] text-white/30 border border-white/5 font-bold">K</div>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-[#999999] text-[12px] font-normal uppercase tracking-[0.1em]">{getTimeGreeting()},</span>
-            <span className="text-[#CCFF00] text-[12px] font-semibold uppercase tracking-[0.1em]">
+            <span className="text-white/40 text-[11px] font-black uppercase tracking-[0.2em]">{getTimeGreeting()},</span>
+            <span className="text-[#CCFF00] text-[11px] font-black uppercase tracking-[0.2em] drop-shadow-[0_0_10px_rgba(204,255,0,0.3)]">
               {user?.name?.split(" ")[0] || user?.fullName?.split(" ")[0] || "User"}
             </span>
           </div>
         </div>
 
         {/* Right Section: Actions */}
-        <div className="flex items-center gap-3 sm:gap-4 lg:min-w-[200px] justify-end">
+        <div className="flex items-center gap-3 sm:gap-5 lg:min-w-[200px] justify-end">
           
-          <button className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-[#CCFF00] text-black rounded-[6px] font-normal text-[13px] tracking-wide hover:bg-[#BFFF00] hover:shadow-[0_4px_12px_rgba(204,255,0,0.25)] transition-all duration-300 font-[Arial]">
-            <Plus size={18} strokeWidth={2.5} />
+          <button className="hidden sm:flex items-center gap-2 px-6 py-3 bg-[#CCFF00] text-black rounded-[8px] font-black text-xs uppercase tracking-widest hover:bg-[#a3e635] hover:shadow-[0_0_20px_rgba(132,204,22,0.4)] transition-all active:scale-95 group">
+            <Plus size={18} strokeWidth={3} className="group-hover:rotate-90 transition-transform duration-300" />
             <span>New Booking</span>
           </button>
 
@@ -183,19 +186,47 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
           <div className="h-8 w-[1px] bg-[#2D2D2D] mx-1 hidden sm:block" />
 
           {/* Profile Section */}
-          <div className="relative">
+          <div className="relative" ref={profileRef}>
             <button 
-              onClick={handleProfileClick}
-              className="flex items-center gap-3 p-1.5 pr-4 bg-[#2D2D2D]/50 border border-[#2D2D2D] rounded-[8px] hover:bg-[#2D2D2D] hover:border-[#404040] transition-all duration-300 group"
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="flex items-center gap-3 p-1.5 pr-4 bg-[#0d0d0d] border border-white/5 rounded-[8px] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 group"
             >
-              <div className="w-9 h-9 rounded-[6px] bg-[#CCFF00] flex items-center justify-center text-black shadow-lg shadow-[#CCFF00]/10 group-hover:scale-105 transition-transform">
-                <User size={20} strokeWidth={2.5} />
+              <div className="w-10 h-10 rounded-[6px] bg-[#CCFF00] flex items-center justify-center text-black shadow-lg shadow-[#CCFF00]/10 group-hover:scale-105 transition-transform">
+                <User size={22} strokeWidth={3} />
               </div>
-              <div className="hidden sm:flex flex-col items-start gap-0.5">
-                <span className="text-[12px] font-semibold text-white tracking-wide uppercase">{user?.name || user?.fullName || "Partner User"}</span>
-                <span className="text-[10px] font-normal text-[#999999] uppercase tracking-[0.1em]">{role?.replace("BMSP_", "") || "OWNER"}</span>
+              <div className="hidden sm:flex flex-col items-start">
+                <span className="text-[12px] font-black text-white tracking-tight uppercase leading-none mb-1">{user?.name || user?.fullName || "User"}</span>
+                <span className="text-[9px] font-bold text-white/40 uppercase tracking-[0.2em] leading-none">{role?.replace("BMSP_", "") || "OWNER"}</span>
               </div>
+              <ChevronDown size={14} className={`text-white/40 transition-transform duration-300 ${showProfileMenu ? "rotate-180" : ""}`} />
             </button>
+
+            {showProfileMenu && (
+              <div className="absolute right-0 mt-4 w-48 bg-[#000000] border border-[#2D2D2D] rounded-[8px] shadow-[var(--shadow-4)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <div className="py-2">
+                  <button 
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      handleProfileClick();
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#2D2D2D]/50 hover:text-[#CCFF00] transition-colors"
+                  >
+                    <User size={16} />
+                    Profile
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      handleLogout();
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-500/10 transition-colors"
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </nav>

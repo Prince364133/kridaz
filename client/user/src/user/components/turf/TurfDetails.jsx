@@ -6,6 +6,7 @@ import useReviews from "../../hooks/useReviews";
 import Reviews from "../reviews/Reviews";
 import TurfDetailsSkeleton from "../ui/TurfDetailsSkeleton";
 import useReservation from "../../hooks/useReservation";
+import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import toast from "react-hot-toast";
 import { 
   MapPin, 
@@ -44,6 +45,7 @@ const TurfDetails = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isCoinModalOpen, setIsCoinModalOpen] = useState(false);
   const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
+  const { gateInteraction } = useLoginOnDemand();
 
   const {
     selectedDate,
@@ -68,9 +70,9 @@ const TurfDetails = () => {
     });
   };
 
-  const handleConfirmCoinPayment = async () => {
+  const handleConfirmCoinPayment = async (couponCode = null) => {
     try {
-      const result = await confirmReservation();
+      const result = await confirmReservation(couponCode);
       if (result?.success) {
         setIsPaymentSuccessful(true);
         return { success: true, bookingId: result.bookingId };
@@ -195,11 +197,6 @@ const TurfDetails = () => {
   }
 
   const handleReservation = () => {
-    if (!isLoggedIn) {
-      navigate("/login");
-      return;
-    }
-
     if (!selectedStartTime) {
       toast.error("Please select a time slot");
       return;
@@ -214,9 +211,10 @@ const TurfDetails = () => {
         isOpen={isCoinModalOpen}
         onClose={handleModalClose}
         onConfirm={handleConfirmCoinPayment}
-        amount={pricePerHour * duration}
+        amount={(pricePerHour || turf.pricePerHour || 0) * duration}
         currentBalance={user?.walletBalance || 0}
         description={`Confirm your booking for ${turf.name}. Coins will be deducted from your wallet.`}
+        turfId={turf._id}
       />
       {/* Top Navigation Bar */}
       <div className="container mx-auto px-4 mb-4">
