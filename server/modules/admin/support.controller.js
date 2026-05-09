@@ -2,6 +2,8 @@ import SupportTicket from "../../models/supportTicket.model.js";
 import Dispute from "../../models/dispute.model.js";
 import Booking from "../../models/booking.model.js";
 import { logAdminAction } from "../../utils/auditLogger.js";
+import generateEmail from "../../utils/generateEmail.js";
+import { createNotification } from "../../utils/notificationHelper.js";
 
 // --- Support Ticket Controllers ---
 
@@ -21,11 +23,35 @@ export const updateTicketStatus = async (req, res) => {
   const { ticketId } = req.params;
   const { status } = req.body;
   try {
-    const ticket = await SupportTicket.findByIdAndUpdate(
-      ticketId,
-      { status },
-      { new: true }
-    );
+    const ticket = await SupportTicket.findById(ticketId).populate("owner user");
+    if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+
+    ticket.status = status;
+    await ticket.save();
+
+    // Send Notification
+    const recipient = ticket.owner || ticket.user;
+    const recipientModel = ticket.owner ? 'Owner' : 'User';
+
+    if (recipient && recipient.email) {
+      // Email
+      await generateEmail(
+        recipient.email,
+        `Support Ticket Status Updated: ${ticket.subject}`,
+        `<p>Hello ${recipient.name},</p><p>Your support ticket status has been updated to: <strong>${status}</strong>.</p><p>View details in your dashboard.</p>`
+      );
+
+      // In-app Notification
+      await createNotification({
+        recipientId: recipient._id,
+        recipientModel,
+        title: "Ticket Status Updated",
+        message: `Your ticket "${ticket.subject}" is now ${status}.`,
+        type: "SUPPORT",
+        link: "/partner/docs-support" // This will need to be dynamic based on role in frontend
+      });
+    }
+
     res.status(200).json({ success: true, message: "Status updated", ticket });
 
     await logAdminAction(req, "UPDATE_TICKET_STATUS", "RESOLUTION", ticket._id, {
@@ -40,7 +66,7 @@ export const replyToTicket = async (req, res) => {
   const { ticketId } = req.params;
   const { message } = req.body;
   try {
-    const ticket = await SupportTicket.findById(ticketId);
+    const ticket = await SupportTicket.findById(ticketId).populate("owner user");
     if (!ticket) return res.status(404).json({ message: "Ticket not found" });
 
     ticket.replies.push({
@@ -51,6 +77,30 @@ export const replyToTicket = async (req, res) => {
     if (ticket.status === "OPEN") ticket.status = "IN_PROGRESS";
     
     await ticket.save();
+
+    // Send Notification
+    const recipient = ticket.owner || ticket.user;
+    const recipientModel = ticket.owner ? 'Owner' : 'User';
+
+    if (recipient && recipient.email) {
+      // Email
+      await generateEmail(
+        recipient.email,
+        `New Reply on Support Ticket: ${ticket.subject}`,
+        `<p>Hello ${recipient.name},</p><p>An administrator has replied to your support ticket.</p><p><strong>Message:</strong> ${message}</p><p>Please check your dashboard to reply.</p>`
+      );
+
+      // In-app Notification
+      await createNotification({
+        recipientId: recipient._id,
+        recipientModel,
+        title: "New Support Reply",
+        message: `Admin replied to your ticket: "${message.substring(0, 50)}..."`,
+        type: "SUPPORT",
+        link: "/partner/docs-support"
+      });
+    }
+
     res.status(200).json({ success: true, message: "Reply sent", ticket });
 
     await logAdminAction(req, "REPLY_TO_TICKET", "RESOLUTION", ticket._id);

@@ -137,14 +137,28 @@ const SupportCenter = () => {
                   {/* Messages */}
                   <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar bg-[#0d0d0d]">
                      {/* Initial Message */}
-                     <div className="flex flex-col items-start max-w-[80%]">
+                      <div className="flex flex-col items-start max-w-[80%]">
                         <div className="bg-[#1a1a1a] p-4 rounded-2xl rounded-tl-none border border-white/5 shadow-xl">
-                           <p className="text-sm leading-relaxed">{selectedTicket.message}</p>
+                           <p className="text-sm leading-relaxed mb-4">{selectedTicket.message}</p>
+                           
+                           {/* Attachments */}
+                           {selectedTicket.images && selectedTicket.images.length > 0 && (
+                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                               {selectedTicket.images.map((img, i) => (
+                                 <a key={i} href={img} target="_blank" rel="noreferrer" className="block relative aspect-video rounded-lg overflow-hidden border border-white/10 hover:border-[#84CC16]/50 transition-colors">
+                                   <img src={img} alt={`attachment-${i}`} className="w-full h-full object-cover" />
+                                   <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
+                                      <span className="text-[8px] font-black uppercase text-white bg-black/60 px-2 py-1 rounded">View Full</span>
+                                   </div>
+                                 </a>
+                               ))}
+                             </div>
+                           )}
                         </div>
                         <span className="text-[10px] text-gray-500 mt-2 font-bold uppercase tracking-wider">
                            {selectedTicket.user?.name || selectedTicket.owner?.name} • {new Date(selectedTicket.createdAt).toLocaleString()}
                         </span>
-                     </div>
+                      </div>
 
                      {/* Replies */}
                      {selectedTicket.replies.map((reply, idx) => (

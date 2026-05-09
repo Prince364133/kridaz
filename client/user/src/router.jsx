@@ -53,6 +53,7 @@ import {
   VenueIntelligence,
   OwnerRevenue,
   OwnerPromotions,
+  PayoutBanking,
 } from "@components/owner";
 import CoachDashboard from "./components/coach/CoachDashboard";
 import CoachStudents from "./components/coach/CoachStudents";
@@ -88,6 +89,7 @@ import {
   SupportCenter,
   DisputeManager,
   AuditLogs,
+  FinancialMissionControl,
 } from "@components/admin";
 import PartnerSupport from "@components/owner/Support/PartnerSupport";
 import DashboardProfile from "@components/shared/DashboardProfile";
@@ -135,6 +137,7 @@ const router = createBrowserRouter([
       { path: "support", element: <SupportCenter /> },
       { path: "disputes", element: <DisputeManager /> },
       { path: "audit", element: <AuditLogs /> },
+      { path: "finance", element: <FinancialMissionControl /> },
       { path: "features", element: <FeatureFlags /> },
       { path: "marketing", element: <MarketingManagement /> },
       { path: "blogs", element: <BlogManagement /> },
@@ -165,6 +168,7 @@ const router = createBrowserRouter([
       { path: "revenue", element: <OwnerRevenue /> },
       { path: "promotions", element: <OwnerPromotions /> },
       { path: "support", element: <PartnerSupport /> },
+      { path: "banking", element: <PayoutBanking /> },
       { path: "profile", element: <DashboardProfile /> },
       { path: "*", element: <NotFound /> },
     ],
@@ -188,6 +192,7 @@ const router = createBrowserRouter([
       { path: "reviews", element: <ProfessionalReviews /> },
       { path: "revenue", element: <OwnerRevenue /> },
       { path: "support", element: <PartnerSupport /> },
+      { path: "banking", element: <PayoutBanking /> },
       { path: "profile", element: <ProfessionalProfile /> },
       { path: "*", element: <NotFound /> },
     ],
@@ -210,6 +215,7 @@ const router = createBrowserRouter([
       { path: "reviews", element: <ProfessionalReviews /> },
       { path: "revenue", element: <OwnerRevenue /> },
       { path: "support", element: <PartnerSupport /> },
+      { path: "banking", element: <PayoutBanking /> },
       { path: "profile", element: <ProfessionalProfile /> },
       { path: "*", element: <NotFound /> },
     ],

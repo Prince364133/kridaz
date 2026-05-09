@@ -11,6 +11,26 @@ const bookingSchema = new mongoose.Schema(
       orderId: { type: String, required: true },
       paymentId: { type: String, required: true },
     },
+    status: { 
+      type: String, 
+      enum: ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"], 
+      default: "CONFIRMED" 
+    },
+    bookingSource: { 
+      type: String, 
+      enum: ["USER", "PARTNER_MANUAL"], 
+      default: "USER" 
+    },
+    paymentMethod: { 
+      type: String, 
+      enum: ["ONLINE", "WALLET", "CASH"], 
+      default: "ONLINE" 
+    },
+    guestDetails: {
+      name: String,
+      phone: String,
+      email: String,
+    },
   },
   { timestamps: true }
 );

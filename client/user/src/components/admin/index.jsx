@@ -43,3 +43,6 @@ export {default as DisputeManager} from "./Resolution/DisputeManager"
 
 // Audit
 export {default as AuditLogs} from "./Audit/AuditLogs"
+
+// Finance
+export {default as FinancialMissionControl} from "./Finance/FinancialMissionControl"

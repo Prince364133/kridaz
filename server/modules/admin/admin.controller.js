@@ -533,3 +533,27 @@ export const rejectWithdrawalRequest = async (req, res) => {
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+export const verifyKYC = async (req, res) => {
+  const admin = req.admin.role;
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized access denied" });
+  }
+
+  try {
+    const owner = await Owner.findById(id);
+    if (!owner) return res.status(404).json({ message: "Owner not found" });
+
+    owner.bankingDetails.kycStatus = status;
+    await owner.save();
+
+    await logAdminAction(req, `KYC_${status}`, "USER_MANAGEMENT", owner._id, { status });
+
+    res.status(200).json({ success: true, message: `KYC status updated to ${status}` });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

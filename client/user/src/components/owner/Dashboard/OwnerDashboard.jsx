@@ -40,6 +40,8 @@ import CountUp from "react-countup";
 import { useSelector } from "react-redux";
 import useOwnerDashboard from "@hooks/owner/useOwnerDashboard";
 import DashboardSkeleton from "./DashboardSkeleton";
+import OccupancyHeatmap from "./OccupancyHeatmap";
+import PeakHoursChart from "./PeakHoursChart";
 
 const OwnerDashboard = () => {
   const { dashboardData, loading, error } = useOwnerDashboard();
@@ -295,8 +297,7 @@ const OwnerDashboard = () => {
               </ChartCard>
             </div>
 
-            {/* Venue Health */}
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-4 h-full">
               <ChartCard 
                 title="Venue Health" 
                 subtitle="Optimization Score"
@@ -307,7 +308,6 @@ const OwnerDashboard = () => {
                 }
               >
                 <div className="flex flex-col h-full">
-                  {/* Gauge */}
                   <div className="flex-1 flex flex-col items-center justify-center py-2">
                     <div className="relative w-32 h-32 flex items-center justify-center">
                       <svg className="w-full h-full transform -rotate-90">
@@ -333,7 +333,6 @@ const OwnerDashboard = () => {
                     </div>
                   </div>
 
-                  {/* Stats Grid */}
                   <div className="grid grid-cols-2 gap-2 mt-4">
                     {[
                       { label: "Profile Comp.", value: `${venueHealth.profileComp || 95}%` },
@@ -348,7 +347,6 @@ const OwnerDashboard = () => {
                     ))}
                   </div>
 
-                  {/* Action Button */}
                   <button className="w-full mt-5 py-2.5 bg-transparent border border-[#CCFF00]/30 hover:border-[#CCFF00] hover:bg-[#CCFF00]/5 text-[#CCFF00] text-[11px] font-medium uppercase tracking-[0.15em] rounded-[6px] transition-all flex items-center justify-center gap-2 group">
                     Improve Your Score
                     <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform" />
@@ -359,106 +357,18 @@ const OwnerDashboard = () => {
 
           </div>
 
-          {/* Row: Heatmap and Feeds */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-            
-            {/* Occupancy Heatmap */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
             <div className="lg:col-span-8">
-              <ChartCard 
-                title="Occupancy Heatmap" 
-                subtitle="Live peak hour identification"
-                className="h-auto"
-                action={
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 rounded-[2px] bg-[#2D2D2D]" />
-                      <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Low</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 rounded-[2px] bg-[#CCFF00]" />
-                      <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Peak</span>
-                    </div>
-                  </div>
-                }
-              >
-                <div className="overflow-x-auto no-scrollbar pt-4">
-                  <div className="min-w-[700px] space-y-2">
-                    {/* Hours Header */}
-                    <div className="flex gap-1 mb-4 ml-10">
-                      {Array.from({ length: 24 }).map((_, i) => (
-                        <div key={i} className="flex-1 text-center text-[8px] font-medium text-[#999999] uppercase tracking-wider">
-                          {i.toString().padStart(2, '0')}
-                        </div>
-                      ))}
-                    </div>
-                    {/* Days Rows */}
-                    {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                      <div key={day} className="flex items-center gap-1">
-                        <div className="w-10 text-[10px] font-medium text-[#878C9F] uppercase tracking-wider">{day}</div>
-                        <div className="flex-1 flex gap-1">
-                          {Array.from({ length: 24 }).map((_, hour) => {
-                            const data = occupancyHeatmap.find(d => d.day === day && d.hour === hour);
-                            const intensity = data ? Math.min(1, data.value / 10) : 0;
-                            return (
-                              <div 
-                                key={hour} 
-                                className="flex-1 h-8 rounded-[2px] transition-all duration-500 hover:scale-110 cursor-pointer"
-                                style={{ 
-                                  backgroundColor: intensity > 0 ? `rgba(204, 255, 0, ${0.1 + intensity * 0.9})` : 'rgba(45, 45, 45, 0.3)',
-                                  boxShadow: intensity > 0.7 ? '0 0 10px rgba(204, 255, 0, 0.15)' : 'none'
-                                }}
-                                title={`${day}, ${hour}:00 - ${data?.value || 0} Bookings`}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </ChartCard>
+               <OccupancyHeatmap />
             </div>
-
-            {/* Sidebar Feed */}
             <div className="lg:col-span-4">
-              
-              {/* Live Feed */}
-              <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] h-full">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider">Live Feed</h2>
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] rounded-full text-[10px] font-medium uppercase tracking-widest animate-pulse border border-[#CCFF00]/20">
-                    <span className="w-1 h-1 bg-[#CCFF00] rounded-full" /> Live
-                  </div>
-                </div>
-                
-                <div className="space-y-6">
-                  {[
-                    { icon: Zap, title: "New booking received", desc: "Arjun K booked Ground 1 for 2 hours.", time: "2 mins ago", color: "text-[#CCFF00]" },
-                    { icon: Info, title: "Ground 2 at capacity", desc: "90% occupancy reached for evening slots.", time: "15 mins ago", color: "text-[#0000EE]" },
-                    { icon: CheckCircle2, title: "Payment successful", desc: "₹2,400 received for Booking #8003.", time: "45 mins ago", color: "text-[#4CAF50]" },
-                  ].map((item, i) => (
-                    <div key={i} className="flex gap-4 group cursor-pointer">
-                      <div className={`mt-1 p-2 rounded-[6px] bg-[#2D2D2D] ${item.color} group-hover:scale-110 transition-transform`}><item.icon size={14} /></div>
-                      <div>
-                        <p className="text-[14px] font-semibold text-white uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">{item.title}</p>
-                        <p className="text-[12px] text-[#999999] mt-0.5">{item.desc}</p>
-                        <p className="text-[10px] font-medium text-[#878C9F] uppercase mt-1 flex items-center gap-1"><Clock size={10} /> {item.time}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <button className="w-full mt-8 py-3 bg-transparent border border-[#2D2D2D] hover:bg-[#CCFF00]/10 hover:text-[#CCFF00] text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-[Arial]">
-                  View Full Activity History
-                </button>
-              </div>
+               <PeakHoursChart />
             </div>
           </div>
 
           {/* Row: Bookings and Insights */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
             
-            {/* Recent Bookings Table */}
             <div className="lg:col-span-8">
               <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)]">
                 <div className="flex items-center justify-between mb-8">
@@ -475,7 +385,6 @@ const OwnerDashboard = () => {
                         className="bg-[#2D2D2D] border border-[#404040] rounded-[6px] py-2 pl-9 pr-4 text-[14px] text-white focus:outline-none focus:border-[#CCFF00] transition-all font-inter"
                       />
                     </div>
-                    <button className="w-10 h-10 bg-[#2D2D2D] text-[#999999] rounded-[6px] flex items-center justify-center hover:text-white transition-colors border border-[#404040]"><Activity size={18} /></button>
                   </div>
                 </div>
 
@@ -497,11 +406,12 @@ const OwnerDashboard = () => {
                           <td className="py-4">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-[4px] bg-[#2D2D2D] flex items-center justify-center text-[12px] font-semibold text-white uppercase border border-[#404040]">
-                                {booking?.user?.name?.[0] || "U"}
+                                {booking?.user?.name?.[0] || booking?.guestDetails?.name?.[0] || "U"}
                               </div>
                               <div>
-                                <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{booking?.user?.name || "Player Name"}</p>
-                                <p className="text-[12px] font-normal text-[#999999]">B00{i+1}</p>
+                                <p className="text-[14px] font-semibold text-white uppercase tracking-tight">
+                                  {booking?.user?.name || booking?.guestDetails?.name || "Player Name"}
+                                </p>
                               </div>
                             </div>
                           </td>
@@ -512,19 +422,13 @@ const OwnerDashboard = () => {
                             </div>
                           </td>
                           <td className="py-4">
-                            <div>
-                              <p className="text-[14px] font-semibold text-white tracking-tight">18:00 - 19:00</p>
-                              <p className="text-[12px] font-medium text-[#CCFF00] uppercase">Today</p>
-                            </div>
+                            <p className="text-[14px] font-semibold text-white tracking-tight">18:00 - 19:00</p>
                           </td>
                           <td className="py-4">
                             <span className="px-3 py-1 bg-[#4CAF50]/15 text-[#4CAF50] text-[12px] font-medium uppercase tracking-wider rounded-[12px] border border-[#4CAF50]/30">Confirmed</span>
                           </td>
                           <td className="py-4">
-                            <div>
-                              <p className="text-[14px] font-semibold text-white tracking-tight">₹1,500</p>
-                              <p className="text-[12px] font-medium text-[#4CAF50] uppercase">Paid</p>
-                            </div>
+                            <p className="text-[14px] font-semibold text-white tracking-tight">₹{booking?.totalPrice || "0"}</p>
                           </td>
                           <td className="py-4 text-right">
                             <button className="p-2 text-[#878C9F] hover:text-[#CCFF00] transition-colors"><ExternalLink size={16} /></button>
@@ -534,20 +438,11 @@ const OwnerDashboard = () => {
                     </tbody>
                   </table>
                 </div>
-                
-                <div className="mt-8 pt-6 border-t border-[#2D2D2D] flex items-center justify-between">
-                  <p className="text-[12px] font-normal text-[#999999] uppercase tracking-widest">Showing 5 of {totalBookings} bookings</p>
-                  <button className="text-[13px] font-normal text-[#CCFF00] uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-all font-[Arial]">
-                    View All Transactions <ChevronRight size={14} />
-                  </button>
-                </div>
               </div>
             </div>
 
-            {/* Smart Insights Sidebar */}
             <div className="lg:col-span-4">
               <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] relative overflow-hidden h-full">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[80px]" />
                 <div className="flex items-center gap-3 mb-6 relative z-10">
                   <div className="p-2 bg-[#CCFF00]/10 text-[#CCFF00] rounded-[6px] border border-[#CCFF00]/20"><Zap size={20} /></div>
                   <div>
@@ -558,18 +453,15 @@ const OwnerDashboard = () => {
 
                 <div className="space-y-4 relative z-10">
                   {[
-                    { icon: TrendingUp, title: "Offer weekday discounts", desc: "Boost Monday-Thursday morning bookings by 20% with a 'Early Bird' promo.", action: "Create Offer" },
-                    { icon: Activity, title: "Boost Ground 3 visibility", desc: "This ground has 40% lower occupancy than others this month.", action: "Promote Now" },
+                    { icon: TrendingUp, title: "Offer weekday discounts", desc: "Boost Monday-Thursday morning bookings by 20% with a 'Early Bird' promo." },
+                    { icon: Activity, title: "Boost Ground 3 visibility", desc: "This ground has 40% lower occupancy than others this month." },
                   ].map((item, i) => (
                     <div key={i} className="bg-[#2D2D2D]/20 p-4 rounded-[6px] border border-[#2D2D2D] hover:bg-[#2D2D2D]/40 transition-all group">
                       <div className="flex items-start gap-4">
-                        <div className="mt-1 p-2 rounded-[6px] bg-[#CCFF00]/10 text-[#CCFF00] group-hover:scale-110 transition-transform"><item.icon size={14} /></div>
+                        <div className="mt-1 p-2 rounded-[6px] bg-[#CCFF00]/10 text-[#CCFF00]"><item.icon size={14} /></div>
                         <div className="flex-1">
                           <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{item.title}</p>
                           <p className="text-[12px] text-[#999999] mt-1 leading-relaxed">{item.desc}</p>
-                          <button className="mt-3 text-[12px] font-normal text-[#CCFF00] uppercase tracking-widest flex items-center gap-1.5 hover:text-white transition-colors font-[Arial]">
-                            {item.action} <ChevronRight size={12} />
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -578,16 +470,6 @@ const OwnerDashboard = () => {
               </div>
             </div>
           </div>
-
-          {/* Footer Metrics */}
-          <div className="pt-8 lg:pt-16 border-t border-[#2D2D2D] flex flex-col sm:flex-row gap-4 justify-between items-center pb-8 opacity-40">
-            <div className="flex items-center gap-4">
-               <span className="text-[10px] font-medium uppercase tracking-widest">System Status: Optimized</span>
-               <div className="h-4 w-[1px] bg-[#2D2D2D] hidden sm:block" />
-               <span className="text-[10px] font-medium uppercase tracking-widest">Business Intelligence Platform</span>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>
@@ -597,9 +479,7 @@ const OwnerDashboard = () => {
 const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend, trendNegative }) => {
   return (
     <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#CCFF00]/30 transition-all duration-500 min-h-[140px] shadow-[var(--shadow-2)]">
-      {/* Background Watermark Icon */}
       <Icon className="absolute -right-4 -bottom-4 w-20 h-20 text-white/[0.02] group-hover:text-white/[0.04] transition-colors" />
-      
       {/* Top Row: Icon and Trend */}
       <div className="flex items-center justify-between mb-5">
         <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] flex items-center justify-center transition-all shadow-sm">

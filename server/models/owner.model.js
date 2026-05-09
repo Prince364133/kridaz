@@ -37,6 +37,20 @@ const ownerSchema = new mongoose.Schema(
     rating: { type: Number, default: 0 },
     numReviews: { type: Number, default: 0 },
     bookings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Booking' }],
+    bankingDetails: {
+      accountName: String,
+      accountNumber: String,
+      ifscCode: String,
+      bankName: String,
+      upiId: String,
+      cancelledCheckUrl: String,
+      kycStatus: { 
+        type: String, 
+        enum: ["NOT_SUBMITTED", "PENDING", "VERIFIED", "REJECTED"], 
+        default: "NOT_SUBMITTED" 
+      },
+      payoutMode: { type: String, enum: ["BANK", "UPI"], default: "BANK" }
+    },
  },
  { timestamps: true }
 );

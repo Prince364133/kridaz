@@ -10,6 +10,7 @@ import generateEmail from "../../utils/generateEmail.js";
 import cloudinary from "../../utils/cloudinary.js";
 import WalletTransaction from "../../models/walletTransaction.model.js";
 import { sendWhatsAppMessage } from "../../utils/notification.service.js";
+import { notifyAdmins } from "../../utils/notificationHelper.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -459,6 +460,15 @@ export const ownerRequest = async (req, res) => {
       role: role || "owner",
     });
     await newOwnerRequest.save();
+
+    // Notify Admin
+    await notifyAdmins({
+      title: "New Partner Inquiry",
+      message: `New request from ${name} for role: ${role || "owner"}`,
+      type: "SYSTEM",
+      link: "/admin/partners"
+    });
+
     return res
       .status(201)
       .json({ success: true, message: "Owner request created successfully" });
@@ -520,6 +530,14 @@ export const upgradeRequest = async (req, res) => {
     });
 
     await newRequest.save();
+
+    // Notify Admin
+    await notifyAdmins({
+      title: "Role Upgrade Request",
+      message: `User ${name} requested upgrade to ${role || "owner"}`,
+      type: "SYSTEM",
+      link: "/admin/partners"
+    });
     
     return res.status(201).json({
       success: true,
@@ -741,20 +759,28 @@ export const resetPassword = async (req, res) => {
 
     const hashedPassword = await argon2.hash(newPassword);
 
-    let userUpdated = await User.findOneAndUpdate({ email }, { password: hashedPassword });
-    let ownerUpdated = false;
-    if (!userUpdated) {
-      ownerUpdated = await Owner.findOneAndUpdate({ email }, { password: hashedPassword });
+    const user = await User.findOne({ email });
+    const owner = await Owner.findOne({ email });
+
+    if (!user && !owner) {
+      return res.status(404).json({ success: false, message: 'Account not found' });
     }
 
-    if (!userUpdated && !ownerUpdated) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+    if (user) {
+      user.password = hashedPassword;
+      await user.save();
+    }
+
+    if (owner) {
+      owner.password = hashedPassword;
+      await owner.save();
     }
 
     await OTP.findOneAndDelete({ email });
 
-    return res.status(200).json({ success: true, message: 'Password reset successful' });
+    return res.status(200).json({ success: true, message: 'Password updated successfully' });
   } catch (err) {
+    console.error("Reset Password Error:", err);
     return res.status(500).json({ success: false, message: err.message });
   }
 };

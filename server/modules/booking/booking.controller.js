@@ -12,6 +12,7 @@ import generateQRCode from "../../utils/generateQRCode.js";
 import adjustTime from "../../utils/adjustTime.js";
 import generateEmail, { generateHTMLContent } from "../../utils/generateEmail.js";
 import { generateInvoice } from "../../utils/invoiceGenerator.js";
+import { createNotification } from "../../utils/notificationHelper.js";
 import { format, parseISO } from "date-fns";
 
 // --- USER OPERATIONS ---
@@ -132,6 +133,16 @@ export const verifyPayment = async (req, res) => {
       totalPrice,
       QRcode
     );
+
+    // Notify Owner
+    await createNotification({
+      recipientId: turf.owner._id,
+      recipientModel: 'Owner',
+      title: "New Booking Received",
+      message: `A new booking has been confirmed for ${turf.name} on ${formattedDate}.`,
+      type: "BOOKING",
+      link: "/partner/bookings"
+    });
 
     // Generate and Send Invoice (non-blocking)
     generateInvoice(booking, turf, user).then(pdfBuffer => {
@@ -321,6 +332,16 @@ export const bookWithWallet = async (req, res) => {
       QRcode
     );
 
+    // Notify Owner
+    await createNotification({
+      recipientId: turf.owner._id,
+      recipientModel: 'Owner',
+      title: "New Wallet Booking",
+      message: `A new booking (Wallet) has been confirmed for ${turf.name} on ${formattedDate}.`,
+      type: "BOOKING",
+      link: "/partner/bookings"
+    });
+
     // Generate Invoice PDF
     generateInvoice(booking[0], turf, user).then(pdfBuffer => {
       generateEmail(
@@ -426,7 +447,8 @@ export const getOwnerBookings = async (req, res) => {
         $project: {
           id: "$_id",
           turfName: "$turf.name",
-          userName: { $ifNull: ["$user.name", "Partner/Other"] },
+          userName: { $ifNull: ["$user.name", "$guestDetails.name", "Partner/Other"] },
+          bookingSource: 1,
           totalPrice: 1,
           bookingDate: "$createdAt",
           duration: {
@@ -492,5 +514,139 @@ export const validateCoupon = async (req, res) => {
   } catch (error) {
     console.error("Error validating coupon:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const createManualBooking = async (req, res) => {
+  const ownerId = req.owner.id;
+  const {
+    turfId,
+    startTime,
+    endTime,
+    selectedTurfDate,
+    totalPrice,
+    paymentMethod, // CASH or ONLINE
+    customerName,
+    customerEmail,
+    customerPhone
+  } = req.body;
+
+  try {
+    const formattedStartTime = format(parseISO(startTime), "hh:mm a");
+    const formattedEndTime = format(parseISO(endTime), "hh:mm a");
+    const formattedDate = format(parseISO(selectedTurfDate), "d MMM yyyy");
+
+    const adjustedStartTime = adjustTime(startTime, selectedTurfDate);
+    const adjustedEndTime = adjustTime(endTime, selectedTurfDate);
+
+    const turf = await Turf.findById(turfId).populate("owner", "email name");
+    if (!turf) {
+      return res.status(404).json({ success: false, message: "Turf not found" });
+    }
+
+    // Security check: ensure owner owns this turf
+    if (turf.owner._id.toString() !== ownerId) {
+      return res.status(403).json({ success: false, message: "Unauthorized: You do not own this ground" });
+    }
+
+    // Check for overlapping bookings
+    const overlappingSlot = await TimeSlot.findOne({
+      turf: turfId,
+      $or: [
+        { startTime: { $lt: adjustedEndTime, $gte: adjustedStartTime } },
+        { endTime: { $gt: adjustedStartTime, $lte: adjustedEndTime } },
+        { startTime: { $lte: adjustedStartTime }, endTime: { $gte: adjustedEndTime } }
+      ]
+    });
+
+    if (overlappingSlot) {
+      return res.status(400).json({ success: false, message: "This time slot is already booked." });
+    }
+
+    const bookingId = new mongoose.Types.ObjectId();
+    const frontendUrl = process.env.CLIENT_URLS?.split(",")[1] || "http://localhost:5174";
+    const qrUrl = `${frontendUrl}/booking-pass/${bookingId}`;
+    const QRcode = await generateQRCode(qrUrl);
+
+    const timeSlot = await TimeSlot.create({
+      turf: turfId,
+      startTime: adjustedStartTime,
+      endTime: adjustedEndTime,
+    });
+
+    const booking = await Booking.create({
+      _id: bookingId,
+      turf: turfId,
+      timeSlot: timeSlot._id,
+      totalPrice,
+      qrCode: QRcode,
+      payment: { 
+        orderId: paymentMethod === "CASH" ? "CASH_OFFLINE" : `MANUAL_${Date.now()}`, 
+        paymentId: paymentMethod === "CASH" ? "CASH" : "PENDING_MANUAL" 
+      },
+      bookingSource: "PARTNER_MANUAL",
+      paymentMethod: paymentMethod || "CASH",
+      guestDetails: {
+        name: customerName,
+        email: customerEmail,
+        phone: customerPhone
+      }
+    });
+
+    // Send confirmation email to guest
+    const htmlContent = generateHTMLContent(
+      turf.name,
+      turf.location,
+      formattedDate,
+      formattedStartTime,
+      formattedEndTime,
+      totalPrice,
+      QRcode
+    );
+
+    // Notify Owner (Self) - Good for record
+    await createNotification({
+      recipientId: turf.owner._id,
+      recipientModel: 'Owner',
+      title: "Manual Booking Created",
+      message: `You manually added a booking for ${turf.name} on ${formattedDate}.`,
+      type: "BOOKING",
+      link: "/partner/bookings"
+    });
+
+    const guestUser = { name: customerName, email: customerEmail };
+
+    generateInvoice(booking, turf, guestUser).then(pdfBuffer => {
+      generateEmail(
+        customerEmail, 
+        "Booking Confirmation & Invoice - BMS", 
+        htmlContent,
+        [
+          {
+            filename: `Invoice-BMS-${booking._id.toString().slice(-6).toUpperCase()}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf'
+          }
+        ]
+      ).catch((err) => console.error("[MANUAL_EMAIL] Failed to send invoice:", err.message));
+    }).catch(err => {
+      console.error("[MANUAL_INVOICE] Failed:", err.message);
+      generateEmail(customerEmail, "Booking Confirmation", htmlContent).catch(err => {
+        console.error("[MANUAL_EMAIL] Fallback failed:", err.message);
+      });
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Manual booking created successfully. Invoice sent to customer.",
+      bookingId: booking._id,
+    });
+
+  } catch (error) {
+    console.error("Error in createManualBooking", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error: " + error.message,
+    });
   }
 };

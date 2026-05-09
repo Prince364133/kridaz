@@ -28,6 +28,7 @@ const supportTicketSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
+    images: [{ type: String }], // Array of up to 5 image URLs
     lastRepliedAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
