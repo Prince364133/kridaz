@@ -11,9 +11,11 @@ const withdrawalRequestSchema = new mongoose.Schema(
     },
     bankDetails: {
       accountName: { type: String, required: true },
-      accountNumber: { type: String, required: true },
-      ifscCode: { type: String, required: true },
-      bankName: { type: String, required: true },
+      accountNumber: { type: String },
+      ifscCode: { type: String },
+      bankName: { type: String },
+      upiId: { type: String },
+      payoutMode: { type: String, enum: ["BANK", "UPI"], default: "BANK" }
     },
     transactionId: { type: String }, // Provided by admin when manually transferring funds
     rejectionReason: { type: String },

@@ -70,6 +70,11 @@ const turfSchema = new mongoose.Schema(
       }
     ],
     mapUrl: { type: String },
+    pendingUpdates: {
+      type: Map,
+      of: mongoose.Schema.Types.Mixed,
+      default: {}
+    },
   },
   { timestamps: true }
 );

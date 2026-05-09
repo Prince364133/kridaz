@@ -362,41 +362,40 @@ const OwnerDashboard = () => {
               <OccupancyHeatmap />
             </div>
             <div className="lg:col-span-4">
-<<<<<<< HEAD
-  <PeakHoursChart />
-=======
-              
-              {/* Live Feed */}
-              <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] h-full">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider">Live Feed</h2>
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] rounded-full text-[10px] font-medium uppercase tracking-widest animate-pulse border border-[#CCFF00]/20">
-                    <span className="w-1 h-1 bg-[#CCFF00] rounded-full" /> Live
-                  </div>
-                </div>
+              <div className="space-y-6 lg:space-y-8 h-full flex flex-col">
+                <PeakHoursChart />
                 
-                <div className="space-y-6">
-                  {[
-                    { icon: Zap, title: "New booking received", desc: "Arjun K booked Ground 1 for 2 hours.", time: "2 mins ago", color: "text-[#CCFF00]" },
-                    { icon: Info, title: "Ground 2 at capacity", desc: "90% occupancy reached for evening slots.", time: "15 mins ago", color: "text-[#0000EE]" },
-                    { icon: CheckCircle2, title: "Payment successful", desc: "₹2,400 received for Booking #8003.", time: "45 mins ago", color: "text-[#4CAF50]" },
-                  ].map((item, i) => (
-                    <div key={i} className="flex gap-4 group cursor-pointer">
-                      <div className={`mt-1 p-2 rounded-[6px] bg-[#2D2D2D] ${item.color} group-hover:scale-110 transition-transform`}><item.icon size={14} /></div>
-                      <div>
-                        <p className="text-[14px] font-semibold text-white uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">{item.title}</p>
-                        <p className="text-[12px] text-[#999999] mt-0.5">{item.desc}</p>
-                        <p className="text-[10px] font-medium text-[#878C9F] uppercase mt-1 flex items-center gap-1"><Clock size={10} /> {item.time}</p>
-                      </div>
+                {/* Live Feed */}
+                <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] flex-1">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider">Live Feed</h2>
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] rounded-full text-[10px] font-medium uppercase tracking-widest animate-pulse border border-[#CCFF00]/20">
+                      <span className="w-1 h-1 bg-[#CCFF00] rounded-full" /> Live
                     </div>
-                  ))}
+                  </div>
+                  
+                  <div className="space-y-6">
+                    {[
+                      { icon: Zap, title: "New booking received", desc: "Arjun K booked Ground 1 for 2 hours.", time: "2 mins ago", color: "text-[#CCFF00]" },
+                      { icon: Info, title: "Ground 2 at capacity", desc: "90% occupancy reached for evening slots.", time: "15 mins ago", color: "text-[#0000EE]" },
+                      { icon: CheckCircle2, title: "Payment successful", desc: "₹2,400 received for Booking #8003.", time: "45 mins ago", color: "text-[#4CAF50]" },
+                    ].map((item, i) => (
+                      <div key={i} className="flex gap-4 group cursor-pointer">
+                        <div className={`mt-1 p-2 rounded-[6px] bg-[#2D2D2D] ${item.color} group-hover:scale-110 transition-transform`}><item.icon size={14} /></div>
+                        <div>
+                          <p className="text-[14px] font-semibold text-white uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">{item.title}</p>
+                          <p className="text-[12px] text-[#999999] mt-0.5">{item.desc}</p>
+                          <p className="text-[10px] font-medium text-[#878C9F] uppercase mt-1 flex items-center gap-1"><Clock size={10} /> {item.time}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <button className="w-full mt-8 py-3 bg-transparent border border-[#2D2D2D] hover:bg-[#CCFF00]/10 hover:text-[#CCFF00] text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter">
+                    View Full Activity History
+                  </button>
                 </div>
-                
-                <button className="w-full mt-8 py-3 bg-transparent border border-[#2D2D2D] hover:bg-[#CCFF00]/10 hover:text-[#CCFF00] text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter">
-                  View Full Activity History
-                </button>
               </div>
->>>>>>> 01016f4 (Standardized avatar rendering system across all user-facing components)
             </div >
           </div >
 
@@ -472,16 +471,12 @@ const OwnerDashboard = () => {
             </tbody>
           </table>
         </div>
-<<<<<<< HEAD
-=======
-                
-                <div className="mt-8 pt-6 border-t border-[#2D2D2D] flex items-center justify-between">
-                  <p className="text-[12px] font-normal text-[#999999] uppercase tracking-widest">Showing 5 of {totalBookings} bookings</p>
-                  <button className="text-[13px] font-normal text-[#CCFF00] uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-all font-inter">
-                    View All Transactions <ChevronRight size={14} />
-                  </button>
-                </div>
->>>>>>> 01016f4 (Standardized avatar rendering system across all user-facing components)
+        <div className="mt-8 pt-6 border-t border-[#2D2D2D] flex items-center justify-between">
+          <p className="text-[12px] font-normal text-[#999999] uppercase tracking-widest">Showing 5 of {totalBookings} bookings</p>
+          <button className="text-[13px] font-normal text-[#CCFF00] uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-all font-inter">
+            View All Transactions <ChevronRight size={14} />
+          </button>
+        </div>
               </div >
             </div >
 
@@ -506,12 +501,9 @@ const OwnerDashboard = () => {
               <div className="flex-1">
                 <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{item.title}</p>
                 <p className="text-[12px] text-[#999999] mt-1 leading-relaxed">{item.desc}</p>
-<<<<<<< HEAD
-=======
-                          <button className="mt-3 text-[12px] font-normal text-[#CCFF00] uppercase tracking-widest flex items-center gap-1.5 hover:text-white transition-colors font-inter">
-                            {item.action} <ChevronRight size={12} />
-                          </button>
->>>>>>> 01016f4 (Standardized avatar rendering system across all user-facing components)
+                <button className="mt-3 text-[12px] font-normal text-[#CCFF00] uppercase tracking-widest flex items-center gap-1.5 hover:text-white transition-colors font-inter">
+                  Explore <ChevronRight size={12} />
+                </button>
                         </div >
                       </div >
                     </div >

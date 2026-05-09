@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Edit2, Trash2, Clock, MapPin, Tag, Star, LayoutDashboard, Zap } from "lucide-react";
+import { Edit2, Trash2, Clock, MapPin, Tag, Star, LayoutDashboard, Eye, EyeOff } from "lucide-react";
 
 const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
   return (
@@ -13,27 +13,20 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
         
-        {/* Pricing Badge */}
-        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md border border-white/10 text-white font-bold px-3 py-1 rounded-full text-[10px] tracking-tight font-['Open_Sans'] shadow-xl">
-          ₹{turf.pricePerHour}<span className="text-white/40 font-normal ml-0.5">/Hr</span>
-        </div>
 
-        {/* Visibility Badge */}
-        <div className={`absolute top-3 left-3 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest flex items-center gap-1 backdrop-blur-md border ${
-          turf.isActive 
-          ? 'bg-[#CCFF00]/20 border-[#CCFF00]/30 text-[#CCFF00]' 
-          : 'bg-black/60 border-white/10 text-[#878C9F]'
-        }`}>
-           <Zap size={8} className={turf.isActive ? "fill-[#CCFF00]" : ""} />
-           {turf.isActive ? "Visible" : "Hidden"}
-        </div>
+        {/* Status Icon Overlay (Top Right) */}
+        {!turf.isActive && (
+          <div className="absolute top-3 right-3 z-20 bg-black/80 backdrop-blur-md border border-red-500/50 text-red-500 p-1.5 rounded-full shadow-2xl" title="Venue Hidden">
+            <EyeOff size={10} />
+          </div>
+        )}
       </Link>
       
       <div className="p-4 flex flex-col flex-grow relative">
         <Link to={`/partner/turf/${turf._id}`} className="block group/title">
            <div className="flex justify-between items-start mb-3">
               <div className="space-y-1">
-                <h2 className="text-[15px] font-bold text-white uppercase tracking-widest group-hover/title:text-[#CCFF00] transition-colors font-['Open_Sans']">
+                <h2 className="text-[15px] font-bold text-white uppercase tracking-widest group-hover/title:text-[#CCFF00] transition-colors font-open-sans">
                   {turf.name}
                 </h2>
                 <div className="flex items-center gap-2">
@@ -53,31 +46,29 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
               
               <div className="flex items-center bg-[#111] px-2 py-0.5 rounded-[4px] border border-[#2D2D2D]">
                 <Star size={9} className="text-[#CCFF00] mr-1 fill-[#CCFF00]" />
-                <span className="text-[9px] font-bold text-white font-['Open_Sans']">
+                <span className="text-[9px] font-bold text-white font-open-sans">
                   {turf.avgRating ? turf.avgRating.toFixed(1) : "NEW"}
                 </span>
               </div>
            </div>
         </Link>
 
-        <p className="text-[#878C9F] font-inter text-[13px] leading-relaxed line-clamp-2 mb-4">
-          {turf.description}
+        <p className="text-[#878C9F] font-inter text-[13px] leading-relaxed line-clamp-2 mb-4 h-[40px]">
+          {turf.description || "No description provided for this venue."}
         </p>
 
         <div className="mt-auto space-y-4">
           <div className="flex flex-wrap gap-1.5">
-            {turf.sportTypes.map((sport, index) => (
-              <span key={index} className="px-2 py-1 bg-[#1A1A1A] text-[#878C9F] border border-[#2D2D2D] rounded-[4px] text-[9px] font-bold uppercase tracking-[0.5px]">
-                {sport}
-              </span>
-            ))}
+              <div className="flex items-center gap-2 px-3 py-1 bg-[#CCFF00]/5 border border-[#CCFF00]/20 rounded-[4px] text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">
+                 ₹{turf.pricePerHour} <span className="opacity-40 font-normal">SETTLEMENT</span>
+              </div>
           </div>
 
           <div className="flex items-center justify-between pt-4 border-t border-[#2D2D2D]/50">
-            <div className="flex items-center text-[#878C9F] text-[8px] font-bold uppercase tracking-widest">
-              <Clock size={10} className="mr-1.5 text-[#CCFF00]/40" />
-              {turf.openTime} - {turf.closeTime}
-            </div>
+             <button className="flex items-center gap-2 px-4 py-1.5 bg-[#CCFF00] hover:bg-white text-black rounded-[4px] text-[9px] font-black uppercase tracking-widest transition-all shadow-[0_5px_15px_rgba(204,255,0,0.1)]">
+                <Tag size={10} />
+                Promotion
+             </button>
 
             <div className="flex items-center gap-1.5">
               <button
@@ -95,7 +86,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
                   : "bg-black border-[#2D2D2D] text-[#444] hover:text-white"
                 }`}
               >
-                <Zap size={12} className={turf.isActive ? "fill-[#CCFF00]" : ""} />
+                {turf.isActive ? <Eye size={12} /> : <EyeOff size={12} />}
               </button>
 
               <button
