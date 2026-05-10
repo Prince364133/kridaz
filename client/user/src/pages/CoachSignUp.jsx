@@ -2,21 +2,32 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import useSignUpForm from "@hooks/useSignUpForm";
 import { GoogleLogin } from "@react-oauth/google";
+import FileUpload from "../components/common/FileUpload";
 import {
   ArrowRight,
   ShieldCheck,
+  Zap,
+  Globe,
   Lock,
   User,
   Mail,
   Phone,
   ChevronLeft,
-  Dumbbell,
-  BookOpen,
-  Users,
-  Trophy,
+  Building2,
+  BarChart3,
+  CalendarCheck,
   MapPin,
   Locate,
-  UserSquare2
+  UserSquare2,
+  FileText,
+  CreditCard,
+  Image as ImageIcon,
+  CheckCircle2,
+  ChevronRight,
+  Dumbbell,
+  Trophy,
+  Users,
+  BookOpen
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -30,16 +41,65 @@ const CoachSignUp = () => {
     onSubmit, 
     loading,
     setValue,
+    getValues,
+    watch,
+    trigger,
     showOtpInput,
     handleGoogleSuccess,
-    handleGoogleError
+    handleGoogleError,
+    currentStep,
+    setCurrentStep
   } = useSignUpForm("coach");
+
   const [mounted, setMounted] = useState(false);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+  const [docs, setDocs] = useState([]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleDocUpload = (url, name) => {
+    if (!url) {
+      const updatedDocs = docs.filter(d => d.name !== name);
+      setDocs(updatedDocs);
+      setValue("documents", updatedDocs);
+    } else {
+      const newDoc = { name, url };
+      const updatedDocs = [...docs, newDoc];
+      setDocs(updatedDocs);
+      setValue("documents", updatedDocs);
+    }
+  };
+
+  const nextStep = async () => {
+    let fields = [];
+    if (currentStep === 1) {
+      fields = ["name", "username", "email", "phone", "gender", "location", "password", "confirmPassword"];
+    } else if (currentStep === 2) {
+      fields = [
+        "businessDetails.businessName", 
+        "businessDetails.address", 
+        "businessDetails.registrationNumber",
+        "businessDetails.experience",
+        "businessDetails.specialization",
+        "businessDetails.city",
+        "businessDetails.state",
+        "businessDetails.zipCode"
+      ];
+    }
+
+    const isValid = await trigger(fields);
+    if (isValid) {
+      setCurrentStep(currentStep + 1);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const prevStep = () => {
+    setCurrentStep(currentStep - 1);
+    window.scrollTo(0, 0);
+  };
 
   const fetchLocation = () => {
     if (!navigator.geolocation) {
@@ -101,253 +161,300 @@ const CoachSignUp = () => {
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-6">
             {[
-              { icon: Users, label: "Player Connect", val: "Coming Soon" },
-              { icon: BookOpen, label: "Session Management", val: "Coming Soon" },
-              { icon: Trophy, label: "Performance Tracking", val: "Coming Soon" },
-              { icon: ShieldCheck, label: "Verified Coach Badge", val: "Coming Soon" },
+              { icon: Users, title: "Client Base", desc: "Access thousands of active sports players" },
+              { icon: Trophy, title: "Reputation", desc: "Build your coaching brand with verified reviews" },
+              { icon: BookOpen, title: "Tools", desc: "Professional session management & tracking" }
             ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl">
-                <div className="flex items-center gap-4">
-                  <item.icon size={16} className="text-blue-400/50" />
-                  <span className="text-xs font-bold text-white/40 uppercase tracking-widest">{item.label}</span>
+              <div key={i} className="flex gap-4 group cursor-default">
+                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 group-hover:bg-blue-500/10 group-hover:border-blue-500/30 transition-all duration-500">
+                  <item.icon size={20} className="text-blue-400" />
                 </div>
-                <span className="text-xs font-bold text-blue-400 uppercase">{item.val}</span>
+                <div>
+                  <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-1">{item.title}</h4>
+                  <p className="text-gray-500 text-xs leading-relaxed max-w-[200px]">{item.desc}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Right Side: Form */}
-        <div className="lg:col-span-3">
-          <div className="w-full bg-[#0A0A0A] border border-white/10 rounded-[40px] overflow-hidden relative">
-
-            {/* Header */}
-            <div className="bg-white/[0.02] border-b border-white/5 p-8 md:p-10 flex justify-between items-center">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                  <span className="text-[10px] font-bold tracking-[0.2em] text-blue-400/60 uppercase">Coach Registration</span>
+        {/* Right Side - Form */}
+        <div className="lg:col-span-3 w-full">
+          <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[40px] p-8 lg:p-12 shadow-2xl relative overflow-hidden">
+            {/* Step Progress */}
+            <div className="flex items-center justify-between mb-12 relative px-4">
+              <div className="absolute top-1/2 left-0 w-full h-[1px] bg-white/10 -z-0" />
+              {[1, 2, 3].map((step) => (
+                <div 
+                  key={step}
+                  className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-500 ${
+                    currentStep >= step 
+                      ? "bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.5)]" 
+                      : "bg-black border border-white/20 text-gray-500"
+                  }`}
+                >
+                  {currentStep > step ? <CheckCircle2 size={18} /> : step}
                 </div>
-                <h2 className="text-2xl font-bold text-white uppercase tracking-wider">Join as a Coach</h2>
-                <p className="text-xs text-white/20 uppercase tracking-widest">Create your professional profile</p>
-              </div>
-              <Dumbbell size={32} className="text-blue-400/30" />
+              ))}
             </div>
 
-            {/* Body */}
-            <div className="p-8 md:p-14 space-y-10">
-              <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 flex items-start gap-3">
-                <div className="w-5 h-5 mt-0.5 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
-                  <div className="w-2 h-2 rounded-full bg-blue-400" />
-                </div>
-                <p className="text-xs text-blue-300/70 leading-relaxed">
-                  The Coach module is <strong className="text-blue-300">coming soon</strong>. Register now to secure your spot on the early access waitlist.
-                </p>
-              </div>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2 uppercase tracking-tight">
+                {currentStep === 1 ? "Personal Profile" : currentStep === 2 ? "Professional Details" : "Verification Documents"}
+              </h2>
+              <p className="text-gray-500 text-sm">Step {currentStep} of 3 • Mandatory Information</p>
+            </div>
 
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                {showOtpInput ? (
-                  <div className="space-y-6">
-                    <div className="text-center mb-8">
-                      <h3 className="text-xl font-bold text-white uppercase tracking-wider">Verification</h3>
-                      <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] mt-2">Enter the 6-digit code sent to your email</p>
-                    </div>
-
-                    <div className="space-y-2 group/field">
-                      <div className="relative group/input text-center">
-                        <input
-                          {...register("otp")}
-                          type="text"
-                          placeholder="000000"
-                          maxLength={6}
-                          className="w-full bg-white/[0.03] border border-white/5 focus:border-blue-500/50 rounded-xl h-16 text-white text-center text-2xl tracking-[0.5em] font-bold outline-none transition-all"
-                        />
-                      </div>
-                      {errors.otp && <p className="text-red-400 text-[10px] uppercase tracking-widest text-center mt-2">{errors.otp.message}</p>}
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-blue-500 hover:bg-blue-400 text-white h-16 rounded-xl font-bold uppercase tracking-wider text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 group/btn"
-                    >
-                      {loading ? "Verifying..." : "Verify & Join Network"}
-                      {!loading && <ArrowRight className="w-6 h-6 group-hover/btn:translate-x-2 transition-transform" />}
-                    </button>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {currentStep === 1 && (
+                <div className="grid md:grid-cols-2 gap-5">
+                  <div className="md:col-span-2 relative group">
+                    <User className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("name")}
+                      placeholder="FULL NAME"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.name && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.name.message}</p>}
                   </div>
-                ) : (
-                  <>
-                    {/* Google Sign Up */}
-                    <div className="w-full flex flex-col items-center justify-center mb-2">
-                      <GoogleLogin
-                        onSuccess={handleGoogleSuccess}
-                        onError={handleGoogleError}
-                        theme="filled_black"
-                        shape="rectangular"
-                        size="large"
-                        width="100%"
-                        text="signup_with"
-                      />
-                    </div>
 
-                    <div className="flex items-center gap-4 w-full my-6">
-                      <div className="h-px bg-white/5 flex-1"></div>
-                      <span className="text-white/10 text-[10px] font-bold tracking-[0.3em] uppercase whitespace-nowrap">OR REGISTER WITH EMAIL</span>
-                      <div className="h-px bg-white/5 flex-1"></div>
-                    </div>
+                  <div className="md:col-span-2 relative group">
+                    <UserSquare2 className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("username")}
+                      placeholder="USERNAME"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.username && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.username.message}</p>}
+                  </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-                      {/* Name */}
-                      <div className="space-y-3 group/field">
-                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-blue-400 transition-colors ml-1">Full Name</label>
-                        <div className="relative">
-                          <User size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
-                          <input
-                            {...register("name")}
-                            type="text"
-                            placeholder="Your Name"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-blue-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
-                          />
-                        </div>
-                        {errors.name && <p className="text-red-400 text-xs ml-1">{errors.name.message}</p>}
-                      </div>
+                  <div className="relative group">
+                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("email")}
+                      type="email"
+                      placeholder="EMAIL ADDRESS"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.email && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.email.message}</p>}
+                  </div>
 
-                      {/* Email */}
-                      <div className="space-y-3 group/field">
-                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-blue-400 transition-colors ml-1">Email Address</label>
-                        <div className="relative">
-                          <Mail size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
-                          <input
-                            {...register("email")}
-                            type="email"
-                            placeholder="coach@example.com"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-blue-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
-                          />
-                        </div>
-                        {errors.email && <p className="text-red-400 text-xs ml-1">{errors.email.message}</p>}
-                      </div>
+                  <div className="relative group">
+                    <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("phone")}
+                      placeholder="PHONE NUMBER"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.phone && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.phone.message}</p>}
+                  </div>
 
-                      {/* Phone */}
-                      <div className="space-y-3 group/field">
-                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-blue-400 transition-colors ml-1">Phone Number</label>
-                        <div className="relative">
-                          <Phone size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
-                          <input
-                            {...register("phone")}
-                            type="text"
-                            placeholder="+91 00000 00000"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-blue-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
-                          />
-                        </div>
-                        {errors.phone && <p className="text-red-400 text-xs ml-1">{errors.phone.message}</p>}
-                      </div>
-
-                      {/* Gender */}
-                      <div className="space-y-3 group/field">
-                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-blue-400 transition-colors ml-1">Gender</label>
-                        <div className="relative">
-                          <UserSquare2 size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10 z-10 pointer-events-none" />
-                          <select 
-                            {...register("gender")}
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-blue-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm appearance-none outline-none transition-all cursor-pointer"
-                            defaultValue=""
-                          >
-                            <option value="" disabled className="bg-black text-white/40">Select Gender</option>
-                            <option value="Male" className="bg-black text-white">Male</option>
-                            <option value="Female" className="bg-black text-white">Female</option>
-                            <option value="Other" className="bg-black text-white">Other</option>
-                            <option value="Prefer not to say" className="bg-black text-white">Prefer not to say</option>
-                          </select>
-                        </div>
-                        {errors.gender && <p className="text-red-400 text-xs ml-1">{errors.gender.message}</p>}
-                      </div>
-
-                      {/* Location */}
-                      <div className="space-y-3 md:col-span-2 group/field">
-                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-blue-400 transition-colors ml-1">Location</label>
-                        <div className="relative flex gap-2">
-                          <div className="relative flex-1">
-                            <MapPin size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
-                            <input 
-                              {...register("location")}
-                              type="text" 
-                              placeholder="City, State"
-                              className="w-full bg-white/[0.03] border border-white/5 focus:border-blue-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
-                            />
-                          </div>
-                          <button 
-                            type="button" 
-                            onClick={fetchLocation}
-                            disabled={isFetchingLocation}
-                            className="bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl h-14 px-4 flex items-center justify-center gap-2 text-white/80 transition-colors disabled:opacity-50 min-w-[120px]"
-                          >
-                            <Locate size={14} className={isFetchingLocation ? "animate-pulse text-blue-400" : ""} />
-                            <span className="text-[10px] font-bold uppercase tracking-widest">{isFetchingLocation ? "Fetching..." : "Locate"}</span>
-                          </button>
-                        </div>
-                        {errors.location && <p className="text-red-400 text-xs ml-1">{errors.location.message}</p>}
-                      </div>
-
-                      {/* Password */}
-                      <div className="space-y-3 group/field">
-                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-blue-400 transition-colors ml-1">Password</label>
-                        <div className="relative">
-                          <Lock size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
-                          <input
-                            {...register("password")}
-                            type="password"
-                            placeholder="••••••••"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-blue-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
-                          />
-                        </div>
-                        {errors.password && <p className="text-red-400 text-xs ml-1">{errors.password.message}</p>}
-                      </div>
-
-                      {/* Confirm Password */}
-                      <div className="space-y-3 group/field">
-                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-blue-400 transition-colors ml-1">Confirm Password</label>
-                        <div className="relative">
-                          <ShieldCheck size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
-                          <input
-                            {...register("confirmPassword")}
-                            type="password"
-                            placeholder="••••••••"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-blue-500/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
-                          />
-                        </div>
-                        {errors.confirmPassword && <p className="text-red-400 text-xs ml-1">{errors.confirmPassword.message}</p>}
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-blue-500 hover:bg-blue-400 text-white h-16 rounded-xl font-bold uppercase tracking-wider text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50 group/btn mt-4"
+                  <div className="relative group">
+                    <UserSquare2 className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <select
+                      {...register("gender")}
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest appearance-none"
                     >
-                      {loading ? "Sending OTP..." : "Continue to Verification"}
-                      {!loading && <ArrowRight className="w-6 h-6 group-hover/btn:translate-x-2 transition-transform" />}
+                      <option value="" className="bg-black">SELECT GENDER</option>
+                      <option value="male" className="bg-black">MALE</option>
+                      <option value="female" className="bg-black">FEMALE</option>
+                      <option value="other" className="bg-black">OTHER</option>
+                    </select>
+                    {errors.gender && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.gender.message}</p>}
+                  </div>
+
+                  <div className="relative group">
+                    <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("location")}
+                      placeholder="LOCATION"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-14 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    <button
+                      type="button"
+                      onClick={fetchLocation}
+                      disabled={isFetchingLocation}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-xl transition-all text-blue-400 disabled:opacity-50"
+                    >
+                      <Locate size={18} className={isFetchingLocation ? "animate-spin" : ""} />
                     </button>
-                  </>
+                    {errors.location && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.location.message}</p>}
+                  </div>
+
+                  <div className="relative group">
+                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("password")}
+                      type="password"
+                      placeholder="CREATE PASSWORD"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.password && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.password.message}</p>}
+                  </div>
+
+                  <div className="relative group">
+                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("confirmPassword")}
+                      type="password"
+                      placeholder="CONFIRM PASSWORD"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.confirmPassword && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.confirmPassword.message}</p>}
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 2 && (
+                <div className="grid md:grid-cols-2 gap-5">
+                  <div className="md:col-span-2 relative group">
+                    <Building2 className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("businessDetails.businessName")}
+                      placeholder="COACHING ACADEMY / BRAND NAME"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.businessDetails?.businessName && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.businessName.message}</p>}
+                  </div>
+
+                  <div className="relative group">
+                    <BarChart3 className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("businessDetails.experience")}
+                      placeholder="YEARS OF EXPERIENCE"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.businessDetails?.experience && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.experience.message}</p>}
+                  </div>
+
+                  <div className="relative group">
+                    <Trophy className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("businessDetails.specialization")}
+                      placeholder="PRIMARY SPORT / SPECIALIZATION"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.businessDetails?.specialization && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.specialization.message}</p>}
+                  </div>
+
+                  <div className="md:col-span-2 relative group">
+                    <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("businessDetails.address")}
+                      placeholder="OFFICE / ACADEMY ADDRESS"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.businessDetails?.address && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.address.message}</p>}
+                  </div>
+
+                  <div className="relative group">
+                    <Locate className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("businessDetails.city")}
+                      placeholder="CITY"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.businessDetails?.city && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.city.message}</p>}
+                  </div>
+
+                  <div className="relative group">
+                    <Globe className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("businessDetails.state")}
+                      placeholder="STATE"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.businessDetails?.state && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.state.message}</p>}
+                  </div>
+
+                  <div className="relative group">
+                    <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("businessDetails.zipCode")}
+                      placeholder="ZIP CODE"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.businessDetails?.zipCode && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.zipCode.message}</p>}
+                  </div>
+
+                  <div className="relative group">
+                    <FileText className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
+                    <input
+                      {...register("businessDetails.registrationNumber")}
+                      placeholder="CERTIFICATION / REG ID"
+                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
+                    />
+                    {errors.businessDetails?.registrationNumber && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.registrationNumber.message}</p>}
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 3 && (
+                <div className="grid md:grid-cols-2 gap-5">
+                  <div className="md:col-span-2 p-6 rounded-2xl bg-blue-500/5 border border-blue-500/20 mb-4">
+                    <p className="text-[10px] text-blue-400 uppercase font-bold tracking-[0.2em] mb-2">Upload Instructions</p>
+                    <p className="text-xs text-gray-400 leading-relaxed">Please upload your professional certifications, ID proof, and address proof for verification. All documents are mandatory for elite status.</p>
+                  </div>
+
+                  <FileUpload label="Professional Certificate" onUploadSuccess={(url) => handleDocUpload(url, "Certification")} />
+                  <FileUpload label="Identity Proof (PAN/Aadhar)" onUploadSuccess={(url) => handleDocUpload(url, "ID Proof")} />
+                  <FileUpload label="Address Proof" onUploadSuccess={(url) => handleDocUpload(url, "Address Proof")} />
+                  <FileUpload label="Sports Achievements (Optional)" onUploadSuccess={(url) => handleDocUpload(url, "Achievements")} />
+
+                  <div className="md:col-span-2">
+                    {errors.documents && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.documents.message}</p>}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-4 pt-6">
+                {currentStep > 1 && (
+                  <button
+                    type="button"
+                    onClick={prevStep}
+                    className="flex-1 h-16 rounded-2xl border border-white/10 text-white font-bold uppercase tracking-widest text-xs hover:bg-white/5 transition-all flex items-center justify-center gap-2"
+                  >
+                    <ChevronLeft size={16} />
+                    Back
+                  </button>
                 )}
-              </form>
-
-              <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-                <p className="text-xs text-white/20 uppercase tracking-widest">Already registered?</p>
-                <Link to="/login" className="flex items-center gap-2 text-blue-400 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest group">
-                  Login to Portal
-                  <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
+                
+                {currentStep < 3 ? (
+                  <button
+                    type="button"
+                    onClick={nextStep}
+                    className="flex-[2] h-16 rounded-2xl bg-blue-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(37,99,235,0.3)]"
+                  >
+                    Continue
+                    <ChevronRight size={16} />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-[2] h-16 rounded-2xl bg-blue-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(37,99,235,0.3)] disabled:opacity-50"
+                  >
+                    {loading ? "Creating Profile..." : "Complete Registration"}
+                    <ArrowRight size={16} />
+                  </button>
+                )}
               </div>
-            </div>
-          </div>
+            </form>
 
-          <div className="mt-8 text-center">
-            <Link to="/partners" className="inline-flex items-center gap-2 text-white/20 hover:text-white transition-colors text-xs uppercase tracking-widest group">
-              <ChevronLeft size={14} className="group-hover:-translate-x-2 transition-transform" />
-              Back to Partner Gateway
-            </Link>
+            <div className="mt-8 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
+               <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-green-500/10">
+                    <ShieldCheck size={16} className="text-green-400" />
+                  </div>
+                  <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Secure Verification</span>
+               </div>
+               <div className="flex items-center gap-6">
+                  <Link to="/login" className="text-[10px] text-gray-500 hover:text-white uppercase font-bold tracking-widest transition-colors">Already registered?</Link>
+                  <Link to="/partners" className="text-[10px] text-blue-400 hover:text-blue-300 uppercase font-bold tracking-widest transition-colors">Not a coach?</Link>
+               </div>
+            </div>
           </div>
         </div>
       </div>
@@ -356,4 +463,3 @@ const CoachSignUp = () => {
 };
 
 export default CoachSignUp;
-

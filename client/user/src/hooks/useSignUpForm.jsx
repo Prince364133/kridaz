@@ -44,21 +44,24 @@ const registerSchema = yup.object().shape({
   }),
   role: yup.string().required("Role is required"),
   businessDetails: yup.object().shape({
-    businessName: yup.string().optional(),
-    registrationNumber: yup.string().optional(),
-    address: yup.string().optional(),
-    city: yup.string().optional(),
-    state: yup.string().optional(),
-    zipCode: yup.string().optional(),
-    experience: yup.string().optional(),
-    specialization: yup.string().optional(),
+    businessName: yup.string().required("Business / Professional Name is required"),
+    registrationNumber: yup.string().required("Registration / Certification Number is required"),
+    address: yup.string().required("Full Address is required"),
+    city: yup.string().required("City is required"),
+    state: yup.string().required("State is required"),
+    zipCode: yup.string().required("Zip Code is required"),
+    experience: yup.string().required("Experience / Years in field is required"),
+    specialization: yup.string().required("Specialization / Expertise is required"),
   }),
-  documents: yup.array().of(
-    yup.object().shape({
-      name: yup.string().required(),
-      url: yup.string().required(),
-    })
-  ).optional(),
+  documents: yup.array()
+    .min(3, "At least 3 verification documents are required")
+    .of(
+      yup.object().shape({
+        name: yup.string().required(),
+        url: yup.string().required(),
+      })
+    )
+    .required("Verification documents are required"),
 });
 
 /**

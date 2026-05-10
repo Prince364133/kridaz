@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { RouterProvider } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import router from "./router";
-import { login, logout, restoreAuth } from "./redux/slices/authSlice";
+import { login, logout, restoreAuth, setFollowingIds } from "./redux/slices/authSlice";
 import axiosInstance from "@hooks/useAxiosInstance";
 
 // Simple JWT decoder (no verification, just payload extraction)
@@ -52,13 +52,21 @@ export default function App() {
     const initAuth = async () => {
       console.log("App.jsx: Starting initAuth...");
       try {
-        const response = await axiosInstance.get("/api/user/auth/getMe");
-        console.log("App.jsx: /getMe response status:", response.status);
-        if (isMounted && response.data.success) {
+        console.log("App.jsx: Starting initAuth...");
+        const [meResponse, networkResponse] = await Promise.all([
+          axiosInstance.get("/api/user/auth/getMe"),
+          axiosInstance.get("/api/user/players/network").catch(() => ({ data: { success: false } }))
+        ]);
+
+        console.log("App.jsx: /getMe response status:", meResponse.status);
+        if (isMounted && meResponse.data.success) {
           dispatch(restoreAuth({
-            user: response.data.user,
-            role: response.data.role,
-            token: response.data.token // Backend now returns this, but if missing, restoreAuth preserves old one
+            user: meResponse.data.user,
+            role: meResponse.data.role,
+            token: meResponse.data.token,
+            followingIds: networkResponse.data.success 
+              ? (networkResponse.data.following || []).filter(u => u).map(u => u._id)
+              : []
           }));
         }
       } catch (error) {

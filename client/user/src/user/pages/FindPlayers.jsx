@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { followUser, unfollowUser } from "@redux/slices/authSlice";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { 
   Search, 
@@ -24,19 +25,14 @@ const avatarColors = ["#1a3300", "#001a33", "#330033", "#331a00", "#003333", "#1
 const avatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.length] || "#1a1a1a";
 
 const FindPlayers = () => {
-  const { user: currentUser, isLoggedIn } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const { user: currentUser, isLoggedIn, followingIds } = useSelector((state) => state.auth);
   const { gateInteraction } = useLoginOnDemand();
   const navigate = useNavigate();
 
-  // Debugging auth state
-  useEffect(() => {
-    console.log("FindPlayers Auth State:", { isLoggedIn, currentUser });
-  }, [isLoggedIn, currentUser]);
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [followingIds, setFollowingIds] = useState([]);
-  const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     city: "",
     sport: ""
@@ -47,9 +43,6 @@ const FindPlayers = () => {
 
   useEffect(() => {
     fetchPlayers();
-    if (currentUser) {
-      fetchFollowingStatus();
-    }
   }, [filters, currentUser]);
 
   const fetchPlayers = async () => {
@@ -65,16 +58,6 @@ const FindPlayers = () => {
       toast.error("Failed to load players");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchFollowingStatus = async () => {
-    try {
-      const response = await axiosInstance.get("/api/user/players/network");
-      const ids = (response.data.following || []).filter(p => p).map(p => p._id);
-      setFollowingIds(ids);
-    } catch (error) {
-      console.error("Error fetching network:", error);
     }
   };
 
@@ -103,14 +86,16 @@ const FindPlayers = () => {
       const isFollowing = followingIds.includes(targetUserId);
       try {
         const endpoint = `/api/user/players/${targetUserId}/${isFollowing ? 'unfollow' : 'follow'}`;
-        await axiosInstance.post(endpoint);
+        const response = await axiosInstance.post(endpoint);
         
-        if (isFollowing) {
-          setFollowingIds(prev => prev.filter(id => id !== targetUserId));
-          toast.success("Unfollowed player");
-        } else {
-          setFollowingIds(prev => [...prev, targetUserId]);
-          toast.success("Following player");
+        if (response.data.success) {
+          if (isFollowing) {
+            dispatch(unfollowUser(targetUserId));
+            toast.success("Unfollowed player");
+          } else {
+            dispatch(followUser(targetUserId));
+            toast.success("Following player");
+          }
         }
       } catch (error) {
         toast.error("Failed to update follow status");
@@ -147,7 +132,7 @@ const FindPlayers = () => {
 
   return (
     <div className="min-h-screen bg-black text-white pt-24 pb-20 md:pb-12 px-4 md:px-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Compact Header Row */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02] border border-white/5 rounded-2xl p-3 md:p-4">
@@ -209,11 +194,10 @@ const FindPlayers = () => {
 
         {/* Players Grid */}
         <div className="space-y-4 md:space-y-6">
-
           {loading ? (
-            <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="h-16 md:h-48 bg-white/[0.02] border border-white/5 rounded-2xl md:rounded-3xl animate-pulse" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                <div key={i} className="h-64 bg-white/[0.02] border border-white/5 rounded-[32px] animate-pulse" />
               ))}
             </div>
           ) : players.length === 0 ? (
@@ -222,121 +206,96 @@ const FindPlayers = () => {
               <p className="text-white/20 text-sm uppercase tracking-widest">No players found matching your criteria.</p>
             </div>
           ) : (
-          <div className="flex flex-col gap-3 md:gap-4 py-6 px-2">
-            {players.map((player) => (
-              <div key={player._id} className="bg-white/[0.01] border border-white/5 rounded-xl px-3 py-2 md:px-5 md:py-2.5 hover:bg-white/[0.03] transition-all flex items-center gap-3 md:gap-8 group">
-                
-                {/* Premium Profile Icon - High Density */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {players.map((player) => (
                 <div 
-                  className={`relative w-12 h-12 rounded-full p-[2px] transition-all duration-500 group-hover:scale-110 ${player.hasActiveStory ? 'cursor-pointer ring-2 ring-primary ring-offset-2 ring-offset-black' : ''}`}
-                  onClick={() => handleAvatarClick(player)}
+                  key={player._id} 
+                  className="group relative bg-neutral-900/50 rounded-[32px] border border-neutral-800 overflow-hidden hover:border-[#84CC16]/50 transition-all duration-500"
                 >
-                  {/* Glowing Background */}
-                  <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                  
-                  {/* Outer Ring */}
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/40 to-white/10" />
-
-                  {/* Inner Container */}
-                  <div className="w-full h-full rounded-full flex items-center justify-center relative overflow-hidden z-10 bg-[#84CC16]/10 border border-white/10 shrink-0">
-                    {player.profilePicture ? (
-                      <img 
-                        src={player.profilePicture} 
-                        alt={player.name} 
-                        className="w-full h-full rounded-full object-cover absolute inset-0 z-10 brightness-95 group-hover:brightness-110 transition-all" 
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                        }}
-                      />
-                    ) : null}
-                    <div 
-                      className="w-full h-full flex items-center justify-center bg-[#1a1a1a]"
-                      style={{ display: player.profilePicture ? 'none' : 'flex' }}
-                    >
-                      <span className="text-[#84CC16] font-black text-xl tracking-tighter">
-                        {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
-                      </span>
+                  {/* Image Section */}
+                  <div className="relative h-48 sm:h-56 overflow-hidden">
+                    <div className="w-full h-full bg-[#84CC16]/10 flex items-center justify-center overflow-hidden">
+                      {player.profilePicture ? (
+                        <img 
+                          src={player.profilePicture} 
+                          alt={player.name} 
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          onClick={() => handleAvatarClick(player)}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div 
+                        className="w-full h-full flex items-center justify-center cursor-pointer"
+                        style={{ display: player.profilePicture ? 'none' : 'flex' }}
+                        onClick={() => handleAvatarClick(player)}
+                      >
+                        <User size={48} className="text-[#84CC16]" />
+                      </div>
                     </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30 pointer-events-none" />
                     
-                    {/* Glass Shine */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none z-20" />
+                    {/* Follow Button - Hidden for self */}
+                    {(!currentUser || currentUser._id !== player._id) && (
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFollowToggle(player._id);
+                        }}
+                        className={`absolute top-4 right-4 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all z-20 ${
+                          followingIds.includes(player._id) 
+                            ? "bg-white/10 text-white/40 border border-white/10 hover:bg-white/20" 
+                            : "bg-[#84CC16] text-black hover:scale-105 active:scale-95 shadow-lg shadow-[#84CC16]/20"
+                        }`}
+                      >
+                        {followingIds.includes(player._id) ? "Following" : "Follow"}
+                      </button>
+                    )}
                   </div>
-                </div>
 
-                {/* Unified Info Row */}
-                <div className="flex-1 flex flex-row items-center justify-between gap-4 overflow-hidden">
-                  <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-8 overflow-hidden min-w-0">
-                    {/* Name & Username Block */}
-                    <div className="flex items-center gap-3">
-                      <Link to={`/profile/${player._id}`} className="font-bold text-xs md:text-sm text-white hover:text-[#84CC16] transition-colors truncate">
-                        {player.name}
-                      </Link>
-                      <span className="text-[9px] md:text-[10px] font-bold text-white/10 uppercase tracking-widest truncate group-hover:text-white/20 transition-colors">
-                        @{player.username || "player"}
-                      </span>
-                    </div>
-
-                    {/* Meta Section */}
-                    <div className="flex items-center gap-6">
-                      {/* Level Badge - Ultra Compact */}
-                      <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[8px] md:text-[9px] font-black uppercase tracking-widest bg-white/5 border border-white/5" style={{ 
+                  {/* Content Section */}
+                  <div className="p-6">
+                    <Link to={`/profile/${player._id}`} className="block group/link">
+                      <h3 className="font-display text-xl uppercase leading-none mb-1 group-hover/link:text-[#84CC16] transition-colors truncate">{player.name}</h3>
+                      <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-4 truncate">@{player.username || "player"}</p>
+                    </Link>
+                    
+                    <div className="flex items-center gap-2 mb-6">
+                      <div className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[8px] font-black uppercase tracking-widest" style={{ 
                         color: player.bookingCount >= 100 ? "#F472B6" : player.bookingCount >= 50 ? "#818CF8" : player.bookingCount >= 20 ? "#84CC16" : "#64748B",
                       }}>
-                        <Trophy size={9} className="opacity-40" />
-                        <span>
-                          {player.bookingCount >= 100 ? "LEGEND" : player.bookingCount >= 50 ? "ELITE" : player.bookingCount >= 20 ? "PRO" : "BEGINNER"}
-                        </span>
+                        {player.bookingCount >= 100 ? "LEGEND" : player.bookingCount >= 50 ? "ELITE" : player.bookingCount >= 20 ? "PRO" : "BEGINNER"}
                       </div>
-                      
-                      {/* Social Counts - Full Spelling Required */}
-                      <div className="hidden sm:flex items-center gap-4 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.1em] text-white/10 group-hover:text-white/20 transition-colors">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-white/40 group-hover:text-white/60">{player.followers?.length || 0}</span>
-                          <span className="opacity-50">Followers</span>
-                        </div>
-                        <div className="h-2 w-px bg-white/5"></div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-white/40 group-hover:text-white/60">{player.following?.length || 0}</span>
-                          <span className="opacity-50">Following</span>
-                        </div>
+                      <div className="flex items-center gap-1 text-[8px] font-bold text-white/20 uppercase tracking-widest">
+                        <Users size={10} /> {player.followers?.length || 0}
                       </div>
                     </div>
-                  </div>
 
-                  {/* Actions - Sticky Right */}
-                  <div className="flex items-center gap-3 shrink-0">
-                    {(!currentUser || currentUser._id !== player._id) && (
-                      <>
-                        <button
+                    <div className="flex items-center justify-between pt-4 border-t border-neutral-800">
+                      <div className="flex items-center gap-2 text-[10px] font-bold text-white/40 uppercase tracking-tighter">
+                        <MapPin size={12} className="text-[#84CC16]" />
+                        <span className="truncate max-w-[80px]">{player.city || "India"}</span>
+                      </div>
+                      {(!currentUser || currentUser._id !== player._id) && (
+                        <button 
                           onClick={() => {
                             gateInteraction(() => navigate(`/messages?userId=${player._id}`), {
                               title: "Start a Conversation",
-                              message: "Direct messaging allows you to coordinate matches and discuss tactics. Sign in to chat with players."
+                              message: "Coordinate matches and discuss tactics. Sign in to chat."
                             });
                           }}
-                          className="p-1.5 md:p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-[#84CC16] hover:border-[#84CC16]/30 transition-all group/msg"
-                          title="Message Player"
+                          className="bg-white text-black p-2 rounded-lg hover:bg-[#84CC16] transition-all"
                         >
-                          <MessageCircle size={14} className="group-hover/msg:scale-110 transition-transform" />
+                          <MessageCircle size={16} />
                         </button>
-                        <button 
-                          onClick={() => handleFollowToggle(player._id)}
-                          className={`px-3 md:px-5 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all ${
-                            followingIds.includes(player._id) 
-                              ? "bg-white/5 text-white/20 border border-white/10 hover:bg-white/10" 
-                              : "bg-[#84CC16] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(132,204,22,0.15)]"
-                          }`}
-                        >
-                          {followingIds.includes(player._id) ? "Following" : "Follow"}
-                        </button>
-                      </>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

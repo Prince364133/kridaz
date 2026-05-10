@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { followUser, unfollowUser } from "@redux/slices/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { 
@@ -27,15 +28,15 @@ import StoryViewer from "../components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
 const Community = () => {
-  const { user, role, isLoggedIn } = useSelector((state) => state.auth);
+  const { user, role, isLoggedIn, followingIds } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const { gateInteraction } = useLoginOnDemand();
   const navigate = useNavigate();
   const isAdmin = role === 'admin' || role === 'BMSP_ADMIN';
 
   const [posts, setPosts] = useState([]);
   const [stories, setStories] = useState([]);
-  const [followingIds, setFollowingIds] = useState([]);
-   const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
    const [isPublishing, setIsPublishing] = useState(false);
   
   // Post modal state
@@ -61,20 +62,9 @@ const Community = () => {
 
   useEffect(() => {
     fetchData();
-    if (user) {
-      fetchFollowingStatus();
-    }
   }, [user]);
 
-  const fetchFollowingStatus = async () => {
-    try {
-      const response = await axiosInstance.get("/api/user/players/network");
-      const ids = (response.data.following || []).filter(p => p).map(p => p._id);
-      setFollowingIds(ids);
-    } catch (error) {
-      console.error("Error fetching network:", error);
-    }
-  };
+
 
   useEffect(() => {
     let timer;
@@ -332,10 +322,10 @@ const Community = () => {
         const response = await axiosInstance.post(endpoint);
         if (response.data.success) {
           if (isFollowing) {
-            setFollowingIds(followingIds.filter(id => id !== targetUserId));
+            dispatch(unfollowUser(targetUserId));
             toast.success("Unfollowed player");
           } else {
-            setFollowingIds([...followingIds, targetUserId]);
+            dispatch(followUser(targetUserId));
             toast.success("Following player");
           }
         }
@@ -544,16 +534,16 @@ const Community = () => {
                       </p>
                     </Link>
                     {/* Follow button — only shown for logged-in users who are not the post author */}
-                    {isLoggedIn && (!user || user._id !== post.adminId?._id) && (
+                    {isLoggedIn && user?._id !== (post.adminId?._id || post.adminId) && (
                       <button 
-                        onClick={() => handleFollowToggle(post.adminId?._id)}
+                        onClick={() => handleFollowToggle(post.adminId?._id || post.adminId)}
                         className={`ml-2 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
-                          followingIds.includes(post.adminId?._id) 
+                          followingIds.includes(post.adminId?._id || post.adminId) 
                             ? "bg-white/5 text-white/20 border border-white/10 hover:bg-white/10" 
                             : "bg-[#84CC16] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(132,204,22,0.15)]"
                         }`}
                       >
-                        {followingIds.includes(post.adminId?._id) ? "Following" : "Follow"}
+                        {followingIds.includes(post.adminId?._id || post.adminId) ? "Following" : "Follow"}
                       </button>
                     )}
                   </div>

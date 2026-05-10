@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { 
   Facebook, 
   Linkedin, 
@@ -15,7 +15,10 @@ import {
   Smartphone,
   Zap
 } from "lucide-react";
+
 const UserFooter = () => {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
   const currentYear = new Date().getFullYear();
 
   const regions = [
@@ -33,7 +36,7 @@ const UserFooter = () => {
   ];
 
   return (
-    <footer className="bg-black text-white relative overflow-hidden border-t border-white/5 pt-8 pb-12 font-sans">
+    <footer className={`bg-black text-white relative overflow-hidden border-t border-white/5 pt-8 pb-12 font-sans ${!isHomePage ? 'hidden md:block' : ''}`}>
       {/* ── AMBIENT DECOR ── */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#84CC16]/5 blur-[150px] pointer-events-none rounded-full" />
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-[#84CC16]/5 blur-[150px] pointer-events-none rounded-full" />

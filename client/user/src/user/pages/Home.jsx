@@ -11,7 +11,7 @@ import BlogSection from "../components/Blogs/BlogSection";
 import SearchPlayers from "../components/search/SearchPlayers";
 import SearchTurf from "../components/search/SearchTurf";
 import InterestsModal from "../components/modals/InterestsModal";
-import { updateUser } from "@redux/slices/authSlice";
+import { updateUser, followUser, unfollowUser } from "@redux/slices/authSlice";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
 const PRI = "#84CC16";
@@ -78,12 +78,7 @@ const avatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.le
 export default function Home() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoggedIn, role, user } = useSelector((state) => state.auth);
-  const { gateInteraction } = useLoginOnDemand();
-  const [showInterests, setShowInterests] = useState(false);
-  const [activeTab, setActiveTab] = useState("venues");
-  const [players, setPlayers] = useState([]);
-  const [followingIds, setFollowingIds] = useState([]);
+  const { isLoggedIn, role, user, followingIds } = useSelector((state) => state.auth);
   const [turfFilters, setTurfFilters] = useState({});
   const [playerFilters, setPlayerFilters] = useState({});
   const [userLocation, setUserLocation] = useState(null);
@@ -96,6 +91,9 @@ export default function Home() {
   const [hostedGames, setHostedGames] = useState([]);
   const [hostedGamesLoading, setHostedGamesLoading] = useState(true);
   const [selectedGameSport, setSelectedGameSport] = useState("ALL SPORTS");
+  const [activeTab, setActiveTab] = useState("venues");
+  const [showInterests, setShowInterests] = useState(false);
+  const [players, setPlayers] = useState([]);
 
   useEffect(() => {
     if (isLoggedIn && role === 'user' && user && (!user.sportTypes || user.sportTypes.length === 0)) {
@@ -200,19 +198,7 @@ export default function Home() {
       }
     };
 
-    const fetchFollowingStatus = async () => {
-      if (!isLoggedIn) return;
-      try {
-        const response = await axiosInstance.get("/api/user/players/network");
-        const ids = (response.data.following || []).filter(p => p).map(p => p._id);
-        setFollowingIds(ids);
-      } catch (error) {
-        console.error("Error fetching network:", error);
-      }
-    };
-
     fetchPlayers();
-    fetchFollowingStatus();
   }, [playerFilters, userLocation, isLoggedIn]);
 
   useEffect(() => {
@@ -251,14 +237,16 @@ export default function Home() {
       const isFollowing = followingIds.includes(p._id);
       try {
         const endpoint = `/api/user/players/${p._id}/${isFollowing ? 'unfollow' : 'follow'}`;
-        await axiosInstance.post(endpoint);
+        const response = await axiosInstance.post(endpoint);
         
-        if (isFollowing) {
-          setFollowingIds(prev => prev.filter(id => id !== p._id));
-          toast.success(`Unfollowed ${p.name}`);
-        } else {
-          setFollowingIds(prev => [...prev, p._id]);
-          toast.success(`Following ${p.name}`);
+        if (response.data.success) {
+          if (isFollowing) {
+            dispatch(unfollowUser(p._id));
+            toast.success(`Unfollowed ${p.name}`);
+          } else {
+            dispatch(followUser(p._id));
+            toast.success(`Following ${p.name}`);
+          }
         }
       } catch (err) {
         console.error("Follow toggle failed:", err);
@@ -428,8 +416,8 @@ export default function Home() {
 
         {/* Venue grid */}
         {loading || turfLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[...Array(4)].map((_, i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[...Array(8)].map((_, i) => (
               <div key={i} className="rounded-2xl border animate-pulse" style={{ height: 320, backgroundColor: "#111", borderColor: BDR }} />
             ))}
           </div>
@@ -448,7 +436,7 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             {(turfs || []).slice(0, 8).map((t, i) => (
               <Link to={`/turf/${t._id}`} key={t._id} className="bms-card group flex flex-col no-underline bg-[#111] rounded-2xl border border-[#2a2a2a] overflow-hidden">
                 <div className="relative overflow-hidden" style={{ height: 180 }}>
@@ -590,23 +578,25 @@ export default function Home() {
                         </div>
 
                         {/* Follow Button */}
-                        <button 
-                          onClick={(e) => handleFollowToggle(e, p)}
-                          className={`w-full py-3 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.15em] transition-all duration-300 mt-auto
-                            ${isFollowing 
-                              ? 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10' 
-                              : 'bg-[#84CC16]/10 border border-[#84CC16]/20 text-[#84CC16] hover:bg-[#84CC16] hover:text-black hover:scale-[1.02]'}`}
-                        >
-                          {isFollowing ? (
-                            <>
-                              <CheckCircle size={14} /> Following
-                            </>
-                          ) : (
-                            <>
-                              <Plus size={14} /> Follow
-                            </>
-                          )}
-                        </button>
+                        {user?._id !== p._id && (
+                          <button 
+                            onClick={(e) => handleFollowToggle(e, p)}
+                            className={`w-full py-3 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.15em] transition-all duration-300 mt-auto
+                              ${isFollowing 
+                                ? 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10' 
+                                : 'bg-[#84CC16]/10 border border-[#84CC16]/20 text-[#84CC16] hover:bg-[#84CC16] hover:text-black hover:scale-[1.02]'}`}
+                          >
+                            {isFollowing ? (
+                              <>
+                                <CheckCircle size={14} /> Following
+                              </>
+                            ) : (
+                              <>
+                                <Plus size={14} /> Follow
+                              </>
+                            )}
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

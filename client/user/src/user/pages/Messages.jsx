@@ -31,13 +31,20 @@ const Messages = () => {
 
   return (
     <div className="h-[calc(100vh-80px)] flex flex-col md:flex-row bg-[#0a0a0a] overflow-hidden">
-      <ChatSidebar 
-        onSelectChat={setSelectedChat} 
-        selectedChatId={selectedChat?._id}
-        onCreateGroup={() => setIsModalOpen(true)}
-      />
+      <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} w-full md:w-80 h-full`}>
+        <ChatSidebar 
+          onSelectChat={setSelectedChat} 
+          selectedChatId={selectedChat?._id}
+          onCreateGroup={() => setIsModalOpen(true)}
+        />
+      </div>
       
-      <ChatWindow chat={selectedChat} />
+      <div className={`${selectedChat ? 'flex' : 'hidden md:flex'} flex-1 h-full`}>
+        <ChatWindow 
+          chat={selectedChat} 
+          onBack={() => setSelectedChat(null)}
+        />
+      </div>
 
       {isModalOpen && (
         <CreateGroupModal 

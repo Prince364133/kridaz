@@ -70,9 +70,18 @@ const VenueOwnerSignUp = () => {
   const nextStep = async () => {
     let fields = [];
     if (currentStep === 1) {
-      fields = ["name", "email", "phone", "gender", "location", "password", "confirmPassword"];
+      fields = ["name", "username", "email", "phone", "gender", "location", "password", "confirmPassword"];
     } else if (currentStep === 2) {
-      fields = ["businessDetails.businessName", "businessDetails.address", "businessDetails.registrationNumber"];
+      fields = [
+        "businessDetails.businessName", 
+        "businessDetails.address", 
+        "businessDetails.registrationNumber",
+        "businessDetails.city",
+        "businessDetails.state",
+        "businessDetails.zipCode",
+        "businessDetails.experience",
+        "businessDetails.specialization"
+      ];
     }
 
     const isValid = await trigger(fields);
@@ -129,24 +138,24 @@ const VenueOwnerSignUp = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#000] relative overflow-hidden flex flex-col items-center justify-start pt-24 lg:pt-32 pb-20 font-sans text-white">
-      {/* Background decoration */}
+    <div className="min-h-screen bg-[#000] relative overflow-hidden flex flex-col items-center justify-start pt-24 lg:pt-32 pb-20 font-sans">
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-black/95 to-[#84CC16]/5" />
-        <div className="absolute top-1/3 right-0 w-[600px] h-[600px] bg-[#84CC16]/5 blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-black/95 to-lime-900/10" />
+        <div className="absolute top-1/4 -right-20 w-[600px] h-[600px] bg-[#84CC16]/5 blur-[120px] rounded-full pointer-events-none" />
       </div>
 
       <div className={`relative z-10 w-full max-w-[1300px] grid lg:grid-cols-5 gap-0 lg:gap-24 items-start px-6 transition-all duration-1000 transform ${mounted ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
-
-        {/* Left Side: Progress & Info */}
+        
+        {/* Left Side: Info */}
         <div className="hidden lg:flex lg:col-span-2 flex-col space-y-12 sticky top-32">
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#84CC16]/20 bg-[#84CC16]/5">
-              <Building2 size={12} className="text-[#84CC16]" />
-              <span className="text-[10px] font-bold tracking-[0.2em] text-[#84CC16] uppercase">Venue Partner Program</span>
+              <Zap size={12} className="text-[#84CC16]" />
+              <span className="text-[10px] font-bold tracking-[0.2em] text-[#84CC16] uppercase">Partner Program</span>
             </div>
             <h1 className="text-7xl xl:text-8xl font-bold text-white leading-[0.9] tracking-tight uppercase">
-              OWN YOUR <br />
+              SCALE <br />
+              YOUR <br />
               <span className="text-[#84CC16]">VENUE.</span>
             </h1>
             <p className="text-sm text-white/40 uppercase tracking-widest max-w-sm leading-relaxed">
@@ -295,6 +304,7 @@ const VenueOwnerSignUp = () => {
                           <Lock size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
                           <input {...register("password")} type="password" placeholder="••••••••" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all" />
                         </div>
+                        {errors.password && <p className="text-red-400 text-xs ml-1">{errors.password.message}</p>}
                       </div>
 
                       <div className="space-y-3 group/field">
@@ -303,6 +313,7 @@ const VenueOwnerSignUp = () => {
                           <ShieldCheck size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
                           <input {...register("confirmPassword")} type="password" placeholder="••••••••" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all" />
                         </div>
+                        {errors.confirmPassword && <p className="text-red-400 text-xs ml-1">{errors.confirmPassword.message}</p>}
                       </div>
                     </div>
 
@@ -322,6 +333,7 @@ const VenueOwnerSignUp = () => {
                           <Building2 size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
                           <input {...register("businessDetails.businessName")} type="text" placeholder="e.g. Dream Arena Sports Complex" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all" />
                         </div>
+                        {errors.businessDetails?.businessName && <p className="text-red-400 text-xs ml-1">{errors.businessDetails.businessName.message}</p>}
                       </div>
 
                       <div className="space-y-3 group/field">
@@ -330,19 +342,25 @@ const VenueOwnerSignUp = () => {
                           <FileText size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
                           <input {...register("businessDetails.registrationNumber")} type="text" placeholder="GSTIN or PAN" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all" />
                         </div>
+                        {errors.businessDetails?.registrationNumber && <p className="text-red-400 text-xs ml-1">{errors.businessDetails.registrationNumber.message}</p>}
                       </div>
 
                       <div className="space-y-3 group/field">
-                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-[#84CC16] transition-colors ml-1">Contact Person Role</label>
+                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-[#84CC16] transition-colors ml-1">Years of Operation</label>
                         <div className="relative">
-                          <UserSquare2 size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10 z-10 pointer-events-none" />
-                          <select {...register("businessDetails.role")} className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm appearance-none outline-none transition-all cursor-pointer" defaultValue="">
-                            <option value="" disabled className="bg-black text-white/40">Select Role</option>
-                            <option value="Owner" className="bg-black text-white">Owner</option>
-                            <option value="Manager" className="bg-black text-white">Manager</option>
-                            <option value="Authorized Representative" className="bg-black text-white">Authorized Representative</option>
-                          </select>
+                          <BarChart3 size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
+                          <input {...register("businessDetails.experience")} type="text" placeholder="e.g. 5 Years" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all" />
                         </div>
+                        {errors.businessDetails?.experience && <p className="text-red-400 text-xs ml-1">{errors.businessDetails.experience.message}</p>}
+                      </div>
+
+                      <div className="space-y-3 group/field">
+                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-[#84CC16] transition-colors ml-1">Facility Type / Specialization</label>
+                        <div className="relative">
+                          <Locate size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
+                          <input {...register("businessDetails.specialization")} type="text" placeholder="e.g. Multi-sport Complex" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all" />
+                        </div>
+                        {errors.businessDetails?.specialization && <p className="text-red-400 text-xs ml-1">{errors.businessDetails.specialization.message}</p>}
                       </div>
 
                       <div className="space-y-3 md:col-span-2 group/field">
@@ -351,6 +369,25 @@ const VenueOwnerSignUp = () => {
                           <MapPin size={14} className="absolute left-4 top-4 text-white/10" />
                           <textarea {...register("businessDetails.address")} placeholder="Complete street address with landmarks" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl min-h-[100px] p-4 pl-12 text-white text-sm placeholder:text-white/10 outline-none transition-all resize-none"></textarea>
                         </div>
+                        {errors.businessDetails?.address && <p className="text-red-400 text-xs ml-1">{errors.businessDetails.address.message}</p>}
+                      </div>
+
+                      <div className="space-y-3 group/field">
+                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-[#84CC16] transition-colors ml-1">City</label>
+                        <input {...register("businessDetails.city")} type="text" placeholder="City" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 px-4 text-white text-sm placeholder:text-white/10 outline-none transition-all" />
+                        {errors.businessDetails?.city && <p className="text-red-400 text-xs ml-1">{errors.businessDetails.city.message}</p>}
+                      </div>
+
+                      <div className="space-y-3 group/field">
+                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-[#84CC16] transition-colors ml-1">State</label>
+                        <input {...register("businessDetails.state")} type="text" placeholder="State" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 px-4 text-white text-sm placeholder:text-white/10 outline-none transition-all" />
+                        {errors.businessDetails?.state && <p className="text-red-400 text-xs ml-1">{errors.businessDetails.state.message}</p>}
+                      </div>
+
+                      <div className="space-y-3 group/field">
+                        <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-[#84CC16] transition-colors ml-1">Zip Code</label>
+                        <input {...register("businessDetails.zipCode")} type="text" placeholder="Zip Code" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 px-4 text-white text-sm placeholder:text-white/10 outline-none transition-all" />
+                        {errors.businessDetails?.zipCode && <p className="text-red-400 text-xs ml-1">{errors.businessDetails.zipCode.message}</p>}
                       </div>
                     </div>
 
@@ -385,6 +422,8 @@ const VenueOwnerSignUp = () => {
                       <FileUpload label="GMB Profile Screenshot" onUploadSuccess={(url) => handleDocUpload(url, "GMB Screenshot")} />
                     </div>
 
+                    {errors.documents && <p className="text-red-400 text-xs mt-4">{errors.documents.message}</p>}
+
                     <div className="flex gap-4 mt-10">
                       <button type="button" onClick={prevStep} className="flex-1 bg-white/5 hover:bg-white/10 text-white h-16 rounded-xl font-bold uppercase tracking-wider transition-all border border-white/10">
                         Back
@@ -399,12 +438,20 @@ const VenueOwnerSignUp = () => {
 
               </form>
 
-              <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 mt-10">
-                <p className="text-xs text-white/20 uppercase tracking-widest">Already have an account?</p>
-                <Link to="/login" className="flex items-center gap-2 text-[#84CC16] hover:text-white transition-colors text-xs font-bold uppercase tracking-widest group">
-                  Login to Partner Portal
-                  <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
+              <div className="mt-14 pt-10 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-2xl bg-[#84CC16]/10">
+                    <ShieldCheck size={20} className="text-[#84CC16]" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white uppercase tracking-widest">Enterprise Grade</p>
+                    <p className="text-[10px] text-white/20 uppercase tracking-[0.2em]">Security & Privacy</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-8">
+                  <Link to="/login" className="text-[10px] font-bold text-white/20 hover:text-white uppercase tracking-[0.2em] transition-colors">Already registered?</Link>
+                  <Link to="/partners" className="text-[10px] font-bold text-[#84CC16] hover:text-[#a3e635] uppercase tracking-[0.2em] transition-colors">Not a venue owner?</Link>
+                </div>
               </div>
             </div>
           </div>

@@ -13,10 +13,11 @@ import {
   Check,
   CheckCheck,
   Loader2,
-  MessageSquare
+  MessageSquare,
+  ArrowLeft
 } from 'lucide-react';
 
-const ChatWindow = ({ chat }) => {
+const ChatWindow = ({ chat, onBack }) => {
   const { user } = useSelector((state) => state.auth);
   const socket = useSocket();
   const [message, setMessage] = useState('');
@@ -172,7 +173,13 @@ const ChatWindow = ({ chat }) => {
     <div className="flex-1 flex flex-col h-full bg-black/40 relative overflow-hidden">
       {/* Header */}
       <div className="p-4 md:p-6 border-b border-white/10 flex items-center justify-between bg-black/60 backdrop-blur-xl sticky top-0 z-20">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 md:gap-4">
+          <button 
+            onClick={onBack}
+            className="md:hidden w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all mr-1"
+          >
+            <ArrowLeft size={20} />
+          </button>
           <div className="relative shrink-0">
             {renderAvatar()}
             {!chat.isGroupChat && (
@@ -180,7 +187,7 @@ const ChatWindow = ({ chat }) => {
             )}
           </div>
           <div>
-            <h3 className="text-white font-black text-sm uppercase tracking-wide">{getChatName()}</h3>
+            <h3 className="text-white font-black text-sm uppercase tracking-wide truncate max-w-[120px] sm:max-w-none">{getChatName()}</h3>
             <p className="text-[10px] text-[#84CC16] font-bold uppercase tracking-widest opacity-60">
               {chat.isGroupChat ? `${chat.users?.length || 0} Members Online` : "Active Now"}
             </p>

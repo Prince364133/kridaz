@@ -8,9 +8,10 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { login, updateUser } from "@redux/slices/authSlice";
+import { login, updateUser, followUser, unfollowUser } from "@redux/slices/authSlice";
 import useBookingHistory from "../hooks/useBookingHistory";
 import useWriteReview from "../hooks/useWriteReview";
+import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import TurfBookingHistorySkeleton from "../components/ui/TurfBookingHistorySkeleton";
 import TurfBookingHistory from "../components/turf/TurfBookingHistory";
 import WriteReview from "../components/reviews/WriteReview";
@@ -31,7 +32,8 @@ const getMemberLevel = (count) => {
 
 export default function Profile() {
   const { userId } = useParams();
-  const { user: currentUser, role, token } = useSelector((state) => state.auth);
+  const { user: currentUser, role, token, followingIds } = useSelector((state) => state.auth);
+  const { gateInteraction } = useLoginOnDemand();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -81,49 +83,37 @@ export default function Profile() {
 
   // Network (Followers/Following)
   const [networkModal, setNetworkModal] = useState({ isOpen: false, type: "followers" });
-  const [myFollowingIds, setMyFollowingIds] = useState([]);
 
-  useEffect(() => {
-    if (currentUser) {
-      fetchMyFollowing();
-    }
-  }, [currentUser?._id]);
 
-  const fetchMyFollowing = async () => {
-    try {
-      const response = await axiosInstance.get("/api/user/players/network");
-      if (response.data.success) {
-        setMyFollowingIds((response.data.following || []).filter(u => u).map(u => u._id));
-      }
-    } catch (error) {
-      console.error("Error fetching my network:", error);
-    }
+
+  const onFollowClick = () => {
+    gateInteraction(() => handleFollowToggle());
   };
 
   const handleFollowToggle = async () => {
-    if (!currentUser) {
-      toast.error("Please login to follow players");
-      return;
-    }
-    const isFollowing = myFollowingIds.includes(targetUserId);
+    const isFollowing = followingIds.includes(targetUserId);
     try {
       if (isFollowing) {
-        await axiosInstance.post(`/api/user/players/${targetUserId}/unfollow`);
-        setMyFollowingIds(myFollowingIds.filter(id => id !== targetUserId));
-        // Update local profile state to reflect follower count change
-        setProfileUser(prev => ({
-          ...prev,
-          followers: prev.followers.filter(id => id !== currentUser._id)
-        }));
-        toast.success(`Unfollowed ${profileUser.name}`);
+        const response = await axiosInstance.post(`/api/user/players/${targetUserId}/unfollow`);
+        if (response.data.success) {
+          dispatch(unfollowUser(targetUserId));
+          // Update local profile state to reflect follower count change
+          setProfileUser(prev => ({
+            ...prev,
+            followers: prev.followers.filter(id => id !== currentUser._id)
+          }));
+          toast.success(`Unfollowed ${profileUser.name}`);
+        }
       } else {
-        await axiosInstance.post(`/api/user/players/${targetUserId}/follow`);
-        setMyFollowingIds([...myFollowingIds, targetUserId]);
-        setProfileUser(prev => ({
-          ...prev,
-          followers: [...(prev.followers || []), currentUser._id]
-        }));
-        toast.success(`Following ${profileUser.name}`);
+        const response = await axiosInstance.post(`/api/user/players/${targetUserId}/follow`);
+        if (response.data.success) {
+          dispatch(followUser(targetUserId));
+          setProfileUser(prev => ({
+            ...prev,
+            followers: [...(prev.followers || []), currentUser._id]
+          }));
+          toast.success(`Following ${profileUser.name}`);
+        }
       }
     } catch (error) {
       toast.error("Action failed");
@@ -422,14 +412,14 @@ export default function Profile() {
                   </button>
 
                   <button
-                    onClick={handleFollowToggle}
+                    onClick={onFollowClick}
                     className={`px-4 md:px-8 py-2 md:py-2.5 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all ${
-                      myFollowingIds.includes(targetUserId)
+                      followingIds.includes(targetUserId)
                         ? "bg-white/5 text-white/20 border border-white/10 hover:bg-white/10"
                         : "bg-[#84CC16] text-black hover:scale-105 active:scale-95 shadow-lg shadow-[#84CC16]/20"
                     }`}
                   >
-                    {myFollowingIds.includes(targetUserId) ? "Following" : "Follow"}
+                    {followingIds.includes(targetUserId) ? "Following" : "Follow"}
                   </button>
                 </div>
               )}

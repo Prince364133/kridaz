@@ -2,24 +2,24 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { X, Search, UserPlus, UserMinus, Loader2, MapPin, Users } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { followUser, unfollowUser } from "@redux/slices/authSlice";
+import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import toast from "react-hot-toast";
 
 const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
-  const { user: currentUser } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const { user: currentUser, followingIds } = useSelector((state) => state.auth);
+  const { gateInteraction } = useLoginOnDemand();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [followingIds, setFollowingIds] = useState([]);
 
   useEffect(() => {
     if (isOpen && userId) {
       fetchNetwork();
-      if (currentUser) {
-        fetchMyFollowing();
-      }
     }
-  }, [isOpen, userId, type, currentUser]);
+  }, [isOpen, userId, type]);
 
   const fetchNetwork = async () => {
     setLoading(true);
@@ -35,36 +35,30 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
     }
   };
 
-  const fetchMyFollowing = async () => {
-    try {
-      const response = await axiosInstance.get("/api/user/players/network");
-      if (response.data.success) {
-        setFollowingIds(response.data.following.map(u => u._id));
-      }
-    } catch (error) {
-      console.error("Error fetching my network:", error);
-    }
-  };
-
   const handleFollowToggle = async (targetUser) => {
-    if (!currentUser) {
-      toast.error("Please login to follow players");
-      return;
-    }
-    const isFollowing = followingIds.includes(targetUser._id);
-    try {
-      if (isFollowing) {
-        await axiosInstance.post(`/api/user/players/${targetUser._id}/unfollow`);
-        setFollowingIds(followingIds.filter(id => id !== targetUser._id));
-        toast.success(`Unfollowed ${targetUser.name}`);
-      } else {
-        await axiosInstance.post(`/api/user/players/${targetUser._id}/follow`);
-        setFollowingIds([...followingIds, targetUser._id]);
-        toast.success(`Following ${targetUser.name}`);
+    gateInteraction(async () => {
+      const isFollowing = followingIds.includes(targetUser._id);
+      try {
+        if (isFollowing) {
+          const response = await axiosInstance.post(`/api/user/players/${targetUser._id}/unfollow`);
+          if (response.data.success) {
+            dispatch(unfollowUser(targetUser._id));
+            toast.success(`Unfollowed ${targetUser.name}`);
+          }
+        } else {
+          const response = await axiosInstance.post(`/api/user/players/${targetUser._id}/follow`);
+          if (response.data.success) {
+            dispatch(followUser(targetUser._id));
+            toast.success(`Following ${targetUser.name}`);
+          }
+        }
+      } catch (error) {
+        toast.error("Action failed");
       }
-    } catch (error) {
-      toast.error("Action failed");
-    }
+    }, { 
+      title: "Follow Player", 
+      message: `Sign in to follow ${targetUser.name} and stay updated.` 
+    });
   };
 
   const filteredUsers = users.filter(user => 
@@ -118,60 +112,65 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
             </div>
           ) : sortedUsers.length > 0 ? (
             <div className="space-y-1">
-              {sortedUsers.map((user) => (
-                <div key={user._id} className="flex items-center justify-between p-3 hover:bg-white/5 rounded-2xl transition-colors group">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <Link to={`/profile/${user._id}`} onClick={onClose} className="shrink-0 w-10 h-10 rounded-xl overflow-hidden bg-white/5 border border-white/10">
-                      {user.profilePicture ? (
-                        <img 
-                          src={user.profilePicture} 
-                          alt="" 
-                          className="w-full h-full object-cover" 
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div 
-                        className="w-full h-full flex items-center justify-center bg-[#84CC16]/10"
-                        style={{ display: user.profilePicture ? 'none' : 'flex' }}
-                      >
-                        <span className="text-[#84CC16] font-black text-[10px]">
-                          {user.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
-                        </span>
-                      </div>
-                    </Link>
-                    <div className="overflow-hidden">
-                      <Link to={`/profile/${user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#84CC16] transition-colors truncate">
-                        {user.name}
+              {sortedUsers.map((user) => {
+                const isFollowing = followingIds.includes(user._id);
+                const isSelf = currentUser?._id === user._id;
+
+                return (
+                  <div key={user._id} className="flex items-center justify-between p-3 hover:bg-white/5 rounded-2xl transition-colors group">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <Link to={`/profile/${user._id}`} onClick={onClose} className="shrink-0 w-10 h-10 rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                        {user.profilePicture ? (
+                          <img 
+                            src={user.profilePicture} 
+                            alt="" 
+                            className="w-full h-full object-cover" 
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className="w-full h-full flex items-center justify-center bg-[#84CC16]/10"
+                          style={{ display: user.profilePicture ? 'none' : 'flex' }}
+                        >
+                          <span className="text-[#84CC16] font-black text-[10px]">
+                            {user.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
+                          </span>
+                        </div>
                       </Link>
-                      <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase tracking-widest truncate">
-                        <span>@{user.username || user.businessDetails?.businessName || "player"}</span>
-                        {followingIds.includes(user._id) && (
-                          <>
-                            <span className="text-white/20">•</span>
-                            <span className="text-[#84CC16]/60">Following</span>
-                          </>
-                        )}
+                      <div className="overflow-hidden">
+                        <Link to={`/profile/${user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#84CC16] transition-colors truncate">
+                          {user.name}
+                        </Link>
+                        <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase tracking-widest truncate">
+                          <span>@{user.username || user.businessDetails?.businessName || "player"}</span>
+                          {isFollowing && (
+                            <>
+                              <span className="text-white/20">•</span>
+                              <span className="text-[#84CC16]/60">Following</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {currentUser?._id !== user._id && (
-                    <button
-                      onClick={() => handleFollowToggle(user)}
-                      className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
-                        followingIds.includes(user._id)
-                          ? "bg-white/5 text-white/40 border border-white/10 hover:bg-white/10"
-                          : "bg-[#84CC16] text-black hover:scale-105 active:scale-95"
-                      }`}
-                    >
-                      {followingIds.includes(user._id) ? "Following" : "Follow"}
-                    </button>
-                  )}
-                </div>
-              ))}
+                    {!isSelf && (
+                      <button
+                        onClick={() => handleFollowToggle(user)}
+                        className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
+                          isFollowing
+                            ? "bg-white/5 text-white/40 border border-white/10 hover:bg-white/10"
+                            : "bg-[#84CC16] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(132,204,22,0.15)]"
+                        }`}
+                      >
+                        {isFollowing ? "Following" : "Follow"}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-white/20 space-y-2">

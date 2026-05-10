@@ -175,6 +175,50 @@ export default function BusinessRegistration() {
     data.append("portfolioUrl", formData.portfolioUrl);
     data.append("businessDetails", JSON.stringify(formData.businessDetails));
 
+    // Mandatory field check
+    const { businessName, registrationNumber, address, city, state, zipCode, experience, specialization } = formData.businessDetails;
+    
+    // Determine which fields are required based on role
+    const isOwner = formData.role === 'owner' || formData.role === 'VENUE_OWNER';
+    
+    if (isOwner) {
+      if (!businessName || !registrationNumber) {
+        toast.error("Please fill in all business details");
+        setLoading(false);
+        return;
+      }
+    } else {
+      if (!specialization || !experience) {
+        toast.error("Please fill in all professional details");
+        setLoading(false);
+        return;
+      }
+    }
+
+    if (!address || !city || !state || !zipCode || !formData.phone) {
+      toast.error("Please fill in all contact and location details");
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.portfolioUrl) {
+      toast.error("Please provide a portfolio or social media link");
+      setLoading(false);
+      return;
+    }
+
+    // Document validation
+    const requiredDocs = isOwner 
+      ? ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST', 'VENUE']
+      : ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST'];
+
+    const missingDocs = requiredDocs.filter(doc => !files[doc]);
+    if (missingDocs.length > 0) {
+      toast.error(`Please upload all required documents: ${missingDocs.join(', ')}`);
+      setLoading(false);
+      return;
+    }
+
     // Append files with specific names for the backend to identify
     Object.keys(files).forEach(key => {
       if (files[key]) {
@@ -497,7 +541,7 @@ export default function BusinessRegistration() {
                  </div>
 
                  <div className="pt-4 border-t border-white/5">
-                   <label className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 block">Optional Portfolio Link</label>
+                   <label className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 block">Mandatory Portfolio Link</label>
                    <input 
                      type="url"
                      name="portfolioUrl"
