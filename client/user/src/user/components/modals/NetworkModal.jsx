@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { X, Search, UserPlus, UserMinus, Loader2, MapPin, Users } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -79,20 +79,20 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-[#0A0A0A] border border-white/10 w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
-        <div className="flex items-center justify-between p-4 border-b border-white/5">
+      <div className="bg-[#000000] border border-[#2D2D2D] w-full max-w-md rounded-[8px] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+        <div className="flex items-center justify-between p-4 border-b border-[#2D2D2D]">
           <h2 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
             {type === "followers" ? "Followers" : "Following"}
-            <span className="text-[#84CC16] bg-[#84CC16]/10 px-2 py-0.5 rounded-full text-[10px]">
+            <span className="text-[#CCFF00] bg-[#CCFF00]/10 px-2 py-0.5 rounded-full text-[10px]">
               {initialCount}
             </span>
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors text-white/40 hover:text-white">
+          <button onClick={onClose} className="p-2 hover:bg-[#000000] rounded-full transition-colors text-white/40 hover:text-white">
             <X size={20} />
           </button>
         </div>
 
-        <div className="p-4 border-b border-white/5">
+        <div className="p-4 border-b border-[#2D2D2D]">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" size={16} />
             <input
@@ -100,7 +100,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
               placeholder="SEARCH..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder:text-white/20 outline-none focus:border-[#84CC16]/50 transition-all uppercase tracking-widest"
+              className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[6px] py-2.5 pl-10 pr-4 text-xs text-white placeholder:text-white/20 outline-none focus:border-[#CCFF00]/50 transition-all uppercase tracking-widest"
             />
           </div>
         </div>
@@ -108,7 +108,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
         <div className="h-[400px] overflow-y-auto no-scrollbar p-2">
           {loading ? (
             <div className="h-full flex items-center justify-center">
-              <Loader2 className="animate-spin text-[#84CC16]" size={32} />
+              <Loader2 className="animate-spin text-[#CCFF00]" size={32} />
             </div>
           ) : sortedUsers.length > 0 ? (
             <div className="space-y-1">
@@ -117,9 +117,9 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                 const isSelf = currentUser?._id === user._id;
 
                 return (
-                  <div key={user._id} className="flex items-center justify-between p-3 hover:bg-white/5 rounded-2xl transition-colors group">
+                  <div key={user._id} className="flex items-center justify-between p-3 hover:bg-[#000000] rounded-[8px] transition-colors group">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <Link to={`/profile/${user._id}`} onClick={onClose} className="shrink-0 w-10 h-10 rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                      <Link to={`/profile/${user._id}`} onClick={onClose} className="shrink-0 w-10 h-10 rounded-[6px] overflow-hidden bg-[#000000] border border-[#2D2D2D]">
                         {user.profilePicture ? (
                           <img 
                             src={user.profilePicture} 
@@ -132,24 +132,24 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                           />
                         ) : null}
                         <div 
-                          className="w-full h-full flex items-center justify-center bg-[#84CC16]/10"
+                          className="w-full h-full flex items-center justify-center bg-[#CCFF00]/10"
                           style={{ display: user.profilePicture ? 'none' : 'flex' }}
                         >
-                          <span className="text-[#84CC16] font-black text-[10px]">
+                          <span className="text-[#CCFF00] font-black text-[10px]">
                             {user.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
                           </span>
                         </div>
                       </Link>
                       <div className="overflow-hidden">
-                        <Link to={`/profile/${user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#84CC16] transition-colors truncate">
+                        <Link to={`/profile/${user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#CCFF00] transition-colors truncate">
                           {user.name}
                         </Link>
                         <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase tracking-widest truncate">
                           <span>@{user.username || user.businessDetails?.businessName || "player"}</span>
                           {isFollowing && (
                             <>
-                              <span className="text-white/20">•</span>
-                              <span className="text-[#84CC16]/60">Following</span>
+                              <span className="text-white/20">â€¢</span>
+                              <span className="text-[#CCFF00]/60">Following</span>
                             </>
                           )}
                         </div>
@@ -161,8 +161,8 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                         onClick={() => handleFollowToggle(user)}
                         className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
                           isFollowing
-                            ? "bg-white/5 text-white/40 border border-white/10 hover:bg-white/10"
-                            : "bg-[#84CC16] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(132,204,22,0.15)]"
+                            ? "bg-[#000000] text-white/40 border border-[#2D2D2D] hover:bg-white/10"
+                            : "bg-[#CCFF00] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(132,204,22,0.15)]"
                         }`}
                       >
                         {isFollowing ? "Following" : "Follow"}
@@ -185,3 +185,4 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
 };
 
 export default NetworkModal;
+

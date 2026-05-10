@@ -150,6 +150,8 @@ export const verifyPayment = async (req, res) => {
       user: userId,
       turf: turfId,
       timeSlot: timeSlot._id,
+      playStartTime: adjustedStartTime,
+      playEndTime: adjustedEndTime,
       totalPrice,
       advanceAmount: advanceAmount || totalPrice,
       balanceAmount: balanceAmount || 0,
@@ -165,7 +167,17 @@ export const verifyPayment = async (req, res) => {
 
     // Update Owner's pending balance (only the amount PAID online goes to pending)
     const amountPaidOnline = advanceAmount || totalPrice;
-    await Owner.findByIdAndUpdate(turf.owner._id, { $inc: { pendingBalance: amountPaidOnline } });
+    
+    // Robust owner lookup for balance update
+    const targetOwner = await Owner.findOne({ 
+      $or: [{ _id: turf.owner._id }, { userId: turf.owner._id }] 
+    });
+
+    if (targetOwner) {
+      await Owner.findByIdAndUpdate(targetOwner._id, { $inc: { pendingBalance: amountPaidOnline } });
+    } else {
+      console.warn(`WARNING: Could not find owner record to update balance for turf: ${turf._id}`);
+    }
 
     // If it's a regular user, update their bookings array
     if (user.constructor.modelName === "User") {
@@ -363,6 +375,8 @@ export const bookWithWallet = async (req, res) => {
           user: userId,
           turf: turfId,
           timeSlot: timeSlot[0]._id,
+          playStartTime: adjustedStartTime,
+          playEndTime: adjustedEndTime,
           totalPrice: finalPrice,
           advanceAmount: amountToDeduct,
           balanceAmount: balanceAmount || (finalPrice - amountToDeduct),
@@ -544,20 +558,27 @@ export const getUserBookings = async (req, res) => {
 
 export const getOwnerBookings = async (req, res) => {
   try {
-    const ownerId = req.owner.id;
-    const userId = req.owner.id; // Fallback for integrated accounts
+    // req.owner.ownerId = Owner document _id (from JWT), req.owner.id = User _id
+    const ownerId = req.owner.ownerId || req.owner.id;
+    const userId = req.owner.id;
 
-    // Unified owner lookup
-    const ownerRecord = await Owner.findOne({ 
-      $or: [{ _id: ownerId }, { userId: userId }] 
+    // Unified owner lookup: match by Owner._id or Owner.userId
+    const ownerRecord = await Owner.findOne({
+      $or: [{ _id: ownerId }, { userId: userId }]
     });
 
     if (!ownerRecord) {
       return res.status(200).json([]);
     }
 
-    const ownedTurfs = await Turf.find({ owner: ownerRecord._id }).select("_id");
-    
+    // Dual ownership lookup for turfs
+    const ownedTurfs = await Turf.find({
+      $or: [
+        { owner: ownerRecord._id },
+        { owner: ownerRecord.userId }
+      ]
+    }).select("_id");
+
     if (ownedTurfs.length === 0) {
       return res.status(200).json([]);
     }
@@ -569,22 +590,35 @@ export const getOwnerBookings = async (req, res) => {
       { $lookup: { from: "users", localField: "user", foreignField: "_id", as: "user" } },
       { $lookup: { from: "turves", localField: "turf", foreignField: "_id", as: "turf" } },
       { $lookup: { from: "timeslots", localField: "timeSlot", foreignField: "_id", as: "timeSlot" } },
+      // preserveNullAndEmptyArrays: true so bookings with missing docs still appear
       { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
-      { $unwind: "$turf" },
-      { $unwind: "$timeSlot" },
+      { $unwind: { path: "$turf", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$timeSlot", preserveNullAndEmptyArrays: true } },
       {
         $project: {
           id: "$_id",
           turfName: "$turf.name",
-          userName: { $ifNull: ["$user.name", "$guestDetails.name", "Partner/Other"] },
+          // Prefer registered user name, then guest name, then fallback label
+          userName: {
+            $ifNull: [
+              "$user.name",
+              { $ifNull: ["$guestDetails.name", "Partner/Other"] }
+            ]
+          },
           bookingSource: 1,
           totalPrice: 1,
           bookingDate: "$createdAt",
           duration: {
-            $divide: [
-              { $subtract: ["$timeSlot.endTime", "$timeSlot.startTime"] },
-              1000 * 60 * 60,
-            ],
+            $cond: {
+              if: { $and: ["$timeSlot.startTime", "$timeSlot.endTime"] },
+              then: {
+                $divide: [
+                  { $subtract: ["$timeSlot.endTime", "$timeSlot.startTime"] },
+                  1000 * 60 * 60
+                ]
+              },
+              else: 1 // fallback 1-hour duration when timeslot is missing
+            }
           },
           startTime: "$timeSlot.startTime",
           endTime: "$timeSlot.endTime",
@@ -753,6 +787,8 @@ export const createManualBooking = async (req, res) => {
       _id: bookingId,
       turf: turfId,
       timeSlot: timeSlot._id,
+      playStartTime: adjustedStartTime,
+      playEndTime: adjustedEndTime,
       totalPrice,
       qrCode: QRcode,
       payment: { 
@@ -863,5 +899,121 @@ export const downloadInvoice = async (req, res) => {
   } catch (error) {
     console.error("Error generating invoice:", error);
     res.status(500).json({ success: false, message: "Error generating invoice: " + error.message });
+  }
+};
+
+export const cancelBooking = async (req, res) => {
+  const userId = req.user.id || req.user.user;
+  const { id } = req.params;
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const booking = await Booking.findById(id).populate("turf").session(session);
+
+    if (!booking) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+
+    // Security check: ensure user owns this booking
+    if (booking.user.toString() !== userId.toString()) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    // Check if booking is in a cancellable status
+    if (booking.status !== "CONFIRMED" && booking.status !== "PLAYING") {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ success: false, message: "This booking cannot be cancelled at this stage." });
+    }
+
+    // Check if play is more than 72 hours away
+    const playStartTime = new Date(booking.playStartTime);
+    const hoursRemaining = (playStartTime - now) / (1000 * 60 * 60);
+
+    if (hoursRemaining < 72) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ success: false, message: "Cancellations are only allowed at least 72 hours before the slot time." });
+    }
+
+    // Since it's > 72h, it's always eligible for 30% refund
+    const amountPaid = booking.totalPrice; // Total price is refunded 30%
+    const refundAmount = Math.round(amountPaid * 0.3);
+    const message = `Booking cancelled successfully. 30% refund (₹${refundAmount}) has been credited to your wallet.`;
+
+    // 1. Update Booking Status
+    booking.status = "CANCELLED";
+    if (refundAmount > 0) {
+      booking.revenueStatus = "REFUNDED"; // Partially refunded in this case
+    }
+    await booking.save({ session });
+
+    // 2. Refund to Wallet if eligible
+    if (refundAmount > 0) {
+      const user = await User.findById(userId).session(session);
+      if (user) {
+        user.walletBalance = (user.walletBalance || 0) + refundAmount;
+        await user.save({ session });
+
+        await WalletTransaction.create([
+          {
+            user: userId,
+            amount: refundAmount,
+            type: "REFUND",
+            status: "SUCCESS",
+            description: `30% refund for cancelled booking #${booking._id.toString().slice(-6).toUpperCase()}`,
+            bookingId: booking._id,
+          }
+        ], { session });
+      }
+    }
+
+    // 3. Deduct from Owner's pending balance (they get 0 for cancelled bookings)
+    const amountToDeductFromOwner = booking.advanceAmount || booking.totalPrice;
+    const turf = booking.turf;
+    if (turf && turf.owner) {
+      // Find owner record
+      const ownerRecord = await Owner.findOne({ 
+        $or: [{ _id: turf.owner }, { userId: turf.owner }] 
+      }).session(session);
+
+      if (ownerRecord) {
+        ownerRecord.pendingBalance = Math.max(0, (ownerRecord.pendingBalance || 0) - amountToDeductFromOwner);
+        await ownerRecord.save({ session });
+      }
+    }
+
+    // 4. Release TimeSlot (Delete it so it's available for others)
+    if (booking.timeSlot) {
+      await TimeSlot.findByIdAndDelete(booking.timeSlot).session(session);
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // 5. Notify User
+    await createNotification({
+      recipientId: booking.user,
+      recipientModel: 'User',
+      title: "Booking Cancelled",
+      message: isEligibleForRefund 
+        ? `Your booking has been cancelled. 30% refund (₹${refundAmount}) credited to wallet.` 
+        : `Your booking has been cancelled. No refund issued as per policy.`,
+      type: "BOOKING",
+      link: "/profile/bookings"
+    });
+
+    return res.status(200).json({ success: true, message, refundAmount });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Error in cancelBooking:", error);
+    return res.status(500).json({ success: false, message: "Internal server error: " + error.message });
   }
 };

@@ -1,194 +1,342 @@
-import { Clock, MapPin, IndianRupee, Calendar, QrCode, ShieldCheck, Zap, Activity, Wallet, CreditCard, FileText, Ticket } from "lucide-react";
+import {
+  Clock, MapPin, Calendar, QrCode, ShieldCheck, Zap, Activity, Wallet,
+  CreditCard, FileText, Ticket, AlertOctagon, IndianRupee,
+} from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import useBookingHistory from "../../hooks/useBookingHistory";
 import useWriteReview from "../../hooks/useWriteReview";
 import TurfBookingHistorySkeleton from "../../components/ui/TurfBookingHistorySkeleton";
 import WriteReview from "../../components/reviews/WriteReview";
+import RaiseDisputeModal from "../../components/dispute/RaiseDisputeModal";
+
+// ── Design tokens (exact match to OwnerDashboard) ──────────────────────────
+const BG     = "#000000";
+const CARD   = "#000000";
+const BORDER = "#2D2D2D";
+const ACCENT = "#CCFF00";
+const MUTED  = "#878C9F";
+const MUTED2 = "#999999";
+
+// ── Status badge config ────────────────────────────────────────────────────
+const STATUS_META = {
+  CONFIRMED: { label: "Confirmed",     color: ACCENT,    bg: `${ACCENT}15`,  border: `${ACCENT}30`  },
+  CANCELLED: { label: "Cancelled",     color: "#EF4444", bg: "#EF444415",    border: "#EF444430"    },
+  COMPLETED: { label: "Completed",     color: "#10B981", bg: "#10B98115",    border: "#10B98130"    },
+  DISPUTED:  { label: "Under Review",  color: "#F59E0B", bg: "#F59E0B15",    border: "#F59E0B30"    },
+  PLAYING:   { label: "In Progress",   color: "#3B82F6", bg: "#3B82F615",    border: "#3B82F630"    },
+};
+
+// ── Helper: hours until slot ───────────────────────────────────────────────
+const hoursUntil = (dateStr) =>
+  (new Date(dateStr) - new Date()) / (1000 * 60 * 60);
 
 const TurfBookingHistory = () => {
-  const { loading, bookings } = useBookingHistory();
+  const { loading, bookings, cancelBooking } = useBookingHistory();
   const {
-    isReviewModalOpen,
-    rating,
-    review,
-    isSubmitting,
-    openReviewModal,
-    closeReviewModal,
-    handleRatingChange,
-    handleReviewChange,
-    submitReview,
+    isReviewModalOpen, rating, review, isSubmitting,
+    openReviewModal, closeReviewModal,
+    handleRatingChange, handleReviewChange, submitReview,
   } = useWriteReview();
 
-  if (loading) {
-    return <TurfBookingHistorySkeleton />;
-  }
+  const [selectedDisputeBooking, setSelectedDisputeBooking] = useState(null);
+
+  const fetchBookingsRefresh = () => window.location.reload();
+
+  if (loading) return <TurfBookingHistorySkeleton />;
 
   return (
-    <div className="min-h-screen bg-[#000] pt-4 pb-20 px-4 relative overflow-hidden">
-      {/* Decorative Background Elements */}
+    <div className="min-h-screen pb-24 pt-2" style={{ backgroundColor: BG }}>
+      <div className="max-w-4xl mx-auto px-4 space-y-8 lg:space-y-10">
 
-
-      <div className="container mx-auto max-w-4xl relative z-10">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-6 text-center md:text-left">
-          <div className="space-y-3">
-            <div className="flex items-center justify-center md:justify-start gap-3 text-[#84CC16] font-bold text-[10px] uppercase tracking-normal">
-               <Activity size={14} className="animate-pulse" />
-               <span>Booking Management Active</span>
+        {/* ── Page Header ─────────────────────────────────────────────── */}
+        <div
+          className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4"
+          style={{ borderBottom: `1px solid ${BORDER}` }}
+        >
+          <div className="space-y-1">
+            <div className="flex items-center gap-2" style={{ color: ACCENT }}>
+              <Activity size={13} className="animate-pulse" />
+              <span className="text-[10px] font-normal uppercase tracking-[0.3em]">Booking Management</span>
             </div>
-            <h1 className="text-5xl font-bold uppercase tracking-tight text-white">
-              Booking <span className="text-[#84CC16]">History</span>
+            <h1 className="text-3xl lg:text-4xl font-black text-white uppercase tracking-tight">
+              Booking <span style={{ color: ACCENT }}>History</span>
             </h1>
-            <p className="text-gray-400 text-sm max-w-md">
+            <p className="text-[12px]" style={{ color: MUTED2 }}>
               View and manage your previous bookings and upcoming games.
             </p>
           </div>
-          
-          <div className="flex gap-4">
-             <div className="px-8 py-6 bg-[#0A0A0A] border border-white/10 rounded-2xl text-center min-w-[140px] group hover:border-[#84CC16]/30 transition-all">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-normal mb-2">Total Bookings</p>
-                <p className="text-4xl font-bold text-white group-hover:text-[#84CC16] transition-colors">{bookings.length}</p>
-             </div>
-             <div className="px-8 py-6 bg-[#0A0A0A] border border-white/10 rounded-2xl text-center min-w-[140px] group hover:border-[#84CC16]/30 transition-all">
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-normal mb-2">Member Level</p>
-                <p className="text-4xl font-bold text-white group-hover:text-[#84CC16] transition-colors">PRO</p>
-             </div>
+
+          {/* Stats mini-cards */}
+          <div className="flex gap-4 shrink-0">
+            <div
+              className="px-6 py-4 rounded-[8px] text-center min-w-[120px] transition-all"
+              style={{ backgroundColor: CARD, border: `1px solid ${BORDER}` }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = `${ACCENT}30`}
+              onMouseLeave={e => e.currentTarget.style.borderColor = BORDER}
+            >
+              <p className="text-[10px] font-normal uppercase tracking-[0.3em] mb-2" style={{ color: MUTED }}>
+                Total
+              </p>
+              <p className="text-3xl font-semibold text-white">{bookings.length}</p>
+            </div>
+            <div
+              className="px-6 py-4 rounded-[8px] text-center min-w-[120px] transition-all"
+              style={{ backgroundColor: CARD, border: `1px solid ${BORDER}` }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = `${ACCENT}30`}
+              onMouseLeave={e => e.currentTarget.style.borderColor = BORDER}
+            >
+              <p className="text-[10px] font-normal uppercase tracking-[0.3em] mb-2" style={{ color: MUTED }}>
+                Level
+              </p>
+              <p className="text-3xl font-semibold text-white">PRO</p>
+            </div>
           </div>
         </div>
 
-        {/* Bookings Feed */}
-        <div className="space-y-8">
+        {/* ── Bookings Feed ───────────────────────────────────────────── */}
+        <div className="space-y-6">
           {bookings.length === 0 ? (
-            <div className="p-16 text-center bg-[#0A0A0A] rounded-[32px] border border-white/10 space-y-8">
-               <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto text-gray-500">
-                  <Calendar size={36} />
-               </div>
-               <div>
-                  <h3 className="text-2xl font-bold text-white uppercase">No Bookings Yet</h3>
-                  <p className="text-gray-400 text-sm mt-3 max-w-sm mx-auto">You haven't booked any venues yet. Explore local arenas and start playing!</p>
-               </div>
-               <button className="px-10 py-4 bg-[#84CC16] text-black rounded-xl font-bold uppercase text-xs tracking-normal hover:scale-105 active:scale-95 transition-all">
-                 Explore Venues
-               </button>
+            /* Empty state – matches OwnerDashboard EmptyState */
+            <div
+              className="flex flex-col items-center justify-center gap-4 text-center py-24 rounded-[8px]"
+              style={{ border: `1px dashed ${BORDER}` }}
+            >
+              <Calendar size={36} style={{ color: BORDER }} />
+              <p className="text-[13px] font-semibold uppercase tracking-wider" style={{ color: MUTED }}>
+                No Bookings Yet
+              </p>
+              <p className="text-[11px]" style={{ color: "#444" }}>
+                You haven't booked any venues yet. Explore local arenas and start playing!
+              </p>
+              <Link
+                to="/"
+                className="mt-2 px-8 py-3 rounded-[8px] text-[12px] font-normal uppercase tracking-widest transition-all"
+                style={{ border: `1px solid ${BORDER}`, color: MUTED2 }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = `${ACCENT}50`; e.currentTarget.style.color = ACCENT; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED2; }}
+              >
+                Explore Venues
+              </Link>
             </div>
           ) : (
-            bookings.map((booking) => (
-              <div
-                key={booking._id}
-                className="group relative overflow-hidden bg-[#0A0A0A] border border-white/10 rounded-3xl transition-all duration-500 hover:border-[#84CC16]/30 hover:shadow-2xl"
-              >
-                {/* Visual Accent */}
-                <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                
-                <div className="p-8">
-                  <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-                    {/* QR Code Section */}
-                    <div className="relative shrink-0 group/qr">
+            bookings.map((booking) => {
+              const sm = STATUS_META[booking.status] || STATUS_META.CONFIRMED;
+              const hrs = hoursUntil(booking.playStartTime);
+              const slotOver = new Date() > new Date(booking.playEndTime);
 
-                      <Link to={`/booking-pass/${booking._id}`} className="relative p-4 bg-white rounded-2xl block hover:scale-105 transition-transform">
-                        <img
-                          src={booking.qrCode}
-                          alt="Booking QR"
-                          className="w-32 h-32"
-                        />
-                      </Link>
-                      <div className="mt-3 text-center">
-                         <span className="text-[10px] font-bold text-gray-500 uppercase tracking-normal">Entry Pass</span>
+              return (
+                <div
+                  key={booking._id}
+                  className="rounded-[8px] overflow-hidden transition-all duration-300 group"
+                  style={{ backgroundColor: CARD, border: `1px solid ${BORDER}` }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = `${ACCENT}30`}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = BORDER}
+                >
+                  {/* ── Card Header ─────────────────────────────────── */}
+                  <div
+                    className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    style={{ borderBottom: `1px solid ${BORDER}` }}
+                  >
+                    <div>
+                      <h2 className="text-xl font-black text-white uppercase tracking-tight">
+                        {booking.turf.name}
+                      </h2>
+                      <div className="flex items-center gap-1.5 mt-1" style={{ color: MUTED2 }}>
+                        <MapPin size={12} style={{ color: ACCENT }} />
+                        <span className="text-[12px]">{booking.turf.location}</span>
                       </div>
                     </div>
 
-                    {/* Info Section */}
-                    <div className="flex-1 space-y-6 w-full">
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                          <h2 className="text-3xl font-bold text-white uppercase tracking-tight group-hover:text-[#84CC16] transition-colors">
-                            {booking.turf.name}
-                          </h2>
-                          <div className="flex items-center gap-2 mt-2 text-gray-400 font-medium text-xs">
-                            <MapPin size={12} className="text-[#84CC16]" />
-                            {booking.turf.location}
+                    {/* Status badge */}
+                    <div
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-[6px] shrink-0 self-start sm:self-auto"
+                      style={{ backgroundColor: sm.bg, border: `1px solid ${sm.border}` }}
+                    >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full shrink-0"
+                        style={{
+                          backgroundColor: sm.color,
+                          animation: booking.status === "CONFIRMED" ? "pulse 2s infinite" : "none",
+                        }}
+                      />
+                      <span className="text-[10px] font-normal uppercase tracking-widest" style={{ color: sm.color }}>
+                        {sm.label}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* ── Details Row ─────────────────────────────────── */}
+                  <div
+                    className="grid grid-cols-2 md:grid-cols-4 gap-px"
+                    style={{ backgroundColor: BORDER }}
+                  >
+                    {[
+                      { label: "Date",    icon: Calendar,    value: booking.timeSlot.date },
+                      { label: "Time",    icon: Clock,       value: `${booking.timeSlot.formattedStartTime} – ${booking.timeSlot.formattedEndTime}` },
+                      {
+                        label: "Payment",
+                        icon: booking.paymentMethod === "WALLET" ? Wallet : CreditCard,
+                        value: booking.paymentMethod,
+                      },
+                      {
+                        label: "Amount",
+                        icon: IndianRupee,
+                        value: `₹${booking.advanceAmount || booking.totalPrice}`,
+                        sub: booking.paymentType === "PARTIAL"
+                          ? `Balance ₹${booking.balanceAmount}`
+                          : "Fully Paid",
+                        subColor: booking.paymentType === "PARTIAL" ? "#F59E0B" : ACCENT,
+                      },
+                    ].map(({ label, icon: Icon, value, sub, subColor }) => (
+                      <div key={label} className="px-5 py-4" style={{ backgroundColor: CARD }}>
+                        <p className="text-[10px] font-normal uppercase tracking-[0.3em] mb-1.5" style={{ color: MUTED }}>
+                          {label}
+                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <Icon size={13} style={{ color: ACCENT }} />
+                          <span className="text-[12px] font-semibold text-white truncate">{value}</span>
+                        </div>
+                        {sub && (
+                          <p className="text-[9px] font-normal uppercase tracking-wider mt-1" style={{ color: subColor }}>
+                            {sub}
+                          </p>
+                        )}
+                        {booking.cashback > 0 && label === "Payment" && (
+                          <div className="flex items-center gap-1 mt-1" style={{ color: ACCENT }}>
+                            <Zap size={9} className="fill-current" />
+                            <span className="text-[9px] font-normal uppercase tracking-wider">
+                              ₹{booking.cashback} cashback
+                            </span>
                           </div>
-                        </div>
-                        <div className="px-4 py-1.5 bg-[#84CC16]/10 border border-[#84CC16]/20 rounded-full">
-                           <span className="text-[10px] font-bold text-[#84CC16] uppercase tracking-normal">Confirmed</span>
-                        </div>
+                        )}
                       </div>
+                    ))}
+                  </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-white/5">
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-normal">Booking Date</p>
-                          <div className="flex items-center gap-2 text-white font-bold">
-                             <Calendar size={14} className="text-[#84CC16]" />
-                             <span className="tracking-tight">{booking.timeSlot.date}</span>
-                          </div>
-                        </div>
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-normal">Time Slot</p>
-                          <div className="flex items-center gap-2 text-white font-bold">
-                             <Clock size={14} className="text-[#84CC16]" />
-                             <span className="tracking-tight">{booking.timeSlot.formattedStartTime} - {booking.timeSlot.formattedEndTime}</span>
-                          </div>
-                        </div>
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-normal">Payment Mode</p>
-                          <div className="flex items-center gap-2 text-white font-bold uppercase text-[10px]">
-                             {booking.paymentMethod === "WALLET" ? <Wallet size={12} className="text-[#84CC16]" /> : <CreditCard size={12} className="text-[#84CC16]" />}
-                             <span className="tracking-widest">{booking.paymentMethod}</span>
-                          </div>
-                          {booking.cashback > 0 && (
-                            <div className="flex items-center gap-1 text-[#84CC16] text-[8px] font-black uppercase mt-1">
-                                <Zap size={8} fill="currentColor" />
-                                <span>₹{booking.cashback} Cashback</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-normal">Payment Summary</p>
-                          <div className="space-y-2">
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-white uppercase tracking-tight">Paid: ₹{booking.advanceAmount || booking.totalPrice}</span>
-                                <span className={`text-[9px] font-black uppercase tracking-tighter ${booking.paymentType === "PARTIAL" ? "text-orange-400" : "text-[#84CC16]"}`}>
-                                    {booking.paymentType === "PARTIAL" ? `Balance: ₹${booking.balanceAmount}` : "Fully Paid"}
-                                </span>
-                            </div>
-                          </div>
-                        </div>
+                  {/* ── QR Thumbnail + Actions ──────────────────────── */}
+                  <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    {/* QR thumb */}
+                    <Link
+                      to={`/booking-pass/${booking._id}`}
+                      className="flex items-center gap-3 group/qr"
+                    >
+                      <div
+                        className="p-2 rounded-[6px] shrink-0"
+                        style={{ backgroundColor: "#fff" }}
+                      >
+                        <img src={booking.qrCode} alt="QR" className="w-12 h-12" />
                       </div>
-
-                      <div className="flex flex-wrap justify-end gap-3 pt-6">
-                        <Link
-                          to={`/booking-pass/${booking._id}`}
-                          className="flex items-center gap-2 px-6 py-2.5 bg-[#84CC16] border border-[#84CC16] text-black hover:bg-[#a3e635] rounded-xl text-[10px] font-black uppercase tracking-wider transition-all group/btn shadow-[0_0_20px_rgba(132,204,22,0.2)]"
+                      <div>
+                        <p className="text-[11px] font-semibold text-white">Entry Pass</p>
+                        <p className="text-[10px] uppercase tracking-widest transition-colors"
+                           style={{ color: MUTED2 }}
+                           onMouseEnter={e => e.currentTarget.style.color = ACCENT}
+                           onMouseLeave={e => e.currentTarget.style.color = MUTED2}
                         >
-                          <Ticket size={12} className="group-hover/btn:rotate-12 transition-all" />
-                          Open Ticket
-                        </Link>
-                        
-                        <Link
-                          to={`/booking-invoice/${booking._id}`}
-                          className="flex items-center gap-2 px-6 py-2.5 bg-white/5 border border-white/10 hover:border-white/30 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all group/btn"
-                        >
-                          <FileText size={12} className="group-hover/btn:scale-110 transition-all" />
-                          See Invoice
-                        </Link>
+                          Tap to open →
+                        </p>
+                      </div>
+                    </Link>
 
+                    {/* Action buttons */}
+                    <div className="flex flex-wrap gap-2 justify-end">
+
+                      {/* Open Ticket */}
+                      <Link
+                        to={`/booking-pass/${booking._id}`}
+                        className="flex items-center gap-2 px-4 py-2 rounded-[6px] text-[11px] font-normal uppercase tracking-widest transition-all"
+                        style={{ backgroundColor: ACCENT, color: "#000" }}
+                        onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
+                        onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                      >
+                        <Ticket size={12} />
+                        Open Ticket
+                      </Link>
+
+                      {/* Invoice */}
+                      <Link
+                        to={`/booking-invoice/${booking._id}`}
+                        className="flex items-center gap-2 px-4 py-2 rounded-[6px] text-[11px] font-normal uppercase tracking-widest transition-all"
+                        style={{ border: `1px solid ${BORDER}`, color: MUTED2 }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = `${ACCENT}50`; e.currentTarget.style.color = ACCENT; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED2; }}
+                      >
+                        <FileText size={12} />
+                        Invoice
+                      </Link>
+
+                      {/* Write review */}
+                      <button
+                        onClick={() => openReviewModal(booking.turf._id)}
+                        className="flex items-center gap-2 px-4 py-2 rounded-[6px] text-[11px] font-normal uppercase tracking-widest transition-all"
+                        style={{ border: `1px solid ${BORDER}`, color: MUTED2 }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = `${ACCENT}50`; e.currentTarget.style.color = ACCENT; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED2; }}
+                      >
+                        <Zap size={12} />
+                        Review
+                      </button>
+
+                      {/* 72-hr notice */}
+                      {booking.status === "CONFIRMED" && hrs < 72 && !slotOver && (
+                        <div
+                          className="flex items-center gap-2 px-4 py-2 rounded-[6px] text-[10px] font-normal uppercase tracking-widest"
+                          style={{ backgroundColor: "#EF444410", border: "1px solid #EF444430", color: "#EF4444" }}
+                        >
+                          <AlertOctagon size={12} />
+                          Can't cancel within 72hrs
+                        </div>
+                      )}
+
+                      {/* Cancel */}
+                      {booking.status === "CONFIRMED" && hrs >= 72 && !slotOver && (
                         <button
-                          className="flex items-center gap-2 px-6 py-2.5 border border-white/10 hover:border-[#84CC16]/50 text-white hover:text-[#84CC16] rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all group/btn"
-                          onClick={() => openReviewModal(booking.turf._id)}
+                          onClick={() => cancelBooking(booking)}
+                          className="flex items-center gap-2 px-4 py-2 rounded-[6px] text-[11px] font-normal uppercase tracking-widest transition-all"
+                          style={{ backgroundColor: "#EF444410", border: "1px solid #EF444430", color: "#EF4444" }}
+                          onMouseEnter={e => e.currentTarget.style.backgroundColor = "#EF444420"}
+                          onMouseLeave={e => e.currentTarget.style.backgroundColor = "#EF444410"}
                         >
-                          <Zap size={12} className="group-hover/btn:fill-[#84CC16] transition-all" />
-                          Write a Review
+                          <AlertOctagon size={12} />
+                          Cancel
                         </button>
-                      </div>
+                      )}
+
+                      {/* Raise dispute */}
+                      {booking.status !== "CANCELLED" && booking.status !== "DISPUTED" && (
+                        <button
+                          onClick={() => setSelectedDisputeBooking(booking)}
+                          className="flex items-center gap-2 px-4 py-2 rounded-[6px] text-[11px] font-normal uppercase tracking-widest transition-all"
+                          style={{ border: `1px solid ${BORDER}`, color: MUTED2 }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = "#F59E0B50"; e.currentTarget.style.color = "#F59E0B"; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED2; }}
+                        >
+                          <AlertOctagon size={12} />
+                          Dispute
+                        </button>
+                      )}
+
+                      {/* Dispute review state */}
+                      {booking.status === "DISPUTED" && (
+                        <div
+                          className="flex items-center gap-2 px-4 py-2 rounded-[6px] text-[11px] font-normal uppercase tracking-widest"
+                          style={{ backgroundColor: "#F59E0B10", border: "1px solid #F59E0B30", color: "#F59E0B" }}
+                        >
+                          <ShieldCheck size={12} />
+                          Under Review
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
 
+      {/* ── Modals ──────────────────────────────────────────────────────── */}
       {isReviewModalOpen && (
         <WriteReview
           rating={rating}
@@ -201,15 +349,15 @@ const TurfBookingHistory = () => {
         />
       )}
 
-      {/* Decorative Sidebar Labels */}
-      <div className="fixed right-8 top-1/2 -translate-y-1/2 hidden xl:block">
-         <div className="rotate-90 origin-right text-[10px] font-bold text-white/5 uppercase tracking-normal whitespace-nowrap">
-            PLAYER DASHBOARD
-         </div>
-      </div>
+      {selectedDisputeBooking && (
+        <RaiseDisputeModal
+          booking={selectedDisputeBooking}
+          onClose={() => setSelectedDisputeBooking(null)}
+          onSuccess={fetchBookingsRefresh}
+        />
+      )}
     </div>
   );
 };
-
 
 export default TurfBookingHistory;

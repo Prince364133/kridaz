@@ -9,6 +9,7 @@ import storyRouter from "../../modules/story/story.routes.js"
 import communityRouter from "../../modules/community/community.routes.js"
 import walletRouter from "./wallet.routes.js";
 import notificationRouter from "../notification.routes.js";
+import disputeRouter from "./dispute.routes.js";
 import { getPublicPlayers, getLeaderboard } from "../../modules/player/player.controller.js"
 
 const userRouter = Router();
@@ -26,6 +27,7 @@ userRouter.use("/players", playerRouter);
 userRouter.use("/stories", storyRouter);
 userRouter.use("/community", communityRouter);
 userRouter.use("/wallet", walletRouter);
+userRouter.use("/dispute", disputeRouter);
 userRouter.use("/notifications", notificationRouter);
 
 export default userRouter;

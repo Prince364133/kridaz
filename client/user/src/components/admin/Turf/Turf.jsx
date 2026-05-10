@@ -3,8 +3,20 @@ import { MapPin, Clock, Star, Calendar, Check, X } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
-const Turf = ({ turf, onApprove, onReject }) => {
+const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete }) => {
   const navigate = useNavigate();
+
+  const getStatusConfig = (status) => {
+    switch (status) {
+      case 'approved': return { color: 'green', icon: 'bg-green-500', border: 'border-green-500/20', bg: 'bg-green-500/10' };
+      case 'rejected': return { color: 'red', icon: 'bg-red-500', border: 'border-red-500/20', bg: 'bg-red-500/10' };
+      case 'decommissioned': return { color: 'orange', icon: 'bg-orange-500', border: 'border-orange-500/20', bg: 'bg-orange-500/10' };
+      case 'deleted': return { color: 'gray', icon: 'bg-gray-500', border: 'border-gray-500/20', bg: 'bg-gray-500/10' };
+      default: return { color: 'yellow', icon: 'bg-yellow-500', border: 'border-yellow-500/20', bg: 'bg-yellow-500/10' };
+    }
+  };
+
+  const config = getStatusConfig(turf.status);
 
   return (
     <div 
@@ -29,16 +41,8 @@ const Turf = ({ turf, onApprove, onReject }) => {
         </div>
         
         {/* Status badge */}
-        <div className={`absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-            turf.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-            turf.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-            'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-        }`}>
-          <div className={`w-1.5 h-1.5 rounded-full ${
-            turf.status === 'approved' ? 'bg-green-500' :
-            turf.status === 'rejected' ? 'bg-red-500' :
-            'bg-yellow-500'
-          }`} />
+        <div className={`absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${config.bg} text-${config.color}-500 ${config.border}`}>
+          <div className={`w-1.5 h-1.5 rounded-full ${config.icon}`} />
           <span>{turf.status}</span>
         </div>
       </div>
@@ -71,30 +75,66 @@ const Turf = ({ turf, onApprove, onReject }) => {
         )}
 
         {/* Admin Actions */}
-        {turf.status === 'pending' && (
-            <div className="grid grid-cols-2 gap-3 mt-2 pt-5 border-t border-white/5">
-                <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onApprove(turf._id);
-                    }}
-                    className="flex items-center justify-center gap-2 py-3 bg-green-500/5 hover:bg-green-500/10 text-green-500 border border-green-500/10 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
-                >
-                    <Check size={12} />
-                    Approve
-                </button>
-                <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onReject(turf._id);
-                    }}
-                    className="flex items-center justify-center gap-2 py-3 bg-red-500/5 hover:bg-red-500/10 text-red-500 border border-red-500/10 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
-                >
-                    <X size={12} />
-                    Reject
-                </button>
-            </div>
-        )}
+        <div className="grid grid-cols-2 gap-3 mt-2 pt-5 border-t border-white/5">
+          {turf.status === 'pending' ? (
+            <>
+              <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onApprove(turf._id);
+                  }}
+                  className="flex items-center justify-center gap-2 py-3 bg-green-500/5 hover:bg-green-500/10 text-green-500 border border-green-500/10 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
+              >
+                  <Check size={12} />
+                  Approve
+              </button>
+              <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReject(turf._id);
+                  }}
+                  className="flex items-center justify-center gap-2 py-3 bg-red-500/5 hover:bg-red-500/10 text-red-500 border border-red-500/10 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
+              >
+                  <X size={12} />
+                  Reject
+              </button>
+            </>
+          ) : turf.status !== 'deleted' ? (
+            <>
+              <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDecommission(turf._id);
+                  }}
+                  className="flex items-center justify-center gap-2 py-3 bg-orange-500/5 hover:bg-orange-500/10 text-orange-500 border border-orange-500/10 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
+              >
+                  <Clock size={12} />
+                  Decommission
+              </button>
+              <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(turf._id);
+                  }}
+                  className="flex items-center justify-center gap-2 py-3 bg-gray-500/5 hover:bg-gray-500/10 text-gray-400 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
+              >
+                  <X size={12} />
+                  Soft Delete
+              </button>
+            </>
+          ) : (
+            <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(turf._id, true); // True for hard delete
+                }}
+                className="col-span-2 flex items-center justify-center gap-2 py-3 bg-red-600/10 hover:bg-red-600/20 text-red-500 border border-red-500/20 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
+            >
+                <X size={12} />
+                Permanently Delete
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

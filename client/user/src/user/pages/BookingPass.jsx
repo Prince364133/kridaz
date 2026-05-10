@@ -1,15 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axiosInstance from "../../hooks/useAxiosInstance";
-import { Calendar, Clock, MapPin, User, IndianRupee, ChevronLeft, Download, ShieldCheck, Share2, Wallet, CreditCard, Zap, Copy, FileText } from "lucide-react";
+import {
+  Calendar, Clock, MapPin, User, IndianRupee, ChevronLeft, Download,
+  ShieldCheck, Share2, Wallet, CreditCard, Zap, Copy, FileText, AlertOctagon,
+  QrCode,
+} from "lucide-react";
 import { format, parseISO } from "date-fns";
 import toast from "react-hot-toast";
+import RaiseDisputeModal from "../components/dispute/RaiseDisputeModal";
+
+// ── Design tokens (exact match to OwnerDashboard) ──────────────────────────
+const BG      = "#000000";
+const CARD_BG = "#000000";
+const BORDER  = "#2D2D2D";
+const ACCENT  = "#CCFF00";
+const MUTED   = "#878C9F";
+const MUTED2  = "#999999";
 
 const BookingPass = () => {
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
     const fetchBooking = async () => {
@@ -30,259 +45,431 @@ const BookingPass = () => {
     toast.success(`${label} copied to clipboard`);
   };
 
+  const handleCancel = async () => {
+    const playTime = new Date(booking.playStartTime);
+    const now = new Date();
+    const hoursRemaining = (playTime - now) / (1000 * 60 * 60);
+
+    let confirmMsg =
+      "Are you sure you want to cancel this booking? No refund will be issued as it's within 72 hours of the slot.";
+    if (hoursRemaining >= 72) {
+      confirmMsg =
+        "Are you sure you want to cancel? Since you are cancelling more than 72 hours before the slot, you will receive a 30% refund in your wallet. The remaining 70% is non-refundable.";
+    }
+
+    if (!window.confirm(confirmMsg)) return;
+
+    setIsCancelling(true);
+    try {
+      const response = await axiosInstance.post(`/api/booking/user/cancel/${id}`);
+      if (response.data.success) {
+        toast.success(response.data.message || "Booking cancelled successfully.");
+        window.location.reload();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to cancel booking.");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  // ── Loading state ──────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#84CC16]"></div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: BG }}>
+        <div
+          className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2"
+          style={{ borderColor: ACCENT }}
+        />
       </div>
     );
   }
 
+  // ── Error state ────────────────────────────────────────────────────────────
   if (error || !booking) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
-        <h1 className="text-2xl font-bold text-white mb-4">{error || "Something went wrong"}</h1>
-        <Link to="/" className="px-6 py-2 bg-[#84CC16] text-black rounded-lg font-bold">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-6" style={{ backgroundColor: BG }}>
+        <p className="text-white font-semibold text-xl uppercase tracking-widest">
+          {error || "Something went wrong"}
+        </p>
+        <Link
+          to="/"
+          className="px-8 py-3 rounded-[8px] text-[13px] font-normal uppercase tracking-widest transition-all"
+          style={{ border: `1px solid ${BORDER}`, color: MUTED2 }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = ACCENT; e.currentTarget.style.color = ACCENT; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED2; }}
+        >
           Go Back Home
         </Link>
       </div>
     );
   }
 
-  const { turf, timeSlot, user, totalPrice, qrCode, createdAt, paymentMethod, cashback } = booking;
+  const { turf, timeSlot, user, totalPrice, qrCode, createdAt, paymentMethod, cashback, status } = booking;
+  const isSlotOver = new Date() > new Date(booking.playEndTime);
+  const hoursUntilSlot = (new Date(booking.playStartTime) - new Date()) / (1000 * 60 * 60);
+
+  const statusMeta = {
+    CONFIRMED: { label: "Active Pass",    color: ACCENT,     bg: `${ACCENT}15`,  border: `${ACCENT}30`  },
+    CANCELLED: { label: "Cancelled",      color: "#EF4444",  bg: "#EF444415",    border: "#EF444430"    },
+    COMPLETED: { label: "Completed",      color: "#10B981",  bg: "#10B98115",    border: "#10B98130"    },
+    DISPUTED:  { label: "Under Review",   color: "#F59E0B",  bg: "#F59E0B15",    border: "#F59E0B30"    },
+    PLAYING:   { label: "In Progress",    color: "#3B82F6",  bg: "#3B82F615",    border: "#3B82F630"    },
+  };
+  const sm = statusMeta[status] || statusMeta.CONFIRMED;
 
   return (
-    <div className="min-h-screen bg-[#000] pb-20 pt-6">
-      <div className="container mx-auto max-w-lg px-4">
-        <Link to="/booking-history" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8 group">
-          <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="text-sm font-bold uppercase tracking-wider">Back to Bookings</span>
+    <div className="min-h-screen pb-24 pt-6" style={{ backgroundColor: BG }}>
+      <div className="mx-auto max-w-lg px-4">
+
+        {/* ── Back Nav ──────────────────────────────────────────────────── */}
+        <Link
+          to="/booking-history"
+          className="inline-flex items-center gap-2 mb-8 text-[12px] font-normal uppercase tracking-[0.2em] transition-all"
+          style={{ color: MUTED2 }}
+          onMouseEnter={e => e.currentTarget.style.color = "#fff"}
+          onMouseLeave={e => e.currentTarget.style.color = MUTED2}
+        >
+          <ChevronLeft size={16} />
+          Back to Bookings
         </Link>
 
-        {/* The Pass Card */}
-        <div className="relative bg-[#0A0A0A] border border-white/10 rounded-[40px] overflow-hidden shadow-2xl">
-          {/* Top Section - Brand/Status */}
-          <div className="p-8 pb-4 flex justify-between items-start">
-            <div className="space-y-1">
-              <h3 className="text-[#84CC16] font-black text-xl italic tracking-tighter">KRIDAZ</h3>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Entry Pass No: {id.slice(-8).toUpperCase()}</p>
+        {/* ── Pass Card ─────────────────────────────────────────────────── */}
+        <div
+          className="rounded-[8px] overflow-hidden relative"
+          style={{ backgroundColor: CARD_BG, border: `1px solid ${BORDER}` }}
+        >
+          {/* Ambient glow */}
+          <div
+            className="absolute top-0 right-0 w-40 h-40 blur-[80px] pointer-events-none"
+            style={{ backgroundColor: `${ACCENT}08` }}
+          />
+
+          {/* ── Header Row ─────────────────────────────────────────────── */}
+          <div
+            className="px-6 py-5 flex items-center justify-between"
+            style={{ borderBottom: `1px solid ${BORDER}` }}
+          >
+            <div>
+              <h3
+                className="text-xl font-black italic tracking-tighter"
+                style={{ color: ACCENT }}
+              >
+                KRIDAZ
+              </h3>
+              <p className="text-[10px] font-normal uppercase tracking-[0.3em] mt-0.5" style={{ color: MUTED }}>
+                Entry Pass · {id.slice(-8).toUpperCase()}
+              </p>
             </div>
-            <div className="flex flex-col items-end gap-2">
-              <div className="bg-[#84CC16]/10 border border-[#84CC16]/20 px-3 py-1 rounded-full flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 bg-[#84CC16] rounded-full animate-pulse"></div>
-                <span className="text-[10px] font-bold text-[#84CC16] uppercase">Active Pass</span>
-              </div>
+
+            {/* Status pill */}
+            <div
+              className="flex items-center gap-2 px-3 py-1.5 rounded-[6px]"
+              style={{ backgroundColor: sm.bg, border: `1px solid ${sm.border}` }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{
+                  backgroundColor: sm.color,
+                  animation: status === "CONFIRMED" ? "pulse 2s infinite" : "none",
+                }}
+              />
+              <span className="text-[10px] font-normal uppercase tracking-widest" style={{ color: sm.color }}>
+                {sm.label}
+              </span>
             </div>
           </div>
 
-          {/* Turf Info Section */}
-          <div className="px-8 py-4">
-            <h1 className="text-4xl font-bold text-white uppercase tracking-tight mb-2 leading-none">
+          {/* ── Venue Name ─────────────────────────────────────────────── */}
+          <div className="px-6 py-6" style={{ borderBottom: `1px solid ${BORDER}` }}>
+            <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-none mb-2">
               {turf.name}
             </h1>
-            <div className="flex items-center gap-2 text-zinc-400">
-              <MapPin size={14} className="text-[#84CC16]" />
-              <span className="text-sm font-medium">{turf.location}</span>
+            <div className="flex items-center gap-2" style={{ color: MUTED2 }}>
+              <MapPin size={13} style={{ color: ACCENT }} />
+              <span className="text-[12px]">{turf.location}</span>
             </div>
           </div>
 
-          {/* Decorative Divider */}
-          <div className="relative my-4">
-            <div className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-5 h-10 bg-black rounded-r-full border-r border-t border-b border-white/10"></div>
-            <div className="mx-8 border-t border-dashed border-white/20"></div>
-            <div className="absolute right-[-10px] top-1/2 -translate-y-1/2 w-5 h-10 bg-black rounded-l-full border-l border-t border-b border-white/10"></div>
-          </div>
-
-          {/* Booking Details Grid */}
-          <div className="p-8 grid grid-cols-2 gap-y-8">
-            <div className="space-y-1">
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Booking Date</p>
-              <div className="flex items-center gap-2 text-white">
-                <Calendar size={16} className="text-[#84CC16]" />
-                <span className="font-bold">{format(parseISO(timeSlot.startTime), "d MMM yyyy")}</span>
+          {/* ── Details Grid ───────────────────────────────────────────── */}
+          <div
+            className="grid grid-cols-2 gap-px"
+            style={{ backgroundColor: BORDER }}
+          >
+            {[
+              {
+                label: "Booking Date",
+                icon: Calendar,
+                value: format(parseISO(timeSlot.startTime), "d MMM yyyy"),
+              },
+              {
+                label: "Time Slot",
+                icon: Clock,
+                value: `${format(parseISO(timeSlot.startTime), "hh:mm a")} – ${format(parseISO(timeSlot.endTime), "hh:mm a")}`,
+              },
+              {
+                label: "Player",
+                icon: User,
+                value: user?.name || "Guest",
+              },
+              {
+                label: "Payment",
+                icon: paymentMethod === "WALLET" ? Wallet : CreditCard,
+                value: paymentMethod || "ONLINE",
+              },
+            ].map(({ label, icon: Icon, value }) => (
+              <div key={label} className="px-6 py-5" style={{ backgroundColor: CARD_BG }}>
+                <p className="text-[10px] font-normal uppercase tracking-[0.3em] mb-2" style={{ color: MUTED }}>
+                  {label}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Icon size={14} style={{ color: ACCENT }} />
+                  <span className="text-[13px] font-semibold text-white">{value}</span>
+                </div>
               </div>
-            </div>
-            
-            <div className="space-y-1">
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Time Slot</p>
-              <div className="flex items-center gap-2 text-white">
-                <Clock size={16} className="text-[#84CC16]" />
-                <span className="font-bold italic">
-                  {format(parseISO(timeSlot.startTime), "hh:mm a")} - {format(parseISO(timeSlot.endTime), "hh:mm a")}
-                </span>
-              </div>
-            </div>
+            ))}
 
-            <div className="space-y-1">
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Player Name</p>
-              <div className="flex items-center gap-2 text-white">
-                <User size={16} className="text-[#84CC16]" />
-                <span className="font-bold">{user?.name || "Guest"}</span>
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Payment Mode</p>
-              <div className="flex items-center gap-2 text-white">
-                {paymentMethod === "WALLET" ? <Wallet size={16} className="text-[#84CC16]" /> : <CreditCard size={16} className="text-[#84CC16]" />}
-                <span className="font-bold uppercase tracking-tight text-sm">{paymentMethod || "ONLINE"}</span>
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Total Paid</p>
-              <div className="flex items-center gap-1 text-[#84CC16]">
-                <IndianRupee size={16} className="font-bold" />
-                <span className="font-black text-xl">{totalPrice}</span>
+            {/* Total Paid – full width */}
+            <div className="col-span-2 px-6 py-5" style={{ backgroundColor: CARD_BG }}>
+              <p className="text-[10px] font-normal uppercase tracking-[0.3em] mb-2" style={{ color: MUTED }}>
+                Total Paid
+              </p>
+              <div className="flex items-baseline gap-1">
+                <IndianRupee size={18} style={{ color: ACCENT }} />
+                <span className="text-3xl font-semibold text-white">{totalPrice}</span>
               </div>
               {cashback > 0 && (
-                <p className="text-[9px] font-black text-[#84CC16] uppercase tracking-tighter mt-1 flex items-center gap-1">
-                  <Zap size={10} className="fill-[#84CC16]" />
-                  ₹{cashback} Cashback Applied
+                <p className="flex items-center gap-1 mt-1.5 text-[10px] font-normal uppercase tracking-wider" style={{ color: ACCENT }}>
+                  <Zap size={10} className="fill-current" />
+                  ₹{cashback} cashback applied
                 </p>
               )}
             </div>
           </div>
 
-          {/* Contact & Navigation Section */}
+          {/* ── Contact & Navigation ───────────────────────────────────── */}
           {(turf.managerContacts?.length > 0 || turf.mapUrl || turf.owner?.email) && (
-            <div className="px-8 py-6 bg-white/5 border-t border-b border-white/5 space-y-6">
-              <h4 className="text-[10px] font-black text-[#84CC16] uppercase tracking-[0.2em]">Contact & Navigation</h4>
-              
-              <div className="grid grid-cols-1 gap-6">
-                {/* Map Link */}
-                {turf.mapUrl && (
-                  <a 
-                    href={turf.mapUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-4 group/map bg-black/40 p-4 rounded-2xl border border-white/5 hover:border-[#84CC16]/50 transition-all"
-                  >
-                    <div className="w-10 h-10 bg-[#84CC16] rounded-xl flex items-center justify-center text-black">
-                      <MapPin size={20} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white font-bold text-sm">Navigate to Ground</p>
-                      <p className="text-zinc-500 text-[10px] font-medium uppercase tracking-wider">Open in Google Maps</p>
-                    </div>
-                    <ChevronLeft size={16} className="text-zinc-600 group-hover/map:text-[#84CC16] group-hover/map:translate-x-1 rotate-180 transition-all" />
-                  </a>
-                )}
+            <div className="px-6 py-5 space-y-4" style={{ borderTop: `1px solid ${BORDER}` }}>
+              <p className="text-[10px] font-normal uppercase tracking-[0.3em]" style={{ color: ACCENT }}>
+                Contact &amp; Navigation
+              </p>
 
-                {/* Manager Contacts */}
-                {turf.managerContacts?.length > 0 && (
-                  <div className="space-y-3">
-                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-1">Venue Managers</p>
-                    <div className="grid grid-cols-1 gap-2">
-                      {turf.managerContacts.map((contact, idx) => (
-                        <a 
-                          key={idx}
-                          href={`tel:${contact.phone}`}
-                          className="flex items-center justify-between bg-white/5 px-4 py-3 rounded-xl border border-white/5 hover:bg-white/10 transition-colors"
-                        >
-                          <span className="text-white text-sm font-bold">{contact.name}</span>
-                          <span className="text-[#84CC16] text-xs font-black italic tracking-wider">{contact.phone}</span>
-                        </a>
-                      ))}
+              {turf.mapUrl && (
+                <a
+                  href={turf.mapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 p-4 rounded-[8px] transition-all group/map"
+                  style={{ border: `1px solid ${BORDER}` }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = `${ACCENT}50`}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = BORDER}
+                >
+                  <div
+                    className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: `${ACCENT}15`, color: ACCENT }}
+                  >
+                    <MapPin size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-white text-[13px] font-semibold">Navigate to Ground</p>
+                    <p className="text-[10px] uppercase tracking-wider" style={{ color: MUTED2 }}>Open in Google Maps</p>
+                  </div>
+                  <ChevronLeft size={14} className="rotate-180 transition-transform group-hover/map:translate-x-1" style={{ color: MUTED }} />
+                </a>
+              )}
+
+              {turf.managerContacts?.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-[0.3em]" style={{ color: MUTED }}>Venue Managers</p>
+                  {turf.managerContacts.map((contact, idx) => (
+                    <a
+                      key={idx}
+                      href={`tel:${contact.phone}`}
+                      className="flex items-center justify-between px-4 py-3 rounded-[8px] transition-all"
+                      style={{ border: `1px solid ${BORDER}` }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = `${ACCENT}50`}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = BORDER}
+                    >
+                      <span className="text-[13px] font-semibold text-white">{contact.name}</span>
+                      <span className="text-[12px] font-normal" style={{ color: ACCENT }}>{contact.phone}</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              {turf.owner?.email && (
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-[0.3em]" style={{ color: MUTED }}>Support</p>
+                  <div className="flex items-center justify-between px-4 py-3 rounded-[8px]" style={{ border: `1px solid ${BORDER}` }}>
+                    <span className="text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>Venue</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[12px] font-semibold text-white">{turf.owner.email}</span>
+                      <button
+                        onClick={() => copyToClipboard(turf.owner.email, "Venue email")}
+                        className="transition-colors"
+                        style={{ color: MUTED }}
+                        onMouseEnter={e => e.currentTarget.style.color = ACCENT}
+                        onMouseLeave={e => e.currentTarget.style.color = MUTED}
+                      >
+                        <Copy size={12} />
+                      </button>
                     </div>
                   </div>
-                )}
-
-                {/* Support Emails */}
-                <div className="grid grid-cols-1 gap-4 pt-2">
-                  <div className="flex flex-col gap-1">
-                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-1">Support Contacts</p>
-                    <div className="flex flex-col gap-2">
-                      {turf.owner?.email && (
-                        <div className="flex items-center justify-between text-xs px-1 group/email">
-                          <span className="text-zinc-500">Venue:</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-white font-medium">{turf.owner.email}</span>
-                            <button 
-                              onClick={() => copyToClipboard(turf.owner.email, "Venue email")}
-                              className="text-zinc-600 hover:text-[#84CC16] transition-colors"
-                            >
-                              <Copy size={12} />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                      <div className="flex items-center justify-between text-xs px-1 group/email">
-                        <span className="text-zinc-500">Platform:</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[#84CC16] font-bold">contact@kridaz.com</span>
-                          <button 
-                            onClick={() => copyToClipboard("contact@kridaz.com", "Support email")}
-                            className="text-zinc-600 hover:text-[#84CC16] transition-colors"
-                          >
-                            <Copy size={12} />
-                          </button>
-                        </div>
-                      </div>
+                  <div className="flex items-center justify-between px-4 py-3 rounded-[8px]" style={{ border: `1px solid ${BORDER}` }}>
+                    <span className="text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>Platform</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[12px] font-semibold" style={{ color: ACCENT }}>contact@kridaz.com</span>
+                      <button
+                        onClick={() => copyToClipboard("contact@kridaz.com", "Support email")}
+                        className="transition-colors"
+                        style={{ color: MUTED }}
+                        onMouseEnter={e => e.currentTarget.style.color = ACCENT}
+                        onMouseLeave={e => e.currentTarget.style.color = MUTED}
+                      >
+                        <Copy size={12} />
+                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
-          {/* QR Code Section */}
-          <div className="bg-white/5 p-8 flex flex-col items-center gap-4">
-            <div className="p-4 bg-white rounded-3xl shadow-[0_0_50px_rgba(132,204,22,0.1)]">
-              <img src={qrCode} alt="Entry QR" className="w-48 h-48" />
+          {/* ── QR Code ───────────────────────────────────────────────── */}
+          <div
+            className="flex flex-col items-center gap-4 py-8"
+            style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}
+          >
+            <div
+              className="p-4 rounded-[8px]"
+              style={{ backgroundColor: "#fff", boxShadow: `0 0 40px ${ACCENT}15` }}
+            >
+              <img src={qrCode} alt="Entry QR" className="w-44 h-44" />
             </div>
-            <div className="text-center space-y-1">
-              <p className="text-white font-bold uppercase tracking-widest text-xs">Scan at Entrance</p>
-              <p className="text-zinc-500 text-[10px] font-medium">Please show this pass to the turf manager</p>
+            <div className="text-center">
+              <p className="text-[12px] font-semibold text-white uppercase tracking-[0.2em]">Scan at Entrance</p>
+              <p className="text-[10px] mt-1" style={{ color: MUTED2 }}>Show this pass to the turf manager</p>
             </div>
           </div>
 
-          {/* Bottom Action Bar */}
-          <div className="p-8 pt-6 space-y-4">
-            <Link 
+          {/* ── Actions ───────────────────────────────────────────────── */}
+          <div className="p-6 space-y-3">
+
+            {/* Primary: View Invoice */}
+            <Link
               to={`/booking-invoice/${id}`}
-              className="flex items-center justify-center gap-2 bg-[#CCFF00] hover:bg-[#b8e600] rounded-2xl py-4 text-black text-sm font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(204,255,0,0.2)]"
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[8px] text-[13px] font-normal uppercase tracking-widest transition-all"
+              style={{ backgroundColor: ACCENT, color: "#000" }}
+              onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
+              onMouseLeave={e => e.currentTarget.style.opacity = "1"}
             >
-              <FileText size={18} />
+              <FileText size={16} />
               View Invoice
             </Link>
-            
-            <div className="grid grid-cols-2 gap-4">
-            <button 
-              onClick={() => window.print()}
-              className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl py-3 text-white text-xs font-bold uppercase tracking-wider transition-all"
-            >
-              <Download size={14} />
-              Save Pass
-            </button>
-            <button 
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: `Booking at ${turf.name}`,
-                    text: `My booking pass for ${turf.name} on ${format(parseISO(timeSlot.startTime), "d MMM yyyy")}`,
-                    url: window.location.href,
-                  });
-                } else {
-                  navigator.clipboard.writeText(window.location.href);
-                  alert("Link copied to clipboard!");
-                }
-              }}
-              className="flex items-center justify-center gap-2 bg-[#84CC16] hover:bg-[#a3e635] rounded-2xl py-3 text-black text-xs font-bold uppercase tracking-wider transition-all"
-            >
-              <Share2 size={14} />
-              Share
-            </button>
+
+            {/* Secondary row */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => window.print()}
+                className="flex items-center justify-center gap-2 py-3 rounded-[8px] text-[12px] font-normal uppercase tracking-widest transition-all"
+                style={{ border: `1px solid ${BORDER}`, color: MUTED2 }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = `${ACCENT}50`; e.currentTarget.style.color = ACCENT; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED2; }}
+              >
+                <Download size={14} />
+                Save Pass
+              </button>
+              <button
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({
+                      title: `Booking at ${turf.name}`,
+                      text: `My booking pass for ${turf.name} on ${format(parseISO(timeSlot.startTime), "d MMM yyyy")}`,
+                      url: window.location.href,
+                    });
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success("Link copied!");
+                  }
+                }}
+                className="flex items-center justify-center gap-2 py-3 rounded-[8px] text-[12px] font-normal uppercase tracking-widest transition-all"
+                style={{ border: `1px solid ${BORDER}`, color: MUTED2 }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = `${ACCENT}50`; e.currentTarget.style.color = ACCENT; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED2; }}
+              >
+                <Share2 size={14} />
+                Share
+              </button>
+            </div>
+
+            {/* 72-hr policy notice */}
+            {status === "CONFIRMED" && hoursUntilSlot < 72 && !isSlotOver && (
+              <div
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-[8px] text-[11px] font-normal uppercase tracking-widest"
+                style={{ backgroundColor: "#EF444410", border: "1px solid #EF444430", color: "#EF4444" }}
+              >
+                <AlertOctagon size={15} />
+                Can't cancel within 72hrs of slot time
+              </div>
+            )}
+
+            {/* Cancel button */}
+            {status === "CONFIRMED" && hoursUntilSlot >= 72 && !isSlotOver && (
+              <button
+                onClick={handleCancel}
+                disabled={isCancelling}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[8px] text-[13px] font-normal uppercase tracking-widest transition-all disabled:opacity-50"
+                style={{ backgroundColor: "#EF444410", border: "1px solid #EF444430", color: "#EF4444" }}
+                onMouseEnter={e => { if (!isCancelling) e.currentTarget.style.backgroundColor = "#EF444420"; }}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = "#EF444410"}
+              >
+                <AlertOctagon size={16} />
+                {isCancelling ? "Cancelling..." : "Cancel Booking"}
+              </button>
+            )}
+
+            {/* Raise dispute */}
+            {status !== "CANCELLED" && status !== "DISPUTED" && (
+              <button
+                onClick={() => setShowDisputeModal(true)}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[8px] text-[13px] font-normal uppercase tracking-widest transition-all"
+                style={{ border: `1px solid ${BORDER}`, color: MUTED2 }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#F59E0B50"; e.currentTarget.style.color = "#F59E0B"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED2; }}
+              >
+                <AlertOctagon size={16} />
+                Raise a Dispute
+              </button>
+            )}
+
+            {/* Dispute review state */}
+            {status === "DISPUTED" && (
+              <div
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[8px] text-[13px] font-normal uppercase tracking-widest"
+                style={{ backgroundColor: "#F59E0B10", border: "1px solid #F59E0B30", color: "#F59E0B" }}
+              >
+                <ShieldCheck size={16} />
+                Dispute Under Review
+              </div>
+            )}
           </div>
+        </div>
+
+        {/* ── Security Badge ────────────────────────────────────────── */}
+        <div className="mt-6 flex items-center justify-center gap-2" style={{ color: MUTED }}>
+          <ShieldCheck size={14} />
+          <span className="text-[10px] font-normal uppercase tracking-[0.3em]">Verified Digital Entry Pass</span>
         </div>
       </div>
 
-      {/* Security Badge */}
-        <div className="mt-8 flex items-center justify-center gap-2 text-zinc-600">
-          <ShieldCheck size={16} />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Verified Digital Entry Pass</span>
-        </div>
-      </div>
+      {/* Dispute Modal */}
+      {showDisputeModal && (
+        <RaiseDisputeModal
+          booking={booking}
+          onClose={() => setShowDisputeModal(false)}
+          onSuccess={() => window.location.reload()}
+        />
+      )}
     </div>
   );
 };

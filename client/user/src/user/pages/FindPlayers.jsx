@@ -108,7 +108,10 @@ const FindPlayers = () => {
 
   const handleAvatarClick = (player) => {
     gateInteraction(() => {
-      if (!player.hasActiveStory) return;
+      if (!player.hasActiveStory) {
+        navigate(`/profile/${player._id}`);
+        return;
+      }
       
       const fetchStories = async () => {
         try {
@@ -118,15 +121,18 @@ const FindPlayers = () => {
               user: player,
               stories: res.data.stories
             });
+          } else {
+             navigate(`/profile/${player._id}`);
           }
         } catch (error) {
           toast.error("Failed to load stories");
+          navigate(`/profile/${player._id}`);
         }
       };
       fetchStories();
     }, {
-      title: "Watch Stories",
-      message: "See the latest highlights, training sessions, and match updates from your favorite players. Sign in to view their stories."
+      title: "View Profile",
+      message: "Sign in to view player profiles and stories."
     });
   };
 
@@ -140,13 +146,13 @@ const FindPlayers = () => {
             <h2 className="text-[10px] md:text-xs font-bold text-white/20 uppercase tracking-[0.2em] whitespace-nowrap hidden sm:block">Active Players</h2>
             
             <div className="relative flex-1 max-w-md group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#84CC16] transition-colors" size={16} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00] transition-colors" size={16} />
               <input 
                 type="text" 
                 value={searchQuery}
                 onChange={handleSearch}
                 placeholder="SEARCH PLAYERS..."
-                className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#84CC16]/50 rounded-xl h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
+                className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#CCFF00]/50 rounded-xl h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
               />
             </div>
           </div>
@@ -156,7 +162,7 @@ const FindPlayers = () => {
               <select 
                 value={filters.sport}
                 onChange={(e) => handleFilterChange("sport", e.target.value)}
-                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#84CC16] focus:border-[#84CC16]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
+                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#CCFF00] focus:border-[#CCFF00]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
               >
                 <option value="" className="bg-black text-white/40">All Sports</option>
                 {sports.map(sport => (
@@ -165,13 +171,13 @@ const FindPlayers = () => {
               </select>
 
               <div className="relative group">
-                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#84CC16]" size={10} />
+                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00]" size={10} />
                 <input 
                   type="text"
                   placeholder="LOCATION..."
                   value={filters.city}
                   onChange={(e) => handleFilterChange("city", e.target.value)}
-                  className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#84CC16] focus:border-[#84CC16]/50 outline-none w-28 md:w-32 placeholder:text-white/20"
+                  className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#CCFF00] focus:border-[#CCFF00]/50 outline-none w-28 md:w-32 placeholder:text-white/20"
                 />
               </div>
             </div>
@@ -209,15 +215,15 @@ const FindPlayers = () => {
                   
                   {/* Avatar Section */}
                   <div 
-                    className={`relative w-24 h-24 rounded-full p-[2px] transition-all duration-500 group-hover:scale-110 ${player.hasActiveStory ? 'cursor-pointer ring-2 ring-[#84CC16] ring-offset-2 ring-offset-black' : ''}`}
+                    className={`relative w-24 h-24 rounded-full p-[2px] transition-all duration-500 group-hover:scale-110 ${player.hasActiveStory ? 'cursor-pointer ring-2 ring-[#CCFF00] ring-offset-2 ring-offset-black' : ''}`}
                     onClick={() => handleAvatarClick(player)}
                   >
-                    <div className="absolute inset-0 rounded-full bg-[#84CC16]/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 rounded-full bg-[#CCFF00]/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="w-full h-full rounded-full flex items-center justify-center relative overflow-hidden z-10 bg-[#1a1a1a] border border-white/10">
                       {player.profilePicture ? (
                         <img src={player.profilePicture} alt={player.name} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-[#84CC16] font-black text-2xl">
+                        <span className="text-[#CCFF00] font-black text-2xl">
                           {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
                         </span>
                       )}
@@ -226,11 +232,11 @@ const FindPlayers = () => {
 
                   {/* Player Details */}
                   <div className="space-y-1 w-full">
-                    <Link to={`/profile/${player._id}`} className="block font-bold text-sm text-white hover:text-[#84CC16] transition-colors truncate">
+                    <Link to={`/profile/${player._id}`} className="block font-bold text-sm text-white hover:text-[#CCFF00] transition-colors truncate">
                       {player.name}
                     </Link>
                     <div className="flex items-center justify-center gap-1 text-[10px] text-white/40 uppercase tracking-widest">
-                      <MapPin size={10} className="text-[#84CC16]/60" />
+                      <MapPin size={10} className="text-[#CCFF00]/60" />
                       <span>{player.city || 'Athletic'}</span>
                     </div>
 
@@ -238,12 +244,12 @@ const FindPlayers = () => {
                     {player.stats?.cricket?.matches > 0 && (
                       <div className="flex items-center justify-center gap-3 py-1 px-3 bg-white/[0.03] border border-white/5 rounded-full text-[8px] font-bold uppercase tracking-widest text-white/40 mt-1">
                         <div className="flex items-center gap-1">
-                          <span className="text-[#84CC16]">{player.stats.cricket.runs || 0}</span>
+                          <span className="text-[#CCFF00]">{player.stats.cricket.runs || 0}</span>
                           <span>Runs</span>
                         </div>
                         <div className="w-[1px] h-2 bg-white/10" />
                         <div className="flex items-center gap-1">
-                          <span className="text-[#84CC16]">{player.stats.cricket.wickets || 0}</span>
+                          <span className="text-[#CCFF00]">{player.stats.cricket.wickets || 0}</span>
                           <span>Wkts</span>
                         </div>
                       </div>
@@ -259,7 +265,7 @@ const FindPlayers = () => {
                           className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                             followingIds.includes(player._id)
                             ? "bg-white/5 text-white/20 border border-white/10"
-                            : "bg-[#84CC16] text-black hover:bg-[#a3e635] shadow-[0_0_20px_rgba(132,204,22,0.1)]"
+                            : "bg-[#CCFF00] text-black hover:bg-[#a3e635] shadow-[0_0_20px_rgba(132,204,22,0.1)]"
                           }`}
                         >
                           {followingIds.includes(player._id) ? "Following" : "Follow"}
@@ -271,7 +277,7 @@ const FindPlayers = () => {
                               message: "Direct messaging allows you to coordinate matches and discuss tactics. Sign in to chat with players."
                             });
                           }}
-                          className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#84CC16] hover:bg-white/10 transition-all group/msg"
+                          className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#CCFF00] hover:bg-white/10 transition-all group/msg"
                         >
                           <MessageCircle size={16} className="group-hover/msg:scale-110 transition-transform" />
                         </button>

@@ -120,7 +120,9 @@ export default function TurfDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { turfData, isLoading, error, toggleVisibility, deleteArena } = useTurfDetails(id);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  // Use local date string (YYYY-MM-DD) so it matches date-fns format() which also uses local timezone
+  const toLocalDateString = (d) => format(d, 'yyyy-MM-dd');
+  const [selectedDate, setSelectedDate] = useState(toLocalDateString(new Date()));
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isDescExpanded, setIsDescExpanded] = useState(false);
   const [isPolicyExpanded, setIsPolicyExpanded] = useState(false);
@@ -144,8 +146,7 @@ export default function TurfDetails() {
   };
 
   React.useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    setSelectedDate(today);
+    setSelectedDate(toLocalDateString(new Date()));
   }, []);
 
   if (isLoading) return <DashboardSkeleton />;
@@ -642,7 +643,7 @@ export default function TurfDetails() {
                               <span className="text-[9px] text-[#CCFF00] uppercase font-bold tracking-widest">Platform Owner</span>
                            </div>
                            <div className="ml-auto flex gap-2">
-                              <a href={`tel:${turf.owner.phoneNumber}`} className="p-1.5 hover:bg-white/10 rounded-full transition-colors"><Phone size={12} className="text-[#878C9F]" /></a>
+                              <a href={`tel:${turf.owner.phone}`} className="p-1.5 hover:bg-white/10 rounded-full transition-colors"><Phone size={12} className="text-[#878C9F]" /></a>
                               <a href={`mailto:${turf.owner.email}`} className="p-1.5 hover:bg-white/10 rounded-full transition-colors"><Mail size={12} className="text-[#878C9F]" /></a>
                            </div>
                         </div>

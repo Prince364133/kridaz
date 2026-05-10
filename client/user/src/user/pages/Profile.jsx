@@ -4,11 +4,11 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   User, MapPin, Clock, IndianRupee, Calendar, Zap, Activity,
   ArrowRight, ShieldCheck, Trophy, Star, Camera, Edit2, MessageSquare, Heart, Edit3, Trash2, Loader2, Send, MessageCircle,
-  Wallet, CreditCard, Award, Target
+  Wallet, CreditCard, Award, Target, LogOut
 } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { login, updateUser, followUser, unfollowUser } from "@redux/slices/authSlice";
+import { login, logout, updateUser, followUser, unfollowUser } from "@redux/slices/authSlice";
 import useBookingHistory from "../hooks/useBookingHistory";
 import useWriteReview from "../hooks/useWriteReview";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
@@ -19,14 +19,14 @@ import NetworkModal from "../components/modals/NetworkModal";
 import StoryViewer from "../components/StoryViewer";
 import EditProfileModal from "../components/modals/EditProfileModal";
 
-const PRI = "#84CC16";
-const BDR = "#2A2A2A";
+const PRI = "#CCFF00";
+const BDR = "#2D2D2D";
 
 // Derive member level from booking count
 const getMemberLevel = (count) => {
   if (count >= 100) return { label: "LEGEND", color: "#F472B6" }; // Pink
   if (count >= 50) return { label: "ELITE", color: "#818CF8" };  // Indigo
-  if (count >= 20) return { label: "PRO", color: "#84CC16" };    // Lime
+  if (count >= 20) return { label: "PRO", color: "#CCFF00" };    // Lime
   return { label: "BEGINNER", color: "#94A3B8" };              // Slate
 };
 
@@ -117,6 +117,18 @@ export default function Profile() {
       }
     } catch (error) {
       toast.error("Action failed");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.post("/api/user/auth/logout");
+      dispatch(logout());
+      navigate("/", { replace: true });
+      toast.success("Signed out successfully!");
+    } catch (error) {
+      dispatch(logout());
+      navigate("/", { replace: true });
     }
   };
 
@@ -302,8 +314,8 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-black text-white pb-24 overflow-x-hidden">
 
-      {/* ── HIGH DENSITY HEADER ── */}
-      <div className="border-b bg-[#050505] sticky top-0 z-50 backdrop-blur-md" style={{ borderColor: BDR }}>
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ HIGH DENSITY HEADER Ã¢â€â‚¬Ã¢â€â‚¬ */}
+      <div className="border-b bg-black/40 sticky top-0 z-50 backdrop-blur-xl" style={{ borderColor: BDR }}>
         <div className="max-w-5xl mx-auto px-4 py-3 md:py-4">
           <div className="flex items-center justify-between gap-4">
 
@@ -312,8 +324,8 @@ export default function Profile() {
               {/* Profile Avatar */}
               <div className={`relative shrink-0 group ${profileUser?.hasActiveStory ? 'cursor-pointer' : ''}`} onClick={handleAvatarClick}>
                 <div
-                  className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center border overflow-hidden relative bg-[#84CC16]/10 transition-all ${profileUser?.hasActiveStory ? 'border-[#84CC16] ring-2 ring-[#84CC16]/20' : ''}`}
-                  style={{ borderColor: profileUser?.hasActiveStory ? '#84CC16' : BDR }}
+                  className={`w-10 h-10 md:w-14 md:h-14 rounded-2xl flex items-center justify-center border overflow-hidden relative bg-[#CCFF00]/5 transition-all ${profileUser?.hasActiveStory ? 'border-[#CCFF00] ring-2 ring-[#CCFF00]/20' : ''}`}
+                  style={{ borderColor: profileUser?.hasActiveStory ? PRI : BDR }}
                 >
                   {profileUser?.profilePicture ? (
                     <img 
@@ -328,10 +340,10 @@ export default function Profile() {
                   ) : null}
                   
                   <div 
-                    className="w-full h-full flex items-center justify-center bg-[#1a1a1a]"
+                    className="w-full h-full flex items-center justify-center bg-[#000000]"
                     style={{ display: profileUser?.profilePicture ? 'none' : 'flex' }}
                   >
-                    <span className="text-[#84CC16] font-black text-xl tracking-tighter">
+                    <span className="text-[#CCFF00] font-black text-2xl tracking-tighter">
                       {profileUser?.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "U"}
                     </span>
                   </div>
@@ -353,16 +365,16 @@ export default function Profile() {
                       {profileUser?.name}
                     </h1>
                     {/* Level Tag - Integrated */}
-                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-white/5 border border-white/5" style={{ color: memberLevel.color }}>
+                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-[4px] text-[8px] font-normal uppercase tracking-widest bg-[#CCFF00]/10 border border-[#2D2D2D]" style={{ color: memberLevel.color }}>
                       <Trophy size={8} className="opacity-40" />
                       {memberLevel.label}
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] font-bold uppercase tracking-widest text-white/20">
-                    <span className="text-[#84CC16]/60">@{profileUser?.username}</span>
-                    <span className="hidden md:inline text-white/10">•</span>
-                    <span className="hidden md:inline">{profileUser?.role || "USER"}</span>
-                    <span className="text-white/10">•</span>
+                    <span className="text-[#CCFF00]/80">@{profileUser?.username}</span>
+                    <span className="hidden md:inline text-white/10">Ã¢â‚¬Â¢</span>
+                    <span className="hidden md:inline text-white/40">{profileUser?.role || "PLAYER"}</span>
+                    <span className="text-white/10">Ã¢â‚¬Â¢</span>
                     <div className="flex items-center gap-2">
                       {(profileUser?.sportTypes || profileUser?.interests || ['Sports']).map(sport => (
                         <span key={sport} className="text-white/40">{sport}</span>
@@ -372,7 +384,7 @@ export default function Profile() {
                 </div>
 
                 {/* Stats Row - Full Spelling */}
-                <div className="flex items-center gap-4 md:gap-8 border-l border-white/5 md:pl-8 h-8">
+                <div className="flex items-center gap-4 md:gap-8 border-l border-[#2D2D2D] md:pl-8 h-8">
                   <button 
                     onClick={() => setActiveTab("stats")}
                     className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-2 hover:opacity-70 transition-opacity"
@@ -408,20 +420,29 @@ export default function Profile() {
             {/* Right: Actions */}
             <div className="shrink-0">
               {isOwnProfile ? (
-                <button
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="p-2 md:px-4 md:py-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-white transition-all flex items-center gap-2"
-                >
-                  <Edit3 size={14} />
-                  <span className="hidden md:inline text-[10px] font-bold uppercase tracking-widest">Edit Profile</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="p-2 md:px-4 md:py-2 rounded-lg border border-[#2D2D2D] text-[#999999] hover:text-white transition-all flex items-center gap-2"
+                  >
+                    <Edit3 size={14} />
+                    <span className="hidden md:inline text-[10px] font-bold uppercase tracking-widest">Edit Profile</span>
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="p-2 md:px-4 md:py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center gap-2"
+                  >
+                    <LogOut size={14} />
+                    <span className="hidden md:inline text-[10px] font-bold uppercase tracking-widest">Sign Out</span>
+                  </button>
+                </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleMessageClick}
-                    className="p-2 md:px-4 md:py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white transition-all flex items-center gap-2 group"
+                    className="p-2 md:px-4 md:py-2.5 rounded-xl border border-[#2D2D2D] text-[#999999] hover:text-white transition-all flex items-center gap-2 group"
                   >
-                    <MessageCircle size={14} className="group-hover:text-[#84CC16] transition-colors" />
+                    <MessageCircle size={14} className="group-hover:text-[#CCFF00] transition-colors" />
                     <span className="hidden md:inline text-[10px] font-bold uppercase tracking-widest">Message</span>
                   </button>
 
@@ -429,8 +450,8 @@ export default function Profile() {
                     onClick={onFollowClick}
                     className={`px-4 md:px-8 py-2 md:py-2.5 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all ${
                       followingIds.includes(targetUserId)
-                        ? "bg-white/5 text-white/20 border border-white/10 hover:bg-white/10"
-                        : "bg-[#84CC16] text-black hover:scale-105 active:scale-95 shadow-lg shadow-[#84CC16]/20"
+                        ? "border border-[#2D2D2D] text-[#999999] hover:border-[#CCFF00]/30"
+                        : "bg-[#CCFF00] text-black hover:scale-105 active:scale-95 shadow-lg shadow-[#CCFF00]/20"
                     }`}
                   >
                     {followingIds.includes(targetUserId) ? "Following" : "Follow"}
@@ -466,66 +487,59 @@ export default function Profile() {
         />
       )}
 
-      {/* ── CONTENT ── */}
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ CONTENT Ã¢â€â‚¬Ã¢â€â‚¬ */}
       <div className="max-w-5xl mx-auto px-6 pt-4">
 
-        {/* Tabs */}
-        <div className="flex items-center gap-8 mb-12 border-b overflow-x-auto no-scrollbar" style={{ borderColor: BDR }}>
-          <button 
-            onClick={() => setActiveTab("posts")}
-            className={`pb-4 text-[10px] font-bold uppercase tracking-[0.2em] transition-all relative ${activeTab === 'posts' ? 'text-white' : 'text-gray-500 hover:text-gray-300'}`}
-          >
-            Posts
-            {activeTab === 'posts' && <div className="absolute bottom-0 left-0 w-full h-[2px]" style={{ backgroundColor: PRI }} />}
-          </button>
-          <button 
-            onClick={() => setActiveTab("stories")}
-            className={`pb-4 text-[10px] font-bold uppercase tracking-[0.2em] transition-all relative ${activeTab === 'stories' ? 'text-white' : 'text-gray-500 hover:text-gray-300'}`}
-          >
-            Stories
-            {activeTab === 'stories' && <div className="absolute bottom-0 left-0 w-full h-[2px]" style={{ backgroundColor: PRI }} />}
-          </button>
-          <button 
-            onClick={() => setActiveTab("stats")}
-            className={`pb-4 text-[10px] font-bold uppercase tracking-[0.2em] transition-all relative ${activeTab === 'stats' ? 'text-white' : 'text-gray-500 hover:text-gray-300'}`}
-          >
-            Stats
-            {activeTab === 'stats' && <div className="absolute bottom-0 left-0 w-full h-[2px]" style={{ backgroundColor: PRI }} />}
-          </button>
-          
-          {isOwnProfile && (
-            <>
-              <button 
-                onClick={() => setActiveTab("bookings")}
-                className={`pb-4 text-[10px] font-bold uppercase tracking-[0.2em] transition-all relative ${activeTab === 'bookings' ? 'text-white' : 'text-gray-500 hover:text-gray-300'}`}
+        {/* Tabs â€“ exact match to OwnerDashboard filter pills */}
+        <div className="flex items-center gap-3 mb-10 flex-wrap">
+          <div className="flex items-center gap-1 bg-[#2D2D2D] p-1 rounded-[6px]">
+            {["posts", "stories", "stats"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-1.5 rounded-[4px] text-[11px] font-normal uppercase tracking-wider transition-all ${
+                  activeTab === tab
+                    ? "bg-[#CCFF00] text-black"
+                    : "text-[#999999] hover:text-[#FFFFFF]"
+                }`}
               >
-                Bookings
-                {activeTab === 'bookings' && <div className="absolute bottom-0 left-0 w-full h-[2px]" style={{ backgroundColor: PRI }} />}
+                {tab}
               </button>
-              <button 
-                onClick={() => setActiveTab("activity")}
-                className={`pb-4 text-[10px] font-bold uppercase tracking-[0.2em] transition-all relative ${activeTab === 'activity' ? 'text-white' : 'text-gray-500 hover:text-gray-300'}`}
-              >
-                Activity
-                {activeTab === 'activity' && <div className="absolute bottom-0 left-0 w-full h-[2px]" style={{ backgroundColor: PRI }} />}
-              </button>
-            </>
-          )}
+            ))}
+            {isOwnProfile && (
+              <>
+                {["bookings", "activity"].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-4 py-1.5 rounded-[4px] text-[11px] font-normal uppercase tracking-wider transition-all ${
+                      activeTab === tab
+                        ? "bg-[#CCFF00] text-black"
+                        : "text-[#999999] hover:text-[#FFFFFF]"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
         </div>
 
-        {/* ── POSTS TAB ── */}
+
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ POSTS TAB Ã¢â€â‚¬Ã¢â€â‚¬ */}
         {activeTab === "posts" && (
           <div className="space-y-6">
             {loadingContent ? (
-              <div className="flex justify-center py-12"><Loader2 className="animate-spin text-[#84CC16]" /></div>
+              <div className="flex justify-center py-12"><Loader2 className="animate-spin" /></div>
             ) : userPosts.length === 0 ? (
-              <div className="p-16 text-center rounded-[32px] border" style={{ borderColor: BDR, backgroundColor: "#0A0A0A" }}>
+              <div className="flex flex-col items-center justify-center gap-4 text-center py-20 rounded-[8px] border border-dashed" style={{ borderColor: BDR, backgroundColor: "#0A0A0A" }}>
                 <p className="text-gray-500 uppercase tracking-widest text-sm">No posts yet</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {userPosts.map((post) => (
-                  <div key={post._id} className="rounded-2xl border overflow-hidden bg-[#0A0A0A] group relative" style={{ borderColor: BDR }}>
+                  <div key={post._id} className="rounded-[8px] border overflow-hidden bg-[#000000] group relative" style={{ borderColor: BDR }}>
                     {post.mediaUrl ? (
                       <img src={post.mediaUrl} alt="" className="w-full aspect-square object-cover" />
                     ) : (
@@ -559,13 +573,13 @@ export default function Profile() {
           </div>
         )}
 
-        {/* ── STORIES TAB ── */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ STORIES TAB Ã¢â€â‚¬Ã¢â€â‚¬ */}
         {activeTab === "stories" && (
           <div className="space-y-6">
             {loadingContent ? (
-              <div className="flex justify-center py-12"><Loader2 className="animate-spin text-[#84CC16]" /></div>
+              <div className="flex justify-center py-12"><Loader2 className="animate-spin" /></div>
             ) : userStories.length === 0 ? (
-              <div className="p-16 text-center rounded-[32px] border" style={{ borderColor: BDR, backgroundColor: "#0A0A0A" }}>
+              <div className="flex flex-col items-center justify-center gap-4 text-center py-20 rounded-[8px] border border-dashed" style={{ borderColor: BDR, backgroundColor: "#0A0A0A" }}>
                 <p className="text-gray-500 uppercase tracking-widest text-sm">No active stories</p>
               </div>
             ) : (
@@ -583,7 +597,7 @@ export default function Profile() {
                         }}
                       />
                     ) : null}
-                    <div className={`w-full h-full bg-[#111] p-4 flex items-center justify-center text-center text-xs ${story.mediaUrl ? 'hidden' : 'flex'}`}>
+                    <div className={`w-full h-full bg-[#000000] p-4 flex items-center justify-center text-center text-xs ${story.mediaUrl ? 'hidden' : 'flex'}`}>
                       {story.content}
                     </div>
                     <div className="absolute bottom-0 left-0 w-full p-3 bg-gradient-to-t from-black/80 to-transparent text-[10px] text-white">
@@ -603,40 +617,40 @@ export default function Profile() {
           </div>
         )}
 
-        {/* ── STATS TAB ── */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ STATS TAB Ã¢â€â‚¬Ã¢â€â‚¬ */}
         {activeTab === "stats" && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
             {/* Header / Career Summary */}
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-black uppercase tracking-tighter">Cricket Career</h3>
-              <div className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              <div className="px-4 py-1.5 rounded-[6px] bg-[#CCFF00]/10 border border-[#2D2D2D] text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                 Verified stats
               </div>
             </div>
 
             {/* Batting Bento */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+               <div className="bg-[#000000] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col justify-center group hover:border-[#CCFF00]/30 transition-colors">
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Matches</span>
                   <span className="text-4xl font-black text-white">{profileUser?.stats?.cricket?.matches || 0}</span>
                </div>
-               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+               <div className="bg-[#000000] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col justify-center group hover:border-[#CCFF00]/30 transition-colors">
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Runs</span>
-                  <span className="text-4xl font-black text-[#84CC16]">{profileUser?.stats?.cricket?.runs || 0}</span>
+                  <span className="text-4xl font-black text-[#CCFF00]">{profileUser?.stats?.cricket?.runs || 0}</span>
                </div>
-               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+               <div className="bg-[#000000] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col justify-center group hover:border-[#CCFF00]/30 transition-colors">
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Average</span>
                   <span className="text-4xl font-black text-white">
                     {profileUser?.stats?.cricket?.battingAverage ? Number(profileUser.stats.cricket.battingAverage).toFixed(2) : '0.00'}
                   </span>
                </div>
-               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+               <div className="bg-[#000000] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col justify-center group hover:border-[#CCFF00]/30 transition-colors">
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Strike Rate</span>
                   <span className="text-4xl font-black text-white">
                     {profileUser?.stats?.cricket?.battingStrikeRate ? Number(profileUser.stats.cricket.battingStrikeRate).toFixed(2) : '0.00'}
                   </span>
                </div>
-               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+               <div className="bg-[#000000] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col justify-center group hover:border-[#CCFF00]/30 transition-colors">
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Highest</span>
                   <span className="text-4xl font-black text-white">{profileUser?.stats?.cricket?.highestScore || 0}</span>
                </div>
@@ -644,23 +658,23 @@ export default function Profile() {
             
             {/* Bowling Bento */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+               <div className="bg-[#000000] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col justify-center group hover:border-[#CCFF00]/30 transition-colors">
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Wickets</span>
-                  <span className="text-4xl font-black text-[#84CC16]">{profileUser?.stats?.cricket?.wickets || 0}</span>
+                  <span className="text-4xl font-black text-[#CCFF00]">{profileUser?.stats?.cricket?.wickets || 0}</span>
                </div>
-               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+               <div className="bg-[#000000] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col justify-center group hover:border-[#CCFF00]/30 transition-colors">
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Average</span>
                   <span className="text-4xl font-black text-white">
                     {profileUser?.stats?.cricket?.bowlingAverage ? Number(profileUser.stats.cricket.bowlingAverage).toFixed(2) : '0.00'}
                   </span>
                </div>
-               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+               <div className="bg-[#000000] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col justify-center group hover:border-[#CCFF00]/30 transition-colors">
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Economy</span>
                   <span className="text-4xl font-black text-white">
                     {profileUser?.stats?.cricket?.bowlingEconomy ? Number(profileUser.stats.cricket.bowlingEconomy).toFixed(2) : '0.00'}
                   </span>
                </div>
-               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+               <div className="bg-[#000000] border border-[#2D2D2D] p-5 rounded-[8px] flex flex-col justify-center group hover:border-[#CCFF00]/30 transition-colors">
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Best Bowling</span>
                   <span className="text-2xl font-black text-white">
                     {profileUser?.stats?.cricket?.bestBowling?.wickets || 0}/{profileUser?.stats?.cricket?.bestBowling?.runs || 0}
@@ -670,7 +684,7 @@ export default function Profile() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                {/* Milestones */}
-               <div className="bg-[#0A0A0A] border border-white/5 p-8 rounded-[2rem] group hover:border-[#84CC16]/30 transition-colors">
+               <div className="bg-[#000000] border border-[#2D2D2D] p-6 rounded-[8px] group hover:border-[#CCFF00]/30 transition-colors">
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 block text-gray-500">Major Milestones</span>
                   <div className="flex gap-12">
                     <div className="flex flex-col">
@@ -685,12 +699,12 @@ export default function Profile() {
                </div>
 
                {/* Fielding */}
-               <div className="bg-[#0A0A0A] border border-white/5 p-8 rounded-[2rem] group hover:border-[#84CC16]/30 transition-colors">
+               <div className="bg-[#000000] border border-[#2D2D2D] p-6 rounded-[8px] group hover:border-[#CCFF00]/30 transition-colors">
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 block text-gray-500">Fielding Prowess</span>
                   <div className="flex gap-12">
                     <div className="flex flex-col">
                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Catches</span>
-                       <span className="text-5xl font-black text-[#84CC16]">{profileUser?.stats?.cricket?.catches || 0}</span>
+                       <span className="text-5xl font-black text-[#CCFF00]">{profileUser?.stats?.cricket?.catches || 0}</span>
                     </div>
                     <div className="flex flex-col">
                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Stumpings</span>
@@ -700,16 +714,16 @@ export default function Profile() {
                 </div>
              </div>
 
-             {/* ── EARNED BADGES ── */}
+             {/* Ã¢â€â‚¬Ã¢â€â‚¬ EARNED BADGES Ã¢â€â‚¬Ã¢â€â‚¬ */}
              <div className="mt-12">
                <div className="flex items-center justify-between mb-8">
                  <div className="flex items-center gap-3">
-                   <div className="w-8 h-8 rounded-lg bg-[#84CC16]/10 flex items-center justify-center">
-                     <Award className="text-[#84CC16]" size={16} />
+                   <div className="w-8 h-8 rounded-lg bg-[#CCFF00]/10 flex items-center justify-center">
+                     <Award className="text-[#CCFF00]" size={16} />
                    </div>
                    <h3 className="text-xl font-black uppercase tracking-tighter">Achievement Badges</h3>
                  </div>
-                 <div className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                 <div className="px-4 py-1.5 rounded-[6px] bg-[#CCFF00]/10 border border-[#2D2D2D] text-[10px] font-normal text-[#878C9F] uppercase tracking-widest">
                    {profileUser?.badges?.length || 0} Unlocked
                  </div>
                </div>
@@ -729,13 +743,13 @@ export default function Profile() {
                      return (
                        <div 
                          key={idx}
-                         className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2.5rem] flex items-center gap-5 group hover:border-[#84CC16]/30 transition-all hover:bg-[#0F0F0F] relative overflow-hidden"
+                         className="bg-[#000000] border border-[#2D2D2D] p-5 rounded-[8px] flex items-center gap-5 group hover:border-[#CCFF00]/30 transition-all hover:bg-[#0F0F0F] relative overflow-hidden"
                        >
                          {/* Shine effect */}
-                         <div className="absolute inset-0 bg-gradient-to-tr from-[#84CC16]/0 via-[#84CC16]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                         <div className="absolute inset-0 bg-gradient-to-tr from-[#CCFF00]/0 via-[#CCFF00]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                          
-                         <div className="w-14 h-14 rounded-2xl bg-[#111] border border-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform relative z-10">
-                           <IconComponent className="text-[#84CC16]" size={24} />
+                         <div className="w-10 h-10 rounded-[6px] bg-[#CCFF00]/10 border border-[#2D2D2D] flex items-center justify-center shrink-0 transition-transform relative z-10">
+                           <IconComponent className="text-[#CCFF00]" size={24} />
                          </div>
                          <div className="flex flex-col min-w-0 relative z-10">
                            <span className="text-xs font-black uppercase tracking-tight text-white truncate">{badge.name}</span>
@@ -747,8 +761,8 @@ export default function Profile() {
                    })}
                  </div>
                ) : (
-                 <div className="p-16 text-center rounded-[3rem] border border-white/5 bg-[#0A0A0A] group transition-all hover:border-[#84CC16]/10">
-                   <div className="w-20 h-20 rounded-full bg-[#111] border border-white/5 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                 <div className="flex flex-col items-center justify-center gap-4 text-center py-20 rounded-[8px] group transition-all hover:border-[#CCFF00]/10">
+                   <div className="w-20 h-20 rounded-[8px] bg-[#CCFF00]/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                      <Award size={32} className="text-gray-700 opacity-20" />
                    </div>
                    <h4 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-2">The Hall of Fame awaits</h4>
@@ -761,21 +775,21 @@ export default function Profile() {
            </div>
         )}
 
-        {/* ── BOOKINGS TAB ── */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ BOOKINGS TAB Ã¢â€â‚¬Ã¢â€â‚¬ */}
         {activeTab === "bookings" && (
           <TurfBookingHistory />
         )}
 
-        {/* ── ACTIVITY TAB ── */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ ACTIVITY TAB Ã¢â€â‚¬Ã¢â€â‚¬ */}
         {activeTab === "activity" && (
           <div className="space-y-8 animate-in fade-in duration-500">
             {loadingActivity ? (
               <div className="flex flex-col items-center justify-center py-24 gap-4">
-                <Loader2 size={32} className="animate-spin text-[#84CC16]" />
+                <Loader2 size={32} className="animate-spin" />
                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Scanning Social Database...</p>
               </div>
             ) : activity.length === 0 ? (
-              <div className="p-16 text-center rounded-[32px] border space-y-6" style={{ borderColor: BDR, backgroundColor: "#0A0A0A" }}>
+              <div className="flex flex-col items-center justify-center gap-4 text-center py-20 rounded-[8px] border border-dashed space-y-6" style={{ borderColor: BDR, backgroundColor: "#0A0A0A" }}>
                 <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto" style={{ backgroundColor: "#111", border: `1px solid ${BDR}` }}>
                   <MessageSquare size={32} className="text-gray-600" />
                 </div>
@@ -787,28 +801,28 @@ export default function Profile() {
             ) : (
               <div className="grid gap-6">
                 {activity.map((item) => (
-                  <div key={item.postId} className="group bg-[#0A0A0A] border rounded-[2rem] p-6 md:p-8 transition-all hover:border-[#84CC16]/20" style={{ borderColor: BDR }}>
+                  <div key={item.postId} className="group bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 md:p-8 transition-all hover:border-[#CCFF00]/20" style={{ borderColor: BDR }}>
                     <div className="flex flex-col md:flex-row gap-8">
                       {/* Post Context */}
                       <div className="w-full md:w-1/3 space-y-4">
-                        <div className="aspect-video rounded-2xl overflow-hidden border border-white/5 relative bg-[#111]">
+                        <div className="aspect-video rounded-2xl overflow-hidden border border-[#2D2D2D] relative bg-[#000000]">
                           {item.postImage ? (
                             <img src={item.postImage} alt="" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
                           ) : (
-                              <div className="w-full h-full flex items-center justify-center text-[#84CC16]/20 bg-[#1a1a1a]">
+                              <div className="w-full h-full flex items-center justify-center text-[#CCFF00]/20 bg-[#1a1a1a]">
                                 <span className="text-4xl font-black tracking-tighter">
                                   {item.adminName?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
                                 </span>
                               </div>
                           )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
-                            <span className="text-[8px] font-bold text-[#84CC16] uppercase tracking-widest mb-1">{item.adminName}</span>
+                            <span className="text-[8px] font-normal text-[#CCFF00] uppercase tracking-widest mb-1">{item.adminName}</span>
                             <h4 className="text-xs font-bold uppercase tracking-widest line-clamp-2">{item.postTitle}</h4>
                           </div>
                         </div>
                         <div className="flex items-center gap-4 px-2">
                           {item.isLiked && (
-                            <div className="flex items-center gap-1.5 text-[#84CC16]">
+                            <div className="flex items-center gap-1.5 text-[#CCFF00]">
                               <Heart size={12} fill="currentColor" />
                               <span className="text-[10px] font-bold uppercase tracking-widest">Liked</span>
                             </div>
@@ -823,18 +837,18 @@ export default function Profile() {
                       {/* Your Comments */}
                       <div className="flex-1 space-y-4">
                         <div className="flex items-center gap-2 mb-4">
-                          <Edit2 size={12} className="text-[#84CC16]" />
+                          <Edit2 size={12} className="text-[#CCFF00]" />
                           <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Your Interactions</span>
                         </div>
                         <div className="space-y-3">
                           {item.myComments.map((comment) => (
-                            <div key={comment._id} className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 relative group/comment transition-all hover:bg-white/[0.04]">
+                            <div key={comment._id} className="bg-white/[0.02] border border-[#2D2D2D] rounded-[8px] p-5 relative group/comment transition-all hover:bg-white/[0.04]">
                               <div className="flex justify-between items-start mb-3">
                                 <span className="text-[8px] text-white/20 uppercase tracking-[0.2em]">{new Date(comment.createdAt).toLocaleString()}</span>
                                 <div className="flex gap-4 opacity-0 group-hover/comment:opacity-100 transition-opacity">
                                   <button 
                                     onClick={() => { setEditingComment({ postId: item.postId, commentId: comment._id }); setCommentText(comment.text); }}
-                                    className="text-white/20 hover:text-[#84CC16] transition-colors"
+                                    className="text-[#999999] hover:text-[#CCFF00] transition-colors"
                                   >
                                     <Edit3 size={12} />
                                   </button>
@@ -852,7 +866,7 @@ export default function Profile() {
                                   <textarea 
                                     value={commentText}
                                     onChange={(e) => setCommentText(e.target.value)}
-                                    className="w-full bg-black/40 border border-[#84CC16]/30 rounded-xl p-4 text-white text-xs outline-none focus:border-[#84CC16] transition-all resize-none min-h-[100px]"
+                                    className="w-full bg-black/40 border border-[#CCFF00]/30 rounded-[8px] p-4 text-white text-xs outline-none focus:border-[#CCFF00] transition-all resize-none min-h-[100px]"
                                   />
                                   <div className="flex justify-end gap-3">
                                     <button 
@@ -864,7 +878,7 @@ export default function Profile() {
                                     <button 
                                       onClick={() => handleUpdateComment(item.postId, comment._id)}
                                       disabled={isSubmittingComment}
-                                      className="bg-[#84CC16] text-black px-6 py-2 rounded-lg font-bold uppercase tracking-wider text-[10px] flex items-center gap-2 hover:scale-105 transition-all"
+                                      className="bg-[#CCFF00] text-black px-6 py-2 rounded-[8px] font-normal uppercase tracking-wider text-[10px] flex items-center gap-2 hover:scale-105 transition-all"
                                     >
                                       {isSubmittingComment ? <Loader2 size={10} className="animate-spin" /> : <Send size={10} />}
                                       Update
@@ -902,3 +916,7 @@ export default function Profile() {
     </div>
   );
 }
+
+
+
+

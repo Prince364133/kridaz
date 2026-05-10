@@ -5,7 +5,8 @@ import {
   getUserBookings,
   getOwnerBookings,
   getBookingById,
-  downloadInvoice
+  downloadInvoice,
+  cancelBooking
 } from "./booking.controller.js";
 import { createOrderSchema, verifyPaymentSchema } from "./booking.validator.js";
 import { validate } from "../../middleware/validate.middleware.js";
@@ -21,6 +22,8 @@ router.post("/user/verify", verifyUserToken, validate(verifyPaymentSchema), veri
 router.get("/user/all", verifyUserToken, getUserBookings);
 router.get("/:id", getBookingById); // Made public for QR code access or simplified access
 router.get("/user/invoice/:id", downloadInvoice); // Public for direct access via link as per request
+router.post("/user/cancel/:id", verifyUserToken, cancelBooking);
+
 
 // Owner routes
 router.get("/owner/all", verifyOwnerToken, getOwnerBookings);

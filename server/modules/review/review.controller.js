@@ -68,7 +68,12 @@ export const getOwnerTurfReviews = async (req, res) => {
   const ownerId = req.owner.id;
 
   try {
-    const turfs = await Turf.find({ owner: ownerId })
+    const turfs = await Turf.find({ 
+      $or: [
+        { owner: req.owner.ownerId },
+        { owner: req.owner.id }
+      ]
+    })
       .select("name reviews")
       .lean();
 

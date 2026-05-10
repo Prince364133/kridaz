@@ -608,6 +608,9 @@ const EditTurf = () => {
                   <div className="space-y-1">
                     <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[3px] font-open-sans">Matrix Projection</h3>
                     <p className="text-[9px] text-[#444] uppercase tracking-widest font-bold">Override individual slot pricing below</p>
+                    <p className="text-[8px] text-[#878C9F] uppercase tracking-widest font-medium mt-1">
+                      * After 5% service charge (Includes payment gateway charges and GST)
+                    </p>
                   </div>
                   <span className="text-[10px] font-bold text-[#CCFF00] uppercase bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-4 py-1 rounded-full">
                     {generatedSlots.length} Active Slots
@@ -658,8 +661,8 @@ const EditTurf = () => {
                                   placeholder="Slot Price"
                                 />
                               </div>
-                              <div className="flex justify-between items-center px-1">
-                                <span className="text-[8px] font-bold text-[#444] uppercase tracking-widest">Est. Payout (After {platformFeePercent}%)</span>
+                              <div className="flex flex-col items-end px-1">
+                                <span className="text-[8px] font-black text-[#CCFF00] uppercase tracking-[2px] mb-1">Your Net</span>
                                 <span className="text-[10px] font-bold text-[#CCFF00] font-mono">Rs {netRevenue}</span>
                               </div>
                             </div>

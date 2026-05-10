@@ -570,7 +570,7 @@ const TurfDetails = () => {
               )}
 
               {/* Ground Contacts */}
-              {turf.managerContacts && turf.managerContacts.length > 0 && (
+              {((turf.managerContacts && turf.managerContacts.length > 0) || turf.owner) && (
                 <div className="space-y-4">
                   <h2 className="text-xl font-bold uppercase tracking-tight">Ground Contacts</h2>
                   <div className="bg-zinc-900/30 border border-zinc-800 rounded-[1.5rem] p-5 space-y-3">
@@ -579,22 +579,25 @@ const TurfDetails = () => {
                       <div className="flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl hover:border-[#CCFF00]/40 transition-all group relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-1 h-full bg-[#CCFF00]" />
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-[#111] border border-zinc-700 flex items-center justify-center shrink-0">
-                            {turf.owner.profileImage ? (
-                              <img src={turf.owner.profileImage} alt={turf.owner.name} className="w-full h-full object-cover rounded-full" />
+                          <div className="w-10 h-10 rounded-full bg-[#111] border border-zinc-700 flex items-center justify-center shrink-0 overflow-hidden">
+                            {turf.owner.profilePicture ? (
+                              <img src={turf.owner.profilePicture} alt={turf.owner.name} className="w-full h-full object-cover" />
                             ) : (
                               <User className="w-5 h-5 text-zinc-500" />
                             )}
                           </div>
                           <div className="flex flex-col gap-0.5">
                             <span className="text-white text-sm font-bold uppercase tracking-tight">{turf.owner.name}</span>
-                            <span className="text-[#CCFF00] text-[10px] font-bold uppercase tracking-widest">Platform Owner</span>
+                            <span className="text-zinc-500 text-[10px] font-medium lowercase tracking-normal">{turf.owner.email}</span>
+                            <span className="text-[#CCFF00] text-[9px] font-bold uppercase tracking-widest mt-0.5">Venue Owner</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <a href={`tel:${turf.owner.phoneNumber}`} className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 hover:bg-[#CCFF00] hover:text-black transition-all shrink-0">
-                            <Phone className="w-4 h-4" />
-                          </a>
+                          {turf.owner.phone && (
+                            <a href={`tel:${turf.owner.phone}`} className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 hover:bg-[#CCFF00] hover:text-black transition-all shrink-0">
+                              <Phone className="w-4 h-4" />
+                            </a>
+                          )}
                           <a href={`mailto:${turf.owner.email}`} className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 hover:bg-[#CCFF00] hover:text-black transition-all shrink-0">
                             <Mail className="w-4 h-4" />
                           </a>
@@ -603,7 +606,7 @@ const TurfDetails = () => {
                     )}
                     
                     {/* Venue Managers */}
-                    {turf.managerContacts.map((contact, i) => (
+                    {turf.managerContacts && turf.managerContacts.map((contact, i) => (
                       <a
                         key={i}
                         href={`tel:${contact.phone}`}

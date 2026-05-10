@@ -76,7 +76,9 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/admin/support", label: "Docs & Support", icon: HelpCircle },
   ];
 
-  const bottomNavItems = [];
+  const bottomNavItems = [
+    { label: "Sign Out", icon: LogOut, action: "logout" },
+  ];
 
   const renderNavItem = (item) => {
     const isLogout = item.action === "logout";

@@ -660,6 +660,9 @@ const AddTurf = () => {
                   <div className="space-y-1">
                     <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[3px]">Matrix Projection</h3>
                     <p className="text-[9px] text-[#878C9F] font-bold uppercase tracking-widest italic">Set individual slot pricing below</p>
+                    <p className="text-[8px] text-[#444] uppercase tracking-widest font-medium mt-1">
+                      * After 5% service charge (Includes payment gateway charges and GST)
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex flex-col items-end">

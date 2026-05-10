@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import useOwnerBookings from "@hooks/owner/useOwnerBookings";
 import BookingsSkeleton from "./BookingsSkeleton";
-import { format, subHours, subMinutes } from "date-fns";
+import { format } from "date-fns";
 import { ArrowUpDown, Calendar, Clock, User, IndianRupee, Filter, Download, Ticket, FileText } from "lucide-react";
 import Avatar from "react-avatar";
 
@@ -27,8 +27,8 @@ const OwnerBookings = () => {
   };
 
   const formatTime = (dateString) => {
-    const adjustedDate = subMinutes(subHours(new Date(dateString), 5), 30);
-    return format(adjustedDate, "h:mm aa");
+    if (!dateString) return "—";
+    return format(new Date(dateString), "h:mm aa");
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useGetFollowersFollowingQuery, useCreateGroupChatMutation } from '../../../redux/api/chatApi';
 
 const CreateGroupModal = ({ isOpen, onClose, onSuccess }) => {
@@ -40,8 +40,8 @@ const CreateGroupModal = ({ isOpen, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="bg-[#1a1a1a] border border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-        <div className="p-6 border-b border-white/10 flex justify-between items-center">
+      <div className="bg-[#1a1a1a] border border-[#2D2D2D] rounded-[8px] w-full max-w-md overflow-hidden shadow-2xl">
+        <div className="p-6 border-b border-[#2D2D2D] flex justify-between items-center">
           <h2 className="text-xl font-bold text-white">Create Group</h2>
           <button onClick={onClose} className="text-white/60 hover:text-white">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@ const CreateGroupModal = ({ isOpen, onClose, onSuccess }) => {
               required
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary outline-none transition-all"
+              className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[6px] px-4 py-3 text-white focus:border-primary outline-none transition-all"
               placeholder="Enter group name..."
             />
           </div>
@@ -75,10 +75,10 @@ const CreateGroupModal = ({ isOpen, onClose, onSuccess }) => {
                   <div 
                     key={user._id}
                     onClick={() => toggleUser(user._id)}
-                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                    className={`flex items-center gap-3 p-3 rounded-[6px] border cursor-pointer transition-all ${
                       selectedUsers.includes(user._id) 
                         ? 'bg-primary/20 border-primary/50' 
-                        : 'bg-white/5 border-transparent hover:border-white/10'
+                        : 'bg-[#000000] border-transparent hover:border-[#2D2D2D]'
                     }`}
                   >
                     <img src={user.profilePicture || "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-10 h-10 rounded-full" alt={user.name} />
@@ -102,7 +102,7 @@ const CreateGroupModal = ({ isOpen, onClose, onSuccess }) => {
           <button
             type="submit"
             disabled={isCreating || !groupName || selectedUsers.length === 0}
-            className="w-full py-4 bg-primary text-black font-bold rounded-2xl hover:bg-primary/80 transition-all disabled:opacity-50"
+            className="w-full py-4 bg-primary text-black font-bold rounded-[8px] hover:bg-primary/80 transition-all disabled:opacity-50"
           >
             {isCreating ? "Creating..." : "Create Group"}
           </button>
@@ -113,3 +113,4 @@ const CreateGroupModal = ({ isOpen, onClose, onSuccess }) => {
 };
 
 export default CreateGroupModal;
+

@@ -8,6 +8,7 @@ import promotionRouter from "./promotion.routes.js"
 import walletRouter from "./wallet.routes.js"
 import supportRouter from "./support.routes.js"
 import bankingRouter from "./banking.routes.js"
+import revenueRouter from "./revenue.routes.js"
 import notificationRouter from "../notification.routes.js"
 
 const ownerRouter = Router()
@@ -21,6 +22,7 @@ ownerRouter.use("/promotions", promotionRouter);
 ownerRouter.use("/wallet", walletRouter);
 ownerRouter.use("/support", supportRouter);
 ownerRouter.use("/banking", bankingRouter);
+ownerRouter.use("/revenue", revenueRouter);
 ownerRouter.use("/notifications", notificationRouter);
 
 export default ownerRouter;

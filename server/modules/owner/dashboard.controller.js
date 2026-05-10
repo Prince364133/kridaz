@@ -34,7 +34,12 @@ export const getDashboardData = async (req, res) => {
     const ownerId = ownerRecord._id;
 
     // 2. Fetch ground statistics
-    const turfs = await Turf.find({ owner: ownerId }).select("_id name pricePerHour reviews").lean();
+    const turfs = await Turf.find({ 
+      $or: [
+        { owner: ownerId },
+        { owner: ownerRecord.userId }
+      ]
+    }).select("_id name pricePerHour reviews").lean();
     console.log(`DEBUG: Found ${turfs.length} turfs`);
 
     if (turfs.length === 0) {
