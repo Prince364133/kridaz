@@ -16,7 +16,7 @@ router.route("/").post(verifyAuth, accessChat);
 router.route("/").get(verifyAuth, fetchChats);
 router.route("/group").post(verifyAuth, createGroupChat);
 router.route("/rename").put(verifyAuth, renameGroup);
-router.route("/respond-invite").put(verifyAuth, respondToInvite);
+router.route("/respond-invite").post(verifyAuth, respondToInvite);
 
 // Message routes
 router.route("/message/:chatId").get(verifyAuth, allMessages);

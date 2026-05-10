@@ -65,7 +65,7 @@ export const fetchChats = async (req, res) => {
     const currentUserId = req.user?.id || req.owner?.id;
     const currentUserModel = req.user ? "User" : "Owner";
 
-    let results = await Chat.find({
+    const results = await Chat.find({
       $or: [
         { users: { $elemMatch: { user: currentUserId, onModel: currentUserModel } } },
         { pendingMembers: { $elemMatch: { user: currentUserId, onModel: currentUserModel } } }
@@ -74,15 +74,25 @@ export const fetchChats = async (req, res) => {
       .populate("users.user", "-password")
       .populate("groupAdmin.user", "-password")
       .populate("pendingMembers.user", "-password")
-      .populate("latestMessage")
+      .populate({
+        path: "latestMessage",
+        populate: {
+          path: "sender.user",
+          select: "name profilePicture email"
+        }
+      })
       .sort({ updatedAt: -1 });
 
-    results = await User.populate(results, {
-      path: "latestMessage.sender.user",
-      select: "name profilePicture email"
-    });
+    // Separate active chats from invitations
+    const invitations = results.filter(chat => 
+      chat.pendingMembers.some(m => m.user?._id?.toString() === currentUserId.toString() || m.user?.toString() === currentUserId.toString())
+    );
 
-    res.status(200).send(results);
+    const chats = results.filter(chat => 
+      chat.users.some(m => m.user?._id?.toString() === currentUserId.toString() || m.user?.toString() === currentUserId.toString())
+    );
+
+    res.status(200).json({ chats, invitations });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -143,21 +153,27 @@ export const createGroupChat = async (req, res) => {
  * Respond to group invite
  */
 export const respondToInvite = async (req, res) => {
-  const { chatId, accept } = req.body;
+  const { chatId, status } = req.body; // status: 'accepted' or 'rejected'
   const currentUserId = req.user?.id || req.owner?.id;
   const currentUserModel = req.user ? "User" : "Owner";
 
   try {
     const chat = await Chat.findById(chatId);
-    if (!chat) return res.status(404).send("Chat not found");
+    if (!chat) return res.status(404).json({ message: "Chat not found" });
+
+    const accept = status === "accepted";
 
     // Remove from pending
     chat.pendingMembers = chat.pendingMembers.filter(
-      m => m.user.toString() !== currentUserId.toString()
+      m => m.user?.toString() !== currentUserId.toString()
     );
 
     if (accept) {
-      chat.users.push({ user: currentUserId, onModel: currentUserModel });
+      // Add to members if not already there
+      const isMember = chat.users.some(m => m.user?.toString() === currentUserId.toString());
+      if (!isMember) {
+        chat.users.push({ user: currentUserId, onModel: currentUserModel });
+      }
     }
 
     await chat.save();

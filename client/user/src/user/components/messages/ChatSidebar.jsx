@@ -1,6 +1,17 @@
 import React from 'react';
 import { useGetChatsQuery, useRespondToInvitationMutation } from '../../../redux/api/chatApi';
 import { useSelector } from 'react-redux';
+import { 
+  MessageSquare, 
+  Plus, 
+  Users, 
+  User, 
+  Clock, 
+  AlertCircle,
+  Loader2,
+  Check,
+  X
+} from 'lucide-react';
 
 const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup }) => {
   const { user } = useSelector((state) => state.auth);
@@ -9,46 +20,52 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup }) => {
 
   const getChatName = (chat) => {
     if (chat.isGroupChat) return chat.chatName;
-    const otherUser = chat.users.find((u) => u._id !== user?._id);
-    return otherUser ? otherUser.name : "Unknown User";
+    const otherUser = chat.users?.find((u) => u.user?._id !== user?._id);
+    return otherUser?.user?.name || "Unknown User";
   };
 
   const getChatOtherUser = (chat) => {
     if (chat.isGroupChat) return null;
-    return chat.users.find((u) => u._id !== user?._id);
+    return chat.users?.find((u) => u.user?._id !== user?._id)?.user;
+  };
+
+  const getChatImage = (chat) => {
+    if (chat.isGroupChat) return null;
+    const otherUser = getChatOtherUser(chat);
+    return otherUser?.profilePicture || otherUser?.profileImage;
   };
 
   const renderAvatar = (chat) => {
     if (chat.isGroupChat) {
       return (
         <div className="w-12 h-12 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center">
-          <svg className="w-6 h-6 text-[#84CC16]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
+          <Users size={22} className="text-[#84CC16]" />
         </div>
       );
     }
 
     const otherUser = getChatOtherUser(chat);
+    const imageUrl = otherUser?.profilePicture || otherUser?.profileImage;
+
     return (
       <div className="w-12 h-12 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center overflow-hidden">
-        {otherUser?.profilePicture ? (
+        {imageUrl ? (
           <img 
-            src={otherUser.profilePicture} 
-            alt={otherUser.name} 
+            src={imageUrl} 
+            alt={otherUser?.name} 
             className="w-full h-full object-cover"
             onError={(e) => {
               e.target.style.display = 'none';
-              if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+              if (e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'flex';
             }}
           />
         ) : null}
         <div 
           className="w-full h-full flex items-center justify-center"
-          style={{ display: otherUser?.profilePicture ? 'none' : 'flex' }}
+          style={{ display: imageUrl ? 'none' : 'flex' }}
         >
           <span className="text-[#84CC16] font-black text-sm">
-            {otherUser?.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
+            {otherUser?.name ? otherUser.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : <User size={20} />}
           </span>
         </div>
       </div>
@@ -63,51 +80,82 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup }) => {
     }
   };
 
-  if (isLoading) return <div className="p-4 text-white">Loading chats...</div>;
-  if (error) return <div className="p-4 text-red-500">Error loading chats</div>;
+  if (isLoading) {
+    return (
+      <div className="w-full md:w-80 h-full border-r border-white/10 bg-black/20 flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[#84CC16] animate-spin mb-4 opacity-20" />
+        <p className="text-white/20 text-xs font-bold uppercase tracking-widest">Loading Chats</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full md:w-80 h-full border-r border-white/10 bg-black/20 flex flex-col items-center justify-center p-8 text-center">
+        <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
+          <AlertCircle className="w-8 h-8 text-red-500" />
+        </div>
+        <h3 className="text-white font-bold mb-2">Sync Failed</h3>
+        <p className="text-white/40 text-xs mb-6">We couldn't load your conversations. Please try again.</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold transition-all"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   const chats = data?.chats || [];
   const invitations = data?.invitations || [];
 
   return (
     <div className="w-full md:w-80 h-full border-r border-white/10 bg-black/20 flex flex-col overflow-hidden">
-      <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/40">
-        <h2 className="text-xl font-bold text-white">Messages</h2>
+      <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40">
+        <div>
+          <h2 className="text-2xl font-black text-white tracking-tight italic uppercase">Messages</h2>
+          <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] mt-1">Inbox & Groups</p>
+        </div>
         <button 
           onClick={onCreateGroup}
-          className="p-2 bg-primary/20 text-primary hover:bg-primary/40 rounded-full transition-all"
+          className="w-10 h-10 bg-[#84CC16]/10 text-[#84CC16] hover:bg-[#84CC16] hover:text-black rounded-xl transition-all flex items-center justify-center group"
           title="Create Group"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
+          <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-4">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-6">
         {/* Invitations Section */}
         {invitations.length > 0 && (
-          <div>
-            <h3 className="px-3 text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Pending Invitations</h3>
+          <div className="space-y-3">
+            <h3 className="px-3 text-[10px] font-black text-[#84CC16] uppercase tracking-[0.2em]">Pending Invitations</h3>
             {invitations.map((chat) => (
-              <div key={chat._id} className="bg-white/5 border border-white/10 rounded-xl p-3 mb-2 animate-fade-in">
-                <div className="flex items-center gap-3 mb-3">
-                  <img src={getChatImage(chat)} alt={chat.chatName} className="w-10 h-10 rounded-full border border-white/20" />
-                  <div>
-                    <p className="text-white font-medium text-sm">{chat.chatName}</p>
-                    <p className="text-white/60 text-xs">Invited to join group</p>
+              <div key={chat._id} className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden">
+                    {getChatImage(chat) ? (
+                      <img src={getChatImage(chat)} alt={chat.chatName} className="w-full h-full object-cover" />
+                    ) : (
+                      <Users size={18} className="text-white/20" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-bold text-sm truncate">{chat.chatName}</p>
+                    <p className="text-white/40 text-[10px] font-medium uppercase tracking-wider">Group Invitation</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <button 
                     onClick={() => handleRespond(chat._id, 'accepted')}
-                    className="flex-1 py-1.5 bg-primary text-black text-xs font-bold rounded-lg hover:bg-primary/80 transition-all"
+                    className="flex-1 h-10 bg-[#84CC16] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
                   >
                     Accept
                   </button>
                   <button 
                     onClick={() => handleRespond(chat._id, 'rejected')}
-                    className="flex-1 py-1.5 bg-white/10 text-white text-xs font-bold rounded-lg hover:bg-white/20 transition-all"
+                    className="flex-1 h-10 bg-white/5 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white/10 transition-all"
                   >
                     Decline
                   </button>
@@ -118,37 +166,51 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup }) => {
         )}
 
         {/* Chats Section */}
-        <div>
-          <h3 className="px-3 text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Conversations</h3>
+        <div className="space-y-1">
+          <h3 className="px-3 text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-3">Conversations</h3>
           {chats.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-white/40 text-sm">No conversations yet</p>
+            <div className="text-center py-12 px-6">
+              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="w-8 h-8 text-white/10" />
+              </div>
+              <p className="text-white/20 text-xs font-bold uppercase tracking-widest">No messages yet</p>
             </div>
           ) : (
             chats.map((chat) => (
               <button
                 key={chat._id}
                 onClick={() => onSelectChat(chat)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all mb-1 ${
-                  selectedChatId === chat._id ? 'bg-primary/20 border border-primary/30' : 'hover:bg-white/5 border border-transparent'
+                className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all group ${
+                  selectedChatId === chat._id 
+                    ? 'bg-[#84CC16]/10 border border-[#84CC16]/20' 
+                    : 'hover:bg-white/[0.03] border border-transparent hover:border-white/5'
                 }`}
               >
-                <div className="relative">
+                <div className="relative shrink-0">
                   {renderAvatar(chat)}
                   {chat.isGroupChat && (
-                    <div className="absolute -bottom-1 -right-1 bg-primary text-black text-[10px] px-1 rounded-sm font-bold">GP</div>
+                    <div className="absolute -bottom-1 -right-1 bg-[#84CC16] text-black text-[8px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter">Grp</div>
                   )}
                 </div>
                 <div className="flex-1 text-left overflow-hidden">
-                  <div className="flex justify-between items-start">
-                    <p className="text-white font-semibold truncate text-sm">{getChatName(chat)}</p>
+                  <div className="flex justify-between items-center mb-1">
+                    <p className={`font-bold truncate text-sm transition-colors ${selectedChatId === chat._id ? 'text-[#84CC16]' : 'text-white group-hover:text-white'}`}>
+                      {getChatName(chat)}
+                    </p>
                     {chat.latestMessage && (
-                      <span className="text-[10px] text-white/40">{new Date(chat.latestMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className="text-[10px] font-medium text-white/20 shrink-0 ml-2">
+                        {new Date(chat.latestMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     )}
                   </div>
-                  <p className="text-white/50 text-xs truncate">
-                    {chat.latestMessage ? chat.latestMessage.content : "Start a conversation"}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className={`text-xs truncate transition-colors flex-1 ${selectedChatId === chat._id ? 'text-[#84CC16]/60' : 'text-white/40 group-hover:text-white/60'}`}>
+                      {chat.latestMessage ? chat.latestMessage.content : "No messages yet"}
+                    </p>
+                    {chat.latestMessage?.sender?.user?._id === user?._id && (
+                      <Check size={12} className="text-[#84CC16] opacity-40 shrink-0" />
+                    )}
+                  </div>
                 </div>
               </button>
             ))

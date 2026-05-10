@@ -8,7 +8,7 @@ import User from "../../models/user.model.js";
 export const allMessages = async (req, res) => {
   try {
     const messages = await Message.find({ chat: req.params.chatId })
-      .populate("sender.user", "name profilePicture email")
+      .populate("sender.user", "name profilePicture profileImage email")
       .populate("chat");
     res.json(messages);
   } catch (error) {
@@ -39,11 +39,11 @@ export const sendMessage = async (req, res) => {
   try {
     var message = await Message.create(newMessage);
 
-    message = await message.populate("sender.user", "name profilePicture");
+    message = await message.populate("sender.user", "name profilePicture profileImage");
     message = await message.populate("chat");
     message = await User.populate(message, {
       path: "chat.users.user",
-      select: "name profilePicture email",
+      select: "name profilePicture profileImage email",
     });
 
     await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
