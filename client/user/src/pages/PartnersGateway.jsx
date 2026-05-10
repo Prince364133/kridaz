@@ -45,7 +45,7 @@ export default function PartnersGateway() {
     <div className="min-h-screen bg-[#000] text-white selection:bg-[#84CC16] selection:text-black font-sans pt-32 lg:pt-40">
 
       {/* ── HERO SECTION ── */}
-      <section className="relative min-h-[80vh] flex items-center pt-2 lg:pt-4 pb-20 overflow-hidden border-b border-white/5">
+      <section className="relative flex items-center pt-10 pb-16 overflow-hidden border-b border-white/5">
         {/* Background Visual */}
         <div className="absolute right-0 top-0 w-full lg:w-[60%] h-full z-0 opacity-30">
           <img
@@ -101,15 +101,15 @@ export default function PartnersGateway() {
       </section>
 
       {/* ── PARTNER ROLES GRID ── */}
-      <section className="relative z-10 py-32 container mx-auto px-6">
-        <div className="text-center mb-20 space-y-4">
-          <h2 className="text-4xl font-bold uppercase tracking-tight">Select Your Role</h2>
-          <p className="text-white/40 text-sm tracking-widest uppercase">Choose the partnership that fits your business</p>
+      <section className="relative z-10 py-16 container mx-auto px-6">
+        <div className="text-center mb-12 space-y-4">
+          <h2 className="text-3xl font-bold uppercase tracking-tight">Select Your Role</h2>
+          <p className="text-white/40 text-xs tracking-widest uppercase">Choose the partnership that fits your business</p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {partners.map((p) => (
-            <div key={p.role} className="group relative flex flex-col p-10 bg-[#0A0A0A] border border-white/5 rounded-3xl transition-all duration-300 hover:border-white/10 hover:bg-[#0F0F0F]"
+            <Link key={p.role} to={p.link} className="group relative flex flex-col p-8 bg-[#0A0A0A] border border-white/5 rounded-3xl transition-all duration-300 hover:border-white/20 hover:bg-[#111] hover:-translate-y-1 cursor-pointer shadow-lg hover:shadow-2xl"
               style={{ "--accent": p.accent }}
             >
               {/* Status badge */}
@@ -128,34 +128,33 @@ export default function PartnersGateway() {
 
               {/* Icon */}
               <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500"
+                className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500"
                 style={{ backgroundColor: `${p.accent}15` }}
               >
-                {React.createElement(p.icon, { size: 26, style: { color: p.accent } })}
+                {React.createElement(p.icon, { size: 24, style: { color: p.accent } })}
               </div>
 
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3 mb-4">
                 <div className="inline-block px-3 py-1 rounded-full" style={{ backgroundColor: `${p.accent}08`, border: `1px solid ${p.accent}20` }}>
                   <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: p.accent }}>{p.role}</p>
                 </div>
-                <h3 className="text-2xl font-bold text-white">{p.title.charAt(0) + p.title.slice(1).toLowerCase()}</h3>
+                <h3 className="text-xl font-bold text-white uppercase tracking-tight">{p.title}</h3>
               </div>
 
-              <p className="text-white/40 text-sm leading-relaxed mb-10 flex-1">
+              <p className="text-white/40 text-xs leading-relaxed mb-8 flex-1">
                 {p.desc}
               </p>
 
-              <div className="pt-8 border-t border-white/5">
-                <Link
-                  to={p.link}
+              <div className="pt-6 border-t border-white/5 mt-auto">
+                <div
                   className="flex items-center justify-between group/btn font-bold text-[10px] uppercase tracking-widest transition-colors"
                   style={{ color: p.accent }}
                 >
                   {p.status === "Live" ? "Register Now" : "Join Waitlist"}
                   <ArrowRight size={16} className="group-hover/btn:translate-x-2 transition-transform" />
-                </Link>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 

@@ -47,7 +47,6 @@ const Navbar = () => {
     { name: "Venues", path: "/turfs" },
     { name: "Pros", path: "/professionals" },
     { name: "Join Games", path: "/join-games" },
-    { name: "Host Game", path: "/host-game" },
     { name: "Community", path: "/community" },
     { name: "Messages", path: "/messages" },
     { name: "Players", path: "/players" },
@@ -291,22 +290,6 @@ const Navbar = () => {
                             <span className="text-xs font-bold uppercase tracking-tight">My Bookings</span>
                           </Link>
                           
-                          <Link 
-                            to="/host-game" 
-                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-[#84CC16] transition-all group/host"
-                          >
-                            <Trophy size={16} className="group-hover/host:scale-110 transition-transform text-[#84CC16]" />
-                            <span className="text-xs font-bold uppercase tracking-tight">Host a Game</span>
-                          </Link>
-
-                          <Link 
-                            to="/my-hosted-games" 
-                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-[#84CC16] transition-all group/hosted"
-                          >
-                            <Target size={16} className="text-[#84CC16] group-hover/hosted:rotate-12 transition-transform" />
-                            <span className="text-xs font-bold uppercase tracking-tight">My Hosted Games</span>
-                          </Link>
-
                           <Link 
                             to="/my-joined-games" 
                             className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-[#84CC16] transition-all group/joined"
