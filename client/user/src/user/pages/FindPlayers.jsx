@@ -1,38 +1,27 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { followUser, unfollowUser } from "@redux/slices/authSlice";
+import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { 
   Search, 
   MapPin, 
-  UserPlus, 
-  UserMinus, 
   Loader2, 
-  Star,
   Users,
-  Trophy,
-  Filter,
-  Check,
   MessageCircle,
-  User
 } from "lucide-react";
 import toast from "react-hot-toast";
 import StoryViewer from "../components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
-const avatarColors = ["#1a3300", "#001a33", "#330033", "#331a00", "#003333", "#1a0033"];
-const avatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.length] || "#1a1a1a";
-
 const FindPlayers = () => {
-  const dispatch = useDispatch();
-  const { user: currentUser, isLoggedIn, followingIds } = useSelector((state) => state.auth);
+  const { user: currentUser, isLoggedIn } = useSelector((state) => state.auth);
   const { gateInteraction } = useLoginOnDemand();
   const navigate = useNavigate();
 
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [followingIds, setFollowingIds] = useState([]);
   const [filters, setFilters] = useState({
     city: "",
     sport: ""
@@ -43,6 +32,9 @@ const FindPlayers = () => {
 
   useEffect(() => {
     fetchPlayers();
+    if (currentUser) {
+      fetchFollowingStatus();
+    }
   }, [filters, currentUser]);
 
   const fetchPlayers = async () => {
@@ -58,6 +50,16 @@ const FindPlayers = () => {
       toast.error("Failed to load players");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchFollowingStatus = async () => {
+    try {
+      const response = await axiosInstance.get("/api/user/players/network");
+      const ids = (response.data.following || []).filter(p => p).map(p => p._id);
+      setFollowingIds(ids);
+    } catch (error) {
+      console.error("Error fetching network:", error);
     }
   };
 
@@ -86,16 +88,14 @@ const FindPlayers = () => {
       const isFollowing = followingIds.includes(targetUserId);
       try {
         const endpoint = `/api/user/players/${targetUserId}/${isFollowing ? 'unfollow' : 'follow'}`;
-        const response = await axiosInstance.post(endpoint);
+        await axiosInstance.post(endpoint);
         
-        if (response.data.success) {
-          if (isFollowing) {
-            dispatch(unfollowUser(targetUserId));
-            toast.success("Unfollowed player");
-          } else {
-            dispatch(followUser(targetUserId));
-            toast.success("Following player");
-          }
+        if (isFollowing) {
+          setFollowingIds(prev => prev.filter(id => id !== targetUserId));
+          toast.success("Unfollowed player");
+        } else {
+          setFollowingIds(prev => [...prev, targetUserId]);
+          toast.success("Following player");
         }
       } catch (error) {
         toast.error("Failed to update follow status");
@@ -132,7 +132,7 @@ const FindPlayers = () => {
 
   return (
     <div className="min-h-screen bg-black text-white pt-24 pb-20 md:pb-12 px-4 md:px-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Compact Header Row */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02] border border-white/5 rounded-2xl p-3 md:p-4">
@@ -153,7 +153,6 @@ const FindPlayers = () => {
 
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-              {/* Quick Filters */}
               <select 
                 value={filters.sport}
                 onChange={(e) => handleFilterChange("sport", e.target.value)}
@@ -177,8 +176,6 @@ const FindPlayers = () => {
               </div>
             </div>
 
-            <div className="h-6 w-px bg-white/10 mx-1 hidden md:block"></div>
-
             <button 
               onClick={() => {
                 setFilters({ city: "", sport: "" });
@@ -197,7 +194,7 @@ const FindPlayers = () => {
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                <div key={i} className="h-64 bg-white/[0.02] border border-white/5 rounded-[32px] animate-pulse" />
+                <div key={i} className="h-48 bg-white/[0.02] border border-white/5 rounded-2xl animate-pulse" />
               ))}
             </div>
           ) : players.length === 0 ? (
@@ -208,90 +205,63 @@ const FindPlayers = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {players.map((player) => (
-                <div 
-                  key={player._id} 
-                  className="group relative bg-neutral-900/50 rounded-[32px] border border-neutral-800 overflow-hidden hover:border-[#84CC16]/50 transition-all duration-500"
-                >
-                  {/* Image Section */}
-                  <div className="relative h-48 sm:h-56 overflow-hidden">
-                    <div className="w-full h-full bg-[#84CC16]/10 flex items-center justify-center overflow-hidden">
+                <div key={player._id} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 hover:bg-white/[0.04] transition-all flex flex-col items-center text-center gap-4 group relative overflow-hidden">
+                  
+                  {/* Avatar Section */}
+                  <div 
+                    className={`relative w-24 h-24 rounded-full p-[2px] transition-all duration-500 group-hover:scale-110 ${player.hasActiveStory ? 'cursor-pointer ring-2 ring-[#84CC16] ring-offset-2 ring-offset-black' : ''}`}
+                    onClick={() => handleAvatarClick(player)}
+                  >
+                    <div className="absolute inset-0 rounded-full bg-[#84CC16]/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="w-full h-full rounded-full flex items-center justify-center relative overflow-hidden z-10 bg-[#1a1a1a] border border-white/10">
                       {player.profilePicture ? (
-                        <img 
-                          src={player.profilePicture} 
-                          alt={player.name} 
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          onClick={() => handleAvatarClick(player)}
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div 
-                        className="w-full h-full flex items-center justify-center cursor-pointer"
-                        style={{ display: player.profilePicture ? 'none' : 'flex' }}
-                        onClick={() => handleAvatarClick(player)}
-                      >
-                        <User size={48} className="text-[#84CC16]" />
-                      </div>
+                        <img src={player.profilePicture} alt={player.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[#84CC16] font-black text-2xl">
+                          {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
+                        </span>
+                      )}
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30 pointer-events-none" />
-                    
-                    {/* Follow Button - Hidden for self */}
-                    {(!currentUser || currentUser._id !== player._id) && (
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleFollowToggle(player._id);
-                        }}
-                        className={`absolute top-4 right-4 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all z-20 ${
-                          followingIds.includes(player._id) 
-                            ? "bg-white/10 text-white/40 border border-white/10 hover:bg-white/20" 
-                            : "bg-[#84CC16] text-black hover:scale-105 active:scale-95 shadow-lg shadow-[#84CC16]/20"
-                        }`}
-                      >
-                        {followingIds.includes(player._id) ? "Following" : "Follow"}
-                      </button>
-                    )}
                   </div>
 
-                  {/* Content Section */}
-                  <div className="p-6">
-                    <Link to={`/profile/${player._id}`} className="block group/link">
-                      <h3 className="font-display text-xl uppercase leading-none mb-1 group-hover/link:text-[#84CC16] transition-colors truncate">{player.name}</h3>
-                      <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-4 truncate">@{player.username || "player"}</p>
+                  {/* Player Details */}
+                  <div className="space-y-1 w-full">
+                    <Link to={`/profile/${player._id}`} className="block font-bold text-sm text-white hover:text-[#84CC16] transition-colors truncate">
+                      {player.name}
                     </Link>
-                    
-                    <div className="flex items-center gap-2 mb-6">
-                      <div className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[8px] font-black uppercase tracking-widest" style={{ 
-                        color: player.bookingCount >= 100 ? "#F472B6" : player.bookingCount >= 50 ? "#818CF8" : player.bookingCount >= 20 ? "#84CC16" : "#64748B",
-                      }}>
-                        {player.bookingCount >= 100 ? "LEGEND" : player.bookingCount >= 50 ? "ELITE" : player.bookingCount >= 20 ? "PRO" : "BEGINNER"}
-                      </div>
-                      <div className="flex items-center gap-1 text-[8px] font-bold text-white/20 uppercase tracking-widest">
-                        <Users size={10} /> {player.followers?.length || 0}
-                      </div>
+                    <div className="flex items-center justify-center gap-1 text-[10px] text-white/40 uppercase tracking-widest">
+                      <MapPin size={10} className="text-[#84CC16]/60" />
+                      <span>{player.city || 'Athletic'}</span>
                     </div>
+                  </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-neutral-800">
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-white/40 uppercase tracking-tighter">
-                        <MapPin size={12} className="text-[#84CC16]" />
-                        <span className="truncate max-w-[80px]">{player.city || "India"}</span>
-                      </div>
-                      {(!currentUser || currentUser._id !== player._id) && (
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 w-full mt-auto">
+                    {(!currentUser || currentUser._id !== player._id) && (
+                      <>
+                        <button 
+                          onClick={() => handleFollowToggle(player._id)}
+                          className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                            followingIds.includes(player._id)
+                            ? "bg-white/5 text-white/20 border border-white/10"
+                            : "bg-[#84CC16] text-black hover:bg-[#a3e635] shadow-[0_0_20px_rgba(132,204,22,0.1)]"
+                          }`}
+                        >
+                          {followingIds.includes(player._id) ? "Following" : "Follow"}
+                        </button>
                         <button 
                           onClick={() => {
                             gateInteraction(() => navigate(`/messages?userId=${player._id}`), {
                               title: "Start a Conversation",
-                              message: "Coordinate matches and discuss tactics. Sign in to chat."
+                              message: "Direct messaging allows you to coordinate matches and discuss tactics. Sign in to chat with players."
                             });
                           }}
-                          className="bg-white text-black p-2 rounded-lg hover:bg-[#84CC16] transition-all"
+                          className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#84CC16] hover:bg-white/10 transition-all group/msg"
                         >
-                          <MessageCircle size={16} />
+                          <MessageCircle size={16} className="group-hover/msg:scale-110 transition-transform" />
                         </button>
-                      )}
-                    </div>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
@@ -299,6 +269,7 @@ const FindPlayers = () => {
           )}
         </div>
       </div>
+
       {/* Story Viewer */}
       {viewingStoryGroup && (
         <StoryViewer 

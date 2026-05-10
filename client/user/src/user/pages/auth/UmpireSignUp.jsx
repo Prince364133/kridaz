@@ -99,7 +99,7 @@ const UmpireSignUp = () => {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
                   <div className="space-y-3 group/field">
-                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Full Name</label>
+                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Full Name <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <User size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
                       <input
@@ -113,7 +113,7 @@ const UmpireSignUp = () => {
                   </div>
 
                   <div className="space-y-3 group/field">
-                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Email Address</label>
+                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Email Address <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <Mail size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
                       <input
@@ -127,7 +127,7 @@ const UmpireSignUp = () => {
                   </div>
 
                   <div className="space-y-3 group/field">
-                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Phone Number</label>
+                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Phone Number <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <Phone size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
                       <input
@@ -141,7 +141,7 @@ const UmpireSignUp = () => {
                   </div>
 
                   <div className="space-y-3 group/field">
-                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Password</label>
+                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Password <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <Lock size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
                       <input
@@ -155,7 +155,7 @@ const UmpireSignUp = () => {
                   </div>
 
                   <div className="space-y-3 md:col-span-2 group/field">
-                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Confirm Password</label>
+                    <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-amber-400 transition-colors ml-1">Confirm Password <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <ShieldCheck size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
                       <input
