@@ -3,7 +3,7 @@ import { useGetMessagesQuery, useSendMessageMutation } from '../../../redux/api/
 import { useSocket } from '../../../context/SocketContext';
 import { useSelector } from 'react-redux';
 
-const ChatWindow = ({ chat }) => {
+const ChatWindow = ({ chat, onBack }) => {
   const { user } = useSelector((state) => state.auth);
   const socket = useSocket();
   const [message, setMessage] = useState('');
@@ -119,6 +119,14 @@ const ChatWindow = ({ chat }) => {
     <div className="flex-1 flex flex-col h-full bg-black/40 relative">
       {/* Header */}
       <div className="p-4 border-b border-white/10 flex items-center gap-3 bg-black/60 backdrop-blur-md sticky top-0 z-10">
+        <button 
+          onClick={onBack}
+          className="md:hidden p-2 -ml-2 text-white/60 hover:text-white transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
         <div className="relative w-10 h-10 rounded-full border border-white/20 overflow-hidden bg-[#84CC16]/10 flex items-center justify-center shrink-0">
           {chat.isGroupChat ? (
             <svg className="w-5 h-5 text-[#84CC16]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

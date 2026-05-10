@@ -167,6 +167,18 @@ export default function BusinessRegistration() {
     
     setLoading(true);
     
+    // Validate mandatory documents
+    const requiredDocs = formData.role === 'owner' || formData.role === 'VENUE_OWNER' 
+      ? ['PAN', 'AADHAR', 'BUSINESS', 'VENUE']
+      : ['PAN', 'AADHAR']; // Coaches/Umpires might only need ID proof initially
+    
+    const missingDocs = requiredDocs.filter(doc => !files[doc]);
+    if (missingDocs.length > 0) {
+      toast.error(`Please upload required documents: ${missingDocs.join(", ")}`);
+      setLoading(false);
+      return;
+    }
+
     const data = new FormData();
     data.append("name", formData.name);
     data.append("email", formData.email);
@@ -304,7 +316,9 @@ export default function BusinessRegistration() {
                   {formData.role === 'owner' || formData.role === 'VENUE_OWNER' ? (
                     <>
                       <div className="space-y-2 group col-span-2">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">Business Name</label>
+                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                          Business Name <span className="text-red-500">*</span>
+                        </label>
                         <input 
                           type="text" name="businessDetails.businessName" required
                           onChange={handleChange}
@@ -313,7 +327,9 @@ export default function BusinessRegistration() {
                         />
                       </div>
                       <div className="space-y-2 group">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">Registration Number</label>
+                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                          Registration Number <span className="text-red-500">*</span>
+                        </label>
                         <input 
                           type="text" name="businessDetails.registrationNumber" required
                           onChange={handleChange}
@@ -322,7 +338,9 @@ export default function BusinessRegistration() {
                         />
                       </div>
                       <div className="space-y-2 group">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">Business Phone</label>
+                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                          Business Phone <span className="text-red-500">*</span>
+                        </label>
                         <input 
                           type="text" name="phone" required
                           onChange={handleChange}
@@ -334,7 +352,9 @@ export default function BusinessRegistration() {
                   ) : (
                     <>
                       <div className="space-y-2 group col-span-2">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">Specialization</label>
+                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                          Specialization <span className="text-red-500">*</span>
+                        </label>
                         <input 
                           type="text" name="businessDetails.specialization" required
                           onChange={handleChange}
@@ -343,7 +363,9 @@ export default function BusinessRegistration() {
                         />
                       </div>
                       <div className="space-y-2 group">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">Years of Experience</label>
+                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                          Years of Experience <span className="text-red-500">*</span>
+                        </label>
                         <input 
                           type="text" name="businessDetails.experience" required
                           onChange={handleChange}
@@ -352,7 +374,9 @@ export default function BusinessRegistration() {
                         />
                       </div>
                       <div className="space-y-2 group">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">Contact Phone</label>
+                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                          Contact Phone <span className="text-red-500">*</span>
+                        </label>
                         <input 
                           type="text" name="phone" required
                           onChange={handleChange}
@@ -365,7 +389,9 @@ export default function BusinessRegistration() {
                 </div>
 
                 <div className="space-y-2 group">
-                  <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">Full Address</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                    Full Address <span className="text-red-500">*</span>
+                  </label>
                   <div className="relative">
                     <MapPin size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00]" />
                     <input 

@@ -428,7 +428,7 @@ export default function Home() {
 
         {/* Venue grid */}
         {loading || turfLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="rounded-2xl border animate-pulse" style={{ height: 320, backgroundColor: "#111", borderColor: BDR }} />
             ))}
@@ -448,7 +448,7 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             {(turfs || []).slice(0, 8).map((t, i) => (
               <Link to={`/turf/${t._id}`} key={t._id} className="bms-card group flex flex-col no-underline bg-[#111] rounded-2xl border border-[#2a2a2a] overflow-hidden">
                 <div className="relative overflow-hidden" style={{ height: 180 }}>

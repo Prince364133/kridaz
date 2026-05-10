@@ -30,14 +30,20 @@ const Messages = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-80px)] flex flex-col md:flex-row bg-[#0a0a0a] overflow-hidden">
-      <ChatSidebar 
-        onSelectChat={setSelectedChat} 
-        selectedChatId={selectedChat?._id}
-        onCreateGroup={() => setIsModalOpen(true)}
-      />
+    <div className="h-[calc(100vh-80px)] flex bg-[#0a0a0a] overflow-hidden">
+      {/* Sidebar - hidden on mobile when a chat is selected */}
+      <div className={`${selectedChat ? 'hidden md:block' : 'block'} w-full md:w-80 h-full shrink-0`}>
+        <ChatSidebar 
+          onSelectChat={setSelectedChat} 
+          selectedChatId={selectedChat?._id}
+          onCreateGroup={() => setIsModalOpen(true)}
+        />
+      </div>
       
-      <ChatWindow chat={selectedChat} />
+      {/* Chat Window - hidden on mobile when no chat is selected */}
+      <div className={`${selectedChat ? 'block' : 'hidden md:block'} flex-1 h-full`}>
+        <ChatWindow chat={selectedChat} onBack={() => setSelectedChat(null)} />
+      </div>
 
       {isModalOpen && (
         <CreateGroupModal 
@@ -47,7 +53,6 @@ const Messages = () => {
         />
       )}
     </div>
-  );
 };
 
 export default Messages;
