@@ -9,7 +9,7 @@ const partners = [
     role: "Venue Partner",
     title: "OPERATE YOUR FACILITY",
     desc: "Streamline your booking process and manage your venue with our advanced facility management tools. Optimize your operational efficiency.",
-    link: "/signup/venue-owner",
+    link: "/signup/venue",
     icon: Store,
     stat: "Business Growth",
     id: "PARTNER-01",
@@ -31,7 +31,7 @@ const partners = [
     role: "Certified Umpire",
     title: "JOIN OUR NETWORK",
     desc: "Connect with local sports leagues and tournaments. Manage your officiating schedule through our unified partner platform.",
-    link: "/signup/umpire",
+    link: "/signup/official",
     icon: Shield,
     stat: "Verified Official",
     id: "UMPIRE-03",
@@ -42,7 +42,7 @@ const partners = [
 
 export default function PartnersGateway() {
   return (
-    <div className="min-h-screen bg-[#000] text-white selection:bg-[#84CC16] selection:text-black font-sans pt-32 lg:pt-40">
+    <div className="min-h-screen bg-[#000] text-white selection:bg-[#84CC16] selection:text-black font-sans pt-16 lg:pt-24">
 
       {/* ── HERO SECTION ── */}
       <section className="relative flex items-center pt-10 pb-16 overflow-hidden border-b border-white/5">
@@ -76,13 +76,13 @@ export default function PartnersGateway() {
             </div>
 
             <div className="flex flex-wrap items-center gap-4 pt-4">
-              <Link to="/signup/venue-owner" className="bg-[#84CC16] hover:bg-[#a3e635] text-black h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all shadow-[0_10px_30px_rgba(132,204,22,0.2)] active:scale-[0.98]">
+              <Link to="/signup/venue" className="bg-[#84CC16] hover:bg-[#a3e635] text-black h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all shadow-[0_10px_30px_rgba(132,204,22,0.2)] active:scale-[0.98]">
                 <Store className="w-4 h-4" /> Venue Owner
               </Link>
               <Link to="/signup/coach" className="bg-blue-500 hover:bg-blue-400 text-white h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
                 <Award className="w-4 h-4" /> Coach
               </Link>
-              <Link to="/signup/umpire" className="bg-amber-500 hover:bg-amber-400 text-black h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
+              <Link to="/signup/official" className="bg-amber-500 hover:bg-amber-400 text-black h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
                 <Shield className="w-4 h-4" /> Umpire
               </Link>
               <div className="hidden sm:flex items-center gap-10 border-l border-white/10 pl-10">
