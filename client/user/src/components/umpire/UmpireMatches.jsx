@@ -8,68 +8,103 @@ export default function UmpireMatches() {
 
   if (loading) return <DashboardSkeleton />;
 
-  const completedMatches = dashboardData?.matches?.filter(m => m.status === 'completed') || [];
+  const matches = dashboardData?.matches || [];
+  const completedMatches = matches.filter(m => m.status === 'completed');
+  const activeMatches = matches.filter(m => m.status !== 'completed');
+
+  const [searchId, setSearchId] = React.useState("");
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-6 border-b border-white/5">
-        <div className="space-y-1">
-          <h1 className="text-5xl font-black uppercase tracking-tight text-white">
-            Match <span className="text-primary">History</span>
+    <div className="space-y-12 animate-fade-in pb-20">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b border-white/5">
+        <div className="space-y-2">
+          <h1 className="text-5xl font-black uppercase tracking-tighter text-white">
+            Officiating <span className="text-primary">Center</span>
           </h1>
-          <p className="text-gray-500 text-xs font-medium uppercase tracking-wider">Verified officiating record</p>
+          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Direct Match Scoring & Record Management</p>
+        </div>
+        
+        <div className="w-full md:w-80 relative group">
+          <input 
+            type="text" 
+            placeholder="ENTER MATCH SHORT ID (KRZ-XXXX)"
+            value={searchId}
+            onChange={(e) => setSearchId(e.target.value.toUpperCase())}
+            className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-primary/50 outline-none transition-all pr-12"
+          />
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors">
+            <Trophy size={18} />
+          </div>
         </div>
       </div>
 
-      {completedMatches.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#0A0A0A] rounded-[32px] border border-white/5 border-dashed p-12 text-center">
-          <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
-            <Trophy size={32} className="text-white/20" />
+      {/* Active Assignments */}
+      <section className="space-y-6">
+        <h2 className="text-xs font-black uppercase tracking-[0.25em] text-gray-500 flex items-center gap-3">
+          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" /> Active Assignments
+        </h2>
+        
+        {activeMatches.length === 0 && !searchId ? (
+          <div className="p-12 bg-white/[0.02] border border-white/5 border-dashed rounded-[2.5rem] text-center">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-600">No active matches found</p>
           </div>
-          <h3 className="text-xl font-bold text-white uppercase tracking-tight mb-2">No Matches Recorded</h3>
-          <p className="text-gray-500 text-sm max-w-xs mx-auto">Your officiating history is currently empty. Once you complete assigned matches, they will appear here.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4">
-          {completedMatches.map((match) => (
-            <div key={match._id} className="group relative bg-[#0D0D0D] border border-white/5 rounded-[24px] p-6 hover:border-primary/30 transition-all duration-500">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div className="space-y-4 flex-1">
-                  <div className="flex items-center gap-3">
-                    <div className="px-3 py-1 bg-primary/10 rounded-full border border-primary/20">
-                      <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Completed</span>
+        ) : (
+          <div className="grid grid-cols-1 gap-6">
+            {activeMatches.map((match) => (
+              <div key={match._id} className="bg-gradient-to-r from-white/[0.03] to-transparent border border-white/10 rounded-[2rem] p-8 hover:border-primary/20 transition-all group">
+                <div className="flex flex-col md:flex-row justify-between gap-8">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full border border-primary/20">
+                        Match ID: {match.shortId || 'N/A'}
+                      </span>
+                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                        {new Date(match.date).toLocaleDateString()} • {match.time}
+                      </span>
                     </div>
-                    <span className="text-gray-500 text-xs font-medium">{new Date(match.date).toLocaleDateString()} • {match.time}</span>
-                  </div>
-                  
-                  <h3 className="text-2xl font-bold text-white group-hover:text-primary transition-colors">{match.name}</h3>
-                  
-                  <div className="flex flex-wrap gap-6 text-sm text-gray-400">
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} className="text-primary" />
-                      {match.venue}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users size={16} className="text-primary" />
-                      {match.teams?.join(" vs ") || "Teams TBD"}
+                    <h3 className="text-2xl font-black text-white uppercase tracking-tight">{match.name || "Untitled Match"}</h3>
+                    <div className="flex flex-wrap gap-6">
+                       <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
+                          <MapPin size={14} className="text-primary" /> {match.venue}
+                       </div>
+                       <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
+                          <Users size={14} className="text-primary" /> {match.teams?.join(" vs ") || "Teams TBD"}
+                       </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="w-full md:w-auto flex flex-col items-end gap-3">
-                  <div className="text-right">
-                    <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Final Result</p>
-                    <p className="text-white font-bold">{match.result || "Scorecard Pending"}</p>
+                  <div className="flex items-center">
+                    <button 
+                      onClick={() => window.location.href = `/scoring/${match._id}`}
+                      className="w-full md:w-auto h-14 px-10 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 group-hover:scale-[1.02]"
+                    >
+                      Score Game <Zap size={16} fill="currentColor" />
+                    </button>
                   </div>
-                  <button className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white text-xs font-bold uppercase tracking-widest rounded-xl border border-white/10 transition-all">
-                    View Details
-                  </button>
                 </div>
               </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* History */}
+      <section className="space-y-6">
+        <h2 className="text-xs font-black uppercase tracking-[0.25em] text-gray-500">Verified History</h2>
+        <div className="grid grid-cols-1 gap-4 opacity-60 hover:opacity-100 transition-opacity">
+          {completedMatches.map((match) => (
+            <div key={match._id} className="bg-[#0D0D0D] border border-white/5 rounded-[1.5rem] p-6 flex justify-between items-center">
+               <div className="space-y-1">
+                 <h4 className="text-sm font-bold text-white uppercase">{match.name}</h4>
+                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{match.venue} • {new Date(match.date).toLocaleDateString()}</p>
+               </div>
+               <div className="text-right">
+                  <p className="text-[10px] font-black text-primary uppercase tracking-widest">Completed</p>
+                  <p className="text-xs font-bold text-gray-400">{match.result || "Verified"}</p>
+               </div>
             </div>
           ))}
         </div>
-      )}
+      </section>
     </div>
   );
 }

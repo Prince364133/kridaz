@@ -39,6 +39,40 @@ export default function UmpireDashboard() {
           <StatCard title="Earnings" value={earnings} icon={DollarSign} prefix="₹" />
         </div>
 
+        {/* Scoring Center */}
+        <div className="p-8 md:p-10 bg-gradient-to-br from-[#111] to-[#050505] rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
+            <Zap size={120} className="text-primary" />
+          </div>
+          <div className="relative z-10">
+            <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-2">Scoring Center</h2>
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-8">Official Match Scoring Applications</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="p-6 bg-white/[0.03] rounded-3xl border border-white/5 hover:border-primary/30 transition-all group/app cursor-pointer"
+                   onClick={() => window.location.href = '/umpire/matches'}>
+                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 border border-primary/20 group-hover/app:bg-primary group-hover/app:text-black transition-all">
+                  <Zap size={24} />
+                </div>
+                <h3 className="text-lg font-black uppercase tracking-tight text-white mb-2">Cricket Scoring</h3>
+                <p className="text-xs text-gray-500 leading-relaxed mb-4">Official ball-by-ball scoring engine with real-time sync and player analytics.</p>
+                <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest">
+                  Launch App <CheckCircle2 size={12} />
+                </div>
+              </div>
+              
+              {/* Placeholder for other sports */}
+              <div className="p-6 bg-white/[0.01] rounded-3xl border border-white/5 opacity-40 cursor-not-allowed">
+                <div className="w-12 h-12 bg-gray-500/10 rounded-2xl flex items-center justify-center mb-4 border border-white/5">
+                   <Star size={24} className="text-gray-500" />
+                </div>
+                <h3 className="text-lg font-black uppercase tracking-tight text-gray-500 mb-2">Football Scoring</h3>
+                <p className="text-xs text-gray-600 leading-relaxed">Coming Soon</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Match Volume Chart */}
           <div className="lg:col-span-2 p-6 md:p-10 bg-[#0A0A0A] rounded-[2.5rem] border border-white/5 relative transition-all hover:border-[#84CC16]/20 group">

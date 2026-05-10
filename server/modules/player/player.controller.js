@@ -322,3 +322,38 @@ export const getNetworkById = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const getLeaderboard = async (req, res) => {
+  try {
+    const { category = 'batting', limit = 20 } = req.query;
+
+    let sortQuery = {};
+    if (category === 'batting') {
+      sortQuery = { 'cricketStats.totalRuns': -1 };
+    } else if (category === 'bowling') {
+      sortQuery = { 'cricketStats.totalWickets': -1 };
+    } else {
+      sortQuery = { 'cricketStats.totalRuns': -1 }; // Default to batting
+    }
+
+    const players = await User.find({
+      $or: [
+        { 'cricketStats.totalRuns': { $gt: 0 } },
+        { 'cricketStats.totalWickets': { $gt: 0 } }
+      ]
+    })
+    .sort(sortQuery)
+    .limit(parseInt(limit))
+    .select('name username profilePicture cricketStats city');
+
+    const rankedPlayers = players.map((p, index) => ({
+      ...p.toObject(),
+      rank: index + 1
+    }));
+
+    return res.status(200).json({ success: true, players: rankedPlayers });
+  } catch (error) {
+    console.error("Leaderboard error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

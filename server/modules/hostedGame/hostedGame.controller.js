@@ -5,6 +5,7 @@ import Owner from "../../models/owner.model.js";
 import WalletTransaction from "../../models/walletTransaction.model.js";
 import mongoose from "mongoose";
 import { notifyNewGame } from "../../utils/notification.service.js";
+import { generateShortId } from "../scoring/scoring.utils.js";
 
 // Helper to check usable balance
 const getUsableBalance = async (userId) => {
@@ -128,6 +129,7 @@ export const createHostedGame = async (req, res) => {
       },
       city,
       state,
+      shortId: generateShortId(),
       status: "ACTIVE"
     });
 
