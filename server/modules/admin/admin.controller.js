@@ -250,6 +250,50 @@ export const getAllProfessionals = async (req, res) => {
   }
 };
 
+export const getProfessionalDetails = async (req, res) => {
+  const admin = req.admin.role;
+  const { id } = req.params;
+  
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized access denied" });
+  }
+  
+  try {
+    const professional = await Owner.findById(id, { password: 0 })
+      .populate({
+        path: "bookings",
+        populate: [
+          { path: "turf", select: "name location" },
+          { path: "user", select: "name profilePicture email phone" }
+        ]
+      })
+      .lean();
+      
+    if (!professional) {
+      return res.status(404).json({ success: false, message: "Professional not found" });
+    }
+
+    // Fetch hosted games officiated by this umpire
+    const matches = await HostedGame.find({ umpire: id })
+      .populate("host", "name profilePicture email")
+      .populate("ground", "name location")
+      .sort({ date: -1 })
+      .lean();
+
+    // Fetch reviews (if applicable, using 'targetId' or 'owner')
+    // We'll skip reviews if there's no direct schema support, but Owner has rating/numReviews.
+
+    res.status(200).json({
+      success: true,
+      profile: professional,
+      matches
+    });
+  } catch (error) {
+    console.error("Error in getProfessionalDetails: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const getAllRequestedProfessionals = async (req, res) => {
   const admin = req.admin.role;
   if (admin !== "admin" && admin !== "BMSP_ADMIN") {

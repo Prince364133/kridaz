@@ -1,9 +1,21 @@
 import React from "react";
-import { Shield, Mail, Phone, MapPin, IndianRupee, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Shield, Mail, Phone, MapPin, IndianRupee, Search, ChevronRight } from "lucide-react";
 import useProfessionals from "../../../hooks/admin/useProfessionals";
 
 const ProfessionalManagement = ({ role }) => {
-  const { professionals, loading, searchTerm, handleSearch } = useProfessionals(role);
+  const { 
+    professionals, 
+    loading, 
+    searchTerm, 
+    handleSearch 
+  } = useProfessionals(role);
+
+  const navigate = useNavigate();
+
+  const handleCardClick = (id) => {
+    navigate(`/admin/professionals/${id}`);
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white p-6 lg:p-10">
@@ -51,8 +63,15 @@ const ProfessionalManagement = ({ role }) => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {professionals.map((prof) => (
-              <div key={prof._id} className="bg-[#111] border border-white/10 rounded-xl p-6 hover:border-[#84CC16]/50 transition-all duration-300 group">
-                <div className="flex justify-between items-start mb-4">
+              <div 
+                key={prof._id} 
+                onClick={() => handleCardClick(prof._id)}
+                className="bg-[#111] border border-white/10 rounded-xl p-6 hover:border-[#84CC16]/50 hover:bg-[#84CC16]/5 transition-all duration-300 cursor-pointer group relative overflow-hidden"
+              >
+                {/* Glow on hover */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#84CC16]/10 blur-[50px] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                
+                <div className="flex justify-between items-start mb-4 relative z-10">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-[#84CC16]/10 flex items-center justify-center text-[#84CC16] font-bold text-xl uppercase border border-[#84CC16]/20">
                       {prof.name.charAt(0)}

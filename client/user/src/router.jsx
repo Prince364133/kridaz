@@ -92,6 +92,7 @@ import {
   DisputeManager,
   AuditLogs,
   FinancialMissionControl,
+  ProfessionalDetailsPage,
 } from "@components/admin";
 import PartnerSupport from "@components/owner/Support/PartnerSupport";
 import DashboardProfile from "@components/shared/DashboardProfile";
@@ -119,6 +120,7 @@ const router = createBrowserRouter([
         children: [
           { path: "coaches", element: <ProfessionalManagement role="coach" /> },
           { path: "umpires", element: <ProfessionalManagement role="umpire" /> },
+          { path: ":id", element: <ProfessionalDetailsPage /> }
         ],
       },
       { path: "users", element: <UserManagement /> },

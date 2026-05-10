@@ -40,5 +40,8 @@ export {default as DisputeManager} from "./Resolution/DisputeManager"
 // Audit
 export {default as AuditLogs} from "./Audit/AuditLogs"
 
+// Professional Details
+export {default as ProfessionalDetailsPage} from "./ProfessionalManagement/ProfessionalDetailsPage"
+
 // Finance
 export {default as FinancialMissionControl} from "./Finance/FinancialMissionControl"
