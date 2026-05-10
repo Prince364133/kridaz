@@ -17,6 +17,12 @@ const hostedGameSchema = new mongoose.Schema(
       enum: ["PENDING", "ACTIVE", "COMPLETED", "CANCELLED"],
       default: "ACTIVE",
     },
+    shortId: { type: String, unique: true, sparse: true },
+    scoringStatus: {
+      type: String,
+      enum: ["NOT_STARTED", "IN_PROGRESS", "COMPLETED"],
+      default: "NOT_STARTED",
+    },
     teams: {
       teamA: {
         name: { type: String, default: "Team A" },

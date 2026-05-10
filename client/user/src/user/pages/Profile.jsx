@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   User, MapPin, Clock, IndianRupee, Calendar, Zap, Activity,
   ArrowRight, ShieldCheck, Trophy, Star, Camera, Edit2, MessageSquare, Heart, Edit3, Trash2, Loader2, Send, MessageCircle,
-  Wallet, CreditCard
+  Wallet, CreditCard, Award, Target
 } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -374,6 +374,20 @@ export default function Profile() {
                 {/* Stats Row - Full Spelling */}
                 <div className="flex items-center gap-4 md:gap-8 border-l border-white/5 md:pl-8 h-8">
                   <button 
+                    onClick={() => setActiveTab("stats")}
+                    className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-2 hover:opacity-70 transition-opacity"
+                  >
+                    <span className="text-white font-black text-xs md:text-sm">{profileUser?.stats?.cricket?.runs || 0}</span>
+                    <span className="text-white/20 text-[8px] md:text-[9px] font-bold uppercase tracking-widest">Runs</span>
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab("stats")}
+                    className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-2 hover:opacity-70 transition-opacity"
+                  >
+                    <span className="text-white font-black text-xs md:text-sm">{profileUser?.stats?.cricket?.wickets || 0}</span>
+                    <span className="text-white/20 text-[8px] md:text-[9px] font-bold uppercase tracking-widest">Wickets</span>
+                  </button>
+                  <button 
                     onClick={() => setNetworkModal({ isOpen: true, type: 'followers' })}
                     className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-2 hover:opacity-70 transition-opacity"
                   >
@@ -470,6 +484,13 @@ export default function Profile() {
           >
             Stories
             {activeTab === 'stories' && <div className="absolute bottom-0 left-0 w-full h-[2px]" style={{ backgroundColor: PRI }} />}
+          </button>
+          <button 
+            onClick={() => setActiveTab("stats")}
+            className={`pb-4 text-[10px] font-bold uppercase tracking-[0.2em] transition-all relative ${activeTab === 'stats' ? 'text-white' : 'text-gray-500 hover:text-gray-300'}`}
+          >
+            Stats
+            {activeTab === 'stats' && <div className="absolute bottom-0 left-0 w-full h-[2px]" style={{ backgroundColor: PRI }} />}
           </button>
           
           {isOwnProfile && (
@@ -580,6 +601,164 @@ export default function Profile() {
               </div>
             )}
           </div>
+        )}
+
+        {/* ── STATS TAB ── */}
+        {activeTab === "stats" && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+            {/* Header / Career Summary */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-black uppercase tracking-tighter">Cricket Career</h3>
+              <div className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                Verified stats
+              </div>
+            </div>
+
+            {/* Batting Bento */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Matches</span>
+                  <span className="text-4xl font-black text-white">{profileUser?.stats?.cricket?.matches || 0}</span>
+               </div>
+               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Runs</span>
+                  <span className="text-4xl font-black text-[#84CC16]">{profileUser?.stats?.cricket?.runs || 0}</span>
+               </div>
+               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Average</span>
+                  <span className="text-4xl font-black text-white">
+                    {profileUser?.stats?.cricket?.battingAverage ? Number(profileUser.stats.cricket.battingAverage).toFixed(2) : '0.00'}
+                  </span>
+               </div>
+               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Strike Rate</span>
+                  <span className="text-4xl font-black text-white">
+                    {profileUser?.stats?.cricket?.battingStrikeRate ? Number(profileUser.stats.cricket.battingStrikeRate).toFixed(2) : '0.00'}
+                  </span>
+               </div>
+               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Highest</span>
+                  <span className="text-4xl font-black text-white">{profileUser?.stats?.cricket?.highestScore || 0}</span>
+               </div>
+            </div>
+            
+            {/* Bowling Bento */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Wickets</span>
+                  <span className="text-4xl font-black text-[#84CC16]">{profileUser?.stats?.cricket?.wickets || 0}</span>
+               </div>
+               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Average</span>
+                  <span className="text-4xl font-black text-white">
+                    {profileUser?.stats?.cricket?.bowlingAverage ? Number(profileUser.stats.cricket.bowlingAverage).toFixed(2) : '0.00'}
+                  </span>
+               </div>
+               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Economy</span>
+                  <span className="text-4xl font-black text-white">
+                    {profileUser?.stats?.cricket?.bowlingEconomy ? Number(profileUser.stats.cricket.bowlingEconomy).toFixed(2) : '0.00'}
+                  </span>
+               </div>
+               <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center group hover:border-[#84CC16]/30 transition-colors">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Best Bowling</span>
+                  <span className="text-2xl font-black text-white">
+                    {profileUser?.stats?.cricket?.bestBowling?.wickets || 0}/{profileUser?.stats?.cricket?.bestBowling?.runs || 0}
+                  </span>
+               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+               {/* Milestones */}
+               <div className="bg-[#0A0A0A] border border-white/5 p-8 rounded-[2rem] group hover:border-[#84CC16]/30 transition-colors">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 block text-gray-500">Major Milestones</span>
+                  <div className="flex gap-12">
+                    <div className="flex flex-col">
+                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Centuries</span>
+                       <span className="text-5xl font-black text-white">{profileUser?.stats?.cricket?.hundreds || 0}</span>
+                    </div>
+                    <div className="flex flex-col">
+                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Fifties</span>
+                       <span className="text-5xl font-black text-white">{profileUser?.stats?.cricket?.fifties || 0}</span>
+                    </div>
+                  </div>
+               </div>
+
+               {/* Fielding */}
+               <div className="bg-[#0A0A0A] border border-white/5 p-8 rounded-[2rem] group hover:border-[#84CC16]/30 transition-colors">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 block text-gray-500">Fielding Prowess</span>
+                  <div className="flex gap-12">
+                    <div className="flex flex-col">
+                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Catches</span>
+                       <span className="text-5xl font-black text-[#84CC16]">{profileUser?.stats?.cricket?.catches || 0}</span>
+                    </div>
+                    <div className="flex flex-col">
+                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Stumpings</span>
+                       <span className="text-5xl font-black text-white">{profileUser?.stats?.cricket?.stumpings || 0}</span>
+                    </div>
+                  </div>
+                </div>
+             </div>
+
+             {/* ── EARNED BADGES ── */}
+             <div className="mt-12">
+               <div className="flex items-center justify-between mb-8">
+                 <div className="flex items-center gap-3">
+                   <div className="w-8 h-8 rounded-lg bg-[#84CC16]/10 flex items-center justify-center">
+                     <Award className="text-[#84CC16]" size={16} />
+                   </div>
+                   <h3 className="text-xl font-black uppercase tracking-tighter">Achievement Badges</h3>
+                 </div>
+                 <div className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                   {profileUser?.badges?.length || 0} Unlocked
+                 </div>
+               </div>
+
+               {profileUser?.badges && profileUser.badges.length > 0 ? (
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                   {profileUser.badges.map((badge, idx) => {
+                     const IconMap = {
+                       Trophy: Trophy,
+                       Target: Target,
+                       Activity: Activity,
+                       Star: Star,
+                       Zap: Zap
+                     };
+                     const IconComponent = IconMap[badge.icon] || Award;
+
+                     return (
+                       <div 
+                         key={idx}
+                         className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2.5rem] flex items-center gap-5 group hover:border-[#84CC16]/30 transition-all hover:bg-[#0F0F0F] relative overflow-hidden"
+                       >
+                         {/* Shine effect */}
+                         <div className="absolute inset-0 bg-gradient-to-tr from-[#84CC16]/0 via-[#84CC16]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                         
+                         <div className="w-14 h-14 rounded-2xl bg-[#111] border border-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform relative z-10">
+                           <IconComponent className="text-[#84CC16]" size={24} />
+                         </div>
+                         <div className="flex flex-col min-w-0 relative z-10">
+                           <span className="text-xs font-black uppercase tracking-tight text-white truncate">{badge.name}</span>
+                           <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest truncate mb-1">{badge.category}</span>
+                           <p className="text-[8px] text-white/30 font-medium leading-tight line-clamp-2">{badge.description}</p>
+                         </div>
+                       </div>
+                     );
+                   })}
+                 </div>
+               ) : (
+                 <div className="p-16 text-center rounded-[3rem] border border-white/5 bg-[#0A0A0A] group transition-all hover:border-[#84CC16]/10">
+                   <div className="w-20 h-20 rounded-full bg-[#111] border border-white/5 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                     <Award size={32} className="text-gray-700 opacity-20" />
+                   </div>
+                   <h4 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-2">The Hall of Fame awaits</h4>
+                   <p className="text-gray-500 uppercase tracking-[0.2em] text-[9px] font-bold max-w-xs mx-auto leading-relaxed">
+                     Complete matches and reach career milestones to unlock your first achievement badge.
+                   </p>
+                 </div>
+               )}
+             </div>
+           </div>
         )}
 
         {/* ── BOOKINGS TAB ── */}

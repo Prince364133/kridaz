@@ -233,6 +233,21 @@ const FindPlayers = () => {
                       <MapPin size={10} className="text-[#84CC16]/60" />
                       <span>{player.city || 'Athletic'}</span>
                     </div>
+
+                    {/* Stats Ribbon */}
+                    {player.stats?.cricket?.matches > 0 && (
+                      <div className="flex items-center justify-center gap-3 py-1 px-3 bg-white/[0.03] border border-white/5 rounded-full text-[8px] font-bold uppercase tracking-widest text-white/40 mt-1">
+                        <div className="flex items-center gap-1">
+                          <span className="text-[#84CC16]">{player.stats.cricket.runs || 0}</span>
+                          <span>Runs</span>
+                        </div>
+                        <div className="w-[1px] h-2 bg-white/10" />
+                        <div className="flex items-center gap-1">
+                          <span className="text-[#84CC16]">{player.stats.cricket.wickets || 0}</span>
+                          <span>Wkts</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Actions */}

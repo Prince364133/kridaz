@@ -47,6 +47,7 @@ const Navbar = () => {
     { name: "Pros", path: "/professionals" },
     { name: "Join Games", path: "/join-games" },
     { name: "Community", path: "/community" },
+    { name: "Leaderboard", path: "/leaderboard" },
     { name: "Players", path: "/players" },
     { name: "Business", path: "#" },
   ];
@@ -260,6 +261,14 @@ const Navbar = () => {
                         >
                           <Trophy size={18} className="text-white/40" />
                           <span className="text-sm font-medium">My Joined Matches</span>
+                        </Link>
+
+                        <Link 
+                          to="/leaderboard" 
+                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-primary/10 text-primary border border-primary/10 transition-all"
+                        >
+                          <Trophy size={18} className="text-primary/70" />
+                          <span className="text-sm font-bold">Global Leaderboard</span>
                         </Link>
 
                         <Link 

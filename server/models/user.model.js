@@ -25,6 +25,36 @@ const userSchema = new mongoose.Schema({
     bookings:[{type:mongoose.Schema.Types.ObjectId, ref:'Booking'}],
     walletBalance: { type: Number, default: 0 },
     reservedBalance: { type: Number, default: 0 },
+    stats: {
+      cricket: {
+        matches: { type: Number, default: 0 },
+        runs: { type: Number, default: 0 },
+        wickets: { type: Number, default: 0 },
+        highestScore: { type: Number, default: 0 },
+        bestBowling: {
+          wickets: { type: Number, default: 0 },
+          runs: { type: Number, default: 0 }
+        },
+        battingAverage: { type: Number, default: 0 },
+        battingStrikeRate: { type: Number, default: 0 },
+        bowlingAverage: { type: Number, default: 0 },
+        bowlingEconomy: { type: Number, default: 0 },
+        hundreds: { type: Number, default: 0 },
+        fifties: { type: Number, default: 0 },
+        catches: { type: Number, default: 0 },
+        stumpings: { type: Number, default: 0 },
+        ballsFaced: { type: Number, default: 0 },
+        ballsBowled: { type: Number, default: 0 },
+        runsConceded: { type: Number, default: 0 }
+      },
+      badges: [{
+        name: { type: String }, // e.g., 'Century Maker'
+        category: { type: String }, // 'batting', 'bowling', 'fielding', 'ranking'
+        icon: { type: String },
+        description: { type: String },
+        earnedAt: { type: Date, default: Date.now }
+      }]
+    }
  }, {timestamps: true});
 
 userSchema.index({ locationData: "2dsphere" }, { sparse: true });
