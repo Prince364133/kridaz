@@ -542,21 +542,22 @@ export default function Home() {
                     <div className="relative bg-[#111] rounded-[32px] border border-white/5 overflow-hidden hover:border-[#84CC16]/30 transition-all duration-500 h-full flex flex-col">
                       {/* Card Image Section */}
                       <Link to={`/profile/${p._id}`} className="relative aspect-square overflow-hidden block">
-                        <div className="w-full h-full bg-[#84CC16]/5 flex items-center justify-center">
-                          {p.profilePicture ? (
+                        <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
+                          {(p.profilePicture || p.profileImage) ? (
                             <img 
-                              src={p.profilePicture} 
+                              src={p.profilePicture || p.profileImage} 
                               alt={p.name} 
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                               onError={(e) => {
                                 e.target.style.display = 'none';
-                                if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                const fallback = e.target.nextElementSibling;
+                                if (fallback) fallback.style.display = 'flex';
                               }}
                             />
                           ) : null}
                           <div 
                             className="relative z-10 flex items-center justify-center w-full h-full bg-[#1a1a1a]"
-                            style={{ display: p.profilePicture ? 'none' : 'flex' }}
+                            style={{ display: (p.profilePicture || p.profileImage) ? 'none' : 'flex' }}
                           >
                             <span className="text-[#84CC16] font-black text-4xl tracking-tighter opacity-40 group-hover:opacity-100 transition-opacity duration-500">
                               {initials}

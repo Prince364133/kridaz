@@ -158,20 +158,21 @@ const Navbar = () => {
                   <div className="dropdown dropdown-end group/profile">
                     <div tabIndex={0} role="button" className="relative w-10 sm:w-12 h-10 sm:h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group overflow-hidden">
                       <User size={22} className="text-white/40 group-hover:text-[#84CC16] transition-colors absolute inset-0 m-auto" />
-                      {user?.profilePicture ? (
+                      {(user?.profilePicture || user?.profileImage) ? (
                         <img 
-                          src={user.profilePicture} 
+                          src={user.profilePicture || user.profileImage} 
                           alt="Profile" 
                           className="w-full h-full object-cover relative z-10" 
                           onError={(e) => {
                             e.target.style.display = 'none';
-                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                            const fallback = e.target.nextElementSibling;
+                            if (fallback) fallback.style.display = 'flex';
                           }}
                         />
                       ) : null}
                       <div 
                         className="w-full h-full flex items-center justify-center relative z-10"
-                        style={{ display: user?.profilePicture ? 'none' : 'flex' }}
+                        style={{ display: (user?.profilePicture || user?.profileImage) ? 'none' : 'flex' }}
                       >
                         <span className="text-[#84CC16] font-bold text-sm">
                           {user?.name ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2) : <User size={22} />}
@@ -189,8 +190,8 @@ const Navbar = () => {
                           className="flex items-center gap-3 p-3 rounded-xl bg-white/5 text-white transition-all mb-2"
                         >
                           <div className="w-8 h-8 rounded-full border border-white/10 bg-white/10 flex items-center justify-center shrink-0">
-                            {user?.profilePicture ? (
-                              <img src={user.profilePicture} alt="" className="w-full h-full object-cover rounded-full" />
+                            {(user?.profilePicture || user?.profileImage) ? (
+                              <img src={user.profilePicture || user.profileImage} alt="" className="w-full h-full object-cover rounded-full" />
                             ) : (
                               <User size={16} className="text-[#84CC16]" />
                             )}
