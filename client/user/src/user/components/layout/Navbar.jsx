@@ -48,7 +48,6 @@ const Navbar = () => {
     { name: "Pros", path: "/professionals" },
     { name: "Join Games", path: "/join-games" },
     { name: "Community", path: "/community" },
-    { name: "Messages", path: "/messages" },
     { name: "Players", path: "/players" },
     { name: "Business", path: "#" },
   ];

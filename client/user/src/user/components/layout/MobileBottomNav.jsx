@@ -17,7 +17,6 @@ const MobileBottomNav = () => {
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Venues", path: "/turfs", icon: Search },
-    { name: "Messages", path: "/messages", icon: MessageCircle, protected: true },
     { name: "Wallet", path: "/wallet", icon: Coins, protected: true },
     { name: "You", path: "/profile", icon: User, protected: true },
   ];

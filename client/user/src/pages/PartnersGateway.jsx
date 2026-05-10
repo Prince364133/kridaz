@@ -42,10 +42,10 @@ const partners = [
 
 export default function PartnersGateway() {
   return (
-    <div className="min-h-screen bg-[#000] text-white selection:bg-[#84CC16] selection:text-black font-sans pt-16 lg:pt-24">
+    <div className="min-h-screen bg-[#000] text-white selection:bg-[#84CC16] selection:text-black font-sans pt-16 lg:pt-20">
 
       {/* ── HERO SECTION ── */}
-      <section className="relative flex items-center pt-10 pb-16 overflow-hidden border-b border-white/5">
+      <section className="relative flex items-center py-4 overflow-hidden border-b border-white/5">
         {/* Background Visual */}
         <div className="absolute right-0 top-0 w-full lg:w-[60%] h-full z-0 opacity-30">
           <img
