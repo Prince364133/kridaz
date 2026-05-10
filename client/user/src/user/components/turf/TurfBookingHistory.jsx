@@ -307,6 +307,7 @@ const TurfBookingHistory = () => {
           )}
         </div>
       </div>
+    </div>
 
       {/* ── Modals ──────────────────────────────────────────────────────── */}
       {isReviewModalOpen && (
