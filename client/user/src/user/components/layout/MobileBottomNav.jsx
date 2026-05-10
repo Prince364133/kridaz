@@ -17,8 +17,8 @@ const MobileBottomNav = () => {
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Venues", path: "/turfs", icon: Search },
-    { name: "Wallet", path: "/wallet", icon: Coins, protected: true },
-    { name: "You", path: "/profile", icon: User, protected: true },
+    { name: "Pros", path: "/professionals", icon: Users },
+    { name: "Games", path: "/join-games", icon: Zap },
   ];
 
   // Filter items based on login status and role
@@ -27,12 +27,7 @@ const MobileBottomNav = () => {
     return true;
   });
 
-  // If not logged in, show a "Join" or "Login" instead of Bookings/Profile?
-  // User specifically asked for "bottom navigation nav bar", usually 4-5 items.
-  
-  if (!isLoggedIn) {
-    visibleItems.push({ name: "Join", path: "/signup", icon: User });
-  }
+
 
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-black/80 backdrop-blur-2xl border-t border-white/10 px-4 pb-safe-area-inset-bottom">

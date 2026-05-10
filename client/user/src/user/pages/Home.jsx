@@ -350,15 +350,27 @@ export default function Home() {
 
       {/* ── STATS ── */}
       <section className="border-y" style={{ borderColor: "#1A1A1A", backgroundColor: "#0A0A0A" }}>
-        <div className="w-full px-4 md:px-10 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-0 divide-[#1A1A1A] md:divide-x">
+        <div className="w-full px-2 md:px-10 py-6 sm:py-8 grid grid-cols-4 divide-x divide-[#1A1A1A]">
           {stats.map((s) => (
             <div key={s.label} className="px-1 md:px-8 text-center flex flex-col justify-center overflow-hidden group">
-              <p className="font-display text-xl sm:text-3xl lg:text-5xl leading-none tracking-tighter group-hover:text-white transition-colors" style={{ color: PRI }}>{s.value}</p>
-              <p className="font-mono text-[6px] sm:text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.3em] mt-1 sm:mt-2 text-gray-500 group-hover:text-primary transition-colors">{s.label}</p>
+              <p className="font-display text-[15px] min-[375px]:text-xl sm:text-3xl lg:text-5xl leading-none tracking-tighter group-hover:text-white transition-colors" style={{ color: PRI }}>{s.value}</p>
+              <p className="font-mono text-[5px] min-[375px]:text-[6px] sm:text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.3em] mt-1 sm:mt-2 text-gray-500 group-hover:text-primary transition-colors truncate">{s.label}</p>
             </div>
           ))}
         </div>
       </section>
+
+      {/* Mobile Sub-Nav (Hot Bars) */}
+      <div className="lg:hidden flex items-center justify-between w-full border-b border-[#1A1A1A] bg-[#0A0A0A] py-3 px-4 gap-3">
+        <Link to="/community" className="flex-1 flex items-center justify-center gap-2 py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#84CC16] bg-[#84CC16]/10 border border-[#84CC16]/20 rounded-xl hover:bg-[#84CC16]/20 transition-colors">
+          <Users size={14} />
+          Community
+        </Link>
+        <Link to="/players" className="flex-1 flex items-center justify-center gap-2 py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-white/70 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 hover:text-white transition-colors">
+          <User size={14} />
+          Players
+        </Link>
+      </div>
 
 
       {/* ── FIND YOUR ARENA ── */}
