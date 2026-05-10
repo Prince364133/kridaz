@@ -255,7 +255,7 @@ const Navbar = () => {
                         </Link>
 
                         <Link 
-                          to="/my-joined-matches" 
+                          to="/my-joined-games" 
                           className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <Trophy size={18} className="text-white/40" />
