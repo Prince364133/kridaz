@@ -1,9 +1,10 @@
 import React, { useState } from "react";
+import { format } from "date-fns";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, Calendar, Clock, MapPin, Users, Mail, Phone, 
   CheckCircle2, AlertCircle, Trash2, Edit2, Star, Zap, X, Activity,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, FileText, Navigation, User
 } from "lucide-react";
 import useTurfDetails from "@hooks/owner/useTurfDetails";
 import DashboardSkeleton from "../Dashboard/DashboardSkeleton";
@@ -44,14 +45,14 @@ const BookingModal = ({ slot, onClose }) => {
                 </div>
                 <div className="min-w-0">
                   <h4 className="text-lg font-bold text-white uppercase tracking-tight truncate font-['Open_Sans']">
-                    {bookingDetails.user?.name || "Guest Player"}
+                    {bookingDetails.user?.name || bookingDetails.guestDetails?.name || "Guest Player"}
                   </h4>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className={`px-2 py-0.5 text-black text-[8px] font-bold uppercase rounded-[2px] ${bookingDetails.user?.isGuest ? 'bg-[#878C9F]' : 'bg-[#CCFF00]'}`}>
-                      {bookingDetails.user?.isGuest ? 'Manual' : 'Verified'}
+                    <div className={`px-2 py-0.5 text-black text-[8px] font-bold uppercase rounded-[2px] ${(bookingDetails.user?.isGuest || bookingDetails.guestDetails) ? 'bg-[#878C9F]' : 'bg-[#CCFF00]'}`}>
+                      {(bookingDetails.user?.isGuest || bookingDetails.guestDetails) ? 'Manual' : 'Verified'}
                     </div>
                     <span className="text-[10px] text-[#878C9F] font-bold uppercase tracking-widest">
-                      {bookingDetails.user?.isGuest ? 'Offline Record' : 'Athlete Profile'}
+                      {(bookingDetails.user?.isGuest || bookingDetails.guestDetails) ? 'Offline Record' : 'Athlete Profile'}
                     </span>
                   </div>
                 </div>
@@ -60,21 +61,21 @@ const BookingModal = ({ slot, onClose }) => {
               <div className="space-y-3">
                 <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px] px-1">Contact Intelligence</p>
                 <div className="grid grid-cols-1 gap-2">
-                  <a href={bookingDetails.user?.email ? `mailto:${bookingDetails.user.email}` : "#"} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
+                  <a href={(bookingDetails.user?.email || bookingDetails.guestDetails?.email) ? `mailto:${bookingDetails.user?.email || bookingDetails.guestDetails?.email}` : "#"} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-[#2D2D2D] rounded-[4px] flex items-center justify-center text-[#878C9F] group-hover:text-[#CCFF00]">
                         <Mail size={12} />
                       </div>
-                      <span className="text-xs text-[#878C9F] font-medium">{bookingDetails.user?.email || "No Email Provided"}</span>
+                      <span className="text-xs text-[#878C9F] font-medium">{bookingDetails.user?.email || bookingDetails.guestDetails?.email || "No Email Provided"}</span>
                     </div>
                     <ChevronRight size={14} className="text-[#2D2D2D]" />
                   </a>
-                  <a href={bookingDetails.user?.phoneNumber ? `tel:${bookingDetails.user.phoneNumber}` : "#"} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
+                  <a href={(bookingDetails.user?.phoneNumber || bookingDetails.guestDetails?.phone) ? `tel:${bookingDetails.user?.phoneNumber || bookingDetails.guestDetails?.phone}` : "#"} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-[#2D2D2D] rounded-[4px] flex items-center justify-center text-[#878C9F] group-hover:text-[#CCFF00]">
                         <Phone size={12} />
                       </div>
-                      <span className="text-xs text-[#878C9F] font-medium">{bookingDetails.user?.phoneNumber || "No Phone Provided"}</span>
+                      <span className="text-xs text-[#878C9F] font-medium">{bookingDetails.user?.phoneNumber || bookingDetails.guestDetails?.phone || "No Phone Provided"}</span>
                     </div>
                     <ChevronRight size={14} className="text-[#2D2D2D]" />
                   </a>
@@ -86,7 +87,7 @@ const BookingModal = ({ slot, onClose }) => {
                   <span className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Revenue Impact</span>
                   <span className="text-[8px] text-[#444] font-bold uppercase">Settled via Platform</span>
                 </div>
-                <span className="text-3xl font-bold text-[#CCFF00] font-['Open_Sans'] tracking-tighter">₹{bookingDetails.totalPrice}</span>
+                <span className="text-3xl font-bold text-[#CCFF00] font-['Open_Sans'] tracking-tighter">Rs {bookingDetails.totalPrice}</span>
               </div>
             </>
           ) : (
@@ -121,6 +122,8 @@ export default function TurfDetails() {
   const { turfData, isLoading, error, toggleVisibility, deleteArena } = useTurfDetails(id);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
+  const [isPolicyExpanded, setIsPolicyExpanded] = useState(false);
 
   const handleToggleVisibility = async () => {
     const success = await toggleVisibility();
@@ -174,31 +177,35 @@ export default function TurfDetails() {
   );
 
   const filteredBookings = slots.filter(slot => {
-    const slotDate = new Date(slot.startTime).toISOString().split('T')[0];
-    return slotDate === selectedDate;
+    try {
+      const slotDate = format(new Date(slot.startTime), "yyyy-MM-dd");
+      return slotDate === selectedDate;
+    } catch (e) {
+      return false;
+    }
   });
 
-  const displaySlots = (turf.generatedSlots || []).map(gs => {
-    const booking = filteredBookings.find(b => {
-      const bStart = new Date(b.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      return bStart === gs.startTime;
-    });
-
-    return {
-      _id: booking?._id || `gen-${gs.startTime}`,
-      startTime: gs.startTime,
-      endTime: gs.endTime,
-      isActive: gs.isActive,
-      isBooked: !!booking,
-      bookingDetails: booking?.bookingDetails || null,
-      isTemplate: !booking
-    };
-  });
+  const displaySlots = slots
+    .filter(slot => {
+      try {
+        return format(new Date(slot.startTime), "yyyy-MM-dd") === selectedDate;
+      } catch (e) {
+        return false;
+      }
+    })
+    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+    .map(slot => ({
+      ...slot,
+      // Map startTime/endTime to human readable format for UI
+      startTime: format(new Date(slot.startTime), "hh:mm a"),
+      endTime: format(new Date(slot.endTime), "hh:mm a"),
+      isActive: slot.isActive !== false // Default to true if not specified
+    }));
 
   const uniqueDates = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
-    return d.toISOString().split('T')[0];
+    return format(d, "yyyy-MM-dd");
   });
 
   return (
@@ -267,7 +274,7 @@ export default function TurfDetails() {
                    <div className="space-y-1">
                       <div className="flex items-center gap-2">
                          <MapPin size={14} className={turf.status === 'rejected' ? 'text-red-500/60' : 'text-[#CCFF00]/60'} />
-                         {turf.location}
+                         {turf.location}{turf.city ? `, ${turf.city}` : ""}{turf.state ? `, ${turf.state}` : ""}
                       </div>
                       {pending.location && (
                          <p className="text-amber-500/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
@@ -283,6 +290,17 @@ export default function TurfDetails() {
                       {(pending.openTime || pending.closeTime) && (
                          <p className="text-amber-500/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
                             → {pending.openTime || turf.openTime} - {pending.closeTime || turf.closeTime} <PendingBadge label="Time" />
+                         </p>
+                      )}
+                   </div>
+                   <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                         <span className={`font-bold ${turf.status === 'rejected' ? 'text-red-500/60' : 'text-[#CCFF00]/60'}`}>Rs</span>
+                         {turf.pricePerHour}/hr base
+                      </div>
+                      {pending.pricePerHour && (
+                         <p className="text-amber-500/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
+                            → Rs {pending.pricePerHour}/hr <PendingBadge label="Price" />
                          </p>
                       )}
                    </div>
@@ -431,7 +449,7 @@ export default function TurfDetails() {
                <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px]">Today's Load</p>
                <div>
                   <h4 className="text-3xl font-bold text-white font-['Open_Sans'] uppercase">
-                    {Math.round((filteredBookings.length / (turf.generatedSlots?.length || 1)) * 100)}%
+                    {Math.round((filteredBookings.filter(s => s.isBooked).length / (filteredBookings.length || 1)) * 100)}%
                   </h4>
                   <p className="text-[9px] text-[#CCFF00] font-bold uppercase tracking-widest mt-1">Live Occupancy</p>
                </div>
@@ -443,9 +461,9 @@ export default function TurfDetails() {
                <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px]">Revenue</p>
                <div className="space-y-1">
                   <h4 className="text-3xl font-bold text-white font-['Open_Sans'] uppercase flex items-baseline gap-2">
-                    ₹{filteredBookings.reduce((acc, b) => acc + (b.bookingDetails?.totalPrice || 0), 0)}
+                    Rs {filteredBookings.filter(s => s.isBooked).reduce((acc, b) => acc + (b.bookingDetails?.totalPrice || 0), 0)}
                     {pending.pricePerHour && (
-                       <span className="text-amber-500 text-sm font-bold opacity-80">→ ₹{pending.pricePerHour}/hr <PendingBadge label="Rate" /></span>
+                       <span className="text-amber-500 text-sm font-bold opacity-80">→ Rs {pending.pricePerHour}/hr <PendingBadge label="Rate" /></span>
                     )}
                   </h4>
                   <p className="text-[9px] text-[#CCFF00] font-bold uppercase tracking-widest mt-1">Daily Yield</p>
@@ -454,67 +472,200 @@ export default function TurfDetails() {
          </div>
 
          {/* Consolidated Intelligence */}
-         <div className="xl:col-span-8 p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] flex flex-col md:flex-row gap-8">
-            <div className="flex-1 space-y-4">
+         <div className="xl:col-span-8 space-y-8">
+            <div className="p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] flex flex-col md:flex-row gap-8">
+              <div className="flex-1 space-y-4">
+                 <div className="flex items-center gap-2">
+                    <div className="w-1 h-3 bg-[#CCFF00] rounded-full" />
+                    <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Facility DNA</p>
+                 </div>
+                 <div className="space-y-4">
+                    <div>
+                       <p className="text-[9px] text-[#444] font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
+                          Ground Composition
+                          {pending.groundTypes && <PendingBadge />}
+                       </p>
+                       <div className="flex flex-wrap gap-2">
+                          {(pending.groundTypes || turf.groundTypes || []).map((ground, i) => (
+                             <span key={i} className={`px-2 py-1 border rounded-[4px] text-[9px] font-bold uppercase tracking-wider snap-start ${
+                                pending.groundTypes ? 'bg-amber-500/5 border-amber-500/20 text-amber-500' : 'bg-[#111] border-[#2D2D2D] text-white'
+                             }`}>
+                                {ground}
+                             </span>
+                          ))}
+                       </div>
+                    </div>
+                    <div>
+                       <p className="text-[9px] text-[#444] font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
+                          Capabilities
+                          {pending.facilities && <PendingBadge />}
+                       </p>
+                       <div className="flex flex-wrap gap-2">
+                          {(pending.facilities || turf.facilities || []).map((facility, i) => (
+                             <span key={i} className={`px-2 py-1 border rounded-[4px] text-[9px] font-bold uppercase tracking-wider snap-start ${
+                                pending.facilities ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-[#CCFF00] border-[#CCFF00] text-black'
+                             }`}>
+                                {facility}
+                             </span>
+                          ))}
+                       </div>
+                    </div>
+                 </div>
+              </div>
+
+              <div className="w-px bg-[#2D2D2D] hidden md:block" />
+
+              <div className="flex-1 space-y-4">
+                 <div className="flex items-center gap-2">
+                    <div className="w-1 h-3 bg-[#CCFF00] rounded-full" />
+                    <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Sport Arsenal</p>
+                 </div>
+                 <div className="flex flex-wrap gap-2">
+                    {(pending.sportTypes || turf.sportTypes || []).map((sport, i) => (
+                       <div key={i} className={`flex items-center gap-3 border p-3 rounded-[6px] w-full group/sport transition-colors ${
+                          pending.sportTypes ? 'bg-amber-500/5 border-amber-500/20' : 'bg-[#111] border-[#2D2D2D] hover:border-[#CCFF00]/40'
+                       }`}>
+                          <div className={`w-2 h-2 rounded-full transition-colors ${
+                             pending.sportTypes ? 'bg-amber-500 animate-pulse' : 'bg-[#CCFF00]/20 group-hover/sport:bg-[#CCFF00]'
+                          }`} />
+                          <span className={`text-[11px] font-bold uppercase tracking-wider ${
+                             pending.sportTypes ? 'text-amber-500' : 'text-white'
+                          }`}>{sport}</span>
+                          {pending.sportTypes && <div className="ml-auto"><PendingBadge label="Add" /></div>}
+                       </div>
+                    ))}
+                 </div>
+              </div>
+            </div>
+
+            {/* Description & Policies */}
+            <div className="p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] space-y-6">
                <div className="flex items-center gap-2">
                   <div className="w-1 h-3 bg-[#CCFF00] rounded-full" />
-                  <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Facility DNA</p>
+                  <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Documentation & Policies</p>
                </div>
+               
                <div className="space-y-4">
                   <div>
-                     <p className="text-[9px] text-[#444] font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
-                        Ground Composition
-                        {pending.groundTypes && <PendingBadge />}
-                     </p>
-                     <div className="flex flex-wrap gap-2">
-                        {(pending.groundTypes || turf.groundTypes || []).map((ground, i) => (
-                           <span key={i} className={`px-2 py-1 border rounded-[4px] text-[9px] font-bold uppercase tracking-wider snap-start ${
-                              pending.groundTypes ? 'bg-amber-500/5 border-amber-500/20 text-amber-500' : 'bg-[#111] border-[#2D2D2D] text-white'
-                           }`}>
-                              {ground}
-                           </span>
-                        ))}
-                     </div>
+                    <h4 className="text-[10px] font-bold text-[#444] uppercase tracking-widest mb-2 flex items-center gap-2">
+                       <FileText size={12} className="text-[#CCFF00]" />
+                       Facility Description
+                       {pending.description && <PendingBadge />}
+                    </h4>
+                    <div className="relative">
+                      <p className={`text-[13px] text-white/80 leading-relaxed font-inter ${!isDescExpanded ? 'line-clamp-2' : ''}`}>
+                         {pending.description || turf.description}
+                      </p>
+                      {(pending.description || turf.description)?.length > 150 && (
+                        <button 
+                          onClick={() => setIsDescExpanded(!isDescExpanded)}
+                          className="text-[#CCFF00] text-[10px] font-bold uppercase tracking-wider mt-2 hover:underline"
+                        >
+                          {isDescExpanded ? 'Show Less' : 'Read More'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                     <p className="text-[9px] text-[#444] font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
-                        Capabilities
-                        {pending.facilities && <PendingBadge />}
-                     </p>
-                     <div className="flex flex-wrap gap-2">
-                        {(pending.facilities || turf.facilities || []).map((facility, i) => (
-                           <span key={i} className={`px-2 py-1 border rounded-[4px] text-[9px] font-bold uppercase tracking-wider snap-start ${
-                              pending.facilities ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-[#CCFF00] border-[#CCFF00] text-black'
-                           }`}>
-                              {facility}
-                           </span>
-                        ))}
-                     </div>
+                  
+                  <div className="pt-4 border-t border-[#1A1A1A]">
+                    <h4 className="text-[10px] font-bold text-[#444] uppercase tracking-widest mb-2 flex items-center gap-2">
+                       <AlertCircle size={12} className="text-[#CCFF00]" />
+                       Venue Rules & Policies
+                       {pending.policies && <PendingBadge />}
+                    </h4>
+                    <div className="relative">
+                      <p className={`text-[12px] text-white/70 leading-relaxed font-inter italic border-l-2 border-[#2D2D2D] pl-4 ${!isPolicyExpanded ? 'line-clamp-2' : ''}`}>
+                         {pending.policies || turf.policies || "No specific policies documented."}
+                      </p>
+                      {(pending.policies || turf.policies || "No specific policies documented.")?.length > 150 && (
+                        <button 
+                          onClick={() => setIsPolicyExpanded(!isPolicyExpanded)}
+                          className="text-[#CCFF00] text-[10px] font-bold uppercase tracking-wider mt-2 hover:underline"
+                        >
+                          {isPolicyExpanded ? 'Show Less' : 'Read More'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                </div>
             </div>
 
-            <div className="w-px bg-[#2D2D2D] hidden md:block" />
-
-            <div className="flex-1 space-y-4">
-               <div className="flex items-center gap-2">
-                  <div className="w-1 h-3 bg-[#CCFF00] rounded-full" />
-                  <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Sport Arsenal</p>
-               </div>
-               <div className="flex flex-wrap gap-2">
-                  {(pending.sportTypes || turf.sportTypes || []).map((sport, i) => (
-                     <div key={i} className={`flex items-center gap-3 border p-3 rounded-[6px] w-full group/sport transition-colors ${
-                        pending.sportTypes ? 'bg-amber-500/5 border-amber-500/20' : 'bg-[#111] border-[#2D2D2D] hover:border-[#CCFF00]/40'
-                     }`}>
-                        <div className={`w-2 h-2 rounded-full transition-colors ${
-                           pending.sportTypes ? 'bg-amber-500 animate-pulse' : 'bg-[#CCFF00]/20 group-hover/sport:bg-[#CCFF00]'
-                        }`} />
-                        <span className={`text-[11px] font-bold uppercase tracking-wider ${
-                           pending.sportTypes ? 'text-amber-500' : 'text-white'
-                        }`}>{sport}</span>
-                        {pending.sportTypes && <div className="ml-auto"><PendingBadge label="Add" /></div>}
+            {/* Support Network: Location, Owner, Managers */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <div className="p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] space-y-6">
+                  <div className="flex items-center gap-2">
+                     <div className="w-1 h-3 bg-[#CCFF00] rounded-full" />
+                     <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Location Data</p>
+                  </div>
+                  
+                  <div className="space-y-4">
+                     <div className="flex gap-3">
+                        <MapPin size={16} className="text-[#CCFF00] shrink-0 mt-0.5" />
+                        <div className="space-y-1">
+                           <p className="text-[12px] text-white font-medium">{pending.location || turf.location}</p>
+                           <p className="text-[10px] text-[#878C9F] font-bold uppercase tracking-widest">
+                             {pending.city || turf.city || "City Not Set"}, {pending.state || turf.state || "State Not Set"}
+                           </p>
+                        </div>
                      </div>
-                  ))}
+                     
+                     {turf.mapUrl && (
+                        <a 
+                          href={turf.mapUrl} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="flex items-center justify-center gap-2 w-full py-3 bg-[#111111] hover:bg-[#CCFF00]/10 text-[#CCFF00] border border-[#2D2D2D] hover:border-[#CCFF00]/30 rounded-[8px] text-[10px] font-bold uppercase tracking-widest transition-all"
+                        >
+                           <Navigation size={14} /> Get Directions
+                        </a>
+                     )}
+                  </div>
+               </div>
+
+               <div className="p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] space-y-6">
+                  <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-2">
+                        <div className="w-1 h-3 bg-[#CCFF00] rounded-full" />
+                        <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Personnel & Support</p>
+                     </div>
+                  </div>
+
+                  <div className="space-y-4">
+                     {/* Owner Record */}
+                     {turf.owner && (
+                        <div className="flex gap-3 items-center p-3 rounded-[6px] bg-[#111111] border border-[#2D2D2D]">
+                           <div className="w-8 h-8 rounded-full bg-white/5 border border-[#2D2D2D] flex items-center justify-center shrink-0">
+                              <User size={14} className="text-[#878C9F]" />
+                           </div>
+                           <div className="flex flex-col">
+                              <span className="text-[12px] font-bold text-white tracking-tight">{turf.owner.name}</span>
+                              <span className="text-[9px] text-[#CCFF00] uppercase font-bold tracking-widest">Platform Owner</span>
+                           </div>
+                           <div className="ml-auto flex gap-2">
+                              <a href={`tel:${turf.owner.phoneNumber}`} className="p-1.5 hover:bg-white/10 rounded-full transition-colors"><Phone size={12} className="text-[#878C9F]" /></a>
+                              <a href={`mailto:${turf.owner.email}`} className="p-1.5 hover:bg-white/10 rounded-full transition-colors"><Mail size={12} className="text-[#878C9F]" /></a>
+                           </div>
+                        </div>
+                     )}
+
+                     {/* Manager Records */}
+                     {turf.managerContacts?.length > 0 && (
+                        <div className="space-y-2">
+                           <h4 className="text-[9px] font-bold text-[#444] uppercase tracking-widest mb-2 pl-1">Venue Managers</h4>
+                           {turf.managerContacts.map((manager, i) => (
+                              <div key={i} className="flex items-center justify-between p-2 pl-3 rounded-[4px] border border-dashed border-[#2D2D2D] hover:border-[#CCFF00]/30 transition-colors">
+                                 <div className="flex flex-col">
+                                    <span className="text-[11px] font-bold text-white uppercase">{manager.name}</span>
+                                    <span className="text-[10px] text-[#878C9F] font-mono">{manager.phone}</span>
+                                 </div>
+                                 <a href={`tel:${manager.phone}`} className="p-2 bg-[#CCFF00]/10 text-[#CCFF00] rounded-[4px] hover:bg-[#CCFF00] hover:text-black transition-all">
+                                    <Phone size={12} />
+                                 </a>
+                              </div>
+                           ))}
+                        </div>
+                     )}
+                  </div>
                </div>
             </div>
          </div>
@@ -603,6 +754,9 @@ export default function TurfDetails() {
                           <h4 className="text-lg font-bold text-white font-['Open_Sans'] uppercase tracking-tight">
                              {slot.startTime} - {slot.endTime}
                           </h4>
+                          <p className="text-[10px] text-[#CCFF00] font-bold tracking-widest mt-1">
+                             Rs {slot.price || turf.pricePerHour} <span className="text-[#878C9F] text-[8px]">/ slot</span>
+                          </p>
                        </div>
                        {slot.isActive && (
                          <div className={`px-2 py-0.5 rounded-[3px] text-[8px] font-bold uppercase tracking-widest border ${

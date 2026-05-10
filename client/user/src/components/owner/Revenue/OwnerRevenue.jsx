@@ -61,7 +61,7 @@ export default function OwnerRevenue() {
   const handleWithdrawSubmit = async (e) => {
     e.preventDefault();
     if (!withdrawAmount || parseFloat(withdrawAmount) < 500) {
-      toast.error("Minimum withdrawal amount is ₹500");
+      toast.error("Minimum withdrawal amount is Rs 500");
       return;
     }
     const success = await requestWithdrawal(parseFloat(withdrawAmount), bankDetails);
@@ -123,7 +123,7 @@ export default function OwnerRevenue() {
              <IndianRupee size={20} />
           </div>
           <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">Total Earnings</p>
-          <h3 className="text-3xl font-bold font-['Open_Sans'] text-white">₹{walletData.balance.toLocaleString()}</h3>
+          <h3 className="text-3xl font-bold font-['Open_Sans'] text-white">Rs {walletData.balance.toLocaleString()}</h3>
         </div>
 
         <div className="bg-[#000000] border border-[#CCFF00]/30 rounded-[8px] p-6 flex flex-col relative overflow-hidden shadow-[0_0_20px_rgba(204,255,0,0.05)] transition-all duration-500">
@@ -131,7 +131,7 @@ export default function OwnerRevenue() {
              <TrendingUp size={20} />
           </div>
           <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">Usable Balance</p>
-          <h3 className="text-3xl font-bold font-['Open_Sans'] text-[#CCFF00]">₹{walletData.usableBalance.toLocaleString()}</h3>
+          <h3 className="text-3xl font-bold font-['Open_Sans'] text-[#CCFF00]">Rs {walletData.usableBalance.toLocaleString()}</h3>
         </div>
 
         <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
@@ -139,7 +139,7 @@ export default function OwnerRevenue() {
              <Clock size={20} />
           </div>
           <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">In Process</p>
-          <h3 className="text-3xl font-bold font-['Open_Sans'] text-white">₹{walletData.reservedBalance.toLocaleString()}</h3>
+          <h3 className="text-3xl font-bold font-['Open_Sans'] text-white">Rs {walletData.reservedBalance.toLocaleString()}</h3>
           <p className="text-[8px] text-[#444] mt-2 uppercase font-bold tracking-widest">Pending Verification</p>
         </div>
 
@@ -149,7 +149,7 @@ export default function OwnerRevenue() {
           </div>
           <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">Payouts Cleared</p>
           <h3 className="text-3xl font-bold font-['Open_Sans'] text-white">
-            ₹{withdrawals.filter(w => w.status === 'COMPLETED').reduce((sum, w) => sum + w.amount, 0).toLocaleString()}
+            Rs {withdrawals.filter(w => w.status === 'COMPLETED').reduce((sum, w) => sum + w.amount, 0).toLocaleString()}
           </h3>
           <p className="text-[8px] text-[#CCFF00]/60 mt-2 uppercase font-bold tracking-widest">Successful Settlements</p>
         </div>
@@ -161,7 +161,7 @@ export default function OwnerRevenue() {
          <div className="flex justify-between items-center mb-10 relative z-10">
             <div>
                <h3 className="text-[14px] font-bold text-white uppercase tracking-widest font-open-sans">Revenue Intelligence</h3>
-               <p className="text-[11px] text-[#878C9F] font-inter uppercase tracking-widest mt-1">Daily Coin Accrual vs Last Week</p>
+               <p className="text-[11px] text-[#878C9F] font-inter uppercase tracking-widest mt-1">Daily Revenue Accrual vs Last Week</p>
             </div>
             <div className="flex gap-4">
                <div className="flex items-center gap-2">
@@ -198,7 +198,7 @@ export default function OwnerRevenue() {
                     itemStyle={{color: '#CCFF00', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '10px', fontFamily: 'Inter'}}
                   />
                   <Area type="monotone" dataKey="lastWeek" stroke="#2D2D2D" strokeWidth={2} fill="transparent" />
-                  <Area type="monotone" dataKey="coins" stroke="#CCFF00" strokeWidth={3} fillOpacity={1} fill="url(#colorCoins)" />
+                  <Area type="monotone" dataKey="coins" name="Revenue (Rs)" stroke="#CCFF00" strokeWidth={3} fillOpacity={1} fill="url(#colorCoins)" />
                </AreaChart>
             </ResponsiveContainer>
          </div>
@@ -234,7 +234,7 @@ export default function OwnerRevenue() {
                         <tr key={w._id} className="group hover:bg-white/[0.01] transition-all">
                            <td className="py-5 px-2 text-[#878C9F] text-xs font-bold uppercase tracking-wider">{new Date(w.createdAt).toLocaleDateString()}</td>
                            <td className="py-5 px-2">
-                             <span className="text-sm font-bold text-white group-hover:text-[#CCFF00] transition-colors">₹{w.amount.toLocaleString()}</span>
+                             <span className="text-sm font-bold text-white group-hover:text-[#CCFF00] transition-colors">Rs {w.amount.toLocaleString()}</span>
                            </td>
                            <td className="py-5 px-2">
                               <span className={`text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border ${
@@ -286,7 +286,7 @@ export default function OwnerRevenue() {
                          </div>
                       </div>
                       <div className="text-right">
-                         <p className="text-lg font-bold text-[#CCFF00] tracking-tighter">+₹{tx.amount}</p>
+                         <p className="text-lg font-bold text-[#CCFF00] tracking-tighter">+Rs {tx.amount}</p>
                          <p className="text-[8px] text-[#444] font-bold uppercase tracking-widest mt-1">Settled</p>
                       </div>
                    </div>
@@ -318,10 +318,10 @@ export default function OwnerRevenue() {
                     </div>
                     <div className="space-y-1">
                        <p className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-[3px]">Available Intelligence</p>
-                       <p className="text-3xl font-bold tracking-tight text-white font-['Open_Sans']">₹{walletData.usableBalance.toLocaleString()}</p>
+                       <p className="text-3xl font-bold tracking-tight text-white font-['Open_Sans']">Rs {walletData.usableBalance.toLocaleString()}</p>
                        <p className="text-[9px] text-[#444] font-bold uppercase tracking-widest mt-2 flex items-center gap-1.5">
                           <ShieldCheck size={10} />
-                          Minimum threshold: ₹500
+                          Minimum threshold: Rs 500
                        </p>
                     </div>
                  </div>

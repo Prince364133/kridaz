@@ -42,7 +42,7 @@ const GuestNavbar = () => {
         {/* Brand Logo Unit */}
         <Link to="/" className="group flex items-center gap-4">
           <div className="flex items-center justify-center">
-            <img src="/logo.png" alt="TurfSpot" className="h-8 lg:h-10 w-auto transition-transform duration-500 group-hover:scale-105" />
+            <img src="/logo.png" alt="Kridaz" className="h-8 lg:h-10 w-auto transition-transform duration-500 group-hover:scale-105" />
           </div>
         </Link>
 

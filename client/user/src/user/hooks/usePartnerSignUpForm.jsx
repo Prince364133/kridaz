@@ -60,7 +60,7 @@ const usePartnerSignUpForm = (predefinedRole = "owner") => {
 
       if (predefinedRole === "owner") {
         dispatch(login({ token: result.token, role: result.role }));
-        toast.success("Welcome to TurfSpot!");
+        toast.success("Welcome to Kridaz!");
         window.location.href = "/partner";
       } else {
         const waitlistNumber = result.waitlistNumber || Math.floor(Math.random() * 50) + 1;

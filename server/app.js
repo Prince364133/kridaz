@@ -85,7 +85,7 @@ app.get("/api/debug", async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("TurfSpot API is running");
+  res.send("Kridaz API is running");
 });
 
 // Error handling

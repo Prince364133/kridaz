@@ -166,7 +166,7 @@ const CoinDeductionModal = ({
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
-        name: "TurfSpot Wallet",
+        name: "Kridaz Wallet",
         description: "Wallet Instant Recharge",
         order_id: order.id,
         handler: async (response) => {
@@ -353,7 +353,7 @@ const CoinDeductionModal = ({
                             <Wallet size={20} />
                           </div>
                           <div className="text-left">
-                            <p className={`text-xs font-bold uppercase tracking-tight ${paymentMode === "WALLET" ? "text-white" : "text-zinc-400"}`}>TurfSpot Wallet</p>
+                            <p className={`text-xs font-bold uppercase tracking-tight ${paymentMode === "WALLET" ? "text-white" : "text-zinc-400"}`}>Kridaz Wallet</p>
                             <p className="text-[10px] font-medium text-zinc-500">Balance: ₹{currentBalance}</p>
                           </div>
                         </div>

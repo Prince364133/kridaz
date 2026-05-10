@@ -49,7 +49,7 @@ export default function CoachLanding() {
               Build Your <br /><span style={{ color: PRI }}>Legacy.</span>
             </h1>
             <p className="text-gray-400 text-base md:text-lg mb-8 max-w-lg mx-auto md:mx-0">
-              Take your coaching business to the next level. BookMySportz provides the digital infrastructure to manage your students, schedule sessions, and grow your brand.
+              Take your coaching business to the next level. Kridaz provides the digital infrastructure to manage your students, schedule sessions, and grow your brand.
             </p>
             <Link
               to="/business/register?role=coach"
@@ -108,7 +108,7 @@ export default function CoachLanding() {
           <div className="grid gap-6 md:gap-8">
             {[
               { 
-                text: "“Managing 100+ students across 3 batches was a nightmare. BookMySportz simplified my administrative work by 80%.”", 
+                text: "“Managing 100+ students across 3 batches was a nightmare. Kridaz simplified my administrative work by 80%.”", 
                 name: "Coach Arjun", 
                 role: "National Cricket Academy", 
                 icon: Trophy 

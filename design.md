@@ -1,7 +1,7 @@
-# design.md — BookMySportz AI Design System (Agent-First)
+# design.md — Kridaz AI Design System (Agent-First)
 
 **Purpose:**
-This document defines strict rules and decision logic for AI agents to design or redesign any BookMySportz page consistently.
+This document defines strict rules and decision logic for AI agents to design or redesign any Kridaz page consistently.
 
 ## 1. Core Objective (DO NOT VIOLATE)
 Every design must:

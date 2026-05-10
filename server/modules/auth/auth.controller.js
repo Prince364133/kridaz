@@ -71,7 +71,7 @@ export const sendOtp = async (req, res) => {
     // Send Email
     await generateEmail(
       email,
-      "Your BookMySportz Verification Code",
+      "Your Kridaz Verification Code",
       `<p>Your verification code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>`
     );
 
@@ -87,7 +87,7 @@ export const sendOtp = async (req, res) => {
     } else {
       await sendWhatsAppMessage(
         phone,
-        `Your BookMySportz verification code is: ${phoneOtp}. Do not share this with anyone.`
+        `Your Kridaz verification code is: ${phoneOtp}. Do not share this with anyone.`
       );
     }
 
@@ -146,7 +146,7 @@ export const registerUser = async (req, res) => {
       amount: 50,
       type: "OFFER",
       status: "SUCCESS",
-      description: "Platform Welcome Bonus: 50 Free Coins",
+      description: "Platform Welcome Bonus: Rs 50 Credits",
     });
 
     await OTP.deleteOne({ _id: otpRecord._id });
@@ -426,7 +426,7 @@ export const googleAuth = async (req, res) => {
           amount: 50,
           type: "OFFER",
           status: "SUCCESS",
-          description: "Platform Welcome Bonus: 50 Free Coins",
+          description: "Platform Welcome Bonus: Rs 50 Credits",
         });
 
         roleToReturn = "user";
@@ -503,27 +503,34 @@ export const ownerRequest = async (req, res) => {
 
 // Submit Role Upgrade Request
 export const upgradeRequest = async (req, res) => {
-  const { name, email, phone, role } = req.body;
+  const { name, email, phone, role, portfolioUrl } = req.body;
   const userId = req.user?.id;
 
   try {
+    console.log(`[UPGRADE_START] Request from ${email} for role ${role}`);
+
     // 1. Parse businessDetails if it's a string (from FormData)
     let businessDetails = req.body.businessDetails;
     if (typeof businessDetails === "string") {
       try {
         businessDetails = JSON.parse(businessDetails);
       } catch (e) {
-        console.error("Failed to parse businessDetails", e);
+        console.error("[UPGRADE] Failed to parse businessDetails", e);
+        // If it's a string and fails to parse, we should still try to handle it or throw a better error
       }
     }
 
     // 2. Check if user already has a professional role
-    const ownerAccount = await Owner.findOne({ email: email.toLowerCase() });
-    if (ownerAccount) {
-      return res.status(400).json({ 
-        success: false, 
-        message: `Account already has a professional role (${ownerAccount.role}).` 
-      });
+    if (email) {
+      const ownerAccount = await Owner.findOne({ email: email.toLowerCase() });
+      if (ownerAccount) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Account already has a professional role (${ownerAccount.role}).` 
+        });
+      }
+    } else {
+      return res.status(400).json({ success: false, message: "Email is required for verification." });
     }
 
     // 3. Check for existing requests
@@ -552,16 +559,13 @@ export const upgradeRequest = async (req, res) => {
     // 4. Handle File Uploads
     const documents = [];
     
-    console.log("[UPGRADE] User ID:", req.user._id);
-    console.log("[UPGRADE] Request Files:", req.files ? `Count: ${req.files.length}` : "UNDEFINED");
+    console.log("[UPGRADE] User ID:", userId);
+    console.log("[UPGRADE] Request Files:", req.files ? `Count: ${req.files.length}` : "NONE");
     
     if (req.files && req.files.length > 0) {
-      console.log(`[UPGRADE] Uploading ${req.files.length} documents to Cloudinary...`);
       for (const file of req.files) {
         try {
-          console.log(`[UPGRADE] Processing file: ${file.originalname} (${file.size} bytes)`);
-          const url = await uploadToCloudinary(file.buffer, "turfspot/verification");
-          console.log(`[UPGRADE] Successfully uploaded ${file.originalname} to ${url}`);
+          const url = await uploadToCloudinary(file.buffer, "kridaz/verification");
           documents.push({
             name: file.originalname,
             url: url
@@ -570,8 +574,6 @@ export const upgradeRequest = async (req, res) => {
           console.error(`[UPGRADE] Error uploading ${file.originalname}:`, uploadErr);
         }
       }
-    } else {
-      console.warn("[UPGRADE] No files found in req.files. Check if frontend field name matches 'documents'");
     }
 
     // 5. Create new request
@@ -583,18 +585,23 @@ export const upgradeRequest = async (req, res) => {
       role: role || "owner",
       businessDetails,
       documents,
+      portfolioUrl,
       status: "pending",
     });
 
     await newRequest.save();
 
     // 6. Notify Admin
-    await notifyAdmins({
-      title: "Role Upgrade Request",
-      message: `User ${name} requested upgrade to ${role || "owner"}`,
-      type: "SYSTEM",
-      link: "/admin/partners"
-    });
+    try {
+      await notifyAdmins({
+        title: "Role Upgrade Request",
+        message: `User ${name} requested upgrade to ${role || "owner"}`,
+        type: "SYSTEM",
+        link: "/admin/partners"
+      });
+    } catch (notifyErr) {
+      console.error("[UPGRADE] Notification error (non-fatal):", notifyErr);
+    }
     
     return res.status(201).json({
       success: true,
@@ -603,7 +610,6 @@ export const upgradeRequest = async (req, res) => {
   } catch (err) {
     console.error(chalk.red("Upgrade Request Error:"), err);
     
-    // Handle Mongoose duplicate key error specifically
     if (err.code === 11000) {
       return res.status(400).json({ 
         success: false, 
@@ -649,6 +655,9 @@ export const getMe = async (req, res) => {
       }
     } else {
       account = await Owner.findById(id).select("-password").lean();
+      if (!account) {
+        account = await Owner.findOne({ userId: id }).select("-password").lean();
+      }
     }
 
     if (!account) {
@@ -692,7 +701,7 @@ export const updateProfilePicture = async (req, res) => {
     // Upload to Cloudinary
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: `BookMySportz/profiles/${role}` },
+        { folder: `kridaz/profiles/${role}` },
         (error, result) => {
           if (error) reject(error);
           else resolve(result);

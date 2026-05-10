@@ -76,7 +76,7 @@ export default function CustomerDirectory() {
           <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
             <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-3">Avg. LTV</p>
             <div className="flex items-end justify-between">
-              <h3 className="text-2xl font-semibold text-white tracking-tight">₹{stats.avgLtv.toLocaleString()}</h3>
+              <h3 className="text-2xl font-semibold text-white tracking-tight">Rs {stats.avgLtv.toLocaleString()}</h3>
               <span className="px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] text-[10px] font-medium uppercase tracking-wider rounded-full">Per Player</span>
             </div>
           </div>
@@ -145,7 +145,7 @@ export default function CustomerDirectory() {
                         <span className="text-[13px] font-medium text-[#999999] uppercase tracking-widest font-inter">{customer.bookingCount} Sessions</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-[16px] font-semibold text-white tracking-tight font-inter">₹{customer.totalRevenue.toLocaleString()}</span>
+                        <span className="text-[16px] font-semibold text-white tracking-tight font-inter">Rs {customer.totalRevenue.toLocaleString()}</span>
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-[13px] font-medium text-[#999999] uppercase tracking-widest font-inter">{customer.lastActiveFormatted}</span>

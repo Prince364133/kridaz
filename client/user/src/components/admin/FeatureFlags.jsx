@@ -64,7 +64,7 @@ export const FeatureFlags = () => {
             PLATFORM FEATURES
           </h1>
           <p className="text-sm text-gray-400">
-            Control dynamic features and sections across the BookMySportz platform.
+            Control dynamic features and sections across the Kridaz platform.
           </p>
         </div>
         <button

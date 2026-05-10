@@ -1,6 +1,6 @@
-# TurfSpot Developer Guide
+# Kridaz Developer Guide
 
-Welcome to the TurfSpot development team! This guide will help you understand the project structure and how to contribute effectively.
+Welcome to the Kridaz development team! This guide will help you understand the project structure and how to contribute effectively.
 
 ## 🏗 Scalable Folder Structure
 

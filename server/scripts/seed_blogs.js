@@ -57,7 +57,7 @@ const blogs = [
 
 const seedBlogs = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/bookmysportz");
+    await mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/kridaz");
     console.log("Connected to MongoDB for seeding blogs...");
 
     await Blog.deleteMany({});

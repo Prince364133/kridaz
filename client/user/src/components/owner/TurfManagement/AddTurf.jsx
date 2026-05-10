@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { Controller } from "react-hook-form";
-import { setHours, setMinutes } from "date-fns";
 import { FormField } from "@components/common";
 import useAddTurf from "@hooks/owner/useAddTurf";
 import { Button } from "@components/common";
 import { fetchStates, fetchCities } from "../../../user/utils/locationService";
 import { Search, Plus } from "lucide-react";
+import ClockPicker from "@components/common/ClockPicker";
 
 const AddTurf = () => {
   const {
@@ -40,6 +38,7 @@ const AddTurf = () => {
     generatedSlots,
     toggleDay,
     toggleSlotActive,
+    updateSlotPrice,
     loading,
     getMyLocation,
     isLocating,
@@ -110,7 +109,7 @@ const AddTurf = () => {
               </h1>
             </div>
             <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
-              Register a New Facility | BookMySportz
+              Register a New Facility | Kridaz
             </p>
           </div>
         </header>
@@ -553,25 +552,17 @@ const AddTurf = () => {
                       control={control}
                       rules={{ required: "Opening time is required" }}
                       render={({ field }) => (
-                        <div className="relative datepicker-dark">
-                          <DatePicker
-                            selected={field.value}
-                            onChange={(date) => {
-                              field.onChange(date);
-                              setValue("closeTime", null);
-                            }}
-                            showTimeSelect
-                            showTimeSelectOnly
-                            timeIntervals={60}
-                            timeCaption="Time"
-                            dateFormat="h:mm aa"
-                            portalId="root"
-                            popperPlacement="bottom-start"
-                            className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all"
-                          />
-                        </div>
+                        <ClockPicker
+                          value={field.value}
+                          onChange={(date) => {
+                            field.onChange(date);
+                            setValue("closeTime", null);
+                          }}
+                          placeholder="12:00 AM"
+                        />
                       )}
                     />
+                    {errors.openTime && <span className="text-[#CCFF00] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.openTime.message}</span>}
                   </div>
 
                   <div className="form-control">
@@ -583,25 +574,15 @@ const AddTurf = () => {
                       control={control}
                       rules={{ required: "Closing time is required" }}
                       render={({ field }) => (
-                        <div className="relative datepicker-dark">
-                          <DatePicker
-                            selected={field.value}
-                            onChange={field.onChange}
-                            showTimeSelect
-                            showTimeSelectOnly
-                            timeIntervals={60}
-                            timeCaption="Time"
-                            dateFormat="h:mm aa"
-                            portalId="root"
-                            popperPlacement="top-start"
-                            className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#CCFF00]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                            disabled={!openTime}
-                            minTime={openTime || setHours(setMinutes(new Date(), 0), 0)}
-                            maxTime={setHours(setMinutes(new Date(), 30), 23)}
-                          />
-                        </div>
+                        <ClockPicker
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="12:00 AM"
+                          disabled={!openTime}
+                        />
                       )}
                     />
+                    {errors.closeTime && <span className="text-[#CCFF00] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.closeTime.message}</span>}
                   </div>
                 </div>
 
@@ -684,7 +665,7 @@ const AddTurf = () => {
                     <div className="flex flex-col items-end">
                       <span className="text-[8px] font-bold text-[#878C9F] uppercase tracking-widest mb-1">Max Daily Revenue</span>
                       <span className="text-[11px] font-bold text-black uppercase bg-[#CCFF00] px-4 py-1.5 rounded-[4px] shadow-[0_2px_10px_rgba(204,255,0,0.2)]">
-                        ₹ {generatedSlots.reduce((acc, s) => acc + (s.isActive ? Number(s.price) : 0), 0).toFixed(2)}
+                        Rs {generatedSlots.reduce((acc, s) => acc + (s.isActive ? Number(s.price) : 0), 0).toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -724,7 +705,7 @@ const AddTurf = () => {
                           <div className="flex flex-col items-end">
                             <span className="text-[8px] font-black text-[#878C9F] uppercase tracking-[2px] mb-1">Slot Price (INR)</span>
                             <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-[#444]">₹</span>
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-[#444]">Rs</span>
                               <input 
                                 type="number"
                                 value={slot.price}
@@ -740,7 +721,7 @@ const AddTurf = () => {
                           <div className="flex flex-col items-end min-w-[80px]">
                             <span className="text-[8px] font-black text-[#CCFF00] uppercase tracking-[2px] mb-1">Your Net</span>
                             <span className="text-[13px] font-black text-[#CCFF00] font-mono tracking-tight italic">
-                              ₹{(slot.price * 0.95).toFixed(2)}
+                              Rs {(slot.price * 0.95).toFixed(2)}
                             </span>
                           </div>
                         </div>

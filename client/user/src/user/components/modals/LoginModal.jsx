@@ -84,7 +84,7 @@ const LoginModal = ({ isOpen, onClose, title = "Login Required", message = "Plea
           </div>
 
           <p className="mt-8 text-[10px] text-gray-600 uppercase tracking-[0.2em] font-medium">
-            Secure Authentication by TurfSpot
+            Secure Authentication by Kridaz
           </p>
         </div>
       </div>

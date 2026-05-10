@@ -14,7 +14,7 @@ import useOwnerWallet from "../../../hooks/owner/useOwnerWallet";
 import toast from "react-hot-toast";
 
 const PayoutBanking = () => {
-  const { bankingDetails, walletBalance, payoutSettings, loading: bankingLoading, isPayoutDay, updateBanking, requestPayout } = useBanking();
+  const { bankingDetails, walletBalance, payoutSettings, loading: bankingLoading, isPayoutDay, updateBanking, requestPayout, verifyPassword } = useBanking();
   const { dashboardData, loading: dashboardLoading } = useOwnerDashboard();
   const { walletData, withdrawals, loading: walletLoading, refresh: refreshWallet } = useOwnerWallet();
   const [isEditingBank, setIsEditingBank] = useState(false);
@@ -121,10 +121,7 @@ const PayoutBanking = () => {
     setShowVerifyModal(true);
   };
 
-  const { verifyPassword, refresh } = useBanking();
-
-  const handleIdentityVerify = async () => {
-    if (!password) return toast.error("Enter password");
+  const handleVerify = async () => {
     setVerifying(true);
     const success = await verifyPassword(password);
     if (success) {
@@ -139,14 +136,14 @@ const PayoutBanking = () => {
   };
 
   const handlePayoutRequest = async () => {
-    if (numericWithdrawAmount < 500) {
-      toast.error("Minimum withdrawal is 500 coins", {
+    if (numericWithdrawAmount < 5000) {
+      toast.error("Minimum withdrawal is Rs 5000", {
         style: { background: "#000", color: "#fff", border: "1px solid #ff4d4d", fontSize: "10px", fontWeight: "black" }
       });
       return;
     }
-    if (numericWithdrawAmount > 100000) {
-      toast.error("Maximum withdrawal limit is 100,000 coins", {
+    if (numericWithdrawAmount > 300000) {
+      toast.error("Maximum withdrawal limit is Rs 300,000", {
         style: { background: "#000", color: "#fff", border: "1px solid #ff4d4d", fontSize: "10px", fontWeight: "black" }
       });
       return;
@@ -193,15 +190,15 @@ const PayoutBanking = () => {
                 <div className="flex flex-wrap gap-4 pt-4">
                   <div className="bg-[#CCFF00]/5 border border-[#CCFF00]/20 px-6 py-3 rounded-2xl">
                      <p className="text-[10px] text-[#CCFF00] font-bold uppercase mb-1">Confirmed Revenue</p>
-                     <p className="text-2xl font-black text-white">{numericTotalCoins.toLocaleString()} <span className="text-xs text-[#CCFF00] ml-1 uppercase">Coins</span></p>
+                     <p className="text-2xl font-black text-white">Rs {numericTotalCoins.toLocaleString()} <span className="text-xs text-[#CCFF00] ml-1 uppercase">Credits</span></p>
                   </div>
                   <div className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl">
                      <p className="text-[10px] text-gray-500 font-bold uppercase mb-1">Pending Revenue</p>
-                     <p className="text-2xl font-black text-white">{numericPendingCoins.toLocaleString()} <span className="text-xs text-gray-400 ml-1 uppercase">Upcoming</span></p>
+                     <p className="text-2xl font-black text-white">Rs {numericPendingCoins.toLocaleString()} <span className="text-xs text-gray-400 ml-1 uppercase">Upcoming</span></p>
                   </div>
                   <div className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl">
                      <p className="text-[10px] text-gray-500 font-bold uppercase mb-1">Lifetime Earnings</p>
-                     <p className="text-2xl font-black text-white">{(dashboardData?.totalRevenue || 0).toLocaleString()}</p>
+                     <p className="text-2xl font-black text-white">Rs {(dashboardData?.totalRevenue || 0).toLocaleString()}</p>
                   </div>
                </div>
             </div>
@@ -267,7 +264,7 @@ const PayoutBanking = () => {
                                     {new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
                                  </td>
                                  <td className={`px-8 py-6 text-right font-black tracking-tight ${tx.type === 'DEBIT' ? 'text-red-500' : 'text-[#CCFF00]'}`}>
-                                    {tx.type === 'DEBIT' ? '-' : '+'} {Number(tx.amount).toLocaleString()} Coins
+                                    {tx.type === 'DEBIT' ? '-' : '+'} Rs {Number(tx.amount).toLocaleString()}
                                  </td>
                               </tr>
                            ))
@@ -432,7 +429,7 @@ const PayoutBanking = () => {
                                  {withdrawal.status === 'SUCCESS' ? <CheckCircle size={14} /> : <History size={14} />}
                               </div>
                               <div>
-                                 <p className="text-sm font-black text-white tracking-tight">₹ {Number(withdrawal.amount).toLocaleString()}</p>
+                                 <p className="text-sm font-black text-white tracking-tight">Rs {Number(withdrawal.amount).toLocaleString()}</p>
                                  <p className="text-[10px] text-[#878C9F] font-bold uppercase tracking-widest mt-1">
                                     {new Date(withdrawal.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit' })}
                                  </p>
@@ -495,9 +492,9 @@ const PayoutBanking = () => {
                     <div className="space-y-6 animate-in slide-in-from-bottom duration-500">
                        <div className="bg-[#151617] p-6 rounded-[8px] border border-[#2D2D2D] relative overflow-hidden group">
                           <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[40px] pointer-events-none" />
-                          <p className="text-[10px] text-[#878C9F] font-black uppercase tracking-widest mb-3 relative z-10">Total Coin</p>
+                          <p className="text-[10px] text-[#878C9F] font-black uppercase tracking-widest mb-3 relative z-10">Total Balance</p>
                           <div className="flex items-center gap-3 relative z-10">
-                             <span className="text-3xl font-black text-[#CCFF00]">₹</span>
+                             <span className="text-3xl font-black text-[#CCFF00]">Rs</span>
                              <span className="text-3xl font-black text-white">{numericTotalCoins.toLocaleString()}</span>
                           </div>
                           <div className="mt-4 flex justify-between items-center relative z-10">
@@ -516,11 +513,11 @@ const PayoutBanking = () => {
                        <div className="bg-[#151617] p-6 rounded-[8px] border border-[#2D2D2D] relative overflow-hidden group space-y-6">
                           <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[40px] pointer-events-none" />
                           
-                          {/* Total Coin Display */}
+                          {/* Total Balance Display */}
                           <div className="space-y-2 relative z-10">
-                             <p className="text-[9px] text-[#878C9F] font-black uppercase tracking-widest">Total Coin</p>
+                             <p className="text-[9px] text-[#878C9F] font-black uppercase tracking-widest">Total Balance</p>
                              <div className="flex items-center gap-2">
-                                <span className="text-xl font-black text-[#CCFF00]">₹</span>
+                                <span className="text-xl font-black text-[#CCFF00]">Rs</span>
                                 <span className="text-xl font-black text-white/50">{numericTotalCoins.toLocaleString()}</span>
                              </div>
                           </div>
@@ -529,7 +526,7 @@ const PayoutBanking = () => {
                           <div className="space-y-2 relative z-10 p-4 bg-white/5 rounded-[6px] border border-white/5">
                              <p className="text-[10px] text-[#CCFF00] font-black uppercase tracking-widest">Withdraw Amount</p>
                              <div className="flex items-center gap-3">
-                                <span className="text-3xl font-black text-[#CCFF00]">₹</span>
+                                <span className="text-3xl font-black text-[#CCFF00]">Rs</span>
                                 <input 
                                   type="number"
                                   className="w-full bg-transparent border-none text-3xl font-black text-white focus:outline-none p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -547,12 +544,12 @@ const PayoutBanking = () => {
                              <div className="space-y-1">
                                 <p className="text-[9px] text-[#878C9F] font-bold uppercase tracking-widest">Remaining Balance</p>
                                 <p className={`text-sm font-black transition-colors ${numericTotalCoins - withdrawAmount < 0 ? 'text-red-500' : 'text-[#CCFF00]'}`}>
-                                   ₹ {(numericTotalCoins - withdrawAmount).toLocaleString()}
+                                   Rs {(numericTotalCoins - withdrawAmount).toLocaleString()}
                                 </p>
                              </div>
                               <div className="flex gap-2">
-                                 <p className="text-[9px] text-white/30 font-black uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded border border-white/10">Min: ₹500</p>
-                                 <p className="text-[9px] text-white/30 font-black uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded border border-white/10">Max: ₹1L</p>
+                                 <p className="text-[9px] text-white/30 font-black uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded border border-white/10">Min: Rs 500</p>
+                                 <p className="text-[9px] text-white/30 font-black uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded border border-white/10">Max: Rs 1L</p>
                               </div>
                           </div>
                        </div>

@@ -71,7 +71,7 @@ const TransactionTable = ({
                 {transaction.payment.paymentId}
               </td>
               <td className="p-4 text-right">
-                 <span className="font-bold text-sm text-[#84CC16] tracking-tight">₹{transaction.totalPrice}</span>
+                 <span className="font-bold text-sm text-[#84CC16] tracking-tight">Rs {transaction.totalPrice}</span>
               </td>
             </tr>
           ))}

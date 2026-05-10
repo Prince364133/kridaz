@@ -140,7 +140,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                   <div>
                     <h3 className="font-bold text-[13px] uppercase tracking-wider text-white font-inter">{turf.name}</h3>
                     <p className="text-[9px] text-[#878C9F] flex items-center gap-1 mt-1 uppercase font-bold tracking-widest"><MapPin size={10} className="text-[#CCFF00]" /> {turf.location}</p>
-                    <p className="text-[12px] font-black text-[#CCFF00] mt-2 tracking-widest font-inter">₹{turf.pricePerHour}</p>
+                    <p className="text-[12px] font-black text-[#CCFF00] mt-2 tracking-widest font-inter">Rs {turf.pricePerHour}</p>
                   </div>
                 </button>
               ))}
@@ -277,7 +277,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
               {selectedTurf && (
                  <div className="space-y-0.5">
                     <p className="text-[9px] font-bold text-[#878C9F] uppercase tracking-[0.2em] font-inter">Total Settlement</p>
-                    <p className="text-[20px] font-bold text-[#CCFF00] font-open-sans">₹{selectedTurf.pricePerHour}</p>
+                    <p className="text-[20px] font-bold text-[#CCFF00] font-open-sans">Rs {selectedTurf.pricePerHour}</p>
                  </div>
               )}
            </div>

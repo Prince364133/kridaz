@@ -31,7 +31,7 @@ export const createAdBanner = async (req, res) => {
     const bannerData = { ...req.body };
     
     if (req.file) {
-      bannerData.imageUrl = await uploadToCloudinary(req.file.buffer, "BookMySportz/marketing");
+      bannerData.imageUrl = await uploadToCloudinary(req.file.buffer, "kridaz/marketing");
     }
 
     const banner = await AdBanner.create(bannerData);
@@ -46,7 +46,7 @@ export const updateAdBanner = async (req, res) => {
     const bannerData = { ...req.body };
 
     if (req.file) {
-      bannerData.imageUrl = await uploadToCloudinary(req.file.buffer, "BookMySportz/marketing");
+      bannerData.imageUrl = await uploadToCloudinary(req.file.buffer, "kridaz/marketing");
     }
 
     const banner = await AdBanner.findByIdAndUpdate(req.params.id, bannerData, { new: true });

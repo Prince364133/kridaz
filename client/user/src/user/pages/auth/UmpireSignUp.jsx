@@ -46,7 +46,7 @@ const UmpireSignUp = () => {
               <span style={{ color: ACCENT }}>THE GAME.</span>
             </h1>
             <p className="text-sm text-white/40 uppercase tracking-widest max-w-sm leading-relaxed">
-              Join the elite network of TurfSpot officials. Manage your availability, get matched with matches, and elevate your officiating career.
+              Join the elite network of Kridaz officials. Manage your availability, get matched with matches, and elevate your officiating career.
             </p>
           </div>
 

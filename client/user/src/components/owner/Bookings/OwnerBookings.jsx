@@ -192,7 +192,7 @@ const OwnerBookings = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className="text-[16px] font-semibold text-white tracking-tight">
-                        ₹{booking.totalPrice.toLocaleString()}
+                        Rs {booking.totalPrice.toLocaleString()}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -230,7 +230,7 @@ const OwnerBookings = () => {
             Displaying {bookings.length} operational records | End of Feed
           </p>
           <div className="flex gap-4">
-            <span className="text-[10px] font-medium uppercase tracking-widest">BookMySportz Engine v1.4</span>
+            <span className="text-[10px] font-medium uppercase tracking-widest">Kridaz Engine v1.4</span>
           </div>
         </div>
       </div>

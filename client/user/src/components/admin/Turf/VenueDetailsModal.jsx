@@ -124,7 +124,7 @@ const VenueDetailsModal = ({ isOpen, onClose, turf, onApprove, onReject }) => {
                   <div className="p-8 bg-[#CCFF00] rounded-3xl space-y-1 shadow-2xl shadow-[#CCFF00]/10">
                     <p className="text-black/60 text-[10px] font-black uppercase tracking-widest">Base Hourly Rate</p>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-black">₹{turf.pricePerHour}</span>
+                      <span className="text-4xl font-black text-black">Rs {turf.pricePerHour}</span>
                       <span className="text-black/60 font-bold text-sm">/HR</span>
                     </div>
                   </div>

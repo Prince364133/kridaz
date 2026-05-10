@@ -348,7 +348,7 @@ const Community = () => {
   const handleShareToPlatform = (platform, postId) => {
     const url = `${window.location.origin}${window.location.pathname}?post=${postId}`;
     const encodedUrl = encodeURIComponent(url);
-    const text = encodeURIComponent("Check out this post on TurfSpot!");
+    const text = encodeURIComponent("Check out this post on Kridaz!");
     
     let shareUrl = '';
     
@@ -485,7 +485,7 @@ const Community = () => {
           ) : posts.length === 0 ? (
             <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-20 text-center space-y-4">
               <MessageCircle size={48} className="mx-auto text-white/10" />
-              <p className="text-white/20 text-sm uppercase tracking-widest">No updates from TurfSpot yet.</p>
+              <p className="text-white/20 text-sm uppercase tracking-widest">No updates from Kridaz yet.</p>
             </div>
           ) : (
             posts.map((post) => (
@@ -528,7 +528,7 @@ const Community = () => {
                       </div>
                     </div>
                     <Link to={`/profile/${post.adminId?._id}`} className="hover:opacity-80 transition-opacity">
-                      <h3 className="font-bold uppercase tracking-wider text-sm">{post.adminId?.name || "TurfSpot Admin"}</h3>
+                      <h3 className="font-bold uppercase tracking-wider text-sm">{post.adminId?.name || "Kridaz Admin"}</h3>
                       <p className="text-[10px] text-white/40 uppercase tracking-widest flex items-center gap-1">
                         <Clock size={10} /> {new Date(post.createdAt).toLocaleDateString()}
                       </p>

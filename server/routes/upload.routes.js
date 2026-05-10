@@ -16,7 +16,7 @@ router.post("/", upload.single("file"), async (req, res) => {
       return res.status(400).json({ success: false, message: "No file provided" });
     }
 
-    const folder = req.body.folder || "turfspot/verification";
+    const folder = req.body.folder || "kridaz/verification";
     const result = await uploadToCloudinary(req.file.buffer, folder);
 
     return res.status(200).json({

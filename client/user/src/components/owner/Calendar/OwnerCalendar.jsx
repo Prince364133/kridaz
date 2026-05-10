@@ -195,7 +195,7 @@ const OwnerCalendar = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
            {[
              { label: 'Confirmed Slots', value: data?.stats?.confirmedSlots || 0, trend: '+12%', icon: Activity, color: '#CCFF00' },
-             { label: 'Utilized Revenue', value: `₹${(data?.stats?.totalRevenue || 0).toLocaleString()}`, trend: '+₹1.2k', icon: Zap, color: '#3B82F6' },
+             { label: 'Utilized Revenue', value: `Rs ${(data?.stats?.totalRevenue || 0).toLocaleString()}`, trend: '+Rs 1.2k', icon: Zap, color: '#3B82F6' },
              { label: 'Average Load', value: `${data?.stats?.averageLoad || 0}%`, trend: 'Stable', icon: Clock, color: '#CCFF00' },
            ].map((stat, i) => (
              <div key={i} className="bg-[#111] border border-[#2D2D2D] p-8 rounded-[12px] flex flex-col justify-between relative overflow-hidden group hover:border-[#CCFF00]/30 transition-all">

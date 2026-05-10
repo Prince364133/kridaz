@@ -60,7 +60,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
         <div className="mt-auto space-y-4">
           <div className="flex flex-wrap gap-1.5">
               <div className="flex items-center gap-2 px-3 py-1 bg-[#CCFF00]/5 border border-[#CCFF00]/20 rounded-[4px] text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">
-                 ₹{turf.pricePerHour} <span className="opacity-40 font-normal">SETTLEMENT</span>
+                 Rs {turf.pricePerHour} <span className="opacity-40 font-normal">SETTLEMENT</span>
               </div>
           </div>
 

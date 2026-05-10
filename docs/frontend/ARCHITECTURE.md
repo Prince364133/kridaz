@@ -1,7 +1,7 @@
 # Frontend Architecture Specification
 
 ## 🏛 Overview
-TurfSpot's frontend is designed for high modularity, scalability, and developer productivity. It follows a **Layered Architecture** pattern, separating concerns between UI, Business Logic, and Data Fetching.
+Kridaz's frontend is designed for high modularity, scalability, and developer productivity. It follows a **Layered Architecture** pattern, separating concerns between UI, Business Logic, and Data Fetching.
 
 ## 📁 Directory Structure & Responsibilities
 

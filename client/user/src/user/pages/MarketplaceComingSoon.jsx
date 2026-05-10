@@ -41,7 +41,7 @@ const MarketplaceComingSoon = () => {
 
         {/* Description */}
         <p className="text-zinc-500 text-sm md:text-base font-medium max-w-md mx-auto leading-relaxed">
-          We're curating a premium collection of sports gear, equipment, and exclusive TurfSpot merchandise. Built for champions, arriving soon.
+          We're curating a premium collection of sports gear, equipment, and exclusive Kridaz merchandise. Built for champions, arriving soon.
         </p>
 
         {/* Feature Grid */}

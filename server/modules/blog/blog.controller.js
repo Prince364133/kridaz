@@ -52,7 +52,7 @@ export const createBlog = async (req, res) => {
     // If a file was uploaded via multipart, push it to Cloudinary
     if (req.file) {
       console.log("[createBlog]: Uploading file to Cloudinary...");
-      imageUrl = await uploadToCloudinary(req.file.buffer, "turfspot/blogs");
+      imageUrl = await uploadToCloudinary(req.file.buffer, "kridaz/blogs");
     }
 
     if (!imageUrl) {
@@ -83,7 +83,7 @@ export const updateBlog = async (req, res) => {
     // If a new file was uploaded, replace the image on Cloudinary
     if (req.file) {
       console.log("[updateBlog]: Uploading new file to Cloudinary...");
-      updates.imageUrl = await uploadToCloudinary(req.file.buffer, "turfspot/blogs");
+      updates.imageUrl = await uploadToCloudinary(req.file.buffer, "kridaz/blogs");
     }
 
     // Ensure order is a number if provided

@@ -25,7 +25,7 @@ const PartnerFooter = () => {
           <div className="space-y-6 max-w-xl">
             <Link to="/" className="group flex items-center gap-4">
               <div className="flex items-center justify-center">
-                <img src="/logo.png" alt="BookMySportz" className="h-10 lg:h-12 w-auto" />
+                <img src="/logo.png" alt="Kridaz" className="h-10 lg:h-12 w-auto" />
               </div>
               <div className="border-l border-white/20 pl-4 h-10 flex flex-col justify-center">
                 <span className="block text-[10px] font-semibold text-[#84CC16] tracking-wider uppercase leading-none mb-1">Partner Portal</span>
@@ -100,7 +100,7 @@ const PartnerFooter = () => {
               </div>
               <div>
                 <p className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">Email Us</p>
-                <p className="text-sm font-medium text-white">partners@bookmysportz.com</p>
+                <p className="text-sm font-medium text-white">partners@kridaz.com</p>
               </div>
             </div>
 
@@ -117,7 +117,7 @@ const PartnerFooter = () => {
 
           <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 border-t border-white/5 pt-8">
             <p className="text-xs text-white/30">
-              &copy; {currentYear} BookMySportz. All rights reserved. Professional Venue Management Suite.
+              &copy; {currentYear} Kridaz. All rights reserved. Professional Venue Management Suite.
             </p>
             <div className="flex gap-6">
               <Link to="#" className="text-xs text-white/30 hover:text-white transition-colors">Privacy Policy</Link>

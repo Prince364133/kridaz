@@ -71,7 +71,7 @@ export default function PartnersGateway() {
                 <span className="text-[#84CC16]">PARTNER.</span>
               </h1>
               <p className="text-lg text-white/40 max-w-2xl border-l-2 border-[#84CC16] pl-8 leading-relaxed">
-                Connect with TurfSpot to access a unified sports ecosystem. Whether you are a Venue Owner, Professional Coach, or Certified Official, we provide the ultimate platform to scale your impact.
+                Connect with Kridaz to access a unified sports ecosystem. Whether you are a Venue Owner, Professional Coach, or Certified Official, we provide the ultimate platform to scale your impact.
               </p>
             </div>
 

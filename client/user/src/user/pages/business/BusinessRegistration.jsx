@@ -63,6 +63,8 @@ export default function BusinessRegistration() {
     VENUE: null
   });
 
+  const isOwner = formData.role === 'owner' || formData.role === 'VENUE_OWNER';
+
   const handleFileChange = (type, file) => {
     setFiles(prev => ({ ...prev, [type]: file }));
   };
@@ -167,14 +169,14 @@ export default function BusinessRegistration() {
     
     setLoading(true);
     
-    // Validate mandatory documents
-    const requiredDocs = formData.role === 'owner' || formData.role === 'VENUE_OWNER' 
-      ? ['PAN', 'AADHAR', 'BUSINESS', 'VENUE']
-      : ['PAN', 'AADHAR']; // Coaches/Umpires might only need ID proof initially
-    
+    // Consolidated Document validation
+    const requiredDocs = isOwner 
+      ? ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST', 'VENUE']
+      : ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST'];
+
     const missingDocs = requiredDocs.filter(doc => !files[doc]);
     if (missingDocs.length > 0) {
-      toast.error(`Please upload required documents: ${missingDocs.join(", ")}`);
+      toast.error(`Please upload all required documents: ${missingDocs.join(", ")}`);
       setLoading(false);
       return;
     }
@@ -188,27 +190,31 @@ export default function BusinessRegistration() {
     data.append("businessDetails", JSON.stringify(formData.businessDetails));
 
     // Mandatory field check
-    const { businessName, registrationNumber, address, city, state, zipCode, experience, specialization } = formData.businessDetails;
-    
-    // Determine which fields are required based on role
-    const isOwner = formData.role === 'owner' || formData.role === 'VENUE_OWNER';
+    const { businessName, registrationNumber, address, city } = formData.businessDetails;
+    const { portfolioUrl } = formData;
+
+    if (!portfolioUrl) {
+      toast.error("Portfolio link is mandatory");
+      setLoading(false);
+      return;
+    }
     
     if (isOwner) {
       if (!businessName || !registrationNumber) {
-        toast.error("Please fill in all business details");
+        toast.error("Please fill in all business details (Name & Registration Number)");
         setLoading(false);
         return;
       }
     } else {
-      if (!specialization || !experience) {
-        toast.error("Please fill in all professional details");
+      if (!formData.businessDetails.specialization || !formData.businessDetails.experience) {
+        toast.error("Please fill in your specialization and experience");
         setLoading(false);
         return;
       }
     }
 
-    if (!address || !city || !state || !zipCode || !formData.phone) {
-      toast.error("Please fill in all contact and location details");
+    if (!address || !city) {
+      toast.error("Please provide your full address");
       setLoading(false);
       return;
     }
@@ -219,17 +225,6 @@ export default function BusinessRegistration() {
       return;
     }
 
-    // Document validation
-    const requiredDocs = isOwner 
-      ? ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST', 'VENUE']
-      : ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST'];
-
-    const missingDocs = requiredDocs.filter(doc => !files[doc]);
-    if (missingDocs.length > 0) {
-      toast.error(`Please upload all required documents: ${missingDocs.join(', ')}`);
-      setLoading(false);
-      return;
-    }
 
     // Append files with specific names for the backend to identify
     Object.keys(files).forEach(key => {
@@ -313,7 +308,7 @@ export default function BusinessRegistration() {
               <h1 className="text-5xl md:text-6xl font-display uppercase leading-none mb-4">
                 Professional <br /> <span style={{ color: PRI }}>Registration.</span>
               </h1>
-              <p className="text-gray-400 text-lg">Tell us about your business to get verified and access the TurfSpot dashboard.</p>
+              <p className="text-gray-400 text-lg">Tell us about your business to get verified and access the Kridaz dashboard.</p>
             </div>
 
             {hasRoleConflict && (
@@ -323,7 +318,7 @@ export default function BusinessRegistration() {
                   <h3 className="text-amber-500 font-bold tracking-wide uppercase text-sm mb-1">Role Conflict</h3>
                   <p className="text-amber-500/80 text-sm">
                     Your account already holds the <strong className="text-amber-500 uppercase">{existingRole}</strong> role. 
-                    You can view this form, but you cannot submit a new application as TurfSpot supports only one professional role per account.
+                    You can view this form, but you cannot submit a new application as Kridaz supports only one professional role per account.
                   </p>
                 </div>
               </div>
@@ -556,14 +551,14 @@ export default function BusinessRegistration() {
                      onFileSelect={(file) => handleFileChange("GST", file)}
                      selectedFile={files.GST}
                    />
-                   {(formData.role === 'owner' || formData.role === 'VENUE_OWNER') && (
-                     <DocumentUpload 
-                       label="Venue Ownership Doc" 
-                       id="venue"
-                       onFileSelect={(file) => handleFileChange("VENUE", file)}
-                       selectedFile={files.VENUE}
-                     />
-                   )}
+                    {isOwner && (
+                      <DocumentUpload 
+                        label="Venue Ownership Doc" 
+                        id="venue"
+                        onFileSelect={(file) => handleFileChange("VENUE", file)}
+                        selectedFile={files.VENUE}
+                      />
+                    )}
                  </div>
 
                  <div className="pt-4 border-t border-white/5">

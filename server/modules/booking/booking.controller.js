@@ -49,7 +49,8 @@ export const createOrder = async (req, res) => {
 export const verifyPayment = async (req, res) => {
   const userId = req.user.id || req.user.user;
   const {
-    id: turfId,
+    id,
+    turfId: bodyTurfId,
     startTime,
     endTime,
     selectedTurfDate,
@@ -61,6 +62,7 @@ export const verifyPayment = async (req, res) => {
     orderId,
     razorpay_signature,
   } = req.body;
+  const turfId = bodyTurfId || id;
 
   try {
     const formattedStartTime = format(parseISO(startTime), "hh:mm a");
@@ -84,8 +86,20 @@ export const verifyPayment = async (req, res) => {
     ]);
 
     const user = userResult;
-    if (!user || !turf) {
-      return res.status(404).json({ success: false, message: "Account or Turf not found" });
+    
+    // Defensive check: If turf owner population failed (e.g. owner is in User collection instead of Owner collection)
+    if (turf && !turf.owner) {
+      const rawTurf = await Turf.findById(turfId).select("owner");
+      if (rawTurf && rawTurf.owner) {
+        turf.owner = await User.findById(rawTurf.owner).select("email name");
+      }
+    }
+
+    if (!user || !turf || !turf.owner) {
+      return res.status(404).json({ 
+        success: false, 
+        message: !turf ? "Turf not found" : !turf.owner ? "Turf owner not found. Please contact support." : "Account not found" 
+      });
     }
 
     const settings = settingsDoc?.value || {};
@@ -182,11 +196,11 @@ export const verifyPayment = async (req, res) => {
     generateInvoice(booking, turf, user).then(pdfBuffer => {
       generateEmail(
         user.email, 
-        "Booking Confirmation & Invoice - TurfSpot", 
+        "Booking Confirmation & Invoice - Kridaz", 
         htmlContent,
         [
           {
-            filename: `Invoice-TS-${booking._id.toString().slice(-6).toUpperCase()}.pdf`,
+            filename: `Invoice-KRZ-${booking._id.toString().slice(-6).toUpperCase()}.pdf`,
             content: pdfBuffer,
             contentType: 'application/pdf'
           }
@@ -217,7 +231,8 @@ export const verifyPayment = async (req, res) => {
 
 export const bookWithWallet = async (req, res) => {
   const userId = req.user.id || req.user.user;
-  const { id: turfId, startTime, endTime, selectedTurfDate, totalPrice: originalPrice, couponCode } = req.body;
+  const { id, turfId: bodyTurfId, startTime, endTime, selectedTurfDate, totalPrice: originalPrice, couponCode } = req.body;
+  const turfId = bodyTurfId || id;
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -277,8 +292,15 @@ export const bookWithWallet = async (req, res) => {
       SystemSetting.findOne({ key: "PAYOUT_CONFIG" }).session(session)
     ]);
 
-    if (!turf) {
-      throw new Error("Turf not found");
+    if (turf && !turf.owner) {
+      const rawTurf = await Turf.findById(turfId).select("owner").session(session);
+      if (rawTurf && rawTurf.owner) {
+        turf.owner = await User.findById(rawTurf.owner).select("email name").session(session);
+      }
+    }
+
+    if (!turf || !turf.owner) {
+      throw new Error(!turf ? "Turf not found" : "Turf owner not found. Please contact support.");
     }
 
     const settings = settingsDoc?.value || {};
@@ -442,11 +464,11 @@ export const bookWithWallet = async (req, res) => {
     generateInvoice(booking[0], turf, user).then(pdfBuffer => {
       generateEmail(
         user.email, 
-        "Booking Confirmation & Invoice - TurfSpot", 
+        "Booking Confirmation & Invoice - Kridaz", 
         htmlContent,
         [
           {
-            filename: `Invoice-TS-${booking[0]._id.toString().slice(-6).toUpperCase()}.pdf`,
+            filename: `Invoice-KRZ-${booking[0]._id.toString().slice(-6).toUpperCase()}.pdf`,
             content: pdfBuffer,
             contentType: 'application/pdf'
           }
@@ -523,7 +545,18 @@ export const getUserBookings = async (req, res) => {
 export const getOwnerBookings = async (req, res) => {
   try {
     const ownerId = req.owner.id;
-    const ownedTurfs = await Turf.find({ owner: ownerId }).select("_id");
+    const userId = req.owner.id; // Fallback for integrated accounts
+
+    // Unified owner lookup
+    const ownerRecord = await Owner.findOne({ 
+      $or: [{ _id: ownerId }, { userId: userId }] 
+    });
+
+    if (!ownerRecord) {
+      return res.status(200).json([]);
+    }
+
+    const ownedTurfs = await Turf.find({ owner: ownerRecord._id }).select("_id");
     
     if (ownedTurfs.length === 0) {
       return res.status(200).json([]);
@@ -615,6 +648,7 @@ export const validateCoupon = async (req, res) => {
 
 export const createManualBooking = async (req, res) => {
   const ownerId = req.owner.id;
+  const userId = req.owner.id; // Fallback for integrated accounts
   const {
     turfId,
     startTime,
@@ -659,13 +693,34 @@ export const createManualBooking = async (req, res) => {
     const adjustedStartTime = fromZonedTime(combineDateAndTime(turfDate, startTimeDate), timeZone);
     const adjustedEndTime = fromZonedTime(combineDateAndTime(turfDate, endTimeDate), timeZone);
 
+    // Unified owner lookup
+    const ownerRecord = await Owner.findOne({ 
+      $or: [{ _id: ownerId }, { userId: userId }] 
+    });
+
+    if (!ownerRecord) {
+      return res.status(403).json({ success: false, message: "Owner profile not found." });
+    }
+
     const turf = await Turf.findById(turfId).populate("owner", "email name");
-    if (!turf) {
-      return res.status(404).json({ success: false, message: "Turf not found" });
+    
+    // Defensive check: If turf owner population failed (e.g. owner is in User collection instead of Owner collection)
+    if (turf && !turf.owner) {
+      const rawTurf = await Turf.findById(turfId).select("owner");
+      if (rawTurf && rawTurf.owner) {
+        turf.owner = await User.findById(rawTurf.owner).select("email name");
+      }
+    }
+
+    if (!turf || !turf.owner) {
+      return res.status(404).json({ 
+        success: false, 
+        message: !turf ? "Turf not found" : "Turf owner not found. Please contact support." 
+      });
     }
 
     // Security check: ensure owner owns this turf
-    if (turf.owner._id.toString() !== ownerId) {
+    if (turf.owner._id.toString() !== ownerRecord._id.toString()) {
       return res.status(403).json({ success: false, message: "Unauthorized: You do not own this ground" });
     }
 
@@ -739,11 +794,11 @@ export const createManualBooking = async (req, res) => {
     generateInvoice(booking, turf, guestUser).then(pdfBuffer => {
       generateEmail(
         customerEmail, 
-        "Booking Confirmation & Invoice - BMS", 
+        "Booking Confirmation & Invoice - Kridaz", 
         htmlContent,
         [
           {
-            filename: `Invoice-BMS-${booking._id.toString().slice(-6).toUpperCase()}.pdf`,
+            filename: `Invoice-KRZ-${booking._id.toString().slice(-6).toUpperCase()}.pdf`,
             content: pdfBuffer,
             contentType: 'application/pdf'
           }

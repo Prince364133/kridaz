@@ -49,7 +49,7 @@ export default function UmpireLanding() {
               Officiate & <br /><span style={{ color: PRI }}>Earn.</span>
             </h1>
             <p className="text-gray-400 text-lg mb-8 max-w-lg">
-              Turn your expertise into income. BookMySportz connects certified umpires and referees with local tournaments and leagues looking for professional officiating.
+              Turn your expertise into income. Kridaz connects certified umpires and referees with local tournaments and leagues looking for professional officiating.
             </p>
             <Link
               to="/business/register?role=umpire"

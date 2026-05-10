@@ -10,19 +10,8 @@ const axiosInstance = axios.create({
 
 // Request interceptor: attach JWT token from Redux-Persist storage (Optional fallback)
 axiosInstance.interceptors.request.use((config) => {
-  let token = null;
-  try {
-    const persistedUser = localStorage.getItem("persist:root");
-    if (persistedUser) {
-      const parsedUser = JSON.parse(persistedUser);
-      if (parsedUser.auth) {
-        const parsedAuth = JSON.parse(parsedUser.auth);
-        token = parsedAuth.token;
-      }
-    }
-  } catch (error) {
-    // Silently fail as the httpOnly cookie will be sent automatically
-  }
+  const state = store.getState();
+  const token = state.auth.token;
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

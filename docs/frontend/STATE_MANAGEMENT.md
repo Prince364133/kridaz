@@ -1,7 +1,7 @@
 # State Management Specification
 
 ## 🎯 Philosophy
-TurfSpot leverages **Redux Toolkit (RTK)** to manage complex global state and **RTK Query** for efficient server-state synchronization. Our goal is to minimize local state prop-drilling and ensure data consistency across the platform.
+Kridaz leverages **Redux Toolkit (RTK)** to manage complex global state and **RTK Query** for efficient server-state synchronization. Our goal is to minimize local state prop-drilling and ensure data consistency across the platform.
 
 ## 🏗 Redux Toolkit (Client State)
 Used for data that doesn't originate from the server or needs to be shared across many disconnected components.

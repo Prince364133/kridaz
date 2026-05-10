@@ -419,7 +419,7 @@ export default function Home() {
                   <span style={{ color: PRI }}>Coming Soon</span>
                 </h3>
                 <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gray-500 mt-6 max-w-md mx-auto">
-                  We're building the ultimate destination for sports gear, equipment, and exclusive TurfSpot merchandise.
+                  We're building the ultimate destination for sports gear, equipment, and exclusive Kridaz merchandise.
                 </p>
               </div>
             )}
@@ -1170,7 +1170,7 @@ export default function Home() {
                   <div className="absolute -inset-10 bg-primary/5 rounded-full opacity-10 group-hover:opacity-20 transition-opacity" />
                   <img
                     src="/sports_app_mockup_1777351423147.png"
-                    alt="BookMySportz App Mockup"
+                    alt="Kridaz App Mockup"
                     className="relative w-full max-w-2xl mx-auto transform scale-[1.5] sm:scale-110 lg:scale-150 -rotate-6 hover:rotate-0 transition-all duration-700"
                   />
                 </div>

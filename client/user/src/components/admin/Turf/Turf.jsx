@@ -24,7 +24,7 @@ const Turf = ({ turf, onApprove, onReject }) => {
         {/* Price badge */}
         <div className="absolute top-4 left-4">
           <span className="bg-[#CCFF00] text-black px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
-            ₹{turf.pricePerHour}/hr
+            Rs {turf.pricePerHour}/hr
           </span>
         </div>
         

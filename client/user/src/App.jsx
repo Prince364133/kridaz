@@ -34,7 +34,9 @@ export default function App() {
   console.log("App.jsx: Rendering App component...");
   const dispatch = useDispatch();
   const theme = useSelector((state) => state.theme.current);
-  const [loading, setLoading] = useState(true);
+  const authState = useSelector((state) => state.auth);
+  // If we have a persisted session, don't show the blocking loading screen
+  const [loading, setLoading] = useState(!authState.isLoggedIn);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -50,16 +52,15 @@ export default function App() {
     }, 5000);
 
     const initAuth = async () => {
-      console.log("App.jsx: Starting initAuth...");
+      console.log("App.jsx: Starting auth check...");
       try {
-        console.log("App.jsx: Starting initAuth...");
-        const [meResponse, networkResponse] = await Promise.all([
-          axiosInstance.get("/api/user/auth/getMe"),
-          axiosInstance.get("/api/user/players/network").catch(() => ({ data: { success: false } }))
-        ]);
-
-        console.log("App.jsx: /getMe response status:", meResponse.status);
+        const meResponse = await axiosInstance.get("/api/user/auth/getMe");
+        
         if (isMounted && meResponse.data.success) {
+          console.log("App.jsx: Session verified successfully.");
+          // Only fetch network if getMe succeeds
+          const networkResponse = await axiosInstance.get("/api/user/players/network").catch(() => ({ data: { success: false } }));
+          
           dispatch(restoreAuth({
             user: meResponse.data.user,
             role: meResponse.data.role,
@@ -71,18 +72,28 @@ export default function App() {
         }
       } catch (error) {
         if (isMounted) {
-          dispatch(logout());
-          console.warn("App.jsx: Auth initialization failed/expired:", error.message);
+          // 401/403 means session is definitively invalid or guest access
+          if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            // ONLY logout if we THOUGHT we were logged in. 
+            // If we're already logged out (guest), don't trigger anything.
+            if (authState.isLoggedIn) {
+              console.warn("App.jsx: Session expired, logging out.");
+              dispatch(logout());
+            }
+          } else {
+            console.warn("App.jsx: Auth check failed due to network/server issue. Preserving existing session.", error.message);
+          }
         }
       } finally {
         if (isMounted) {
           clearTimeout(authTimeout);
-          console.log("App.jsx: initAuth complete, setting loading to false");
           setLoading(false);
         }
       }
     };
 
+    // If we're already logged in, do the check in background
+    // If not logged in, we stay in loading state until check completes (auto-login check)
     initAuth();
     return () => {
       isMounted = false;

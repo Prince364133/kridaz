@@ -64,7 +64,7 @@ const BookingPass = () => {
           {/* Top Section - Brand/Status */}
           <div className="p-8 pb-4 flex justify-between items-start">
             <div className="space-y-1">
-              <h3 className="text-[#84CC16] font-black text-xl italic tracking-tighter">TURFSPOT</h3>
+              <h3 className="text-[#84CC16] font-black text-xl italic tracking-tighter">KRIDAZ</h3>
               <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Entry Pass No: {id.slice(-8).toUpperCase()}</p>
             </div>
             <div className="flex flex-col items-end gap-2">
@@ -210,9 +210,9 @@ const BookingPass = () => {
                       <div className="flex items-center justify-between text-xs px-1 group/email">
                         <span className="text-zinc-500">Platform:</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-[#84CC16] font-bold">support@turfspot.com</span>
+                          <span className="text-[#84CC16] font-bold">contact@kridaz.com</span>
                           <button 
-                            onClick={() => copyToClipboard("support@turfspot.com", "Support email")}
+                            onClick={() => copyToClipboard("contact@kridaz.com", "Support email")}
                             className="text-zinc-600 hover:text-[#84CC16] transition-colors"
                           >
                             <Copy size={12} />

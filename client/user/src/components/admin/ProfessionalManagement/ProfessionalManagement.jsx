@@ -85,7 +85,7 @@ const ProfessionalManagement = ({ role }) => {
                   {prof.price > 0 && (
                     <div className="flex items-center gap-3 text-sm text-gray-400">
                       <IndianRupee size={16} className="text-gray-500" />
-                      <span>Rate: ₹{prof.price} / session</span>
+                      <span>Rate: Rs {prof.price} / session</span>
                     </div>
                   )}
                 </div>
@@ -101,7 +101,7 @@ const ProfessionalManagement = ({ role }) => {
                   </div>
                   <div className="text-center">
                     <p className="text-xs text-gray-500 uppercase">Wallet</p>
-                    <p className="font-bold text-[#84CC16]">₹{prof.walletBalance || 0}</p>
+                    <p className="font-bold text-[#84CC16]">Rs {prof.walletBalance || 0}</p>
                   </div>
                 </div>
               </div>

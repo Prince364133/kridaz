@@ -59,7 +59,7 @@ export default function AuthNavbar() {
         <Link to="/auth" className="btn btn-ghost p-2">
           <img
             src="/logo.png"
-            alt="BookMySportz"
+            alt="Kridaz"
             className="h-10 w-full object-contain"
           />
         </Link>

@@ -49,7 +49,7 @@ export default function VenueOwnerLanding() {
               Maximize Your <br /><span style={{ color: PRI }}>Turf Utilization.</span>
             </h1>
             <p className="text-gray-400 text-base md:text-lg mb-8 max-w-lg mx-auto md:mx-0">
-              Transform your sports facility into a fully automated, high-yield business. BookMySportz connects you with thousands of local players actively looking for venues.
+              Transform your sports facility into a fully automated, high-yield business. Kridaz connects you with thousands of local players actively looking for venues.
             </p>
             <Link
               to="/business/register?role=owner"
@@ -108,7 +108,7 @@ export default function VenueOwnerLanding() {
           <div className="grid gap-6 md:gap-8">
             {[
               { 
-                text: "“BookMySportz turned idle slots into steady revenue. The dashboard is a total game‑changer for my business operations.”", 
+                text: "“Kridaz turned idle slots into steady revenue. The dashboard is a total game‑changer for my business operations.”", 
                 name: "Priya Sharma", 
                 role: "Arena 51 Owner", 
                 icon: Trophy 

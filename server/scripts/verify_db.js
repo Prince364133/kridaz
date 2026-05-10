@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/turfspot";
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/kridaz";
 
 async function checkDatabase() {
   try {

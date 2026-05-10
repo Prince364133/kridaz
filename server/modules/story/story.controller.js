@@ -16,7 +16,7 @@ export const createStory = async (req, res) => {
 
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
-        const mediaUrl = await uploadToCloudinary(file.buffer, 'turfspot/stories');
+        const mediaUrl = await uploadToCloudinary(file.buffer, 'kridaz/stories');
         const newStory = new Story({
           userId,
           userModel,
@@ -30,7 +30,7 @@ export const createStory = async (req, res) => {
         createdStories.push(newStory);
       }
     } else if (req.file) {
-      const mediaUrl = await uploadToCloudinary(req.file.buffer, 'turfspot/stories');
+      const mediaUrl = await uploadToCloudinary(req.file.buffer, 'kridaz/stories');
       const newStory = new Story({
         userId,
         userModel,
@@ -167,7 +167,7 @@ export const updateStory = async (req, res) => {
     }
 
     if (req.file) {
-      updateData.mediaUrl = await uploadToCloudinary(req.file.buffer, 'turfspot/stories');
+      updateData.mediaUrl = await uploadToCloudinary(req.file.buffer, 'kridaz/stories');
     }
 
     const updatedStory = await Story.findByIdAndUpdate(id, updateData, { new: true });

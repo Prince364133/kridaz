@@ -35,7 +35,7 @@ async function fixAll() {
   // 2. Also ensure everyone has a name to avoid UI issues
   const result2 = await usersCollection.updateMany(
     { name: { $exists: false } },
-    { $set: { name: "TurfSpot Player" } }
+    { $set: { name: "Kridaz Player" } }
   );
   console.log(`Updated ${result2.modifiedCount} users with missing names`);
 

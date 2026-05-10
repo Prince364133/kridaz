@@ -237,7 +237,7 @@ export default function VenueIntelligence() {
                     <div key={venue.name} className="space-y-1">
                       <div className="flex justify-between text-[11px] font-bold text-white">
                         <span>{venue.name}</span>
-                        <span className="text-[#CCFF00]">₹{venue.value.toLocaleString()}</span>
+                        <span className="text-[#CCFF00]">Rs {venue.value.toLocaleString()}</span>
                       </div>
                       <div className="w-full bg-[#1A1A1A] rounded-[4px] h-6 overflow-hidden relative">
                         <div 

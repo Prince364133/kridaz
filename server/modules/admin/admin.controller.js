@@ -378,13 +378,13 @@ export const approveOwnerRequest = async (req, res) => {
     const html = ` 
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f9f9; padding: 20px; border-radius: 10px;">
         <h1 style="color: #4CAF50;">Congratulations!</h1>
-        <p>Your request to become a <strong>${ownerRequest.role}</strong> on TurfSpot has been approved.</p>
+        <p>Your request to become a <strong>${ownerRequest.role}</strong> on Kridaz has been approved.</p>
         <p>You can now access your dashboard using your existing login credentials:</p>
         <div style="text-align: center; margin: 30px 0;">
           <a href="${process.env.OWNER_URL || 'http://localhost:5173'}" style="background-color: #4CAF50; color: white; padding: 12px 25px; text-decoration: none; font-size: 16px; border-radius: 5px; font-weight: bold;">Go to Dashboard</a>
         </div>
         <p>If you have any questions, feel free to contact our support team.</p>
-        <p>Best regards,<br/>The TurfSpot Team</p>
+        <p>Best regards,<br/>The Kridaz Team</p>
     </div>`;
     
     await generateEmail(to, subject, html);
@@ -536,7 +536,7 @@ export const approveWithdrawalRequest = async (req, res) => {
         <p>Your withdrawal request for <strong>₹${request.amount}</strong> has been approved and processed.</p>
         <p><strong>Transaction ID:</strong> ${transactionId || "N/A"}</p>
         <p>The funds should reflect in your bank account shortly.</p>
-        <p>Best regards,<br/>The BookMySportz Team</p>
+        <p>Best regards,<br/>The Kridaz Team</p>
       </div>
     `;
     await generateEmail(to, subject, html);
@@ -593,7 +593,7 @@ export const rejectWithdrawalRequest = async (req, res) => {
           <p>Your withdrawal request for <strong>₹${request.amount}</strong> has been rejected.</p>
           <p><strong>Reason:</strong> ${reason || "No specific reason provided."}</p>
           <p>The amount has been credited back to your usable wallet balance.</p>
-          <p>Best regards,<br/>The BookMySportz Team</p>
+          <p>Best regards,<br/>The Kridaz Team</p>
         </div>
       `;
       await generateEmail(to, subject, html);
