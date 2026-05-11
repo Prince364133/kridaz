@@ -206,24 +206,31 @@ const Navbar = () => {
                         <div className="h-[1px] bg-white/5 my-1" />
 
                         {/* DASHBOARDS SECTION */}
-                        {["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire"].includes(role?.toLowerCase()) && (
+                        {(["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire"].includes(role?.toLowerCase()) || 
+                          ["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire"].includes(user?.role?.toLowerCase())) && (
                           <>
-                            {(role === "BMSP_ADMIN" || role === "admin") && (
+                            {(role === "BMSP_ADMIN" || role === "admin" || user?.role === "BMSP_ADMIN" || user?.role === "admin") && (
                               <Link to="/admin" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                 <ShieldCheck size={18} className="text-white/40" />
                                 <span className="text-sm font-medium">Admin Console</span>
                               </Link>
                             )}
-                            {["owner", "venue_owner", "verified_venue_owner"].includes(role?.toLowerCase()) && (
+                            {(["owner", "venue_owner", "verified_venue_owner"].includes(role?.toLowerCase()) || ["owner", "venue_owner", "verified_venue_owner"].includes(user?.role?.toLowerCase())) && (
                               <Link to="/partner" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                 <Activity size={18} className="text-white/40" />
                                 <span className="text-sm font-medium">Partner Dashboard</span>
                               </Link>
                             )}
-                            {["coach"].includes(role?.toLowerCase()) && (
+                            {(["coach"].includes(role?.toLowerCase()) || ["coach"].includes(user?.role?.toLowerCase())) && (
                               <Link to="/coach" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                 <Zap size={18} className="text-white/40" />
                                 <span className="text-sm font-medium">Coach Portal</span>
+                              </Link>
+                            )}
+                            {(["umpire"].includes(role?.toLowerCase()) || ["umpire"].includes(user?.role?.toLowerCase())) && (
+                              <Link to="/umpire" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                <Zap size={18} className="text-white/40" />
+                                <span className="text-sm font-medium">Umpire Portal</span>
                               </Link>
                             )}
                             <div className="h-[1px] bg-white/5 my-1" />

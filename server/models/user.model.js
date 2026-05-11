@@ -6,6 +6,8 @@ const userSchema = new mongoose.Schema({
     email:{type:String, required:true, unique: true},
     password:{type:String},
     googleId:{type:String},
+    role: { type: String, default: "user" },
+    ownerDetails: { type: mongoose.Schema.Types.ObjectId, ref: 'Owner' },
     phone:{type:String},
     gender:{type:String, enum:["Male", "Female", "Other", "Prefer not to say"]},
     location:{type:String},

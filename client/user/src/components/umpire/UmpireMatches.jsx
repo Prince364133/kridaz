@@ -6,13 +6,13 @@ import DashboardSkeleton from "../owner/Dashboard/DashboardSkeleton";
 export default function UmpireMatches() {
   const { dashboardData, loading, error } = useUmpireDashboard();
 
+  const [searchId, setSearchId] = React.useState("");
+
   if (loading) return <DashboardSkeleton />;
 
   const matches = dashboardData?.matches || [];
   const completedMatches = matches.filter(m => m.status === 'completed');
   const activeMatches = matches.filter(m => m.status !== 'completed');
-
-  const [searchId, setSearchId] = React.useState("");
 
   return (
     <div className="space-y-12 animate-fade-in pb-20">

@@ -244,6 +244,7 @@ const SignUp = () => {
                           <UserSquare2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
                           <input 
                             {...register("username")}
+                            onInput={(e) => { e.target.value = e.target.value.toLowerCase(); }}
                             type="text" 
                             placeholder="johndoe_123"
                             className={`w-full bg-white/[0.03] border rounded-xl h-14 pl-12 pr-12 text-white text-sm placeholder:text-white/20 outline-none transition-all ${

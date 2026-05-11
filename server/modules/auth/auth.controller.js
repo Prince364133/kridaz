@@ -252,7 +252,8 @@ export const registerOwner = async (req, res) => {
 
 // Login Step 1 (Now Unified Login)
 export const loginStep1 = async (req, res) => {
-  const { email, password } = req.body;
+  let { email, password } = req.body;
+  if (email) email = email.toLowerCase();
   try {
     const owner = await Owner.findOne({ email });
     let account = owner || await User.findOne({ email });
@@ -305,7 +306,8 @@ export const loginStep1 = async (req, res) => {
 
 // Unified Login
 export const login = async (req, res) => {
-  const { email, password, otp } = req.body;
+  let { email, password, otp } = req.body;
+  if (email) email = email.toLowerCase();
   console.log("Unified login attempt for:", email);
   try {
     const owner = await Owner.findOne({ email });
@@ -643,14 +645,20 @@ export const getMe = async (req, res) => {
     if (role === "user") {
       account = await User.findById(id).select("-password").lean();
       if (account) {
-        // Query by userId (most reliable) and get any active application
-        const existingRequest = await OwnerRequest.findOne({ userId: id })
-          .sort({ createdAt: -1 }) // get the most recent application
-          .lean();
+        // Recover the true role for users whose role was missing from userSchema previously
+        const ownerAccount = await Owner.findOne({ userId: id }).select("-password").lean();
+        if (ownerAccount) {
+          account.role = ownerAccount.role;
+        } else {
+          // Query by userId (most reliable) and get any active application
+          const existingRequest = await OwnerRequest.findOne({ userId: id })
+            .sort({ createdAt: -1 }) // get the most recent application
+            .lean();
 
-        if (existingRequest && existingRequest.status !== "rejected") {
-          applicationStatus = existingRequest.status;   // "pending" | "approved"
-          applicationRole = existingRequest.role;       // "owner" | "coach" | "umpire"
+          if (existingRequest && existingRequest.status !== "rejected") {
+            applicationStatus = existingRequest.status;   // "pending" | "approved"
+            applicationRole = existingRequest.role;       // "owner" | "coach" | "umpire"
+          }
         }
       }
     } else {
@@ -675,7 +683,7 @@ export const getMe = async (req, res) => {
     return res.status(200).json({ 
       success: true, 
       user: account, 
-      role,
+      role: account.role || role,
       token
     });
   } catch (err) {
