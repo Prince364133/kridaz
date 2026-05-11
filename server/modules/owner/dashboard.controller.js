@@ -8,6 +8,7 @@ import Session from "../../models/session.model.js";
 import WalletTransaction from "../../models/walletTransaction.model.js";
 import Owner from "../../models/owner.model.js";
 import HostedGame from "../../models/hostedGame.model.js";
+import { format, formatDistanceToNow } from "date-fns";
 
 
 export const getDashboardData = async (req, res) => {
@@ -263,7 +264,10 @@ export const getDashboardData = async (req, res) => {
 };
 
 export const getCoachDashboardData = async (req, res) => {
-  const coachId = req.owner.id;
+  const coachId = req.owner?.id || req.user?.id;
+  if (!coachId) {
+    return res.status(401).json({ success: false, message: "Unauthorized: Coach profile required" });
+  }
   console.log("DEBUG: Fetching coach dashboard data for coachId:", coachId);
   
   try {
@@ -779,5 +783,4 @@ export const getOwnerCustomers = async (req, res) => {
   }
 };
 
-// Helper imports needed for the new controller
-import { format, formatDistanceToNow } from "date-fns";
+
