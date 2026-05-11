@@ -27,9 +27,6 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401) {
       const isAuthCheck = error.config?.url?.includes('/api/user/auth/getMe');
       
-      // If it's just the initial auth check failing, we let App.jsx handle the catch block 
-      // which will clear auth state without forcing a redirect.
-      // For other 401s, we dispatch logout to update state, and ProtectedRoute will handle redirects.
       if (!isAuthCheck) {
         store.dispatch(logout());
       }

@@ -17,4 +17,11 @@ router.post("/approve", verifyUser, controller.approveJoinRequest);
 router.post("/reject", verifyUser, controller.rejectJoinRequest);
 router.post("/cancel", verifyUser, controller.cancelHostedGame);
 
+// Umpire specific
+router.get("/find-by-id", controller.getHostedGameByShortId);
+router.get("/:id", controller.getHostedGameById);
+
+router.post("/request-umpire", verifyUser, controller.requestToUmpire);
+router.post("/handle-umpire-request", verifyUser, controller.handleUmpireRequest);
+
 export default router;

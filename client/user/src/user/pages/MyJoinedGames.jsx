@@ -3,11 +3,13 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { 
-  Users, LogOut, Clock, MapPin, 
-  Trophy, Info, Calendar, Coins, User
+  Trophy, Info, Calendar, Clock, MapPin, Coins, User, Shield, LogOut
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 
 const MyJoinedGames = () => {
+  const navigate = useNavigate();
   const [joinedGames, setJoinedGames] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -57,7 +59,7 @@ const MyJoinedGames = () => {
             <Trophy size={48} className="mx-auto mb-4 text-neutral-700" />
             <h3 className="text-xl font-bold">No matches joined yet</h3>
             <p className="text-neutral-500 mb-6">Explore games hosted by the community and join one!</p>
-            <button onClick={() => window.location.href='/join-games'} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-xl">
+            <button onClick={() => navigate('/join-games')} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-xl">
               Find Games
             </button>
           </div>
@@ -117,33 +119,50 @@ const MyJoinedGames = () => {
               </div>
 
               <div className="p-4 bg-neutral-900/50 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                   <div className="w-8 h-8 bg-[#84CC16]/10 rounded-full flex items-center justify-center border border-white/10 overflow-hidden shrink-0">
+                <div 
+                  className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => game.host?._id && navigate(`/profile/${game.host._id}`)}
+                >
+                   <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center border border-white/10 overflow-hidden shrink-0">
                       {game.host?.profilePicture ? (
                         <img 
                           src={game.host.profilePicture} 
                           className="w-full h-full object-cover" 
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                          }}
+                          alt=""
                         />
-                      ) : null}
-                      <div 
-                        className="w-full h-full flex items-center justify-center"
-                        style={{ display: game.host?.profilePicture ? 'none' : 'flex' }}
-                      >
-                        <User size={16} className="text-[#84CC16]" />
-                      </div>
+                      ) : (
+                        <User size={16} className="text-primary" />
+                      )}
                    </div>
                    <div className="text-[10px]">
                       <p className="text-neutral-500 font-bold uppercase">Hosted By</p>
                       <p className="font-black uppercase tracking-tighter">{game.host?.name}</p>
                    </div>
                 </div>
-                <div className="flex items-center gap-1 text-yellow-500 font-black">
-                  <Coins size={14} /> {game.perPlayerCharge}
+                <div className="flex items-center gap-4">
+                  {game.umpire && (
+                    <div 
+                      className="flex items-center gap-2 px-3 py-1 bg-yellow-500/10 rounded-full border border-yellow-500/20 cursor-pointer hover:border-yellow-500/50 transition-all"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/professionals/${game.umpire._id}`);
+                      }}
+                    >
+                      {game.umpire.profilePicture ? (
+                        <img src={game.umpire.profilePicture} className="w-4 h-4 rounded-full object-cover border border-yellow-500/20" alt="" />
+                      ) : (
+                        <Shield size={10} className="text-yellow-500 fill-yellow-500/20" />
+                      )}
+                      <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">
+                        Umpire: {game.umpire.name}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1 text-yellow-500 font-black">
+                    <Coins size={14} /> {game.perPlayerCharge}
+                  </div>
                 </div>
+
               </div>
             </div>
           ))

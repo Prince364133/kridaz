@@ -42,7 +42,12 @@ const socketConfig = (server) => {
     // ── Join a chat room ──
     socket.on("join chat", (room) => {
       socket.join(room);
-      console.log("User Joined Room: " + room);
+      console.log("User Joined Chat Room: " + room);
+    });
+
+    socket.on("joinMatch", (matchId) => {
+      socket.join(matchId);
+      console.log(`User joined Match Room: ${matchId}`);
     });
 
     // ── Typing indicators (include room so receiver can filter) ──

@@ -5,88 +5,88 @@ import Owner from "../../models/owner.model.js";
 import WalletTransaction from "../../models/walletTransaction.model.js";
 import Turf from "../../models/turf.model.js";
 import { createNotification, notifyAdmins } from "../../utils/notificationHelper.js";
+import { runInTransaction } from "../../utils/transaction.js";
 
 
 /**
  * USER: Raise a new dispute for a booking in the IN_REVIEW_WINDOW
  */
 export const raiseDispute = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const userId = req.user.id;
     const { bookingId, reason, customReason, description, images } = req.body;
 
-    const booking = await Booking.findOne({
-      _id: bookingId,
-      user: userId,
-      status: "IN_REVIEW_WINDOW"
-    }).populate("turf").session(session);
+    const result = await runInTransaction(async ({ session }) => {
+      const booking = await Booking.findOne({
+        _id: bookingId,
+        user: userId,
+        status: "IN_REVIEW_WINDOW"
+      }).populate("turf").session(session);
 
-    if (!booking) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({ success: false, message: "Booking not found or not eligible for dispute." });
-    }
+      if (!booking) {
+        throw { status: 400, message: "Booking not found or not eligible for dispute." };
+      }
 
-    if (booking.dispute) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({ success: false, message: "A dispute is already active for this booking." });
-    }
+      if (booking.dispute) {
+        throw { status: 400, message: "A dispute is already active for this booking." };
+      }
 
-    // 1. Create the dispute
-    const disputeReason = reason === "Other" ? customReason : reason;
-    const newDispute = await Dispute.create(
-      [
-        {
-          booking: booking._id,
-          raisedBy: userId,
-          turfOwner: booking.turf.owner,
-          reason: disputeReason,
-          description,
-          images: images || [],
-          status: "OPEN",
-          bookingDetails: {
-            turfName: booking.turf.name,
-            playStartTime: booking.playStartTime,
-            playEndTime: booking.playEndTime,
-            totalPrice: booking.totalPrice,
-            ownerRevenue: booking.ownerRevenue
-          }
-        }
-      ],
-      { session }
-    );
-
-    // 2. Update Booking Status
-    booking.status = "DISPUTED";
-    booking.dispute = newDispute[0]._id;
-    await booking.save({ session });
-
-    // 3. Freeze Funds from Owner (Move from inProgress to disputeBalance)
-    const owner = await Owner.findById(booking.turf.owner).session(session);
-    if (owner) {
-      owner.inProgressBalance -= booking.ownerRevenue;
-      owner.disputeBalance += booking.ownerRevenue;
-      await owner.save({ session });
-
-      await WalletTransaction.create(
+      // 1. Create the dispute
+      const disputeReason = reason === "Other" ? customReason : reason;
+      const newDispute = await Dispute.create(
         [
           {
-            user: owner.userId || owner._id,
-            type: "DISPUTE_FREEZE",
-            amount: booking.ownerRevenue,
-            bookingId: booking._id,
-            disputeId: newDispute[0]._id,
-            status: "SUCCESS",
-            description: `Funds frozen due to dispute on booking ${booking._id}`
+            booking: booking._id,
+            raisedBy: userId,
+            turfOwner: booking.turf.owner,
+            reason: disputeReason,
+            description,
+            images: images || [],
+            status: "OPEN",
+            bookingDetails: {
+              turfName: booking.turf.name,
+              playStartTime: booking.playStartTime,
+              playEndTime: booking.playEndTime,
+              totalPrice: booking.totalPrice,
+              ownerRevenue: booking.ownerRevenue
+            }
           }
         ],
         { session }
       );
-    }
+
+      // 2. Update Booking Status
+      booking.status = "DISPUTED";
+      booking.dispute = newDispute[0]._id;
+      await booking.save({ session });
+
+      // 3. Freeze Funds from Owner (Move from inProgress to disputeBalance)
+      const owner = await Owner.findById(booking.turf.owner).session(session);
+      if (owner) {
+        owner.inProgressBalance -= booking.ownerRevenue;
+        owner.disputeBalance += booking.ownerRevenue;
+        await owner.save({ session });
+
+        await WalletTransaction.create(
+          [
+            {
+              user: owner.userId || owner._id,
+              type: "DISPUTE_FREEZE",
+              amount: booking.ownerRevenue,
+              bookingId: booking._id,
+              disputeId: newDispute[0]._id,
+              status: "SUCCESS",
+              description: `Funds frozen due to dispute on booking ${booking._id}`
+            }
+          ],
+          { session }
+        );
+      }
+
+      return { newDispute: newDispute[0], booking, owner, disputeReason };
+    });
+
+    const { newDispute, booking, owner, disputeReason } = result;
 
     // ── Notifications ──────────────────────────────────────────────────────────
     // Notify Admin
@@ -109,21 +109,18 @@ export const raiseDispute = async (req, res) => {
       });
     }
 
-    await session.commitTransaction();
-
-    session.endSession();
-
     return res.status(201).json({
       success: true,
       message: "Dispute raised successfully.",
-      data: newDispute[0]
+      data: newDispute
     });
 
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     console.error("[DISPUTE] Error raising dispute:", error);
-    return res.status(500).json({ success: false, message: "Failed to raise dispute." });
+    return res.status(error.status || 500).json({ 
+      success: false, 
+      message: error.message || "Failed to raise dispute." 
+    });
   }
 };
 
@@ -273,122 +270,115 @@ export const getDisputeById = async (req, res) => {
  * ADMIN: Resolve a dispute (Release funds to owner or Refund to user)
  */
 export const resolveDispute = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const { disputeId } = req.params;
     const { resolutionAction, resolutionNotes, partialAmount } = req.body; // 'RELEASE_TO_OWNER', 'REFUND_TO_USER', 'PARTIAL_REFUND', 'CLOSE_NO_ACTION'
 
+    const result = await runInTransaction(async ({ session }) => {
+      const dispute = await Dispute.findById(disputeId).session(session);
+      if (!dispute) {
+        throw { status: 404, message: "Dispute not found." };
+      }
 
-    const dispute = await Dispute.findById(disputeId).session(session);
-    if (!dispute) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).json({ success: false, message: "Dispute not found." });
-    }
+      if (dispute.status === "RESOLVED") {
+        throw { status: 400, message: "Dispute is already resolved." };
+      }
 
-    if (dispute.status === "RESOLVED") {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({ success: false, message: "Dispute is already resolved." });
-    }
+      const booking = await Booking.findById(dispute.booking).session(session);
+      const owner = await Owner.findById(dispute.turfOwner).session(session);
 
-    const booking = await Booking.findById(dispute.booking).session(session);
-    const owner = await Owner.findById(dispute.turfOwner).session(session);
+      if (resolutionAction === "RELEASE_TO_OWNER") {
+        // 1. Move funds from disputeBalance to walletBalance
+        if (owner) {
+          owner.disputeBalance -= dispute.bookingDetails.ownerRevenue;
+          owner.walletBalance += dispute.bookingDetails.ownerRevenue;
+          await owner.save({ session });
 
-    if (resolutionAction === "RELEASE_TO_OWNER") {
-      // 1. Move funds from disputeBalance to walletBalance
-      if (owner) {
-        owner.disputeBalance -= dispute.bookingDetails.ownerRevenue;
-        owner.walletBalance += dispute.bookingDetails.ownerRevenue;
-        await owner.save({ session });
+          await WalletTransaction.create(
+            [
+              {
+                user: owner.userId || owner._id,
+                type: "DISPUTE_RELEASE",
+                amount: dispute.bookingDetails.ownerRevenue,
+                bookingId: booking._id,
+                disputeId: dispute._id,
+                status: "SUCCESS",
+                description: `Funds released from dispute for booking ${booking._id}`
+              }
+            ],
+            { session }
+          );
+        }
+        
+        // 2. Mark booking as COMPLETED
+        booking.status = "COMPLETED";
+        booking.revenueStatus = "SETTLED";
+        booking.settledAt = new Date();
+        await booking.save({ session });
 
-        await WalletTransaction.create(
-          [
+      } else if (resolutionAction === "REFUND_TO_USER") {
+        // 1. Deduct funds from owner's dispute balance (money vanishes from owner)
+        if (owner) {
+          owner.disputeBalance -= dispute.bookingDetails.ownerRevenue;
+          await owner.save({ session });
+        }
+
+        // 2. We do NOT refund standard user wallet directly right now unless requested by Kridaz policy
+        // But we CAN mark booking as CANCELLED so it's clear
+        booking.status = "CANCELLED";
+        booking.revenueStatus = "REFUNDED";
+        await booking.save({ session });
+      } else if (resolutionAction === "PARTIAL_REFUND") {
+        if (!partialAmount || partialAmount <= 0 || partialAmount > dispute.bookingDetails.ownerRevenue) {
+          throw { status: 400, message: "Invalid partial refund amount." };
+        }
+
+        // 1. Release partial amount to owner, rest vanishes (refunded in policy)
+        const amountToOwner = dispute.bookingDetails.ownerRevenue - partialAmount;
+        
+        if (owner) {
+          owner.disputeBalance -= dispute.bookingDetails.ownerRevenue;
+          owner.walletBalance += amountToOwner;
+          await owner.save({ session });
+
+          await WalletTransaction.create([
             {
               user: owner.userId || owner._id,
               type: "DISPUTE_RELEASE",
-              amount: dispute.bookingDetails.ownerRevenue,
+              amount: amountToOwner,
               bookingId: booking._id,
               disputeId: dispute._id,
               status: "SUCCESS",
-              description: `Funds released from dispute for booking ${booking._id}`
+              description: `Partial funds released (₹${amountToOwner}) after dispute resolution.`
             }
-          ],
-          { session }
-        );
-      }
-      
-      // 2. Mark booking as COMPLETED
-      booking.status = "COMPLETED";
-      booking.revenueStatus = "SETTLED";
-      booking.settledAt = new Date();
-      await booking.save({ session });
+          ], { session });
+        }
 
-    } else if (resolutionAction === "REFUND_TO_USER") {
-      // 1. Deduct funds from owner's dispute balance (money vanishes from owner)
-      if (owner) {
-        owner.disputeBalance -= dispute.bookingDetails.ownerRevenue;
-        await owner.save({ session });
-      }
+        booking.status = "COMPLETED"; // Or a new status like PARTIALLY_REFUNDED
+        booking.revenueStatus = "SETTLED";
+        await booking.save({ session });
 
-      // 2. We do NOT refund standard user wallet directly right now unless requested by Kridaz policy
-      // But we CAN mark booking as CANCELLED so it's clear
-      booking.status = "CANCELLED";
-      booking.revenueStatus = "REFUNDED";
-      await booking.save({ session });
-    } else if (resolutionAction === "PARTIAL_REFUND") {
-      if (!partialAmount || partialAmount <= 0 || partialAmount > dispute.bookingDetails.ownerRevenue) {
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(400).json({ success: false, message: "Invalid partial refund amount." });
+      } else if (resolutionAction === "CLOSE_NO_ACTION") {
+        // Just release all to owner (standard close)
+        if (owner) {
+          owner.disputeBalance -= dispute.bookingDetails.ownerRevenue;
+          owner.walletBalance += dispute.bookingDetails.ownerRevenue;
+          await owner.save({ session });
+        }
+        booking.status = "COMPLETED";
+        booking.revenueStatus = "SETTLED";
+        await booking.save({ session });
+      } else {
+        throw { status: 400, message: "Invalid resolution action." };
       }
 
-      // 1. Release partial amount to owner, rest vanishes (refunded in policy)
-      const amountToOwner = dispute.bookingDetails.ownerRevenue - partialAmount;
-      
-      if (owner) {
-        owner.disputeBalance -= dispute.bookingDetails.ownerRevenue;
-        owner.walletBalance += amountToOwner;
-        await owner.save({ session });
+      dispute.resolvedAt = new Date();
+      await dispute.save({ session });
 
-        await WalletTransaction.create([
-          {
-            user: owner.userId || owner._id,
-            type: "DISPUTE_RELEASE",
-            amount: amountToOwner,
-            bookingId: booking._id,
-            disputeId: dispute._id,
-            status: "SUCCESS",
-            description: `Partial funds released (₹${amountToOwner}) after dispute resolution.`
-          }
-        ], { session });
-      }
+      return { dispute, booking, owner };
+    });
 
-      booking.status = "COMPLETED"; // Or a new status like PARTIALLY_REFUNDED
-      booking.revenueStatus = "SETTLED";
-      await booking.save({ session });
-
-    } else if (resolutionAction === "CLOSE_NO_ACTION") {
-      // Just release all to owner (standard close)
-      if (owner) {
-        owner.disputeBalance -= dispute.bookingDetails.ownerRevenue;
-        owner.walletBalance += dispute.bookingDetails.ownerRevenue;
-        await owner.save({ session });
-      }
-      booking.status = "COMPLETED";
-      booking.revenueStatus = "SETTLED";
-      await booking.save({ session });
-    } else {
-
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({ success: false, message: "Invalid resolution action." });
-    }
-
-    dispute.resolvedAt = new Date();
-    await dispute.save({ session });
+    const { dispute, booking, owner } = result;
 
     // ── Notifications ──────────────────────────────────────────────────────────
     // Notify User
@@ -413,10 +403,6 @@ export const resolveDispute = async (req, res) => {
       });
     }
 
-    await session.commitTransaction();
-
-    session.endSession();
-
     return res.status(200).json({
       success: true,
       message: `Dispute resolved successfully. Action: ${resolutionAction}`,
@@ -424,10 +410,11 @@ export const resolveDispute = async (req, res) => {
     });
 
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     console.error("[DISPUTE] Error resolving dispute:", error);
-    return res.status(500).json({ success: false, message: "Failed to resolve dispute." });
+    return res.status(error.status || 500).json({ 
+      success: false, 
+      message: error.message || "Failed to resolve dispute." 
+    });
   }
 };
 

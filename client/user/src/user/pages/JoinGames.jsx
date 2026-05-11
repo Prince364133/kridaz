@@ -7,8 +7,9 @@ import { toast } from 'react-hot-toast';
 import { 
   Users, MapPin, Calendar, Clock, 
   Search, Filter, Coins, ChevronRight,
-  UserCheck, Trophy, Info
+  UserCheck, Trophy, Info, Shield
 } from 'lucide-react';
+
 import CoinAnimation from '../components/CoinAnimation';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
@@ -206,9 +207,16 @@ const JoinGames = () => {
                   </div>
                 </div>
 
-                <h3 className="text-xl font-black mb-1 flex items-center gap-2">
-                  {game.teams.teamA.name} <span className="text-xs text-neutral-500 italic">VS</span> {game.teams.teamB.name}
-                </h3>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-xl font-black flex items-center gap-2">
+                    {game.teams.teamA.name} <span className="text-xs text-neutral-500 italic">VS</span> {game.teams.teamB.name}
+                  </h3>
+                  {game.shortId && (
+                    <span className="text-[10px] text-neutral-600 font-black tracking-widest bg-neutral-900/50 px-2 py-0.5 rounded border border-white/5">
+                      {game.shortId}
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-neutral-400 flex items-center gap-1 mb-4">
                   <MapPin size={14} /> {game.ground?.name || 'Self-Arranged Venue'}
                 </p>
@@ -235,6 +243,26 @@ const JoinGames = () => {
                     ))}
                   </div>
                 </div>
+                
+                {game.umpire && (
+                  <div 
+                    className="mt-3 flex items-center gap-2 px-3 py-1.5 bg-yellow-500/5 rounded-xl border border-yellow-500/20 hover:border-yellow-500/50 transition-all cursor-pointer group/badge"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/professionals/${game.umpire._id}`);
+                    }}
+                  >
+                    {game.umpire.profilePicture ? (
+                      <img src={game.umpire.profilePicture} className="w-4 h-4 rounded-full object-cover border border-yellow-500/20" />
+                    ) : (
+                      <Shield size={10} className="text-yellow-500 fill-yellow-500/20" />
+                    )}
+                    <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest truncate group-hover/badge:text-yellow-400">
+                      Umpire: {game.umpire.name}
+                    </span>
+                  </div>
+                )}
+
               </div>
 
               <div className="px-5 pb-5 flex items-center justify-between">
@@ -294,8 +322,24 @@ const JoinGames = () => {
               <div className="p-8">
                 <div className="flex justify-between items-start mb-8">
                   <div>
-                    <h2 className="text-3xl font-black tracking-tighter uppercase italic">{selectedGame.gameType} MATCH</h2>
-                    <p className="text-neutral-400 mt-1">{selectedGame.ground?.name || 'Venue to be decided'}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h2 className="text-3xl font-black tracking-tighter uppercase italic">{selectedGame.gameType} MATCH</h2>
+                      {selectedGame.shortId && (
+                        <span className="bg-neutral-800 text-neutral-400 text-[10px] font-black px-2 py-1 rounded-full uppercase tracking-wider">
+                          {selectedGame.shortId}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <p className="text-neutral-400">{selectedGame.ground?.name || 'Venue to be decided'}</p>
+                      <button 
+                        onClick={() => navigate(`/match/${selectedGame._id}`)}
+                        className="text-[10px] text-primary font-black uppercase tracking-widest hover:underline"
+                      >
+                        View Full Details →
+                      </button>
+                    </div>
+
                   </div>
                   <button onClick={() => setSelectedGame(null)} className="p-2 bg-neutral-800 rounded-xl">✕</button>
                 </div>
@@ -316,11 +360,23 @@ const JoinGames = () => {
                     <p className="text-[10px] text-neutral-500 uppercase font-bold">Join Fee</p>
                     <p className="text-sm font-black">{selectedGame.perPlayerCharge}</p>
                   </div>
-                  <div className="bg-neutral-800/50 p-4 rounded-2xl border border-neutral-800 text-center">
-                    <UserCheck className="mx-auto mb-2 text-yellow-500" size={20} />
-                    <p className="text-[10px] text-neutral-500 uppercase font-bold">Umpire</p>
-                    <p className="text-sm font-black">{selectedGame.umpire ? 'HIRED' : 'NONE'}</p>
+                  <div 
+                    className={`bg-neutral-800/50 p-4 rounded-2xl border border-neutral-800 text-center transition-all ${selectedGame.umpire ? 'cursor-pointer hover:border-yellow-500 group/u' : ''}`}
+                    onClick={() => selectedGame.umpire && navigate(`/professionals/${selectedGame.umpire._id}`)}
+                  >
+                    {selectedGame.umpire?.profilePicture ? (
+                      <div className="w-8 h-8 rounded-full overflow-hidden mx-auto mb-2 border border-white/10 group-hover/u:border-yellow-500/50 transition-colors">
+                        <img src={selectedGame.umpire.profilePicture} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <UserCheck className="mx-auto mb-2 text-yellow-500" size={20} />
+                    )}
+                    <p className="text-[10px] text-neutral-500 uppercase font-bold tracking-widest">Umpire</p>
+                    <p className="text-xs font-black uppercase truncate group-hover/u:text-yellow-500 transition-colors">
+                      {selectedGame.umpire ? (selectedGame.umpire.name || 'HIRED') : 'NONE'}
+                    </p>
                   </div>
+
                 </div>
 
                 <div className="space-y-8">

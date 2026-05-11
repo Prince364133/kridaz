@@ -160,7 +160,7 @@ const PayoutBanking = () => {
        setShowVerifyModal(false);
        setPassword("");
        setIsVerified(false);
-       refresh(); // Refresh balance
+       refreshWallet(); // Refresh balance
     }
   };
 
@@ -481,7 +481,7 @@ const PayoutBanking = () => {
                           />
                        </div>
                        <button 
-                         onClick={handleIdentityVerify}
+                         onClick={handleVerify}
                          disabled={verifying}
                          className="w-full py-5 bg-[#CCFF00] text-black rounded-[6px] font-black uppercase tracking-[0.2em] text-[11px] shadow-[0_10px_40px_rgba(204,255,0,0.2)] hover:bg-[#b3ff00] transition-all transform active:scale-[0.98]"
                        >

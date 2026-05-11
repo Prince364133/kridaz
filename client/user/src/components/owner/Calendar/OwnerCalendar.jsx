@@ -15,7 +15,7 @@ import { format, addDays, subDays } from "date-fns";
 import CountUp from "react-countup";
 
 const OwnerCalendar = () => {
-  const axiosInstance = useAxiosInstance();
+  const axiosInstance = useAxiosInstance;
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);

@@ -16,6 +16,7 @@ import { generateInvoice } from "../../utils/invoiceGenerator.js";
 import { createNotification } from "../../utils/notificationHelper.js";
 import { format, parseISO, parse } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
+import { runInTransaction } from "../../utils/transaction.js";
 
 // --- USER OPERATIONS ---
 
@@ -246,9 +247,6 @@ export const bookWithWallet = async (req, res) => {
   const { id, turfId: bodyTurfId, startTime, endTime, selectedTurfDate, totalPrice: originalPrice, couponCode } = req.body;
   const turfId = bodyTurfId || id;
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const formattedStartTime = format(parseISO(startTime), "hh:mm a");
     const formattedEndTime = format(parseISO(endTime), "hh:mm a");
@@ -257,201 +255,204 @@ export const bookWithWallet = async (req, res) => {
     const adjustedStartTime = adjustTime(startTime, selectedTurfDate);
     const adjustedEndTime = adjustTime(endTime, selectedTurfDate);
 
-    // 1. Check user and balance
-    let user = await User.findById(userId).session(session);
-    if (!user) {
-      user = await Owner.findById(userId).session(session);
-    }
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    let finalPrice = originalPrice;
-    let appliedCoupon = null;
-
-    if (couponCode) {
-      appliedCoupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true }).session(session);
-      if (appliedCoupon) {
-        if (new Date() > new Date(appliedCoupon.validUntil)) {
-          throw new Error("Coupon has expired");
-        }
-        if (appliedCoupon.turfId && appliedCoupon.turfId.toString() !== turfId.toString()) {
-          throw new Error("Coupon is not valid for this ground");
-        }
-        if (appliedCoupon.usageLimit > 0 && appliedCoupon.timesUsed >= appliedCoupon.usageLimit) {
-          throw new Error("Coupon usage limit reached");
-        }
-
-        let discount = 0;
-        if (appliedCoupon.discountType === "PERCENTAGE") {
-          discount = originalPrice * (appliedCoupon.discountValue / 100);
-        } else {
-          discount = appliedCoupon.discountValue;
-        }
-        finalPrice = Math.max(0, originalPrice - discount);
+    const result = await runInTransaction(async ({ session }) => {
+      // 1. Check user and balance
+      let user = await User.findById(userId).session(session);
+      if (!user) {
+        user = await Owner.findById(userId).session(session);
       }
-    }
-
-    const { advanceAmount, balanceAmount, paymentType } = req.body;
-    const amountToDeduct = advanceAmount || finalPrice;
-
-    if (user.walletBalance < amountToDeduct) {
-      throw new Error("Insufficient wallet balance. Please top up your wallet.");
-    }
-
-    const [turf, settingsDoc] = await Promise.all([
-      Turf.findById(turfId).populate("owner", "email name").session(session),
-      SystemSetting.findOne({ key: "PAYOUT_CONFIG" }).session(session)
-    ]);
-
-    if (turf && !turf.owner) {
-      const rawTurf = await Turf.findById(turfId).select("owner").session(session);
-      if (rawTurf && rawTurf.owner) {
-        turf.owner = await User.findById(rawTurf.owner).select("email name").session(session);
+      if (!user) {
+        throw new Error("User not found");
       }
-    }
 
-    if (!turf || !turf.owner) {
-      throw new Error(!turf ? "Turf not found" : "Turf owner not found. Please contact support.");
-    }
+      let finalPrice = originalPrice;
+      let appliedCoupon = null;
 
-    const settings = settingsDoc?.value || {};
-    const gstPercentage = typeof settings.gstPercentage !== 'undefined' ? Number(settings.gstPercentage) : 0;
-    const platformFeePercentage = typeof settings.platformFeePercentage !== 'undefined' ? Number(settings.platformFeePercentage) : 5;
+      if (couponCode) {
+        appliedCoupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true }).session(session);
+        if (appliedCoupon) {
+          if (new Date() > new Date(appliedCoupon.validUntil)) {
+            throw new Error("Coupon has expired");
+          }
+          if (appliedCoupon.turfId && appliedCoupon.turfId.toString() !== turfId.toString()) {
+            throw new Error("Coupon is not valid for this ground");
+          }
+          if (appliedCoupon.usageLimit > 0 && appliedCoupon.timesUsed >= appliedCoupon.usageLimit) {
+            throw new Error("Coupon usage limit reached");
+          }
 
-    // Check if the SELECTED DATE is beyond the configuration expiry
-    const startOfSelectedDate = new Date(selectedTurfDate);
-    startOfSelectedDate.setHours(0, 0, 0, 0);
+          let discount = 0;
+          if (appliedCoupon.discountType === "PERCENTAGE") {
+            discount = originalPrice * (appliedCoupon.discountValue / 100);
+          } else {
+            discount = appliedCoupon.discountValue;
+          }
+          finalPrice = Math.max(0, originalPrice - discount);
+        }
+      }
 
-    if (turf.slotsConfigDuration === "Fixed Weeks" && turf.slotsConfigExpiry && startOfSelectedDate > turf.slotsConfigExpiry) {
-      throw new Error("This slot is no longer available as the venue configuration has expired.");
-    }
+      const { advanceAmount, balanceAmount, paymentType } = req.body;
+      const amountToDeduct = advanceAmount || finalPrice;
 
-    const gstAmountCalc = Math.round(finalPrice * (gstPercentage / (100 + gstPercentage)));
-    const baseAmount = finalPrice - gstAmountCalc;
-    const platformFee = Math.round(baseAmount * (platformFeePercentage / 100));
-    const ownerRevenue = baseAmount - platformFee;
+      if (user.walletBalance < amountToDeduct) {
+        throw new Error("Insufficient wallet balance. Please top up your wallet.");
+      }
 
-    // 2. Check for overlapping bookings
-    const overlappingSlot = await TimeSlot.findOne({
-      turf: turfId,
-      $or: [
-        { startTime: { $lt: adjustedEndTime, $gte: adjustedStartTime } },
-        { endTime: { $gt: adjustedStartTime, $lte: adjustedEndTime } },
-        { startTime: { $lte: adjustedStartTime }, endTime: { $gte: adjustedEndTime } }
-      ]
-    }).session(session);
+      const [turf, settingsDoc] = await Promise.all([
+        Turf.findById(turfId).populate("owner", "email name").session(session),
+        SystemSetting.findOne({ key: "PAYOUT_CONFIG" }).session(session)
+      ]);
 
-    if (overlappingSlot) {
-      throw new Error("This time slot is already booked. Please select another time.");
-    }
+      if (turf && !turf.owner) {
+        const rawTurf = await Turf.findById(turfId).select("owner").session(session);
+        if (rawTurf && rawTurf.owner) {
+          turf.owner = await User.findById(rawTurf.owner).select("email name").session(session);
+        }
+      }
 
-    // 3. Deduct balance
-    user.walletBalance -= amountToDeduct;
-    await user.save({ session });
+      if (!turf || !turf.owner) {
+        throw new Error(!turf ? "Turf not found" : "Turf owner not found. Please contact support.");
+      }
 
-    // 3. Create objects
-    const bookingId = new mongoose.Types.ObjectId();
-    const frontendUrl = process.env.CLIENT_URLS?.split(",")[1] || "http://localhost:5174";
-    const qrUrl = `${frontendUrl}/booking-pass/${bookingId}`;
+      const settings = settingsDoc?.value || {};
+      const gstPercentage = typeof settings.gstPercentage !== 'undefined' ? Number(settings.gstPercentage) : 0;
+      const platformFeePercentage = typeof settings.platformFeePercentage !== 'undefined' ? Number(settings.platformFeePercentage) : 5;
 
-    const QRcode = await generateQRCode(qrUrl);
+      // Check if the SELECTED DATE is beyond the configuration expiry
+      const startOfSelectedDate = new Date(selectedTurfDate);
+      startOfSelectedDate.setHours(0, 0, 0, 0);
 
-    const timeSlot = await TimeSlot.create(
-      [
-        {
-          turf: turfId,
-          startTime: adjustedStartTime,
-          endTime: adjustedEndTime,
-        },
-      ],
-      { session }
-    );
+      if (turf.slotsConfigDuration === "Fixed Weeks" && turf.slotsConfigExpiry && startOfSelectedDate > turf.slotsConfigExpiry) {
+        throw new Error("This slot is no longer available as the venue configuration has expired.");
+      }
 
-    const booking = await Booking.create(
-      [
-        {
-          _id: bookingId,
-          user: userId,
-          turf: turfId,
-          timeSlot: timeSlot[0]._id,
-          playStartTime: adjustedStartTime,
-          playEndTime: adjustedEndTime,
-          totalPrice: finalPrice,
-          advanceAmount: amountToDeduct,
-          balanceAmount: balanceAmount || (finalPrice - amountToDeduct),
-          paymentType: paymentType || (amountToDeduct < finalPrice ? "PARTIAL" : "FULL"),
-          qrCode: QRcode,
-          payment: {
-            orderId: "WALLET",
-            paymentId: `WAL_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-          },
-          paymentMethod: "WALLET",
-          revenueStatus: "PENDING",
-          platformFee,
-          gstAmount: gstAmountCalc,
-          ownerRevenue
-        },
-      ],
-      { session }
-    );
+      const gstAmountCalc = Math.round(finalPrice * (gstPercentage / (100 + gstPercentage)));
+      const baseAmount = finalPrice - gstAmountCalc;
+      const platformFee = Math.round(baseAmount * (platformFeePercentage / 100));
+      const ownerRevenue = baseAmount - platformFee;
 
-    // Update Owner's pending balance (only the amount PAID online goes to pending)
-    await Owner.findByIdAndUpdate(turf.owner._id, { $inc: { pendingBalance: amountToDeduct } }).session(session);
+      // 2. Check for overlapping bookings
+      const overlappingSlot = await TimeSlot.findOne({
+        turf: turfId,
+        $or: [
+          { startTime: { $lt: adjustedEndTime, $gte: adjustedStartTime } },
+          { endTime: { $gt: adjustedStartTime, $lte: adjustedEndTime } },
+          { startTime: { $lte: adjustedStartTime }, endTime: { $gte: adjustedEndTime } }
+        ]
+      }).session(session);
 
-    // 4. Update user bookings array
-    user.bookings.push(booking[0]._id);
-    await user.save({ session });
+      if (overlappingSlot) {
+        throw new Error("This time slot is already booked. Please select another time.");
+      }
 
-    // 5. Calculate Dynamic Cashback
-    const cashbackPercentage = settings.cashbackPercentage || 5;
-    const cashbackAmount = Math.round(finalPrice * (cashbackPercentage / 100));
-    if (cashbackAmount > 0) {
-      user.walletBalance += cashbackAmount;
+      // 3. Deduct balance
+      user.walletBalance -= amountToDeduct;
       await user.save({ session });
-      
-      // Create cashback transaction
+
+      // 3. Create objects
+      const bookingId = new mongoose.Types.ObjectId();
+      const frontendUrl = process.env.CLIENT_URLS?.split(",")[1] || "http://localhost:5174";
+      const qrUrl = `${frontendUrl}/booking-pass/${bookingId}`;
+
+      const QRcode = await generateQRCode(qrUrl);
+
+      const timeSlot = await TimeSlot.create(
+        [
+          {
+            turf: turfId,
+            startTime: adjustedStartTime,
+            endTime: adjustedEndTime,
+          },
+        ],
+        { session }
+      );
+
+      const booking = await Booking.create(
+        [
+          {
+            _id: bookingId,
+            user: userId,
+            turf: turfId,
+            timeSlot: timeSlot[0]._id,
+            playStartTime: adjustedStartTime,
+            playEndTime: adjustedEndTime,
+            totalPrice: finalPrice,
+            advanceAmount: amountToDeduct,
+            balanceAmount: balanceAmount || (finalPrice - amountToDeduct),
+            paymentType: paymentType || (amountToDeduct < finalPrice ? "PARTIAL" : "FULL"),
+            qrCode: QRcode,
+            payment: {
+              orderId: "WALLET",
+              paymentId: `WAL_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+            },
+            paymentMethod: "WALLET",
+            revenueStatus: "PENDING",
+            platformFee,
+            gstAmount: gstAmountCalc,
+            ownerRevenue
+          },
+        ],
+        { session }
+      );
+
+      // Update Owner's pending balance (only the amount PAID online goes to pending)
+      await Owner.findByIdAndUpdate(turf.owner._id, { $inc: { pendingBalance: amountToDeduct } }).session(session);
+
+      // 4. Update user bookings array
+      user.bookings.push(booking[0]._id);
+      await user.save({ session });
+
+      // 5. Calculate Dynamic Cashback
+      const cashbackPercentage = settings.cashbackPercentage || 5;
+      const cashbackAmount = Math.round(finalPrice * (cashbackPercentage / 100));
+      if (cashbackAmount > 0) {
+        user.walletBalance += cashbackAmount;
+        await user.save({ session });
+        
+        // Create cashback transaction
+        await WalletTransaction.create(
+          [
+            {
+              user: userId,
+              amount: cashbackAmount,
+              type: "OFFER",
+              status: "SUCCESS",
+              description: `${cashbackPercentage}% Cashback for booking #${booking[0]._id.toString().slice(-6).toUpperCase()}`,
+              bookingId: booking[0]._id,
+            },
+          ],
+          { session }
+        );
+        
+        // Update booking with cashback info
+        booking[0].cashback = cashbackAmount;
+        await booking[0].save({ session });
+      }
+
+      // 6. Create wallet transaction record for the debit
       await WalletTransaction.create(
         [
           {
             user: userId,
-            amount: cashbackAmount,
-            type: "OFFER",
+            amount: amountToDeduct,
+            type: "DEBIT",
             status: "SUCCESS",
-            description: `${cashbackPercentage}% Cashback for booking #${booking[0]._id.toString().slice(-6).toUpperCase()}`,
+            description: `Booking at ${turf.name}`,
             bookingId: booking[0]._id,
           },
         ],
         { session }
       );
-      
-      // Update booking with cashback info
-      booking[0].cashback = cashbackAmount;
-      await booking[0].save({ session });
-    }
 
-    // 6. Create wallet transaction record for the debit
-    await WalletTransaction.create(
-      [
-        {
-          user: userId,
-          amount: amountToDeduct,
-          type: "DEBIT",
-          status: "SUCCESS",
-          description: `Booking at ${turf.name}`,
-          bookingId: booking[0]._id,
-        },
-      ],
-      { session }
-    );
+      if (appliedCoupon) {
+        appliedCoupon.timesUsed += 1;
+        await appliedCoupon.save({ session });
+      }
 
-    if (appliedCoupon) {
-      appliedCoupon.timesUsed += 1;
-      await appliedCoupon.save({ session });
-    }
+      return { booking: booking[0], turf, user, finalPrice, QRcode, formattedDate, formattedStartTime, formattedEndTime };
+    });
 
-    await session.commitTransaction();
-    session.endSession();
+    const { booking, turf, user, finalPrice, QRcode } = result;
 
     // 6. Send email with Invoice (non-blocking)
     const htmlContent = generateHTMLContent(
@@ -475,14 +476,14 @@ export const bookWithWallet = async (req, res) => {
     });
 
     // Generate Invoice PDF
-    generateInvoice(booking[0], turf, user).then(pdfBuffer => {
+    generateInvoice(booking, turf, user).then(pdfBuffer => {
       generateEmail(
         user.email, 
         "Booking Confirmation & Invoice - Kridaz", 
         htmlContent,
         [
           {
-            filename: `Invoice-KRZ-${booking[0]._id.toString().slice(-6).toUpperCase()}.pdf`,
+            filename: `Invoice-KRZ-${booking._id.toString().slice(-6).toUpperCase()}.pdf`,
             content: pdfBuffer,
             contentType: 'application/pdf'
           }
@@ -501,12 +502,10 @@ export const bookWithWallet = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Booking successful! Invoice sent to your email.",
-      bookingId: booking[0]._id,
+      bookingId: booking._id,
       newBalance: user.walletBalance
     });
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     console.error("Error in bookWithWallet:", error);
     return res.status(400).json({
       success: false,
@@ -905,104 +904,97 @@ export const downloadInvoice = async (req, res) => {
 export const cancelBooking = async (req, res) => {
   const userId = req.user.id || req.user.user;
   const { id } = req.params;
-
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  const now = new Date();
 
   try {
-    const booking = await Booking.findById(id).populate("turf").session(session);
+    const result = await runInTransaction(async ({ session }) => {
+      const booking = await Booking.findById(id).populate("turf").session(session);
 
-    if (!booking) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).json({ success: false, message: "Booking not found" });
-    }
+      if (!booking) {
+        throw { status: 404, message: "Booking not found" };
+      }
 
-    // Security check: ensure user owns this booking
-    if (booking.user.toString() !== userId.toString()) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(403).json({ success: false, message: "Unauthorized" });
-    }
+      // Security check: ensure user owns this booking
+      if (booking.user.toString() !== userId.toString()) {
+        throw { status: 403, message: "Unauthorized" };
+      }
 
-    // Check if booking is in a cancellable status
-    if (booking.status !== "CONFIRMED" && booking.status !== "PLAYING") {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({ success: false, message: "This booking cannot be cancelled at this stage." });
-    }
+      // Check if booking is in a cancellable status
+      if (booking.status !== "CONFIRMED" && booking.status !== "PLAYING") {
+        throw { status: 400, message: "This booking cannot be cancelled at this stage." };
+      }
 
-    // Check if play is more than 72 hours away
-    const playStartTime = new Date(booking.playStartTime);
-    const hoursRemaining = (playStartTime - now) / (1000 * 60 * 60);
+      // Check if play is more than 72 hours away
+      const playStartTime = new Date(booking.playStartTime);
+      const hoursRemaining = (playStartTime - now) / (1000 * 60 * 60);
 
-    if (hoursRemaining < 72) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({ success: false, message: "Cancellations are only allowed at least 72 hours before the slot time." });
-    }
+      if (hoursRemaining < 72) {
+        throw { status: 400, message: "Cancellations are only allowed at least 72 hours before the slot time." };
+      }
 
-    // Since it's > 72h, it's always eligible for 30% refund
-    const amountPaid = booking.totalPrice; // Total price is refunded 30%
-    const refundAmount = Math.round(amountPaid * 0.3);
+      // Since it's > 72h, it's always eligible for 30% refund
+      const amountPaid = booking.totalPrice; // Total price is refunded 30%
+      const refundAmount = Math.round(amountPaid * 0.3);
+
+      // 1. Update Booking Status
+      booking.status = "CANCELLED";
+      if (refundAmount > 0) {
+        booking.revenueStatus = "REFUNDED"; // Partially refunded in this case
+      }
+      await booking.save({ session });
+
+      // 2. Refund to Wallet if eligible
+      if (refundAmount > 0) {
+        const user = await User.findById(userId).session(session);
+        if (user) {
+          user.walletBalance = (user.walletBalance || 0) + refundAmount;
+          await user.save({ session });
+
+          await WalletTransaction.create([
+            {
+              user: userId,
+              amount: refundAmount,
+              type: "REFUND",
+              status: "SUCCESS",
+              description: `30% refund for cancelled booking #${booking._id.toString().slice(-6).toUpperCase()}`,
+              bookingId: booking._id,
+            }
+          ], { session });
+        }
+      }
+
+      // 3. Deduct from Owner's pending balance (they get 0 for cancelled bookings)
+      const amountToDeductFromOwner = booking.advanceAmount || booking.totalPrice;
+      const turf = booking.turf;
+      if (turf && turf.owner) {
+        // Find owner record
+        const ownerRecord = await Owner.findOne({ 
+          $or: [{ _id: turf.owner }, { userId: turf.owner }] 
+        }).session(session);
+
+        if (ownerRecord) {
+          ownerRecord.pendingBalance = Math.max(0, (ownerRecord.pendingBalance || 0) - amountToDeductFromOwner);
+          await ownerRecord.save({ session });
+        }
+      }
+
+      // 4. Release TimeSlot (Delete it so it's available for others)
+      if (booking.timeSlot) {
+        await TimeSlot.findByIdAndDelete(booking.timeSlot).session(session);
+      }
+
+      return { booking, refundAmount };
+    });
+
+    const { booking, refundAmount } = result;
     const message = `Booking cancelled successfully. 30% refund (₹${refundAmount}) has been credited to your wallet.`;
-
-    // 1. Update Booking Status
-    booking.status = "CANCELLED";
-    if (refundAmount > 0) {
-      booking.revenueStatus = "REFUNDED"; // Partially refunded in this case
-    }
-    await booking.save({ session });
-
-    // 2. Refund to Wallet if eligible
-    if (refundAmount > 0) {
-      const user = await User.findById(userId).session(session);
-      if (user) {
-        user.walletBalance = (user.walletBalance || 0) + refundAmount;
-        await user.save({ session });
-
-        await WalletTransaction.create([
-          {
-            user: userId,
-            amount: refundAmount,
-            type: "REFUND",
-            status: "SUCCESS",
-            description: `30% refund for cancelled booking #${booking._id.toString().slice(-6).toUpperCase()}`,
-            bookingId: booking._id,
-          }
-        ], { session });
-      }
-    }
-
-    // 3. Deduct from Owner's pending balance (they get 0 for cancelled bookings)
-    const amountToDeductFromOwner = booking.advanceAmount || booking.totalPrice;
-    const turf = booking.turf;
-    if (turf && turf.owner) {
-      // Find owner record
-      const ownerRecord = await Owner.findOne({ 
-        $or: [{ _id: turf.owner }, { userId: turf.owner }] 
-      }).session(session);
-
-      if (ownerRecord) {
-        ownerRecord.pendingBalance = Math.max(0, (ownerRecord.pendingBalance || 0) - amountToDeductFromOwner);
-        await ownerRecord.save({ session });
-      }
-    }
-
-    // 4. Release TimeSlot (Delete it so it's available for others)
-    if (booking.timeSlot) {
-      await TimeSlot.findByIdAndDelete(booking.timeSlot).session(session);
-    }
-
-    await session.commitTransaction();
-    session.endSession();
 
     // 5. Notify User
     await createNotification({
       recipientId: booking.user,
       recipientModel: 'User',
       title: "Booking Cancelled",
-      message: isEligibleForRefund 
+      message: refundAmount > 0 
         ? `Your booking has been cancelled. 30% refund (₹${refundAmount}) credited to wallet.` 
         : `Your booking has been cancelled. No refund issued as per policy.`,
       type: "BOOKING",
@@ -1011,9 +1003,10 @@ export const cancelBooking = async (req, res) => {
 
     return res.status(200).json({ success: true, message, refundAmount });
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     console.error("Error in cancelBooking:", error);
-    return res.status(500).json({ success: false, message: "Internal server error: " + error.message });
+    return res.status(error.status || 500).json({ 
+      success: false, 
+      message: error.message || "Internal server error" 
+    });
   }
 };

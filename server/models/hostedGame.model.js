@@ -23,6 +23,10 @@ const hostedGameSchema = new mongoose.Schema(
       enum: ["NOT_STARTED", "IN_PROGRESS", "COMPLETED"],
       default: "NOT_STARTED",
     },
+    umpireRequest: {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "Owner" },
+      status: { type: String, enum: ["NONE", "PENDING", "APPROVED", "REJECTED"], default: "NONE" },
+    },
     teams: {
       teamA: {
         name: { type: String, default: "Team A" },

@@ -19,7 +19,7 @@ const ProfessionalDetailsPage = () => {
       try {
         const response = await axiosInstance.get(`/api/admin/professionals/${id}`);
         if (response.data.success) {
-          setDetails(response.data.data);
+          setDetails(response.data);
         }
       } catch (error) {
         console.error("Error fetching professional details:", error);

@@ -1,11 +1,20 @@
 import mongoose from "mongoose";
+import dns from 'node:dns/promises';
 
 export default async function connectDB() {
-  console.log("[DATABASE] Attempting to connect to URI:", process.env.MONGO_URI.split("@")[1]); // Log host part only for security
+  const host = process.env.MONGO_URI.split("@")[1].split(":")[0];
+  try {
+    const lookup = await dns.lookup(host);
+    console.log(`[DATABASE] Host ${host} resolved to ${lookup.address}`);
+  } catch (dnsErr) {
+    console.error(`[DATABASE] DNS Resolution failed for ${host}:`, dnsErr.message);
+  }
+
+  console.log("[DATABASE] Attempting to connect to URI:", process.env.MONGO_URI.split("@")[1]); 
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 10000, // Wait 10s
-      connectTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 15000, 
+      connectTimeoutMS: 15000,
     });
     console.log(`[DATABASE] Success! Connected to database: ${conn.connection.name}`);
     

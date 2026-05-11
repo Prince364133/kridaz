@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TurfCard from "./TurfCard.jsx";
 import TurfCardSkeleton from "../ui/TurfCardSkeleton.jsx";
 import useTurfData from "../../hooks/useTurfData.jsx";
 import SearchTurf from "../search/SearchTurf.jsx";
-import { Trophy, MapPin } from "lucide-react";
+import { Trophy, MapPin, Loader2 } from "lucide-react";
 
 /**
  * Turf — Venue discovery page.
@@ -15,11 +15,78 @@ import { Trophy, MapPin } from "lucide-react";
  */
 const Turf = () => {
   const [searchFilters, setSearchFilters] = useState({});
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationStatus, setLocationStatus] = useState("detecting"); // 'detecting' | 'granted' | 'denied'
   const { turfs, loading } = useTurfData(searchFilters);
+
+  // ── Auto-detect location ──────────────────────────────────────────
+  const detectLocation = () => {
+    setLocationStatus("detecting");
+    
+    if (!navigator.geolocation) {
+      fallbackToIPLocation();
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        
+        const loc = { lat, lng };
+        setUserLocation(loc);
+        setLocationStatus("granted");
+        
+        setSearchFilters((prev) => ({ 
+          ...prev,
+          lat,
+          lng
+        }));
+      },
+      (err) => {
+        console.warn("Geolocation denied or failed:", err.message);
+        fallbackToIPLocation();
+      },
+      { timeout: 8000, maximumAge: 60000 }
+    );
+  };
+
+  const fallbackToIPLocation = async () => {
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+      if (data.latitude && data.longitude) {
+        const lat = data.latitude;
+        const lng = data.longitude;
+        
+        const loc = { lat, lng };
+        setUserLocation(loc);
+        setLocationStatus("granted");
+        
+        setSearchFilters((prev) => ({ 
+          ...prev,
+          lat,
+          lng
+        }));
+      } else {
+        setLocationStatus("denied");
+      }
+    } catch (error) {
+      setLocationStatus("denied");
+    }
+  };
+
+  useEffect(() => {
+    detectLocation();
+  }, []);
 
   // ── Handle search filters from the SearchTurf bar ─────────────────
   const handleSearch = (filters) => {
-    setSearchFilters({ ...filters });
+    setSearchFilters({
+      ...filters,
+      lat: userLocation?.lat,
+      lng: userLocation?.lng,
+    });
   };
 
   return (
@@ -36,7 +103,16 @@ const Turf = () => {
           <div className="flex flex-col gap-1">
             <h2 className="text-base md:text-lg font-bold uppercase tracking-[0.05em] text-white flex items-center gap-3 font-sans">
               <MapPin size={18} className="text-[#84CC16]" />
-              {`AVAILABLE VENUES — ${turfs.length}`}
+              {locationStatus === "detecting" ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin text-[#84CC16]" />
+                  DETECTING LOCATION...
+                </span>
+              ) : locationStatus === "granted" ? (
+                `NEAREST TO YOU — ${turfs.length} VENUE${turfs.length !== 1 ? "S" : ""}`
+              ) : (
+                `AVAILABLE VENUES — ${turfs.length}`
+              )}
             </h2>
           </div>
         </div>
@@ -58,8 +134,12 @@ const Turf = () => {
               >
                 <TurfCard
                   turf={turf}
-                  featured={false}
-                  distance={null}
+                  featured={idx === 0 && locationStatus === "granted"}
+                  distance={
+                    turf.distance != null
+                      ? `${(turf.distance / 1000).toFixed(1)} km`
+                      : null
+                  }
                 />
               </div>
             ))}
@@ -70,7 +150,11 @@ const Turf = () => {
             <h3 className="text-2xl font-display uppercase text-gray-400 mb-2">Venues Not Found</h3>
             <p className="text-gray-600">Try adjusting your filters or search keywords.</p>
             <button
-              onClick={() => setSearchFilters({})}
+              onClick={() =>
+                setSearchFilters(
+                  userLocation ? { lat: userLocation.lat, lng: userLocation.lng } : {}
+                )
+              }
               className="mt-8 px-10 py-3 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
             >
               Clear All Filters

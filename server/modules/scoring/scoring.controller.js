@@ -1,5 +1,7 @@
+import mongoose from "mongoose";
 import HostedGame from "../../models/hostedGame.model.js";
 import CricketScoring from "../../models/cricketScoring.model.js";
+
 import User from "../../models/user.model.js";
 import { generateShortId } from "./scoring.utils.js";
 import { aggregatePlayerStats } from "./scoring.service.js";
@@ -45,7 +47,7 @@ export const completeMatch = async (req, res) => {
 export const searchMatch = async (req, res) => {
   try {
     const { shortId } = req.params;
-    const match = await HostedGame.findOne({ shortId })
+    const match = await HostedGame.findOne({ shortId: shortId.toUpperCase() })
       .populate("host", "name profilePicture")
       .populate("ground", "name location city");
 
@@ -64,33 +66,92 @@ export const searchMatch = async (req, res) => {
  */
 export const startScoring = async (req, res) => {
   try {
-    const { matchId } = req.body;
-    const umpireId = req.user._id;
+    const { matchId, battingTeamId, battingTeam } = req.body;
+    const finalBattingTeam = battingTeamId || battingTeam || "teamA";
+    
+    // Support both req.owner and req.user for maximum compatibility
+    const umpireId = req.owner?.ownerId || req.user?.id;
 
-    const match = await HostedGame.findById(matchId);
-    if (!match) {
+    console.log(`[Scoring] startScoring: matchId=${matchId}, umpireId=${umpireId}, team=${finalBattingTeam}`);
+
+    if (!umpireId) {
+      return res.status(401).json({ success: false, message: "Umpire identity not found. Please log in again." });
+    }
+
+    const hostedGame = await HostedGame.findById(matchId).populate("umpire");
+    if (!hostedGame) {
       return res.status(404).json({ success: false, message: "Match not found" });
     }
 
-    // Check if scoring already exists
+    // Support both direct ID match and Owner-User relationship match
+    const matchUmpireId = hostedGame.umpire?._id || hostedGame.umpire;
+    const matchUmpireUserId = hostedGame.umpire?.userId;
+
+    // Comprehensive Authorization Check
+    const matchUmpireIdStr = matchUmpireId?.toString();
+    const matchUmpireUserIdStr = matchUmpireUserId?.toString();
+    const matchHostIdStr = hostedGame.host?._id?.toString() || hostedGame.host?.toString();
+    const matchRequestUmpireIdStr = hostedGame.umpireRequest?.user?._id?.toString() || hostedGame.umpireRequest?.user?.toString();
+    
+    const reqUmpireIdStr = umpireId?.toString();
+    const reqUserIdStr = req.user?.id?.toString() || req.user?.user?.toString();
+    const userRole = req.user?.role;
+    const isAdmin = ["BMSP_SUPER_ADMIN", "BMSP_ADMIN"].includes(userRole);
+
+    console.log(`[Scoring] Auth Debug:
+      Match Umpire: ${matchUmpireIdStr}
+      Match Umpire User: ${matchUmpireUserIdStr}
+      Match Request Umpire: ${matchRequestUmpireIdStr}
+      Match Host: ${matchHostIdStr}
+      Req Umpire: ${reqUmpireIdStr}
+      Req User: ${reqUserIdStr}
+      User Role: ${userRole}
+    `);
+
+    const isAuthorized = 
+      isAdmin ||
+      (matchUmpireIdStr && matchUmpireIdStr === reqUmpireIdStr) || 
+      (matchUmpireUserIdStr && matchUmpireUserIdStr === reqUserIdStr) ||
+      (matchUmpireIdStr && matchUmpireIdStr === reqUserIdStr) ||
+      (matchHostIdStr && matchHostIdStr === reqUserIdStr) ||
+      (matchRequestUmpireIdStr && matchRequestUmpireIdStr === reqUmpireIdStr);
+
+    if (!isAuthorized) {
+      console.log(`[Scoring] Auth FAILED after check.`);
+      return res.status(403).json({ 
+        success: false, 
+        message: "Authorization failed. Only the assigned umpire, host, or admin can score this match.",
+        debug: { matchUmpireIdStr, matchHostIdStr, matchRequestUmpireIdStr, reqUmpireIdStr, reqUserIdStr, userRole }
+      });
+    }
+
     let scoring = await CricketScoring.findOne({ matchId });
+
     if (!scoring) {
       scoring = new CricketScoring({
         matchId,
-        umpire: umpireId,
+        umpire: req.user.id,
+        currentInningsIndex: 0,
         innings: [
-          { battingTeam: "teamA", totalRuns: 0, totalWickets: 0, totalBalls: 0 },
-          { battingTeam: "teamB", totalRuns: 0, totalWickets: 0, totalBalls: 0 }
+          {
+            battingTeam: finalBattingTeam,
+            totalRuns: 0,
+            totalWickets: 0,
+            totalBalls: 0,
+            isCompleted: false,
+            extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0, penalty: 0 }
+          }
         ]
       });
       await scoring.save();
-      
-      match.scoringStatus = "IN_PROGRESS";
-      await match.save();
+
+      hostedGame.scoringStatus = "IN_PROGRESS";
+      await hostedGame.save();
     }
 
     res.status(200).json({ success: true, scoring });
   } catch (error) {
+    console.error("[Scoring] Start Error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -110,7 +171,7 @@ export const updateScore = async (req, res) => {
     // Add ball to timeline
     scoring.timeline.push(ballData);
     
-    // Update basic stats (simplified for now, full logic will be in Phase 2/3)
+    // Update basic stats
     const currentInnings = scoring.innings[scoring.currentInningsIndex];
     if (!ballData.isExtra || ballData.extraType !== "WIDE") {
        currentInnings.totalBalls += 1;
@@ -134,6 +195,9 @@ export const updateScore = async (req, res) => {
 export const getMatchStatus = async (req, res) => {
   try {
     const { matchId } = req.params;
+    console.log(`[Scoring] Fetching status for match: ${matchId}`);
+    
+    // Check if scoring exists
     const scoring = await CricketScoring.findOne({ matchId })
       .populate("matchId")
       .populate("umpire", "name")
@@ -141,11 +205,25 @@ export const getMatchStatus = async (req, res) => {
       .populate("bowlingStats.user", "name profilePicture");
 
     if (!scoring) {
-      return res.status(404).json({ success: false, message: "No active scoring for this match" });
+      console.log(`[Scoring] No active session, providing hostedGame fallback for: ${matchId}`);
+      // Fallback to hosted game details
+      const hostedGame = await HostedGame.findById(matchId)
+        .populate("host", "name profilePicture")
+        .populate("ground", "name location city")
+        .populate("umpire", "name profilePicture")
+        .populate("teams.teamA.slots.user", "name profilePicture")
+        .populate("teams.teamB.slots.user", "name profilePicture");
+
+      if (!hostedGame) {
+        return res.status(404).json({ success: false, message: "Match not found" });
+      }
+
+      return res.status(200).json({ success: true, hostedGame });
     }
 
     res.status(200).json({ success: true, scoring });
   } catch (error) {
+    console.error("[Scoring] Status Error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -156,7 +234,16 @@ export const getMatchStatus = async (req, res) => {
 export const getMatchAnalytics = async (req, res) => {
   try {
     const { matchId } = req.params;
-    const scoring = await CricketScoring.findOne({ matchId })
+    
+    // Resolve matchId if it's a shortId
+    let actualMatchId = matchId;
+    if (!mongoose.Types.ObjectId.isValid(matchId)) {
+      const match = await HostedGame.findOne({ shortId: matchId });
+      if (!match) return res.status(404).json({ success: false, message: "Match not found" });
+      actualMatchId = match._id;
+    }
+
+    const scoring = await CricketScoring.findOne({ matchId: actualMatchId })
       .populate("matchId")
       .populate("umpire", "name")
       .populate("battingStats.user", "name profilePicture")
@@ -164,6 +251,7 @@ export const getMatchAnalytics = async (req, res) => {
       .populate("timeline.batter", "name")
       .populate("timeline.bowler", "name")
       .populate("timeline.fielder", "name");
+
 
     if (!scoring) {
       return res.status(404).json({ success: false, message: "Match data not found" });
