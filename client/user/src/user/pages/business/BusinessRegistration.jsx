@@ -168,11 +168,11 @@ export default function BusinessRegistration() {
     setLoading(true);
     
     // Validate mandatory documents
-    const requiredDocs = formData.role === 'owner' || formData.role === 'VENUE_OWNER' 
+    let requiredDocs = formData.role === 'owner' || formData.role === 'VENUE_OWNER' 
       ? ['PAN', 'AADHAR', 'BUSINESS', 'VENUE']
       : ['PAN', 'AADHAR']; // Coaches/Umpires might only need ID proof initially
     
-    const missingDocs = requiredDocs.filter(doc => !files[doc]);
+    let missingDocs = requiredDocs.filter(doc => !files[doc]);
     if (missingDocs.length > 0) {
       toast.error(`Please upload required documents: ${missingDocs.join(", ")}`);
       setLoading(false);
@@ -220,11 +220,11 @@ export default function BusinessRegistration() {
     }
 
     // Document validation
-    const requiredDocs = isOwner 
+    requiredDocs = isOwner 
       ? ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST', 'VENUE']
       : ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST'];
 
-    const missingDocs = requiredDocs.filter(doc => !files[doc]);
+    missingDocs = requiredDocs.filter(doc => !files[doc]);
     if (missingDocs.length > 0) {
       toast.error(`Please upload all required documents: ${missingDocs.join(', ')}`);
       setLoading(false);
