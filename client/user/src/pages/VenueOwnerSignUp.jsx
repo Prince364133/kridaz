@@ -42,7 +42,10 @@ const VenueOwnerSignUp = () => {
     handleGoogleSuccess,
     handleGoogleError,
     currentStep,
-    setCurrentStep
+    setCurrentStep,
+    user,
+    role,
+    navigate
   } = useSignUpForm("owner");
 
   const [mounted, setMounted] = useState(false);
@@ -51,7 +54,11 @@ const VenueOwnerSignUp = () => {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Redirect if already an owner
+    if (user?.role === "owner" || role === "owner") {
+      navigate("/partner");
+    }
+  }, [user, role, navigate]);
 
   const handleDocUpload = (url, name) => {
     if (!url) {

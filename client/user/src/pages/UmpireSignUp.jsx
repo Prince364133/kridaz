@@ -48,7 +48,10 @@ const UmpireSignUp = () => {
     handleGoogleSuccess,
     handleGoogleError,
     currentStep,
-    setCurrentStep
+    setCurrentStep,
+    user,
+    role,
+    navigate
   } = useSignUpForm("umpire");
 
   const [mounted, setMounted] = useState(false);
@@ -57,7 +60,11 @@ const UmpireSignUp = () => {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Redirect if already an umpire
+    if (user?.role === "umpire" || role === "umpire") {
+      navigate("/umpire");
+    }
+  }, [user, role, navigate]);
 
   const handleDocUpload = (url, name) => {
     if (!url) {

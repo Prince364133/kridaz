@@ -1,18 +1,25 @@
 import React from "react";
-import { Trophy, Calendar, MapPin, Users, CheckCircle2 } from "lucide-react";
+import { Trophy, Calendar, MapPin, Users, CheckCircle2, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import useUmpireDashboard from "@hooks/owner/useUmpireDashboard";
 import DashboardSkeleton from "../owner/Dashboard/DashboardSkeleton";
 
 export default function UmpireMatches() {
   const { dashboardData, loading, error } = useUmpireDashboard();
-
+  const navigate = useNavigate();
   const [searchId, setSearchId] = React.useState("");
 
   if (loading) return <DashboardSkeleton />;
 
   const matches = dashboardData?.matches || [];
-  const completedMatches = matches.filter(m => m.status === 'completed');
-  const activeMatches = matches.filter(m => m.status !== 'completed');
+  
+  // Filter matches by searchId if present
+  const filteredMatches = searchId 
+    ? matches.filter(m => m.shortId?.toUpperCase().includes(searchId) || m.name?.toUpperCase().includes(searchId))
+    : matches;
+
+  const completedMatches = filteredMatches.filter(m => m.status === 'completed');
+  const activeMatches = filteredMatches.filter(m => m.status !== 'completed');
 
   return (
     <div className="space-y-12 animate-fade-in pb-20">
@@ -74,7 +81,7 @@ export default function UmpireMatches() {
                   </div>
                   <div className="flex items-center">
                     <button 
-                      onClick={() => window.location.href = `/scoring/${match._id}`}
+                      onClick={() => navigate(`/scoring/${match._id}`)}
                       className="w-full md:w-auto h-14 px-10 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 group-hover:scale-[1.02]"
                     >
                       Score Game <Zap size={16} fill="currentColor" />

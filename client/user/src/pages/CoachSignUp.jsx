@@ -48,7 +48,10 @@ const CoachSignUp = () => {
     handleGoogleSuccess,
     handleGoogleError,
     currentStep,
-    setCurrentStep
+    setCurrentStep,
+    user,
+    role,
+    navigate
   } = useSignUpForm("coach");
 
   const [mounted, setMounted] = useState(false);
@@ -57,7 +60,11 @@ const CoachSignUp = () => {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Redirect if already a coach
+    if (user?.role === "coach" || role === "coach") {
+      navigate("/coach");
+    }
+  }, [user, role, navigate]);
 
   const handleDocUpload = (url, name) => {
     if (!url) {
