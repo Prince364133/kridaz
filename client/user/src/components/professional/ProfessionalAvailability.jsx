@@ -3,7 +3,8 @@ import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { Calendar, Clock, Plus, Trash2, Save, Loader2, CalendarDays, Zap } from "lucide-react";
 import toast from "react-hot-toast";
-import { format, addDays, startOfToday } from "date-fns";
+import { format, addDays, startOfToday, parse } from "date-fns";
+import ClockPicker from "../common/ClockPicker";
 
 export default function ProfessionalAvailability() {
   const { user } = useSelector((state) => state.auth);
@@ -12,8 +13,18 @@ export default function ProfessionalAvailability() {
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [slots, setSlots] = useState([]);
   const [newSlot, setNewSlot] = useState({ startTime: "09:00", endTime: "10:00" });
+  const [hasAvailability, setHasAvailability] = useState({}); // To track which dates have slots
 
-  const dates = Array.from({ length: 14 }, (_, i) => addDays(startOfToday(), i));
+  const timeToDate = (timeStr) => {
+    if (!timeStr) return new Date();
+    return parse(timeStr, 'HH:mm', new Date());
+  };
+
+  const dateToTime = (date) => {
+    return format(date, 'HH:mm');
+  };
+
+  const dates = Array.from({ length: 28 }, (_, i) => addDays(startOfToday(), i));
 
   useEffect(() => {
     fetchAvailability();
@@ -22,7 +33,8 @@ export default function ProfessionalAvailability() {
   const fetchAvailability = async () => {
     try {
       setFetching(true);
-      const res = await axiosInstance.get(`/api/professional/details/${user.id || user.user}?date=${selectedDate}`);
+      const professionalId = user._id || user.id || user.user;
+      const res = await axiosInstance.get(`/api/professional/details/${professionalId}?date=${selectedDate}`);
       if (res.data.availability) {
         setSlots(res.data.availability.slots);
       } else {
@@ -30,31 +42,75 @@ export default function ProfessionalAvailability() {
       }
     } catch (error) {
       console.error("Error fetching availability:", error);
+      setSlots([]); // Ensure slots are cleared on error to prevent stale data
     } finally {
       setFetching(false);
     }
   };
 
-  const handleAddSlot = () => {
+  const handleAddSlot = async () => {
     if (slots.some(s => s.startTime === newSlot.startTime)) {
       toast.error("Slot already exists");
       return;
     }
-    setSlots([...slots, { ...newSlot, isAvailable: true }].sort((a, b) => a.startTime.localeCompare(b.startTime)));
-  };
+    const updatedSlots = [...slots, { ...newSlot, isAvailable: true }].sort((a, b) => a.startTime.localeCompare(b.startTime));
+    setSlots(updatedSlots);
 
-  const handleRemoveSlot = (startTime) => {
-    setSlots(slots.filter(s => s.startTime !== startTime));
-  };
-
-  const handleSave = async () => {
     try {
       setLoading(true);
+      const promises = [];
+      for (let i = 0; i < 28; i++) {
+        const targetDate = format(addDays(startOfToday(), i), 'yyyy-MM-dd');
+        promises.push(axiosInstance.put("/api/professional/availability", {
+          date: targetDate,
+          slots: updatedSlots
+        }));
+      }
+      await Promise.all(promises);
+      
+      const newHasAvailability = {};
+      for (let i = 0; i < 28; i++) {
+        const d = format(addDays(startOfToday(), i), 'yyyy-MM-dd');
+        newHasAvailability[d] = true;
+      }
+      setHasAvailability(prev => ({...prev, ...newHasAvailability}));
+      
+      toast.success("Slot added to all 28 days!");
+    } catch (error) {
+      toast.error("Failed to add slot to all days");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveSlot = async (startTime) => {
+    const updatedSlots = slots.filter(s => s.startTime !== startTime);
+    setSlots(updatedSlots);
+    await handleSave(updatedSlots, selectedDate);
+  };
+
+  const handleSave = async (customSlots = null, customDate = null) => {
+    try {
+      setLoading(true);
+      // Check if customDate is a string (not an Event)
+      const targetDate = typeof customDate === 'string' ? customDate : selectedDate;
+      // Check if customSlots is an array (not an Event)
+      const targetSlots = Array.isArray(customSlots) ? customSlots : slots;
+      
       await axiosInstance.put("/api/professional/availability", {
-        date: selectedDate,
-        slots
+        date: targetDate,
+        slots: targetSlots
       });
-      toast.success("Availability updated successfully");
+      
+      if (!customDate) {
+        toast.success("Availability updated successfully");
+      }
+      
+      // Update local cache of which dates have slots
+      setHasAvailability(prev => ({
+        ...prev,
+        [targetDate]: targetSlots.length > 0
+      }));
     } catch (error) {
       console.error("Error saving availability:", error);
       toast.error("Failed to save availability");
@@ -62,6 +118,9 @@ export default function ProfessionalAvailability() {
       setLoading(false);
     }
   };
+
+
+
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -91,11 +150,12 @@ export default function ProfessionalAvailability() {
               {dates.map((date) => {
                 const dateStr = format(date, 'yyyy-MM-dd');
                 const isSelected = selectedDate === dateStr;
+                const hasSlots = hasAvailability[dateStr];
                 return (
                   <button 
                     key={dateStr}
                     onClick={() => setSelectedDate(dateStr)}
-                    className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${
+                    className={`relative flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${
                       isSelected 
                       ? "bg-primary border-primary text-black" 
                       : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
@@ -103,6 +163,10 @@ export default function ProfessionalAvailability() {
                   >
                     <span className="text-[8px] font-black uppercase tracking-tighter mb-1">{format(date, 'EEE')}</span>
                     <span className="text-lg font-black leading-none">{format(date, 'dd')}</span>
+                    <span className="text-[7px] font-bold uppercase tracking-widest mt-1 opacity-60">{format(date, 'MMM')}</span>
+                    {hasSlots && !isSelected && (
+                      <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
+                    )}
                   </button>
                 );
               })}
@@ -115,20 +179,16 @@ export default function ProfessionalAvailability() {
             <div className="flex flex-col md:flex-row items-end gap-4 mb-10 pb-8 border-b border-white/5">
               <div className="flex-1 space-y-2">
                 <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Start Time</label>
-                <input 
-                  type="time" 
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:border-primary outline-none"
-                  value={newSlot.startTime}
-                  onChange={(e) => setNewSlot({...newSlot, startTime: e.target.value})}
+                <ClockPicker 
+                  value={timeToDate(newSlot.startTime)}
+                  onChange={(date) => setNewSlot({...newSlot, startTime: dateToTime(date)})}
                 />
               </div>
               <div className="flex-1 space-y-2">
                 <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">End Time</label>
-                <input 
-                  type="time" 
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:border-primary outline-none"
-                  value={newSlot.endTime}
-                  onChange={(e) => setNewSlot({...newSlot, endTime: e.target.value})}
+                <ClockPicker 
+                  value={timeToDate(newSlot.endTime)}
+                  onChange={(date) => setNewSlot({...newSlot, endTime: dateToTime(date)})}
                 />
               </div>
               <button 
@@ -139,7 +199,11 @@ export default function ProfessionalAvailability() {
               </button>
             </div>
 
-            <h3 className="text-sm font-black uppercase tracking-widest text-white mb-6">Active Slots for {format(new Date(selectedDate), 'MMMM dd, yyyy')}</h3>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+              <h3 className="text-sm font-black uppercase tracking-widest text-white">Active Slots for {format(new Date(selectedDate), 'MMMM dd, yyyy')}</h3>
+              
+
+            </div>
             
             {fetching ? (
               <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-primary" size={32} /></div>
