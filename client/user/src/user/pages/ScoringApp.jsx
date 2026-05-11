@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useCricketScoring from '@hooks/shared/useCricketScoring';
-import BallByBallHistory from '../components/shared/BallByBallHistory';
+import BallByBallHistory from '../../components/shared/BallByBallHistory';
 
 /* ─── Helpers ─── */
 const ballColor = (ball) => {

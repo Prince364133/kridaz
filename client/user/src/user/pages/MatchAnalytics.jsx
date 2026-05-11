@@ -16,7 +16,7 @@ import useCricketScoring from '@hooks/shared/useCricketScoring';
 import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
-import BallByBallHistory from '../components/shared/BallByBallHistory';
+import BallByBallHistory from '../../components/shared/BallByBallHistory';
 
 const MatchAnalytics = () => {
   const { matchId } = useParams();

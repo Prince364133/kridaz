@@ -4,26 +4,12 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { 
   Users, Check, X, Clock, MapPin, 
-  ChevronRight, Trophy, Info, AlertCircle, Calendar, User, Shield
+  ChevronRight, Trophy, Info, AlertCircle, Calendar, User
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const MyHostedGames = () => {
-  const navigate = useNavigate();
   const [myGames, setMyGames] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const handleUmpireAction = async (gameId, action) => {
-    try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/hosted-game/handle-umpire-request`, { gameId, action }, { withCredentials: true });
-      if (res.data.success) {
-        toast.success(res.data.message);
-        fetchMyGames();
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Action failed');
-    }
-  };
 
   const fetchMyGames = async () => {
     try {
@@ -102,7 +88,7 @@ const MyHostedGames = () => {
             <Trophy size={48} className="mx-auto mb-4 text-neutral-700" />
             <h3 className="text-xl font-bold">No games hosted yet</h3>
             <p className="text-neutral-500 mb-6">Start hosting and build your community!</p>
-            <button onClick={() => navigate('/host-game')} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-xl">
+            <button onClick={() => window.location.href='/host-game'} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-xl">
               Host Now
             </button>
           </div>
@@ -112,49 +98,9 @@ const MyHostedGames = () => {
               <div className="p-6 border-b border-neutral-800">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        {game.gameType}
-                      </span>
-                      {game.shortId && (
-                        <div className="flex items-center gap-1.5 bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-full border border-white/5 group relative">
-                          <span className="text-[10px] font-black uppercase tracking-wider">
-                            ID: {game.shortId}
-                          </span>
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigator.clipboard.writeText(game.shortId);
-                              toast.success("Match ID Copied!");
-                            }}
-                            className="hover:text-yellow-500 transition-colors"
-                            title="Copy Match ID"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                          </button>
-                        </div>
-                      )}
-                      {game.umpire && (
-                        <div 
-                          className="flex items-center gap-1.5 bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20 shadow-[0_0_15px_rgba(132,204,22,0.1)] cursor-pointer hover:border-primary/50 transition-all"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/professionals/${game.umpire._id}`);
-                          }}
-                        >
-                          {game.umpire.profilePicture ? (
-                            <img src={game.umpire.profilePicture} className="w-4 h-4 rounded-full object-cover border border-primary/20" alt="" />
-                          ) : (
-                            <Shield size={10} className="fill-primary/20" />
-                          )}
-                          <span className="text-[10px] font-black uppercase tracking-wider">
-                            {game.umpire.name || 'Umpire Hired'}
-                          </span>
-                        </div>
-                      )}
-
-                    </div>
-
+                    <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      {game.gameType}
+                    </span>
                     <h2 className="text-2xl font-black mt-1 uppercase italic tracking-tighter">
                       {game.teams?.teamA?.name} vs {game.teams?.teamB?.name}
                     </h2>
@@ -197,47 +143,6 @@ const MyHostedGames = () => {
               <div className="p-6">
                 <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-widest mb-4">Pending Requests</h3>
                 <div className="space-y-3">
-                  {/* Umpire Request */}
-                  {game.umpireRequest?.status === 'PENDING' && (
-                    <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20 group hover:border-primary/40 transition-all mb-4">
-                      <div className="flex items-center justify-between">
-                          <div 
-                            className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={() => navigate(`/professionals/${game.umpireRequest.user?._id}`)}
-                          >
-                            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20 overflow-hidden shrink-0">
-                              {game.umpireRequest.user?.profilePicture ? (
-                                <img src={game.umpireRequest.user.profilePicture} className="w-full h-full object-cover" alt="" />
-                              ) : <Shield size={24} className="text-primary" />}
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="px-2 py-0.5 bg-primary text-black text-[8px] font-black uppercase tracking-widest rounded-md">UMPIRE</span>
-                                <p className="font-black uppercase tracking-tighter">{game.umpireRequest.user?.name}</p>
-                              </div>
-                              <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">
-                                Professional Service Request
-                              </p>
-                            </div>
-                          </div>
-                        <div className="flex gap-2">
-                          <button 
-                            onClick={() => handleUmpireAction(game._id, 'REJECT')}
-                            className="p-2 bg-neutral-800 text-neutral-400 hover:text-red-500 rounded-xl transition-colors"
-                          >
-                            <X size={20} />
-                          </button>
-                          <button 
-                            onClick={() => handleUmpireAction(game._id, 'APPROVE')}
-                            className="p-2 bg-primary text-black rounded-xl hover:scale-105 transition-transform"
-                          >
-                            <Check size={20} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   {['teamA', 'teamB'].map((teamKey, tIdx) => (
                     game.teams?.[teamKey]?.slots?.map((slot, sIdx) => (
                       slot.status === 'PENDING' && (
@@ -286,11 +191,7 @@ const MyHostedGames = () => {
                       )
                     ))
                   ))}
-                  {!myGames.some(g => g._id === game._id && (
-                    g.umpireRequest?.status === 'PENDING' || 
-                    g.teams?.teamA?.slots?.some(s => s.status === 'PENDING') || 
-                    g.teams?.teamB?.slots?.some(s => s.status === 'PENDING')
-                  )) && (
+                  {!myGames.some(g => g._id === game._id && (g.teams?.teamA?.slots?.some(s => s.status === 'PENDING') || g.teams?.teamB?.slots?.some(s => s.status === 'PENDING'))) && (
                     <div className="text-center py-4 text-neutral-600 text-sm italic">
                       No pending join requests
                     </div>

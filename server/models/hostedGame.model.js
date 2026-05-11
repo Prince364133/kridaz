@@ -30,6 +30,7 @@ const hostedGameSchema = new mongoose.Schema(
     teams: {
       teamA: {
         name: { type: String, default: "Team A" },
+        image: { type: String },
         slots: [
           {
             user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -40,6 +41,7 @@ const hostedGameSchema = new mongoose.Schema(
       },
       teamB: {
         name: { type: String, default: "Team B" },
+        image: { type: String },
         slots: [
           {
             user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

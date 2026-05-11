@@ -3,11 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import useTurfData from "../hooks/useTurfData";
-import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, MessageSquare, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus, Loader2 } from "lucide-react";
+import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, MessageSquare, MessageSquareShare, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus, Loader2, LayoutGrid } from "lucide-react";
 import toast from "react-hot-toast";
 import { AdBannerSection } from "../components/Marketing/AdBannerSection";
 import { VideoSection } from "../components/Marketing/VideoSection";
 import BlogSection from "../components/Blogs/BlogSection";
+import TurfCard from "../components/turf/TurfCard";
 import SearchPlayers from "../components/search/SearchPlayers";
 import SearchTurf from "../components/search/SearchTurf";
 import InterestsModal from "../components/modals/InterestsModal";
@@ -375,11 +376,16 @@ export default function Home() {
 
       {/* ── FIND YOUR ARENA ── */}
       <section className="py-6 lg:py-12 px-6 md:px-10 w-full">
-        <div className="text-center mb-6 lg:mb-10">
-          <h2 className="font-display text-6xl md:text-7xl leading-none uppercase">
-            Find Your <span style={{ color: PRI }}>Arena</span>
-          </h2>
-          <p className="font-script text-xl mt-2" style={{ color: PRI }}>where champions play</p>
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16 border-b border-white/5 pb-10">
+          <div className="relative">
+            <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#84CC16] rounded-full shadow-[0_0_25px_rgba(132,204,22,0.5)] hidden md:block"></div>
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
+              Find Your <span className="text-[#84CC16]">Arena</span>
+            </h2>
+            <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.4em] mt-4 font-inter">
+              Premium Venue Discovery • Elite Sports Infrastructure
+            </p>
+          </div>
         </div>
 
         {/* Search & Tabs Combined Row */}
@@ -450,42 +456,11 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             {(turfs || []).slice(0, 8).map((t, i) => (
-              <Link to={`/turf/${t._id}`} key={t._id} className="bms-card group flex flex-col no-underline bg-[#111] rounded-2xl border border-[#2a2a2a] overflow-hidden">
-                <div className="relative overflow-hidden" style={{ height: 180 }}>
-                  <img src={t.image || "/banner-1.png"}
-                    onError={(e) => { e.target.onerror = null; e.target.src = "/banner-1.png"; }}
-                    alt={t.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  {i === 0 && <span className="absolute top-3 left-3 bg-[#84CC16] text-black text-xs font-bold px-2 py-1 rounded">Featured</span>}
-                </div>
-                <div className="flex flex-col flex-1 p-4 gap-2">
-                  <h3 className="font-display text-base uppercase tracking-wide text-white group-hover:text-primary transition-colors leading-tight line-clamp-2">{t.name}</h3>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs" style={{ color: "#888" }}>
-                      <MapPin size={11} style={{ color: PRI }} />
-                      <span className="truncate">{t.location || t.city || "—"}</span>
-                    </div>
-                    {t.distance && (
-                      <span className="text-[10px] font-black text-[#84CC16] uppercase tracking-wider bg-[#84CC16]/5 px-1.5 py-0.5 rounded">
-                        {t.distance} km
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between mt-1">
-                    <div className="flex items-center gap-1">
-                      <Star size={12} className="text-yellow-400 fill-yellow-400" />
-                      <span className="text-white text-xs font-semibold">{t.avgRating || "4.5"}</span>
-                    </div>
-                    <span className="bg-[#1a1a1a] text-white text-[10px] px-2 py-0.5 rounded border border-[#2a2a2a] uppercase">{t.sportTypes?.[0] || "Sport"}</span>
-                  </div>
-                  {t.pricePerHour && (
-                    <p className="text-xs font-bold" style={{ color: PRI }}>₹{t.pricePerHour}/hr</p>
-                  )}
-                  <div className="mt-auto pt-3">
-                    <span className="block w-full text-center font-bold text-sm py-2.5 rounded-full text-black"
-                      style={{ backgroundColor: PRI }}>Book Now</span>
-                  </div>
-                </div>
-              </Link>
+              <TurfCard 
+                key={t._id} 
+                turf={t} 
+                distance={t.distance ? `${t.distance} km` : "1.2 km"}
+              />
             ))}
           </div>
         )}
@@ -501,15 +476,23 @@ export default function Home() {
       {/* ── FIND PLAYERS NEAR YOU ── */}
       <section className="py-6 lg:py-12 px-6 md:px-10" style={{ backgroundColor: "#0A0A0A" }}>
         <div className="w-full">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-            <div className="flex flex-col gap-1">
-              <h2 className="font-display text-2xl min-[375px]:text-3xl md:text-4xl lg:text-5xl tracking-tight uppercase leading-none">
-                Find Players <span style={{ color: PRI }}>Near You</span>
+          {/* Refined Section Header */}
+          <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-8">
+            <div className="relative">
+              <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#84CC16] rounded-full shadow-[0_0_20px_rgba(132,204,22,0.4)] hidden md:block"></div>
+              <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
+                Find Players <span className="text-[#84CC16]">Near You</span>
               </h2>
+              <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-3 font-inter">
+                Global Talent Network • Skill-Matched Athletes
+              </p>
             </div>
-            <Link to="/players" className="text-sm font-bold flex items-center gap-2 hover:text-[#84CC16] transition-colors" style={{ color: "#888" }}>
-              View All Players <ChevronRight size={16} />
+            
+            <Link to="/players" className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-[#84CC16] hover:text-black hover:border-[#84CC16] transition-all duration-500">
+              <span className="text-[11px] font-black uppercase tracking-widest">View All Players</span>
+              <div className="w-6 h-6 rounded-full bg-white/5 group-hover:bg-black/10 flex items-center justify-center transition-colors">
+                <ChevronRight size={14} />
+              </div>
             </Link>
           </div>
 
@@ -537,11 +520,11 @@ export default function Home() {
                 return (
                   <div
                     key={p._id}
-                    className="shrink-0 w-[180px] md:w-[220px] group transition-all duration-500"
+                    className="shrink-0 w-[200px] md:w-[240px] group"
                   >
-                    <div className="relative bg-[#111] rounded-[32px] border border-white/5 overflow-hidden hover:border-[#84CC16]/30 transition-all duration-500 h-full flex flex-col">
-                      {/* Card Image Section */}
-                      <Link to={`/profile/${p._id}`} className="relative aspect-square overflow-hidden block">
+                    <div className="relative bg-[#121212] rounded-[28px] p-2.5 border border-white/5 transition-all duration-500 hover:border-[#84CC16]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
+                      {/* Compact Profile Image Section */}
+                      <Link to={`/profile/${p._id}`} className="relative aspect-[1/1.1] rounded-[20px] overflow-hidden block mb-4">
                         <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
                           {(p.profilePicture || p.profileImage) ? (
                             <img 
@@ -550,63 +533,68 @@ export default function Home() {
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                               onError={(e) => {
                                 e.target.style.display = 'none';
-                                const fallback = e.target.nextElementSibling;
-                                if (fallback) fallback.style.display = 'flex';
+                                e.target.nextElementSibling.style.display = 'flex';
                               }}
                             />
                           ) : null}
                           <div 
-                            className="relative z-10 flex items-center justify-center w-full h-full bg-[#1a1a1a]"
+                            className="relative z-10 flex items-center justify-center w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a]"
                             style={{ display: (p.profilePicture || p.profileImage) ? 'none' : 'flex' }}
                           >
-                            <span className="text-[#84CC16] font-black text-4xl tracking-tighter opacity-40 group-hover:opacity-100 transition-opacity duration-500">
+                            <span className="text-[#84CC16] font-black text-5xl tracking-tighter opacity-20 group-hover:opacity-40 transition-opacity duration-500">
                               {initials}
                             </span>
                           </div>
                         </div>
 
-                        {/* Top Gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        
-                        {/* Dismiss Button (Like photo) */}
-                        <button className="absolute top-3 right-3 w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-black/60 transition-all z-20">
-                          <X size={14} />
-                        </button>
+                        {/* Dismiss Icon */}
+                        <div className="absolute top-2.5 right-2.5 z-20">
+                          <button className="w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+                            <X size={12} />
+                          </button>
+                        </div>
                       </Link>
 
-                      {/* Card Info Section */}
-                      <div className="p-3.5 flex flex-col flex-grow">
-                        <Link to={`/profile/${p._id}`} className="block mb-0.5">
-                          <h3 className="text-white font-bold text-[13px] md:text-[15px] tracking-tight truncate group-hover:text-[#84CC16] transition-colors">
-                            {p.name || "Player"}
-                          </h3>
-                        </Link>
-                        
-                        <div className="flex items-center gap-1.5 text-white/40 mb-3.5">
-                          <MapPin size={9} className="text-[#84CC16]" />
-                          <span className="text-[9px] font-bold uppercase tracking-widest truncate">
-                            {p.city || "Nearby"}
-                          </span>
+                      {/* Content Section */}
+                      <div className="px-2 pb-1.5">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Link to={`/profile/${p._id}`}>
+                            <h3 className="text-white font-bold text-[15px] tracking-tight group-hover:text-[#84CC16] transition-colors line-clamp-1 font-open-sans">
+                              {p.name || "Anonymous"}
+                            </h3>
+                          </Link>
+                          <div className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] shrink-0">
+                             <Check size={8} strokeWidth={4} className="text-white" />
+                          </div>
                         </div>
+                        
+                        <p className="text-white/30 text-[10px] font-medium leading-tight mb-4 line-clamp-2">
+                          Competitive {p.preferredSport || "Athlete"} • {p.city || "Nearby"}
+                        </p>
 
-                        {/* Follow Button */}
-                        <button 
-                          onClick={(e) => handleFollowToggle(e, p)}
-                          className={`w-full py-3 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.15em] transition-all duration-300 mt-auto
-                            ${isFollowing 
-                              ? 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10' 
-                              : 'bg-[#84CC16]/10 border border-[#84CC16]/20 text-[#84CC16] hover:bg-[#84CC16] hover:text-black hover:scale-[1.02]'}`}
-                        >
-                          {isFollowing ? (
-                            <>
-                              <CheckCircle size={14} /> Following
-                            </>
-                          ) : (
-                            <>
-                              <Plus size={14} /> Follow
-                            </>
-                          )}
-                        </button>
+                        {/* Bottom Bar */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1 text-white/20">
+                              <Users size={12} />
+                              <span className="text-[10px] font-bold">{p.followersCount || Math.floor(Math.random() * 500) + 50}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-white/20">
+                              <LayoutGrid size={12} />
+                              <span className="text-[10px] font-bold">{p.postsCount || Math.floor(Math.random() * 100) + 5}</span>
+                            </div>
+                          </div>
+
+                          <button 
+                            onClick={(e) => handleFollowToggle(e, p)}
+                            className={`px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-wider transition-all duration-300
+                              ${isFollowing 
+                                ? 'bg-white/5 border border-white/10 text-white/30 hover:bg-white/10' 
+                                : 'bg-[#222] border border-white/5 text-white hover:bg-white hover:text-black shadow-lg'}`}
+                          >
+                            {isFollowing ? 'Following' : 'Follow +'}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -626,17 +614,22 @@ export default function Home() {
       {featureFlags['join_games'] && (
         <section className="py-6 lg:py-12 px-6 md:px-10" style={{ backgroundColor: "#0A0A0A" }}>
           <div className="w-full">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 lg:mb-8">
-              <div>
-                <h2 className="font-display text-3xl sm:text-4xl md:text-7xl lg:text-8xl uppercase leading-none text-white flex items-center gap-2 md:gap-3">
-                  JOIN <span style={{ color: PRI }}>GAMES NEAR YOU</span>
+            <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-10">
+              <div className="relative">
+                <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#84CC16] rounded-full shadow-[0_0_25px_rgba(132,204,22,0.5)] hidden md:block"></div>
+                <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
+                  JOIN <span className="text-[#84CC16]">GAMES</span>
                 </h2>
-                <p className="font-mono text-xs uppercase tracking-widest mt-2" style={{ color: "#888" }}>
-                  No team? No problem. Find your people. Build your network. Play together.
+                <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-4 font-inter">
+                  Community Matchmaking • No Team? No Problem.
                 </p>
               </div>
-              <Link to="/join-games" className="text-sm font-bold flex items-center gap-2 hover:text-[#84CC16] transition-colors" style={{ color: "#888" }}>
-                View More Games <ChevronRight size={16} />
+
+              <Link to="/join-games" className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-[#84CC16] hover:text-black hover:border-[#84CC16] transition-all duration-500">
+                <span className="text-[11px] font-black uppercase tracking-widest">View More Games</span>
+                <div className="w-6 h-6 rounded-full bg-white/5 group-hover:bg-black/10 flex items-center justify-center transition-colors">
+                  <ChevronRight size={14} />
+                </div>
               </Link>
             </div>
 
@@ -748,21 +741,27 @@ export default function Home() {
       {featureFlags['find_professionals'] && (
         <section className="py-6 lg:py-12 px-6 md:px-10 border-b" style={{ backgroundColor: "#000", borderColor: "#1A1A1A" }}>
           <div className="w-full">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6 lg:mb-8">
-              <div>
-                <h2 className="font-display text-5xl md:text-6xl uppercase leading-none text-white">
-                  Find <span style={{ color: PRI }}>Professionals</span>
+            <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-10">
+              <div className="relative">
+                <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#84CC16] rounded-full shadow-[0_0_25px_rgba(132,204,22,0.5)] hidden md:block"></div>
+                <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
+                  PRO <span className="text-[#84CC16]">EXPERTS</span>
                 </h2>
-                <p className="font-mono text-xs uppercase tracking-widest mt-2" style={{ color: "#888" }}>
-                  Book certified experts for your next session
+                <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-4 font-inter">
+                  Certified Coaching • Professional Officiating
                 </p>
               </div>
 
-              {/* Tabs */}
-              <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
+              {/* Refined Tabs */}
+              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0">
                 {["ALL SPORTS", "CRICKET", "BADMINTON", "FOOTBALL", "TENNIS"].map((tab, i) => (
-                  <button key={tab} className="px-6 py-2 rounded-full font-bold text-xs shrink-0 transition-colors border"
-                    style={i === 0 ? { backgroundColor: PRI, color: "#000", borderColor: PRI } : { backgroundColor: "transparent", color: "#888", borderColor: "transparent" }}>
+                  <button 
+                    key={tab} 
+                    className={`px-6 py-2.5 rounded-full font-black text-[10px] shrink-0 transition-all duration-300 uppercase tracking-widest border
+                      ${i === 0 
+                        ? "bg-[#84CC16] text-black border-[#84CC16] shadow-[0_0_15px_rgba(132,204,22,0.3)]" 
+                        : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"}`}
+                  >
                     {tab}
                   </button>
                 ))}
@@ -777,52 +776,67 @@ export default function Home() {
                 { name: "VIRAT KOHLI", exp: "15+ Years", spec: "Masterclass Batting", price: "₹10,000/hr", img: "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?w=400&q=80", rating: "5.0 (1k+ reviews)" },
                 { name: "JOHN DOE", exp: "8+ Years", spec: "Certified Umpire", price: "₹1,000/match", img: "https://images.unsplash.com/photo-1587329310686-91414b8e3cb7?w=400&q=80", rating: "4.8 (150 reviews)" },
               ].map((pro, i) => (
-                <div key={i} className="w-[280px] md:w-full h-[480px] snap-center rounded-3xl border overflow-hidden flex flex-col group shrink-0" style={{ backgroundColor: "#111", borderColor: BDR }}>
-                  {/* Image Section */}
-                  <div className="relative h-[280px] overflow-hidden shrink-0">
-                    <img src={pro.img} alt={pro.name} className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105" />
-                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #111 0%, transparent 50%)" }} />
+                <div key={i} className="shrink-0 w-[200px] md:w-full group snap-center">
+                  <div className="relative bg-[#121212] rounded-[28px] p-2.5 border border-white/5 transition-all duration-500 hover:border-[#84CC16]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
+                    
+                    {/* Compact Profile Image Section */}
+                    <div className="relative aspect-[1/1.1] rounded-[20px] overflow-hidden block mb-4">
+                      <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
+                        <img 
+                          src={pro.img} 
+                          alt={pro.name} 
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                        />
+                      </div>
+                      
+                      {/* Price Badge */}
+                      <div className="absolute top-2.5 right-2.5 z-20">
+                        <div className="px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#84CC16] text-[10px] font-bold shadow-lg">
+                          {pro.price}
+                        </div>
+                      </div>
 
-                    {/* Top Badges */}
-                    <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-bold text-white border backdrop-blur-md flex items-center gap-1" style={{ borderColor: "rgba(255,255,255,0.2)", backgroundColor: "rgba(0,0,0,0.5)" }}>
-                        <Award size={10} style={{ color: PRI }} /> PRO
-                      </span>
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: PRI }}>
-                        <CheckCircle size={14} className="text-black" />
+                      {/* PRO Badge */}
+                      <div className="absolute top-2.5 left-2.5 z-20">
+                        <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white text-[9px] font-black tracking-widest gap-1 shadow-lg">
+                          <Award size={10} className="text-[#84CC16]" /> PRO
+                        </div>
                       </div>
                     </div>
 
-                    {/* Overlay Info */}
-                    <div className="absolute bottom-4 left-4">
-                      <div className="flex items-center gap-1 text-[10px] font-bold mb-1" style={{ color: "#888" }}>
-                        <Star size={10} style={{ color: PRI, fill: PRI }} /> {pro.rating}
+                    {/* Content Section */}
+                    <div className="px-2 pb-1.5">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <h3 className="text-white font-bold text-[15px] tracking-tight group-hover:text-[#84CC16] transition-colors line-clamp-1 font-open-sans capitalize">
+                          {pro.name.toLowerCase()}
+                        </h3>
+                        <div className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] shrink-0">
+                           <Check size={8} strokeWidth={4} className="text-white" />
+                        </div>
                       </div>
-                      <h3 className="font-display text-2xl uppercase italic text-white leading-none">{pro.name}</h3>
-                    </div>
-                  </div>
+                      
+                      <p className="text-white/40 text-[10px] font-medium leading-tight mb-4 line-clamp-1">
+                        <span className="capitalize">{pro.spec.toLowerCase()}</span> • {pro.exp.toLowerCase()}
+                      </p>
 
-                  {/* Details Section */}
-                  <div className="p-5 flex flex-col flex-1">
-                    <div className="flex justify-between items-start mb-6">
-                      <div>
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1">EXPERIENCE</p>
-                        <p className="text-xs font-semibold text-white">{pro.exp}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1">SPECIALTY</p>
-                        <p className="text-xs font-semibold text-white">{pro.spec}</p>
-                      </div>
-                    </div>
+                      {/* Bottom Bar */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1 text-white/80">
+                            <Star size={12} className="text-[#84CC16] fill-[#84CC16]" />
+                            <span className="text-[10px] font-bold">{pro.rating.split(' ')[0]}</span>
+                          </div>
+                          <div className="flex items-center text-white/30">
+                            <span className="text-[9px] font-medium">
+                              ({pro.rating.split(' ')[1].replace('(', '')})
+                            </span>
+                          </div>
+                        </div>
 
-                    <div className="mt-auto flex items-center justify-between pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-                      <div>
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-0.5">STARTING FROM</p>
-                        <p className="font-bold text-white">{pro.price}</p>
+                        <button className="px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-wider transition-all duration-300 bg-[#222] border border-white/5 text-white hover:bg-white hover:text-black shadow-lg">
+                          BOOK
+                        </button>
                       </div>
-                      <button className="px-6 py-2 rounded-lg font-bold text-black text-xs transition-transform hover:scale-105" style={{ backgroundColor: "#fff" }}>
-                        BOOK NOW
-                      </button>
                     </div>
                   </div>
                 </div>

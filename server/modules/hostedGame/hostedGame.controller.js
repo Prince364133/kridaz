@@ -21,6 +21,16 @@ const getUsableBalance = async (userId) => {
   return Math.max(uBal, oBal);
 };
 
+// Helper: strip base64 images before saving to keep document size low
+const sanitizeImage = (img) => {
+  if (!img) return null;
+  if (img.startsWith('data:')) {
+    // base64 — truncate if > 200KB to avoid mongo doc limit
+    return img.length > 200000 ? img.substring(0, 200000) : img;
+  }
+  return img; // plain URL
+};
+
 export const getGroundsForHosting = async (req, res) => {
   try {
     const { city, state, sportType } = req.query;
@@ -147,10 +157,12 @@ export const createHostedGame = async (req, res) => {
         teams: {
           teamA: {
             name: teamA.name || "Team A",
+            image: sanitizeImage(teamA.image),
             slots: teamA.slots.map(s => ({ role: s.role, status: "OPEN" }))
           },
           teamB: {
             name: teamB.name || "Team B",
+            image: sanitizeImage(teamB.image),
             slots: teamB.slots.map(s => ({ role: s.role, status: "OPEN" }))
           }
         },

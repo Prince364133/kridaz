@@ -1,20 +1,24 @@
 import React from "react";
-import { Search } from "lucide-react";
+import { Search, Command } from "lucide-react";
 
 const SearchInput = ({ searchTerm, handleSearch }) => {
   return (
-    <div className="w-full">
-      <div className="relative group flex items-center bg-[#111] border border-white/5 rounded-xl h-11 transition-all focus-within:border-[#84CC16]/50">
-        <div className="pl-4 shrink-0">
-          <Search size={14} className="text-gray-500 group-focus-within:text-[#84CC16] transition-colors" />
+    <div className="relative w-full group">
+      <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-white/20 group-focus-within:text-[#CCFF00] transition-colors">
+        <Search size={18} />
+      </div>
+      <input
+        type="text"
+        placeholder="Search identity database..."
+        className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-3.5 pl-12 pr-12 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#CCFF00]/50 transition-all font-inter shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] group-hover:border-white/20"
+        value={searchTerm}
+        onChange={(e) => handleSearch(e.target.value)}
+      />
+      <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-[6px] border border-white/10">
+           <Command size={11} className="text-white/40" />
+           <span className="text-[10px] font-black text-white/40">K</span>
         </div>
-        <input
-          type="text"
-          placeholder="SEARCH USER DATABASE..."
-          className="w-full bg-transparent border-none py-2 px-4 text-[11px] font-bold text-white focus:ring-0 placeholder:text-gray-600 uppercase tracking-wider"
-          value={searchTerm}
-          onChange={(e) => handleSearch(e.target.value)}
-        />
       </div>
     </div>
   );

@@ -7,16 +7,15 @@ import { toast } from 'react-hot-toast';
 import { 
   Users, MapPin, Calendar, Clock, 
   Search, Filter, Coins, ChevronRight,
-  UserCheck, Trophy, Info, Shield
+  UserCheck, Trophy, Info, Zap, ShieldCheck
 } from 'lucide-react';
-
 import CoinAnimation from '../components/CoinAnimation';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
 const JoinGames = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useSelector((state) => state.auth);
   const { gateInteraction } = useLoginOnDemand();
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedGame, setSelectedGame] = useState(null);
@@ -36,7 +35,7 @@ const JoinGames = () => {
       if (sport !== 'All Sports') url += `gameType=${sport}&`;
       
       const res = await axiosInstance.get(url);
-      setGames(res.data.games);
+      setGames(res.data.games || []);
     } catch (err) {
       toast.error("Failed to fetch games");
     } finally {
@@ -45,7 +44,6 @@ const JoinGames = () => {
   };
 
   useEffect(() => {
-    // Try to get location from user profile or local state
     const fetchUserAndGames = async () => {
       try {
         const userRes = await axiosInstance.get(`/api/user/auth/getMe`);
@@ -57,18 +55,13 @@ const JoinGames = () => {
           fetchGames();
         }
       } catch (err) {
-        console.error("Profile fetch error:", err);
         fetchGames();
       }
     };
     fetchUserAndGames();
   }, []);
 
-  const handleSearch = (e) => {
-    const val = e.target.value;
-    setSearch(val);
-    // Simple local filtering for search or we could fetch again
-  };
+  const handleSearch = (e) => setSearch(e.target.value);
 
   const filteredGames = games.filter(game => 
     game.gameType.toLowerCase().includes(search.toLowerCase()) ||
@@ -78,7 +71,6 @@ const JoinGames = () => {
 
   const handleJoinGame = async () => {
     if (!joiningSlot) return;
-    
     gateInteraction(async () => {
       try {
         const res = await axiosInstance.post(`/api/hosted-game/join`, {
@@ -87,10 +79,7 @@ const JoinGames = () => {
           slotIndex: joiningSlot.index,
           role: joiningSlot.role
         });
-
-        if (res.data.success) {
-          setShowCoinAnim(true);
-        }
+        if (res.data.success) setShowCoinAnim(true);
       } catch (err) {
         const errorMsg = err.response?.data?.message || "Failed to join game";
         toast.error(errorMsg);
@@ -105,288 +94,325 @@ const JoinGames = () => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-900 text-white p-4 pb-24">
-      {/* Header */}
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-black italic tracking-tighter">JOIN GAMES</h1>
-          <p className="text-neutral-400">Play matches hosted by the community</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button 
-            onClick={() => {
-              gateInteraction(() => navigate('/my-hosted-games'), {
-                title: "View Your Games",
-                message: "Access your dashboard to manage your hosted matches and active joining requests."
-              });
-            }} 
-            className="px-6 py-3 bg-neutral-800 text-white font-bold rounded-xl flex items-center gap-2 border border-neutral-700"
-          >
-            <Users size={18} /> My Games
-          </button>
-          <button 
-            onClick={() => {
-              gateInteraction(() => navigate('/host-game'), {
-                title: "Host a Game",
-                message: "Ready to be a leader? Sign in to create your own match and invite players."
-              });
-            }} 
-            className="px-6 py-3 bg-yellow-500 text-black font-bold rounded-xl flex items-center gap-2"
-          >
-            <Trophy size={18} /> Host a Game
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#000000] text-white p-6 lg:p-10 pb-24 relative overflow-hidden font-inter">
+      {/* Dynamic Background Glow */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#CCFF00]/5 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#CCFF00]/5 blur-[150px] pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="relative col-span-2">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
-          <input 
-            className="w-full bg-neutral-800 border-none rounded-xl py-3 pl-12 text-sm focus:ring-1 ring-yellow-500 outline-none" 
-            placeholder="Search by city or venue..." 
-            value={search}
-            onChange={handleSearch}
-          />
-        </div>
-        <div className="relative">
-          <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
-          <select 
-            className="w-full bg-neutral-800 border-none rounded-xl py-3 pl-12 appearance-none text-sm outline-none"
-            value={sportFilter}
-            onChange={(e) => {
-              setSportFilter(e.target.value);
-              fetchGames(userLocation.city, userLocation.state, e.target.value);
-            }}
-          >
-            <option>All Sports</option>
-            <option>Cricket</option>
-            <option>Football</option>
-            <option>Badminton</option>
-            <option>Basketball</option>
-            <option>Tennis</option>
-            <option>Volleyball</option>
-          </select>
-        </div>
-        <div className="flex items-center gap-2 px-4 bg-neutral-800/50 rounded-xl border border-neutral-800">
-          <MapPin size={16} className="text-yellow-500" />
-          <span className="text-[10px] font-black uppercase truncate">
-            {userLocation.city || 'ALL INDIA'}
-          </span>
-        </div>
-      </div>
-
-      {/* Game List */}
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {loading ? (
-          [1, 2, 3].map(i => <div key={i} className="h-64 bg-neutral-800 rounded-3xl animate-pulse" />)
-        ) : filteredGames.length === 0 ? (
-          <div className="col-span-full py-20 text-center">
-            <div className="w-20 h-20 bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Info className="text-neutral-500" size={32} />
-            </div>
-            <h3 className="text-xl font-bold">No games found</h3>
-            <p className="text-neutral-500">
-              {userLocation.city ? `No games currently hosted in ${userLocation.city}.` : "No games match your search."}
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Header Section */}
+        <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-10 border-b border-[#2D2D2D] pb-10 mb-12">
+          <div className="relative">
+            <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#CCFF00] rounded-full shadow-[0_0_25px_rgba(204,255,0,0.5)] hidden md:block"></div>
+            <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none mb-4 font-open-sans">
+              Join <span className="text-[#CCFF00]">Games</span>
+            </h1>
+            <p className="text-sm md:text-xl font-medium text-[#999999] tracking-tight max-w-xl">
+              Competitive Matchmaking • Discover & participate in matches hosted by the elite sports community.
             </p>
           </div>
-        ) : (
-          filteredGames.map(game => (
-            <motion.div
-              key={game._id}
-              whileHover={{ y: -5 }}
-              className="bg-neutral-800/50 border border-neutral-800 rounded-3xl overflow-hidden hover:border-yellow-500/30 transition-all cursor-pointer group"
-              onClick={() => setSelectedGame(game)}
+
+          <div className="flex flex-wrap items-center gap-4">
+            <button 
+              onClick={() => gateInteraction(() => navigate('/my-hosted-games'))}
+              className="px-6 py-3.5 bg-[#121212] border border-[#2D2D2D] text-white font-black text-[11px] uppercase tracking-widest rounded-[12px] flex items-center gap-2.5 hover:bg-white hover:text-black transition-all duration-500 shadow-xl"
             >
-              <div className="p-5">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="bg-yellow-500/10 px-3 py-1 rounded-full text-xs font-bold text-yellow-500">
-                    {game.gameType}
-                  </div>
-                  <div className="flex items-center gap-1 text-yellow-500 font-black">
-                    <Coins size={14} /> {game.perPlayerCharge}
-                  </div>
-                </div>
+              <Users size={16} /> My Ledger
+            </button>
+            <button 
+              onClick={() => gateInteraction(() => navigate('/host-game'))}
+              className="px-6 py-3.5 bg-[#CCFF00] text-black font-black text-[11px] uppercase tracking-widest rounded-[12px] flex items-center gap-2.5 hover:scale-105 transition-all duration-500 shadow-[0_0_30px_rgba(204,255,0,0.2)]"
+            >
+              <Trophy size={16} /> Host Match
+            </button>
+          </div>
+        </div>
 
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-xl font-black flex items-center gap-2">
-                    {game.teams.teamA.name} <span className="text-xs text-neutral-500 italic">VS</span> {game.teams.teamB.name}
-                  </h3>
-                  {game.shortId && (
-                    <span className="text-[10px] text-neutral-600 font-black tracking-widest bg-neutral-900/50 px-2 py-0.5 rounded border border-white/5">
-                      {game.shortId}
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-neutral-400 flex items-center gap-1 mb-4">
-                  <MapPin size={14} /> {game.ground?.name || 'Self-Arranged Venue'}
-                </p>
+        {/* Search & Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
+          <div className="md:col-span-6 relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00] transition-colors" size={20} />
+            <input 
+              className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#CCFF00]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]" 
+              placeholder="Search by city, venue, or sport..." 
+              value={search}
+              onChange={handleSearch}
+            />
+          </div>
+          <div className="md:col-span-3 relative group">
+            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00] transition-colors" size={18} />
+            <select 
+              className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 pl-12 pr-4 appearance-none text-sm text-white focus:outline-none focus:border-[#CCFF00]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]"
+              value={sportFilter}
+              onChange={(e) => {
+                setSportFilter(e.target.value);
+                fetchGames(userLocation.city, userLocation.state, e.target.value);
+              }}
+            >
+              <option>All Sports</option>
+              <option>Cricket</option>
+              <option>Football</option>
+              <option>Badminton</option>
+              <option>Basketball</option>
+              <option>Tennis</option>
+              <option>Volleyball</option>
+            </select>
+          </div>
+          <div className="md:col-span-3 flex items-center gap-3 px-5 py-4 bg-[#CCFF00]/5 border border-[#CCFF00]/10 rounded-[12px] shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
+            <MapPin size={18} className="text-[#CCFF00]" />
+            <div className="min-w-0">
+              <p className="text-[8px] font-black text-[#CCFF00]/60 uppercase tracking-widest mb-0.5">CURRENT DOMAIN</p>
+              <p className="text-[11px] font-black text-white uppercase truncate tracking-widest">
+                {userLocation.city || 'GLOBAL NETWORK'}
+              </p>
+            </div>
+          </div>
+        </div>
 
-                <div className="flex items-center gap-4 text-xs font-medium text-neutral-300 bg-neutral-900/50 p-3 rounded-2xl">
-                  <div className="flex items-center gap-1">
-                    <Calendar size={14} className="text-yellow-500" /> {new Date(game.date).toLocaleDateString()}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock size={14} className="text-yellow-500" /> {game.time}
-                  </div>
+        {/* Game List */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {loading ? (
+            [1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+              <div key={i} className="h-[420px] bg-[#0d0d0d] rounded-[24px] border border-[#2D2D2D] animate-pulse" />
+            ))
+          ) : filteredGames.length === 0 ? (
+            <div className="col-span-full py-32 text-center bg-[#0d0d0d] rounded-[32px] border border-[#2D2D2D] relative overflow-hidden">
+              <div className="absolute inset-0 bg-[#CCFF00]/5 blur-[100px]" />
+              <div className="relative z-10 space-y-6">
+                <div className="w-24 h-24 bg-white/5 border border-white/5 rounded-full flex items-center justify-center mx-auto shadow-2xl">
+                  <Info className="text-[#CCFF00]/40" size={48} />
                 </div>
-
-                <div className="flex items-center justify-between mt-4 bg-neutral-900/30 p-2 rounded-xl">
-                  <div className="flex items-center gap-2 text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
-                    <Users size={12} className="text-yellow-500" /> 
-                    <span>
-                      {game.teams.teamA.slots.filter(s => s.status === 'OPEN').length + game.teams.teamB.slots.filter(s => s.status === 'OPEN').length} / {game.teams.teamA.slots.length + game.teams.teamB.slots.length} Slots Open
-                    </span>
-                  </div>
-                  <div className="flex -space-x-2">
-                    {[...Array(Math.min(5, game.teams.teamA.slots.length + game.teams.teamB.slots.length))].map((_, i) => (
-                      <div key={i} className="w-5 h-5 rounded-full border border-neutral-800 bg-neutral-700 flex items-center justify-center text-[6px]">👤</div>
-                    ))}
-                  </div>
+                <div className="space-y-2">
+                  <h3 className="text-3xl font-black text-white uppercase tracking-tighter">No Active Matches</h3>
+                  <p className="text-[#999999] max-w-md mx-auto">
+                    The sports ledger is currently empty. Be the first to host a match in this region.
+                  </p>
                 </div>
-                
-                {game.umpire && (
-                  <div 
-                    className="mt-3 flex items-center gap-2 px-3 py-1.5 bg-yellow-500/5 rounded-xl border border-yellow-500/20 hover:border-yellow-500/50 transition-all cursor-pointer group/badge"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/professionals/${game.umpire._id}`);
-                    }}
-                  >
-                    {game.umpire.profilePicture ? (
-                      <img src={game.umpire.profilePicture} className="w-4 h-4 rounded-full object-cover border border-yellow-500/20" />
-                    ) : (
-                      <Shield size={10} className="text-yellow-500 fill-yellow-500/20" />
-                    )}
-                    <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest truncate group-hover/badge:text-yellow-400">
-                      Umpire: {game.umpire.name}
-                    </span>
-                  </div>
-                )}
-
-              </div>
-
-              <div className="px-5 pb-5 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full border border-white/20 overflow-hidden bg-[#84CC16]/10 flex items-center justify-center shrink-0">
-                    {game.host?.profilePicture ? (
-                      <img 
-                        src={game.host.profilePicture} 
-                        alt="" 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                        }}
-                      />
-                    ) : null}
-                    <div 
-                      className="w-full h-full flex items-center justify-center"
-                      style={{ display: game.host?.profilePicture ? 'none' : 'flex' }}
-                    >
-                      <span className="text-[#84CC16] font-black text-[10px]">
-                        {game.host?.name ? game.host.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-[10px]">
-                    <p className="text-neutral-500">HOSTED BY</p>
-                    <p className="font-bold uppercase tracking-tighter">{game.host?.name || 'Unknown Host'}</p>
-                  </div>
-                </div>
-                <button className="p-2 bg-yellow-500 text-black rounded-lg group-hover:px-4 transition-all flex items-center gap-2 font-bold text-xs">
-                  JOIN <ChevronRight size={14} />
+                <button 
+                  onClick={() => navigate('/host-game')}
+                  className="px-10 py-4 bg-[#CCFF00] text-black font-black text-xs uppercase tracking-[0.2em] rounded-full shadow-[0_0_20px_rgba(204,255,0,0.2)] hover:scale-105 transition-all"
+                >
+                  Create Match
                 </button>
               </div>
-            </motion.div>
-          ))
-        )}
+            </div>
+          ) : (
+            filteredGames.map(game => (
+              <motion.div
+                key={game._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -6, scale: 1.01 }}
+                transition={{ duration: 0.3 }}
+                className="group relative rounded-[24px] overflow-hidden cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/5 hover:border-[#CCFF00]/30 transition-all duration-500"
+                style={{ minHeight: '480px' }}
+                onClick={() => setSelectedGame(game)}
+              >
+                {/* ── Background: Split Team Images ── */}
+                <div className="absolute inset-0 z-0 overflow-hidden">
+                  {/* Team A — Left Half */}
+                  <div className="absolute inset-y-0 left-0 w-1/2 overflow-hidden">
+                    <img
+                      src={game.teams?.teamA?.image || "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&q=80"}
+                      alt="Team A"
+                      className="w-full h-full object-cover object-right scale-110 group-hover:scale-125 transition-transform duration-700"
+                    />
+                  </div>
+                  {/* Team B — Right Half */}
+                  <div className="absolute inset-y-0 right-0 w-1/2 overflow-hidden">
+                    <img
+                      src={game.teams?.teamB?.image || "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80"}
+                      alt="Team B"
+                      className="w-full h-full object-cover object-left scale-110 group-hover:scale-125 transition-transform duration-700"
+                    />
+                  </div>
+
+                  {/* Center vignette — vintage blend where images meet */}
+                  <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-28 bg-gradient-to-r from-transparent via-black to-transparent opacity-90" />
+                  {/* Edge vignettes (left + right) */}
+                  <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-black/70 to-transparent" />
+                  <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-black/70 to-transparent" />
+
+                  {/* Top-to-bottom dark overlay for readability */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/15 to-black/92" />
+                  {/* Bottom neon-green tinted overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a1500]/85 via-transparent to-transparent" />
+                </div>
+
+
+                {/* ── Content ── */}
+                <div className="relative z-10 flex flex-col h-full p-5" style={{ minHeight: '480px' }}>
+
+                  {/* Top Row: Sport badge + Coins */}
+                  <div className="flex items-start justify-between mb-auto">
+                    <div className="px-4 py-1.5 bg-[#CCFF00]/20 border border-[#CCFF00]/40 rounded-full backdrop-blur-sm">
+                      <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">{game.gameType}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10">
+                      <Coins size={13} className="text-[#CCFF00]" />
+                      <span className="text-sm font-black text-white">{game.perPlayerCharge || 'FREE'}</span>
+                    </div>
+                  </div>
+
+                  {/* Center: Rivalry + Team Names */}
+                  <div className="py-6">
+                    {/* Divider label */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="h-px flex-1 bg-[#CCFF00]/30" />
+                      <span className="text-[9px] font-black text-[#CCFF00]/70 uppercase tracking-[0.4em] flex items-center gap-1">
+                        <Zap size={10} className="text-[#CCFF00]" /> Rivalry Ledger
+                      </span>
+                      <div className="h-px flex-1 bg-[#CCFF00]/30" />
+                    </div>
+
+                    {/* Team Names */}
+                    <h3 className="font-black uppercase leading-none tracking-tighter text-white font-open-sans drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" style={{ fontSize: 'clamp(1.4rem, 4vw, 2.2rem)' }}>
+                      {game.teams.teamA.name}{' '}
+                      <span className="text-[#CCFF00] italic">VS</span>{' '}
+                      {game.teams.teamB.name}
+                    </h3>
+
+                    {/* Venue */}
+                    <div className="flex items-center gap-2 mt-3 text-white/70 text-xs font-medium">
+                      <MapPin size={13} className="text-[#CCFF00] shrink-0" />
+                      <span className="truncate">{game.ground?.name || 'Self-Arranged Venue'}</span>
+                    </div>
+                  </div>
+
+                  {/* Bottom Panel */}
+                  <div className="bg-black/60 backdrop-blur-md rounded-[16px] border border-white/10 p-4 space-y-4 mt-auto">
+
+                    {/* Date + Time boxes */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-black/50 border border-[#CCFF00]/20 rounded-[12px] p-3">
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <div className="w-6 h-6 rounded-lg bg-[#CCFF00]/10 border border-[#CCFF00]/20 flex items-center justify-center">
+                            <Calendar size={12} className="text-[#CCFF00]" />
+                          </div>
+                        </div>
+                        <p className="text-[7px] font-black text-[#CCFF00]/60 uppercase tracking-widest mb-0.5">Kickoff Date</p>
+                        <p className="text-[13px] font-black text-white">
+                          {new Date(game.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                        </p>
+                      </div>
+                      <div className="bg-black/50 border border-[#CCFF00]/20 rounded-[12px] p-3">
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <div className="w-6 h-6 rounded-lg bg-[#CCFF00]/10 border border-[#CCFF00]/20 flex items-center justify-center">
+                            <Clock size={12} className="text-[#CCFF00]" />
+                          </div>
+                        </div>
+                        <p className="text-[7px] font-black text-[#CCFF00]/60 uppercase tracking-widest mb-0.5">Precision Time</p>
+                        <p className="text-[13px] font-black text-white">{game.time}</p>
+                      </div>
+                    </div>
+
+                    {/* Slots */}
+                    <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-[#CCFF00]/10 border border-[#CCFF00]/20 flex items-center justify-center">
+                          <Users size={14} className="text-[#CCFF00]" />
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-black text-white leading-none">
+                            {game.teams.teamA.slots.filter(s => s.status === 'OPEN').length + game.teams.teamB.slots.filter(s => s.status === 'OPEN').length} OPEN
+                          </p>
+                          <p className="text-[7px] font-bold text-[#CCFF00]/50 uppercase tracking-widest mt-0.5">Available Capacity</p>
+                        </div>
+                      </div>
+                      <div className="flex -space-x-1.5">
+                        {[...Array(4)].map((_, i) => (
+                          <div key={i} className="w-6 h-6 rounded-full border border-[#0d0d0d] bg-[#CCFF00]/10 flex items-center justify-center shadow-lg">
+                            <Users size={10} className="text-[#CCFF00]/50" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Host + Join */}
+                    <div className="flex items-center justify-between gap-3 pt-1 border-t border-white/5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-full border border-[#CCFF00]/20 bg-[#1A1A1A] flex items-center justify-center overflow-hidden shrink-0">
+                          {game.host?.profilePicture ? (
+                            <img src={game.host.profilePicture} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-[#CCFF00] font-black text-[11px]">
+                              {game.host?.name ? game.host.name[0].toUpperCase() : '?'}
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-[7px] font-black text-white/40 uppercase tracking-widest mb-0.5">Commanded By</p>
+                          <p className="text-[11px] font-black text-white uppercase tracking-tight truncate max-w-[90px]">
+                            {game.host?.name || 'Unknown'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button className="flex items-center gap-2 px-5 py-3 bg-[#CCFF00] text-black rounded-[12px] font-black text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(204,255,0,0.4)] hover:scale-105 hover:shadow-[0_0_30px_rgba(204,255,0,0.6)] transition-all duration-300">
+                        JOIN <ChevronRight size={14} strokeWidth={3} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          )}
+        </div>
       </div>
 
-      {/* Game Details & Join Modal */}
+      {/* Game Details Modal */}
       <AnimatePresence>
         {selectedGame && (
-          <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-4 lg:p-10 overflow-hidden">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedGame(null)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              className="absolute inset-0 bg-black/90 backdrop-blur-xl"
             />
             <motion.div
-              initial={{ y: "100%", opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: "100%", opacity: 0 }}
-              className="relative bg-neutral-900 border border-neutral-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl"
+              initial={{ y: "100%", opacity: 0, scale: 0.95 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: "100%", opacity: 0, scale: 0.95 }}
+              className="relative bg-[#000000] border border-[#2D2D2D] w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[32px] shadow-[0_30px_60px_rgba(0,0,0,0.8)] custom-scrollbar"
             >
-              <div className="p-8">
-                <div className="flex justify-between items-start mb-8">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h2 className="text-3xl font-black tracking-tighter uppercase italic">{selectedGame.gameType} MATCH</h2>
-                      {selectedGame.shortId && (
-                        <span className="bg-neutral-800 text-neutral-400 text-[10px] font-black px-2 py-1 rounded-full uppercase tracking-wider">
-                          {selectedGame.shortId}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <p className="text-neutral-400">{selectedGame.ground?.name || 'Venue to be decided'}</p>
-                      <button 
-                        onClick={() => navigate(`/match/${selectedGame._id}`)}
-                        className="text-[10px] text-primary font-black uppercase tracking-widest hover:underline"
-                      >
-                        View Full Details →
-                      </button>
-                    </div>
-
+              <div className="sticky top-0 z-20 bg-black/50 backdrop-blur-md border-b border-[#2D2D2D] px-8 py-6 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="px-4 py-1.5 bg-[#CCFF00] text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
+                    {selectedGame.gameType} Elite
                   </div>
-                  <button onClick={() => setSelectedGame(null)} className="p-2 bg-neutral-800 rounded-xl">✕</button>
+                  <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter font-open-sans">Match Intelligence</h2>
+                </div>
+                <button onClick={() => setSelectedGame(null)} className="w-10 h-10 bg-[#121212] border border-[#2D2D2D] rounded-full flex items-center justify-center text-[#CCFF00] hover:bg-[#CCFF00] hover:text-black transition-all">✕</button>
+              </div>
+
+              <div className="p-8 lg:p-12">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                  {[
+                    { icon: Calendar, label: "Execution Date", value: new Date(selectedGame.date).toLocaleDateString() },
+                    { icon: Clock, label: "Precise Time", value: selectedGame.time },
+                    { icon: Coins, label: "Network Fee", value: selectedGame.perPlayerCharge || 'Free' },
+                    { icon: ShieldCheck, label: "Security / Umpire", value: selectedGame.umpire ? 'Verified' : 'Unmanaged' }
+                  ].map((stat, i) => (
+                    <div key={i} className="bg-[#0d0d0d] border border-[#2D2D2D] p-5 rounded-[20px] text-center group hover:border-[#CCFF00]/40 transition-all">
+                      <stat.icon className="mx-auto mb-3 text-[#CCFF00]" size={24} />
+                      <p className="text-[8px] text-[#878C9F] uppercase font-black tracking-widest mb-1">{stat.label}</p>
+                      <p className="text-sm font-black text-white uppercase">{stat.value}</p>
+                    </div>
+                  ))}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                  <div className="bg-neutral-800/50 p-4 rounded-2xl border border-neutral-800 text-center">
-                    <Calendar className="mx-auto mb-2 text-yellow-500" size={20} />
-                    <p className="text-[10px] text-neutral-500 uppercase font-bold">Date</p>
-                    <p className="text-sm font-black">{new Date(selectedGame.date).toLocaleDateString()}</p>
-                  </div>
-                  <div className="bg-neutral-800/50 p-4 rounded-2xl border border-neutral-800 text-center">
-                    <Clock className="mx-auto mb-2 text-yellow-500" size={20} />
-                    <p className="text-[10px] text-neutral-500 uppercase font-bold">Time</p>
-                    <p className="text-sm font-black">{selectedGame.time}</p>
-                  </div>
-                  <div className="bg-neutral-800/50 p-4 rounded-2xl border border-neutral-800 text-center">
-                    <Coins className="mx-auto mb-2 text-yellow-500" size={20} />
-                    <p className="text-[10px] text-neutral-500 uppercase font-bold">Join Fee</p>
-                    <p className="text-sm font-black">{selectedGame.perPlayerCharge}</p>
-                  </div>
-                  <div 
-                    className={`bg-neutral-800/50 p-4 rounded-2xl border border-neutral-800 text-center transition-all ${selectedGame.umpire ? 'cursor-pointer hover:border-yellow-500 group/u' : ''}`}
-                    onClick={() => selectedGame.umpire && navigate(`/professionals/${selectedGame.umpire._id}`)}
-                  >
-                    {selectedGame.umpire?.profilePicture ? (
-                      <div className="w-8 h-8 rounded-full overflow-hidden mx-auto mb-2 border border-white/10 group-hover/u:border-yellow-500/50 transition-colors">
-                        <img src={selectedGame.umpire.profilePicture} alt="" className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <UserCheck className="mx-auto mb-2 text-yellow-500" size={20} />
-                    )}
-                    <p className="text-[10px] text-neutral-500 uppercase font-bold tracking-widest">Umpire</p>
-                    <p className="text-xs font-black uppercase truncate group-hover/u:text-yellow-500 transition-colors">
-                      {selectedGame.umpire ? (selectedGame.umpire.name || 'HIRED') : 'NONE'}
-                    </p>
-                  </div>
-
-                </div>
-
-                <div className="space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                   {['teamA', 'teamB'].map((teamKey, tIdx) => (
-                    <div key={teamKey}>
-                      <h3 className="text-xl font-black mb-4 flex items-center justify-between">
-                        {selectedGame.teams[teamKey].name}
-                        <span className="text-xs text-neutral-500 font-bold uppercase tracking-widest">Team {tIdx === 0 ? 'A' : 'B'}</span>
-                      </h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div key={teamKey} className="space-y-6">
+                      <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-4">
+                        <h3 className="text-2xl font-black text-white uppercase tracking-tighter font-open-sans">
+                          {selectedGame.teams[teamKey].name}
+                        </h3>
+                        <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">Team {tIdx === 0 ? 'A' : 'B'}</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {selectedGame.teams[teamKey].slots.map((slot, sIdx) => (
                           <button
                             key={sIdx}
@@ -400,14 +426,17 @@ const JoinGames = () => {
                               setJoiningSlot({ team: teamKey === 'teamA' ? 'A' : 'B', index: sIdx, role: slot.role });
                               setShowConfirm(true);
                             }}
-                            className={`p-3 rounded-xl border transition-all text-left group ${
+                            className={`p-5 rounded-[20px] border transition-all duration-500 text-left group relative overflow-hidden ${
                               slot.status === 'OPEN' 
-                              ? 'bg-neutral-800/50 border-neutral-700 hover:border-yellow-500' 
-                              : 'bg-neutral-800 opacity-50 border-neutral-800'
+                              ? 'bg-[#121212] border-white/5 hover:border-[#CCFF00]/40 hover:bg-[#CCFF00]/5' 
+                              : 'bg-black/50 opacity-40 border-transparent'
                             }`}
                           >
-                            <p className="text-[10px] text-neutral-500 font-bold uppercase mb-1">{slot.role}</p>
-                            <p className="font-black truncate">
+                            {slot.status === 'OPEN' && (
+                              <div className="absolute top-0 left-0 w-1 h-full bg-[#CCFF00] scale-y-0 group-hover:scale-y-100 transition-transform" />
+                            )}
+                            <p className="text-[9px] text-[#878C9F] font-black uppercase tracking-widest mb-1">{slot.role}</p>
+                            <p className="font-black text-white uppercase tracking-tight">
                               {slot.status === 'OPEN' ? 'AVAILABLE' : slot.status === 'PENDING' ? 'RESERVED' : 'OCCUPIED'}
                             </p>
                           </button>
@@ -422,34 +451,34 @@ const JoinGames = () => {
         )}
       </AnimatePresence>
 
-      {/* Join Confirmation */}
+      {/* Confirmation Modal */}
       <AnimatePresence>
         {showConfirm && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowConfirm(false)} className="absolute inset-0 bg-black/90 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowConfirm(false)} className="absolute inset-0 bg-black/95 backdrop-blur-md" />
             <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="relative bg-neutral-900 border border-neutral-800 p-8 rounded-3xl max-w-sm w-full text-center"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative bg-[#000000] border border-[#2D2D2D] p-10 rounded-[32px] max-w-md w-full text-center shadow-2xl"
             >
-              <div className="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Coins size={32} className="text-yellow-500" />
+              <div className="w-20 h-20 bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(204,255,0,0.1)]">
+                <Coins size={40} className="text-[#CCFF00]" />
               </div>
-              <h2 className="text-2xl font-black mb-2 uppercase italic tracking-tighter">JOIN REQUEST</h2>
-              <p className="text-neutral-400 mb-8">
-                Joining this game will reserve <span className="text-white font-bold">{selectedGame?.perPlayerCharge} coins</span>. These will be deducted once the host approves you.
+              <h2 className="text-3xl font-black text-white uppercase tracking-tighter leading-none mb-4 font-open-sans">Join Protocol</h2>
+              <p className="text-[#999999] mb-10 text-sm leading-relaxed">
+                Participation requires <span className="text-[#CCFF00] font-black">{selectedGame?.perPlayerCharge || 0} Coins</span>. These will be securely escrowed until match confirmation.
               </p>
               <div className="flex gap-4">
-                <button onClick={() => setShowConfirm(false)} className="flex-1 py-4 bg-neutral-800 rounded-xl font-bold">BACK</button>
+                <button onClick={() => setShowConfirm(false)} className="flex-1 py-4 bg-[#121212] border border-[#2D2D2D] rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Abort</button>
                 <button
                   onClick={() => {
                     setShowConfirm(false);
                     handleJoinGame();
                   }}
-                  className="flex-1 py-4 bg-yellow-500 text-black font-black rounded-xl"
+                  className="flex-1 py-4 bg-[#CCFF00] text-black font-black rounded-xl text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(204,255,0,0.2)] hover:scale-105 transition-all"
                 >
-                  JOIN
+                  Confirm
                 </button>
               </div>
             </motion.div>
@@ -463,7 +492,7 @@ const JoinGames = () => {
         onComplete={() => {
           setShowCoinAnim(false);
           setSelectedGame(null);
-          toast.success("Join Request Sent!");
+          toast.success("Deployment Successful! Request Sent.");
           fetchGames();
         }} 
       />

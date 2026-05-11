@@ -9,14 +9,18 @@ import { Trophy, MapPin, Loader2 } from "lucide-react";
  * Turf — Venue discovery page.
  *
  * Behaviour:
- * 1. Loads all approved venues by default.
- * 2. User can filter by Sport, State, and City using the search bar.
- * 3. City dropdown is dynamically populated based on the selected state.
+ * 1. On mount, silently requests browser geolocation.
+ * 2. If granted → backend receives lat/lng → MongoDB $geoNear sorts by proximity
+ *    → nearest venues appear at the top.
+ * 3. If denied  → falls back to normal listing (no distance data).
+ * 4. All search filter changes (sport / state / city) always include the
+ *    latest userLocation so proximity sort is preserved while filtering.
  */
 const Turf = () => {
   const [searchFilters, setSearchFilters] = useState({});
   const [userLocation, setUserLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState("detecting"); // 'detecting' | 'granted' | 'denied'
+
   const { turfs, loading } = useTurfData(searchFilters);
 
   // ── Auto-detect location ──────────────────────────────────────────
@@ -33,7 +37,19 @@ const Turf = () => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         
-        const loc = { lat, lng };
+        // Reverse Geocode to get City/State names for the search bar
+        let city = "";
+        let state = "";
+        try {
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+          const data = await res.json();
+          city = data.city || data.locality || "";
+          state = data.principalSubdivision || "";
+        } catch (error) {
+          console.warn("Reverse geocoding failed:", error);
+        }
+
+        const loc = { lat, lng, city, state };
         setUserLocation(loc);
         setLocationStatus("granted");
         
@@ -77,7 +93,7 @@ const Turf = () => {
   };
 
   useEffect(() => {
-    detectLocation();
+    // detectLocation(); // DISABLED for privacy (manual entry only)
   }, []);
 
   // ── Handle search filters from the SearchTurf bar ─────────────────
@@ -95,7 +111,7 @@ const Turf = () => {
 
         {/* ── Sticky Search Bar ────────────────────────────────────── */}
         <div className="sticky top-0 z-40 bg-black/95 backdrop-blur-md pt-2 pb-2 -mx-6 px-6 mb-10 border-b border-white/5">
-          <SearchTurf onSearch={handleSearch} />
+          <SearchTurf onSearch={handleSearch} userLocation={userLocation} />
         </div>
 
         {/* ── Section Header ───────────────────────────────────────── */}
@@ -115,17 +131,18 @@ const Turf = () => {
               )}
             </h2>
           </div>
+
         </div>
 
         {/* ── Cards Grid ───────────────────────────────────────────── */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
             {Array.from({ length: 6 }).map((_, i) => (
               <TurfCardSkeleton key={`skeleton-${i}`} />
             ))}
           </div>
         ) : turfs.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
             {turfs.map((turf, idx) => (
               <div
                 key={turf._id}
