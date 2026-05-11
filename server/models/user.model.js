@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
     bookings:[{type:mongoose.Schema.Types.ObjectId, ref:'Booking'}],
     walletBalance: { type: Number, default: 0 },
     reservedBalance: { type: Number, default: 0 },
+    lastSeen: { type: Date, default: Date.now },
     stats: {
       cricket: {
         matches: { type: Number, default: 0 },
