@@ -8,8 +8,11 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
   const [hour, setHour] = useState(12);
   const [minute, setMinute] = useState(0);
   const [period, setPeriod] = useState("AM");
+  const [isDragging, setIsDragging] = useState(false);
+  
   const triggerRef = useRef(null);
   const popupRef = useRef(null);
+  const svgRef = useRef(null);
   const [pos, setPos] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
@@ -55,6 +58,68 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
   const selectHour = (h) => { setHour(h); setMode("minutes"); };
   const selectMinute = (m) => { setMinute(m); confirm(m); };
 
+  // --- Rotation Logic ---
+  const handleInteraction = (e) => {
+    if (!svgRef.current) return;
+    const rect = svgRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    const x = clientX - centerX;
+    const y = clientY - centerY;
+    
+    // Calculate angle in degrees (0 is 12 o'clock)
+    let angle = Math.atan2(y, x) * (180 / Math.PI) + 90;
+    if (angle < 0) angle += 360;
+    
+    if (mode === "hours") {
+      let h = Math.round(angle / 30);
+      if (h === 0) h = 12;
+      if (h > 12) h = 12;
+      setHour(h);
+    } else {
+      let m = Math.round(angle / 6);
+      if (m === 60) m = 0;
+      setMinute(m);
+    }
+  };
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    handleInteraction(e);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (isDragging) {
+        e.preventDefault();
+        handleInteraction(e);
+      }
+    };
+    const handleMouseUp = () => {
+      if (isDragging) {
+        setIsDragging(false);
+        if (mode === "hours") setMode("minutes");
+      }
+    };
+
+    if (isDragging) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("touchmove", handleMouseMove, { passive: false });
+      window.addEventListener("touchend", handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleMouseMove);
+      window.removeEventListener("touchend", handleMouseUp);
+    };
+  }, [isDragging, mode]);
+
   const fmt = () => {
     if (!value || !(value instanceof Date) || isNaN(value)) return placeholder;
     const h = value.getHours(), m = value.getMinutes();
@@ -91,7 +156,7 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
         <div
           ref={popupRef}
           style={{ position: "absolute", top: pos.top, left: pos.left, zIndex: 99999 }}
-          className="w-[270px] bg-[#0A0A0A] border border-[#2D2D2D] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden"
+          className="w-[270px] bg-[#0A0A0A] border border-[#2D2D2D] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden select-none"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-[#1A1A1A]">
@@ -124,18 +189,29 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
 
           {/* SVG Clock Face */}
           <div className="px-5 pb-2">
-            <svg viewBox="0 0 100 100" className="w-full">
+            <svg 
+              ref={svgRef}
+              viewBox="0 0 100 100" 
+              className="w-full cursor-pointer touch-none"
+              onMouseDown={handleMouseDown}
+              onTouchStart={handleMouseDown}
+            >
               <circle cx="50" cy="50" r="48" fill="#111" stroke="#2D2D2D" strokeWidth="0.5" />
-              <line x1="50" y1="50" x2={handEnd.x} y2={handEnd.y} stroke="#CCFF00" strokeWidth="1.5" strokeLinecap="round" />
-              <circle cx="50" cy="50" r="2.5" fill="#CCFF00" />
+              
+              {/* The Hand */}
+              <g>
+                <line x1="50" y1="50" x2={handEnd.x} y2={handEnd.y} stroke="#CCFF00" strokeWidth="2" strokeLinecap="round" />
+                <circle cx={handEnd.x} cy={handEnd.y} r="3" fill="#CCFF00" />
+                <circle cx="50" cy="50" r="2.5" fill="#CCFF00" />
+              </g>
 
               {mode === "hours" && Array.from({ length: 12 }, (_, i) => {
                 const h = i + 1, p = pos12(h), sel = h === hour;
                 return (
-                  <g key={h} onClick={() => selectHour(h)} style={{ cursor: "pointer" }}>
+                  <g key={h}>
                     <circle cx={p.x} cy={p.y} r="6.5" fill={sel ? "#CCFF00" : "transparent"} />
                     <text x={p.x} y={p.y + 0.5} textAnchor="middle" dominantBaseline="middle"
-                      fontSize="6" fontWeight="bold" fill={sel ? "#000" : "#fff"} style={{ userSelect: "none" }}>{h}</text>
+                      fontSize="6" font-weight="900" fill={sel ? "#000" : "#fff"} style={{ userSelect: "none" }}>{h}</text>
                   </g>
                 );
               })}
@@ -143,10 +219,10 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
               {mode === "minutes" && MINUTES.map((m) => {
                 const p = posMin(m), sel = m === minute;
                 return (
-                  <g key={m} onClick={() => selectMinute(m)} style={{ cursor: "pointer" }}>
+                  <g key={m}>
                     <circle cx={p.x} cy={p.y} r="6.5" fill={sel ? "#CCFF00" : "transparent"} />
                     <text x={p.x} y={p.y + 0.5} textAnchor="middle" dominantBaseline="middle"
-                      fontSize="5" fontWeight="bold" fill={sel ? "#000" : "#fff"} style={{ userSelect: "none" }}>
+                      fontSize="5" font-weight="900" fill={sel ? "#000" : "#fff"} style={{ userSelect: "none" }}>
                       {m === 0 ? "00" : m}
                     </text>
                   </g>
