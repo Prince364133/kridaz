@@ -3,6 +3,7 @@ import {
   getAllTurfs, 
   getTurfById, 
   getTimeSlotByTurfId,
+  getTurfLocations,
   turfRegister,
   getTurfByOwner,
   editTurfById,
@@ -19,6 +20,7 @@ const router = express.Router();
 
 // User routes
 router.get("/user/all", getAllTurfs);
+router.get("/user/locations", getTurfLocations);
 router.get("/user/details/:id", getTurfById);
 router.get("/user/timeSlot", getTimeSlotByTurfId);
 

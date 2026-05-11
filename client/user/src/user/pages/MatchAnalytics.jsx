@@ -8,13 +8,15 @@ import {
   ArrowLeft, 
   Activity,
   Star,
-  Award
+  Award,
+  Share2,
+  Download
 } from 'lucide-react';
 import useCricketScoring from '@hooks/shared/useCricketScoring';
 import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
-import { Share2, Download } from 'lucide-react';
+import BallByBallHistory from '../../components/shared/BallByBallHistory';
 
 const MatchAnalytics = () => {
   const { matchId } = useParams();
@@ -265,6 +267,12 @@ const MatchAnalytics = () => {
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Ball-by-Ball History Section */}
+        <div className="bg-[#0A0A0A] border border-white/5 rounded-[2.5rem] p-8">
+           <h3 className="text-xl font-black uppercase tracking-tighter mb-8">Ball-by-Ball Timeline</h3>
+           <BallByBallHistory matchData={scoring} />
         </div>
       </div>
     </div>

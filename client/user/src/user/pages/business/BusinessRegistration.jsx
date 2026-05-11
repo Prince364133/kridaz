@@ -1,4 +1,4 @@
-﻿// Business Registration Page for Professional Upgrades
+// Business Registration Page for Professional Upgrades
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -123,8 +123,8 @@ export default function BusinessRegistration() {
     }
 
     // Check if user already has a professional role
-    const professionalRoles = ["owner", "VENUE_OWNER", "VERIFIED_VENUE_OWNER", "COACH", "UMPIRE", "admin", "BMSP_ADMIN"];
-    if (user?.role && professionalRoles.includes(user.role)) {
+    const professionalRoles = ["owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "admin", "bmsp_admin"];
+    if (user?.role && professionalRoles.includes(user.role.toLowerCase())) {
       setHasRoleConflict(true);
       setExistingRole(user.role);
     }
@@ -249,7 +249,40 @@ export default function BusinessRegistration() {
     }
   };
 
-  // â”€â”€ Application pending review â”€â”€
+  // ─── Role Conflict ───
+  if (hasRoleConflict && existingRole) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+        <div className="max-w-md w-full text-center space-y-8 p-12 rounded-[8px] border border-[#2D2D2D] bg-[#000000] relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-[#F59E0B]" />
+          <div className="w-16 h-16 bg-[#F59E0B]/10 rounded-[8px] flex items-center justify-center mx-auto mb-6">
+            <ShieldAlert size={40} className="text-[#F59E0B]" />
+          </div>
+          <h2 className="text-4xl font-black uppercase tracking-tight">
+            Role <span className="text-[#F59E0B]">Conflict</span>
+          </h2>
+          <p className="text-gray-400 leading-relaxed">
+            Your account already holds the <span className="text-white capitalize font-semibold">{existingRole}</span> role. 
+            Kridaz supports only one professional role per account.
+          </p>
+          <button
+            onClick={() => {
+              if (existingRole?.toLowerCase() === "coach") navigate("/coach");
+              else if (existingRole?.toLowerCase() === "umpire") navigate("/umpire");
+              else if (["owner", "venue_owner", "verified_venue_owner"].includes(existingRole?.toLowerCase())) navigate("/partner");
+              else if (["admin", "bmsp_admin"].includes(existingRole?.toLowerCase())) navigate("/admin");
+              else navigate("/");
+            }}
+            className="w-full py-4 rounded-[8px] border border-[#2D2D2D] hover:border-[#F59E0B]/30 hover:text-[#F59E0B] transition-all font-normal uppercase tracking-widest text-[12px]"
+          >
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Application pending review ───
   if (isPending || submitted) {
     const displayRole = submitted ? formData.role : pendingRole;
     return (
@@ -311,18 +344,7 @@ export default function BusinessRegistration() {
               <p className="text-gray-400 text-lg">Tell us about your business to get verified and access the Kridaz dashboard.</p>
             </div>
 
-            {hasRoleConflict && (
-              <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/30 rounded-[8px] p-5 flex gap-4 items-start">
-                <ShieldAlert className="text-amber-500 shrink-0 mt-1" />
-                <div>
-                  <h3 className="text-amber-500 font-bold tracking-wide uppercase text-sm mb-1">Role Conflict</h3>
-                  <p className="text-amber-500/80 text-sm">
-                    Your account already holds the <strong className="text-amber-500 uppercase">{existingRole}</strong> role. 
-                    You can view this form, but you cannot submit a new application as Kridaz supports only one professional role per account.
-                  </p>
-                </div>
-              </div>
-            )}
+            {/* Role conflict banner removed as it's now handled by the early return view */}
 
             <form onSubmit={handleSubmit} className="space-y-8">
               

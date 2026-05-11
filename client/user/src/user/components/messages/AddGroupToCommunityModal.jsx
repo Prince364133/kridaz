@@ -1,0 +1,191 @@
+import React, { useState } from 'react';
+import { useGetChatsQuery, useCreateGroupChatMutation, useAddGroupsToCommunityMutation } from '../../../redux/api/chatApi';
+import { 
+  Plus, 
+  X, 
+  Users, 
+  Search, 
+  CheckCircle2,
+  MessageSquare,
+  Globe
+} from 'lucide-react';
+
+const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
+  const [activeTab, setActiveTab] = useState('new'); // 'new' or 'existing'
+  const [newGroupName, setNewGroupName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedExistingGroups, setSelectedExistingGroups] = useState([]);
+
+  const { data: chatData, isLoading: isLoadingChats } = useGetChatsQuery();
+  const [createGroupChat, { isLoading: isCreating }] = useCreateGroupChatMutation();
+  const [addGroupsToCommunity, { isLoading: isAddingGroups }] = useAddGroupsToCommunityMutation();
+
+  if (!isOpen) return null;
+
+  const existingGroups = chatData?.chats?.filter(c => c.isGroupChat && !c.isCommunity && !c.parentCommunity) || [];
+  const filteredGroups = existingGroups.filter(g => 
+    g.chatName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleCreateNew = async (e) => {
+    e.preventDefault();
+    if (!newGroupName.trim()) return;
+
+    try {
+      await createGroupChat({
+        name: newGroupName,
+        parentCommunity: communityId,
+        users: JSON.stringify([])
+      }).unwrap();
+      onClose();
+    } catch (err) {
+      console.error("Failed to create group in community:", err);
+    }
+  };
+
+  const handleAddExisting = async () => {
+    if (selectedExistingGroups.length === 0) return;
+    try {
+      await addGroupsToCommunity({
+        communityId,
+        groupIds: selectedExistingGroups
+      }).unwrap();
+      onClose();
+    } catch (err) {
+      console.error("Failed to add existing groups to community:", err);
+      alert("Failed to add groups: " + (err.data?.message || err.error));
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in">
+      <div className="bg-[#111111] border border-white/10 rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+        
+        {/* Header */}
+        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#84CC16]/10 flex items-center justify-center">
+              <Globe size={20} className="text-[#84CC16]" />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-white italic uppercase tracking-tight">Add Group</h2>
+              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">To Community</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors text-white/20 hover:text-white">
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex border-b border-white/5">
+          <button 
+            onClick={() => setActiveTab('new')}
+            className={`flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
+              activeTab === 'new' ? 'text-[#84CC16] border-b-2 border-[#84CC16] bg-[#84CC16]/5' : 'text-white/30 hover:text-white/60'
+            }`}
+          >
+            Create New
+          </button>
+          <button 
+            onClick={() => setActiveTab('existing')}
+            className={`flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
+              activeTab === 'existing' ? 'text-[#84CC16] border-b-2 border-[#84CC16] bg-[#84CC16]/5' : 'text-white/30 hover:text-white/60'
+            }`}
+          >
+            Add Existing
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+          {activeTab === 'new' ? (
+            <form onSubmit={handleCreateNew} className="space-y-6 animate-slide-in">
+              <div className="space-y-4">
+                <div className="w-20 h-20 rounded-2xl bg-[#84CC16]/10 mx-auto flex items-center justify-center mb-6">
+                  <MessageSquare size={32} className="text-[#84CC16]" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2 ml-1">Group Name</label>
+                  <input
+                    type="text"
+                    autoFocus
+                    value={newGroupName}
+                    onChange={(e) => setNewGroupName(e.target.value)}
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-[#84CC16] outline-none transition-all font-bold placeholder:text-white/10"
+                    placeholder="e.g. Announcements, Off-topic..."
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={isCreating || !newGroupName.trim()}
+                className="w-full py-4 bg-[#84CC16] text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
+              >
+                {isCreating ? 'Creating...' : 'Create Group'} <Plus size={18} />
+              </button>
+            </form>
+          ) : (
+            <div className="space-y-6 animate-slide-in">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 w-4 h-4" />
+                <input 
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search your groups..."
+                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:border-[#84CC16]/40 outline-none transition-all placeholder:text-white/10"
+                />
+              </div>
+
+              <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                {isLoadingChats ? (
+                  <div className="py-10 flex justify-center"><div className="w-6 h-6 border-2 border-[#84CC16] border-t-transparent rounded-full animate-spin"></div></div>
+                ) : filteredGroups.length === 0 ? (
+                  <p className="text-center py-6 text-white/20 text-xs italic font-medium">No available groups found.</p>
+                ) : (
+                  filteredGroups.map((group) => (
+                    <div 
+                      key={group._id}
+                      onClick={() => {
+                        if (selectedExistingGroups.includes(group._id)) {
+                          setSelectedExistingGroups(selectedExistingGroups.filter(id => id !== group._id));
+                        } else {
+                          setSelectedExistingGroups([...selectedExistingGroups, group._id]);
+                        }
+                      }}
+                      className={`flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all border ${
+                        selectedExistingGroups.includes(group._id)
+                          ? 'bg-[#84CC16]/10 border-[#84CC16]/30'
+                          : 'bg-white/[0.02] border-transparent hover:border-white/10'
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                          <Users size={18} className="text-white/40" />
+                        </div>
+                        <span className="text-sm font-bold text-white/80">{group.chatName}</span>
+                      </div>
+                      {selectedExistingGroups.includes(group._id) && (
+                        <CheckCircle2 size={20} className="text-[#84CC16]" />
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <button
+                onClick={handleAddExisting}
+                disabled={selectedExistingGroups.length === 0 || isAddingGroups}
+                className="w-full py-4 bg-[#84CC16] text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
+              >
+                {isAddingGroups ? 'Adding...' : `Add ${selectedExistingGroups.length} Group${selectedExistingGroups.length !== 1 ? 's' : ''}`}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AddGroupToCommunityModal;

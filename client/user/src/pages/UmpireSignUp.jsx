@@ -48,7 +48,10 @@ const UmpireSignUp = () => {
     handleGoogleSuccess,
     handleGoogleError,
     currentStep,
-    setCurrentStep
+    setCurrentStep,
+    user,
+    role,
+    navigate
   } = useSignUpForm("umpire");
 
   const [mounted, setMounted] = useState(false);
@@ -57,7 +60,11 @@ const UmpireSignUp = () => {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Redirect if already an umpire
+    if (user?.role === "umpire" || role === "umpire") {
+      navigate("/umpire");
+    }
+  }, [user, role, navigate]);
 
   const handleDocUpload = (url, name) => {
     if (!url) {
@@ -224,6 +231,7 @@ const UmpireSignUp = () => {
                     <UserSquare2 className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-400 transition-colors" size={20} />
                     <input
                       {...register("username")}
+                      onInput={(e) => { e.target.value = e.target.value.toLowerCase(); }}
                       placeholder="USERNAME"
                       className="w-full bg-white/5 border border-white/10 focus:border-red-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
                     />

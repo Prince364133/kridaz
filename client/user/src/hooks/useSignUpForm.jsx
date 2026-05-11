@@ -4,7 +4,7 @@ import * as yup from "yup";
 import { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { login } from "../redux/slices/authSlice";
 
@@ -71,6 +71,7 @@ const registerSchema = yup.object().shape({
 const useSignUpForm = (predefinedRole = "user") => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { user, role } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState(null); // 'checking', 'available', 'unavailable'
@@ -257,7 +258,10 @@ const useSignUpForm = (predefinedRole = "user") => {
     setShowOnboarding,
     onboardingUser,
     currentStep,
-    setCurrentStep
+    setCurrentStep,
+    user,
+    role,
+    navigate
   };
 };
 

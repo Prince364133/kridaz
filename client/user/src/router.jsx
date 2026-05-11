@@ -31,6 +31,7 @@ import Messages from "@user/pages/Messages";
 import CheckoutPage from "@user/pages/checkout/CheckoutPage";
 import ScoringApp from "@user/pages/ScoringApp";
 import MatchAnalytics from "@user/pages/MatchAnalytics";
+import MatchDetails from "@user/pages/MatchDetails";
 import Leaderboard from "@user/pages/Leaderboard";
 
 
@@ -248,6 +249,8 @@ const router = createBrowserRouter([
       { path: "join-games", element: <JoinGames /> },
       { path: "my-hosted-games", element: <ProtectedRoute><MyHostedGames /></ProtectedRoute> },
       { path: "my-joined-games", element: <ProtectedRoute><MyJoinedGames /></ProtectedRoute> },
+      { path: "match/:matchId", element: <ProtectedRoute><MatchDetails /></ProtectedRoute> },
+
       { path: "professionals", element: <FindProfessionals /> },
       { path: "professionals/:id", element: <ProfessionalDetails /> },
       { path: "messages", element: <ProtectedRoute><Messages /></ProtectedRoute> },

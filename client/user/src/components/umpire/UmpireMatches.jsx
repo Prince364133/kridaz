@@ -1,18 +1,63 @@
 import React from "react";
-import { Trophy, Calendar, MapPin, Users, CheckCircle2 } from "lucide-react";
+import { Trophy, Calendar, MapPin, Users, CheckCircle2, Zap, Search, Loader2, Hand, Clock, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import useUmpireDashboard from "@hooks/owner/useUmpireDashboard";
 import DashboardSkeleton from "../owner/Dashboard/DashboardSkeleton";
+import axiosInstance from "@hooks/useAxiosInstance";
+import { toast } from "react-hot-toast";
 
 export default function UmpireMatches() {
-  const { dashboardData, loading, error } = useUmpireDashboard();
+  const { dashboardData, loading, error, refreshData } = useUmpireDashboard();
+  const navigate = useNavigate();
+  const [searchId, setSearchId] = React.useState("");
+  const [globalMatch, setGlobalMatch] = React.useState(null);
+  const [searching, setSearching] = React.useState(false);
+
+  // Global search effect — fires after typing KRZ- prefix (4+ chars)
+  React.useEffect(() => {
+    if (searchId.length >= 4) {
+      const fetchGlobal = async () => {
+        setSearching(true);
+        try {
+          const res = await axiosInstance.get(`/api/hosted-game/find-by-id?shortId=${searchId}`);
+          setGlobalMatch(res.data.game);
+        } catch (e) {
+          setGlobalMatch(null);
+        } finally {
+          setSearching(false);
+        }
+      };
+      const timer = setTimeout(fetchGlobal, 600);
+      return () => clearTimeout(timer);
+    } else {
+      setGlobalMatch(null);
+    }
+  }, [searchId]);
+
+  const handleRequestUmpire = async (gameId) => {
+    try {
+      const res = await axiosInstance.post(`/api/hosted-game/request-umpire`, { gameId });
+      if (res.data.success) {
+        toast.success("Umpire request sent to host!");
+        setSearchId("");
+        if (refreshData) refreshData();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to send request");
+    }
+  };
 
   if (loading) return <DashboardSkeleton />;
 
   const matches = dashboardData?.matches || [];
-  const completedMatches = matches.filter(m => m.status === 'completed');
+  
+  // Local matches filtering
   const activeMatches = matches.filter(m => m.status !== 'completed');
+  const filteredMatches = searchId 
+    ? activeMatches.filter(m => m.shortId?.toUpperCase().includes(searchId) || m.name?.toUpperCase().includes(searchId))
+    : activeMatches;
 
-  const [searchId, setSearchId] = React.useState("");
+  const completedMatches = matches.filter(m => m.status === 'completed');
 
   return (
     <div className="space-y-12 animate-fade-in pb-20">
@@ -41,27 +86,102 @@ export default function UmpireMatches() {
       {/* Active Assignments */}
       <section className="space-y-6">
         <h2 className="text-xs font-black uppercase tracking-[0.25em] text-gray-500 flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" /> Active Assignments
+          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" /> {searchId ? "Search Results" : "Active Assignments"}
         </h2>
         
-        {activeMatches.length === 0 && !searchId ? (
+        {/* Global Search Result */}
+        {searching && (
+          <div className="p-12 bg-white/[0.02] border border-white/5 rounded-[2.5rem] text-center flex flex-col items-center gap-4">
+             <Loader2 className="animate-spin text-primary" size={24} />
+             <p className="text-[10px] font-black uppercase tracking-widest text-gray-600">Searching global network...</p>
+          </div>
+        )}
+
+        {!searching && globalMatch && !activeMatches.some(m => m._id === globalMatch._id) && (
+          <div className="bg-gradient-to-r from-primary/10 to-transparent border border-primary/20 rounded-[2rem] p-8 group shadow-[0_0_50px_rgba(132,204,22,0.05)] animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex flex-col md:flex-row justify-between gap-8">
+              <div 
+                className="space-y-4 cursor-pointer"
+                onClick={() => navigate(`/match/${globalMatch._id}`)}
+              >
+                <div className="flex items-center gap-4">
+                  <span className="px-3 py-1 bg-primary text-black text-[10px] font-black uppercase tracking-widest rounded-full">
+                    FOUND MATCH: {globalMatch.shortId}
+                  </span>
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                    {new Date(globalMatch.date).toLocaleDateString()} • {globalMatch.time}
+                  </span>
+                </div>
+                <h3 className="text-2xl font-black text-white uppercase tracking-tight">
+                  {globalMatch.teams?.teamA?.name || 'Team A'} VS {globalMatch.teams?.teamB?.name || 'Team B'}
+                </h3>
+                <div className="flex flex-wrap gap-6">
+                   <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
+                      <MapPin size={14} className="text-primary" /> {globalMatch.ground?.name || "Self-Arranged Venue"}
+                   </div>
+                   <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
+                      <Users size={14} className="text-primary" /> {globalMatch.city}
+                   </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                {globalMatch.umpire ? (
+                   <div className="flex flex-col md:flex-row items-center gap-3">
+                      <div className="flex items-center gap-2 px-6 py-4 bg-primary/10 rounded-2xl text-[10px] font-black text-primary uppercase tracking-widest border border-primary/20 shadow-[0_0_20px_rgba(132,204,22,0.1)]">
+                        <Shield size={16} className="fill-primary/20" /> Umpire Hired
+                      </div>
+                      <button 
+                        onClick={() => window.open(`/scoring/${globalMatch._id}`, '_blank', 'noopener,noreferrer')}
+                        className="h-14 px-10 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3"
+                      >
+                        Score Now <Zap size={16} fill="currentColor" />
+                      </button>
+                   </div>
+                ) : globalMatch.umpireRequest?.status === "PENDING" ? (
+                   <div className="flex items-center gap-2 px-6 py-4 bg-white/5 rounded-2xl text-[10px] font-black text-gray-500 uppercase tracking-widest border border-white/5">
+                      <Clock size={16} /> Request Pending Approval
+                   </div>
+                ) : (
+                  <button 
+                    onClick={() => handleRequestUmpire(globalMatch._id)}
+                    className="w-full md:w-auto h-14 px-10 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3"
+                  >
+                    Request to Umpire <Hand size={16} fill="currentColor" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {(filteredMatches.length === 0 && !globalMatch && !searching) ? (
           <div className="p-12 bg-white/[0.02] border border-white/5 border-dashed rounded-[2.5rem] text-center">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-600">No active matches found</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-600">
+              {searchId.length >= 4 ? `No match found for "${searchId}"` : "No active matches found"}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6">
-            {activeMatches.map((match) => (
-              <div key={match._id} className="bg-gradient-to-r from-white/[0.03] to-transparent border border-white/10 rounded-[2rem] p-8 hover:border-primary/20 transition-all group">
+            {filteredMatches.map((match) => (
+              <div 
+                key={match._id} 
+                onClick={() => navigate(`/match/${match._id}`)}
+                className="cursor-pointer bg-gradient-to-r from-white/[0.03] to-transparent border border-white/10 rounded-[2rem] p-8 hover:border-primary/20 transition-all group"
+              >
                 <div className="flex flex-col md:flex-row justify-between gap-8">
                   <div className="space-y-4">
                     <div className="flex items-center gap-4">
                       <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full border border-primary/20">
                         Match ID: {match.shortId || 'N/A'}
                       </span>
+                      <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest rounded-full border border-green-500/20 flex items-center gap-1">
+                        <CheckCircle2 size={10} /> Umpire Hired
+                      </span>
                       <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                         {new Date(match.date).toLocaleDateString()} • {match.time}
                       </span>
                     </div>
+
                     <h3 className="text-2xl font-black text-white uppercase tracking-tight">{match.name || "Untitled Match"}</h3>
                     <div className="flex flex-wrap gap-6">
                        <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
@@ -74,7 +194,10 @@ export default function UmpireMatches() {
                   </div>
                   <div className="flex items-center">
                     <button 
-                      onClick={() => window.location.href = `/scoring/${match._id}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(`/scoring/${match._id}`, '_blank', 'noopener,noreferrer');
+                      }}
                       className="w-full md:w-auto h-14 px-10 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 group-hover:scale-[1.02]"
                     >
                       Score Game <Zap size={16} fill="currentColor" />
@@ -90,9 +213,13 @@ export default function UmpireMatches() {
       {/* History */}
       <section className="space-y-6">
         <h2 className="text-xs font-black uppercase tracking-[0.25em] text-gray-500">Verified History</h2>
-        <div className="grid grid-cols-1 gap-4 opacity-60 hover:opacity-100 transition-opacity">
+        <div className="grid grid-cols-1 gap-4 opacity-60 hover:opacity-100 transition-opacity text-left">
           {completedMatches.map((match) => (
-            <div key={match._id} className="bg-[#0D0D0D] border border-white/5 rounded-[1.5rem] p-6 flex justify-between items-center">
+            <div 
+              key={match._id} 
+              onClick={() => navigate(`/match/${match._id}`)}
+              className="cursor-pointer bg-[#0D0D0D] border border-white/5 rounded-[1.5rem] p-6 flex justify-between items-center hover:border-white/10 transition-all"
+            >
                <div className="space-y-1">
                  <h4 className="text-sm font-bold text-white uppercase">{match.name}</h4>
                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{match.venue} • {new Date(match.date).toLocaleDateString()}</p>
