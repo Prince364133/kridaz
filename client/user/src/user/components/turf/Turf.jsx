@@ -1,108 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import TurfCard from "./TurfCard.jsx";
 import TurfCardSkeleton from "../ui/TurfCardSkeleton.jsx";
 import useTurfData from "../../hooks/useTurfData.jsx";
 import SearchTurf from "../search/SearchTurf.jsx";
-import { Trophy, MapPin, Loader2 } from "lucide-react";
+import { Trophy, MapPin } from "lucide-react";
 
 /**
  * Turf — Venue discovery page.
  *
  * Behaviour:
- * 1. On mount, silently requests browser geolocation.
- * 2. If granted → backend receives lat/lng → MongoDB $geoNear sorts by proximity
- *    → nearest venues appear at the top.
- * 3. If denied  → falls back to normal listing (no distance data).
- * 4. All search filter changes (sport / state / city) always include the
- *    latest userLocation so proximity sort is preserved while filtering.
+ * 1. Loads all approved venues by default.
+ * 2. User can filter by Sport, State, and City using the search bar.
+ * 3. City dropdown is dynamically populated based on the selected state.
  */
 const Turf = () => {
   const [searchFilters, setSearchFilters] = useState({});
-  const [userLocation, setUserLocation] = useState(null);
-  const [locationStatus, setLocationStatus] = useState("detecting"); // 'detecting' | 'granted' | 'denied'
-
   const { turfs, loading } = useTurfData(searchFilters);
-
-  // ── Auto-detect location ──────────────────────────────────────────
-  const detectLocation = () => {
-    setLocationStatus("detecting");
-    
-    if (!navigator.geolocation) {
-      fallbackToIPLocation();
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        
-        // Reverse Geocode to get City/State names for the search bar
-        let city = "";
-        let state = "";
-        try {
-          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
-          const data = await res.json();
-          city = data.city || data.locality || "";
-          state = data.principalSubdivision || "";
-        } catch (error) {
-          console.warn("Reverse geocoding failed:", error);
-        }
-
-        const loc = { lat, lng, city, state };
-        setUserLocation(loc);
-        setLocationStatus("granted");
-        
-        setSearchFilters((prev) => ({ 
-          ...prev,
-          lat,
-          lng
-        }));
-      },
-      (err) => {
-        console.warn("Geolocation denied or failed:", err.message);
-        fallbackToIPLocation();
-      },
-      { timeout: 8000, maximumAge: 60000 }
-    );
-  };
-
-  const fallbackToIPLocation = async () => {
-    try {
-      const res = await fetch("https://ipapi.co/json/");
-      const data = await res.json();
-      if (data.latitude && data.longitude) {
-        const lat = data.latitude;
-        const lng = data.longitude;
-        
-        const loc = { lat, lng };
-        setUserLocation(loc);
-        setLocationStatus("granted");
-        
-        setSearchFilters((prev) => ({ 
-          ...prev,
-          lat,
-          lng
-        }));
-      } else {
-        setLocationStatus("denied");
-      }
-    } catch (error) {
-      setLocationStatus("denied");
-    }
-  };
-
-  useEffect(() => {
-    // detectLocation(); // DISABLED for privacy (manual entry only)
-  }, []);
 
   // ── Handle search filters from the SearchTurf bar ─────────────────
   const handleSearch = (filters) => {
-    setSearchFilters({
-      ...filters,
-      lat: userLocation?.lat,
-      lng: userLocation?.lng,
-    });
+    setSearchFilters({ ...filters });
   };
 
   return (
@@ -111,7 +28,7 @@ const Turf = () => {
 
         {/* ── Sticky Search Bar ────────────────────────────────────── */}
         <div className="sticky top-0 z-40 bg-black/95 backdrop-blur-md pt-2 pb-2 -mx-6 px-6 mb-10 border-b border-white/5">
-          <SearchTurf onSearch={handleSearch} userLocation={userLocation} />
+          <SearchTurf onSearch={handleSearch} />
         </div>
 
         {/* ── Section Header ───────────────────────────────────────── */}
@@ -119,19 +36,9 @@ const Turf = () => {
           <div className="flex flex-col gap-1">
             <h2 className="text-base md:text-lg font-bold uppercase tracking-[0.05em] text-white flex items-center gap-3 font-sans">
               <MapPin size={18} className="text-[#84CC16]" />
-              {locationStatus === "detecting" ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 size={16} className="animate-spin text-[#84CC16]" />
-                  DETECTING LOCATION...
-                </span>
-              ) : locationStatus === "granted" ? (
-                `NEAREST TO YOU — ${turfs.length} VENUE${turfs.length !== 1 ? "S" : ""}`
-              ) : (
-                `AVAILABLE VENUES — ${turfs.length}`
-              )}
+              {`AVAILABLE VENUES — ${turfs.length}`}
             </h2>
           </div>
-
         </div>
 
         {/* ── Cards Grid ───────────────────────────────────────────── */}
@@ -151,12 +58,8 @@ const Turf = () => {
               >
                 <TurfCard
                   turf={turf}
-                  featured={idx === 0 && locationStatus === "granted"}
-                  distance={
-                    turf.distance != null
-                      ? `${(turf.distance / 1000).toFixed(1)} km`
-                      : null
-                  }
+                  featured={false}
+                  distance={null}
                 />
               </div>
             ))}
@@ -167,11 +70,7 @@ const Turf = () => {
             <h3 className="text-2xl font-display uppercase text-gray-400 mb-2">Venues Not Found</h3>
             <p className="text-gray-600">Try adjusting your filters or search keywords.</p>
             <button
-              onClick={() =>
-                setSearchFilters(
-                  userLocation ? { lat: userLocation.lat, lng: userLocation.lng } : {}
-                )
-              }
+              onClick={() => setSearchFilters({})}
               className="mt-8 px-10 py-3 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
             >
               Clear All Filters

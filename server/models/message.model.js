@@ -13,6 +13,12 @@ const messageSchema = new mongoose.Schema(
         user: { type: mongoose.Schema.Types.ObjectId, refPath: "readBy.onModel" },
         onModel: { type: String, enum: ["User", "Owner"] }
       }
+    ],
+    deletedBy: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, refPath: "deletedBy.onModel" },
+        onModel: { type: String, enum: ["User", "Owner"] }
+      }
     ]
   },
   { timestamps: true }

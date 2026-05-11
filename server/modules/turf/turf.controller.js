@@ -102,6 +102,55 @@ export const getAllTurfs = async (req, res) => {
   }
 };
 
+/**
+ * Returns distinct states and cities from approved turfs
+ * so the frontend can populate filter dropdowns.
+ */
+export const getTurfLocations = async (req, res) => {
+  try {
+    const results = await Turf.aggregate([
+      { $match: { status: "approved", isActive: true } },
+      {
+        $group: {
+          _id: { state: "$state", city: "$city" },
+        },
+      },
+      { $sort: { "_id.state": 1, "_id.city": 1 } },
+    ]);
+
+    // Build a map: { state: [city1, city2, ...] }
+    const locationMap = {};
+    const states = new Set();
+
+    for (const r of results) {
+      const state = r._id.state || "";
+      const city = r._id.city || "";
+      if (!state && !city) continue;
+
+      if (state) {
+        states.add(state);
+        if (!locationMap[state]) locationMap[state] = [];
+        if (city && !locationMap[state].includes(city)) {
+          locationMap[state].push(city);
+        }
+      }
+    }
+
+    // Sort cities within each state
+    for (const s of Object.keys(locationMap)) {
+      locationMap[s].sort();
+    }
+
+    return res.status(200).json({
+      states: [...states].sort(),
+      citiesByState: locationMap,
+    });
+  } catch (err) {
+    console.log(chalk.red("Error in getTurfLocations"), err);
+    return res.status(500).json({ message: err.message });
+  }
+};
+
 export const getTurfById = async (req, res) => {
   const { id } = req.params;
   try {

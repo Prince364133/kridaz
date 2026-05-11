@@ -4,6 +4,11 @@ const chatSchema = new mongoose.Schema(
   {
     chatName: { type: String, trim: true },
     isGroupChat: { type: Boolean, default: false },
+    isCommunity: { type: Boolean, default: false },
+    description: { type: String, trim: true },
+    parentCommunity: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
+    isAnnouncementGroup: { type: Boolean, default: false },
+    adminOnlyMessages: { type: Boolean, default: false },
     users: [
       {
         user: { type: mongoose.Schema.Types.ObjectId, refPath: "users.onModel" },
