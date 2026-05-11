@@ -111,7 +111,7 @@ export const BlogManagement = () => {
     readTime: "5 mins read",
     date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }).toUpperCase(),
     category: "Sports",
-    author: "BookMySportz Team",
+    author: "Kridaz Team",
     order: 0,
     status: "published",
   });
@@ -169,7 +169,7 @@ export const BlogManagement = () => {
         readTime: "5 mins read",
         date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }).toUpperCase(),
         category: "Sports",
-        author: "BookMySportz Team",
+        author: "Kridaz Team",
         order: blogs.length + 1,
         status: "published",
       });

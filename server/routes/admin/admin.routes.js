@@ -16,6 +16,7 @@ import supportRouter from "./support.routes.js"
 import auditRouter from "./audit.routes.js"
 import settingsRouter from "./settings.routes.js"
 import notificationRouter from "../notification.routes.js"
+import adminDisputeRouter from "./dispute.routes.js"
 import verifyAdminToken from "../../middleware/jwt/admin.middleware.js"
 
 const adminRouter = Router()
@@ -35,6 +36,7 @@ adminRouter.use("/turfs", verifyAdminToken, turfRouter);
 adminRouter.use("/dashboard", verifyAdminToken, dashboardRouter);
 adminRouter.use("/transactions", verifyAdminToken, transactionRouter);
 adminRouter.use("/community", verifyAdminToken, communityRouter);
+adminRouter.use("/dispute", verifyAdminToken, adminDisputeRouter);
 adminRouter.use("/notifications", verifyAdminToken, notificationRouter);
 
 export default adminRouter;

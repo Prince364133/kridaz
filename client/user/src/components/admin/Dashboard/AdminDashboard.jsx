@@ -65,12 +65,11 @@ export default function AdminDashboard() {
       
       {/* High-Level Command Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-5 relative z-10">
-        <StatsCard title="Total Users" value={totalUsers} icon={Users} trend="+4.2%" />
+        <StatsCard title="Total Users" value={totalUsers} icon={Users} />
         <StatsCard 
           title="Active Venues" 
           value={totalTurfs} 
           icon={Landmark} 
-          trend="Live" 
           onClick={() => navigate("/admin/turfs")}
         />
         <StatsCard 
@@ -81,20 +80,19 @@ export default function AdminDashboard() {
           trendNegative={pendingTurfs > 0}
           onClick={() => navigate("/admin/turfs")}
         />
-        <StatsCard title="Marketplace Volume" value={totalBookings} icon={Activity} trend="+12%" />
+        <StatsCard title="Marketplace Volume" value={totalBookings} icon={Activity} />
         <StatsCard 
           title="Total Payouts" 
           value={totalPayouts} 
-          prefix="₹" 
+          prefix="Rs " 
           icon={CreditCard} 
-          trend="+8.5%"
           onClick={() => navigate("/admin/withdrawals")}
         />
         <StatsCard 
           title="Support Load" 
           value={openTickets} 
           icon={MessageSquare} 
-          trend={openTickets > 10 ? "High" : "Low"} 
+          trend={openTickets > 10 ? "High" : openTickets > 0 ? "Active" : "Clear"} 
           trendNegative={openTickets > 10}
           onClick={() => navigate("/admin/support")}
         />

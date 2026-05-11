@@ -27,9 +27,9 @@ export const generateInvoice = async (booking, user, turf) => {
       doc
         .fillColor("#444444")
         .fontSize(20)
-        .text("TURFSPOT", 110, 57)
+        .text("KRIDAZ", 110, 57)
         .fontSize(10)
-        .text("BookMySportz Pvt Ltd.", 200, 50, { align: "right" })
+        .text("Kridaz Pvt Ltd.", 200, 50, { align: "right" })
         .text("123 Sports Arena Complex", 200, 65, { align: "right" })
         .text("Bangalore, KA 560001", 200, 80, { align: "right" })
         .moveDown();
@@ -109,12 +109,12 @@ export const generateInvoice = async (booking, user, turf) => {
         .fillColor("#888888")
         .fontSize(8)
         .text("Authorized Signature", 400, footerY + 40, { align: "center" })
-        .text("BookMySportz Admin", 400, footerY + 50, { align: "center" });
+        .text("Kridaz Admin", 400, footerY + 50, { align: "center" });
 
       doc
         .fontSize(10)
         .fillColor("#444444")
-        .text("Thank you for choosing TurfSpot!", 50, footerY + 40, { align: "left" })
+        .text("Thank you for choosing Kridaz!", 50, footerY + 40, { align: "left" })
         .fontSize(8)
         .text("This is a computer-generated invoice and does not require a physical signature.", 50, footerY + 60, { align: "left" });
 

@@ -1,4 +1,4 @@
-// Business Registration Page for Professional Upgrades
+﻿// Business Registration Page for Professional Upgrades
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -62,6 +62,8 @@ export default function BusinessRegistration() {
     GST: null,
     VENUE: null
   });
+
+  const isOwner = formData.role === 'owner' || formData.role === 'VENUE_OWNER';
 
   const handleFileChange = (type, file) => {
     setFiles(prev => ({ ...prev, [type]: file }));
@@ -167,14 +169,14 @@ export default function BusinessRegistration() {
     
     setLoading(true);
     
-    // Validate mandatory documents
-    let requiredDocs = formData.role === 'owner' || formData.role === 'VENUE_OWNER' 
-      ? ['PAN', 'AADHAR', 'BUSINESS', 'VENUE']
-      : ['PAN', 'AADHAR']; // Coaches/Umpires might only need ID proof initially
-    
-    let missingDocs = requiredDocs.filter(doc => !files[doc]);
+    // Consolidated Document validation
+    const requiredDocs = isOwner 
+      ? ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST', 'VENUE']
+      : ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST'];
+
+    const missingDocs = requiredDocs.filter(doc => !files[doc]);
     if (missingDocs.length > 0) {
-      toast.error(`Please upload required documents: ${missingDocs.join(", ")}`);
+      toast.error(`Please upload all required documents: ${missingDocs.join(", ")}`);
       setLoading(false);
       return;
     }
@@ -188,27 +190,31 @@ export default function BusinessRegistration() {
     data.append("businessDetails", JSON.stringify(formData.businessDetails));
 
     // Mandatory field check
-    const { businessName, registrationNumber, address, city, state, zipCode, experience, specialization } = formData.businessDetails;
-    
-    // Determine which fields are required based on role
-    const isOwner = formData.role === 'owner' || formData.role === 'VENUE_OWNER';
+    const { businessName, registrationNumber, address, city } = formData.businessDetails;
+    const { portfolioUrl } = formData;
+
+    if (!portfolioUrl) {
+      toast.error("Portfolio link is mandatory");
+      setLoading(false);
+      return;
+    }
     
     if (isOwner) {
       if (!businessName || !registrationNumber) {
-        toast.error("Please fill in all business details");
+        toast.error("Please fill in all business details (Name & Registration Number)");
         setLoading(false);
         return;
       }
     } else {
-      if (!specialization || !experience) {
-        toast.error("Please fill in all professional details");
+      if (!formData.businessDetails.specialization || !formData.businessDetails.experience) {
+        toast.error("Please fill in your specialization and experience");
         setLoading(false);
         return;
       }
     }
 
-    if (!address || !city || !state || !zipCode || !formData.phone) {
-      toast.error("Please fill in all contact and location details");
+    if (!address || !city) {
+      toast.error("Please provide your full address");
       setLoading(false);
       return;
     }
@@ -219,17 +225,6 @@ export default function BusinessRegistration() {
       return;
     }
 
-    // Document validation
-    requiredDocs = isOwner 
-      ? ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST', 'VENUE']
-      : ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST'];
-
-    missingDocs = requiredDocs.filter(doc => !files[doc]);
-    if (missingDocs.length > 0) {
-      toast.error(`Please upload all required documents: ${missingDocs.join(', ')}`);
-      setLoading(false);
-      return;
-    }
 
     // Append files with specific names for the backend to identify
     Object.keys(files).forEach(key => {
@@ -254,17 +249,17 @@ export default function BusinessRegistration() {
     }
   };
 
-  // ── Application pending review ──
+  // â”€â”€ Application pending review â”€â”€
   if (isPending || submitted) {
     const displayRole = submitted ? formData.role : pendingRole;
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-        <div className="max-w-md w-full text-center space-y-8 p-12 rounded-[40px] border border-white/5 bg-[#0A0A0A] relative overflow-hidden">
+        <div className="max-w-md w-full text-center space-y-8 p-12 rounded-[8px] border border-[#2D2D2D] bg-[#000000] relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-[#CCFF00]" />
-          <div className="w-20 h-20 bg-[#CCFF00]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 bg-[#CCFF00]/10 rounded-[8px] flex items-center justify-center mx-auto mb-6">
             <Clock size={40} className="text-[#CCFF00] animate-pulse" />
           </div>
-          <h2 className="text-4xl font-display uppercase tracking-tight">
+          <h2 className="text-4xl font-black uppercase tracking-tight">
             Application <span className="text-[#CCFF00]">Pending</span>
           </h2>
           <p className="text-gray-400 leading-relaxed">
@@ -272,7 +267,7 @@ export default function BusinessRegistration() {
             <span className="text-white capitalize font-semibold">{displayRole}</span>. Our admin
             team is reviewing your registration details and documents.
           </p>
-          <div className="bg-white/5 rounded-2xl p-6 text-sm text-left space-y-4">
+          <div className="bg-[#000000] rounded-[8px] p-5 text-[12px] text-left space-y-4 border border-[#2D2D2D]">
             <div className="flex items-center gap-3 text-gray-300">
               <CheckCircle2 size={18} className="text-[#CCFF00]" />
               <span>Application Received</span>
@@ -282,13 +277,13 @@ export default function BusinessRegistration() {
               <span>Document Verification In-Progress</span>
             </div>
             <div className="flex items-center gap-3 text-white/20">
-              <div className="w-[18px] h-[18px] border-2 border-white/10 rounded-full" />
+              <div className="w-[18px] h-[18px] border-2 border-[#2D2D2D] rounded-full" />
               <span>Final Approval &amp; Access</span>
             </div>
           </div>
           <button
             onClick={() => navigate("/")}
-            className="w-full py-4 rounded-2xl border border-white/10 hover:bg-white/5 transition-colors font-bold uppercase tracking-widest text-xs"
+            className="w-full py-4 rounded-[8px] border border-[#2D2D2D] hover:border-[#CCFF00]/30 hover:text-[#CCFF00] transition-all font-normal uppercase tracking-widest text-[12px]"
           >
             Back to Home
           </button>
@@ -310,20 +305,20 @@ export default function BusinessRegistration() {
           
           <div className="space-y-10">
             <div>
-              <h1 className="text-5xl md:text-6xl font-display uppercase leading-none mb-4">
+              <h1 className="text-5xl md:text-6xl font-black uppercase leading-none mb-4">
                 Professional <br /> <span style={{ color: PRI }}>Registration.</span>
               </h1>
-              <p className="text-gray-400 text-lg">Tell us about your business to get verified and access the TurfSpot dashboard.</p>
+              <p className="text-gray-400 text-lg">Tell us about your business to get verified and access the Kridaz dashboard.</p>
             </div>
 
             {hasRoleConflict && (
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6 flex gap-4 items-start">
+              <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/30 rounded-[8px] p-5 flex gap-4 items-start">
                 <ShieldAlert className="text-amber-500 shrink-0 mt-1" />
                 <div>
                   <h3 className="text-amber-500 font-bold tracking-wide uppercase text-sm mb-1">Role Conflict</h3>
                   <p className="text-amber-500/80 text-sm">
                     Your account already holds the <strong className="text-amber-500 uppercase">{existingRole}</strong> role. 
-                    You can view this form, but you cannot submit a new application as TurfSpot supports only one professional role per account.
+                    You can view this form, but you cannot submit a new application as Kridaz supports only one professional role per account.
                   </p>
                 </div>
               </div>
@@ -333,25 +328,25 @@ export default function BusinessRegistration() {
               
               <div className="grid grid-cols-2 gap-6">
                  <div className="space-y-2 group">
-                   <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">Full Name</label>
+                   <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">Full Name</label>
                    <input 
                      type="text" value={formData.name} disabled
-                     className="w-full bg-white/5 border border-white/5 rounded-2xl h-14 px-5 text-gray-400 outline-none cursor-not-allowed"
+                     className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] h-14 px-5 text-[#878C9F] outline-none cursor-not-allowed"
                    />
                  </div>
                  <div className="space-y-2 group">
-                   <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">Email Address</label>
+                   <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">Email Address</label>
                    <input 
                      type="email" value={formData.email} disabled
-                     className="w-full bg-white/5 border border-white/5 rounded-2xl h-14 px-5 text-gray-400 outline-none cursor-not-allowed"
+                     className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] h-14 px-5 text-[#878C9F] outline-none cursor-not-allowed"
                    />
                  </div>
               </div>
 
-              <div className="p-8 rounded-[32px] border border-white/5 bg-[#0A0A0A] space-y-8 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#CCFF00]/20" />
+              <div className="p-8 rounded-[8px] border border-[#2D2D2D] bg-[#000000] space-y-8 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px] pointer-events-none" />
                 
-                <h3 className="text-xl font-display uppercase tracking-tight flex items-center gap-3">
+                <h3 className="text-lg font-semibold uppercase tracking-tight flex items-center gap-3">
                   {formData.role === 'owner' ? <Building2 className="text-[#CCFF00]" /> : <Award className="text-[#CCFF00]" />}
                   {formData.role === 'owner' ? 'Business Details' : 'Professional Profile'}
                 </h3>
@@ -360,72 +355,72 @@ export default function BusinessRegistration() {
                   {formData.role === 'owner' || formData.role === 'VENUE_OWNER' ? (
                     <>
                       <div className="space-y-2 group col-span-2">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                           Business Name <span className="text-red-500">*</span>
                         </label>
                         <input 
                           type="text" name="businessDetails.businessName" required
                           onChange={handleChange}
                           placeholder="e.g. Dream Sports Arena"
-                          className="w-full bg-white/5 border border-white/5 focus:border-[#CCFF00]/50 rounded-2xl h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                       <div className="space-y-2 group">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                           Registration Number <span className="text-red-500">*</span>
                         </label>
                         <input 
                           type="text" name="businessDetails.registrationNumber" required
                           onChange={handleChange}
                           placeholder="GSTIN or License No."
-                          className="w-full bg-white/5 border border-white/5 focus:border-[#CCFF00]/50 rounded-2xl h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                       <div className="space-y-2 group">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                           Business Phone <span className="text-red-500">*</span>
                         </label>
                         <input 
                           type="text" name="phone" required
                           onChange={handleChange}
                           placeholder="+91 00000 00000"
-                          className="w-full bg-white/5 border border-white/5 focus:border-[#CCFF00]/50 rounded-2xl h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                     </>
                   ) : (
                     <>
                       <div className="space-y-2 group col-span-2">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                           Specialization <span className="text-red-500">*</span>
                         </label>
                         <input 
                           type="text" name="businessDetails.specialization" required
                           onChange={handleChange}
                           placeholder="e.g. Advanced Cricket Coaching"
-                          className="w-full bg-white/5 border border-white/5 focus:border-[#CCFF00]/50 rounded-2xl h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                       <div className="space-y-2 group">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                           Years of Experience <span className="text-red-500">*</span>
                         </label>
                         <input 
                           type="text" name="businessDetails.experience" required
                           onChange={handleChange}
                           placeholder="e.g. 5+ Years"
-                          className="w-full bg-white/5 border border-white/5 focus:border-[#CCFF00]/50 rounded-2xl h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                       <div className="space-y-2 group">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                           Contact Phone <span className="text-red-500">*</span>
                         </label>
                         <input 
                           type="text" name="phone" required
                           onChange={handleChange}
                           placeholder="+91 00000 00000"
-                          className="w-full bg-white/5 border border-white/5 focus:border-[#CCFF00]/50 rounded-2xl h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                     </>
@@ -433,7 +428,7 @@ export default function BusinessRegistration() {
                 </div>
 
                 <div className="space-y-2 group">
-                  <label className="text-xs font-bold uppercase tracking-widest text-gray-500 group-focus-within:text-[#CCFF00] transition-colors">
+                  <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                     Full Address <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
@@ -444,7 +439,7 @@ export default function BusinessRegistration() {
                       onChange={handleChange}
                       autoComplete="off"
                       placeholder="Street name, Landmark"
-                      className="w-full bg-white/5 border border-white/5 focus:border-[#CCFF00]/50 rounded-2xl h-14 pl-12 pr-12 text-white outline-none transition-all"
+                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 pl-12 pr-12 text-white outline-none transition-all"
                     />
                     
                     {isSearching && (
@@ -457,16 +452,16 @@ export default function BusinessRegistration() {
                     {showSuggestions && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setShowSuggestions(false)} />
-                        <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-[#0A0A0A] border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl animate-in fade-in slide-in-from-top-2">
+                        <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden z-50 shadow-2xl animate-in fade-in slide-in-from-top-2">
                           <div className="p-1 max-h-[240px] overflow-y-auto custom-scrollbar">
                             {suggestions.map((suggestion, index) => (
                                 <button
                                   key={index}
                                   type="button"
                                   onClick={() => handleSuggestionSelect(suggestion)}
-                                  className="w-full flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 text-left transition-all group/item"
+                                  className="w-full flex items-start gap-3 p-3 rounded-[6px] hover:bg-[#CCFF00]/5 text-left transition-all group/item"
                                 >
-                                  <div className="p-2 bg-white/5 rounded-lg group-hover/item:bg-[#CCFF00]/10 transition-colors mt-0.5">
+                                  <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] transition-colors mt-0.5">
                                     <Navigation size={14} className="text-gray-500 group-hover/item:text-[#CCFF00]" />
                                   </div>
                                   <div className="flex flex-col min-w-0">
@@ -493,7 +488,7 @@ export default function BusinessRegistration() {
                       value={formData.businessDetails.city}
                       onChange={handleChange}
                       placeholder="City"
-                      className="w-full bg-white/5 border border-white/5 focus:border-[#CCFF00]/50 rounded-2xl h-14 px-5 text-white outline-none transition-all"
+                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-2">
@@ -502,7 +497,7 @@ export default function BusinessRegistration() {
                       value={formData.businessDetails.state}
                       onChange={handleChange}
                       placeholder="State"
-                      className="w-full bg-white/5 border border-white/5 focus:border-[#CCFF00]/50 rounded-2xl h-14 px-5 text-white outline-none transition-all"
+                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-2">
@@ -511,17 +506,17 @@ export default function BusinessRegistration() {
                       value={formData.businessDetails.zipCode}
                       onChange={handleChange}
                       placeholder="Zip Code"
-                      className="w-full bg-white/5 border border-white/5 focus:border-[#CCFF00]/50 rounded-2xl h-14 px-5 text-white outline-none transition-all"
+                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Enhanced Document Section */}
-              <div className="p-8 rounded-[32px] border border-white/5 bg-[#0A0A0A] space-y-8 relative overflow-hidden">
+              <div className="p-8 rounded-[8px] border border-[#2D2D2D] bg-[#000000] space-y-8 relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-3xl pointer-events-none" />
                  
-                 <h3 className="text-xl font-display uppercase tracking-tight flex items-center gap-3">
+                 <h3 className="text-lg font-semibold uppercase tracking-tight flex items-center gap-3">
                    <FileText className="text-[#CCFF00]" /> Compliance Documents
                  </h3>
 
@@ -556,24 +551,24 @@ export default function BusinessRegistration() {
                      onFileSelect={(file) => handleFileChange("GST", file)}
                      selectedFile={files.GST}
                    />
-                   {(formData.role === 'owner' || formData.role === 'VENUE_OWNER') && (
-                     <DocumentUpload 
-                       label="Venue Ownership Doc" 
-                       id="venue"
-                       onFileSelect={(file) => handleFileChange("VENUE", file)}
-                       selectedFile={files.VENUE}
-                     />
-                   )}
+                    {isOwner && (
+                      <DocumentUpload 
+                        label="Venue Ownership Doc" 
+                        id="venue"
+                        onFileSelect={(file) => handleFileChange("VENUE", file)}
+                        selectedFile={files.VENUE}
+                      />
+                    )}
                  </div>
 
-                 <div className="pt-4 border-t border-white/5">
-                   <label className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 block">Mandatory Portfolio Link</label>
+                 <div className="pt-4 border-t border-[#2D2D2D]">
+                   <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] mb-2 block">Mandatory Portfolio Link</label>
                    <input 
                      type="url"
                      name="portfolioUrl"
                      onChange={handleChange}
                      placeholder="e.g. Behance, Personal Website, or Instagram"
-                     className="w-full bg-white/5 border border-white/5 focus:border-[#CCFF00]/50 rounded-2xl h-14 px-5 text-white outline-none transition-all text-sm"
+                     className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all text-sm"
                    />
                  </div>
               </div>
@@ -581,10 +576,10 @@ export default function BusinessRegistration() {
               <button 
                 type="submit"
                 disabled={loading || hasRoleConflict}
-                className={`w-full py-6 rounded-[24px] font-bold text-lg uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 ${
+                className={`w-full py-6 rounded-[8px] font-normal text-[13px] uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 ${
                   hasRoleConflict 
-                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed shadow-none'
-                    : 'bg-[#CCFF00] hover:bg-[#a3e635] text-black shadow-[0_10px_40px_-10px_rgba(132,204,22,0.3)] hover:shadow-[0_20px_60px_-10px_rgba(132,204,22,0.4)]'
+                    ? 'bg-[#2D2D2D] text-[#878C9F] cursor-not-allowed'
+                    : 'bg-[#CCFF00] hover:opacity-90 text-black '
                 }`}
               >
                 {loading ? (
@@ -608,11 +603,11 @@ export default function BusinessRegistration() {
           </div>
 
           <aside className="space-y-6">
-             <div className="p-8 rounded-[40px] border border-white/5 bg-[#0A0A0A] relative overflow-hidden">
+             <div className="p-8 rounded-[8px] border border-[#2D2D2D] bg-[#000000] relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
                    <ShieldCheckIcon size={80} className="text-[#CCFF00]" />
                 </div>
-                <h4 className="font-display uppercase text-[#CCFF00] mb-4">Verification Policy</h4>
+                <h4 className="text-[13px] font-semibold text-[#CCFF00] uppercase tracking-[0.3em] mb-4">Verification Policy</h4>
                 <ul className="space-y-4">
                   {[
                     "Reviews take 24-48 hours",
@@ -621,7 +616,7 @@ export default function BusinessRegistration() {
                     "Email notification on status",
                     "Dedicated support access"
                   ].map((text, i) => (
-                    <li key={i} className="flex gap-3 text-sm text-gray-400">
+                    <li key={i} className="flex gap-3 text-[12px] text-[#999999]">
                       <CheckCircle2 size={16} className="text-[#CCFF00] shrink-0" />
                       {text}
                     </li>
@@ -629,23 +624,23 @@ export default function BusinessRegistration() {
                 </ul>
              </div>
 
-             <div className="p-8 rounded-[40px] border border-[#CCFF00]/20 bg-[#CCFF00]/5 backdrop-blur-sm">
+             <div className="p-8 rounded-[8px] border border-[#2D2D2D] bg-[#000000]">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-xl bg-[#CCFF00]/10">
+                  <div className="p-2 rounded-[6px] bg-[#CCFF00]/10">
                     <Briefcase size={20} className="text-[#CCFF00]" />
                   </div>
-                  <h4 className="font-display uppercase text-white">Partner Perks</h4>
+                  <h4 className="text-[13px] font-semibold text-white uppercase tracking-[0.3em]">Partner Perks</h4>
                 </div>
                 <div className="space-y-4 text-gray-400 text-sm leading-relaxed">
                   <p>Join India's fastest growing sports ecosystem. Get access to:</p>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-white/5 rounded-xl border border-white/5">
-                      <span className="text-[#CCFF00] block font-bold mb-1">0%</span>
-                      <span className="text-[10px] uppercase tracking-tighter">Initial Fee</span>
+                    <div className="p-4 bg-[#000000] rounded-[8px] border border-[#2D2D2D]">
+                      <span className="text-[#CCFF00] block font-semibold text-xl mb-1">0%</span>
+                      <span className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F]">Initial Fee</span>
                     </div>
-                    <div className="p-3 bg-white/5 rounded-xl border border-white/5">
-                      <span className="text-[#CCFF00] block font-bold mb-1">24/7</span>
-                      <span className="text-[10px] uppercase tracking-tighter">Support</span>
+                    <div className="p-4 bg-[#000000] rounded-[8px] border border-[#2D2D2D]">
+                      <span className="text-[#CCFF00] block font-semibold text-xl mb-1">24/7</span>
+                      <span className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F]">Support</span>
                     </div>
                   </div>
                 </div>
@@ -670,10 +665,10 @@ function DocumentUpload({ label, id, onFileSelect, selectedFile }) {
       />
       <label 
         htmlFor={id}
-        className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed transition-all cursor-pointer h-32 text-center
+        className={`flex flex-col items-center justify-center p-6 border border-dashed transition-all cursor-pointer h-32 text-center rounded-[8px]
           ${selectedFile 
             ? 'border-[#CCFF00] bg-[#CCFF00]/5' 
-            : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/5'
+            : 'border-[#2D2D2D] bg-[#000000] hover:border-[#CCFF00]/50 hover:bg-[#CCFF00]/5'
           }`}
       >
         {selectedFile ? (
@@ -685,10 +680,10 @@ function DocumentUpload({ label, id, onFileSelect, selectedFile }) {
           </div>
         ) : (
           <div className="space-y-1">
-            <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-1 group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] flex items-center justify-center mx-auto mb-1 transition-transform">
                <FileText size={18} className="text-gray-500" />
             </div>
-            <span className="text-[10px] font-bold text-gray-500 uppercase group-hover:text-gray-300 transition-colors">
+            <span className="text-[10px] font-normal text-[#878C9F] uppercase tracking-wider group-hover:text-[#CCFF00] transition-colors">
               {label}
             </span>
           </div>
@@ -716,5 +711,7 @@ function ShieldCheckIcon({ size, className }) {
     </svg>
   );
 }
+
+
 
 

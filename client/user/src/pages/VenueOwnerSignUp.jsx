@@ -159,7 +159,7 @@ const VenueOwnerSignUp = () => {
               <span className="text-[#84CC16]">VENUE.</span>
             </h1>
             <p className="text-sm text-white/40 uppercase tracking-widest max-w-sm leading-relaxed">
-              Complete your business profile to start listing your sports facility on TurfSpot.
+              Complete your business profile to start listing your sports facility on Kridaz.
             </p>
           </div>
 

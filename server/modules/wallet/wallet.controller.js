@@ -27,11 +27,11 @@ export const createTopupOrder = async (req, res) => {
     }
 
     if (amount < 500) {
-      return res.status(400).json({ message: "Minimum top-up amount is ₹500" });
+      return res.status(400).json({ message: "Minimum top-up amount is Rs 500" });
     }
 
     if (amount > 10000) {
-      return res.status(400).json({ message: "Maximum top-up amount is ₹10,000" });
+      return res.status(400).json({ message: "Maximum top-up amount is Rs 10,000" });
     }
 
     const options = {
@@ -200,11 +200,11 @@ export const requestWithdrawal = async (req, res) => {
     }
 
     if (!amount || amount < 500) {
-      return res.status(400).json({ message: "Minimum withdrawal amount is ₹500" });
+      return res.status(400).json({ message: "Minimum withdrawal amount is Rs 500" });
     }
 
     if (amount > 100000) {
-      return res.status(400).json({ message: "Maximum withdrawal amount is ₹1,00,000" });
+      return res.status(400).json({ message: "Maximum withdrawal amount is Rs 1,00,000" });
     }
 
     const owner = req.user.ownerId 
@@ -235,7 +235,7 @@ export const requestWithdrawal = async (req, res) => {
     // 3. Notify Admin
     await notifyAdmins({
       title: "Withdrawal Requested",
-      message: `Partner ${owner.name} requested a withdrawal of ₹${amount}.`,
+      message: `Partner ${owner.name} requested a withdrawal of Rs ${amount}.`,
       type: "WITHDRAWAL",
       link: "/admin/withdrawals"
     });

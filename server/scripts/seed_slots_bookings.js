@@ -9,7 +9,7 @@ dotenv.config();
 
 const seedSlotsAndBookings = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/bookmysportz");
+    await mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/kridaz");
     console.log("Connected to MongoDB...");
 
     const turfs = await Turf.find();

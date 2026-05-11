@@ -34,6 +34,19 @@ const ownerSchema = new mongoose.Schema(
     walletBalance: { type: Number, default: 0 },
     reservedBalance: { type: Number, default: 0 },
     pendingBalance: { type: Number, default: 0 },
+
+    // ── Revenue settlement buckets ────────────────────────────────────────────
+    // inProgressBalance  : Booking played, currently inside 2-hr review window.
+    //                      Moved from pendingBalance by cron when slot ends.
+    //                      Moved to walletBalance on auto-settle (no dispute).
+    // disputeBalance     : Funds frozen because customer raised a dispute.
+    //                      Admin resolution either releases to walletBalance
+    //                      or triggers a customer refund.
+    // withdrawnBalance   : Cumulative total of approved withdrawal payouts.
+    //                      Read-only accounting field — never decremented.
+    inProgressBalance: { type: Number, default: 0 },
+    disputeBalance:    { type: Number, default: 0 },
+    withdrawnBalance:  { type: Number, default: 0 },
     certifications: [{ type: String }],
     rating: { type: Number, default: 0 },
     numReviews: { type: Number, default: 0 },

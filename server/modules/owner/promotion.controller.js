@@ -1,11 +1,15 @@
 import Coupon from "../../models/coupon.model.js";
 import Turf from "../../models/turf.model.js";
+import Owner from "../../models/owner.model.js";
 
 // Create a new promotion/coupon
 export const createPromotion = async (req, res) => {
   try {
     const { code, discountType, discountValue, validUntil, usageLimit, turfId } = req.body;
-    const ownerId = req.owner.id;
+    const ownerData = req.owner;
+    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
+    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
+    const ownerId = ownerRecord._id;
 
     // Check if code already exists
     const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
@@ -42,7 +46,10 @@ export const createPromotion = async (req, res) => {
 // Get all promotions for the logged-in owner
 export const getPromotions = async (req, res) => {
   try {
-    const ownerId = req.owner.id;
+    const ownerData = req.owner;
+    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
+    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
+    const ownerId = ownerRecord._id;
     const coupons = await Coupon.find({ ownerId }).populate("turfId", "name").sort({ createdAt: -1 });
     
     // Format the response for the frontend
@@ -69,7 +76,10 @@ export const getPromotions = async (req, res) => {
 export const deletePromotion = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerId = req.owner.id;
+    const ownerData = req.owner;
+    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
+    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
+    const ownerId = ownerRecord._id;
 
     const coupon = await Coupon.findOneAndDelete({ _id: id, ownerId });
     if (!coupon) {
@@ -87,7 +97,10 @@ export const deletePromotion = async (req, res) => {
 export const togglePromotionStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerId = req.owner.id;
+    const ownerData = req.owner;
+    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
+    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
+    const ownerId = ownerRecord._id;
 
     const coupon = await Coupon.findOne({ _id: id, ownerId });
     if (!coupon) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { X, Trash2, MessageCircle, Twitter, Facebook, Link as LinkIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -41,7 +41,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin }) =>
           {storyGroup.stories.map((_, idx) => (
             <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
               <div 
-                className={`h-full bg-[#84CC16] transition-all duration-300 ${idx < currentStoryIndex ? 'w-full' : idx === currentStoryIndex ? 'w-full animate-progress' : 'w-0'}`}
+                className={`h-full bg-[#CCFF00] transition-all duration-300 ${idx < currentStoryIndex ? 'w-full' : idx === currentStoryIndex ? 'w-full animate-progress' : 'w-0'}`}
                 style={{ animationDuration: '5s' }}
               />
             </div>
@@ -97,7 +97,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin }) =>
         <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black to-transparent flex items-center gap-4 z-[110]">
           <Link 
             to={`/profile/${storyGroup.user._id}`} 
-            className="w-10 h-10 rounded-full border-2 border-[#84CC16] overflow-hidden hover:opacity-80 transition-opacity shrink-0"
+            className="w-10 h-10 rounded-full border-2 border-[#CCFF00] overflow-hidden hover:opacity-80 transition-opacity shrink-0"
             onClick={(e) => e.stopPropagation()}
           >
             <img src={storyGroup.user.profilePicture || "/default-avatar.png"} alt="" className="w-full h-full object-cover" />
@@ -109,7 +109,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin }) =>
               onClick={(e) => e.stopPropagation()}
             >
               <p className="text-xs font-bold uppercase tracking-wider text-white truncate">{storyGroup.user.name}</p>
-              <p className="text-[10px] text-[#84CC16] font-bold uppercase tracking-widest truncate">@{storyGroup.user.username}</p>
+              <p className="text-[10px] text-[#CCFF00] font-bold uppercase tracking-widest truncate">@{storyGroup.user.username}</p>
             </Link>
           </div>
           {(isAdmin || isOwner) && onDelete && (
@@ -141,3 +141,4 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin }) =>
 };
 
 export default StoryViewer;
+

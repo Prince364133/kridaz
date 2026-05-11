@@ -75,7 +75,7 @@ export const notifyNewGame = async (game, host) => {
 ⏰ Time: ${time}
 👤 Hosted by: ${host.name}
 
-Join the action now on TurfSpot! 🏏⚽🏐
+Join the action now on Kridaz! 🏏⚽🏐
     `;
 
     const emailSubject = `New ${gameType} Match in ${city}!`;

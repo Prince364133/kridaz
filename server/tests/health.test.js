@@ -11,6 +11,6 @@ describe("Health Check API", () => {
   it("should return 200 for root route /", async () => {
     const res = await request(app).get("/");
     expect(res.statusCode).toEqual(200);
-    expect(res.text).toContain("TurfSpot API is running");
+    expect(res.text).toContain("Kridaz API is running");
   });
 });

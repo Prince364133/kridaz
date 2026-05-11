@@ -9,7 +9,8 @@ import storyRouter from "../../modules/story/story.routes.js"
 import communityRouter from "../../modules/community/community.routes.js"
 import walletRouter from "./wallet.routes.js";
 import notificationRouter from "../notification.routes.js";
-import { getPublicPlayers } from "../../modules/player/player.controller.js"
+import disputeRouter from "./dispute.routes.js";
+import { getPublicPlayers, getLeaderboard } from "../../modules/player/player.controller.js"
 
 const userRouter = Router();
 
@@ -20,11 +21,13 @@ userRouter.use("/review", reviewRouter);
 userRouter.use("/blogs", blogRouter);
 // Public — no auth required, safe public fields only
 userRouter.get("/players", getPublicPlayers);
+userRouter.get("/leaderboard", getLeaderboard);
 
 userRouter.use("/players", playerRouter);
 userRouter.use("/stories", storyRouter);
 userRouter.use("/community", communityRouter);
 userRouter.use("/wallet", walletRouter);
+userRouter.use("/dispute", disputeRouter);
 userRouter.use("/notifications", notificationRouter);
 
 export default userRouter;

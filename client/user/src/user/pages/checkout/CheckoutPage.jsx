@@ -135,7 +135,7 @@ const CheckoutPage = () => {
     try {
       if (paymentMode === "WALLET") {
         const bookingPayload = {
-          id: turfId,
+          turfId,
           startTime: startISO,
           endTime: endISO,
           selectedTurfDate: dateISO,
@@ -161,7 +161,7 @@ const CheckoutPage = () => {
         const paymentResult = await handlePayment(order, user);
 
         const res = await axiosInstance.post("/api/user/booking/verify-payment", {
-          id: turfId,
+          turfId,
           startTime: startISO,
           endTime: endISO,
           selectedTurfDate: dateISO,
@@ -243,7 +243,7 @@ const CheckoutPage = () => {
           </button>
           <div className="flex items-center gap-3">
             <ShieldCheck size={20} className="text-[#CCFF00]" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">TurfSpot Secure Checkout</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Kridaz Secure Checkout</span>
           </div>
         </div>
 
@@ -413,7 +413,7 @@ const CheckoutPage = () => {
                       </div>
                       <div className="text-left">
                         <div className="flex items-center gap-3">
-                          <p className={`text-sm font-black uppercase tracking-tight ${paymentMode === "WALLET" ? "text-white" : "text-zinc-400"}`}>TurfSpot Wallet</p>
+                          <p className={`text-sm font-black uppercase tracking-tight ${paymentMode === "WALLET" ? "text-white" : "text-zinc-400"}`}>Kridaz Wallet</p>
                           <span className="bg-[#CCFF00]/10 text-[#CCFF00] text-[8px] font-black px-2 py-0.5 rounded-full uppercase">{settings?.cashbackPercentage || 5}% Cashback</span>
                         </div>
                         <p className="text-[10px] font-bold text-zinc-500 mt-0.5 uppercase tracking-widest">Available Balance: ₹{currentBalance}</p>

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, MapPin, Clock, Calendar, Check, X, 
-  Info, Phone, User, Globe, Shield, Activity
+  Info, Phone, User, Globe, Shield, Activity, Mail, ExternalLink, Star,
+  Navigation, FileText, DollarSign
 } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
@@ -16,6 +17,8 @@ const VenueApprovalDetail = () => {
   const { turfData, loading, approveTurf, rejectTurf } = useTurfData();
   const [turf, setTurf] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, type: "" });
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
+  const [isPolicyExpanded, setIsPolicyExpanded] = useState(false);
 
   useEffect(() => {
     if (turfData && id) {
@@ -94,9 +97,27 @@ const VenueApprovalDetail = () => {
             <h1 className="text-5xl lg:text-8xl font-black text-white uppercase tracking-tighter leading-none">
               {turf.name}
             </h1>
-            <div className="flex items-center gap-2 text-gray-400 font-bold">
-              <MapPin size={18} className="text-[#CCFF00]" />
-              <span className="text-lg">{turf.location}</span>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2 text-gray-400 font-bold">
+                <MapPin size={18} className="text-[#CCFF00]" />
+                <span className="text-lg">
+                  {[turf.location, turf.city, turf.state].filter(Boolean).join(", ")}
+                </span>
+              </div>
+              <a
+                href={
+                  turf.mapUrl ||
+                  (turf.locationData?.coordinates?.length === 2
+                    ? `https://maps.google.com/?q=${turf.locationData.coordinates[1]},${turf.locationData.coordinates[0]}`
+                    : `https://maps.google.com/maps/search/?api=1&query=${encodeURIComponent([turf.location, turf.city, turf.state].filter(Boolean).join(", "))}`)
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#CCFF00]/10 border border-[#CCFF00]/30 text-[#CCFF00] text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-[#CCFF00]/20 transition-all"
+              >
+                <Navigation size={10} />
+                Get Directions
+              </a>
             </div>
           </div>
         </div>
@@ -115,9 +136,19 @@ const VenueApprovalDetail = () => {
                 </div>
                 <h2 className="text-xs font-black uppercase tracking-[0.2em]">The Mission Brief</h2>
               </div>
-              <p className="text-gray-400 text-xl leading-relaxed font-medium italic">
-                "{turf.description || "No description provided for this venue."}"
-              </p>
+              <div className="relative">
+                <p className={`text-gray-400 text-xl leading-relaxed font-medium italic ${!isDescExpanded ? 'line-clamp-2' : ''}`}>
+                  "{turf.description || "No description provided for this venue."}"
+                </p>
+                {(turf.description || "No description provided for this venue.")?.length > 150 && (
+                  <button 
+                    onClick={() => setIsDescExpanded(!isDescExpanded)}
+                    className="text-[#CCFF00] text-xs font-bold uppercase tracking-wider mt-3 hover:underline"
+                  >
+                    {isDescExpanded ? 'Show Less' : 'Read More'}
+                  </button>
+                )}
+              </div>
             </section>
 
             {/* Gallery Section */}
@@ -161,6 +192,62 @@ const VenueApprovalDetail = () => {
                 ))}
               </div>
             </section>
+
+            {/* Venue Policy Section */}
+            <section className="space-y-6">
+              <div className="flex items-center gap-3 text-[#CCFF00]">
+                <div className="w-8 h-8 rounded-lg bg-[#CCFF00]/10 flex items-center justify-center border border-[#CCFF00]/20">
+                  <FileText size={16} />
+                </div>
+                <h2 className="text-xs font-black uppercase tracking-[0.2em]">Venue Policies</h2>
+              </div>
+              {turf.policies ? (
+                <div className="p-6 bg-white/[0.02] border border-white/5 rounded-[24px] space-y-3 relative">
+                  <p className={`text-gray-400 text-sm leading-relaxed whitespace-pre-wrap ${!isPolicyExpanded ? 'line-clamp-2' : ''}`}>{turf.policies}</p>
+                  {turf.policies?.length > 150 && (
+                    <button 
+                      onClick={() => setIsPolicyExpanded(!isPolicyExpanded)}
+                      className="text-[#CCFF00] text-xs font-bold uppercase tracking-wider mt-2 hover:underline"
+                    >
+                      {isPolicyExpanded ? 'Show Less' : 'Read More'}
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="p-6 bg-white/[0.02] border border-dashed border-white/10 rounded-[24px] flex items-center gap-3">
+                  <Shield size={16} className="text-gray-600 shrink-0" />
+                  <p className="text-gray-600 text-xs font-bold uppercase tracking-widest">No specific policies defined — standard facility rules apply.</p>
+                </div>
+              )}
+            </section>
+
+            {/* Per-Slot Pricing Section */}
+            {turf.generatedSlots && turf.generatedSlots.length > 0 && (
+              <section className="space-y-6">
+                <div className="flex items-center gap-3 text-[#CCFF00]">
+                  <div className="w-8 h-8 rounded-lg bg-[#CCFF00]/10 flex items-center justify-center border border-[#CCFF00]/20">
+                    <DollarSign size={16} />
+                  </div>
+                  <h2 className="text-xs font-black uppercase tracking-[0.2em]">Per-Slot Rate Schedule</h2>
+                  <span className="ml-auto px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-gray-500 uppercase">
+                    {turf.generatedSlots.length} Slots
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-72 overflow-y-auto pr-1">
+                  {turf.generatedSlots.map((slot, i) => (
+                    <div key={i} className={`p-4 rounded-[20px] border flex flex-col gap-1 ${
+                      slot.isActive !== false
+                        ? "bg-white/[0.02] border-white/5 hover:border-[#CCFF00]/20"
+                        : "bg-transparent border-dashed border-white/5 opacity-40"
+                    } transition-colors`}>
+                      <span className="text-white text-[10px] font-black">{slot.startTime}</span>
+                      <span className="text-gray-600 text-[9px] font-bold">→ {slot.endTime}</span>
+                      <span className="text-[#CCFF00] text-sm font-black mt-1">Rs {slot.price ?? turf.pricePerHour}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           {/* Right Column: Operations & Verification */}
@@ -200,7 +287,7 @@ const VenueApprovalDetail = () => {
               <div className="pb-8 border-b border-white/5">
                 <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-2">Base Operations Cost</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-black text-white tracking-tighter">₹{turf.pricePerHour}</span>
+                  <span className="text-5xl font-black text-white tracking-tighter">Rs {turf.pricePerHour}</span>
                   <span className="text-[#CCFF00] font-black text-sm uppercase">/ Hour</span>
                 </div>
               </div>
@@ -208,8 +295,48 @@ const VenueApprovalDetail = () => {
               <div className="space-y-8">
                 <DetailRow icon={Clock} label="OPERATING WINDOW" val={`${turf.openTime} - ${turf.closeTime}`} />
                 <DetailRow icon={Calendar} label="LISTING TIMESTAMP" val={turf.createdAt ? format(new Date(turf.createdAt), "PPP") : "N/A"} />
-                <DetailRow icon={User} label="PARTNER IDENTIFIER" val={turf.owner?.name || turf.owner || "Anonymous Merchant"} />
+                {turf.city && <DetailRow icon={MapPin} label="CITY" val={turf.city} />}
+                {turf.state && <DetailRow icon={Globe} label="STATE" val={turf.state} />}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-gray-500">
+                    <Navigation size={14} className="text-[#CCFF00]" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">DIRECTIONS</span>
+                  </div>
+                  <a
+                    href={
+                      turf.mapUrl ||
+                      (turf.locationData?.coordinates?.length === 2
+                        ? `https://maps.google.com/?q=${turf.locationData.coordinates[1]},${turf.locationData.coordinates[0]}`
+                        : `https://maps.google.com/maps/search/?api=1&query=${encodeURIComponent([turf.location, turf.city, turf.state].filter(Boolean).join(", "))}`)
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-3 bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-2xl text-[#CCFF00] text-[10px] font-black uppercase tracking-widest hover:bg-[#CCFF00]/20 transition-all group"
+                  >
+                    <Navigation size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                    Open in Google Maps
+                    <ExternalLink size={10} className="ml-auto opacity-50" />
+                  </a>
+                </div>
               </div>
+
+              {/* Slot Duration & Break */}
+              {(turf.slotDuration || turf.breakTime !== undefined) && (
+                <div className="pt-4 border-t border-white/5 grid grid-cols-2 gap-4">
+                  {turf.slotDuration && (
+                    <div className="p-3 bg-white/[0.02] rounded-2xl border border-white/5">
+                      <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Slot Duration</p>
+                      <p className="text-white font-black text-sm">{turf.slotDuration} min</p>
+                    </div>
+                  )}
+                  {turf.breakTime !== undefined && (
+                    <div className="p-3 bg-white/[0.02] rounded-2xl border border-white/5">
+                      <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Break Time</p>
+                      <p className="text-white font-black text-sm">{turf.breakTime} min</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Manager Contacts */}
               {turf.managerContacts && turf.managerContacts.length > 0 && (
@@ -226,6 +353,103 @@ const VenueApprovalDetail = () => {
                       </a>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+
+            {/* Owner Intelligence Card */}
+            <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[40px] space-y-6">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-[#CCFF00]/10 flex items-center justify-center border border-[#CCFF00]/20">
+                  <User size={16} className="text-[#CCFF00]" />
+                </div>
+                <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#CCFF00]">Owner Intelligence</h2>
+              </div>
+
+              {/* Avatar + name row */}
+              <div className="flex items-center gap-5">
+                <div className="w-16 h-16 rounded-2xl bg-[#1A1A1A] border border-[#2D2D2D] overflow-hidden shrink-0 flex items-center justify-center">
+                  {turf.owner?.profileImage ? (
+                    <img src={turf.owner.profileImage} alt={turf.owner?.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <User size={28} className="text-[#CCFF00]/40" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-white font-black text-xl uppercase tracking-tight truncate">
+                    {turf.owner?.name || "Unknown Owner"}
+                  </p>
+                  <span className="text-[9px] font-black px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20 rounded-full uppercase tracking-widest">
+                    {turf.owner?.role?.replace(/_/g, " ") || "Venue Owner"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-2 border-t border-white/5">
+                {/* Email */}
+                {turf.owner?.email && (
+                  <a href={`mailto:${turf.owner.email}`}
+                    className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-2xl border border-white/5 hover:border-[#CCFF00]/30 hover:bg-[#CCFF00]/5 transition-all group">
+                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                      <Mail size={14} className="text-[#CCFF00]" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Email</p>
+                      <p className="text-white text-xs font-bold truncate">{turf.owner.email}</p>
+                    </div>
+                    <ExternalLink size={12} className="text-gray-600 group-hover:text-[#CCFF00] shrink-0" />
+                  </a>
+                )}
+
+                {/* Phone */}
+                {turf.owner?.phoneNumber && (
+                  <a href={`tel:${turf.owner.phoneNumber}`}
+                    className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-2xl border border-white/5 hover:border-[#CCFF00]/30 hover:bg-[#CCFF00]/5 transition-all group">
+                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                      <Phone size={14} className="text-[#CCFF00]" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Phone</p>
+                      <p className="text-white text-xs font-bold">{turf.owner.phoneNumber}</p>
+                    </div>
+                    <ExternalLink size={12} className="text-gray-600 group-hover:text-[#CCFF00] shrink-0" />
+                  </a>
+                )}
+
+                {/* Joined */}
+                {turf.owner?.createdAt && (
+                  <div className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-2xl border border-white/5">
+                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                      <Calendar size={14} className="text-[#CCFF00]" />
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Member Since</p>
+                      <p className="text-white text-xs font-bold">
+                        {new Date(turf.owner.createdAt).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" })}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Rating */}
+                {turf.owner?.rating !== undefined && (
+                  <div className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-2xl border border-white/5">
+                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                      <Star size={14} className="text-[#CCFF00]" />
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Owner Rating</p>
+                      <p className="text-white text-xs font-bold">{turf.owner.rating?.toFixed(1) || "New"} / 5.0</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Venue count badge */}
+              {turf.owner?.totalVenues !== undefined && (
+                <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                  <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Total Venues Owned</span>
+                  <span className="text-2xl font-black text-[#CCFF00]">{turf.owner.totalVenues}</span>
                 </div>
               )}
             </div>

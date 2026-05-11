@@ -120,7 +120,7 @@ export default function BlogDetail() {
         <div className="max-w-4xl mx-auto px-6 py-5 flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
             <User size={13} style={{ color: PRI }} />
-            {blog.author || "BookMySportz Team"}
+            {blog.author || "Kridaz Team"}
           </div>
           <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
             <Calendar size={13} style={{ color: PRI }} />

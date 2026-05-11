@@ -33,7 +33,7 @@ const blogSchema = new mongoose.Schema(
     },
     author: {
       type: String,
-      default: "BookMySportz Team",
+      default: "Kridaz Team",
     },
     views: {
       type: Number,

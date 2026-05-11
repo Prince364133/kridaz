@@ -171,7 +171,7 @@ const useSignUpForm = (predefinedRole = "user") => {
       const result = response.data;
 
       dispatch(login({ token: result.token, role: result.role, user: result.user }));
-      toast.success(`Welcome to TurfSpot, ${data.name}!`);
+      toast.success(`Welcome to Kridaz, ${data.name}!`);
       navigate("/");
     } catch (error) {
       toast.error(error.response?.data?.message || "Registration failed");

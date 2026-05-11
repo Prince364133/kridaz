@@ -113,7 +113,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
           </button>
           <Link to="/" className="flex items-center gap-4 group">
             <div className="w-20 h-10 sm:w-32 sm:h-12 bg-transparent flex items-center justify-center overflow-hidden">
-               <img src="/logo.png" alt="BookMySportz Logo" className="w-full h-full object-contain" />
+               <img src="/logo.png" alt="Kridaz Logo" className="w-full h-full object-contain" />
             </div>
           </Link>
         </div>

@@ -50,7 +50,7 @@ const UserFooter = () => {
           <div className="lg:col-span-5 space-y-8">
             <Link to="/" className="group flex items-center gap-6">
               <div className="flex items-center justify-center">
-                <img src="/logo.png" alt="TurfSpot" className="h-10 lg:h-12 w-auto brightness-125" />
+                <img src="/logo.png" alt="Kridaz" className="h-10 lg:h-12 w-auto brightness-125" />
               </div>
             </Link>
             <p className="text-white/60 text-sm leading-relaxed font-sans max-w-lg">
@@ -120,7 +120,7 @@ const UserFooter = () => {
             {/* Email */}
             <div className="flex items-center gap-2">
               <Mail size={14} className="text-[#84CC16]/60 shrink-0" />
-              <span className="text-sm text-white/80">contact@bookmysportz.com</span>
+              <span className="text-sm text-white/80">contact@kridaz.com</span>
             </div>
 
             {/* Office */}
@@ -148,7 +148,7 @@ const UserFooter = () => {
         {/* Bottom Bar */}
         <div className="border-t border-white/5 pt-12 flex flex-col md:flex-row items-center justify-between gap-8">
           <p className="text-xs text-white/40">
-            &copy; {currentYear} BookMySportz. All rights reserved.
+            &copy; {currentYear} Kridaz. All rights reserved.
           </p>
         </div>
       </div>

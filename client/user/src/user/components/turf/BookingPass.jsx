@@ -232,7 +232,7 @@ const BookingPass = () => {
                     <div className="flex items-center gap-3 text-xs">
                         <Mail size={14} className="text-[#84CC16]" />
                         <span className="text-zinc-400 font-bold uppercase text-[10px]">Support:</span>
-                        <span className="text-white font-medium">support@bookmysportz.com</span>
+                        <span className="text-white font-medium">contact@kridaz.com</span>
                     </div>
                  </div>
               </div>
@@ -266,7 +266,7 @@ const BookingPass = () => {
                <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
                     <Zap size={16} fill="currentColor" />
-                    <span className="text-xs font-black uppercase italic tracking-tighter">Powered by TurfSpot</span>
+                    <span className="text-xs font-black uppercase italic tracking-tighter">Powered by Kridaz</span>
                   </div>
                   <div className="flex items-center gap-2 text-[10px] font-bold uppercase opacity-80">
                     <span>Payment: {booking.paymentMethod}</span>

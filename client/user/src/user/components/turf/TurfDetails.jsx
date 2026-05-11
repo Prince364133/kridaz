@@ -27,7 +27,11 @@ import {
   ArrowRight,
   CheckCircle2,
   Info,
-  ExternalLink
+  ExternalLink,
+  Phone,
+  Navigation,
+  Mail,
+  User
 } from "lucide-react";
 
 import WriteReview from "../../components/reviews/WriteReview";
@@ -156,8 +160,8 @@ const TurfDetails = () => {
 
   const handleShare = async () => {
     const shareData = {
-      title: turf?.name || "TurfSpot Venue",
-      text: `Check out ${turf?.name} in ${turf?.location} on TurfSpot!`,
+      title: turf?.name || "Kridaz Venue",
+      text: `Check out ${turf?.name} in ${turf?.location} on Kridaz!`,
       url: window.location.href,
     };
 
@@ -549,14 +553,14 @@ const TurfDetails = () => {
                           {turf.location}{turf.city ? `, ${turf.city}` : ""}{turf.state ? `, ${turf.state}` : ""}
                         </p>
                         <a
-                          href={turf.locationData?.coordinates
+                          href={turf.mapUrl || (turf.locationData?.coordinates
                             ? `https://www.google.com/maps?q=${turf.locationData.coordinates[1]},${turf.locationData.coordinates[0]}`
-                            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${turf.location} ${turf.city || ""} ${turf.state || ""}}`)}`}
+                            : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${turf.location} ${turf.city || ""} ${turf.state || ""}`)}`)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[#CCFF00] text-[10px] font-black uppercase tracking-wider hover:underline"
+                          className="text-[#CCFF00] text-[10px] font-black uppercase tracking-wider hover:underline flex items-center gap-2"
                         >
-                          Launch Navigation
+                          <Navigation size={12} /> Launch Navigation
                         </a>
                       </div>
                     </div>
@@ -565,6 +569,61 @@ const TurfDetails = () => {
                 </div>
               )}
 
+              {/* Ground Contacts */}
+              {((turf.managerContacts && turf.managerContacts.length > 0) || turf.owner) && (
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold uppercase tracking-tight">Ground Contacts</h2>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-[1.5rem] p-5 space-y-3">
+                    {/* Owner Record */}
+                    {turf.owner && (
+                      <div className="flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl hover:border-[#CCFF00]/40 transition-all group relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-[#CCFF00]" />
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-[#111] border border-zinc-700 flex items-center justify-center shrink-0 overflow-hidden">
+                            {turf.owner.profilePicture ? (
+                              <img src={turf.owner.profilePicture} alt={turf.owner.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <User className="w-5 h-5 text-zinc-500" />
+                            )}
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-white text-sm font-bold uppercase tracking-tight">{turf.owner.name}</span>
+                            <span className="text-zinc-500 text-[10px] font-medium lowercase tracking-normal">{turf.owner.email}</span>
+                            <span className="text-[#CCFF00] text-[9px] font-bold uppercase tracking-widest mt-0.5">Venue Owner</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {turf.owner.phone && (
+                            <a href={`tel:${turf.owner.phone}`} className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 hover:bg-[#CCFF00] hover:text-black transition-all shrink-0">
+                              <Phone className="w-4 h-4" />
+                            </a>
+                          )}
+                          <a href={`mailto:${turf.owner.email}`} className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 hover:bg-[#CCFF00] hover:text-black transition-all shrink-0">
+                            <Mail className="w-4 h-4" />
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Venue Managers */}
+                    {turf.managerContacts && turf.managerContacts.map((contact, i) => (
+                      <a
+                        key={i}
+                        href={`tel:${contact.phone}`}
+                        className="flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl hover:border-[#CCFF00]/40 hover:bg-zinc-900 transition-all group pl-5"
+                      >
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-white text-sm font-bold uppercase tracking-tight">{contact.name}</span>
+                          <span className="text-zinc-500 text-[10px] font-bold">Venue Manager • {contact.phone}</span>
+                        </div>
+                        <div className="w-9 h-9 rounded-xl bg-[#CCFF00]/10 border border-[#CCFF00]/20 flex items-center justify-center text-[#CCFF00] group-hover:bg-[#CCFF00] group-hover:text-black transition-all shrink-0">
+                          <Phone className="w-4 h-4" />
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
 
             </div>
           </div>

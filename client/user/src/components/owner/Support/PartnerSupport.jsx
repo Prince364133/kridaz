@@ -73,7 +73,7 @@ const PartnerSupport = () => {
       const uploadPromises = files.map(async (file) => {
         const data = new FormData();
         data.append("file", file);
-        data.append("folder", "turfspot/support");
+        data.append("folder", "kridaz/support");
         
         console.log(`PartnerSupport.jsx: Uploading ${file.name} (${file.size} bytes)...`);
         const res = await axiosInstance.post("/api/upload", data, {
@@ -128,7 +128,7 @@ const PartnerSupport = () => {
               </h1>
             </div>
             <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
-              Get assistance from the BMS Admin Team
+              Get assistance from the Kridaz Admin Team
             </p>
           </div>
 

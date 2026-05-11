@@ -48,7 +48,49 @@ const useTurfData = () => {
     }
   };
 
-  return { turfData, loading, approveTurf, rejectTurf, refetch: fetchTurfData };
+  const decommissionTurf = async (id, adminData) => {
+    try {
+      await axiosInstance.put(`/api/admin/turfs/${id}/decommission`, adminData);
+      await fetchTurfData();
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  };
+
+  const softDeleteTurf = async (id, adminData) => {
+    try {
+      await axiosInstance.put(`/api/admin/turfs/${id}/soft-delete`, adminData);
+      await fetchTurfData();
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  };
+
+  const hardDeleteTurf = async (id) => {
+    try {
+      await axiosInstance.delete(`/api/admin/turfs/${id}/hard-delete`);
+      await fetchTurfData();
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  };
+
+  return { 
+    turfData, 
+    loading, 
+    approveTurf, 
+    rejectTurf, 
+    decommissionTurf, 
+    softDeleteTurf, 
+    hardDeleteTurf, 
+    refetch: fetchTurfData 
+  };
 };
 
 export default useTurfData;

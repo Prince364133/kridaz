@@ -43,6 +43,7 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/partner/reviews", label: "Reviews", icon: Star },
     { to: "/partner/promotions", label: "Promotions", icon: Tag },
     { to: "/partner/support", label: "Docs & Support", icon: HelpCircle },
+    { label: "Sign Out", icon: LogOut, action: "logout" },
   ];
 
 

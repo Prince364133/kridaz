@@ -90,7 +90,7 @@ export const generateHTMLContent = (turfName, location,date,startTime,endTime,to
             <p><strong>Date:</strong> ${date}</p>
             <p><strong>Start Time:</strong> ${startTime}</p>
             <p><strong>End Time:</strong> ${endTime}</p>
-            <p><strong>Total Price:</strong> ${totalPrice}</p>
+            <p><strong>Total Price:</strong> Rs ${totalPrice}</p>
         </div>
         <div class="qr-code">
             <img src="${QRcode}" alt="QR Code">

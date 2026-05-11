@@ -30,7 +30,7 @@ export const generateInvoice = async (booking, turf, user) => {
       });
 
       // --- Colors ---
-      const primaryColor = '#84CC16'; // Lime green from TurfSpot theme
+      const primaryColor = '#84CC16'; // Lime green from Kridaz theme
       const darkColor = '#1F2937';
       const grayColor = '#6B7280';
 
@@ -40,11 +40,11 @@ export const generateInvoice = async (booking, turf, user) => {
         doc.image(logoPath, 50, 45, { width: 40 });
         doc.fillColor(primaryColor)
            .fontSize(22)
-           .text('TurfSpot', 100, 50, { bold: true });
+           .text('Kridaz', 100, 50, { bold: true });
       } else {
         doc.fillColor(primaryColor)
            .fontSize(25)
-           .text('TurfSpot', 50, 50, { bold: true });
+           .text('Kridaz', 50, 50, { bold: true });
       }
       
       doc.fillColor(darkColor)
@@ -54,7 +54,7 @@ export const generateInvoice = async (booking, turf, user) => {
       // Company Details (Right aligned)
       doc.fontSize(10)
          .fillColor(grayColor)
-         .text('BookMySportz Pvt Ltd.', 400, 50, { align: 'right' })
+         .text('Kridaz Pvt Ltd.', 400, 50, { align: 'right' })
          .text('123, Sports Complex, HSR Layout', 400, 65, { align: 'right' })
          .text('Bangalore, KA - 560102', 400, 80, { align: 'right' })
          .text('GSTIN: 29AAACB1234A1Z5', 400, 95, { align: 'right' });
@@ -72,7 +72,7 @@ export const generateInvoice = async (booking, turf, user) => {
          .fillColor(grayColor)
          .text(`Invoice Number: TS-${booking._id.toString().slice(-6).toUpperCase()}`, 50, 165)
          .text(`Booking Date: ${new Date(booking.createdAt).toLocaleDateString()}`, 50, 180)
-         .text(`Payment Method: TurfSpot Wallet (Coins)`, 50, 195);
+         .text(`Payment Method: Online Payment`, 50, 195);
 
       // --- Billing Details ---
       doc.fillColor(darkColor)
@@ -103,7 +103,7 @@ export const generateInvoice = async (booking, turf, user) => {
          .text('Booking Date', 200, tableTop + 8, { bold: true })
          .text('Time Slot', 320, tableTop + 8, { bold: true })
          .text('Duration', 420, tableTop + 8, { bold: true })
-         .text('Price (Coins)', 480, tableTop + 8, { align: 'right', bold: true });
+         .text('Price (Rs)', 480, tableTop + 8, { align: 'right', bold: true });
 
       // Item Row
       const rowTop = tableTop + 35;
@@ -140,17 +140,17 @@ export const generateInvoice = async (booking, turf, user) => {
 
       doc.fontSize(10)
          .text('Total Amount:', 350, summaryTop + 20)
-         .text(`${booking.totalPrice} Coins`, 480, summaryTop + 20, { align: 'right' });
+         .text(`Rs ${booking.totalPrice}`, 480, summaryTop + 20, { align: 'right' });
 
       doc.fontSize(12)
          .fillColor(primaryColor)
          .text('Advance Paid:', 350, summaryTop + 40, { bold: true })
-         .text(`${booking.advanceAmount || booking.totalPrice} Coins`, 480, summaryTop + 40, { align: 'right', bold: true });
+         .text(`Rs ${booking.advanceAmount || booking.totalPrice}`, 480, summaryTop + 40, { align: 'right', bold: true });
 
       doc.fontSize(12)
          .fillColor('#F97316') // Orange
          .text('Venue Balance:', 350, summaryTop + 60, { bold: true })
-         .text(`${booking.balanceAmount || 0} Coins`, 480, summaryTop + 60, { align: 'right', bold: true });
+         .text(`Rs ${booking.balanceAmount || 0}`, 480, summaryTop + 60, { align: 'right', bold: true });
 
       // Payment Status Badge
       const statusX = 350;
@@ -167,7 +167,7 @@ export const generateInvoice = async (booking, turf, user) => {
 
       doc.fontSize(9)
          .fillColor(grayColor)
-         .text(`Platform: support@turfspot.com`, 350, summaryTop + 130)
+         .text(`Platform: support@kridaz.com`, 350, summaryTop + 130)
          .text(`Venue: ${turf.owner?.email || 'N/A'}`, 350, summaryTop + 142);
 
       // Manager Contacts (Left Side)
@@ -206,7 +206,7 @@ export const generateInvoice = async (booking, turf, user) => {
       // Fake digital signature look
       doc.fontSize(14)
          .fillColor(grayColor)
-         .text('TurfSpot Accounts Team', 50, 725, { oblique: true });
+         .text('Kridaz Accounts Team', 50, 725, { oblique: true });
 
       doc.rect(50, 745, 150, 1).fill('#E5E7EB');
 

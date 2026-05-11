@@ -1,9 +1,8 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { Controller } from "react-hook-form";
 import { setHours, setMinutes } from "date-fns";
+import ClockPicker from "@components/common/ClockPicker";
 import { FormField, Button } from "@components/common";
 import useEditTurf from "@hooks/owner/useEditTurf";
 import DashboardSkeleton from "../Dashboard/DashboardSkeleton";
@@ -106,7 +105,7 @@ const EditTurf = () => {
               </div>
             </div>
             <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-14">
-              Update Facility Parameters | {turf?.name || "TurfSpot"}
+              Update Facility Parameters | {turf?.name || "Kridaz"}
             </p>
           </div>
         </header>
@@ -489,21 +488,17 @@ const EditTurf = () => {
                       name="openTime"
                       control={control}
                       render={({ field }) => (
-                        <DatePicker
-                          selected={field.value}
+                        <ClockPicker
+                          value={field.value}
                           onChange={(date) => {
                             field.onChange(date);
                             setValue("closeTime", null);
                           }}
-                          showTimeSelect
-                          showTimeSelectOnly
-                          timeIntervals={60}
-                          timeCaption="Time"
-                          dateFormat="h:mm aa"
-                          className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all"
+                          placeholder="12:00 AM"
                         />
                       )}
                     />
+                    {errors.openTime && <p className="text-[#CCFF00] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.openTime.message}</p>}
                   </div>
 
                   <div className="form-control">
@@ -514,19 +509,15 @@ const EditTurf = () => {
                       name="closeTime"
                       control={control}
                       render={({ field }) => (
-                        <DatePicker
-                          selected={field.value}
+                        <ClockPicker
+                          value={field.value}
                           onChange={field.onChange}
-                          showTimeSelect
-                          showTimeSelectOnly
-                          timeIntervals={60}
-                          timeCaption="Time"
-                          dateFormat="h:mm aa"
-                          className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all disabled:opacity-30"
+                          placeholder="12:00 AM"
                           disabled={!openTime}
                         />
                       )}
                     />
+                    {errors.closeTime && <p className="text-[#CCFF00] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.closeTime.message}</p>}
                   </div>
                 </div>
 
@@ -617,6 +608,9 @@ const EditTurf = () => {
                   <div className="space-y-1">
                     <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[3px] font-open-sans">Matrix Projection</h3>
                     <p className="text-[9px] text-[#444] uppercase tracking-widest font-bold">Override individual slot pricing below</p>
+                    <p className="text-[8px] text-[#878C9F] uppercase tracking-widest font-medium mt-1">
+                      * After 5% service charge (Includes payment gateway charges and GST)
+                    </p>
                   </div>
                   <span className="text-[10px] font-bold text-[#CCFF00] uppercase bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-4 py-1 rounded-full">
                     {generatedSlots.length} Active Slots
@@ -667,9 +661,9 @@ const EditTurf = () => {
                                   placeholder="Slot Price"
                                 />
                               </div>
-                              <div className="flex justify-between items-center px-1">
-                                <span className="text-[8px] font-bold text-[#444] uppercase tracking-widest">Est. Payout (After {platformFeePercent}%)</span>
-                                <span className="text-[10px] font-bold text-[#CCFF00] font-mono">₹{netRevenue}</span>
+                              <div className="flex flex-col items-end px-1">
+                                <span className="text-[8px] font-black text-[#CCFF00] uppercase tracking-[2px] mb-1">Your Net</span>
+                                <span className="text-[10px] font-bold text-[#CCFF00] font-mono">Rs {netRevenue}</span>
                               </div>
                             </div>
                           )}

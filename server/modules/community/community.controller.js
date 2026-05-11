@@ -13,7 +13,7 @@ export const createPost = async (req, res) => {
 
     let image = '';
     if (req.file) {
-      image = await uploadToCloudinary(req.file.buffer, 'turfspot/community');
+      image = await uploadToCloudinary(req.file.buffer, 'kridaz/community');
     }
 
     const authorModel = req.user?.role === 'user' ? 'User' : 'Owner';
@@ -86,7 +86,7 @@ export const updatePost = async (req, res) => {
 
     let updateData = { title, content };
     if (req.file) {
-      updateData.image = await uploadToCloudinary(req.file.buffer, 'turfspot/community');
+      updateData.image = await uploadToCloudinary(req.file.buffer, 'kridaz/community');
     }
 
     const updatedPost = await CommunityPost.findByIdAndUpdate(id, updateData, { new: true });

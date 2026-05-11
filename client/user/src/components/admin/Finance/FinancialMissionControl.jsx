@@ -124,7 +124,7 @@ const FinancialMissionControl = () => {
             value={stats?.totalRevenue || 0}
             icon={IndianRupee}
             trend="+14.2%"
-            prefix="₹"
+            prefix="Rs "
           />
           <FinanceStatsCard 
             title="Pending Payouts"
@@ -132,21 +132,21 @@ const FinancialMissionControl = () => {
             icon={Clock}
             trend={`${pendingCount} Requests`}
             trendColor="text-yellow-500"
-            prefix="₹"
+            prefix="Rs "
           />
           <FinanceStatsCard 
             title="Processed (MTD)"
             value={totalProcessedMTD}
             icon={CheckCircle2}
             trend="Stable"
-            prefix="₹"
+            prefix="Rs "
           />
           <FinanceStatsCard 
             title="Average Payout"
             value={avgPayout}
             icon={TrendingUp}
             trend="Rolling"
-            prefix="₹"
+            prefix="Rs "
           />
           <FinanceStatsCard 
             title="KYC Compliance"
@@ -262,7 +262,7 @@ const FinancialMissionControl = () => {
                             </td>
                             <td className="px-6 py-4">
                               <p className="font-black text-white text-[16px] tracking-tighter italic">
-                                ₹{req.amount.toLocaleString()}
+                                Rs {req.amount.toLocaleString()}
                               </p>
                             </td>
                             <td className="px-6 py-4">
@@ -432,7 +432,7 @@ const FinancialMissionControl = () => {
                           <p className="text-[10px] text-[#878C9F] uppercase tracking-widest mt-0.5">Minimum processing value</p>
                         </div>
                       </div>
-                      <p className="font-mono text-[#CCFF00] text-xl font-black italic">₹5,000</p>
+                      <p className="font-mono text-[#CCFF00] text-xl font-black italic">Rs 5,000</p>
                     </div>
 
                     <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#CCFF00]/20 transition-all">

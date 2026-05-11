@@ -55,7 +55,7 @@ const WalletPage = () => {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: data.order.amount,
         currency: "INR",
-        name: "TurfSpot Wallet",
+        name: "Kridaz Wallet",
         description: "Wallet Coin Top-up",
         order_id: data.order.id,
         handler: async (response) => {

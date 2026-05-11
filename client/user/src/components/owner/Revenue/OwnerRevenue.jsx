@@ -1,51 +1,18 @@
-import React, { useMemo, useState } from "react";
-import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar
-} from "recharts";
+import React, { useState } from "react";
 import { 
   IndianRupee, TrendingUp, Calendar, Download, 
-  CreditCard, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2,
-  Wallet, Landmark, Plus, X, AlertCircle, ShieldCheck
+  CreditCard, Clock, CheckCircle2,
+  Wallet, Landmark, X, AlertCircle, ShieldCheck,
+  AlertOctagon, CheckCircle, Hourglass
 } from "lucide-react";
-import useOwnerDashboard from "@hooks/owner/useOwnerDashboard";
-import useOwnerBookings from "@hooks/owner/useOwnerBookings";
-import useOwnerWallet from "@hooks/owner/useOwnerWallet";
+import useOwnerRevenue from "../../../hooks/owner/useOwnerRevenue";
+import useOwnerWallet from "../../../hooks/owner/useOwnerWallet";
 import DashboardSkeleton from "../Dashboard/DashboardSkeleton";
 import toast from "react-hot-toast";
 
-const PendingBadge = ({ label = "Audit" }) => (
-  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[8px] font-bold uppercase tracking-widest animate-pulse">
-    <div className="w-1 h-1 rounded-full bg-amber-500" />
-    {label}
-  </span>
-);
-
 export default function OwnerRevenue() {
-  const { dashboardData, loading: dashboardLoading } = useOwnerDashboard();
-  const { bookings, loading: bookingsLoading } = useOwnerBookings();
-  const { walletData, withdrawals, loading: walletLoading, requestWithdrawal, submitting } = useOwnerWallet();
-
-  // Analytics Data (Real data from Dashboard)
-  const analyticsData = useMemo(() => {
-    if (!dashboardData?.revenueOverTimeRaw || dashboardData.revenueOverTimeRaw.length === 0) {
-      return [
-        { name: 'Mon', coins: 0, lastWeek: 0 },
-        { name: 'Tue', coins: 0, lastWeek: 0 },
-        { name: 'Wed', coins: 0, lastWeek: 0 },
-        { name: 'Thu', coins: 0, lastWeek: 0 },
-        { name: 'Fri', coins: 0, lastWeek: 0 },
-        { name: 'Sat', coins: 0, lastWeek: 0 },
-        { name: 'Sun', coins: 0, lastWeek: 0 },
-      ];
-    }
-    
-    return dashboardData.revenueOverTimeRaw.map(item => ({
-      name: new Date(item._id).toLocaleDateString('en-US', { weekday: 'short' }),
-      coins: item.revenue,
-      lastWeek: item.revenue * 0.8 // Simulated comparison
-    }));
-  }, [dashboardData]);
+  const { revenueData, loading: revenueLoading } = useOwnerRevenue();
+  const { requestWithdrawal, submitting } = useOwnerWallet();
 
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
@@ -56,12 +23,12 @@ export default function OwnerRevenue() {
     bankName: ""
   });
 
-  if (dashboardLoading || bookingsLoading || walletLoading) return <DashboardSkeleton />;
+  if (revenueLoading) return <DashboardSkeleton />;
 
   const handleWithdrawSubmit = async (e) => {
     e.preventDefault();
     if (!withdrawAmount || parseFloat(withdrawAmount) < 500) {
-      toast.error("Minimum withdrawal amount is ₹500");
+      toast.error("Minimum withdrawal amount is Rs 500");
       return;
     }
     const success = await requestWithdrawal(parseFloat(withdrawAmount), bankDetails);
@@ -71,29 +38,7 @@ export default function OwnerRevenue() {
     }
   };
 
-  // Data processing
-  const totalRevenue = dashboardData?.totalRevenue || 0;
-  
-  // Calculate today's revenue
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todaysRevenue = bookings.reduce((sum, booking) => {
-    const bookingDate = new Date(booking.createdAt); // Source truth is createdAt
-    if (bookingDate >= today) {
-      return sum + (booking.totalPrice || 0);
-    }
-    return sum;
-  }, 0);
-
-  // Recent Transactions (Bookings)
-  const recentTransactions = bookings.slice(0, 5).map(booking => ({
-    id: booking._id,
-    customer: booking.user?.name || booking.guestDetails?.name || "Guest User",
-    amount: booking.totalPrice,
-    date: new Date(booking.createdAt).toLocaleDateString(),
-    status: booking.status || "completed",
-    turf: booking.turf?.name || "Unknown Arena"
-  }));
+  const { balances, inProgressBookings, recentTransactions } = revenueData || {};
 
   return (
     <div className="h-full custom-scrollbar bg-[#000000] text-white">
@@ -104,11 +49,18 @@ export default function OwnerRevenue() {
         <div>
           <div className="flex items-center gap-3">
              <IndianRupee className="text-[#CCFF00]" size={32} />
-             <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] tracking-tight uppercase leading-none">Revenue Intelligence</h1>
+             <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] tracking-tight uppercase leading-none">Revenue Engine</h1>
           </div>
-          <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-11">Financial analytics and withdrawal management</p>
+          <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-11">Financial lifecycle, disputes & withdrawals</p>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto">
+          <button 
+            onClick={() => setShowWithdrawModal(true)}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#CCFF00] text-black border border-[#CCFF00] hover:bg-[#b3ff00] rounded-[8px] text-[13px] font-bold uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(204,255,0,0.2)] w-full md:w-auto"
+          >
+            <Wallet size={18} />
+            Withdraw
+          </button>
           <button className="flex items-center justify-center gap-2 px-6 py-3 bg-[#000000] hover:bg-[#111111] border border-[#2D2D2D] rounded-[8px] text-[13px] font-bold uppercase tracking-widest transition-all shadow-[var(--shadow-2)] w-full md:w-auto">
             <Download size={18} />
             Statement
@@ -116,182 +68,154 @@ export default function OwnerRevenue() {
         </div>
       </div>
 
-      {/* Top Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F]">
-             <IndianRupee size={20} />
-          </div>
-          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">Total Earnings</p>
-          <h3 className="text-3xl font-bold font-['Open_Sans'] text-white">₹{walletData.balance.toLocaleString()}</h3>
-        </div>
-
+      {/* Top Stat Cards (6 Cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
+        
         <div className="bg-[#000000] border border-[#CCFF00]/30 rounded-[8px] p-6 flex flex-col relative overflow-hidden shadow-[0_0_20px_rgba(204,255,0,0.05)] transition-all duration-500">
           <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-full flex items-center justify-center mb-4 text-[#CCFF00]">
-             <TrendingUp size={20} />
-          </div>
-          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">Usable Balance</p>
-          <h3 className="text-3xl font-bold font-['Open_Sans'] text-[#CCFF00]">₹{walletData.usableBalance.toLocaleString()}</h3>
-        </div>
-
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F]">
-             <Clock size={20} />
-          </div>
-          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">In Process</p>
-          <h3 className="text-3xl font-bold font-['Open_Sans'] text-white">₹{walletData.reservedBalance.toLocaleString()}</h3>
-          <p className="text-[8px] text-[#444] mt-2 uppercase font-bold tracking-widest">Pending Verification</p>
-        </div>
-
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F]">
              <CheckCircle2 size={20} />
           </div>
-          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">Payouts Cleared</p>
-          <h3 className="text-3xl font-bold font-['Open_Sans'] text-white">
-            ₹{withdrawals.filter(w => w.status === 'COMPLETED').reduce((sum, w) => sum + w.amount, 0).toLocaleString()}
-          </h3>
-          <p className="text-[8px] text-[#CCFF00]/60 mt-2 uppercase font-bold tracking-widest">Successful Settlements</p>
+          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">Usable Balance</p>
+          <h3 className="text-3xl font-bold font-['Open_Sans'] text-[#CCFF00]">Rs {(balances?.usable || 0).toLocaleString()}</h3>
+          <p className="text-[8px] text-[#878C9F] mt-2 uppercase font-bold tracking-widest">Ready for Withdrawal</p>
         </div>
+
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
+          <div className="w-10 h-10 bg-amber-500/10 rounded-full flex items-center justify-center mb-4 text-amber-500">
+             <Hourglass size={20} />
+          </div>
+          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">In Progress Balance</p>
+          <h3 className="text-3xl font-bold font-['Open_Sans'] text-amber-500">Rs {(balances?.inProgress || 0).toLocaleString()}</h3>
+          <p className="text-[8px] text-[#444] mt-2 uppercase font-bold tracking-widest">Escrow / Review Window</p>
+        </div>
+
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-red-500/30 transition-all duration-500">
+          <div className="w-10 h-10 bg-red-500/10 rounded-full flex items-center justify-center mb-4 text-red-500">
+             <AlertOctagon size={20} />
+          </div>
+          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">Dispute Balance</p>
+          <h3 className="text-3xl font-bold font-['Open_Sans'] text-red-500">Rs {(balances?.dispute || 0).toLocaleString()}</h3>
+          <p className="text-[8px] text-[#444] mt-2 uppercase font-bold tracking-widest">Frozen under review</p>
+        </div>
+
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] transition-all duration-500">
+          <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F]">
+             <TrendingUp size={20} />
+          </div>
+          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">Total Lifetime Revenue</p>
+          <h3 className="text-3xl font-bold font-['Open_Sans'] text-white">Rs {(balances?.totalRevenue || 0).toLocaleString()}</h3>
+        </div>
+
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] transition-all duration-500">
+          <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F]">
+             <Landmark size={20} />
+          </div>
+          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">Total Withdrawn</p>
+          <h3 className="text-3xl font-bold font-['Open_Sans'] text-white">Rs {(balances?.withdrawn || 0).toLocaleString()}</h3>
+        </div>
+
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] transition-all duration-500">
+          <div className="w-10 h-10 bg-blue-500/10 rounded-full flex items-center justify-center mb-4 text-blue-500">
+             <Calendar size={20} />
+          </div>
+          <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[3px] mb-1">Pending Settlements</p>
+          <h3 className="text-3xl font-bold font-['Open_Sans'] text-white">Rs {(balances?.pendingSettlements || 0).toLocaleString()}</h3>
+          <p className="text-[8px] text-[#444] mt-2 uppercase font-bold tracking-widest">Future Bookings</p>
+        </div>
+
       </div>
 
-      {/* Revenue Intelligence Chart (Centralized) */}
-      <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-8 shadow-[var(--shadow-2)] relative overflow-hidden group">
-         <div className="absolute top-0 right-0 w-64 h-64 bg-[#CCFF00]/5 blur-[80px] pointer-events-none group-hover:bg-[#CCFF00]/10 transition-colors" />
-         <div className="flex justify-between items-center mb-10 relative z-10">
-            <div>
-               <h3 className="text-[14px] font-bold text-white uppercase tracking-widest font-open-sans">Revenue Intelligence</h3>
-               <p className="text-[11px] text-[#878C9F] font-inter uppercase tracking-widest mt-1">Daily Coin Accrual vs Last Week</p>
-            </div>
-            <div className="flex gap-4">
-               <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-[2px] bg-[#CCFF00]" />
-                  <span className="text-[10px] font-bold text-gray-500 uppercase">This Week</span>
-               </div>
-               <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-[2px] bg-white/20" />
-                  <span className="text-[10px] font-bold text-gray-500 uppercase">Last Week</span>
-               </div>
-            </div>
-         </div>
-
-         <div className="h-[350px] w-full relative z-10">
-            <ResponsiveContainer width="100%" height="100%">
-               <AreaChart data={analyticsData}>
-                  <defs>
-                     <linearGradient id="colorCoins" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="#CCFF00" stopOpacity={0}/>
-                     </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2D2D2D" />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{fill: '#878C9F', fontSize: 10, fontWeight: 'medium', textTransform: 'uppercase'}}
-                    dy={10}
-                  />
-                  <YAxis hide />
-                  <Tooltip 
-                    contentStyle={{backgroundColor: '#000000', border: '1px solid #2D2D2D', borderRadius: '8px', padding: '12px'}}
-                    itemStyle={{color: '#CCFF00', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '10px', fontFamily: 'Inter'}}
-                  />
-                  <Area type="monotone" dataKey="lastWeek" stroke="#2D2D2D" strokeWidth={2} fill="transparent" />
-                  <Area type="monotone" dataKey="coins" stroke="#CCFF00" strokeWidth={3} fillOpacity={1} fill="url(#colorCoins)" />
-               </AreaChart>
-            </ResponsiveContainer>
-         </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mt-8">
         
-        {/* Withdrawal History */}
-        <div className="lg:col-span-2 bg-[#000000] border border-[#2D2D2D] rounded-[12px] p-8 shadow-2xl">
+        {/* In Progress Bookings (Review Window) */}
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[12px] p-8 shadow-2xl flex flex-col max-h-[500px]">
+           <div className="flex justify-between items-center mb-8 border-b border-[#2D2D2D] pb-6">
+              <div className="flex items-center gap-3">
+                 <div className="w-1.5 h-6 bg-amber-500 rounded-full" />
+                 <h2 className="text-[13px] font-bold text-white uppercase tracking-[4px] flex items-center gap-2">
+                    Review Window (Escrow)
+                 </h2>
+              </div>
+           </div>
+           
+           <div className="overflow-y-auto custom-scrollbar flex-1 pr-2">
+              <div className="space-y-4">
+                 {inProgressBookings && inProgressBookings.length > 0 ? (
+                   inProgressBookings.map((booking) => (
+                     <div key={booking._id} className="p-4 bg-[#050505] rounded-[8px] border border-[#2D2D2D] flex items-center justify-between">
+                        <div>
+                           <p className="text-sm font-bold text-white uppercase">{booking.turf?.name || 'Arena'}</p>
+                           <p className="text-[10px] text-amber-500 font-bold uppercase tracking-widest mt-1">
+                             Auto-settles: {new Date(booking.reviewWindowEndsAt).toLocaleString()}
+                           </p>
+                        </div>
+                        <div className="text-right">
+                           <p className="text-lg font-bold text-white tracking-tighter">Rs {booking.ownerRevenue}</p>
+                        </div>
+                     </div>
+                   ))
+                 ) : (
+                   <div className="py-20 text-center">
+                      <div className="flex flex-col items-center gap-4 opacity-20">
+                         <CheckCircle size={40} />
+                         <p className="text-[10px] font-bold uppercase tracking-[4px]">No bookings in review</p>
+                      </div>
+                   </div>
+                 )}
+              </div>
+           </div>
+        </div>
+
+        {/* Recent Financial Transactions */}
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[12px] p-8 shadow-2xl flex flex-col max-h-[500px]">
            <div className="flex justify-between items-center mb-8 border-b border-[#2D2D2D] pb-6">
               <div className="flex items-center gap-3">
                  <div className="w-1.5 h-6 bg-[#CCFF00] rounded-full" />
                  <h2 className="text-[13px] font-bold text-white uppercase tracking-[4px] flex items-center gap-2">
-                    Withdrawal Registry
+                    Recent Movements
                  </h2>
               </div>
-              <ShieldCheck size={18} className="text-[#2D2D2D]" />
            </div>
            
-           <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full text-left">
-                 <thead>
-                    <tr className="text-[10px] font-bold text-[#444] uppercase tracking-[3px] border-b border-[#2D2D2D]">
-                       <th className="pb-4 px-2">Timestamp</th>
-                       <th className="pb-4 px-2">Quantum</th>
-                       <th className="pb-4 px-2">Status</th>
-                       <th className="pb-4 px-2">Audit ID</th>
-                    </tr>
-                 </thead>
-                 <tbody className="divide-y divide-[#2D2D2D]/30">
-                    {withdrawals.length > 0 ? (
-                      withdrawals.map((w) => (
-                        <tr key={w._id} className="group hover:bg-white/[0.01] transition-all">
-                           <td className="py-5 px-2 text-[#878C9F] text-xs font-bold uppercase tracking-wider">{new Date(w.createdAt).toLocaleDateString()}</td>
-                           <td className="py-5 px-2">
-                             <span className="text-sm font-bold text-white group-hover:text-[#CCFF00] transition-colors">₹{w.amount.toLocaleString()}</span>
-                           </td>
-                           <td className="py-5 px-2">
-                              <span className={`text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border ${
-                                w.status === 'COMPLETED' ? 'bg-[#CCFF00]/5 border-[#CCFF00]/20 text-[#CCFF00]' :
-                                w.status === 'PENDING' ? 'bg-amber-500/5 border-amber-500/20 text-amber-500' :
-                                'bg-red-500/5 border-red-500/20 text-red-500'
-                              }`}>
-                                 {w.status}
-                              </span>
-                           </td>
-                           <td className="py-5 px-2 text-[#333] font-mono text-[10px] tracking-tighter group-hover:text-[#666] transition-colors">{w.transactionId || 'AWAITING_SETTLEMENT'}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="4" className="py-20 text-center">
-                           <div className="flex flex-col items-center gap-4 opacity-20">
-                              <AlertCircle size={40} />
-                              <p className="text-[10px] font-bold uppercase tracking-[4px]">Zero Financial Movements</p>
-                           </div>
-                        </td>
-                      </tr>
-                    )}
-                 </tbody>
-              </table>
-           </div>
-        </div>
-
-        {/* Recent Activity List */}
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[12px] p-8 flex flex-col shadow-2xl">
-           <div className="flex items-center gap-3 mb-8 border-b border-[#2D2D2D] pb-6">
-              <div className="w-1.5 h-6 bg-blue-500 rounded-full" />
-              <h2 className="text-[13px] font-bold text-white uppercase tracking-[4px]">
-                 Live Stream
-              </h2>
-           </div>
-           
-           <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-2">
-              {recentTransactions.map((tx) => (
-                <div key={tx.id} className="p-4 bg-[#050505] rounded-[8px] border border-[#2D2D2D] hover:border-[#CCFF00]/20 transition-all group">
-                   <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                         <div className="w-10 h-10 rounded-full bg-[#111] border border-[#2D2D2D] text-[#878C9F] flex items-center justify-center group-hover:border-[#CCFF00]/40 group-hover:text-[#CCFF00] transition-all">
-                            <ArrowDownRight size={18} />
-                         </div>
-                         <div>
-                            <p className="text-sm font-bold text-white uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">{tx.customer}</p>
-                            <p className="text-[9px] text-[#444] font-bold uppercase tracking-[2px] mt-1">{tx.date}</p>
-                         </div>
-                      </div>
-                      <div className="text-right">
-                         <p className="text-lg font-bold text-[#CCFF00] tracking-tighter">+₹{tx.amount}</p>
-                         <p className="text-[8px] text-[#444] font-bold uppercase tracking-widest mt-1">Settled</p>
+           <div className="overflow-y-auto custom-scrollbar flex-1 pr-2">
+              <div className="space-y-4">
+                 {recentTransactions && recentTransactions.length > 0 ? (
+                   recentTransactions.map((tx) => {
+                     let colorClass = "text-white";
+                     let sign = "";
+                     if (tx.type === "SETTLEMENT" || tx.type === "DISPUTE_RELEASE") {
+                       colorClass = "text-[#CCFF00]";
+                       sign = "+";
+                     } else if (tx.type === "WITHDRAWAL") {
+                       colorClass = "text-red-500";
+                       sign = "-";
+                     } else if (tx.type === "DISPUTE_FREEZE") {
+                       colorClass = "text-amber-500";
+                       sign = "🥶";
+                     }
+                     return (
+                       <div key={tx._id} className="p-4 bg-[#050505] rounded-[8px] border border-[#2D2D2D] flex items-center justify-between">
+                          <div>
+                             <p className="text-xs font-bold text-white uppercase tracking-wider">{tx.type.replace(/_/g, ' ')}</p>
+                             <p className="text-[9px] text-[#878C9F] font-bold uppercase tracking-[2px] mt-1">
+                               {new Date(tx.createdAt).toLocaleDateString()}
+                             </p>
+                          </div>
+                          <div className="text-right">
+                             <p className={`text-lg font-bold ${colorClass} tracking-tighter`}>{sign} Rs {tx.amount}</p>
+                          </div>
+                       </div>
+                     );
+                   })
+                 ) : (
+                   <div className="py-20 text-center">
+                      <div className="flex flex-col items-center gap-4 opacity-20">
+                         <AlertCircle size={40} />
+                         <p className="text-[10px] font-bold uppercase tracking-[4px]">Zero Financial Movements</p>
                       </div>
                    </div>
-                </div>
-              ))}
+                 )}
+              </div>
            </div>
         </div>
 
@@ -317,11 +241,11 @@ export default function OwnerRevenue() {
                        <Wallet size={20} />
                     </div>
                     <div className="space-y-1">
-                       <p className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-[3px]">Available Intelligence</p>
-                       <p className="text-3xl font-bold tracking-tight text-white font-['Open_Sans']">₹{walletData.usableBalance.toLocaleString()}</p>
+                       <p className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-[3px]">Usable Balance</p>
+                       <p className="text-3xl font-bold tracking-tight text-white font-['Open_Sans']">Rs {(balances?.usable || 0).toLocaleString()}</p>
                        <p className="text-[9px] text-[#444] font-bold uppercase tracking-widest mt-2 flex items-center gap-1.5">
                           <ShieldCheck size={10} />
-                          Minimum threshold: ₹500
+                          Minimum threshold: Rs 500
                        </p>
                     </div>
                  </div>
@@ -335,7 +259,7 @@ export default function OwnerRevenue() {
                             type="number"
                             required
                             min="500"
-                            max={walletData.usableBalance}
+                            max={balances?.usable || 0}
                             value={withdrawAmount}
                             onChange={(e) => setWithdrawAmount(e.target.value)}
                             className="w-full bg-[#050505] border border-[#2D2D2D] rounded-[12px] pl-10 pr-4 py-4 text-white focus:outline-none focus:border-[#CCFF00]/50 transition-all font-bold text-2xl placeholder-[#111]"
@@ -392,7 +316,7 @@ export default function OwnerRevenue() {
 
                  <button 
                    type="submit"
-                   disabled={submitting || !withdrawAmount || parseFloat(withdrawAmount) > walletData.usableBalance}
+                   disabled={submitting || !withdrawAmount || parseFloat(withdrawAmount) > (balances?.usable || 0)}
                    className="w-full py-5 bg-[#CCFF00] hover:bg-[#b3ff00] text-black rounded-[12px] font-black uppercase tracking-[4px] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed shadow-[0_15px_30px_rgba(204,255,0,0.15)] active:scale-[0.98]"
                  >
                     {submitting ? 'Processing Audit...' : 'Execute Withdrawal'}

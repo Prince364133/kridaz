@@ -20,16 +20,16 @@ const seedData = async () => {
     console.log("Connected to MongoDB...");
 
     // 1. Create or find Owner
-    let owner = await Owner.findOne({ email: "admin@turfspot.com" });
+    let owner = await Owner.findOne({ email: "admin@kridaz.com" });
     if (!owner) {
       owner = await Owner.create({
         name: "Admin Owner",
-        email: "admin@turfspot.com",
+        email: "admin@kridaz.com",
         password: "adminpassword",
         phone: "9999999999",
         role: "admin",
       });
-      console.log("Created owner: admin@turfspot.com");
+      console.log("Created owner: admin@kridaz.com");
     }
 
     // 2. Create or find User

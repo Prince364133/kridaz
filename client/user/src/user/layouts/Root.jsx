@@ -44,7 +44,10 @@ const Root = () => {
         <Outlet />
       </main>
       <MobileBottomNav />
-      <UserFooter />
+      {/* Footer only visible on desktop OR if it's the home page on mobile */}
+      <div className={location.pathname === '/' ? 'block' : 'hidden lg:block'}>
+        <UserFooter />
+      </div>
     </div>
   );
 };

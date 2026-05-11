@@ -19,6 +19,7 @@ const MobileBottomNav = () => {
     { name: "Venues", path: "/turfs", icon: Search },
     { name: "Pros", path: "/professionals", icon: Users },
     { name: "Games", path: "/join-games", icon: Zap },
+    { name: "Profile", path: "/profile", icon: User },
   ];
 
   // Filter items based on login status and role

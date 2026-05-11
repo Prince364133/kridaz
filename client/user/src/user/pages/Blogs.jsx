@@ -74,7 +74,7 @@ const Blogs = () => {
               <span className="text-white/20 italic">Stories & Insights</span>
             </h1>
             <p className="text-gray-500 font-mono text-xs uppercase tracking-[0.3em] mt-6 leading-relaxed">
-              Discover the latest in sports, fitness, and venue management from the TurfSpot community.
+              Discover the latest in sports, fitness, and venue management from the Kridaz community.
             </p>
           </div>
 

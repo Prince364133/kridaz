@@ -7,6 +7,7 @@ import uploadRouter from "./upload.routes.js";
 import hostedGameRouter from "../modules/hostedGame/hostedGame.routes.js";
 import professionalRouter from "../modules/professional/professional.routes.js";
 import chatRouter from "../modules/chat/chat.routes.js";
+import scoringRouter from "../modules/scoring/scoring.routes.js";
 
 const rootRouter = Router();
 
@@ -18,5 +19,6 @@ rootRouter.use("/upload", uploadRouter);
 rootRouter.use("/hosted-game", hostedGameRouter);
 rootRouter.use("/professional", professionalRouter);
 rootRouter.use("/chat", chatRouter);
+rootRouter.use("/scoring", scoringRouter);
 
 export default rootRouter;

@@ -157,7 +157,7 @@ const CoachSignUp = () => {
               <span style={{ color: ACCENT }}>SMARTER.</span>
             </h1>
             <p className="text-sm text-white/40 uppercase tracking-widest max-w-sm leading-relaxed">
-              Join the TurfSpot coach network. Connect with players, manage sessions, and grow your coaching career.
+              Join the Kridaz coach network. Connect with players, manage sessions, and grow your coaching career.
             </p>
           </div>
 

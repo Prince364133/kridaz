@@ -29,6 +29,9 @@ import FindProfessionals from "@user/pages/FindProfessionals";
 import ProfessionalDetails from "@user/pages/ProfessionalDetails";
 import Messages from "@user/pages/Messages";
 import CheckoutPage from "@user/pages/checkout/CheckoutPage";
+import ScoringApp from "@user/pages/ScoringApp";
+import MatchAnalytics from "@user/pages/MatchAnalytics";
+import Leaderboard from "@user/pages/Leaderboard";
 
 
 // Business Landing Pages (User Portal)
@@ -89,6 +92,7 @@ import {
   DisputeManager,
   AuditLogs,
   FinancialMissionControl,
+  ProfessionalDetailsPage,
 } from "@components/admin";
 import PartnerSupport from "@components/owner/Support/PartnerSupport";
 import DashboardProfile from "@components/shared/DashboardProfile";
@@ -116,6 +120,7 @@ const router = createBrowserRouter([
         children: [
           { path: "coaches", element: <ProfessionalManagement role="coach" /> },
           { path: "umpires", element: <ProfessionalManagement role="umpire" /> },
+          { path: ":id", element: <ProfessionalDetailsPage /> }
         ],
       },
       { path: "users", element: <UserManagement /> },
@@ -214,7 +219,14 @@ const router = createBrowserRouter([
       { path: "*", element: <NotFound /> },
     ],
   },
-
+  {
+    path: "/scoring/:matchId",
+    element: (
+      <ProtectedRoute requiredRole="umpire">
+        <ScoringApp />
+      </ProtectedRoute>
+    ),
+  },
   // ── USER PORTAL (Fall-through Priority) ──
   {
     path: "/",
@@ -256,6 +268,8 @@ const router = createBrowserRouter([
       { path: "checkout/:turfId", element: <ProtectedRoute><CheckoutPage /></ProtectedRoute> },
       { path: "booking-pass/:id", element: <BookingPass /> },
       { path: "booking-invoice/:id", element: <BookingInvoice /> },
+      { path: "analytics/:matchId", element: <MatchAnalytics /> },
+      { path: "leaderboard", element: <Leaderboard /> },
       { path: "*", element: <NotFound /> },
     ],
   },

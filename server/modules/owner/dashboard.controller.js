@@ -6,19 +6,40 @@ import User from "../../models/user.model.js";
 import Match from "../../models/match.model.js";
 import Session from "../../models/session.model.js";
 import WalletTransaction from "../../models/walletTransaction.model.js";
+import Owner from "../../models/owner.model.js";
 
 export const getDashboardData = async (req, res) => {
-  const ownerId = req.owner.id;
-  const role = req.owner.role;
-  console.log(`DEBUG: Fetching main dashboard data for ${role} (ID: ${ownerId})`);
+  const userId = req.user.id;
+  const role = req.user.role;
+  console.log(`DEBUG: Fetching main dashboard data for ${role} (ID: ${userId})`);
 
   // Redirect based on role
   if (role === "coach") return getCoachDashboardData(req, res);
   if (role === "umpire") return getUmpireDashboardData(req, res);
 
   try {
-    console.log("DEBUG: Querying Turf model...");
-    const turfs = await Turf.find({ owner: ownerId }).select("_id name pricePerHour reviews").lean();
+    // 1. Resolve correct owner document
+    const ownerRecord = await Owner.findOne({ 
+      $or: [
+        { _id: userId }, // If userId is already an Owner ID
+        { userId: userId } // If userId is a User ID linked to an Owner
+      ]
+    });
+
+    if (!ownerRecord) {
+      console.log(`DEBUG: No owner profile found for ID: ${userId}`);
+      return res.status(404).json({ message: "Owner profile not found" });
+    }
+
+    const ownerId = ownerRecord._id;
+
+    // 2. Fetch ground statistics
+    const turfs = await Turf.find({ 
+      $or: [
+        { owner: ownerId },
+        { owner: ownerRecord.userId }
+      ]
+    }).select("_id name pricePerHour reviews").lean();
     console.log(`DEBUG: Found ${turfs.length} turfs`);
 
     if (turfs.length === 0) {
@@ -39,44 +60,43 @@ export const getDashboardData = async (req, res) => {
 
     const turfIds = turfs.map((turf) => turf._id);
     const now = new Date();
-    const todayStart = new Date(now.setHours(0,0,0,0));
+    const startOfToday = new Date(now.setHours(0,0,0,0));
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
+
     const [
-      totalBookings,
-      reviews,
       totalRevenueData,
       bookingsPerTurfDay,
       bookingsPerTurfWeek,
       bookingsPerTurfMonth,
-      revenueOverTimeRaw,
+      revenueTrendDay,
+      revenueTrendWeek,
+      revenueTrendMonth,
       activeUsers,
       revenueByCategory,
       occupancyRaw,
       revenueByVenueRaw,
     ] = await Promise.all([
-      Booking.countDocuments({ turf: { $in: turfIds } }),
-      Review.find({ turf: { $in: turfIds } }).select("rating").lean(),
+      // Total Revenue stats
       Booking.aggregate([
-        { $match: { turf: { $in: turfIds } } },
+        { $match: { turf: { $in: turfIds }, status: { $ne: "CANCELLED" } } },
         {
           $group: {
             _id: null,
             totalRevenue: { $sum: "$totalPrice" },
-            settlementRevenue: {
-              $sum: {
-                $cond: [{ $eq: ["$bookingSource", "PARTNER_MANUAL"] }, 0, "$totalPrice"]
-              }
-            }
+            settlementRevenue: { $sum: "$totalPrice" } // Adjust if settlement logic exists
           }
-        },
+        }
       ]),
       // Bookings Per Turf - DAY
       Booking.aggregate([
-        { $match: { turf: { $in: turfIds }, createdAt: { $gte: todayStart } } },
+        { $match: { turf: { $in: turfIds }, status: { $ne: "CANCELLED" } } },
+        { $lookup: { from: "timeslots", localField: "timeSlot", foreignField: "_id", as: "slot" } },
+        { $unwind: "$slot" },
+        { $match: { "slot.startTime": { $gte: startOfToday } } },
         { $group: { _id: "$turf", count: { $sum: 1 } } },
         { $lookup: { from: "turves", localField: "_id", foreignField: "_id", as: "turf" } },
         { $unwind: "$turf" },
@@ -84,7 +104,10 @@ export const getDashboardData = async (req, res) => {
       ]),
       // Bookings Per Turf - WEEK
       Booking.aggregate([
-        { $match: { turf: { $in: turfIds }, createdAt: { $gte: sevenDaysAgo } } },
+        { $match: { turf: { $in: turfIds }, status: { $ne: "CANCELLED" } } },
+        { $lookup: { from: "timeslots", localField: "timeSlot", foreignField: "_id", as: "slot" } },
+        { $unwind: "$slot" },
+        { $match: { "slot.startTime": { $gte: sevenDaysAgo } } },
         { $group: { _id: "$turf", count: { $sum: 1 } } },
         { $lookup: { from: "turves", localField: "_id", foreignField: "_id", as: "turf" } },
         { $unwind: "$turf" },
@@ -92,55 +115,87 @@ export const getDashboardData = async (req, res) => {
       ]),
       // Bookings Per Turf - MONTH
       Booking.aggregate([
-        { $match: { turf: { $in: turfIds }, createdAt: { $gte: thirtyDaysAgo } } },
+        { $match: { turf: { $in: turfIds }, status: { $ne: "CANCELLED" } } },
+        { $lookup: { from: "timeslots", localField: "timeSlot", foreignField: "_id", as: "slot" } },
+        { $unwind: "$slot" },
+        { $match: { "slot.startTime": { $gte: thirtyDaysAgo } } },
         { $group: { _id: "$turf", count: { $sum: 1 } } },
         { $lookup: { from: "turves", localField: "_id", foreignField: "_id", as: "turf" } },
         { $unwind: "$turf" },
         { $project: { name: "$turf.name", value: "$count" } }
       ]),
+      // Revenue Over Time - DAY (Hourly)
       Booking.aggregate([
-        { 
-          $match: { 
-            turf: { $in: turfIds },
-            createdAt: { $gte: sevenDaysAgo }
-          } 
-        },
+        { $match: { turf: { $in: turfIds }, status: { $ne: "CANCELLED" } } },
+        { $lookup: { from: "timeslots", localField: "timeSlot", foreignField: "_id", as: "slot" } },
+        { $unwind: "$slot" },
+        { $match: { "slot.startTime": { $gte: startOfToday } } },
         {
           $group: {
-            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            _id: { $hour: "$slot.startTime" },
             revenue: { $sum: "$totalPrice" },
-          },
+          }
         },
-        { $sort: { _id: 1 } },
+        { $sort: { _id: 1 } }
       ]),
-      Booking.distinct("user", { turf: { $in: turfIds } }),
+      // Revenue Over Time - WEEK (Daily)
+      Booking.aggregate([
+        { $match: { turf: { $in: turfIds }, status: { $ne: "CANCELLED" } } },
+        { $lookup: { from: "timeslots", localField: "timeSlot", foreignField: "_id", as: "slot" } },
+        { $unwind: "$slot" },
+        { $match: { "slot.startTime": { $gte: sevenDaysAgo } } },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$slot.startTime" } },
+            revenue: { $sum: "$totalPrice" },
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]),
+      // Revenue Over Time - MONTH (Daily)
+      Booking.aggregate([
+        { $match: { turf: { $in: turfIds }, status: { $ne: "CANCELLED" } } },
+        { $lookup: { from: "timeslots", localField: "timeSlot", foreignField: "_id", as: "slot" } },
+        { $unwind: "$slot" },
+        { $match: { "slot.startTime": { $gte: thirtyDaysAgo } } },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$slot.startTime" } },
+            revenue: { $sum: "$totalPrice" },
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]),
+      Booking.distinct("user", { turf: { $in: turfIds }, status: { $ne: "CANCELLED" } }),
       // Revenue By Category
       Booking.aggregate([
-        { $match: { turf: { $in: turfIds } } },
+        { $match: { turf: { $in: turfIds }, status: { $ne: "CANCELLED" } } },
         { $lookup: { from: "turves", localField: "turf", foreignField: "_id", as: "turfInfo" } },
         { $unwind: "$turfInfo" },
         { $group: { _id: "$turfInfo.category", value: { $sum: "$totalPrice" } } },
         { $project: { name: "$_id", value: 1 } }
       ]),
-      // Detailed Occupancy Heatmap with Turf Breakdown
+      // Detailed Occupancy Heatmap
       Booking.aggregate([
-        { $match: { turf: { $in: turfIds } } },
+        { $match: { turf: { $in: turfIds }, status: { $ne: "CANCELLED" } } },
+        { $lookup: { from: "timeslots", localField: "timeSlot", foreignField: "_id", as: "slot" } },
+        { $unwind: "$slot" },
         { $lookup: { from: "turves", localField: "turf", foreignField: "_id", as: "turfInfo" } },
         { $unwind: "$turfInfo" },
         {
           $group: {
             _id: {
-              day: { $dayOfWeek: "$createdAt" },
-              hour: { $hour: "$createdAt" }
+              day: { $dayOfWeek: "$slot.startTime" },
+              hour: { $hour: "$slot.startTime" }
             },
             count: { $sum: 1 },
             turfs: { $addToSet: "$turfInfo.name" }
           }
         }
       ]),
-      // Revenue By Venue (Comparison)
+      // Revenue By Venue
       Booking.aggregate([
-        { $match: { turf: { $in: turfIds } } },
+        { $match: { turf: { $in: turfIds }, status: { $ne: "CANCELLED" } } },
         { $lookup: { from: "turves", localField: "turf", foreignField: "_id", as: "turfInfo" } },
         { $unwind: "$turfInfo" },
         { $group: { _id: "$turfInfo.name", revenue: { $sum: "$totalPrice" } } },
@@ -148,35 +203,31 @@ export const getDashboardData = async (req, res) => {
       ]),
     ]);
 
-    const occupancyHeatmap = occupancyRaw.map(o => ({
-      day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][o._id.day - 1],
-      hour: o._id.hour,
+    const occupancyHeatmap = (occupancyRaw || []).map(o => ({
+      day: o._id && o._id.day ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][o._id.day - 1] : "Unknown",
+      hour: o._id ? o._id.hour : 0,
       value: o.count,
       turfs: o.turfs
     }));
 
-    const revenueByVenue = revenueByVenueRaw.map(v => ({
-      name: v.name,
-      value: v.value
-    }));
-
-    const totalReviews = reviews.length;
-    const averageRating = totalReviews > 0 
-      ? (reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1) 
+    const totalReviews = await Review.countDocuments({ turf: { $in: turfIds } });
+    const reviews = await Review.find({ turf: { $in: turfIds } }).select("rating").lean();
+    const averageRating = totalReviews > 0 && Array.isArray(reviews)
+      ? (reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / totalReviews).toFixed(1) 
       : 0;
 
     const venueHealth = {
       score: Math.round((averageRating / 5) * 100),
-      profileComp: 95, // Logic for profile completeness
+      profileComp: 95,
       responseRate: 98,
       satisfaction: averageRating,
       cancellation: 1.2
     };
 
-    const totalPossibleSlots = turfs.length * 12 * 30;
+    const totalPossibleSlots = turfs.length * 12 * 30; // Approx
+    const totalBookings = await Booking.countDocuments({ turf: { $in: turfIds }, status: { $ne: "CANCELLED" } });
     const utilization = totalPossibleSlots > 0 ? Math.min(100, Math.round((totalBookings / totalPossibleSlots) * 100)) : 0;
 
-    console.log("DEBUG: Sending successful main dashboard response");
     res.json({
       totalBookings,
       totalReviews,
@@ -187,9 +238,11 @@ export const getDashboardData = async (req, res) => {
       bookingsPerTurfDay,
       bookingsPerTurfWeek,
       bookingsPerTurfMonth,
-      revenueOverTimeRaw,
+      revenueTrendDay,
+      revenueTrendWeek,
+      revenueTrendMonth,
       revenueByCategory,
-      revenueByVenue,
+      revenueByVenue: revenueByVenueRaw,
       occupancyHeatmap,
       venueHealth,
       recentBookings: await Booking.find({ turf: { $in: turfIds } })
@@ -203,12 +256,7 @@ export const getDashboardData = async (req, res) => {
     });
   } catch (error) {
     console.error("CRITICAL ERROR in getDashboardData:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Error fetching dashboard data", 
-      error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+    res.status(500).json({ success: false, message: "Error fetching dashboard data" });
   }
 };
 
@@ -527,17 +575,21 @@ export const getDetailedOccupancyStats = async (req, res) => {
           day: d,
           hour: h,
           count: slotsInThisHour.length,
-          details: slotsInThisHour.map(b => ({
-            id: b._id,
-            user: b.user?.name || "Guest",
-            email: b.user?.email,
-            phone: b.user?.phone,
-            turf: b.turf?.name,
-            amount: b.totalPrice,
-            time: b.timeSlot ? 
-              `${new Date(b.timeSlot.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(b.timeSlot.endTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}` : 
-              "N/A"
-          }))
+          details: slotsInThisHour.map(b => {
+            const bStartTime = b.timeSlot?.startTime;
+            const bEndTime = b.timeSlot?.endTime;
+            return {
+              id: b._id,
+              user: b.user?.name || "Guest",
+              email: b.user?.email,
+              phone: b.user?.phone,
+              turf: b.turf?.name,
+              amount: b.totalPrice,
+              time: bStartTime && bEndTime ? 
+                `${new Date(bStartTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(bEndTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}` : 
+                "N/A"
+            };
+          })
         });
       }
     }
@@ -668,8 +720,8 @@ export const getOwnerCustomers = async (req, res) => {
         return {
           ...c,
           status,
-          joinedFormatted: `Joined ${format(new Date(c.joinedDate), "MMM yyyy")}`,
-          lastActiveFormatted: formatDistanceToNow(new Date(c.lastActive), { addSuffix: true })
+          joinedFormatted: c.joinedDate ? `Joined ${format(new Date(c.joinedDate), "MMM yyyy")}` : "N/A",
+          lastActiveFormatted: c.lastActive ? formatDistanceToNow(new Date(c.lastActive), { addSuffix: true }) : "Never"
         };
       }),
       stats: {

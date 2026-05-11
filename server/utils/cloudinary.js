@@ -14,7 +14,7 @@ cloudinary.config({
  * @param {string} folder  - Cloudinary folder path
  * @returns {Promise<string>} - The secure URL of the uploaded image
  */
-export const uploadToCloudinary = (buffer, folder = "turfspot") => {
+export const uploadToCloudinary = (buffer, folder = "kridaz") => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       { folder, resource_type: "auto" },

@@ -6,6 +6,8 @@ const useProfessionals = (roleFilter) => {
   const [professionals, setProfessionals] = useState([]);
   const [allProfessionals, setAllProfessionals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [selectedProfessionalDetails, setSelectedProfessionalDetails] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearch = useCallback(
@@ -44,6 +46,22 @@ const useProfessionals = (roleFilter) => {
     }
   };
 
+  const fetchProfessionalDetails = async (id) => {
+    setDetailsLoading(true);
+    setSelectedProfessionalDetails(null);
+    try {
+      const response = await axiosInstance.get(`/api/admin/professionals/${id}`);
+      setSelectedProfessionalDetails(response.data);
+      return response.data;
+    } catch (err) {
+      console.error("Failed to fetch professional details:", err);
+      toast.error(err.response?.data?.message || "Failed to fetch professional details");
+      return null;
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchProfessionals();
   }, [roleFilter]);
@@ -53,6 +71,9 @@ const useProfessionals = (roleFilter) => {
     loading,
     searchTerm,
     handleSearch,
+    fetchProfessionalDetails,
+    selectedProfessionalDetails,
+    detailsLoading,
   };
 };
 

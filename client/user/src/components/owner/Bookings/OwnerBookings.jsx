@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import useOwnerBookings from "@hooks/owner/useOwnerBookings";
 import BookingsSkeleton from "./BookingsSkeleton";
-import { format, subHours, subMinutes } from "date-fns";
+import { format } from "date-fns";
 import { ArrowUpDown, Calendar, Clock, User, IndianRupee, Filter, Download, Ticket, FileText } from "lucide-react";
 import Avatar from "react-avatar";
 
@@ -27,8 +27,8 @@ const OwnerBookings = () => {
   };
 
   const formatTime = (dateString) => {
-    const adjustedDate = subMinutes(subHours(new Date(dateString), 5), 30);
-    return format(adjustedDate, "h:mm aa");
+    if (!dateString) return "—";
+    return format(new Date(dateString), "h:mm aa");
   };
 
   return (
@@ -192,7 +192,7 @@ const OwnerBookings = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className="text-[16px] font-semibold text-white tracking-tight">
-                        ₹{booking.totalPrice.toLocaleString()}
+                        Rs {booking.totalPrice.toLocaleString()}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -230,7 +230,7 @@ const OwnerBookings = () => {
             Displaying {bookings.length} operational records | End of Feed
           </p>
           <div className="flex gap-4">
-            <span className="text-[10px] font-medium uppercase tracking-widest">BookMySportz Engine v1.4</span>
+            <span className="text-[10px] font-medium uppercase tracking-widest">Kridaz Engine v1.4</span>
           </div>
         </div>
       </div>

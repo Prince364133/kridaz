@@ -1,10 +1,13 @@
 import SupportTicket from "../../models/supportTicket.model.js";
+import Owner from "../../models/owner.model.js";
 import { notifyAdmins } from "../../utils/notificationHelper.js";
 
 export const createTicket = async (req, res) => {
-  const ownerId = req.owner.id;
-  const { subject, message, category, images } = req.body;
+  const ownerData = req.owner;
   try {
+    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
+    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
+    const ownerId = ownerRecord._id;
     if (message.length > 10000) {
       return res.status(400).json({ message: "Message exceeds 10,000 characters limit" });
     }
@@ -37,8 +40,12 @@ export const createTicket = async (req, res) => {
 };
 
 export const getMyTickets = async (req, res) => {
-  const ownerId = req.owner.id;
+  const ownerData = req.owner;
   try {
+    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
+    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
+    const ownerId = ownerRecord._id;
+
     const tickets = await SupportTicket.find({ owner: ownerId }).sort({ createdAt: -1 });
     res.status(200).json({ success: true, tickets });
   } catch (error) {
@@ -47,10 +54,14 @@ export const getMyTickets = async (req, res) => {
 };
 
 export const addReply = async (req, res) => {
-  const ownerId = req.owner.id;
+  const ownerData = req.owner;
   const { ticketId } = req.params;
   const { message } = req.body;
   try {
+    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
+    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
+    const ownerId = ownerRecord._id;
+
     const ticket = await SupportTicket.findOne({ _id: ticketId, owner: ownerId });
     if (!ticket) return res.status(404).json({ message: "Ticket not found" });
 

@@ -33,7 +33,7 @@ const BookingHistoryChart = ({ data }) => (
           tickLine={false} 
           axisLine={false}
           tick={{ fill: '#666', fontWeight: 900, fontSize: 10 }}
-          tickFormatter={(value) => `₹${value}`}
+          tickFormatter={(value) => `Rs ${value}`}
         />
         <Tooltip 
           contentStyle={{ 

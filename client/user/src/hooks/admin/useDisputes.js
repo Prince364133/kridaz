@@ -10,7 +10,7 @@ const useDisputes = () => {
   const fetchDisputes = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get("/api/admin/support/disputes");
+      const response = await axiosInstance.get("/api/admin/dispute/get-all");
       setDisputes(response.data.disputes);
     } catch (err) {
       console.error(err);
@@ -20,10 +20,14 @@ const useDisputes = () => {
     }
   };
 
-  const handleResolve = async (id, action, message) => {
+  const handleResolve = async (id, action, message, partialAmount = 0) => {
     setProcessingId(id);
     try {
-      await axiosInstance.put(`/api/admin/support/disputes/${id}/resolve`, { action, message });
+      await axiosInstance.post(`/api/admin/dispute/${id}/resolve`, { 
+        resolutionAction: action, 
+        resolutionNotes: message,
+        partialAmount 
+      });
       toast.success("Dispute resolved");
       fetchDisputes();
     } catch (err) {
@@ -32,6 +36,17 @@ const useDisputes = () => {
       setProcessingId("");
     }
   };
+
+  const handleReply = async (id, message) => {
+    try {
+      await axiosInstance.post(`/api/admin/dispute/${id}/reply`, { message });
+      toast.success("Reply sent");
+      fetchDisputes();
+    } catch (err) {
+      toast.error("Failed to send reply");
+    }
+  };
+
 
   useEffect(() => {
     fetchDisputes();
@@ -42,6 +57,8 @@ const useDisputes = () => {
     loading,
     processingId,
     handleResolve,
+    handleReply,
+
     refresh: fetchDisputes
   };
 };

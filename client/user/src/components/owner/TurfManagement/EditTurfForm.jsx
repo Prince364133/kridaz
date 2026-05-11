@@ -133,7 +133,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
             </InputWrapper>
 
             <div className="grid grid-cols-2 gap-4">
-              <InputWrapper label="Hourly Rate (₹)" error={errors.pricePerHour?.message}>
+              <InputWrapper label="Hourly Rate (Rs)" error={errors.pricePerHour?.message}>
                 <input
                   type="number"
                   {...register('pricePerHour', { valueAsNumber: true })}

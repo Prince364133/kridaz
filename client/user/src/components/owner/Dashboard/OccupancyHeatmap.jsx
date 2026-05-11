@@ -159,7 +159,7 @@ const OccupancyHeatmap = () => {
                        </div>
                        <div className="text-right">
                           <p className="text-[10px] text-[#878C9F] uppercase font-bold tracking-widest">Amount</p>
-                          <p className="text-white font-black">₹{b.amount}</p>
+                          <p className="text-white font-black">Rs {b.amount}</p>
                        </div>
                     </div>
 

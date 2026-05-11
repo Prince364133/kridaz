@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
 import chalk from "chalk";
 import Turf from "../../models/turf.model.js";
+import Owner from "../../models/owner.model.js";
 import TimeSlot from "../../models/timeSlot.model.js";
 import Booking from "../../models/booking.model.js";
 import Review from "../../models/review.model.js";
 import cloudinary from "../../utils/cloudinary.js";
-import { startOfDay, parseISO } from "date-fns";
-import { fromZonedTime } from "date-fns-tz";
+import { startOfDay, parseISO, addDays, format, parse } from "date-fns";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { getTurfWithAvgRating } from "./turf.service.js";
 
 // --- HELPERS ---
@@ -89,7 +90,12 @@ export const getAllTurfs = async (req, res) => {
       return { ...t, slotsNeedsUpdate: turfDoc ? turfDoc.slotsNeedsUpdate : t.slotsNeedsUpdate };
     }));
 
-    return res.status(200).json({ turfs: processedTurfs });
+    const populatedTurfs = await Turf.populate(processedTurfs, {
+      path: "owner",
+      select: "name email phone profilePicture role createdAt"
+    });
+
+    return res.status(200).json({ turfs: populatedTurfs });
   } catch (err) {
     console.log(chalk.red("Error in getAllTurfs"), err);
     return res.status(500).json({ message: err.message });
@@ -99,7 +105,7 @@ export const getAllTurfs = async (req, res) => {
 export const getTurfById = async (req, res) => {
   const { id } = req.params;
   try {
-    const turf = await Turf.findById(id);
+    const turf = await Turf.findById(id).populate("owner", "name email phone profilePicture role createdAt");
     if (!turf) {
       return res.status(404).json({ message: "Turf not found" });
     }
@@ -182,7 +188,10 @@ export const getTimeSlotByTurfId = async (req, res) => {
 // --- OWNER OPERATIONS ---
 
 export const turfRegister = async (req, res) => {
-  const owner = req.owner.id;
+  const ownerData = req.owner;
+  const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
+  if (!ownerRecord) return res.status(404).json({ success: false, message: "Owner profile not found" });
+  const owner = ownerRecord._id;
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ success: false, message: "At least one turf image is required" });
   }
@@ -190,7 +199,7 @@ export const turfRegister = async (req, res) => {
     const uploadPromises = req.files.map((file) => {
       return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: "BookMySportz/turfs" },
+          { folder: "kridaz/turfs" },
           (error, result) => {
             if (error) reject(error);
             else resolve(result.secure_url);
@@ -256,9 +265,18 @@ export const turfRegister = async (req, res) => {
 };
 
 export const getTurfByOwner = async (req, res) => {
-  const ownerId = req.owner.id;
+  const ownerData = req.owner;
   try {
-    const turfs = await Turf.find({ owner: ownerId });
+    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
+    if (!ownerRecord) return res.status(404).json({ success: false, message: "Owner profile not found" });
+    const ownerId = ownerRecord._id;
+
+    const turfs = await Turf.find({ 
+      $or: [
+        { owner: ownerId },
+        { owner: ownerRecord.userId }
+      ]
+    });
     
     // Check for expiry on each turf
     await Promise.all(turfs.map(t => checkTurfExpiry(t)));
@@ -272,7 +290,10 @@ export const getTurfByOwner = async (req, res) => {
 };
 
 export const editTurfById = async (req, res) => {
-  const owner = req.owner.id;
+  const ownerData = req.owner;
+  const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
+  if (!ownerRecord) return res.status(404).json({ success: false, message: "Owner profile not found" });
+  const owner = ownerRecord._id;
   const { id } = req.params;
   const { sportTypes, groundTypes, facilities, sportsType, ...otherDetails } = req.body;
   
@@ -338,7 +359,10 @@ export const editTurfById = async (req, res) => {
   updatedTurfData.slotsNeedsUpdate = false;
 
   try {
-    const turf = await Turf.findOne({ owner, _id: id });
+    const turf = await Turf.findOne({ 
+      _id: id,
+      $or: [{ owner }, { owner: ownerRecord.userId }]
+    });
     if (!turf) {
       return res.status(404).json({ success: false, message: "Turf not found" });
     }
@@ -348,7 +372,7 @@ export const editTurfById = async (req, res) => {
       const uploadPromises = req.files.map((file) => {
         return new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: "BookMySportz/turfs" },
+            { folder: "kridaz/turfs" },
             (error, result) => {
               if (error) reject(error);
               else resolve(result.secure_url);
@@ -385,10 +409,14 @@ export const editTurfById = async (req, res) => {
 };
 
 export const getTurfDetailsWithSlots = async (req, res) => {
-  const ownerId = req.owner.id;
+  const ownerData = req.owner;
   const { id } = req.params;
 
   try {
+    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
+    if (!ownerRecord) return res.status(404).json({ success: false, message: "Owner profile not found" });
+    const ownerId = ownerRecord._id;
+
     const turf = await Turf.findById(id);
     if (!turf) {
       return res.status(404).json({ success: false, message: "Turf not found" });
@@ -399,7 +427,8 @@ export const getTurfDetailsWithSlots = async (req, res) => {
       .populate("user", "name email phoneNumber profileImage")
       .populate("timeSlot");
 
-    const slotsWithBookings = timeSlots.map(slot => {
+    // Start with existing real slots (booked or manually created)
+    const processedSlots = timeSlots.map(slot => {
       const booking = bookings.find(b => b.timeSlot && b.timeSlot._id.toString() === slot._id.toString());
       
       let userDetails = null;
@@ -418,18 +447,82 @@ export const getTurfDetailsWithSlots = async (req, res) => {
       }
 
       return {
-        ...slot.toObject(),
+        _id: slot._id,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
         isBooked: !!booking,
         bookingDetails: booking ? {
           user: userDetails,
           totalPrice: booking.totalPrice,
           bookedAt: booking.createdAt,
-          bookingSource: booking.bookingSource
+          bookingSource: booking.bookingSource,
+          status: booking.status
         } : null
       };
     });
 
-    return res.status(200).json({ success: true, turf, slots: slotsWithBookings });
+    // Generate virtual slots for the next 7 days to show availability
+    const timeZone = process.env.TIMEZONE || "Asia/Kolkata";
+    const today = startOfDay(toZonedTime(new Date(), timeZone));
+    
+    const allSlots = [...processedSlots];
+
+    // Create a lookup for quick existing slot check
+    const existingSlotTimes = new Set(processedSlots.map(s => 
+      `${new Date(s.startTime).getTime()}-${new Date(s.endTime).getTime()}`
+    ));
+
+    for (let i = 0; i < 7; i++) {
+      const currentDate = addDays(today, i);
+      const dayName = format(currentDate, "EEEE");
+      
+      // Skip if it's an off day
+      if (turf.offDays && turf.offDays.includes(dayName)) continue;
+      if (turf.availableDays && !turf.availableDays.includes(dayName)) continue;
+      
+      // Add slots from template
+      if (turf.generatedSlots && turf.generatedSlots.length > 0) {
+        for (const template of turf.generatedSlots) {
+          if (template.isActive === false) continue;
+
+          try {
+            // Parse template times for the current loop date
+            const startTime = parse(template.startTime, "hh:mm a", currentDate);
+            const endTime = parse(template.endTime, "hh:mm a", currentDate);
+            
+            const utcStart = fromZonedTime(startTime, timeZone);
+            const utcEnd = fromZonedTime(endTime, timeZone);
+            
+            const timeKey = `${utcStart.getTime()}-${utcEnd.getTime()}`;
+            
+            if (!existingSlotTimes.has(timeKey)) {
+              allSlots.push({
+                _id: `virtual_${timeKey}`,
+                startTime: utcStart,
+                endTime: utcEnd,
+                isBooked: false,
+                bookingDetails: null,
+                price: template.price || turf.pricePerHour,
+                isActive: true
+              });
+            }
+          } catch (err) {
+            // Skip invalid template formats
+            continue;
+          }
+        }
+      }
+    }
+
+    // Final sort by time
+    allSlots.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+    const stats = {
+      totalBookings: bookings.filter(b => b.status !== "CANCELLED").length,
+      totalRevenue: bookings.filter(b => b.status !== "CANCELLED").reduce((acc, b) => acc + b.totalPrice, 0)
+    };
+
+    return res.status(200).json({ success: true, turf, slots: allSlots, stats });
   } catch (err) {
     console.error("Error getting turf details with slots:", err);
     return res.status(500).json({ success: false, message: err.message });
@@ -443,7 +536,9 @@ export const adminGetAllTurfs = async (req, res) => {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
-    const turfs = await Turf.find().lean();
+    const turfs = await Turf.find()
+      .populate("owner", "name email phoneNumber profileImage role createdAt")
+      .lean();
     const turfsWithRating = await Promise.all(turfs.map(getTurfWithAvgRating));
     return res.status(200).json({ turfs: turfsWithRating });
   } catch (error) {
@@ -456,7 +551,7 @@ export const adminApproveTurf = async (req, res) => {
   const { id } = req.params;
   const { name, designation } = req.body;
   try {
-    const turf = await Turf.findById(id);
+    const turf = await Turf.findById(id).populate("owner", "name email phoneNumber profileImage role createdAt");
     if (!turf) return res.status(404).json({ success: false, message: "Turf not found" });
 
     // Record verification metadata
@@ -495,18 +590,85 @@ export const adminRejectTurf = async (req, res) => {
         verifiedAt: new Date(),
         action: "rejected"
       }
-    }, { new: true });
+    }, { new: true }).populate("owner", "name email phoneNumber profileImage role createdAt");
     return res.status(200).json({ success: true, message: "Turf rejected", turf });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
 
-export const toggleTurfVisibility = async (req, res) => {
-  const owner = req.owner.id;
+export const adminDecommissionTurf = async (req, res) => {
+  const { id } = req.params;
+  const { name, designation } = req.body;
+  try {
+    const turf = await Turf.findByIdAndUpdate(id, { 
+      status: "decommissioned",
+      isActive: false,
+      verificationData: {
+        adminName: name,
+        adminDesignation: designation,
+        verifiedAt: new Date(),
+        action: "decommissioned"
+      }
+    }, { new: true }).populate("owner", "name email phoneNumber profileImage role createdAt");
+    if (!turf) return res.status(404).json({ success: false, message: "Turf not found" });
+    return res.status(200).json({ success: true, message: "Venue decommissioned. Owner must re-apply for verification.", turf });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const adminSoftDeleteTurf = async (req, res) => {
+  const { id } = req.params;
+  const { name, designation } = req.body;
+  try {
+    const turf = await Turf.findByIdAndUpdate(id, { 
+      status: "deleted",
+      isActive: false,
+      verificationData: {
+        adminName: name,
+        adminDesignation: designation,
+        verifiedAt: new Date(),
+        action: "deleted"
+      }
+    }, { new: true }).populate("owner", "name email phoneNumber profileImage role createdAt");
+    if (!turf) return res.status(404).json({ success: false, message: "Turf not found" });
+    return res.status(200).json({ success: true, message: "Venue moved to deleted list.", turf });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const adminHardDeleteTurf = async (req, res) => {
   const { id } = req.params;
   try {
-    const turf = await Turf.findOne({ owner, _id: id });
+    const turf = await Turf.findById(id);
+    if (!turf) return res.status(404).json({ success: false, message: "Turf not found" });
+
+    // Permanently delete associated data
+    await TimeSlot.deleteMany({ turf: id });
+    await Booking.deleteMany({ turf: id });
+    await Review.deleteMany({ turf: id });
+    await Turf.findByIdAndDelete(id);
+
+    return res.status(200).json({ success: true, message: "Venue and all associated data permanently deleted" });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const toggleTurfVisibility = async (req, res) => {
+  const ownerData = req.owner;
+  const { id } = req.params;
+  try {
+    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
+    if (!ownerRecord) return res.status(404).json({ success: false, message: "Owner profile not found" });
+    const owner = ownerRecord._id;
+
+    const turf = await Turf.findOne({ 
+      _id: id,
+      $or: [{ owner }, { owner: ownerRecord.userId }]
+    });
     if (!turf) return res.status(404).json({ success: false, message: "Turf not found" });
     
     turf.isActive = !turf.isActive;
@@ -523,10 +685,16 @@ export const toggleTurfVisibility = async (req, res) => {
 };
 
 export const deleteTurf = async (req, res) => {
-  const owner = req.owner.id;
+  const ownerData = req.owner;
   const { id } = req.params;
   try {
-    const turf = await Turf.findOneAndDelete({ owner, _id: id });
+    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
+    if (!ownerRecord) return res.status(404).json({ success: false, message: "Owner profile not found" });
+    const owner = ownerRecord._id;
+    const turf = await Turf.findOneAndDelete({ 
+      _id: id,
+      $or: [{ owner }, { owner: ownerRecord.userId }]
+    });
     if (!turf) return res.status(404).json({ success: false, message: "Turf not found or unauthorized" });
     
     // Also delete all associated data

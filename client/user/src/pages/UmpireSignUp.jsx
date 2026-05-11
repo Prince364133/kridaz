@@ -157,7 +157,7 @@ const UmpireSignUp = () => {
               <span style={{ color: ACCENT }}>OFFICIAL.</span>
             </h1>
             <p className="text-sm text-white/40 uppercase tracking-widest max-w-sm leading-relaxed">
-              Join the TurfSpot elite officials network. Officiate professional matches and build your career.
+              Join the Kridaz elite officials network. Officiate professional matches and build your career.
             </p>
           </div>
 

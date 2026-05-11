@@ -1,0 +1,186 @@
+import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { X, Clock } from "lucide-react";
+
+const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = false }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [mode, setMode] = useState("hours");
+  const [hour, setHour] = useState(12);
+  const [minute, setMinute] = useState(0);
+  const [period, setPeriod] = useState("AM");
+  const triggerRef = useRef(null);
+  const popupRef = useRef(null);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (value instanceof Date && !isNaN(value)) {
+      let h = value.getHours();
+      const m = value.getMinutes();
+      const p = h >= 12 ? "PM" : "AM";
+      h = h % 12 || 12;
+      setHour(h);
+      setMinute(m);
+      setPeriod(p);
+    }
+  }, [value]);
+
+  const open = () => {
+    if (disabled) return;
+    if (triggerRef.current) {
+      const r = triggerRef.current.getBoundingClientRect();
+      setPos({ top: r.bottom + window.scrollY + 8, left: r.left + window.scrollX });
+    }
+    setMode("hours");
+    setIsOpen(true);
+  };
+
+  useEffect(() => {
+    const handle = (e) => {
+      if (popupRef.current && !popupRef.current.contains(e.target) && !triggerRef.current?.contains(e.target))
+        setIsOpen(false);
+    };
+    if (isOpen) document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [isOpen]);
+
+  const confirm = (m = minute) => {
+    const d = new Date();
+    let h24 = hour % 12;
+    if (period === "PM") h24 += 12;
+    d.setHours(h24, m, 0, 0);
+    onChange(d);
+    setIsOpen(false);
+  };
+
+  const selectHour = (h) => { setHour(h); setMode("minutes"); };
+  const selectMinute = (m) => { setMinute(m); confirm(m); };
+
+  const fmt = () => {
+    if (!value || !(value instanceof Date) || isNaN(value)) return placeholder;
+    const h = value.getHours(), m = value.getMinutes();
+    const p = h >= 12 ? "PM" : "AM";
+    return `${String(h % 12 || 12).padStart(2, "0")}:${String(m).padStart(2, "0")} ${p}`;
+  };
+
+  const pos12 = (n, radius = 38) => {
+    const a = (n * 30 - 90) * (Math.PI / 180);
+    return { x: 50 + radius * Math.cos(a), y: 50 + radius * Math.sin(a) };
+  };
+  const posMin = (m, radius = 38) => {
+    const a = (m * 6 - 90) * (Math.PI / 180);
+    return { x: 50 + radius * Math.cos(a), y: 50 + radius * Math.sin(a) };
+  };
+
+  const handEnd = mode === "hours" ? pos12(hour) : posMin(minute);
+  const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={open}
+        disabled={disabled}
+        className={`w-full bg-[#111111] border ${isOpen ? "border-[#CCFF00]/60" : "border-[#2D2D2D]"} text-white text-sm h-12 rounded-[8px] px-4 transition-all flex items-center justify-between ${disabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer hover:border-[#CCFF00]/40"}`}
+      >
+        <span className={value instanceof Date && !isNaN(value) ? "text-white font-medium" : "text-[#555]"}>{fmt()}</span>
+        <Clock size={14} className="text-[#CCFF00] opacity-60 shrink-0" />
+      </button>
+
+      {isOpen && createPortal(
+        <div
+          ref={popupRef}
+          style={{ position: "absolute", top: pos.top, left: pos.left, zIndex: 99999 }}
+          className="w-[270px] bg-[#0A0A0A] border border-[#2D2D2D] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#1A1A1A]">
+            <span className="text-[9px] font-black text-[#878C9F] uppercase tracking-[3px]">
+              {mode === "hours" ? "Select Hour" : "Select Minute"}
+            </span>
+            <button onClick={() => setIsOpen(false)} className="text-[#444] hover:text-white transition-colors">
+              <X size={13} />
+            </button>
+          </div>
+
+          {/* Time Display */}
+          <div className="flex items-center justify-center gap-1 pt-4 pb-1">
+            <button onClick={() => setMode("hours")} className={`text-[32px] font-black transition-colors ${mode === "hours" ? "text-[#CCFF00]" : "text-white/40 hover:text-white"}`}>
+              {String(hour).padStart(2, "0")}
+            </button>
+            <span className="text-[32px] font-black text-white/20">:</span>
+            <button onClick={() => setMode("minutes")} className={`text-[32px] font-black transition-colors ${mode === "minutes" ? "text-[#CCFF00]" : "text-white/40 hover:text-white"}`}>
+              {String(minute).padStart(2, "0")}
+            </button>
+            <div className="flex flex-col gap-1 ml-3">
+              {["AM", "PM"].map((p) => (
+                <button key={p} onClick={() => setPeriod(p)}
+                  className={`text-[9px] font-black px-2 py-1 rounded-[4px] uppercase tracking-wider transition-all ${period === p ? "bg-[#CCFF00] text-black" : "text-[#555] hover:text-white"}`}>
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* SVG Clock Face */}
+          <div className="px-5 pb-2">
+            <svg viewBox="0 0 100 100" className="w-full">
+              <circle cx="50" cy="50" r="48" fill="#111" stroke="#2D2D2D" strokeWidth="0.5" />
+              <line x1="50" y1="50" x2={handEnd.x} y2={handEnd.y} stroke="#CCFF00" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="50" cy="50" r="2.5" fill="#CCFF00" />
+
+              {mode === "hours" && Array.from({ length: 12 }, (_, i) => {
+                const h = i + 1, p = pos12(h), sel = h === hour;
+                return (
+                  <g key={h} onClick={() => selectHour(h)} style={{ cursor: "pointer" }}>
+                    <circle cx={p.x} cy={p.y} r="6.5" fill={sel ? "#CCFF00" : "transparent"} />
+                    <text x={p.x} y={p.y + 0.5} textAnchor="middle" dominantBaseline="middle"
+                      fontSize="6" fontWeight="bold" fill={sel ? "#000" : "#fff"} style={{ userSelect: "none" }}>{h}</text>
+                  </g>
+                );
+              })}
+
+              {mode === "minutes" && MINUTES.map((m) => {
+                const p = posMin(m), sel = m === minute;
+                return (
+                  <g key={m} onClick={() => selectMinute(m)} style={{ cursor: "pointer" }}>
+                    <circle cx={p.x} cy={p.y} r="6.5" fill={sel ? "#CCFF00" : "transparent"} />
+                    <text x={p.x} y={p.y + 0.5} textAnchor="middle" dominantBaseline="middle"
+                      fontSize="5" fontWeight="bold" fill={sel ? "#000" : "#fff"} style={{ userSelect: "none" }}>
+                      {m === 0 ? "00" : m}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="px-5 pb-4 flex gap-3">
+            {mode === "hours" && (
+              <button onClick={() => setMode("minutes")}
+                className="flex-1 py-2.5 bg-[#CCFF00]/10 border border-[#CCFF00]/20 text-[#CCFF00] text-[9px] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#CCFF00]/20 transition-all">
+                Next →
+              </button>
+            )}
+            {mode === "minutes" && (
+              <>
+                <button onClick={() => setMode("hours")}
+                  className="flex-1 py-2.5 border border-[#2D2D2D] text-[#878C9F] text-[9px] font-black uppercase tracking-widest rounded-[8px] hover:text-white transition-all">
+                  ← Back
+                </button>
+                <button onClick={() => confirm(minute)}
+                  className="flex-1 py-2.5 bg-[#CCFF00] text-black text-[9px] font-black uppercase tracking-widest rounded-[8px] hover:bg-white transition-all">
+                  Confirm
+                </button>
+              </>
+            )}
+          </div>
+        </div>,
+        document.getElementById("root") || document.body
+      )}
+    </>
+  );
+};
+
+export default ClockPicker;

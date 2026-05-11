@@ -1,7 +1,7 @@
-# TurfSpot Architecture
+# Kridaz Architecture
 
 ## Overview
-TurfSpot is a unified platform for turf booking and partner management (Venue Owners, Coaches, Umpires).
+Kridaz is a unified platform for turf booking and partner management (Venue Owners, Coaches, Umpires).
 
 ## Directory Structure
 

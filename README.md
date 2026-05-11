@@ -1,6 +1,6 @@
-# TurfSpot 🏟️
+# Kridaz 🏟️
 
-TurfSpot is a production-grade platform for turf booking and sports management. It unifies Users, Venue Owners, Coaches, and Admins into a single, seamless experience.
+Kridaz is a production-grade platform for turf booking and sports management. It unifies Users, Venue Owners, Coaches, and Admins into a single, seamless experience.
 
 ## 🚀 Key Features
 
@@ -46,8 +46,8 @@ TurfSpot is a production-grade platform for turf booking and sports management. 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-repo/TurfSpot.git
-   cd TurfSpot
+   git clone https://github.com/your-repo/Kridaz.git
+   cd Kridaz
    ```
 
 2. **Setup Backend**
@@ -71,4 +71,4 @@ TurfSpot is a production-grade platform for turf booking and sports management. 
 Please read our **[Developer Guide](DEVELOPER_GUIDE.md)** before submitting a Pull Request. We follow a modular architecture and strict validation standards.
 
 ---
-**TurfSpot - Book Your Game, Own Your Passion.**
+**Kridaz - Book Your Game, Own Your Passion.**

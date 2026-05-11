@@ -3,24 +3,33 @@ import WithdrawalRequest from "../../models/withdrawalRequest.model.js";
 import * as argon2 from "argon2";
 
 export const getBankingDetails = async (req, res) => {
-  const ownerId = req.owner.id;
+  const { id, ownerId } = req.owner;
   try {
-    const owner = await Owner.findById(ownerId).select("bankingDetails walletBalance");
+    const owner = ownerId 
+      ? await Owner.findById(ownerId).select("bankingDetails walletBalance")
+      : await Owner.findOne({ userId: id }).select("bankingDetails walletBalance");
+      
+    if (!owner) {
+      return res.status(404).json({ success: false, message: "Partner record not found" });
+    }
     res.status(200).json({ 
       success: true, 
-      bankingDetails: owner.bankingDetails,
+      bankingDetails: owner.bankingDetails || {},
       walletBalance: owner.walletBalance || 0 
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
 export const updateBankingDetails = async (req, res) => {
-  const ownerId = req.owner.id;
+  const { id, ownerId } = req.owner;
   const { accountName, accountNumber, ifscCode, bankName, upiId, payoutMode, cancelledCheckUrl } = req.body;
   try {
-    const owner = await Owner.findById(ownerId);
+    const owner = ownerId 
+      ? await Owner.findById(ownerId)
+      : await Owner.findOne({ userId: id });
+      
     if (!owner) return res.status(404).json({ message: "Owner not found" });
 
     const currentDetails = owner.bankingDetails || {};
@@ -53,11 +62,14 @@ export const getPayoutConfig = async (req, res) => {
 };
 
 export const requestPayout = async (req, res) => {
-  const ownerId = req.owner.id;
+  const { id, ownerId } = req.owner;
   const { amount, password } = req.body;
 
   try {
-    const owner = await Owner.findById(ownerId);
+    const owner = ownerId 
+      ? await Owner.findById(ownerId)
+      : await Owner.findOne({ userId: id });
+      
     if (!owner) return res.status(404).json({ message: "Owner not found" });
 
     // Verify password using argon2
@@ -77,11 +89,11 @@ export const requestPayout = async (req, res) => {
     }
 
     if (amount < 5000) {
-      return res.status(400).json({ success: false, message: "Minimum withdrawal amount is 5000 coins" });
+      return res.status(400).json({ success: false, message: "Minimum withdrawal amount is Rs 5000" });
     }
 
     if (amount > 300000) {
-      return res.status(400).json({ success: false, message: "Maximum withdrawal limit is 300,000 coins" });
+      return res.status(400).json({ success: false, message: "Maximum withdrawal limit is Rs 300,000" });
     }
 
     // Check if banking info exists
@@ -119,7 +131,7 @@ export const requestPayout = async (req, res) => {
 
     res.status(200).json({ 
       success: true, 
-      message: `Withdrawal of ${amount} coins initiated to ${owner.bankingDetails.bankName}. Funds will reflect in 48-72 hours.` 
+      message: `Withdrawal of Rs ${amount} initiated to ${owner.bankingDetails.bankName}. Funds will reflect in 48-72 hours.` 
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

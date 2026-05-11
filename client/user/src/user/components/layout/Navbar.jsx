@@ -47,6 +47,7 @@ const Navbar = () => {
     { name: "Pros", path: "/professionals" },
     { name: "Join Games", path: "/join-games" },
     { name: "Community", path: "/community" },
+    { name: "Leaderboard", path: "/leaderboard" },
     { name: "Players", path: "/players" },
     { name: "Business", path: "#" },
   ];
@@ -66,7 +67,7 @@ const Navbar = () => {
           {/* Logo & Mobile Location Section */}
           <div className="flex flex-col items-start justify-center">
             <Link to="/" className="group flex items-center justify-center">
-              <img src="/logo.png" alt="TurfSpot" className="h-8 lg:h-10 w-auto brightness-125 group-hover:scale-105 transition-transform duration-500" />
+              <img src="/logo.png" alt="Kridaz" className="h-8 lg:h-10 w-auto brightness-125 group-hover:scale-105 transition-transform duration-500" />
             </Link>
 
             <div className="lg:hidden flex items-center gap-1 mt-0.5 ml-1 text-white/50">
@@ -260,6 +261,14 @@ const Navbar = () => {
                         >
                           <Trophy size={18} className="text-white/40" />
                           <span className="text-sm font-medium">My Joined Matches</span>
+                        </Link>
+
+                        <Link 
+                          to="/leaderboard" 
+                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-primary/10 text-primary border border-primary/10 transition-all"
+                        >
+                          <Trophy size={18} className="text-primary/70" />
+                          <span className="text-sm font-bold">Global Leaderboard</span>
                         </Link>
 
                         <Link 

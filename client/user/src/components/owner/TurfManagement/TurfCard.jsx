@@ -33,13 +33,17 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
                   <div className={`px-2 py-0.5 rounded-[4px] text-[9px] font-bold uppercase tracking-widest border ${
                      turf.status === 'approved' ? 'bg-[#CCFF00]/10 border-[#CCFF00]/20 text-[#CCFF00]' :
                      turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                     turf.status === 'decommissioned' ? 'bg-orange-500/10 border-orange-500/20 text-orange-500' :
+                     turf.status === 'deleted' ? 'bg-zinc-800 border-zinc-700 text-zinc-500' :
                      'bg-[#1A1A1A] border-[#2D2D2D] text-yellow-500'
                   }`}>
                      {turf.status}
                   </div>
                   <span className="text-[10px] text-[#444] font-medium uppercase tracking-widest">•</span>
                   <div className="flex items-center text-[#878C9F] text-[9px] font-bold uppercase tracking-widest">
-                    {turf.location}
+                    {turf.status === 'decommissioned' ? (
+                      <span className="text-orange-500/80 animate-pulse">Action Required: Re-apply</span>
+                    ) : turf.location}
                   </div>
                 </div>
               </div>
@@ -60,7 +64,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
         <div className="mt-auto space-y-4">
           <div className="flex flex-wrap gap-1.5">
               <div className="flex items-center gap-2 px-3 py-1 bg-[#CCFF00]/5 border border-[#CCFF00]/20 rounded-[4px] text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">
-                 ₹{turf.pricePerHour} <span className="opacity-40 font-normal">SETTLEMENT</span>
+                 Rs {turf.pricePerHour} <span className="opacity-40 font-normal">SETTLEMENT</span>
               </div>
           </div>
 

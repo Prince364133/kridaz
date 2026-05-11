@@ -250,6 +250,50 @@ export const getAllProfessionals = async (req, res) => {
   }
 };
 
+export const getProfessionalDetails = async (req, res) => {
+  const admin = req.admin.role;
+  const { id } = req.params;
+  
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized access denied" });
+  }
+  
+  try {
+    const professional = await Owner.findById(id, { password: 0 })
+      .populate({
+        path: "bookings",
+        populate: [
+          { path: "turf", select: "name location" },
+          { path: "user", select: "name profilePicture email phone" }
+        ]
+      })
+      .lean();
+      
+    if (!professional) {
+      return res.status(404).json({ success: false, message: "Professional not found" });
+    }
+
+    // Fetch hosted games officiated by this umpire
+    const matches = await HostedGame.find({ umpire: id })
+      .populate("host", "name profilePicture email")
+      .populate("ground", "name location")
+      .sort({ date: -1 })
+      .lean();
+
+    // Fetch reviews (if applicable, using 'targetId' or 'owner')
+    // We'll skip reviews if there's no direct schema support, but Owner has rating/numReviews.
+
+    res.status(200).json({
+      success: true,
+      profile: professional,
+      matches
+    });
+  } catch (error) {
+    console.error("Error in getProfessionalDetails: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const getAllRequestedProfessionals = async (req, res) => {
   const admin = req.admin.role;
   if (admin !== "admin" && admin !== "BMSP_ADMIN") {
@@ -378,13 +422,13 @@ export const approveOwnerRequest = async (req, res) => {
     const html = ` 
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f9f9; padding: 20px; border-radius: 10px;">
         <h1 style="color: #4CAF50;">Congratulations!</h1>
-        <p>Your request to become a <strong>${ownerRequest.role}</strong> on TurfSpot has been approved.</p>
+        <p>Your request to become a <strong>${ownerRequest.role}</strong> on Kridaz has been approved.</p>
         <p>You can now access your dashboard using your existing login credentials:</p>
         <div style="text-align: center; margin: 30px 0;">
           <a href="${process.env.OWNER_URL || 'http://localhost:5173'}" style="background-color: #4CAF50; color: white; padding: 12px 25px; text-decoration: none; font-size: 16px; border-radius: 5px; font-weight: bold;">Go to Dashboard</a>
         </div>
         <p>If you have any questions, feel free to contact our support team.</p>
-        <p>Best regards,<br/>The TurfSpot Team</p>
+        <p>Best regards,<br/>The Kridaz Team</p>
     </div>`;
     
     await generateEmail(to, subject, html);
@@ -536,7 +580,7 @@ export const approveWithdrawalRequest = async (req, res) => {
         <p>Your withdrawal request for <strong>₹${request.amount}</strong> has been approved and processed.</p>
         <p><strong>Transaction ID:</strong> ${transactionId || "N/A"}</p>
         <p>The funds should reflect in your bank account shortly.</p>
-        <p>Best regards,<br/>The BookMySportz Team</p>
+        <p>Best regards,<br/>The Kridaz Team</p>
       </div>
     `;
     await generateEmail(to, subject, html);
@@ -593,7 +637,7 @@ export const rejectWithdrawalRequest = async (req, res) => {
           <p>Your withdrawal request for <strong>₹${request.amount}</strong> has been rejected.</p>
           <p><strong>Reason:</strong> ${reason || "No specific reason provided."}</p>
           <p>The amount has been credited back to your usable wallet balance.</p>
-          <p>Best regards,<br/>The BookMySportz Team</p>
+          <p>Best regards,<br/>The Kridaz Team</p>
         </div>
       `;
       await generateEmail(to, subject, html);

@@ -304,7 +304,7 @@ export default function OwnerPromotions() {
                     className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#CCFF00]/50"
                   >
                     <option value="PERCENTAGE">Percentage (%)</option>
-                    <option value="FLAT">Flat Amount (₹)</option>
+                    <option value="FLAT">Flat Amount (Rs)</option>
                   </select>
                 </div>
                 <div>
