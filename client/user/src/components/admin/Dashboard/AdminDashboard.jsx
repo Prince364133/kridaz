@@ -218,7 +218,7 @@ const ChartCard = ({ title, subtitle, children, action }) => (
     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 relative z-10 shrink-0">
       <div>
         <h2 className="text-[14px] font-bold text-white uppercase tracking-wider leading-none mb-2">{title}</h2>
-        <p className="text-[10px] text-[#999999] uppercase tracking-widest">{subtitle}</p>
+        <p className="admin-subheading text-[#999999]">{subtitle}</p>
       </div>
       {action && <div className="z-20">{action}</div>}
     </div>

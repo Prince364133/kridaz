@@ -57,11 +57,13 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       <Link
         key={item.to || item.label}
         to={item.to || "#"}
-        className={`flex items-center h-[48px] px-4 group relative transition-all duration-300 rounded-[8px] mx-2 mb-1 border border-transparent ${
-          isActive 
-            ? "bg-[#CCFF00] text-black shadow-[0_4px_15px_rgba(204,255,0,0.2)] border-[#CCFF00]/20" 
-            : "bg-transparent text-[#999999] hover:bg-[#CCFF00]/5 hover:text-[#CCFF00] hover:border-[#CCFF00]/10"
-        } ${isLogout ? "hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20" : ""}`}
+        className={`flex items-center px-4 py-3 group relative transition-all duration-300 ${
+          isLogout 
+            ? "text-[#999999] hover:text-red-500" 
+            : isActive 
+              ? "text-black" 
+              : "text-[#999999] hover:text-white"
+        }`}
         onClick={(e) => {
           if (isLogout) {
             e.preventDefault();
@@ -73,16 +75,32 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
           }
         }}
       >
+        {isActive && !isLogout && (
+          <div className="absolute inset-x-2 inset-y-1 bg-[#CCFF00] rounded-xl -z-10 shadow-[0_0_20px_rgba(204,255,0,0.4)] transition-all duration-300" />
+        )}
+        
+        {!isActive && !isLogout && (
+          <div className="absolute inset-x-2 inset-y-1 bg-white/5 rounded-xl -z-10 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+        )}
+
+        {isLogout && (
+          <div className="absolute inset-x-2 inset-y-1 bg-white/5 rounded-xl -z-10 opacity-0 group-hover:opacity-100 group-hover:bg-red-500/10 transition-all duration-300" />
+        )}
+        
         <div className="flex-shrink-0 flex items-center justify-center w-6">
           <Icon 
-            size={20} 
+            size={18} 
             className={`transition-colors duration-300 ${
-              isActive ? "text-black" : "text-[#999999] group-hover:text-[#CCFF00]"
-            } ${isLogout ? "group-hover:text-red-500" : ""}`} 
+              isLogout 
+                ? "text-[#999999]/40 group-hover:text-red-500" 
+                : isActive 
+                  ? "text-black" 
+                  : "text-[#999999]/40 group-hover:text-[#CCFF00]"
+            }`} 
           />
         </div>
 
-        <span className={`text-[13px] font-bold uppercase tracking-widest ml-4 whitespace-nowrap overflow-hidden transition-all duration-300 ${isMinimized ? "opacity-0 w-0" : "opacity-100 w-auto"} ${isActive ? "text-black" : ""}`}>
+        <span className={`font-bold text-[11px] uppercase tracking-[0.2em] ml-4 whitespace-nowrap overflow-hidden transition-all duration-300 ${isMinimized ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
           {item.label}
         </span>
       </Link>
@@ -91,7 +109,7 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
 
   return (
     <aside
-      className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#000000] border-r border-[#2D2D2D] overflow-x-hidden transition-all duration-300 ease-in-out z-40 flex flex-col
+      className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#000000]/90 backdrop-blur-xl border-r border-[#2D2D2D] overflow-x-hidden transition-all duration-300 ease-in-out z-40 flex flex-col
         ${isMinimized ? "lg:w-20" : "w-64 lg:w-[280px]"}
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         ${className || ""}`}

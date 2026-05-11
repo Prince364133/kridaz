@@ -92,19 +92,24 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
           <button
             onClick={() => !isMinimized && toggleMenu(item.label)}
             className={`flex items-center justify-between w-full px-4 py-3 group relative transition-all duration-300 ${
-              isActive ? "text-black" : "text-white/40 hover:text-white"
+              (item.to ? location.pathname === item.to : (isActive && !isMenuOpen)) ? "text-black" : "text-white/60 hover:text-white"
             }`}
           >
-            {isActive && (
+            {item.to ? (location.pathname === item.to && (
               <div className="absolute inset-x-2 inset-y-1 bg-[#CCFF00] rounded-xl -z-10 shadow-[0_0_15px_rgba(204,255,0,0.3)] transition-all duration-300" />
-            )}
+            )) : (isActive && !isMenuOpen && (
+              <div className="absolute inset-x-2 inset-y-1 bg-[#CCFF00] rounded-xl -z-10 shadow-[0_0_15px_rgba(204,255,0,0.3)] transition-all duration-300" />
+            ))}
             {!isActive && (
               <div className="absolute inset-x-2 inset-y-1 bg-white/5 rounded-xl -z-10 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+            )}
+            {isActive && !isMenuOpen && (
+               <div className="absolute left-0 w-1 h-6 bg-[#CCFF00] rounded-full transition-all duration-300" />
             )}
             
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center justify-center w-6">
-                <Icon size={18} className={`transition-colors ${isActive ? "text-black" : "text-white/20 group-hover:text-[#CCFF00]"}`} />
+                <Icon size={18} className={`transition-colors ${(item.to ? location.pathname === item.to : (isActive && !isMenuOpen)) ? "text-black" : "text-white/40 group-hover:text-[#CCFF00]"}`} />
               </div>
               <span className={`font-medium text-sm tracking-wide ml-4 whitespace-nowrap overflow-hidden transition-all duration-300 ${isMinimized ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
                 {item.label}
@@ -119,18 +124,24 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
           </button>
           
           <div className={`overflow-hidden transition-all duration-500 ${!isMinimized && isMenuOpen ? "max-h-96 opacity-100 mb-2" : "max-h-0 opacity-0"}`}>
-            <div className="ml-10 space-y-1 border-l border-white/10 mt-1">
+            <div className="ml-6 space-y-1 border-l border-white/5 mt-1">
               {item.subItems.map((subItem) => {
                 const isSubActive = location.pathname === subItem.to;
                 return (
                   <Link
                     key={subItem.to}
                     to={subItem.to}
-                    className={`flex items-center px-4 py-2 transition-all duration-300 ${
-                      isSubActive ? "text-[#CCFF00]" : "text-white/30 hover:text-white"
+                    className={`flex items-center px-6 py-2.5 group relative transition-all duration-300 ${
+                      isSubActive ? "text-black" : "text-white/50 hover:text-white"
                     }`}
                   >
-                    <span className={`font-medium tracking-wide ${isSubActive ? "text-sm" : "text-xs"}`}>
+                    {isSubActive && (
+                      <div className="absolute inset-x-2 inset-y-1 bg-[#CCFF00] rounded-xl -z-10 shadow-[0_0_15px_rgba(204,255,0,0.3)] transition-all duration-300" />
+                    )}
+                    {!isSubActive && (
+                      <div className="absolute inset-x-2 inset-y-1 bg-white/5 rounded-xl -z-10 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                    )}
+                    <span className={`font-bold tracking-wide transition-all duration-300 ${isSubActive ? "text-xs" : "text-[10px] uppercase opacity-60 group-hover:opacity-100"}`}>
                       {subItem.label}
                     </span>
                   </Link>
@@ -151,7 +162,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
             ? "text-white/40 hover:text-red-500" 
             : isActive 
               ? "text-black" 
-              : "text-white/40 hover:text-white"
+              : "text-white/60 hover:text-white"
         }`}
         onClick={(e) => {
           if (isLogout) {
@@ -198,7 +209,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
 
   return (
     <aside
-      className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#0a0a0a] border-r border-white/5 overflow-x-hidden transition-all duration-300 ease-in-out z-40 flex flex-col
+      className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#0a0a0a]/90 backdrop-blur-xl border-r border-white/5 overflow-x-hidden transition-all duration-300 ease-in-out z-40 flex flex-col
         ${isMinimized ? "lg:w-20" : "w-64"}
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         ${className || ""}`}

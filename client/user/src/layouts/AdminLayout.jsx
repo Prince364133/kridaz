@@ -11,7 +11,7 @@ const AdminLayout = () => {
   const isMinimized = !isHovered;
 
   return (
-    <div className="flex flex-col min-h-screen bg-black">
+    <div className="flex flex-col min-h-screen bg-black admin-panel">
       <AuthenticatedNavbar toggleSidebar={toggleSidebar} />
 
       <div className="flex flex-1 pt-16 lg:pt-20">

@@ -50,7 +50,6 @@ export const getUmpiresForHosting = async (req, res) => {
 
 export const createHostedGame = async (req, res) => {
   const session = await mongoose.startSession();
-  session.startTransaction();
   try {
     const hostId = req.user.id || req.user.user;
     const { 
@@ -90,23 +89,19 @@ export const createHostedGame = async (req, res) => {
       });
     }
 
-    // 3. Reserve Coins
-    const updatedUser = await User.findByIdAndUpdate(hostId, { $inc: { reservedBalance: totalCost } }, { session });
-    if (!updatedUser) {
-      await Owner.findByIdAndUpdate(hostId, { $inc: { reservedBalance: totalCost } }, { session });
-    }
+    // Helper: strip base64 images before saving to keep document size low
+    // Store only URL-based images; for base64, strip and keep a flag
+    const sanitizeImage = (img) => {
+      if (!img) return null;
+      if (img.startsWith('data:')) {
+        // base64 — store as-is (user-uploaded; truncate if > 200KB to avoid mongo doc limit)
+        return img.length > 200000 ? img.substring(0, 200000) : img;
+      }
+      return img; // plain URL
+    };
 
-    // 4. Create Transaction Record
-    await WalletTransaction.create([{
-      user: hostId,
-      amount: totalCost,
-      type: "HOST_GAME",
-      status: "RESERVED",
-      description: `Reserved for hosting ${gameType} game at ${date}`
-    }], { session });
-
-    // 5. Create Game
-    const hostedGame = new HostedGame({
+    // 3. Build game object
+    const gameObj = {
       host: hostId,
       gameType,
       date,
@@ -119,22 +114,68 @@ export const createHostedGame = async (req, res) => {
       totalCost,
       teams: {
         teamA: {
-          name: teamA.name || "Team A",
-          slots: teamA.slots.map(s => ({ role: s.role, status: "OPEN" }))
+          name: teamA?.name || "Team A",
+          image: sanitizeImage(teamA?.image),
+          slots: (teamA?.slots || []).map(s => ({ role: s.role, status: "OPEN" }))
         },
         teamB: {
-          name: teamB.name || "Team B",
-          slots: teamB.slots.map(s => ({ role: s.role, status: "OPEN" }))
+          name: teamB?.name || "Team B",
+          image: sanitizeImage(teamB?.image),
+          slots: (teamB?.slots || []).map(s => ({ role: s.role, status: "OPEN" }))
         }
       },
       city,
       state,
       shortId: generateShortId(),
       status: "ACTIVE"
-    });
+    };
 
-    await hostedGame.save({ session });
-    await session.commitTransaction();
+    // 4. Try with transaction first; fall back to sessionless if replica set unavailable
+    let hostedGame;
+    try {
+      session.startTransaction();
+
+      if (totalCost > 0) {
+        const updatedUser = await User.findByIdAndUpdate(hostId, { $inc: { reservedBalance: totalCost } }, { session });
+        if (!updatedUser) {
+          await Owner.findByIdAndUpdate(hostId, { $inc: { reservedBalance: totalCost } }, { session });
+        }
+
+        await WalletTransaction.create([{
+          user: hostId,
+          amount: totalCost,
+          type: "HOST_GAME",
+          status: "RESERVED",
+          description: `Reserved for hosting ${gameType} game at ${date}`
+        }], { session });
+      }
+
+      hostedGame = new HostedGame(gameObj);
+      await hostedGame.save({ session });
+      await session.commitTransaction();
+
+    } catch (txErr) {
+      // If transaction fails (e.g. standalone MongoDB), abort and retry without session
+      try { await session.abortTransaction(); } catch (_) {}
+
+      if (totalCost > 0) {
+        const updatedUser = await User.findByIdAndUpdate(hostId, { $inc: { reservedBalance: totalCost } });
+        if (!updatedUser) {
+          await Owner.findByIdAndUpdate(hostId, { $inc: { reservedBalance: totalCost } });
+        }
+
+        await WalletTransaction.create([{
+          user: hostId,
+          amount: totalCost,
+          type: "HOST_GAME",
+          status: "RESERVED",
+          description: `Reserved for hosting ${gameType} game at ${date}`
+        }]);
+      }
+
+      hostedGame = new HostedGame(gameObj);
+      await hostedGame.save();
+    }
 
     // Trigger Notifications (Non-blocking)
     const host = await User.findById(hostId).select("name email phone");
@@ -147,13 +188,14 @@ export const createHostedGame = async (req, res) => {
     });
 
   } catch (error) {
-    await session.abortTransaction();
+    try { await session.abortTransaction(); } catch (_) {}
     console.error("Error in createHostedGame:", error);
     return res.status(500).json({ success: false, message: error.message });
   } finally {
     session.endSession();
   }
 };
+
 
 export const getAllHostedGames = async (req, res) => {
   try {

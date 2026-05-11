@@ -8,9 +8,20 @@ import {
   Trophy, Calendar, Clock, MapPin, 
   Users, UserCheck, ChevronRight, Search,
   ArrowLeft, Coins, CheckCircle2, AlertCircle,
-  ShieldCheck, Zap, Trash2, Plus
+  ShieldCheck, Zap, Trash2, Plus, ImageIcon
 } from 'lucide-react';
 import CoinAnimation from '../components/CoinAnimation';
+
+const MOCK_TEAM_IMAGES = [
+  { label: "Stadium Night",  url: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&q=80" },
+  { label: "Football Arena", url: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80" },
+  { label: "Cricket Ground", url: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800&q=80" },
+  { label: "Indoor Court",   url: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800&q=80" },
+  { label: "Night Match",    url: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800&q=80" },
+  { label: "Floodlit Pitch", url: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800&q=80" },
+  { label: "Basketball",     url: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80" },
+  { label: "Running Track",  url: "https://images.unsplash.com/photo-1564769610726-59cead6a6f8f?w=800&q=80" },
+];
 
 const SPORT_DEFAULTS = {
   "Cricket": [
@@ -69,8 +80,8 @@ const HostGame = () => {
     perPlayerCharge: 0,
     city: user?.city || '',
     state: user?.state || '',
-    teamA: { name: 'Team A', slots: [] },
-    teamB: { name: 'Team B', slots: [] }
+    teamA: { name: 'Team A', slots: [], image: MOCK_TEAM_IMAGES[0].url },
+    teamB: { name: 'Team B', slots: [], image: MOCK_TEAM_IMAGES[1].url }
   });
 
   const [grounds, setGrounds] = useState([]);
@@ -161,6 +172,27 @@ const HostGame = () => {
     const newSlots = [...gameData[teamKey].slots];
     newSlots[idx].role = role;
     setGameData({ ...gameData, [teamKey]: { ...gameData[teamKey], slots: newSlots } });
+  };
+
+  const handleTeamImageUpload = (teamKey, e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be smaller than 5MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setGameData(prev => ({
+        ...prev,
+        [teamKey]: { ...prev[teamKey], image: ev.target.result, imageName: file.name }
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -382,6 +414,7 @@ const HostGame = () => {
                 
                 {["teamA", "teamB"].map((teamKey) => (
                   <div key={teamKey} className="space-y-8">
+                    {/* Team Header */}
                     <div className="flex items-center gap-5">
                       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl ${teamKey === 'teamA' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}`}>
                         {teamKey === 'teamA' ? 'A' : 'B'}
@@ -399,10 +432,78 @@ const HostGame = () => {
                       </div>
                     </div>
 
+                    {/* Team Image Upload */}
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest block">Card Background Image</label>
+
+                      {/* Preview + Upload Row */}
+                      <div className="flex items-center gap-4">
+                        {/* Preview */}
+                        <div className="relative w-28 h-18 shrink-0 rounded-xl overflow-hidden border border-white/10 bg-neutral-900" style={{ height: '70px' }}>
+                          <img
+                            src={gameData[teamKey].image}
+                            alt="preview"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                        </div>
+
+                        {/* Upload button */}
+                        <label
+                          htmlFor={`img-upload-${teamKey}`}
+                          className="flex-1 flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-[#CCFF00]/30 rounded-2xl cursor-pointer hover:border-[#CCFF00]/60 hover:bg-[#CCFF00]/5 transition-all group"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-[#CCFF00]/10 border border-[#CCFF00]/20 flex items-center justify-center group-hover:bg-[#CCFF00]/20 transition-all">
+                            <ImageIcon size={16} className="text-[#CCFF00]" />
+                          </div>
+                          <span className="text-[10px] font-black text-[#CCFF00]/70 uppercase tracking-widest">
+                            {gameData[teamKey].imageName ? 'Change Photo' : 'Upload Photo'}
+                          </span>
+                          {gameData[teamKey].imageName && (
+                            <span className="text-[8px] text-white/30 truncate max-w-[120px]">{gameData[teamKey].imageName}</span>
+                          )}
+                          <input
+                            id={`img-upload-${teamKey}`}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleTeamImageUpload(teamKey, e)}
+                          />
+                        </label>
+                      </div>
+
+                      {/* Quick-select presets */}
+                      <div className="space-y-2">
+                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Or choose a preset</p>
+                        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                          {MOCK_TEAM_IMAGES.map((img) => (
+                            <button
+                              key={img.url}
+                              onClick={() => setGameData(prev => ({ ...prev, [teamKey]: { ...prev[teamKey], image: img.url, imageName: null } }))}
+                              className={`relative rounded-xl overflow-hidden border-2 transition-all shrink-0 w-20 aspect-video ${
+                                gameData[teamKey].image === img.url
+                                  ? 'border-[#CCFF00] shadow-[0_0_10px_rgba(204,255,0,0.3)]'
+                                  : 'border-transparent hover:border-white/20'
+                              }`}
+                            >
+                              <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
+                              {gameData[teamKey].image === img.url && (
+                                <div className="absolute inset-0 bg-[#CCFF00]/20 flex items-center justify-center">
+                                  <CheckCircle2 size={14} className="text-[#CCFF00]" />
+                                </div>
+                              )}
+                              <p className="absolute bottom-0 left-0 right-0 bg-black/70 text-[6px] font-black text-white text-center py-0.5 uppercase">{img.label}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Slots */}
                     <div className="space-y-3">
                       {gameData[teamKey].slots.map((slot, idx) => (
                         <div key={idx} className="flex items-center gap-3 group">
-                          <div className="flex-1 flex items-center gap-4 bg-neutral-900 border border-neutral-800 p-4 rounded-2xl group-hover:border-yellow-500/30 transition-all">
+                          <div className="flex-1 flex items-center gap-4 bg-neutral-900 border border-neutral-800 p-4 rounded-2xl group-hover:border-[#CCFF00]/30 transition-all">
                             <input 
                               className="bg-transparent text-xs font-black uppercase tracking-widest outline-none w-full"
                               value={slot.role}
@@ -422,7 +523,7 @@ const HostGame = () => {
 
                     <button
                       onClick={() => addSlot(teamKey)}
-                      className="w-full py-4 border-2 border-dashed border-neutral-800 rounded-2xl text-neutral-500 text-xs font-black uppercase tracking-widest hover:border-yellow-500/30 hover:text-yellow-500 transition-all flex items-center justify-center gap-2 bg-neutral-900/30"
+                      className="w-full py-4 border-2 border-dashed border-neutral-800 rounded-2xl text-neutral-500 text-xs font-black uppercase tracking-widest hover:border-[#CCFF00]/30 hover:text-[#CCFF00] transition-all flex items-center justify-center gap-2 bg-neutral-900/30"
                     >
                       <Plus size={16} /> Add More Slots
                     </button>

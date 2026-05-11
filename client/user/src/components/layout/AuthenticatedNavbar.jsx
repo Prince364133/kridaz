@@ -127,7 +127,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
             <input 
               type="text" 
               placeholder="Search bookings, players, or reports..."
-              className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-12 pr-16 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#CCFF00]/50 transition-all font-inter shadow-inner"
+              className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-2.5 pl-12 pr-16 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#CCFF00]/50 hover:border-white/20 transition-all font-inter shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] focus:shadow-[0_0_20px_rgba(204,255,0,0.1)]"
             />
             <div className="absolute inset-y-0 right-4 flex items-center gap-1.5">
               <div className="flex items-center justify-center w-5 h-5 rounded bg-white/5 text-[10px] text-white/30 border border-white/5"><Command size={10} /></div>
