@@ -9,10 +9,12 @@ import professionalRouter from "../modules/professional/professional.routes.js";
 import chatRouter from "../modules/chat/chat.routes.js";
 import scoringRouter from "../modules/scoring/scoring.routes.js";
 import youtubeRouter from "../modules/youtube/youtube.routes.js";
+import locationRouter from "./location.routes.js";
 
 const rootRouter = Router();
 
 rootRouter.use("/features", featureRouter);
+rootRouter.use("/location", locationRouter);
 rootRouter.use("/user", userRouter);
 rootRouter.use("/owner", ownerRouter);
 rootRouter.use("/admin", adminRouter);

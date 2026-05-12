@@ -7,7 +7,9 @@ const socketConfig = (server) => {
   io = new Server(server, {
     pingTimeout: 60000,
     cors: {
-      origin: ["http://localhost:5173", "http://localhost:5174", "https://kridaz.vercel.app"],
+      origin: process.env.CLIENT_URLS 
+        ? process.env.CLIENT_URLS.split(",").map((url) => url.trim()) 
+        : ["http://localhost:5173", "http://localhost:5174", "https://kridaz.vercel.app"],
     },
   });
 

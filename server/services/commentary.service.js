@@ -3,9 +3,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const openai = new OpenAI({
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-});
+}) : null;
 
 /**
  * Automated Commentary Service
@@ -31,7 +31,7 @@ export const commentaryService = {
     }
 
     try {
-      if (!openai.apiKey) {
+      if (!openai) {
         return fallbackText;
       }
 
