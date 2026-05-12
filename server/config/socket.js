@@ -101,6 +101,11 @@ const socketConfig = (server) => {
       socket.in(chatId).emit("messages read", { chatId, userId });
     });
 
+    socket.on("delete message", (data) => {
+      const { chatId, messageIds } = data;
+      socket.in(chatId).emit("message deleted", { chatId, messageIds });
+    });
+
     socket.on("disconnect", () => {
       if (socket.userId) {
         const lastSeen = new Date();

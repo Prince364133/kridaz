@@ -31,8 +31,10 @@ import {
   Phone,
   Navigation,
   Mail,
-  User
+  User,
+  MessageSquareShare
 } from "lucide-react";
+import ShareTurfModal from "../modals/ShareTurfModal";
 
 import WriteReview from "../../components/reviews/WriteReview";
 // import CoinDeductionModal from "../../components/modals/CoinDeductionModal";
@@ -51,6 +53,7 @@ const TurfDetails = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isCoinModalOpen, setIsCoinModalOpen] = useState(false);
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
   const [settings, setSettings] = useState(null);
 
@@ -296,8 +299,16 @@ const TurfDetails = () => {
             <button 
               onClick={handleShare}
               className="p-4 rounded-full bg-zinc-900/50 border border-zinc-800 text-white hover:border-[#CCFF00] hover:bg-zinc-900 transition-all duration-300 active:scale-90"
+              title="Share Link"
             >
               <Share2 className="w-6 h-6" />
+            </button>
+            <button 
+              onClick={() => setIsShareModalOpen(true)}
+              className="p-4 rounded-full bg-zinc-900/50 border border-zinc-800 text-[#CCFF00] hover:bg-[#CCFF00] hover:text-black transition-all duration-300 active:scale-90 shadow-lg shadow-[#CCFF00]/5"
+              title="Forward to Friends"
+            >
+              <MessageSquareShare className="w-6 h-6" />
             </button>
           </div>
         </div>
@@ -695,6 +706,12 @@ const TurfDetails = () => {
           </div>
         </div>
       )}
+      
+      <ShareTurfModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        turf={turf}
+      />
     </div>
   );
 };

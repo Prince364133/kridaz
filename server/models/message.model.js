@@ -19,7 +19,15 @@ const messageSchema = new mongoose.Schema(
         user: { type: mongoose.Schema.Types.ObjectId, refPath: "deletedBy.onModel" },
         onModel: { type: String, enum: ["User", "Owner"] }
       }
-    ]
+    ],
+    media: [
+      {
+        url: { type: String },
+        type: { type: String, enum: ["image", "video", "file"] }
+      }
+    ],
+    isStarred: { type: Boolean, default: false },
+    isForwarded: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

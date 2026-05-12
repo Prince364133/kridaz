@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Star, ChevronLeft, ChevronRight, Zap, Heart, Timer, Activity, MessageSquareShare } from "lucide-react";
+import { MapPin, Star, ChevronLeft, ChevronRight, Zap, Heart, Timer, Activity, MessageSquareShare, Send } from "lucide-react";
+import ShareTurfModal from "../modals/ShareTurfModal";
 
 const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const to = `/turf/${turf._id}`;
@@ -121,9 +123,17 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
                     {turf.city || turf.location || "Nearby Venue"}
                   </p>
                 </div>
-                <MessageSquareShare size={12} md:size={14} className="text-[#84CC16] hover:scale-110 transition-transform cursor-pointer shrink-0" />
-              </div>
-            </div>
+                    <MessageSquareShare 
+                      size={12} md:size={14} 
+                      className="text-[#84CC16] hover:scale-110 transition-transform cursor-pointer shrink-0" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsShareModalOpen(true);
+                      }}
+                    />
+                  </div>
+                </div>
 
             {/* Pricing & Rating Row */}
             <div className="flex items-center justify-between items-end pt-2 md:pt-3 border-t border-white/10">
@@ -148,6 +158,12 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
           </div>
         </div>
       </div>
+      
+      <ShareTurfModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        turf={turf}
+      />
     </div>
   );
 };

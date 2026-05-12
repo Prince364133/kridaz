@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useGetChatsQuery, useRespondToInvitationMutation } from '../../../redux/api/chatApi';
+import { useGetChatsQuery, useRespondToInvitationMutation, useTogglePinChatMutation, useDeleteChatMutation, useRemoveFromGroupMutation } from '../../../redux/api/chatApi';
 import { useSelector } from 'react-redux';
 import { useSocket } from '../../../context/SocketContext';
 import { 
@@ -12,10 +12,15 @@ import {
   Check,
   CheckCheck,
   X,
-  Globe
+  Globe,
+  MoreVertical,
+  Pin,
+  PinOff,
+  Trash2
 } from 'lucide-react';
+import ConfirmModal from '../modals/ConfirmModal';
 
-const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateCommunity }) => {
+const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateCommunity, onEditProfile, onChatDeleted }) => {
   const { user } = useSelector((state) => state.auth);
   const { data, isLoading, error, refetch } = useGetChatsQuery();
   const [respondToInvitation] = useRespondToInvitationMutation();
@@ -23,13 +28,38 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
   const [unreadCounts, setUnreadCounts] = useState({});
   const [typingChats, setTypingChats] = useState({});
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  const [activeMenu, setActiveMenu] = useState(null);
   const addMenuRef = useRef(null);
+  const menuRef = useRef(null);
+  
+  const [togglePinChat] = useTogglePinChatMutation();
+  const [deleteChatMutation] = useDeleteChatMutation();
+  const [removeFromGroup] = useRemoveFromGroupMutation();
+
+  const [confirmModalConfig, setConfirmModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
+
+  const openConfirmModal = (title, message, onConfirm) => {
+    setConfirmModalConfig({
+      isOpen: true,
+      title,
+      message,
+      onConfirm,
+    });
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (addMenuRef.current && !addMenuRef.current.contains(event.target)) {
         setIsAddMenuOpen(false);
+      }
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setActiveMenu(null);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -61,14 +91,35 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
       setTypingChats(prev => ({ ...prev, [room]: false }));
     };
 
+    const handleChatUpdated = () => {
+      refetch();
+    };
+
+    const handleChatDeleted = (deletedChatId) => {
+      refetch();
+      if (selectedChatId === deletedChatId && onChatDeleted) {
+        onChatDeleted();
+      }
+    };
+
+    const handleProfileUpdated = () => {
+      refetch();
+    };
+
     socket.on('message recieved', handleNewMessage);
     socket.on('typing', handleTyping);
     socket.on('stop typing', handleStopTyping);
+    socket.on('chat updated', handleChatUpdated);
+    socket.on('chat deleted', handleChatDeleted);
+    socket.on('user profile updated', handleProfileUpdated);
 
     return () => {
       socket.off('message recieved', handleNewMessage);
       socket.off('typing', handleTyping);
       socket.off('stop typing', handleStopTyping);
+      socket.off('chat updated', handleChatUpdated);
+      socket.off('chat deleted', handleChatDeleted);
+      socket.off('user profile updated', handleProfileUpdated);
     };
   }, [socket, selectedChatId, refetch]);
 
@@ -116,8 +167,12 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
     if (chat.isGroupChat) {
       return (
         <div className="relative">
-          <div className="w-12 h-12 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center">
-            <Users size={22} className="text-[#84CC16]" />
+          <div className="w-12 h-12 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center overflow-hidden">
+            {chat.groupImage ? (
+              <img src={chat.groupImage} className="w-full h-full object-cover" alt="" />
+            ) : (
+              <Users size={22} className="text-[#84CC16]" />
+            )}
           </div>
         </div>
       );
@@ -261,6 +316,39 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
             </div>
           )}
         </div>
+
+        {/* User Profile Avatar - Clickable to edit profile */}
+        <div 
+          className="relative group cursor-pointer"
+          onClick={onEditProfile}
+        >
+          <div className="w-10 h-10 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center overflow-hidden hover:border-[#84CC16]/50 transition-all shadow-lg active:scale-95">
+            {(user?.profilePicture || user?.profileImage) ? (
+              <img 
+                src={user.profilePicture || user.profileImage} 
+                alt="My Profile" 
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  if (e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div 
+              className="w-full h-full flex items-center justify-center"
+              style={{ display: (user?.profilePicture || user?.profileImage) ? 'none' : 'flex' }}
+            >
+              <span className="text-[#84CC16] font-black text-xs">
+                {user?.name ? user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "U"}
+              </span>
+            </div>
+          </div>
+          
+          {/* Tooltip */}
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-white text-[9px] font-black uppercase tracking-widest rounded border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-[100]">
+            Edit My Profile
+          </div>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -305,40 +393,50 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
 
         {/* All Chats Section */}
         <div className="px-2 py-1">
-          {chats.filter(chat => !chat.parentCommunity).map((chat) => {
+          {chats.filter(chat => !chat.parentCommunity)
+            .sort((a, b) => {
+              const myId = user?._id || user?.id || user?.userId;
+              const aPinned = a.pinnedBy?.includes(myId) ? 1 : 0;
+              const bPinned = b.pinnedBy?.includes(myId) ? 1 : 0;
+              if (aPinned !== bPinned) return bPinned - aPinned;
+              return 0; 
+            })
+            .map((chat) => {
+            const myId = user?._id || user?.id || user?.userId;
             const unreadCount = unreadCounts[chat._id] || 0;
             const isTypingInChat = typingChats[chat._id];
             const isSelected = selectedChatId === chat._id;
+            const isPinned = chat.pinnedBy?.includes(myId);
             const latestSenderId = chat.latestMessage?.sender?.user?._id || chat.latestMessage?.sender?.user;
             const latestSenderName = chat.latestMessage?.sender?.user?.name || chat.latestMessage?.sender?.name;
-            const myIds = [user?._id, user?.id, user?.userId].filter(Boolean);
-            const isMySentMessage = myIds.includes(latestSenderId) || (latestSenderName && latestSenderName === user?.name);
+            const isMySentMessage = [myId].includes(latestSenderId) || (latestSenderName && latestSenderName === user?.name);
 
             return (
-              <button
-                key={chat._id}
-                onClick={() => onSelectChat(chat)}
-                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all group ${
-                  isSelected
-                    ? 'bg-[#84CC16]/10 border border-[#84CC16]/20' 
-                    : 'hover:bg-white/[0.03] border border-transparent'
-                }`}
-              >
-                <div className="relative shrink-0">
-                  {renderAvatar(chat)}
-                  {chat.isCommunity ? (
-                    <div className="absolute -bottom-1 -right-1 bg-[#84CC16] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Com</div>
-                  ) : chat.isGroupChat ? (
-                    <div className="absolute -bottom-1 -right-1 bg-[#84CC16] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Grp</div>
-                  ) : null}
-                </div>
-                <div className="flex-1 text-left overflow-hidden min-w-0">
-                  <div className="flex justify-between items-center mb-0.5">
-                    <p className={`font-bold truncate text-sm transition-colors ${
-                      isSelected ? 'text-[#84CC16]' : unreadCount > 0 ? 'text-white' : 'text-white/80 group-hover:text-white'
-                    }`}>
-                      {getChatName(chat)}
-                    </p>
+              <div key={chat._id} className="relative group/chat">
+                <button
+                  onClick={() => onSelectChat(chat)}
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
+                    isSelected
+                      ? 'bg-[#84CC16]/10 border border-[#84CC16]/20' 
+                      : 'hover:bg-white/[0.03] border border-transparent'
+                  }`}
+                >
+                  <div className="relative shrink-0">
+                    {renderAvatar(chat)}
+                    {chat.isCommunity ? (
+                      <div className="absolute -bottom-1 -right-1 bg-[#84CC16] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Com</div>
+                    ) : chat.isGroupChat ? (
+                      <div className="absolute -bottom-1 -right-1 bg-[#84CC16] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Grp</div>
+                    ) : null}
+                  </div>
+                  <div className="flex-1 text-left overflow-hidden min-w-0">
+                    <div className="flex justify-between items-center mb-0.5">
+                      <p className={`font-bold truncate text-sm transition-colors ${
+                        isSelected ? 'text-[#84CC16]' : unreadCount > 0 ? 'text-white' : 'text-white/80 group-hover/chat:text-white'
+                      }`}>
+                        {isPinned && <Pin size={10} className="inline mr-1 text-[#84CC16]" />}
+                        {getChatName(chat)}
+                      </p>
                     <span className={`text-[10px] font-medium shrink-0 ml-2 ${
                       unreadCount > 0 ? 'text-[#84CC16]' : 'text-white/20'
                     }`}>
@@ -375,10 +473,171 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                   </div>
                 </div>
               </button>
+              
+              {/* 3-Dot Menu Button */}
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 transition-opacity">
+                <button 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    setActiveMenu(activeMenu === chat._id ? null : chat._id); 
+                  }} 
+                  className="text-white/40 hover:text-white p-1 rounded-full hover:bg-white/10"
+                >
+                  <MoreVertical size={16} />
+                </button>
+              </div>
+
+              {/* Dropdown Menu */}
+              {activeMenu === chat._id && (() => {
+                const isGroupAdmin = chat.isGroupChat && chat.groupAdmins?.some(admin => {
+                  const adminId = (admin.user?._id || admin.user)?.toString();
+                  return adminId === myId;
+                });
+
+                const handleDelete = async () => {
+                  setActiveMenu(null);
+                  try {
+                    await deleteChatMutation(chat._id).unwrap();
+                    if (selectedChatId === chat._id) onChatDeleted?.();
+                  } catch (err) {
+                    console.error("Delete failed:", err);
+                    alert(err.data?.message || "Failed to delete");
+                  }
+                };
+
+                const handleExit = async () => {
+                  setActiveMenu(null);
+                  try {
+                    await removeFromGroup({ chatId: chat._id, userId: myId }).unwrap();
+                    if (selectedChatId === chat._id) onChatDeleted?.();
+                  } catch (err) {
+                    console.error("Exit failed:", err);
+                    alert(err.data?.message || "Failed to exit");
+                  }
+                };
+
+                return (
+                  <div ref={menuRef} className="absolute right-8 top-1/2 -translate-y-1/2 w-44 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl py-1.5 z-50 animate-scale-up">
+                    {/* Pin / Unpin */}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); togglePinChat({ chatId: chat._id }); setActiveMenu(null); }}
+                      className="w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-white/5 flex items-center gap-2.5 transition-colors"
+                    >
+                      {isPinned ? <PinOff size={14} /> : <Pin size={14} />}
+                      {isPinned ? "Unpin chat" : "Pin chat"}
+                    </button>
+
+                    {/* --- 1-on-1 Chat: just Delete --- */}
+                    {!chat.isGroupChat && (
+                      <button 
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          setActiveMenu(null);
+                          openConfirmModal(
+                            "Delete Chat",
+                            "Are you sure you want to delete this entire conversation?",
+                            handleDelete
+                          );
+                        }}
+                        className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
+                      >
+                        <Trash2 size={14} /> Delete chat
+                      </button>
+                    )}
+
+                    {/* --- Group (not community): Exit + Delete --- */}
+                    {chat.isGroupChat && !chat.isCommunity && (
+                      <>
+                        <button 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            setActiveMenu(null);
+                            openConfirmModal(
+                              "Delete Group",
+                              "Are you sure you want to exit and permanently delete this group and all its messages?",
+                              handleDelete
+                            );
+                          }}
+                          className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                          Exit and delete group
+                        </button>
+                        {isGroupAdmin && (
+                          <button 
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              setActiveMenu(null);
+                              openConfirmModal(
+                                "Delete Group",
+                                "Permanently delete this group and all messages for everyone?",
+                                handleDelete
+                              );
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm text-red-500 font-semibold hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
+                          >
+                            <Trash2 size={14} /> Delete group
+                          </button>
+                        )}
+                      </>
+                    )}
+
+                    {/* --- Community: Exit + Delete --- */}
+                    {chat.isCommunity && (
+                      <>
+                        <button 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            setActiveMenu(null);
+                            openConfirmModal(
+                              "Delete Community",
+                              "Are you sure you want to permanently delete this community? All child groups and messages will be wiped.",
+                              handleDelete
+                            );
+                          }}
+                          className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                          Exit and delete community
+                        </button>
+                        {isGroupAdmin && (
+                          <button 
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              setActiveMenu(null);
+                              openConfirmModal(
+                                "Delete Community",
+                                "Permanently delete this community and ALL its groups and messages?",
+                                handleDelete
+                              );
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm text-red-500 font-semibold hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
+                          >
+                            <Trash2 size={14} /> Delete community
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
             );
           })}
         </div>
       </div>
+      
+      {/* Custom Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModalConfig.isOpen}
+        onClose={() => setConfirmModalConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModalConfig.onConfirm}
+        title={confirmModalConfig.title}
+        message={confirmModalConfig.message}
+        confirmText="Delete"
+        cancelText="Cancel"
+        isDestructive={true}
+      />
     </div>
   );
 };
