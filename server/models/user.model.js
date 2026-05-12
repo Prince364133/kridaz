@@ -58,7 +58,13 @@ const userSchema = new mongoose.Schema({
         description: { type: String },
         earnedAt: { type: Date, default: Date.now }
       }]
-    }
+    },
+    youtubeAccessToken:  { type: String, default: null },
+    youtubeRefreshToken: { type: String, default: null },
+    youtubeTokenExpiry:  { type: Date,   default: null },
+    youtubeChannelId:    { type: String, default: null },
+    youtubeChannelName:  { type: String, default: null },
+    youtubeChannelThumb: { type: String, default: null }
  }, {timestamps: true});
 
 userSchema.index({ locationData: "2dsphere" }, { sparse: true });

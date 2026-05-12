@@ -1,5 +1,6 @@
 import { ArrowRight, Calendar, Star, Trophy, CheckCircle, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import ScrollToTop from "@components/common/ScrollToTop";
 
 const PRI = "#F59E0B"; // Amber for officials
@@ -13,6 +14,10 @@ const benefits = [
 const BG = "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=1800&q=80&auto=format&fit=crop";
 
 export default function UmpireLanding() {
+  const { isLoggedIn, role, user } = useSelector((state) => state.auth);
+  const userRole = (role || user?.role || "").toLowerCase();
+  const isUmpire = ["umpire", "limited_umpire"].includes(userRole);
+
   return (
     <div className="relative min-h-screen text-white pt-4 pb-20 overflow-hidden" style={{ backgroundColor: "#000" }}>
       <ScrollToTop />
@@ -51,13 +56,23 @@ export default function UmpireLanding() {
             <p className="text-gray-400 text-lg mb-8 max-w-lg">
               Turn your expertise into income. Kridaz connects certified umpires and referees with local tournaments and leagues looking for professional officiating.
             </p>
-            <Link
-              to="/business/register?role=umpire"
-              className="inline-flex items-center gap-3 font-bold text-black rounded-full px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest"
-              style={{ backgroundColor: PRI }}
-            >
-              Join as an Official <ArrowRight size={20} />
-            </Link>
+            {isUmpire ? (
+              <Link
+                to="/umpire"
+                className="inline-flex items-center gap-3 font-bold text-black rounded-full px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest"
+                style={{ backgroundColor: PRI }}
+              >
+                Go to Dashboard <ArrowRight size={20} />
+              </Link>
+            ) : (
+              <Link
+                to="/business/register?role=umpire"
+                className="inline-flex items-center gap-3 font-bold text-black rounded-full px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest"
+                style={{ backgroundColor: PRI }}
+              >
+                Join as an Official <ArrowRight size={20} />
+              </Link>
+            )}
           </div>
 
           <div className="grid gap-6">

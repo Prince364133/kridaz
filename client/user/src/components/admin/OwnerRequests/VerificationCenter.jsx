@@ -49,7 +49,8 @@ const VerificationCenter = () => {
     { id: "all", label: "ALL PARTNERS" },
     { id: "owner", label: "VENUE OWNERS" },
     { id: "coach", label: "COACHES" },
-    { id: "umpire", label: "UMPIRES" }
+    { id: "umpire", label: "UMPIRES" },
+    { id: "streamer", label: "STREAMERS" }
   ];
 
   const confirmApproval = async () => {

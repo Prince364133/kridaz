@@ -206,28 +206,28 @@ const Navbar = () => {
                         <div className="h-[1px] bg-white/5 my-1" />
 
                         {/* DASHBOARDS SECTION */}
-                        {(["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire"].includes(role?.toLowerCase()) || 
-                          ["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire"].includes(user?.role?.toLowerCase())) && (
+                        {(["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "limited_umpire"].some(r => role?.toLowerCase().includes(r)) || 
+                          ["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "limited_umpire"].some(r => user?.role?.toLowerCase().includes(r))) && (
                           <>
-                            {(role === "BMSP_ADMIN" || role === "admin" || user?.role === "BMSP_ADMIN" || user?.role === "admin") && (
+                            {(role?.toLowerCase() === "admin" || role?.toLowerCase().includes("bmsp_admin") || user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase().includes("bmsp_admin")) && (
                               <Link to="/admin" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                 <ShieldCheck size={18} className="text-white/40" />
-                                <span className="text-sm font-medium">Admin Console</span>
+                                <span className="text-sm font-medium">Admin Panel</span>
                               </Link>
                             )}
-                            {(["owner", "venue_owner", "verified_venue_owner"].includes(role?.toLowerCase()) || ["owner", "venue_owner", "verified_venue_owner"].includes(user?.role?.toLowerCase())) && (
+                            {(role?.toLowerCase().includes("owner") || user?.role?.toLowerCase().includes("owner") || role?.toLowerCase().includes("venue") || user?.role?.toLowerCase().includes("venue")) && (
                               <Link to="/partner" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                 <Activity size={18} className="text-white/40" />
                                 <span className="text-sm font-medium">Partner Dashboard</span>
                               </Link>
                             )}
-                            {(["coach"].includes(role?.toLowerCase()) || ["coach"].includes(user?.role?.toLowerCase())) && (
+                            {(role?.toLowerCase().includes("coach") || user?.role?.toLowerCase().includes("coach")) && (
                               <Link to="/coach" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                 <Zap size={18} className="text-white/40" />
                                 <span className="text-sm font-medium">Coach Portal</span>
                               </Link>
                             )}
-                            {(["umpire"].includes(role?.toLowerCase()) || ["umpire"].includes(user?.role?.toLowerCase())) && (
+                            {(role?.toLowerCase().includes("umpire") || user?.role?.toLowerCase().includes("umpire")) && (
                               <Link to="/umpire" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                 <Zap size={18} className="text-white/40" />
                                 <span className="text-sm font-medium">Umpire Portal</span>

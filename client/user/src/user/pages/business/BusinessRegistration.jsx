@@ -99,6 +99,8 @@ export default function BusinessRegistration() {
         navigate("/signup/coach");
       } else if (roleFromUrl === 'umpire') {
         navigate("/signup/official");
+      } else if (roleFromUrl === 'streamer') {
+        navigate("/signup/streamer");
       } else {
         toast.error("Please login first to register your business");
         navigate("/login?redirect=" + encodeURIComponent("/business/register?role=" + roleFromUrl));
@@ -123,8 +125,11 @@ export default function BusinessRegistration() {
     }
 
     // Check if user already has a professional role
-    const professionalRoles = ["owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "admin", "bmsp_admin"];
-    if (user?.role && professionalRoles.includes(user.role.toLowerCase())) {
+    const professionalRoles = ["owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "streamer", "admin", "bmsp_admin"];
+    const isLimitedUmpire = user?.role?.toLowerCase() === "limited_umpire";
+    
+    // limited_umpire is only a conflict if they aren't applying for umpire upgrade
+    if (user?.role && (professionalRoles.includes(user.role.toLowerCase()) || (isLimitedUmpire && roleFromUrl !== "umpire"))) {
       setHasRoleConflict(true);
       setExistingRole(user.role);
     }
@@ -269,6 +274,7 @@ export default function BusinessRegistration() {
             onClick={() => {
               if (existingRole?.toLowerCase() === "coach") navigate("/coach");
               else if (existingRole?.toLowerCase() === "umpire") navigate("/umpire");
+              else if (existingRole?.toLowerCase() === "streamer") navigate("/streamer");
               else if (["owner", "venue_owner", "verified_venue_owner"].includes(existingRole?.toLowerCase())) navigate("/partner");
               else if (["admin", "bmsp_admin"].includes(existingRole?.toLowerCase())) navigate("/admin");
               else navigate("/");

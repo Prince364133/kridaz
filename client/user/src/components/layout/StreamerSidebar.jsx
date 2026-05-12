@@ -14,23 +14,23 @@ import {
   IndianRupee,
   Landmark,
   Clock,
-  User
+  User,
+  Video
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
-import useUmpireDashboard from "@hooks/owner/useUmpireDashboard";
+import useStreamerDashboard from "@hooks/owner/useStreamerDashboard";
 import { toast } from "react-hot-toast";
 
-const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
+const StreamerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { role } = useSelector((state) => state.auth);
-  const { dashboardData, loading: dashLoading } = useUmpireDashboard();
-  const isLimitedUmpire = role?.toLowerCase() === "limited_umpire";
-  const upgradeRequested = dashboardData?.upgradeRequested || false;
+  const { dashboardData, loading: dashLoading } = useStreamerDashboard();
+  const isLimitedStreamer = role?.toLowerCase() === "limited_streamer";
   const [requestLoading, setRequestLoading] = React.useState(false);
 
   const handleLogout = () => {
@@ -53,18 +53,18 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   };
 
   const mainNavItems = [
-    { to: "/umpire", label: "Overview", icon: LayoutDashboard },
-    { to: "/umpire/matches", label: "Matches", icon: Trophy },
-    { to: "/umpire/schedule", label: "Schedule", icon: Calendar },
-    { to: "/umpire/availability", label: "Availability", icon: Clock },
-    { to: "/umpire/bookings", label: "Bookings", icon: Activity },
-    { to: "/umpire/revenue", label: "Earnings", icon: IndianRupee },
-    { to: "/umpire/banking", label: "Payout & Banking", icon: Landmark },
-    { to: "/umpire/profile", label: "Profile", icon: User },
-    { to: "/umpire/support", label: "Docs & Support", icon: HelpCircle },
+    { to: "/streamer", label: "Overview", icon: LayoutDashboard },
+    { to: "/streamer/matches", label: "Stream Matches", icon: Video },
+    { to: "/streamer/schedule", label: "Schedule", icon: Calendar },
+    { to: "/streamer/availability", label: "Availability", icon: Clock },
+    { to: "/streamer/bookings", label: "Bookings", icon: Activity },
+    { to: "/streamer/revenue", label: "Earnings", icon: IndianRupee },
+    { to: "/streamer/banking", label: "Payout & Banking", icon: Landmark },
+    { to: "/streamer/profile", label: "Profile", icon: User },
+    { to: "/streamer/support", label: "Docs & Support", icon: HelpCircle },
   ].filter(item => {
-    if (isLimitedUmpire) {
-      return item.to === "/umpire/matches";
+    if (isLimitedStreamer) {
+      return item.to === "/streamer/matches";
     }
     return true;
   });
@@ -84,7 +84,7 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
           isLogout 
             ? "text-white/40 hover:text-red-500" 
             : isActive 
-              ? "text-black" 
+              ? "text-white" 
               : "text-white/40 hover:text-white"
         }`}
         onClick={(e) => {
@@ -100,7 +100,7 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       >
         {/* Active Glow/Background */}
         {isActive && !isLogout && (
-          <div className="absolute inset-x-2 inset-y-1 bg-[#84CC16] rounded-xl -z-10 shadow-[0_0_15px_rgba(132,204,22,0.3)] transition-all duration-300" />
+          <div className="absolute inset-x-2 inset-y-1 bg-violet-500 rounded-xl -z-10 shadow-[0_0_15px_rgba(139,92,246,0.3)] transition-all duration-300" />
         )}
         
         {/* Hover Background */}
@@ -119,8 +119,8 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
               isLogout 
                 ? "text-white/20 group-hover:text-red-500" 
                 : isActive 
-                  ? "text-black" 
-                  : "text-white/20 group-hover:text-[#84CC16]"
+                  ? "text-white" 
+                  : "text-white/20 group-hover:text-violet-500"
             }`} 
           />
         </div>
@@ -150,7 +150,7 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       >
         <div className="flex flex-col p-4 border-b border-white/5 bg-black/20 gap-4 lg:hidden">
           <div className="flex items-center justify-end">
-            <button onClick={toggleSidebar} className="text-white hover:text-[#84CC16] transition-colors">
+            <button onClick={toggleSidebar} className="text-white hover:text-violet-500 transition-colors">
               <X size={20} />
             </button>
           </div>
@@ -159,12 +159,12 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         {/* Status Section */}
         <div className={`px-4 py-6 border-b border-white/5 transition-all duration-300 ${isMinimized ? "items-center" : ""}`}>
           <div className="flex items-center gap-3">
-             <div className={`flex-shrink-0 w-2 h-2 rounded-full ${isLimitedUmpire ? "bg-amber-500 animate-pulse" : "bg-[#84CC16] shadow-[0_0_10px_rgba(132,204,22,0.5)]"}`} />
+             <div className={`flex-shrink-0 w-2 h-2 rounded-full ${isLimitedStreamer ? "bg-amber-500 animate-pulse" : "bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]"}`} />
              {!isMinimized && (
                <div className="animate-in fade-in slide-in-from-left-2 duration-300">
                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 leading-none mb-1">Status</p>
-                  <p className={`text-[10px] font-black uppercase tracking-tight ${isLimitedUmpire ? "text-amber-500" : "text-[#84CC16]"}`}>
-                    {isLimitedUmpire ? "Unverified" : "Verified"}
+                  <p className={`text-[10px] font-black uppercase tracking-tight ${isLimitedStreamer ? "text-amber-500" : "text-violet-500"}`}>
+                    {isLimitedStreamer ? "Unverified" : "Verified"}
                   </p>
                </div>
              )}
@@ -186,5 +186,4 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   );
 };
 
-
-export default UmpireSidebar;
+export default StreamerSidebar;

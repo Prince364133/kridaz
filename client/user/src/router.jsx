@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 
 // Layouts
-import { AdminLayout, PartnerLayout, GuestLayout, CoachLayout, UmpireLayout } from "@layouts";
+import { AdminLayout, PartnerLayout, GuestLayout, CoachLayout, UmpireLayout, StreamerLayout } from "@layouts";
 import UserRoot from "@user/layouts/Root";
 
 // User Portal Pages (via @user alias)
@@ -41,12 +41,17 @@ import LiveScoreboard from "@user/pages/LiveScoreboard";
 import UserVenueOwnerLanding from "@user/pages/business/VenueOwnerLanding";
 import UserCoachLanding from "@user/pages/business/CoachLanding";
 import UserUmpireLanding from "@user/pages/business/UmpireLanding";
+import UserStreamerLanding from "@user/pages/business/StreamerLanding";
 import BusinessRegistration from "@user/pages/business/BusinessRegistration";
 // Owner Portal Pages
 import PartnersGateway from "@pages/PartnersGateway";
 import VenueOwnerSignUp from "@pages/VenueOwnerSignUp";
 import CoachSignUp from "@pages/CoachSignUp";
 import UmpireSignUp from "@pages/UmpireSignUp";
+import StreamerSignUp from "@user/pages/auth/StreamerSignUp";
+
+import StreamSetup from "./components/streamer/StreamSetup";
+import { YouTubeConnected, YouTubeError } from "@pages/YouTubeAuthStatus";
 
 import {
   AddTurf,
@@ -66,10 +71,13 @@ import CoachDashboard from "./components/coach/CoachDashboard";
 import CoachStudents from "./components/coach/CoachStudents";
 import CoachSessions from "./components/coach/CoachSessions";
 import CoachMasterclass from "./components/coach/CoachMasterclass";
-
 import UmpireDashboard from "./components/umpire/UmpireDashboard";
 import UmpireMatches from "./components/umpire/UmpireMatches";
 import UmpireSchedule from "./components/umpire/UmpireSchedule";
+
+import StreamerDashboard from "./components/streamer/StreamerDashboard";
+import StreamerMatches from "./components/streamer/StreamerMatches";
+import StreamerSchedule from "./components/streamer/StreamerSchedule";
 import UmpireFeedback from "./components/umpire/UmpireFeedback";
 
 import ProfessionalAvailability from "./components/professional/ProfessionalAvailability";
@@ -224,6 +232,36 @@ const router = createBrowserRouter([
       { path: "*", element: <NotFound /> },
     ],
   },
+  
+  // ── STREAMER PORTAL ──
+  {
+    path: "/streamer",
+    element: (
+      <ProtectedRoute requiredRole="streamer">
+        <StreamerLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <StreamerDashboard /> },
+      { path: "matches", element: <StreamerMatches /> },
+      { path: "schedule", element: <StreamerSchedule /> },
+      { path: "revenue", element: <OwnerRevenue /> },
+      { path: "support", element: <PartnerSupport /> },
+      { path: "banking", element: <PayoutBanking /> },
+      { path: "profile", element: <ProfessionalProfile /> },
+      { path: "*", element: <NotFound /> },
+    ],
+  },
+
+  {
+    path: "/matches/:id/stream-setup",
+    element: (
+      <ProtectedRoute requiredRole="streamer">
+        <StreamSetup />
+      </ProtectedRoute>
+    ),
+  },
+
   {
     path: "/scoring/:matchId",
     element: (
@@ -253,6 +291,9 @@ const router = createBrowserRouter([
       { path: "players", element: <FindPlayers /> },
       { path: "host-game", element: <ProtectedRoute><HostGame /></ProtectedRoute> },
       { path: "join-games", element: <JoinGames /> },
+      { path: "matches/:matchId/stream-setup", element: <ProtectedRoute><StreamSetup /></ProtectedRoute> },
+      { path: "youtube-connected", element: <YouTubeConnected /> },
+      { path: "youtube-error", element: <YouTubeError /> },
       { path: "my-hosted-games", element: <ProtectedRoute><MyHostedGames /></ProtectedRoute> },
       { path: "my-joined-games", element: <ProtectedRoute><MyJoinedGames /></ProtectedRoute> },
       { path: "match/:matchId", element: <ProtectedRoute><MatchDetails /></ProtectedRoute> },
@@ -266,12 +307,14 @@ const router = createBrowserRouter([
       { path: "business/venue", element: <UserVenueOwnerLanding /> },
       { path: "business/coach", element: <UserCoachLanding /> },
       { path: "business/official", element: <UserUmpireLanding /> },
+      { path: "business/streamer", element: <UserStreamerLanding /> },
       { path: "business/register", element: <BusinessRegistration /> },
       
       // Business Auth
       { path: "signup/venue", element: <PublicRoute><VenueOwnerSignUp /></PublicRoute> },
       { path: "signup/coach", element: <PublicRoute><CoachSignUp /></PublicRoute> },
       { path: "signup/official", element: <PublicRoute><UmpireSignUp /></PublicRoute> },
+      { path: "signup/streamer", element: <PublicRoute><StreamerSignUp /></PublicRoute> },
       { path: "wallet", element: <ProtectedRoute><UserWallet /></ProtectedRoute> },
       { path: "booking-history", element: <ProtectedRoute><UserTurfBookingHistory /></ProtectedRoute> },
       { path: "checkout/:turfId", element: <ProtectedRoute><CheckoutPage /></ProtectedRoute> },

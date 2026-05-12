@@ -13,6 +13,7 @@ import {
 import { fetchStates, fetchCities } from '../utils/locationService';
 import CoinAnimation from '../components/CoinAnimation';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import { useSocket } from '@/context/SocketContext';
 
 const JoinGames = () => {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const JoinGames = () => {
   const [userLocation, setUserLocation] = useState({ city: '', state: '' });
 
   // Deep-link / Invite state
+  const { socket } = useSocket();
   const [inviteData, setInviteData] = useState(null);
   const [showInvitePopup, setShowInvitePopup] = useState(false);
   const [verifyingInvite, setVerifyingInvite] = useState(false);
@@ -86,7 +88,7 @@ const JoinGames = () => {
       setLoadingStates(false);
     };
     loadStates();
-
+    
     // Check for deep-link inviteToken
     const params = new URLSearchParams(window.location.search);
     const token = params.get('inviteToken');
@@ -94,6 +96,24 @@ const JoinGames = () => {
       handleVerifyInvite(token);
     }
   }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleStreamUpdate = ({ gameId, status }) => {
+      setGames(prevGames => 
+        prevGames.map(game => 
+          game._id === gameId ? { ...game, isLive: status } : game
+        )
+      );
+    };
+
+    socket.on('streamStatusUpdate', handleStreamUpdate);
+
+    return () => {
+      socket.off('streamStatusUpdate', handleStreamUpdate);
+    };
+  }, [socket]);
 
   const handleVerifyInvite = async (token) => {
     try {

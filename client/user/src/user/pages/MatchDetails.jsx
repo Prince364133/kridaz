@@ -9,10 +9,12 @@ import {
 } from 'lucide-react';
 import axiosInstance from '@hooks/useAxiosInstance';
 import { toast } from 'react-hot-toast';
+import { useSocket } from '@/context/SocketContext';
 
 const MatchDetails = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
+  const { socket } = useSocket();
   const { user } = useSelector((state) => state.auth);
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,6 +33,22 @@ const MatchDetails = () => {
     };
     fetchGameDetails();
   }, [matchId, navigate]);
+
+  useEffect(() => {
+    if (!socket || !matchId) return;
+
+    const handleStreamUpdate = ({ gameId, status }) => {
+      if (gameId === matchId) {
+        setGame(prev => prev ? { ...prev, isLive: status } : prev);
+      }
+    };
+
+    socket.on('streamStatusUpdate', handleStreamUpdate);
+
+    return () => {
+      socket.off('streamStatusUpdate', handleStreamUpdate);
+    };
+  }, [socket, matchId]);
 
   if (loading) return (
     <div className="min-h-screen bg-black flex items-center justify-center">
@@ -84,6 +102,12 @@ const MatchDetails = () => {
                 <span className={`px-3 py-1 ${isCompleted ? 'bg-blue-500' : isCancelled ? 'bg-red-500' : 'bg-orange-500'} text-white text-[10px] font-black uppercase tracking-widest rounded-full`}>
                   {game.status}
                 </span>
+                {game.isLive && (
+                  <span className="px-3 py-1 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full flex items-center gap-1.5 animate-pulse">
+                    <div className="w-1 h-1 rounded-full bg-white" />
+                    LIVE STREAM
+                  </span>
+                )}
               </div>
               <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter italic">
                 {game.teams?.teamA?.name} <span className="text-primary not-italic">vs</span> {game.teams?.teamB?.name}

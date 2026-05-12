@@ -3,6 +3,7 @@ import {
   getDashboardData, 
   getCoachDashboardData, 
   getUmpireDashboardData,
+  getStreamerDashboardData,
   getOwnerCalendarData,
   getDetailedOccupancyStats,
   getOwnerCustomers
@@ -14,6 +15,7 @@ const dashboardRouter = express.Router();
 dashboardRouter.get("/", verifyOwnerToken, getDashboardData);
 dashboardRouter.get("/coach", verifyOwnerToken, getCoachDashboardData);
 dashboardRouter.get("/umpire", verifyOwnerToken, getUmpireDashboardData);
+dashboardRouter.get("/streamer", verifyOwnerToken, getStreamerDashboardData);
 dashboardRouter.get("/calendar", verifyOwnerToken, getOwnerCalendarData);
 dashboardRouter.get("/occupancy", verifyOwnerToken, getDetailedOccupancyStats);
 dashboardRouter.get("/customers", verifyOwnerToken, getOwnerCustomers);

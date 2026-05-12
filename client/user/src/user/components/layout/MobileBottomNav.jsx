@@ -7,10 +7,11 @@ const MobileBottomNav = () => {
   const { isLoggedIn, role } = useSelector((state) => state.auth);
 
   const getDashboardPath = () => {
-    if (role === "BMSP_ADMIN" || role === "admin") return "/admin";
-    if (["owner", "VENUE_OWNER", "VERIFIED_VENUE_OWNER"].includes(role)) return "/partner";
-    if (["COACH", "coach"].includes(role)) return "/coach";
-    if (["UMPIRE", "umpire"].includes(role)) return "/umpire";
+    const roleStr = role?.toLowerCase() || "";
+    if (roleStr.includes("admin")) return "/admin";
+    if (["owner", "venue_owner", "verified_venue_owner"].some(r => roleStr.includes(r))) return "/partner";
+    if (roleStr.includes("coach")) return "/coach";
+    if (roleStr.includes("umpire")) return "/umpire";
     return "/profile";
   };
 

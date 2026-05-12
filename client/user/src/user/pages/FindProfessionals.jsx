@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { Search, MapPin, Star, ChevronRight, Users, User, Calendar, Shield, Trophy, Activity, Award, CheckCircle, Filter, Loader2, Check, X, LayoutGrid } from "lucide-react";
+import { Search, MapPin, Star, ChevronRight, Users, User, Calendar, Shield, Trophy, Activity, Award, CheckCircle, Filter, Loader2, Check, X, LayoutGrid, Video } from "lucide-react";
 import toast from "react-hot-toast";
 import { fetchStates, fetchCities } from "@user/utils/locationService";
 
@@ -10,7 +10,7 @@ const PRI = "#84CC16";
 const BDR = "#2A2A2A";
 
 const sports = ["ALL SPORTS", "CRICKET", "BADMINTON", "FOOTBALL", "TENNIS", "PICKLEBALL"];
-const roles = ["All", "Coach", "Umpire"];
+const roles = ["All", "Coach", "Umpire", "Streamer"];
 
 export default function FindProfessionals() {
   const navigate = useNavigate();
@@ -238,7 +238,7 @@ export default function FindProfessionals() {
                     {/* Role Badge */}
                     <div className="absolute top-2 left-2 z-20">
                       <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white text-[8px] font-black tracking-widest gap-1 shadow-lg">
-                        {pro.role === 'umpire' ? <Shield size={8} className="text-[#84CC16]" /> : <Trophy size={8} className="text-[#84CC16]" />}
+                        {pro.role === 'umpire' ? <Shield size={8} className="text-[#84CC16]" /> : pro.role === 'streamer' ? <Video size={8} className="text-[#84CC16]" /> : <Trophy size={8} className="text-[#84CC16]" />}
                         <span className="text-[#84CC16]">{pro.role?.toUpperCase()}</span>
                       </div>
                     </div>

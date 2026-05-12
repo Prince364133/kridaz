@@ -3,13 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { 
-  Users, Check, X, Clock, MapPin, 
-  ChevronRight, Trophy, Info, AlertCircle, Calendar, User
+  Users, Check, X, Clock, MapPin, Video, MonitorPlay,
+  ChevronRight, Trophy, Info, AlertCircle, Calendar, User, PlayCircle
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const MyHostedGames = () => {
   const [myGames, setMyGames] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchMyGames = async () => {
     try {
@@ -70,6 +72,22 @@ const MyHostedGames = () => {
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to cancel game");
+    }
+  };
+
+  const handleProfessionalRequest = async (gameId, role, action) => {
+    try {
+      const endpoint = role === 'streamer' ? 'handle-streamer-request' : 'handle-umpire-request';
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/hosted-game/${endpoint}`, {
+        gameId, action
+      }, { withCredentials: true });
+
+      if (res.data.success) {
+        toast.success(`${role.charAt(0).toUpperCase() + role.slice(1)} request ${action.toLowerCase()}d!`);
+        fetchMyGames();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || `Failed to ${action.toLowerCase()} request`);
     }
   };
 
@@ -137,12 +155,20 @@ const MyHostedGames = () => {
                   </div>
                   
                   {game.status !== 'CANCELLED' && (
-                    <button 
-                      onClick={() => handleCancelGame(game._id)}
-                      className="px-4 py-1.5 bg-red-500/10 text-red-500 text-[10px] font-black rounded-full hover:bg-red-500 hover:text-white transition-all uppercase tracking-wider"
-                    >
-                      Cancel Game
-                    </button>
+                    <>
+                      <button 
+                        onClick={() => navigate(`/matches/${game._id}/stream-setup`)}
+                        className="px-4 py-1.5 bg-red-500/10 text-red-500 text-[10px] font-black rounded-full hover:bg-red-500 hover:text-white transition-all uppercase tracking-wider flex items-center gap-1"
+                      >
+                        <PlayCircle size={14} /> Setup Live Stream
+                      </button>
+                      <button 
+                        onClick={() => handleCancelGame(game._id)}
+                        className="px-4 py-1.5 bg-neutral-800 text-neutral-400 text-[10px] font-black rounded-full hover:bg-red-500 hover:text-white transition-all uppercase tracking-wider"
+                      >
+                        Cancel Game
+                      </button>
+                    </>
                   )}
                   {game.status === 'CANCELLED' && (
                     <span className="px-4 py-1.5 bg-neutral-900 text-neutral-500 text-[10px] font-black rounded-full uppercase tracking-wider">
@@ -152,62 +178,122 @@ const MyHostedGames = () => {
                 </div>
               </div>
 
-              <div className="p-6">
-                <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-widest mb-4">Pending Requests</h3>
-                <div className="space-y-3">
-                  {['teamA', 'teamB'].map((teamKey, tIdx) => (
-                    game.teams?.[teamKey]?.slots?.map((slot, sIdx) => (
-                      slot.status === 'PENDING' && (
-                        <div key={`${teamKey}-${sIdx}`} className="flex items-center justify-between p-4 bg-neutral-900 rounded-2xl border border-neutral-800 group hover:border-yellow-500/30 transition-all">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-[#84CC16]/10 rounded-full flex items-center justify-center border border-white/10 overflow-hidden shrink-0">
-                              {slot.user?.profilePicture ? (
-                                <img 
-                                  src={slot.user.profilePicture} 
-                                  className="w-full h-full object-cover" 
-                                  onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                                  }}
-                                />
-                              ) : null}
-                              <div 
-                                className="w-full h-full flex items-center justify-center"
-                                style={{ display: slot.user?.profilePicture ? 'none' : 'flex' }}
-                              >
-                                <User size={24} className="text-[#84CC16]" />
-                              </div>
-                            </div>
-                            <div>
-                              <p className="font-black uppercase tracking-tighter">{slot.user?.name}</p>
-                              <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">
-                                TEAM {tIdx === 0 ? 'A' : 'B'} • {slot.role}
-                              </p>
-                            </div>
+              {/* Professional Requests Section */}
+              <div className="p-6 bg-neutral-900/30 border-t border-neutral-800">
+                <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-widest mb-4">Professional Services</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Umpire Slot */}
+                  <div className="p-4 bg-neutral-900 rounded-2xl border border-neutral-800">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Users size={16} className="text-blue-500" />
+                        <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Umpire</span>
+                      </div>
+                      {game.umpire ? (
+                        <span className="px-2 py-0.5 bg-green-500/10 text-green-500 text-[10px] font-black rounded-full uppercase">Assigned</span>
+                      ) : (
+                        <span className="px-2 py-0.5 bg-neutral-800 text-neutral-500 text-[10px] font-black rounded-full uppercase">Open</span>
+                      )}
+                    </div>
+                    
+                    {game.umpire ? (
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-[10px] font-bold text-blue-500 border border-blue-500/20">
+                          {game.umpire?.name?.[0] || 'U'}
+                        </div>
+                        <p className="text-xs font-black uppercase tracking-tighter text-white">{game.umpire?.name}</p>
+                      </div>
+                    ) : game.umpireRequest?.status === 'PENDING' ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center text-[10px] font-bold text-yellow-500 border border-yellow-500/20">
+                            {game.umpireRequest?.user?.name?.[0] || 'U'}
                           </div>
-                          <div className="flex gap-2">
-                            <button 
-                              onClick={() => handleReject(game._id, tIdx === 0 ? 'A' : 'B', sIdx)}
-                              className="p-2 bg-neutral-800 text-neutral-400 hover:text-red-500 rounded-xl transition-colors"
-                            >
-                              <X size={20} />
-                            </button>
-                            <button 
-                              onClick={() => handleApprove(game._id, tIdx === 0 ? 'A' : 'B', sIdx)}
-                              className="p-2 bg-yellow-500 text-black rounded-xl hover:scale-105 transition-transform"
-                            >
-                              <Check size={20} />
-                            </button>
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-tighter text-white">{game.umpireRequest?.user?.name}</p>
+                            <p className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">Requested Assignment</p>
                           </div>
                         </div>
-                      )
-                    ))
-                  ))}
-                  {!myGames.some(g => g._id === game._id && (g.teams?.teamA?.slots?.some(s => s.status === 'PENDING') || g.teams?.teamB?.slots?.some(s => s.status === 'PENDING'))) && (
-                    <div className="text-center py-4 text-neutral-600 text-sm italic">
-                      No pending join requests
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => handleProfessionalRequest(game._id, 'umpire', 'REJECT')}
+                            className="flex-1 py-2 bg-neutral-800 text-neutral-400 text-[10px] font-black rounded-xl uppercase hover:bg-red-500/10 hover:text-red-500 transition-all"
+                          >
+                            Decline
+                          </button>
+                          <button 
+                            onClick={() => handleProfessionalRequest(game._id, 'umpire', 'APPROVE')}
+                            className="flex-1 py-2 bg-yellow-500 text-black text-[10px] font-black rounded-xl uppercase hover:scale-105 transition-all"
+                          >
+                            Approve
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-neutral-600 italic">No umpire assigned or requested</p>
+                    )}
+                  </div>
+
+                  {/* Streamer Slot */}
+                  <div className="p-4 bg-neutral-900 rounded-2xl border border-neutral-800">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Video size={16} className="text-violet-500" />
+                        <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Streamer</span>
+                      </div>
+                      {game.streamer ? (
+                        <span className="px-2 py-0.5 bg-green-500/10 text-green-500 text-[10px] font-black rounded-full uppercase">Assigned</span>
+                      ) : (
+                        <span className="px-2 py-0.5 bg-neutral-800 text-neutral-500 text-[10px] font-black rounded-full uppercase">Open</span>
+                      )}
                     </div>
-                  )}
+                    
+                    {game.streamer ? (
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-violet-500/10 flex items-center justify-center text-[10px] font-bold text-violet-500 border border-violet-500/20">
+                            {game.streamer?.name?.[0] || 'S'}
+                          </div>
+                          <p className="text-xs font-black uppercase tracking-tighter text-white">{game.streamer?.name}</p>
+                        </div>
+                        <button 
+                          onClick={() => navigate(`/matches/${game._id}/stream-setup`)}
+                          className="p-2 bg-violet-500/10 text-violet-500 hover:bg-violet-500 hover:text-white rounded-lg transition-all"
+                          title="Stream Settings"
+                        >
+                          <MonitorPlay size={14} />
+                        </button>
+                      </div>
+                    ) : game.streamerRequest?.status === 'PENDING' ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center text-[10px] font-bold text-yellow-500 border border-yellow-500/20">
+                            {game.streamerRequest?.user?.name?.[0] || 'S'}
+                          </div>
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-tighter text-white">{game.streamerRequest?.user?.name}</p>
+                            <p className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">Requested Assignment</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => handleProfessionalRequest(game._id, 'streamer', 'REJECT')}
+                            className="flex-1 py-2 bg-neutral-800 text-neutral-400 text-[10px] font-black rounded-xl uppercase hover:bg-red-500/10 hover:text-red-500 transition-all"
+                          >
+                            Decline
+                          </button>
+                          <button 
+                            onClick={() => handleProfessionalRequest(game._id, 'streamer', 'APPROVE')}
+                            className="flex-1 py-2 bg-yellow-500 text-black text-[10px] font-black rounded-xl uppercase hover:scale-105 transition-all"
+                          >
+                            Approve
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-neutral-600 italic">No streamer assigned or requested</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

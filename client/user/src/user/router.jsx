@@ -86,7 +86,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/umpire",
-    element: <ProtectedRoute allowedRoles={["umpire", "admin"]}><UmpireLayout /></ProtectedRoute>,
+    element: <ProtectedRoute allowedRoles={["umpire", "limited_umpire", "admin"]}><UmpireLayout /></ProtectedRoute>,
     children: [
       { index: true, element: <UmpireDashboard /> },
       { path: "matches", element: <UmpireMatches /> },

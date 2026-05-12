@@ -6,6 +6,7 @@ import {
   loginStep1,
   googleAuth,
   upgradeRequest,
+  requestUpgrade,
   getMe,
   logout,
   updateProfilePicture,
@@ -33,6 +34,7 @@ router.post("/login-step1", validate(loginStep1Schema), loginStep1);
 router.post("/login", validate(userLoginSchema), login);
 router.post("/google-auth", googleAuth);
 router.post("/upgrade-request", userAuth, upload.array("documents", 10), upgradeRequest);
+router.post("/request-upgrade", userAuth, requestUpgrade);
 router.get("/getMe", userAuth, getMe);
 router.post("/logout", logout);
 router.post("/profile-picture", userAuth, upload.single("profilePicture"), updateProfilePicture);

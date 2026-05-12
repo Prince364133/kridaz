@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User } from 'lucide-react';
+import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useCricketScoring from '@hooks/shared/useCricketScoring';
 import BallByBallHistory from '../../components/shared/BallByBallHistory';
@@ -98,6 +98,7 @@ const ScoringApp = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [liveEnabled, setLiveEnabled] = useState(false);
   const [liveUrls, setLiveUrls] = useState(null);
+  const [liveLoading, setLiveLoading] = useState(false);
 
   const {
     matchData,
@@ -109,6 +110,35 @@ const ScoringApp = () => {
     completeMatch,
     refresh
   } = useCricketScoring(matchId);
+
+  // Sync live state from server on first data load
+  const hostedGame = matchData?.hostedGameId;
+  React.useEffect(() => {
+    if (hostedGame?.isLive && !liveEnabled) {
+      setLiveEnabled(true);
+      const appBase = import.meta.env.VITE_APP_URL || window.location.origin;
+      setLiveUrls({
+        obsOverlay: `${appBase}/live-overlay/${matchId}?token=${hostedGame.overlayToken || ''}`,
+        publicScoreboard: `${appBase}/live-score/${matchId}`,
+      });
+    } else if (!hostedGame?.isLive && liveEnabled) {
+      setLiveEnabled(false);
+      setLiveUrls(null);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hostedGame?.isLive]);
+
+  React.useEffect(() => {
+    const handleMessage = (e) => {
+      if (e.origin !== window.location.origin) return;
+      if (e.data?.type === 'STREAM_KEYS_READY' && e.data?.matchId === matchId) {
+        toast.success("Stream Keys Ready! Please start broadcasting in OBS.");
+        refresh();
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [matchId, refresh]);
 
   // ── Modal state ─────────────────────────────────────────────────────────────
   const [showInningsSetup, setShowInningsSetup] = useState(false);
@@ -466,9 +496,12 @@ const ScoringApp = () => {
                   </div>
                   <button 
                     onClick={async () => {
+                      if (liveLoading) return;
+                      setLiveLoading(true);
+                      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:6001';
                       if (!liveEnabled) {
                         try {
-                          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/${matchId}/go-live`, {
+                          const response = await fetch(`${apiBase}/api/scoring/${matchId}/go-live`, {
                             method: 'POST',
                             headers: {
                               'Content-Type': 'application/json',
@@ -484,12 +517,14 @@ const ScoringApp = () => {
                             toast.error(data.message || 'Failed to go live');
                           }
                         } catch (err) {
-                          console.error(err);
-                          toast.error('Error starting live broadcast');
+                          console.error('[GoLive Error]', err);
+                          toast.error('Network error starting broadcast');
+                        } finally {
+                          setLiveLoading(false);
                         }
                       } else {
                         try {
-                          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/${matchId}/end-live`, {
+                          const response = await fetch(`${apiBase}/api/scoring/${matchId}/end-live`, {
                             method: 'POST',
                             headers: {
                               'Content-Type': 'application/json',
@@ -505,15 +540,19 @@ const ScoringApp = () => {
                             toast.error(data.message || 'Failed to stop broadcast');
                           }
                         } catch (err) {
-                          console.error(err);
-                          toast.error('Error stopping live broadcast');
+                          console.error('[EndLive Error]', err);
+                          toast.error('Network error stopping broadcast');
+                        } finally {
+                          setLiveLoading(false);
                         }
                       }
                     }}
-                    className={`w-12 h-6 rounded-full relative transition-colors ${liveEnabled ? 'bg-primary' : 'bg-gray-700'}`}
+                    disabled={liveLoading}
+                    className={`w-12 h-6 rounded-full relative transition-colors ${liveEnabled ? 'bg-primary' : 'bg-gray-700'} ${liveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${liveEnabled ? 'left-7' : 'left-1'}`} />
                   </button>
+
                 </div>
 
                 {liveEnabled && (
@@ -553,6 +592,12 @@ const ScoringApp = () => {
                         className="w-full py-2 bg-primary/10 border border-primary/20 text-primary text-[8px] font-black uppercase tracking-widest rounded-lg"
                       >
                         Link YouTube Video
+                      </button>
+                      <button 
+                        onClick={() => window.open(`/matches/${matchId}/stream-setup`, '_blank', 'width=800,height=800')}
+                        className="w-full mt-2 py-2 bg-red-600/20 border border-red-600/30 text-red-500 text-[8px] font-black uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 hover:bg-red-600/30 transition-all"
+                      >
+                        <PlayCircle size={14} /> Auto-Setup YouTube Live
                       </button>
                     </div>
                   </div>

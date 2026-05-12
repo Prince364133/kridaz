@@ -66,6 +66,22 @@ export const getUmpiresForHosting = async (req, res) => {
   }
 };
 
+export const getStreamersForHosting = async (req, res) => {
+  try {
+    const { city, state, gameType } = req.query;
+    let query = { role: "streamer" };
+    
+    if (city) query.city = new RegExp(city, "i");
+    if (state) query.state = new RegExp(state, "i");
+    if (gameType) query.gameTypes = gameType;
+
+    const streamers = await Owner.find(query).select("name email phone profilePicture price gameTypes city state");
+    return res.status(200).json({ streamers });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 export const createHostedGame = async (req, res) => {
   try {
     const result = await runInTransaction(async ({ session, isTransactional }) => {
@@ -73,7 +89,7 @@ export const createHostedGame = async (req, res) => {
       console.log("Creating hosted game for host:", hostId);
 
       const {
-        gameType, date, time, groundId, umpireId, ground, umpire,
+        gameType, date, time, groundId, umpireId, streamerId, ground, umpire, streamer,
         perPlayerCharge, teamA, teamB, city, state,
         // Quick Game specific fields
         gameMode = "PROFESSIONAL",
@@ -86,6 +102,7 @@ export const createHostedGame = async (req, res) => {
 
       const finalGroundId = groundId || ground?._id;
       const finalUmpireId = umpireId || umpire?._id;
+      const finalStreamerId = streamerId || streamer?._id;
 
       if (!hostId) {
          throw new Error("Host ID missing. Please login again.");
@@ -94,6 +111,7 @@ export const createHostedGame = async (req, res) => {
       // 1. Calculate Total Costs
       let groundCost = 0;
       let umpireCost = 0;
+      let streamerCost = 0;
 
       if (finalGroundId) {
         const g = await Turf.findById(finalGroundId);
@@ -104,8 +122,13 @@ export const createHostedGame = async (req, res) => {
         const u = await Owner.findById(finalUmpireId);
         umpireCost = u?.price || 0;
       }
+      
+      if (finalStreamerId) {
+        const s = await Owner.findById(finalStreamerId);
+        streamerCost = s?.price || 0;
+      }
 
-      const totalCost = groundCost + umpireCost;
+      const totalCost = groundCost + umpireCost + streamerCost;
 
       // 2. Check Balance
       const usableBalance = await getUsableBalance(hostId);
@@ -200,9 +223,11 @@ export const createHostedGame = async (req, res) => {
         time,
         ground: finalGroundId,
         umpire: finalUmpireId,
+        streamer: finalStreamerId,
         perPlayerCharge,
         groundCost,
         umpireCost,
+        streamerCost,
         totalCost,
         gameMode,
         ...(isQuick
@@ -418,7 +443,9 @@ export const getMyHostedGames = async (req, res) => {
     const games = await HostedGame.find({ host: hostId })
       .populate("ground")
       .populate("umpire")
+      .populate("streamer")
       .populate("umpireRequest.user", "name profilePicture")
+      .populate("streamerRequest.user", "name profilePicture")
       .populate("teams.teamA.slots.user", "name profilePicture")
       .populate("teams.teamB.slots.user", "name profilePicture");
 
@@ -685,10 +712,11 @@ export const leaveHostedGame = async (req, res) => {
 
 export const getHostedGameByShortId = async (req, res) => {
   try {
-    const { shortId } = req.query;
-    if (!shortId) return res.status(400).json({ message: "Search query is required" });
+    const { shortId, id } = req.query;
+    const queryId = shortId || id;
+    if (!queryId) return res.status(400).json({ message: "Search query is required" });
     
-    const searchUpper = shortId.toUpperCase().trim();
+    const searchUpper = queryId.toUpperCase().trim();
 
     // Build OR query: exact shortId match (case-insensitive), partial regex match, or ObjectId match
     const orClauses = [
@@ -696,8 +724,8 @@ export const getHostedGameByShortId = async (req, res) => {
     ];
     
     // If it looks like a MongoDB ID, add to query
-    if (mongoose.Types.ObjectId.isValid(shortId)) {
-      orClauses.push({ _id: shortId });
+    if (mongoose.Types.ObjectId.isValid(queryId)) {
+      orClauses.push({ _id: queryId });
     }
 
     const game = await HostedGame.findOne({
@@ -707,7 +735,9 @@ export const getHostedGameByShortId = async (req, res) => {
       .populate("host", "name profilePicture")
       .populate("ground", "name location images")
       .populate("umpire", "name profilePicture")
-      .populate("umpireRequest.user", "name profilePicture");
+      .populate("streamer", "name profilePicture")
+      .populate("umpireRequest.user", "name profilePicture")
+      .populate("streamerRequest.user", "name profilePicture");
     
     if (!game) return res.status(404).json({ message: "Game not found" });
     
@@ -767,6 +797,93 @@ export const handleUmpireRequest = async (req, res) => {
 
     await game.save();
     return res.status(200).json({ success: true, message: `Umpire request ${action.toLowerCase()}d successfully!` });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const requestToStreamer = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user.user;
+    const { gameId } = req.body;
+
+    const game = await HostedGame.findById(gameId);
+    if (!game) throw new Error("Game not found");
+    
+    if (game.streamer) throw new Error("This game already has a streamer assigned");
+    
+    const owner = await Owner.findOne({ userId });
+    const streamerId = owner ? owner._id : userId;
+
+    if (game.streamerRequest?.user?.toString() === streamerId.toString() || 
+        game.streamerRequest?.user?.toString() === userId.toString()) {
+      throw new Error("You have already sent a request for this game");
+    }
+
+    game.streamerRequest = {
+      user: streamerId,
+      status: "PENDING"
+    };
+
+    await game.save();
+    return res.status(200).json({ success: true, message: "Streamer request sent to host!" });
+
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const handleStreamerRequest = async (req, res) => {
+  try {
+    const hostId = req.user.id || req.user.user;
+    const { gameId, action } = req.body;
+
+    const game = await HostedGame.findOne({ _id: gameId, host: hostId });
+    if (!game) throw new Error("Unauthorized or game not found");
+
+    if (action === "APPROVE") {
+      game.streamer = game.streamerRequest.user;
+      game.streamerRequest.status = "APPROVED";
+    } else {
+      game.streamerRequest.status = "REJECTED";
+      game.streamerRequest.user = null;
+    }
+
+    await game.save();
+    return res.status(200).json({ success: true, message: `Streamer request ${action.toLowerCase()}d successfully!` });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateStreamConfig = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const config = req.body;
+
+    const game = await HostedGame.findById(id);
+    if (!game) throw new Error("Game not found");
+
+    // Only the assigned streamer or the host should be able to update this
+    const userId = req.user.id || req.user.user;
+    const owner = await Owner.findOne({ userId });
+    const streamerId = owner ? owner._id : userId;
+
+    if (game.streamer?.toString() !== streamerId.toString() && game.host?.toString() !== userId.toString()) {
+      return res.status(403).json({ success: false, message: "Unauthorized to update stream configuration" });
+    }
+
+    game.streamConfig = {
+      ...game.streamConfig,
+      ...config
+    };
+
+    if (config.status) {
+      game.isLive = config.status === "LIVE";
+    }
+
+    await game.save();
+    return res.status(200).json({ success: true, message: "Stream configuration updated successfully!", streamConfig: game.streamConfig });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
