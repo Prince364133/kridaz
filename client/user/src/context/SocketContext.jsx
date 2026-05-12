@@ -4,7 +4,13 @@ import { useSelector } from 'react-redux';
 
 const SocketContext = createContext();
 
-export const useSocket = () => useContext(SocketContext);
+export const useSocket = () => {
+  const context = useContext(SocketContext);
+  if (context === undefined) {
+    throw new Error('useSocket must be used within a SocketProvider');
+  }
+  return context;
+};
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
