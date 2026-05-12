@@ -47,6 +47,65 @@ export default function CoachDashboard() {
     <div className="h-full custom-scrollbar">
       <div className="p-4 md:p-10 space-y-6 md:space-y-12 animate-fade-in pt-2 pb-24 md:pb-12 max-w-[1600px] mx-auto">
 
+        {/* Coach Profile Section */}
+        {dashboardData.coach && (
+          <div className="bg-[#0A0A0A] rounded-[2.5rem] border border-white/5 p-8 flex flex-col md:flex-row items-center gap-8 group hover:border-[#84CC16]/20 transition-all">
+            <div className="relative">
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl overflow-hidden border-4 border-[#84CC16]/20 group-hover:border-[#84CC16]/50 transition-all shadow-2xl shadow-black">
+                <img 
+                  src={dashboardData.coach.profilePicture || "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=300&h=300&fit=crop"} 
+                  alt="Coach" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="absolute -bottom-2 -right-2 bg-[#84CC16] p-2 rounded-xl text-black shadow-lg">
+                <Zap size={16} fill="black" />
+              </div>
+            </div>
+            
+            <div className="flex-1 text-center md:text-left space-y-2">
+              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-white">
+                  {dashboardData.coach.name}
+                </h1>
+                <span className="px-3 py-1 bg-[#84CC16]/10 text-[#84CC16] text-[10px] font-black uppercase tracking-[0.2em] rounded-lg self-center md:self-start">
+                  Pro Coach
+                </span>
+              </div>
+              
+              <p className="text-gray-400 font-medium text-sm md:text-base max-w-2xl">
+                {dashboardData.coach.businessDetails?.specialization || "Expert Sports Consultant"} • {dashboardData.coach.businessDetails?.experience || "N/A"} Experience
+              </p>
+              
+              <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
+                {dashboardData.coach.interests?.map((interest, i) => (
+                  <span key={i} className="px-3 py-1 bg-white/5 text-gray-400 text-[10px] font-bold uppercase tracking-wider rounded-full border border-white/5">
+                    {interest}
+                  </span>
+                )) || (
+                  <span className="px-3 py-1 bg-white/5 text-gray-400 text-[10px] font-bold uppercase tracking-wider rounded-full border border-white/5">
+                    Cricket
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="hidden lg:flex items-center gap-8 pr-4">
+              <div className="text-center">
+                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Rating</p>
+                <div className="flex items-center gap-1 text-white font-black text-xl">
+                  {dashboardData.coach.rating || "4.9"} <span className="text-[#84CC16]">★</span>
+                </div>
+              </div>
+              <div className="w-px h-12 bg-white/5"></div>
+              <div className="text-center">
+                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Reviews</p>
+                <p className="text-white font-black text-xl">{dashboardData.coach.numReviews || "120"}+</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Stats Grid — all real data */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           <StatCard title="Active Trainees" value={activeTrainees} icon={Users} />

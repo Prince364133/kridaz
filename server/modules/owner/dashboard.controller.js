@@ -324,7 +324,10 @@ export const getCoachDashboardData = async (req, res) => {
 
     const totalRevenue = revenueData[0]?.total || 0;
 
-    // 5. Assemble response
+    // 5. Fetch Coach Profile Details
+    const coachProfile = await Owner.findById(coachId).select("-password").lean();
+
+    // 6. Assemble response
     console.log("DEBUG: Assembling coach dashboard response...");
     const responseData = {
       activeTrainees: detailedTrainees.length,
@@ -336,6 +339,7 @@ export const getCoachDashboardData = async (req, res) => {
       studentProgress: [],
       sessions: sessions,
       trainees: detailedTrainees,
+      coach: coachProfile, // Include the coach's profile details
       upcomingSessions: sessions
         .filter(s => s && s.status === 'upcoming')
         .slice(0, 5)
