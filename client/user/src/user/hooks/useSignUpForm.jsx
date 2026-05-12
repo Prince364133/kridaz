@@ -97,15 +97,25 @@ const useSignUpForm = () => {
 
     setLoading(true);
     try {
+      const umpireInvite = localStorage.getItem("umpireInvite");
+      const inviteToken = localStorage.getItem("pendingInvite");
       const response = await axiosInstance.post("/api/user/auth/register", {
         ...data,
         role: "user",
+        umpireInvite,
+        inviteToken
       });
       const result = await response.data;
       toast.success(result.message);
       dispatch(login({ token: result.token, role: result.role, user: result.user }));
       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
-      navigate("/", { replace: true });
+      localStorage.removeItem("pendingInvite");
+      localStorage.removeItem("umpireInvite");
+      if (inviteToken) {
+        navigate(`/join-games?invite=${inviteToken}`, { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     } catch (error) {
       if (error.response) {
         toast.error(error.response?.data?.message);
@@ -120,6 +130,8 @@ const useSignUpForm = () => {
     try {
       const payload = {
         role: "user",
+        inviteToken: localStorage.getItem("pendingInvite"),
+        umpireInvite: localStorage.getItem("umpireInvite")
       };
 
       if (googleResponse.credential) {
@@ -142,7 +154,14 @@ const useSignUpForm = () => {
         // Do not navigate yet, wait for onboarding to complete
       } else {
         toast.success("Successfully logged in with Google!");
-        navigate("/", { replace: true });
+        const inviteToken = localStorage.getItem("pendingInvite");
+        localStorage.removeItem("pendingInvite");
+        localStorage.removeItem("umpireInvite");
+        if (inviteToken) {
+          navigate(`/join-games?invite=${inviteToken}`, { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
       }
     } catch (error) {
       if (error.response) {

@@ -65,7 +65,12 @@ export default function AdminDashboard() {
       
       {/* High-Level Command Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-5 relative z-10">
-        <StatsCard title="Total Users" value={totalUsers} icon={Users} />
+        <StatsCard 
+          title="Total Users" 
+          value={totalUsers} 
+          icon={Users} 
+          onClick={() => navigate("/admin/users")}
+        />
         <StatsCard 
           title="Active Venues" 
           value={totalTurfs} 
@@ -141,7 +146,7 @@ export default function AdminDashboard() {
             <div className="space-y-4 mt-2">
               <ModerationItem icon={BookOpen} label="Blogs" count={publishedBlogs} onClick={() => navigate("/admin/blogs")} />
               <ModerationItem icon={Share2} label="Community Posts" count={totalCommunityPosts} onClick={() => navigate("/admin/community")} />
-              <ModerationItem icon={Trophy} label="Hosted Games" count={totalHostedGames} />
+              <ModerationItem icon={Trophy} label="Hosted Games" count={totalHostedGames} onClick={() => navigate("/admin/games")} />
               <ModerationItem icon={ShieldAlert} label="Active Disputes" count={pendingDisputes} color="text-red-500" onClick={() => navigate("/admin/disputes")} />
             </div>
             <button 

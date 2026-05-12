@@ -8,9 +8,14 @@ import { notifyAdmins } from "../../utils/notificationHelper.js";
 
 const getAccount = async (req) => {
   const { id, role, ownerId } = req.user;
+
+  // Regular users → User model
   if (role === "user") {
     return await User.findById(id);
   }
+
+  // Owner / umpire / coach / admin → Owner model
+  // Try ownerId shortcut first, fall back to userId lookup
   if (ownerId) {
     return await Owner.findById(ownerId);
   }
@@ -94,31 +99,27 @@ export const verifyTopup = async (req, res) => {
     }
 
     const Model = (req.user.role === "user") ? User : Owner;
-    const session = await Model.startSession();
-    let updatedBalance;
-    try {
-      await session.withTransaction(async () => {
-        const updatedAccount = await Model.findByIdAndUpdate(
-          account._id,
-          { $inc: { walletBalance: transaction.amount } },
-          { new: true, session }
-        );
 
-        if (!updatedAccount) throw new Error("Failed to update balance");
-        updatedBalance = updatedAccount.walletBalance;
+    // Atomic wallet credit — $inc is atomic at document level, no replica set needed
+    const updatedAccount = await Model.findByIdAndUpdate(
+      account._id,
+      { $inc: { walletBalance: transaction.amount } },
+      { new: true }
+    );
 
-        transaction.status = "SUCCESS";
-        transaction.razorpayPaymentId = razorpay_payment_id;
-        await transaction.save({ session });
-      });
-    } finally {
-      await session.endSession();
+    if (!updatedAccount) {
+      return res.status(500).json({ success: false, message: "Failed to update wallet balance" });
     }
+
+    // Mark transaction as SUCCESS
+    transaction.status = "SUCCESS";
+    transaction.razorpayPaymentId = razorpay_payment_id;
+    await transaction.save();
 
     return res.status(200).json({
       success: true,
       message: "Wallet topped up successfully",
-      balance: updatedBalance,
+      balance: updatedAccount.walletBalance,
     });
   } catch (error) {
     console.error("Error in verifyTopup:", error);
@@ -159,15 +160,29 @@ export const checkPaymentStatus = async (req, res) => {
       });
 
       if (transaction) {
-        // Since we don't store the role in the transaction, we'll try User then Owner
-        let account = await User.findByIdAndUpdate(
-          transaction.user,
-          { $inc: { walletBalance: transaction.amount } },
-          { new: true }
-        );
+        // Find the user to check their role
+        const userDoc = await User.findById(transaction.user);
+        const isPartner = userDoc && ["owner", "coach", "umpire", "admin"].includes(userDoc.role?.toLowerCase());
 
-        if (!account) {
-          account = await Owner.findByIdAndUpdate(
+        let account;
+        if (isPartner) {
+          // Update Owner collection for partners
+          account = await Owner.findOneAndUpdate(
+            { userId: transaction.user },
+            { $inc: { walletBalance: transaction.amount } },
+            { new: true }
+          );
+          // Fallback to User if no Owner record exists yet (should not happen for active partners)
+          if (!account) {
+            account = await User.findByIdAndUpdate(
+              transaction.user,
+              { $inc: { walletBalance: transaction.amount } },
+              { new: true }
+            );
+          }
+        } else {
+          // Update User collection for regular players
+          account = await User.findByIdAndUpdate(
             transaction.user,
             { $inc: { walletBalance: transaction.amount } },
             { new: true }

@@ -18,7 +18,7 @@ export const getDashboardData = async (req, res) => {
 
   // Redirect based on role
   if (role === "coach") return getCoachDashboardData(req, res);
-  if (role === "umpire") return getUmpireDashboardData(req, res);
+  if (role?.toLowerCase().includes("umpire")) return getUmpireDashboardData(req, res);
 
   try {
     // 1. Resolve correct owner document
@@ -381,13 +381,27 @@ export const getUmpireDashboardData = async (req, res) => {
     const ownerId = req.owner.ownerId;
     const userId = req.owner.id;
 
+    // Fetch owner profile to check for upgradeRequested status
+    const owner = await Owner.findById(ownerId).lean();
+    if (!owner) {
+      console.warn("DEBUG: Owner profile not found for ownerId:", ownerId);
+    }
+
+    // Fetch user details for email/phone fallback search
+    const userRecord = await User.findById(userId).select("email phone").lean();
+    const userEmail = userRecord?.email;
+    const userPhone = userRecord?.phone;
+
     const [legacyMatches, hostedGames] = await Promise.all([
       Match.find({ umpire: { $in: [umpireId, ownerId] } }).sort({ date: 1 }).lean(),
       HostedGame.find({
         $or: [
           { umpire: { $in: [umpireId, userId, ownerId] } },
           { host: { $in: [umpireId, userId, ownerId] } },
-          { "umpireRequest.user": { $in: [umpireId, userId, ownerId] } }
+          { "umpireRequest.user": { $in: [umpireId, userId, ownerId] } },
+          // Robust fallback for invited umpires whose ID link might be pending
+          { "customUmpire.email": userEmail },
+          { "customUmpire.phone": userPhone }
         ],
         status: { $ne: "CANCELLED" }
       })
@@ -460,8 +474,8 @@ export const getUmpireDashboardData = async (req, res) => {
         time: m.date ? `${new Date(m.date).toLocaleDateString()} - ${m.time || 'N/A'}` : 'TBD',
         venue: m.venue || "TBD Venue",
         role: "Head Umpire"
-      }))
-
+      })),
+      upgradeRequested: owner?.upgradeRequested || false
     };
 
     console.log("DEBUG: Sending successful response for umpire dashboard");

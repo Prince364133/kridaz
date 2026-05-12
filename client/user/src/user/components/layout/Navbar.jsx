@@ -55,7 +55,7 @@ const Navbar = () => {
   // Removed dedicated BOOKINGS link
 
   return (
-    <nav className="relative z-[100] flex flex-col">
+    <nav className="sticky top-0 z-[100] flex flex-col">
 
       <div className={`flex justify-center transition-all duration-500 ${isScrolled ? "pt-0" : "pt-0"}`}>
         <div 

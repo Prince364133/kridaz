@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import useCricketScoring from '@hooks/shared/useCricketScoring';
 import { motion } from 'framer-motion';
-import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
 import BallByBallHistory from '../../components/shared/BallByBallHistory';
 
@@ -28,45 +27,211 @@ const MatchAnalytics = () => {
   const captureRef = React.useRef(null);
 
   const handleShare = async () => {
-    if (!captureRef.current) return;
     setIsCapturing(true);
     toast.loading("Generating your scorecard...", { id: 'share' });
-    
+
     try {
-      const canvas = await html2canvas(captureRef.current, {
-        backgroundColor: '#000',
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        windowWidth: 800 // Consistent width for sharing
+      const { scoring, analytics: stats } = analytics || {};
+      const innings0 = scoring?.innings?.[0] || {};
+      const legalBalls = innings0.legalBalls ?? 0;
+      const overs = `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`;
+      const runRate = legalBalls > 0
+        ? ((innings0.totalRuns / legalBalls) * 6).toFixed(2)
+        : '0.00';
+      const batters = scoring?.battingStats?.slice(0, 6) || [];
+
+      // Canvas dimensions
+      const W = 900;
+      const rowH = 44;
+      const headerH = 220;
+      const statsH = 160;
+      const titleH = 60;
+      const battingH = batters.length > 0 ? 48 + batters.length * rowH : 0;
+      const footerH = 60;
+      const H = titleH + headerH + statsH + battingH + footerH + 80;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      // Background
+      ctx.fillStyle = '#080808';
+      ctx.fillRect(0, 0, W, H);
+
+      // Top accent bar
+      ctx.fillStyle = '#CCFF00';
+      ctx.fillRect(0, 0, W, 5);
+
+      let y = 30;
+
+      // Brand title
+      ctx.fillStyle = '#CCFF00';
+      ctx.font = 'bold 38px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('KRIDAZ', W / 2, y + 38);
+      ctx.fillStyle = '#555';
+      ctx.font = '700 11px Arial, sans-serif';
+      ctx.fillText('OFFICIAL MATCH SCORECARD', W / 2, y + 60);
+
+      y += 90;
+
+      // Stat tiles
+      const tiles = [
+        ['TOTAL RUNS', `${innings0.totalRuns ?? 0}/${innings0.totalWickets ?? 0}`],
+        ['RUN RATE', runRate],
+        ['OVERS', overs],
+        ['EXTRAS', `${innings0.extras ?? 0}`],
+      ];
+      const tileW = (W - 80) / 4;
+      const tileH = 100;
+      const tileGap = 16;
+      const tileStartX = 40;
+
+      tiles.forEach(([label, value], i) => {
+        const tx = tileStartX + i * (tileW + tileGap);
+        // Tile background
+        ctx.fillStyle = '#111111';
+        roundRect(ctx, tx, y, tileW, tileH, 14);
+        ctx.fill();
+        // Tile border
+        ctx.strokeStyle = '#222222';
+        ctx.lineWidth = 1;
+        roundRect(ctx, tx, y, tileW, tileH, 14);
+        ctx.stroke();
+        // Label
+        ctx.fillStyle = '#666666';
+        ctx.font = '700 9px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, tx + tileW / 2, y + 26);
+        // Value
+        ctx.fillStyle = '#CCFF00';
+        ctx.font = 'bold 26px Arial, sans-serif';
+        ctx.fillText(value, tx + tileW / 2, y + 72);
       });
-      
-      const image = canvas.toDataURL('image/png');
-      
-      if (navigator.share) {
-        const blob = await (await fetch(image)).blob();
-        const file = new File([blob], `kridaz-scorecard-${matchId}.png`, { type: 'image/png' });
-        
-        await navigator.share({
-          title: 'Kridaz Cricket Scorecard',
-          text: 'Check out my match performance on Kridaz!',
-          files: [file]
+
+      y += tileH + 32;
+
+      // Batting section
+      if (batters.length > 0) {
+        // Section header
+        ctx.fillStyle = '#111111';
+        roundRect(ctx, 40, y, W - 80, battingH, 16);
+        ctx.fill();
+        ctx.strokeStyle = '#222222';
+        ctx.lineWidth = 1;
+        roundRect(ctx, 40, y, W - 80, battingH, 16);
+        ctx.stroke();
+
+        ctx.fillStyle = '#888888';
+        ctx.font = '700 10px Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('BATTING SCORECARD', 64, y + 28);
+
+        // Column headers
+        const cols = { name: 64, runs: W - 260, balls: W - 200, fours: W - 140, sixes: W - 80 };
+        ctx.fillStyle = '#444';
+        ctx.font = '700 9px Arial, sans-serif';
+        ctx.fillText('BATTER', cols.name, y + 44);
+        ctx.textAlign = 'center';
+        ctx.fillText('R', cols.runs, y + 44);
+        ctx.fillText('B', cols.balls, y + 44);
+        ctx.fillText('4s', cols.fours, y + 44);
+        ctx.fillText('6s', cols.sixes, y + 44);
+
+        y += 48;
+
+        batters.forEach((s, i) => {
+          const ry = y + i * rowH;
+          // Alternate row tint
+          if (i % 2 === 0) {
+            ctx.fillStyle = 'rgba(255,255,255,0.02)';
+            ctx.fillRect(40, ry, W - 80, rowH);
+          }
+          // Batter name
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 13px Arial, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText((s.user?.name || '—').toUpperCase(), cols.name, ry + 26);
+          // Stats
+          ctx.fillStyle = '#CCFF00';
+          ctx.font = 'bold 16px Arial, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(s.runs ?? 0, cols.runs, ry + 26);
+          ctx.fillStyle = '#888';
+          ctx.font = '13px Arial, sans-serif';
+          ctx.fillText(s.balls ?? 0, cols.balls, ry + 26);
+          ctx.fillText(s.fours ?? 0, cols.fours, ry + 26);
+          ctx.fillText(s.sixes ?? 0, cols.sixes, ry + 26);
+          // Divider
+          ctx.strokeStyle = '#1a1a1a';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(64, ry + rowH);
+          ctx.lineTo(W - 64, ry + rowH);
+          ctx.stroke();
         });
-        toast.success("Ready to share!", { id: 'share' });
+
+        y += batters.length * rowH + 24;
       } else {
-        const link = document.createElement('a');
-        link.href = image;
-        link.download = `kridaz-scorecard-${matchId}.png`;
-        link.click();
-        toast.success("Scorecard downloaded!", { id: 'share' });
+        y += 16;
       }
+
+      // Footer
+      ctx.fillStyle = '#333333';
+      ctx.font = '700 10px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`kridaz.com  •  ${new Date().toLocaleDateString()}`, W / 2, y + 24);
+
+      // Bottom accent
+      ctx.fillStyle = '#CCFF00';
+      ctx.fillRect(0, H - 4, W, 4);
+
+      // Export
+      const image = canvas.toDataURL('image/png');
+
+      if (navigator.share && navigator.canShare) {
+        try {
+          const blob = await (await fetch(image)).blob();
+          const file = new File([blob], `kridaz-scorecard-${matchId}.png`, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({ title: 'Kridaz Cricket Scorecard', text: 'Check out my match on Kridaz!', files: [file] });
+            toast.success("Ready to share!", { id: 'share' });
+            return;
+          }
+        } catch (_) { /* fall through to download */ }
+      }
+
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `kridaz-scorecard-${matchId}.png`;
+      link.click();
+      toast.success("Scorecard downloaded!", { id: 'share' });
+
     } catch (err) {
       console.error("Share failed:", err);
-      toast.error("Failed to generate image", { id: 'share' });
+      toast.error("Could not generate scorecard. Please try again.", { id: 'share' });
     } finally {
       setIsCapturing(false);
     }
   };
+
+  // Helper: draw rounded rectangle path
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+
 
   useEffect(() => {
     const loadAnalytics = async () => {

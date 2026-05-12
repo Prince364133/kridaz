@@ -21,8 +21,8 @@ const router = express.Router();
 // Public/User route
 router.get('/', getPosts);
 router.get('/my-activity', userAuth, getMyActivity);
-router.get('/user-posts/:userId?', getUserPosts);
-router.get('/user-stories/:userId?', getUserStories);
+router.get('/user-posts/:targetUserId?', getUserPosts);
+router.get('/user-stories/:targetUserId?', getUserStories);
 router.post('/:id/like', userAuth, likePost);
 router.post('/:id/comment', userAuth, addComment);
 router.put('/:id/comment/:commentId', userAuth, updateComment);

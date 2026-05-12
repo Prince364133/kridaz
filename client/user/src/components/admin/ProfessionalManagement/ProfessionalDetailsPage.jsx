@@ -2,8 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, Mail, Phone, MapPin, Shield, Calendar, 
-  IndianRupee, Star, Briefcase, Award, Clock, Activity, CreditCard 
+  IndianRupee, Star, Briefcase, Award, Clock, Activity, CreditCard, Trash2 
 } from "lucide-react";
+import useProfessionals from "../../../hooks/admin/useProfessionals";
+import ConfirmationModal from "../../shared/ConfirmationModal";
+
 import axiosInstance from "../../../hooks/useAxiosInstance";
 
 const ProfessionalDetailsPage = () => {
@@ -12,6 +15,9 @@ const ProfessionalDetailsPage = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { deleteProfessional } = useProfessionals();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -19,7 +25,7 @@ const ProfessionalDetailsPage = () => {
       try {
         const response = await axiosInstance.get(`/api/admin/professionals/${id}`);
         if (response.data.success) {
-          setDetails(response.data.data);
+          setDetails(response.data);
         }
       } catch (error) {
         console.error("Error fetching professional details:", error);
@@ -58,6 +64,15 @@ const ProfessionalDetailsPage = () => {
   }
 
   const { profile, matches } = details;
+
+  const handleDelete = async () => {
+    const success = await deleteProfessional(id);
+    if (success) {
+      navigate(-1);
+    }
+    setShowDeleteModal(false);
+  };
+
 
   return (
     <div className="min-h-screen bg-[#000000] text-white p-6 lg:p-10 relative overflow-hidden">
@@ -107,7 +122,18 @@ const ProfessionalDetailsPage = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 mb-8 sm:mb-0">
+                <button 
+                  onClick={() => setShowDeleteModal(true)}
+                  className="px-6 py-2.5 bg-red-500/10 border border-red-500/20 text-red-400 font-black text-xs uppercase tracking-[0.15em] rounded-xl hover:bg-red-500/20 transition-all flex items-center gap-2"
+                >
+                  <Trash2 size={16} /> Delete Record
+                </button>
+              </div>
             </div>
+
             
             {/* Quick Stats on Header Right */}
             <div className="hidden lg:flex gap-6 pb-8 text-right">
@@ -386,8 +412,18 @@ const ProfessionalDetailsPage = () => {
           </div>
         </div>
       </div>
+      <ConfirmationModal 
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title={`Delete ${profile?.role || "Professional"}`}
+        message={`Are you sure you want to PERMANENTLY delete ${profile?.name}? This action cannot be undone.`}
+        confirmText="Confirm Delete"
+        type="danger"
+      />
     </div>
   );
 };
+
 
 export default ProfessionalDetailsPage;

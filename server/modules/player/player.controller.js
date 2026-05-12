@@ -3,6 +3,17 @@ import User from "../../models/user.model.js";
 import Owner from "../../models/owner.model.js";
 import Story from "../../models/story.model.js";
 
+const resolveUserId = async (id) => {
+  if (!id) return null;
+  try {
+    const owner = await Owner.findById(id);
+    if (owner && owner.userId) return owner.userId.toString();
+    return id.toString();
+  } catch (error) {
+    return id.toString();
+  }
+};
+
 export const getPublicPlayers = async (req, res) => {
   const { lat, lng, city, state, sport } = req.query;
   try {
@@ -64,7 +75,12 @@ export const getPublicPlayers = async (req, res) => {
       state: u.state,
       sportTypes: u.sportTypes || [],
       distance: u.distance ? (u.distance / 1000).toFixed(1) : null, // in km
-      hasActiveStory: activeStories.some(id => id.toString() === u._id.toString()),
+      hasActiveStory: activeStories.some(id => id.toString() === u._id.toString()) && (
+        req.user ? (
+          u.followers?.some(f => f.toString() === req.user.id.toString()) || 
+          u.following?.some(f => f.toString() === req.user.id.toString())
+        ) : false
+      ),
       isFollowing: req.user ? u.followers?.some(f => f.toString() === req.user.id.toString()) : false
     }));
 
@@ -96,10 +112,18 @@ export const searchPlayers = async (req, res) => {
       expiresAt: { $gt: new Date() }
     });
 
-    players = players.map(u => ({
-      ...u.toObject(),
-      hasActiveStory: activeStories.some(id => id.toString() === u._id.toString())
-    }));
+    players = players.map(u => {
+      const userObj = u.toObject();
+      return {
+        ...userObj,
+        hasActiveStory: activeStories.some(id => id.toString() === u._id.toString()) && (
+          req.user ? (
+            userObj.followers?.some(f => f.toString() === req.user.id.toString()) || 
+            userObj.following?.some(f => f.toString() === req.user.id.toString())
+          ) : false
+        )
+      };
+    });
 
     return res.status(200).json({ success: true, players });
   } catch (error) {
@@ -115,26 +139,27 @@ export const followPlayer = async (req, res) => {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const currentUserId = decoded.id || decoded._id;
-    const role = decoded.role || "user";
+    const currentUserId = await resolveUserId(decoded.id || decoded._id);
+    const targetUserId = await resolveUserId(id);
 
-    if (id === currentUserId.toString()) {
+    if (targetUserId === currentUserId) {
       return res.status(400).json({ success: false, message: "You cannot follow yourself" });
     }
 
-    // Update current user's following list (Atomic)
-    if (role === "user") {
-      await User.findByIdAndUpdate(currentUserId, { $addToSet: { following: id } });
+    // Always use User model for social network if it exists
+    const userExists = await User.exists({ _id: currentUserId });
+    const targetUserExists = await User.exists({ _id: targetUserId });
+
+    if (userExists) {
+      await User.findByIdAndUpdate(currentUserId, { $addToSet: { following: targetUserId } });
     } else {
-      await Owner.findByIdAndUpdate(currentUserId, { $addToSet: { following: id } });
+      await Owner.findByIdAndUpdate(currentUserId, { $addToSet: { following: targetUserId } });
     }
 
-    // Update target user's followers list (Atomic)
-    const targetInUser = await User.exists({ _id: id });
-    if (targetInUser) {
-      await User.findByIdAndUpdate(id, { $addToSet: { followers: currentUserId } });
+    if (targetUserExists) {
+      await User.findByIdAndUpdate(targetUserId, { $addToSet: { followers: currentUserId } });
     } else {
-      await Owner.findByIdAndUpdate(id, { $addToSet: { followers: currentUserId } });
+      await Owner.findByIdAndUpdate(targetUserId, { $addToSet: { followers: currentUserId } });
     }
 
     return res.status(200).json({ 
@@ -155,14 +180,23 @@ export const unfollowPlayer = async (req, res) => {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const currentUserId = decoded.id || decoded._id;
-    const role = decoded.role || "user";
+    const currentUserId = await resolveUserId(decoded.id || decoded._id);
+    const targetUserId = await resolveUserId(id);
 
     // Update current user's following list (Atomic)
-    if (role === "user") {
-      await User.findByIdAndUpdate(currentUserId, { $pull: { following: id } });
+    const userExists = await User.exists({ _id: currentUserId });
+    if (userExists) {
+      await User.findByIdAndUpdate(currentUserId, { $pull: { following: targetUserId } });
     } else {
-      await Owner.findByIdAndUpdate(currentUserId, { $pull: { following: id } });
+      await Owner.findByIdAndUpdate(currentUserId, { $pull: { following: targetUserId } });
+    }
+
+    // Update target user's followers list (Atomic)
+    const targetUserExists = await User.exists({ _id: targetUserId });
+    if (targetUserExists) {
+      await User.findByIdAndUpdate(targetUserId, { $pull: { followers: currentUserId } });
+    } else {
+      await Owner.findByIdAndUpdate(targetUserId, { $pull: { followers: currentUserId } });
     }
 
     // Update target user's followers list (Atomic)
@@ -219,13 +253,21 @@ export const getNetwork = async (req, res) => {
 
 export const getPlayerProfile = async (req, res) => {
   try {
-    const { id } = req.params;
-    let user = await User.findById(id).select('-password');
-    let isOwner = false;
+    const targetUserId = await resolveUserId(req.params.id);
+    let user = await User.findById(targetUserId).select('-password');
+    let ownerDoc = null;
 
     if (!user) {
-      user = await Owner.findById(id).select('-password');
-      isOwner = !!user;
+      ownerDoc = await Owner.findById(targetUserId).select('-password');
+      if (ownerDoc && ownerDoc.userId) {
+        user = await User.findById(ownerDoc.userId).select('-password');
+      } else if (ownerDoc) {
+        // Legacy or owner without linked user
+        user = ownerDoc;
+      }
+    } else {
+      // User found, check if they have owner details
+      ownerDoc = await Owner.findOne({ userId: user._id });
     }
 
     if (!user) {
@@ -235,28 +277,58 @@ export const getPlayerProfile = async (req, res) => {
     const bookingCount = user.bookings ? user.bookings.length : 0;
     
     // Check for active stories
+    let hasActiveStory = false;
     const activeStory = await Story.findOne({
       userId: user._id,
       expiresAt: { $gt: new Date() }
     });
+
+    if (activeStory) {
+      const viewerId = req.user?.id;
+      if (viewerId) {
+        if (viewerId.toString() === user._id.toString()) {
+          hasActiveStory = true;
+        } else {
+          const isFollowing = user.followers?.some(id => id.toString() === viewerId.toString());
+          const isFollowedBy = user.following?.some(id => id.toString() === viewerId.toString());
+          if (isFollowing || isFollowedBy) {
+            hasActiveStory = true;
+          }
+        }
+      }
+    }
 
     return res.status(200).json({ 
       success: true, 
       profile: {
         _id: user._id,
         name: user.name,
-        username: user.username || user.businessDetails?.businessName || "Member",
-        profilePicture: user.profilePicture,
-        location: user.location,
-        city: user.city || user.businessDetails?.city,
-        state: user.state || user.businessDetails?.state,
-        sportTypes: user.sportTypes || [],
-        bio: user.bio || user.businessDetails?.experience,
+        username: user.username || ownerDoc?.businessDetails?.businessName || ownerDoc?.username || "Member",
+        profilePicture: user.profilePicture || ownerDoc?.profilePicture,
+        location: user.location || ownerDoc?.location,
+        city: user.city || ownerDoc?.businessDetails?.city || ownerDoc?.city,
+        state: user.state || ownerDoc?.businessDetails?.state || ownerDoc?.state,
+        sportTypes: user.sportTypes || ownerDoc?.sportTypes || ownerDoc?.gameTypes || [],
+        bio: user.bio || ownerDoc?.businessDetails?.experience || ownerDoc?.bio,
         followers: user.followers || [],
         following: user.following || [],
+        interests: user.interests || [],
         bookingCount,
-        hasActiveStory: !!activeStory,
-        role: user.role || (isOwner ? "owner" : "user"),
+        hasActiveStory: hasActiveStory,
+        role: ownerDoc?.role || user.role || "user",
+        stats: user.stats || {
+          cricket: {
+            matches: 0,
+            runs: 0,
+            wickets: 0,
+            highestScore: 0,
+            battingAverage: 0,
+            battingStrikeRate: 0,
+            bowlingAverage: 0,
+            bowlingEconomy: 0
+          }
+        },
+        badges: user.stats?.badges || [],
         createdAt: user.createdAt
       }
     });
@@ -329,22 +401,22 @@ export const getLeaderboard = async (req, res) => {
 
     let sortQuery = {};
     if (category === 'batting') {
-      sortQuery = { 'cricketStats.totalRuns': -1 };
+      sortQuery = { 'stats.cricket.runs': -1 };
     } else if (category === 'bowling') {
-      sortQuery = { 'cricketStats.totalWickets': -1 };
+      sortQuery = { 'stats.cricket.wickets': -1 };
     } else {
-      sortQuery = { 'cricketStats.totalRuns': -1 }; // Default to batting
+      sortQuery = { 'stats.cricket.runs': -1 }; // Default to batting
     }
 
     const players = await User.find({
       $or: [
-        { 'cricketStats.totalRuns': { $gt: 0 } },
-        { 'cricketStats.totalWickets': { $gt: 0 } }
+        { 'stats.cricket.runs': { $gt: 0 } },
+        { 'stats.cricket.wickets': { $gt: 0 } }
       ]
     })
     .sort(sortQuery)
     .limit(parseInt(limit))
-    .select('name username profilePicture cricketStats city');
+    .select('name username profilePicture stats city');
 
     const rankedPlayers = players.map((p, index) => ({
       ...p.toObject(),

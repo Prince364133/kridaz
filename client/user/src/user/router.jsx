@@ -117,6 +117,7 @@ const router = createBrowserRouter([
       { path: "signup/official", element: <UmpireSignUp /> },
       { path: "turf/:id", element: <TurfDetails /> },
       { path: "profile", element: <ProtectedRoute><Profile /></ProtectedRoute> },
+      { path: "profile/:userId", element: <Profile /> },
       { path: "wallet", element: <ProtectedRoute><Wallet /></ProtectedRoute> },
       { path: "blogs", element: <Blogs /> },
       { path: "blogs/:id", element: <BlogDetail /> },

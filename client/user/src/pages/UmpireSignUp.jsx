@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import useSignUpForm from "@hooks/useSignUpForm";
+import axiosInstance from "@hooks/useAxiosInstance";
 import { GoogleLogin } from "@react-oauth/google";
 import FileUpload from "../components/common/FileUpload";
 import {
@@ -57,9 +58,42 @@ const UmpireSignUp = () => {
   const [mounted, setMounted] = useState(false);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
   const [docs, setDocs] = useState([]);
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     setMounted(true);
+    
+    // Check for invite tokens
+    const inviteToken = searchParams.get("invite") || searchParams.get("token");
+    const umpireInvite = searchParams.get("umpireInvite");
+    const tokenToUse = inviteToken || umpireInvite;
+    const emailParam = searchParams.get("email");
+
+    if (emailParam) {
+      const decodedEmail = decodeURIComponent(emailParam);
+      setValue("email", decodedEmail);
+    }
+
+    if (tokenToUse) {
+      localStorage.setItem("umpireInvite", tokenToUse);
+      
+      const fetchInviteDetails = async () => {
+        try {
+          const res = await axiosInstance.get(`/api/hosted-game/verify-invite?token=${tokenToUse}`);
+          if (res.data.success) {
+            const { name, email, phone } = res.data;
+            if (name) setValue("name", name);
+            if (email) setValue("email", email);
+            if (phone) setValue("phone", phone);
+            toast.success(`Welcome ${name || 'Umpire'}! Please complete your signup.`);
+          }
+        } catch (err) {
+          console.error("Invite fetch error:", err);
+        }
+      };
+      fetchInviteDetails();
+    }
+
     // Redirect if already an umpire
     if (user?.role === "umpire" || role === "umpire") {
       navigate("/umpire");

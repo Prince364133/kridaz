@@ -43,8 +43,9 @@ export const checkUsername = async (req, res) => {
     if (!username) {
       return res.status(400).json({ success: false, message: "Username is required" });
     }
-    const existing = await User.findOne({ username: username.toLowerCase() });
-    return res.status(200).json({ success: true, available: !existing });
+    const existingUser = await User.findOne({ username: username.toLowerCase() });
+    const existingOwner = await Owner.findOne({ username: username.toLowerCase() });
+    return res.status(200).json({ success: true, available: !existingUser && !existingOwner });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -101,8 +102,58 @@ export const sendOtp = async (req, res) => {
   }
 };
 
+import HostedGame from "../../models/hostedGame.model.js";
+
+// Check Umpire Invite Details
+export const getUmpireInviteDetails = async (req, res) => {
+  try {
+    const { token } = req.query;
+    if (!token) {
+      return res.status(400).json({ success: false, message: "Token is required" });
+    }
+    const game = await HostedGame.findOne({ "customUmpire.inviteToken": token });
+    if (!game) {
+      return res.status(404).json({ success: false, message: "Invitation not found or expired" });
+    }
+    return res.status(200).json({ 
+      success: true, 
+      invite: {
+        name: game.customUmpire.name,
+        email: game.customUmpire.email,
+        phone: game.customUmpire.phone,
+        gameId: game._id
+      } 
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const requestUpgrade = async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?.userId || req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const owner = await Owner.findOneAndUpdate(
+      { userId },
+      { upgradeRequested: true },
+      { new: true }
+    );
+
+    if (!owner) {
+      return res.status(404).json({ success: false, message: "Owner profile not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Upgrade request submitted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const registerUser = async (req, res) => {
-  const { name, email, password, phone, gender, location, otp, phoneOtp, username, sportTypes } = req.body;
+  const { name, email, password, phone, gender, location, otp, phoneOtp, username, sportTypes, umpireInvite, inviteToken } = req.body;
 
   try {
     const existingUser = await User.findOne({ $or: [{ email }, { phone }, { username }] });
@@ -127,6 +178,16 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await argon2.hash(password);
     const finalUsername = username ? username.toLowerCase() : await generateUniqueUsername(name);
 
+    let role = "user";
+    let inviteGame = null;
+
+    if (umpireInvite) {
+      inviteGame = await HostedGame.findOne({ "customUmpire.inviteToken": umpireInvite });
+      if (inviteGame) {
+        role = "LIMITED_UMPIRE";
+      }
+    }
+
     const newUser = new User({ 
       name, 
       username: finalUsername, 
@@ -136,10 +197,66 @@ export const registerUser = async (req, res) => {
       gender, 
       location, 
       sportTypes,
+      role,
       walletBalance: 50 // Welcome Bonus
     });
     await newUser.save();
     
+    // If it's an umpire invite, create an Owner document as well
+    if (role === "LIMITED_UMPIRE") {
+      const newOwner = new Owner({
+        userId: newUser._id,
+        name,
+        email,
+        phone,
+        password: hashedPassword,
+        role: "LIMITED_UMPIRE",
+        gender,
+        location,
+        gameTypes: sportTypes
+      });
+      await newOwner.save();
+      
+      newUser.ownerDetails = newOwner._id;
+      await newUser.save();
+
+      // Update the hosted game
+      if (inviteGame) {
+        await HostedGame.findOneAndUpdate(
+          { "customUmpire.inviteToken": umpireInvite },
+          { 
+            umpire: newOwner._id,
+            "customUmpire.inviteStatus": "ACCEPTED" 
+          },
+          { new: true }
+        );
+      }
+    }
+
+    // Handle Player Invite
+    if (inviteToken) {
+      const game = await HostedGame.findOne({ "customPlayers.inviteToken": inviteToken });
+      if (game) {
+        // Find the specific invite entry
+        const inviteEntry = game.customPlayers.find(cp => cp.inviteToken === inviteToken);
+        if (inviteEntry) {
+          const sIdx = inviteEntry.slotIndex;
+          
+          // Update the customPlayers entry
+          inviteEntry.inviteStatus = "ACCEPTED";
+          inviteEntry.user = newUser._id;
+
+          // Also update the corresponding quickSlot
+          if (game.quickSlots && game.quickSlots[sIdx]) {
+            game.quickSlots[sIdx].user = newUser._id;
+            game.quickSlots[sIdx].status = "JOINED";
+          }
+
+          await game.save();
+        }
+      }
+    }
+
     // Create Transaction Record for Welcome Bonus
     await WalletTransaction.create({
       user: newUser._id,
@@ -151,7 +268,7 @@ export const registerUser = async (req, res) => {
 
     await OTP.deleteOne({ _id: otpRecord._id });
 
-    const token = generateUserToken(newUser._id);
+    const token = generateUserToken(newUser._id, newUser.role, newUser.ownerDetails);
 
     // Set cookie for shared auth between portals
     res.cookie("auth_token", token, {
@@ -163,7 +280,7 @@ export const registerUser = async (req, res) => {
 
     return res
       .status(201)
-      .json({ success: true, message: "User created successfully", token, user: newUser });
+      .json({ success: true, message: "User created successfully", token, user: newUser, role });
   } catch (err) {
     console.log(chalk.red(err.message));
     return res.status(500).json({ success: false, message: err.message });
@@ -290,6 +407,10 @@ export const loginStep1 = async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
+    if (account.status === "blocked") {
+      return res.status(403).json({ success: false, message: "Your account has been blocked by an administrator." });
+    }
+
     return res.status(200).json({ 
       success: true, 
       message: "Login successful", 
@@ -347,6 +468,10 @@ export const login = async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
+    if (account.status === "blocked") {
+      return res.status(403).json({ success: false, message: "Your account has been blocked by an administrator." });
+    }
+
     return res.status(200).json({ 
       success: true, 
       message: "Login successful", 
@@ -362,7 +487,7 @@ export const login = async (req, res) => {
 
 // Google Auth
 export const googleAuth = async (req, res) => {
-  const { credential, accessToken, role: requestedRole } = req.body;
+  const { credential, accessToken, role: requestedRole, umpireInvite, inviteToken } = req.body;
   try {
     let payload;
 
@@ -436,6 +561,70 @@ export const googleAuth = async (req, res) => {
       }
     }
 
+    // --- HANDLE INVITATIONS (PLAYER OR UMPIRE) ---
+    const activeAccount = user || owner;
+    if (activeAccount) {
+      // 1. Claim Player Invite
+      if (inviteToken) {
+        const game = await HostedGame.findOne({ "customPlayers.inviteToken": inviteToken });
+        if (game) {
+          const inviteEntry = game.customPlayers.find(cp => cp.inviteToken === inviteToken);
+          if (inviteEntry) {
+            const sIdx = inviteEntry.slotIndex;
+            inviteEntry.inviteStatus = "ACCEPTED";
+            inviteEntry.user = activeAccount._id;
+
+            if (game.quickSlots && game.quickSlots[sIdx]) {
+              game.quickSlots[sIdx].user = activeAccount._id;
+              game.quickSlots[sIdx].status = "JOINED";
+            }
+            await game.save();
+          }
+        }
+      }
+
+      // 2. Claim Umpire Invite (Handle promotion for standard users)
+      if (umpireInvite) {
+        const inviteGame = await HostedGame.findOne({ "customUmpire.inviteToken": umpireInvite });
+        if (inviteGame) {
+          let targetOwner = owner;
+
+          if (!owner) {
+            // Promote standard user to limited umpire
+            user.role = "LIMITED_UMPIRE";
+            await user.save();
+
+            targetOwner = new Owner({
+              userId: user._id,
+              name: user.name,
+              email: user.email,
+              googleId: user.googleId,
+              role: "LIMITED_UMPIRE",
+              walletBalance: 0
+            });
+            await targetOwner.save();
+            user.ownerDetails = targetOwner._id;
+            await user.save();
+            owner = targetOwner;
+          }
+
+          // Link match regardless of if owner already existed
+          await HostedGame.findOneAndUpdate(
+            { "customUmpire.inviteToken": umpireInvite },
+            { 
+              umpire: targetOwner._id, 
+              "customUmpire.inviteStatus": "ACCEPTED" 
+            },
+            { new: true }
+          );
+
+          // Update credentials for the response
+          roleToReturn = "LIMITED_UMPIRE"; 
+          token = generateOwnerToken(user?._id || owner.userId, roleToReturn, targetOwner._id);
+        }
+      }
+    }
+
     res.cookie("auth_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -443,12 +632,17 @@ export const googleAuth = async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
+    const authAccount = owner || user;
+    if (authAccount && authAccount.status === "blocked") {
+      return res.status(403).json({ success: false, message: "Your account has been blocked by an administrator." });
+    }
+
     return res.status(200).json({ 
       success: true, 
       message: "Google authentication successful", 
       token, 
       role: roleToReturn,
-      user: owner || user
+      user: authAccount
     });
   } catch (error) {
     console.error(chalk.red("Google Auth Error:"), error);
@@ -678,6 +872,10 @@ export const getMe = async (req, res) => {
       account.applicationRole = applicationRole;
     }
 
+    if (account.status === "blocked") {
+      return res.status(403).json({ success: false, message: "Your account has been blocked by an administrator." });
+    }
+
     const token = req.cookies.auth_token || req.headers.authorization?.split(" ")[1];
 
     return res.status(200).json({ 
@@ -704,7 +902,7 @@ export const updateProfilePicture = async (req, res) => {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const { id, role } = decoded;
+    const { id, role, ownerId } = decoded;
     
     // Upload to Cloudinary
     const uploadResult = await new Promise((resolve, reject) => {
@@ -719,10 +917,17 @@ export const updateProfilePicture = async (req, res) => {
     });
 
     let account;
-    if (role === "user") {
-      account = await User.findByIdAndUpdate(id, { profilePicture: uploadResult.secure_url }, { new: true });
-    } else {
-      account = await Owner.findByIdAndUpdate(id, { profilePicture: uploadResult.secure_url }, { new: true });
+    // Unified update: always update User document
+    account = await User.findByIdAndUpdate(id, { profilePicture: uploadResult.secure_url }, { new: true });
+
+    // For partners, sync with Owner document
+    if (role !== "user") {
+      const targetOwnerId = ownerId || (account && account.ownerDetails);
+      if (targetOwnerId) {
+        await Owner.findByIdAndUpdate(targetOwnerId, { profilePicture: uploadResult.secure_url });
+      } else {
+        await Owner.findOneAndUpdate({ userId: id }, { profilePicture: uploadResult.secure_url });
+      }
     }
 
     if (!account) {
@@ -743,11 +948,17 @@ export const updateProfilePicture = async (req, res) => {
 export const updateInterests = async (req, res) => {
   const { sportTypes } = req.body;
   try {
-    const id = req.user.id;
+    const { id, role, ownerId } = req.user;
     let account = await User.findByIdAndUpdate(id, { sportTypes }, { new: true });
     
-    if (!account) {
-      account = await Owner.findByIdAndUpdate(id, { sportTypes }, { new: true });
+    if (role !== "user") {
+      const targetOwnerId = ownerId || (account && account.ownerDetails);
+      const ownerUpdate = { interests: sportTypes, gameTypes: sportTypes };
+      if (targetOwnerId) {
+        await Owner.findByIdAndUpdate(targetOwnerId, ownerUpdate);
+      } else {
+        await Owner.findOneAndUpdate({ userId: id }, ownerUpdate);
+      }
     }
 
     if (!account) {
@@ -760,27 +971,32 @@ export const updateInterests = async (req, res) => {
   }
 };
 export const updateProfile = async (req, res) => {
-  const { name, username, phone, bio, gender, city, state, location, sportTypes } = req.body;
+  const { name, username, phone, bio, gender, city, state, location, sportTypes, interests } = req.body;
   try {
     const decoded = req.user || req.owner;
     if (!decoded) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const { id, role } = decoded;
+    const { id, role, ownerId } = decoded;
 
     // Check if username is taken by another user
     if (username) {
-      const existing = await User.findOne({ 
+      const existingUser = await User.findOne({ 
         username: username.toLowerCase(), 
         _id: { $ne: id } 
       });
-      if (existing) {
+      const existingOwner = await Owner.findOne({ 
+        username: username.toLowerCase(), 
+        _id: { $ne: id } 
+      });
+      if (existingUser || existingOwner) {
         return res.status(400).json({ success: false, message: "Username already taken" });
       }
     }
 
     let account;
+    const finalInterests = interests || sportTypes || [];
     const updateData = {
       name,
       username: username?.toLowerCase(),
@@ -790,13 +1006,23 @@ export const updateProfile = async (req, res) => {
       city,
       state,
       location,
-      sportTypes
+      sportTypes: finalInterests,
+      interests: finalInterests
     };
 
-    if (role === "user") {
-      account = await User.findByIdAndUpdate(id, updateData, { new: true }).select("-password");
-    } else {
-      account = await Owner.findByIdAndUpdate(id, updateData, { new: true }).select("-password");
+    account = await User.findByIdAndUpdate(id, updateData, { new: true }).select("-password");
+    
+    if (role !== "user") {
+      // Keep Owner in sync
+      const targetOwnerId = ownerId || (account && account.ownerDetails);
+      const ownerUpdate = { ...updateData };
+      ownerUpdate.gameTypes = finalInterests;
+
+      if (targetOwnerId) {
+        await Owner.findByIdAndUpdate(targetOwnerId, ownerUpdate);
+      } else {
+        await Owner.findOneAndUpdate({ userId: id }, ownerUpdate);
+      }
     }
 
     if (!account) {

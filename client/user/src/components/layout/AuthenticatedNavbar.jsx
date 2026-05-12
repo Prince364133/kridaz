@@ -44,7 +44,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
     if (r === "admin" || r === "bmsp_admin") return "/admin";
     if (r === "owner" || r === "bmsp_owner" || r === "verified_venue_owner" || r === "venue_owner") return "/partner";
     if (r === "coach" || r === "bmsp_coach") return "/coach";
-    if (r === "umpire" || r === "bmsp_umpire") return "/umpire";
+    if (r?.includes("umpire")) return "/umpire";
     return "";
   };
 

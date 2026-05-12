@@ -8,6 +8,7 @@ import hostedGameRouter from "../modules/hostedGame/hostedGame.routes.js";
 import professionalRouter from "../modules/professional/professional.routes.js";
 import chatRouter from "../modules/chat/chat.routes.js";
 import scoringRouter from "../modules/scoring/scoring.routes.js";
+import youtubeRouter from "../modules/youtube/youtube.routes.js";
 
 const rootRouter = Router();
 
@@ -20,5 +21,6 @@ rootRouter.use("/hosted-game", hostedGameRouter);
 rootRouter.use("/professional", professionalRouter);
 rootRouter.use("/chat", chatRouter);
 rootRouter.use("/scoring", scoringRouter);
+rootRouter.use("/youtube", youtubeRouter);
 
 export default rootRouter;

@@ -1,6 +1,7 @@
 import React from "react";
-import { Trophy, Calendar, MapPin, Users, CheckCircle2, Zap, Search, Loader2, Hand, Clock, Shield } from "lucide-react";
+import { Trophy, Calendar, MapPin, Users, CheckCircle2, Zap, Search, Loader2, Hand, Clock, Shield, Activity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import useUmpireDashboard from "@hooks/owner/useUmpireDashboard";
 import DashboardSkeleton from "../owner/Dashboard/DashboardSkeleton";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -8,7 +9,9 @@ import { toast } from "react-hot-toast";
 
 export default function UmpireMatches() {
   const { dashboardData, loading, error, refreshData } = useUmpireDashboard();
+  const { role } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const isLimitedUmpire = role?.toLowerCase() === "limited_umpire";
   const [searchId, setSearchId] = React.useState("");
   const [globalMatch, setGlobalMatch] = React.useState(null);
   const [searching, setSearching] = React.useState(false);
@@ -47,10 +50,13 @@ export default function UmpireMatches() {
     }
   };
 
+  const [requestingUpgrade, setRequestingUpgrade] = React.useState(false);
+
   if (loading) return <DashboardSkeleton />;
 
   const matches = dashboardData?.matches || [];
-  
+  const upgradeRequested = dashboardData?.upgradeRequested || false;
+
   // Local matches filtering
   const activeMatches = matches.filter(m => m.status !== 'completed');
   const filteredMatches = searchId 
@@ -59,8 +65,64 @@ export default function UmpireMatches() {
 
   const completedMatches = matches.filter(m => m.status === 'completed');
 
+  const handleRequestUpgrade = async () => {
+    setRequestingUpgrade(true);
+    try {
+      await axiosInstance.post("/api/auth/request-upgrade");
+      toast.success("Application submitted! Admin will review and approve your full umpire access.");
+      // Navigate to form after flagging
+      navigate("/business/register?role=umpire");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to submit request");
+    } finally {
+      setRequestingUpgrade(false);
+    }
+  };
+
   return (
     <div className="space-y-12 animate-fade-in pb-20">
+      {isLimitedUmpire && (
+        <div className="bg-gradient-to-r from-red-500/20 via-red-500/5 to-transparent border border-red-500/20 rounded-[2rem] p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_0_50px_rgba(239,68,68,0.05)]">
+          <div className="flex items-center gap-6">
+            <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center shrink-0 border border-red-500/20">
+              <Shield className={`text-red-500 ${!upgradeRequested ? "animate-pulse" : ""}`} size={32} />
+            </div>
+            <div className="space-y-1">
+              {upgradeRequested ? (
+                <>
+                  <h3 className="text-xl font-black text-white uppercase tracking-tight">Application Pending Review</h3>
+                  <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+                    Your umpire application is <span className="text-yellow-400">under admin review</span>.<br />
+                    You'll be notified once your full access is approved.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-xl font-black text-white uppercase tracking-tight">Restricted Access</h3>
+                  <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+                    You are currently in <span className="text-red-500">Match-Only Mode</span>. <br />
+                    Complete the professional umpire form to unlock earnings, banking, and full profile tools.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+          {upgradeRequested ? (
+            <div className="w-full md:w-auto h-14 px-10 bg-yellow-500/10 text-yellow-400 font-black uppercase text-xs tracking-widest rounded-2xl border border-yellow-500/20 flex items-center justify-center gap-3">
+              <Clock size={16} /> Awaiting Approval
+            </div>
+          ) : (
+            <button 
+              onClick={handleRequestUpgrade}
+              disabled={requestingUpgrade}
+              className="w-full md:w-auto h-14 px-10 bg-white text-black font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-gray-100 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-3"
+            >
+              {requestingUpgrade ? <><Loader2 size={16} className="animate-spin" /> Submitting...</> : "Apply for Full Access"}
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b border-white/5">
         <div className="space-y-2">
           <h1 className="text-5xl font-black uppercase tracking-tighter text-white">
@@ -127,15 +189,21 @@ export default function UmpireMatches() {
               <div className="flex items-center gap-3">
                 {globalMatch.umpire ? (
                    <div className="flex flex-col md:flex-row items-center gap-3">
-                      <div className="flex items-center gap-2 px-6 py-4 bg-primary/10 rounded-2xl text-[10px] font-black text-primary uppercase tracking-widest border border-primary/20 shadow-[0_0_20px_rgba(132,204,22,0.1)]">
-                        <Shield size={16} className="fill-primary/20" /> Umpire Hired
-                      </div>
-                      <button 
-                        onClick={() => window.open(`/scoring/${globalMatch._id}`, '_blank', 'noopener,noreferrer')}
-                        className="h-14 px-10 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3"
-                      >
-                        Score Now <Zap size={16} fill="currentColor" />
-                      </button>
+                     <div className="flex items-center gap-2 px-6 py-4 bg-primary/10 rounded-2xl text-[10px] font-black text-primary uppercase tracking-widest border border-primary/20 shadow-[0_0_20px_rgba(132,204,22,0.1)]">
+                       <Shield size={16} className="fill-primary/20" /> Umpire Hired
+                     </div>
+                     <button 
+                       onClick={() => navigate(`/analytics/${globalMatch._id}`)}
+                       className="h-14 px-6 bg-white/5 border border-white/10 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                     >
+                       Analytics <Activity size={14} />
+                     </button>
+                     <button 
+                       onClick={() => window.open(`/scoring/${globalMatch._id}`, '_blank', 'noopener,noreferrer')}
+                       className="h-14 px-8 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3"
+                     >
+                       Score Now <Zap size={16} fill="currentColor" />
+                     </button>
                    </div>
                 ) : globalMatch.umpireRequest?.status === "PENDING" ? (
                    <div className="flex items-center gap-2 px-6 py-4 bg-white/5 rounded-2xl text-[10px] font-black text-gray-500 uppercase tracking-widest border border-white/5">
@@ -192,13 +260,45 @@ export default function UmpireMatches() {
                        </div>
                     </div>
                   </div>
-                  <div className="flex items-center">
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
+                        navigate(`/analytics/${match._id}`);
+                      }}
+                      className="w-full sm:w-auto h-14 px-8 bg-white/5 border border-white/10 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                    >
+                      Analytics <Activity size={14} />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const matchDate = new Date(match.date);
+                        const timeParts = match.time.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+                        
+                        if (timeParts) {
+                          let hours = parseInt(timeParts[1]);
+                          const minutes = parseInt(timeParts[2]);
+                          const modifier = timeParts[3]?.toUpperCase();
+
+                          if (modifier === 'PM' && hours !== 12) hours += 12;
+                          if (modifier === 'AM' && hours === 12) hours = 0;
+                          
+                          matchDate.setHours(hours, minutes, 0, 0);
+                        }
+
+                        const now = new Date();
+                        const timeDiff = matchDate.getTime() - now.getTime();
+                        const twelveHoursInMs = 12 * 60 * 60 * 1000;
+
+                        if (timeDiff > twelveHoursInMs) {
+                          toast.error("Scoring opens 12h before match start");
+                          return;
+                        }
+
                         window.open(`/scoring/${match._id}`, '_blank', 'noopener,noreferrer');
                       }}
-                      className="w-full md:w-auto h-14 px-10 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 group-hover:scale-[1.02]"
+                      className="w-full sm:w-auto h-14 px-10 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 group-hover:scale-[1.02]"
                     >
                       Score Game <Zap size={16} fill="currentColor" />
                     </button>

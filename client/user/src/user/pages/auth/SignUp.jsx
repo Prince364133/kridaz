@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import useSignUpForm from "../../hooks/useSignUpForm";
 import GoogleAuthButton from "@user/components/auth/GoogleAuthButton";
 import OnboardingModal from "../../components/modals/OnboardingModal";
@@ -33,6 +33,7 @@ import {
 import toast from "react-hot-toast";
 import { Trophy } from "lucide-react";
 import { searchLocations } from "../../utils/locationService";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 const SPORTS = [
   "Cricket", "Football", "Badminton", "Tennis", "Basketball", 
@@ -63,6 +64,7 @@ const SignUp = () => {
   const [showSportsDropdown, setShowSportsDropdown] = useState(false);
   
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -71,7 +73,46 @@ const SignUp = () => {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    const inviteToken = searchParams.get("invite");
+    const umpireToken = searchParams.get("umpireInvite");
+
+    if (inviteToken) {
+      localStorage.setItem("pendingInvite", inviteToken);
+      const emailParam = searchParams.get("email");
+      if (emailParam) {
+        const decodedEmail = decodeURIComponent(emailParam);
+        setValue("email", decodedEmail);
+        console.log("Auto-filled player email from URL:", decodedEmail);
+      }
+      toast.success("Joining via invitation link!");
+    }
+
+    if (umpireToken) {
+      localStorage.setItem("umpireInvite", umpireToken);
+      const emailParam = searchParams.get("email");
+      if (emailParam) {
+        const decodedEmail = decodeURIComponent(emailParam);
+        setValue("email", decodedEmail);
+        console.log("Auto-filled umpire email from URL:", decodedEmail);
+      }
+      
+      const fetchInviteDetails = async () => {
+        try {
+          const res = await axiosInstance.get(`/api/hosted-game/verify-invite?token=${umpireToken}`);
+          if (res.data.success) {
+            const { name, email, phone } = res.data;
+            if (name) setValue("name", name);
+            if (email) setValue("email", email);
+            if (phone) setValue("phone", phone);
+            toast.success(`Welcome ${name || 'Umpire'}! Please complete your signup.`);
+          }
+        } catch (err) {
+          console.error("Invite fetch error:", err);
+        }
+      };
+      fetchInviteDetails();
+    }
+  }, [searchParams, setValue]);
 
   // Debounced search for location suggestions
   useEffect(() => {
@@ -513,7 +554,14 @@ const SignUp = () => {
       <OnboardingModal 
         isOpen={showOnboarding} 
         onClose={() => setShowOnboarding(false)} 
-        onComplete={() => navigate("/")}
+        onComplete={() => {
+          const inviteToken = localStorage.getItem("pendingInvite");
+          if (inviteToken) {
+            navigate(`/join-games?invite=${inviteToken}`);
+          } else {
+            navigate("/");
+          }
+        }}
       />
     </div>
   );

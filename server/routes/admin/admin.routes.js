@@ -17,6 +17,7 @@ import auditRouter from "./audit.routes.js"
 import settingsRouter from "./settings.routes.js"
 import notificationRouter from "../notification.routes.js"
 import adminDisputeRouter from "./dispute.routes.js"
+import gameRouter from "./gameManagement.routes.js"
 import verifyAdminToken from "../../middleware/jwt/admin.middleware.js"
 
 const adminRouter = Router()
@@ -38,6 +39,7 @@ adminRouter.use("/transactions", verifyAdminToken, transactionRouter);
 adminRouter.use("/community", verifyAdminToken, communityRouter);
 adminRouter.use("/dispute", verifyAdminToken, adminDisputeRouter);
 adminRouter.use("/notifications", verifyAdminToken, notificationRouter);
+adminRouter.use("/games", verifyAdminToken, gameRouter);
 
 export default adminRouter;
 

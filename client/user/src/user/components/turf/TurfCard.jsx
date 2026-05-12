@@ -39,7 +39,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
   return (
     <div
       onClick={() => navigate(to)}
-      className="group relative h-[320px] md:h-[420px] w-full rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden cursor-pointer bg-[#0d0d0d] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 hover:border-[#84CC16]/30"
+      className="group relative h-[280px] md:h-[360px] w-full rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden cursor-pointer bg-[#0d0d0d] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 hover:border-[#84CC16]/30"
     >
       {/* ── Background Image ── */}
       <div className="absolute inset-0">

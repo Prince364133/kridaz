@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { login } from '@redux/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '@hooks/useAxiosInstance';
 import { toast } from 'react-hot-toast';
 import { 
   Users, MapPin, Calendar, Clock, 
   Search, Filter, Coins, ChevronRight,
-  UserCheck, Trophy, Info, Zap, ShieldCheck
+  UserCheck, Trophy, Info, Zap, ShieldCheck, X, Share2
 } from 'lucide-react';
+import { fetchStates, fetchCities } from '../utils/locationService';
 import CoinAnimation from '../components/CoinAnimation';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
@@ -24,7 +26,21 @@ const JoinGames = () => {
   const [joiningSlot, setJoiningSlot] = useState(null);
   const [search, setSearch] = useState('');
   const [sportFilter, setSportFilter] = useState('All Sports');
+  const [liveFilter, setLiveFilter] = useState(false);
   const [userLocation, setUserLocation] = useState({ city: '', state: '' });
+
+  // Deep-link / Invite state
+  const [inviteData, setInviteData] = useState(null);
+  const [showInvitePopup, setShowInvitePopup] = useState(false);
+  const [verifyingInvite, setVerifyingInvite] = useState(false);
+
+  // Location filter state
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [loadingStates, setLoadingStates] = useState(false);
+  const [loadingCities, setLoadingCities] = useState(false);
 
   const fetchGames = async (city = '', state = '', sport = 'All Sports') => {
     try {
@@ -50,6 +66,8 @@ const JoinGames = () => {
         const user = userRes.data.user;
         if (user?.city || user?.state) {
           setUserLocation({ city: user.city || '', state: user.state || '' });
+          setSelectedState(user.state || '');
+          setSelectedCity(user.city || '');
           fetchGames(user.city, user.state);
         } else {
           fetchGames();
@@ -59,15 +77,119 @@ const JoinGames = () => {
       }
     };
     fetchUserAndGames();
+
+    // Load all Indian states for the dropdown
+    const loadStates = async () => {
+      setLoadingStates(true);
+      const data = await fetchStates();
+      setStates(data);
+      setLoadingStates(false);
+    };
+    loadStates();
+
+    // Check for deep-link inviteToken
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('inviteToken');
+    if (token) {
+      handleVerifyInvite(token);
+    }
   }, []);
+
+  const handleVerifyInvite = async (token) => {
+    try {
+      setVerifyingInvite(true);
+      const res = await axiosInstance.get(`/api/hosted-game/verify-invite?token=${token}`);
+      if (res.data.success) {
+        setInviteData({
+          ...res.data,
+          token
+        });
+        setShowInvitePopup(true);
+      }
+    } catch (err) {
+      console.error("Invite verification failed:", err);
+      toast.error(err.response?.data?.message || "Invalid or expired invite link");
+    } finally {
+      setVerifyingInvite(false);
+    }
+  };
+
+  const dispatch = useDispatch();
+
+  const handleClaimSlot = async () => {
+    if (!inviteData) return;
+    
+    gateInteraction(async () => {
+      try {
+        const res = await axiosInstance.post(`/api/hosted-game/claim-slot`, {
+          token: inviteData.token
+        });
+        if (res.data.success) {
+          setShowInvitePopup(false);
+
+          // If the backend upgraded the user's role (e.g. to LIMITED_UMPIRE),
+          // refresh Redux auth so navigation guards update immediately.
+          if (res.data.newToken && res.data.updatedRole) {
+            dispatch(login({
+              token: res.data.newToken,
+              role: res.data.updatedRole,
+            }));
+            localStorage.setItem("authToken", res.data.newToken);
+            toast.success("You've been assigned as Umpire! Redirecting to your dashboard...");
+            setTimeout(() => navigate("/umpire/dashboard"), 1200);
+          } else {
+            toast.success("Slot claimed successfully!");
+            fetchGames(selectedCity, selectedState, sportFilter);
+          }
+        }
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Failed to claim slot");
+      }
+    }, {
+      title: "Claim Your Invited Slot",
+      message: "Welcome to the game! Sign in to secure your reserved spot."
+    });
+  };
+
+  // When a state is selected, load its cities
+  useEffect(() => {
+    if (!selectedState) { setCities([]); return; }
+    const loadCities = async () => {
+      setLoadingCities(true);
+      const data = await fetchCities(selectedState);
+      setCities(data);
+      setLoadingCities(false);
+    };
+    loadCities();
+  }, [selectedState]);
+
+  const handleStateChange = (state) => {
+    setSelectedState(state);
+    setSelectedCity('');
+    fetchGames('', state, sportFilter);
+  };
+
+  const handleCityChange = (city) => {
+    setSelectedCity(city);
+    fetchGames(city, selectedState, sportFilter);
+  };
+
+  const handleClearLocation = () => {
+    setSelectedState('');
+    setSelectedCity('');
+    setCities([]);
+    fetchGames('', '', sportFilter);
+  };
 
   const handleSearch = (e) => setSearch(e.target.value);
 
-  const filteredGames = games.filter(game => 
-    game.gameType.toLowerCase().includes(search.toLowerCase()) ||
+  const filteredGames = games.filter(game => {
+    if (liveFilter && !game.isLive) return false;
+    return game.gameType.toLowerCase().includes(search.toLowerCase()) ||
     (game.ground?.name || '').toLowerCase().includes(search.toLowerCase()) ||
-    game.city?.toLowerCase().includes(search.toLowerCase())
-  );
+    game.city?.toLowerCase().includes(search.toLowerCase()) ||
+    (game.gameMode === 'QUICK' ? 'quick game' : 'professional game').includes(search.toLowerCase())
+  });
 
   const handleJoinGame = async () => {
     if (!joiningSlot) return;
@@ -128,25 +250,51 @@ const JoinGames = () => {
           </div>
         </div>
 
+
         {/* Search & Filters */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
-          <div className="md:col-span-6 relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00] transition-colors" size={20} />
-            <input 
-              className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#CCFF00]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]" 
-              placeholder="Search by city, venue, or sport..." 
-              value={search}
-              onChange={handleSearch}
-            />
+          {/* Search */}
+          <div className="md:col-span-4 flex gap-2">
+            <div className="relative flex-1 group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00] transition-colors" size={20} />
+              <input 
+                className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#CCFF00]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]" 
+                placeholder="Search by sport, venue..." 
+                value={search}
+                onChange={handleSearch}
+                onKeyDown={(e) => e.key === 'Enter' && fetchGames(selectedCity, selectedState, sportFilter)}
+              />
+            </div>
+            <button 
+              onClick={() => fetchGames(selectedCity, selectedState, sportFilter)}
+              className="px-6 bg-[#CCFF00] text-black font-black text-[11px] uppercase tracking-widest rounded-[12px] hover:scale-105 transition-all shadow-[0_0_20px_rgba(204,255,0,0.2)]"
+            >
+              Search
+            </button>
+            
+            <button
+              onClick={() => setLiveFilter(!liveFilter)}
+              className={`flex items-center gap-2 px-4 py-4 rounded-[12px] border transition-all ${
+                liveFilter 
+                  ? 'bg-red-600/20 border-red-500/50 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]' 
+                  : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'
+              }`}
+              title="Show only live matches"
+            >
+              <div className={`w-2 h-2 rounded-full ${liveFilter ? 'bg-red-500 animate-pulse' : 'bg-gray-500'}`} />
+              <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block">Live Now</span>
+            </button>
           </div>
-          <div className="md:col-span-3 relative group">
+
+          {/* Sport Filter */}
+          <div className="md:col-span-2 relative group">
             <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00] transition-colors" size={18} />
             <select 
               className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 pl-12 pr-4 appearance-none text-sm text-white focus:outline-none focus:border-[#CCFF00]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]"
               value={sportFilter}
               onChange={(e) => {
                 setSportFilter(e.target.value);
-                fetchGames(userLocation.city, userLocation.state, e.target.value);
+                fetchGames(selectedCity, selectedState, e.target.value);
               }}
             >
               <option>All Sports</option>
@@ -158,14 +306,56 @@ const JoinGames = () => {
               <option>Volleyball</option>
             </select>
           </div>
-          <div className="md:col-span-3 flex items-center gap-3 px-5 py-4 bg-[#CCFF00]/5 border border-[#CCFF00]/10 rounded-[12px] shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
-            <MapPin size={18} className="text-[#CCFF00]" />
-            <div className="min-w-0">
-              <p className="text-[8px] font-black text-[#CCFF00]/60 uppercase tracking-widest mb-0.5">CURRENT DOMAIN</p>
-              <p className="text-[11px] font-black text-white uppercase truncate tracking-widest">
-                {userLocation.city || 'GLOBAL NETWORK'}
-              </p>
-            </div>
+
+          {/* State Dropdown */}
+          <div className="md:col-span-3 relative group">
+            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00] transition-colors pointer-events-none" size={16} />
+            <select
+              className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 pl-10 pr-4 appearance-none text-sm text-white focus:outline-none focus:border-[#CCFF00]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] disabled:opacity-40"
+              value={selectedState}
+              onChange={(e) => handleStateChange(e.target.value)}
+              disabled={loadingStates}
+            >
+              <option value="">{loadingStates ? 'Loading states...' : 'All States'}</option>
+              {states.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* City Dropdown */}
+          <div className="md:col-span-2 relative group">
+            <select
+              className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 px-4 appearance-none text-sm text-white focus:outline-none focus:border-[#CCFF00]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] disabled:opacity-40"
+              value={selectedCity}
+              onChange={(e) => handleCityChange(e.target.value)}
+              disabled={!selectedState || loadingCities}
+            >
+              <option value="">{loadingCities ? 'Loading cities...' : !selectedState ? 'Select state first' : 'All Cities'}</option>
+              {cities.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Clear / Active Location Indicator */}
+          <div className="md:col-span-1 flex items-center">
+            {selectedState ? (
+              <button
+                onClick={handleClearLocation}
+                className="w-full flex items-center justify-center gap-1.5 py-4 bg-[#CCFF00]/10 border border-[#CCFF00]/20 hover:bg-red-500/10 hover:border-red-500/30 text-[#CCFF00] hover:text-red-400 rounded-[12px] text-[10px] font-black uppercase tracking-widest transition-all"
+                title="Clear location filter"
+              >
+                <X size={14} />
+              </button>
+            ) : (
+              <div className="w-full flex items-center justify-center gap-1 py-4 bg-[#CCFF00]/5 border border-[#CCFF00]/10 rounded-[12px]">
+                <MapPin size={14} className="text-[#CCFF00]" />
+                <span className="text-[9px] font-black text-[#CCFF00]/50 uppercase tracking-widest truncate">
+                  {userLocation.city || 'GLOBAL'}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -245,12 +435,70 @@ const JoinGames = () => {
 
                   {/* Top Row: Sport badge + Coins */}
                   <div className="flex items-start justify-between mb-auto">
-                    <div className="px-4 py-1.5 bg-[#CCFF00]/20 border border-[#CCFF00]/40 rounded-full backdrop-blur-sm">
-                      <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">{game.gameType}</span>
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex gap-2">
+                        <div className="px-4 py-1.5 bg-[#CCFF00]/20 border border-[#CCFF00]/40 rounded-full backdrop-blur-sm inline-flex">
+                          <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">{game.gameType}</span>
+                        </div>
+                        {game.gameMode === 'QUICK' && (
+                          <div className="px-4 py-1.5 bg-blue-500/20 border border-blue-500/40 rounded-full backdrop-blur-sm inline-flex">
+                            <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">QUICK</span>
+                          </div>
+                        )}
+                        {game.scoringStatus === 'IN_PROGRESS' && (
+                          <div className="px-4 py-1.5 bg-red-600/20 border border-red-600/40 rounded-full backdrop-blur-sm inline-flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                            <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">LIVE</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(game.shortId || game._id); toast.success('Game ID copied!'); }}
+                          className="px-2.5 py-1 bg-black/50 border border-white/15 hover:border-[#CCFF00]/40 rounded-full inline-flex items-center gap-1 transition-all"
+                          title="Click to copy"
+                        >
+                          <Info size={9} className="text-[#CCFF00]/70" />
+                          <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">ID: {game.shortId || game._id.slice(-6).toUpperCase()}</span>
+                        </button>
+                        <button
+                          onClick={(e) => { 
+                            e.stopPropagation();
+                            const shareUrl = `${window.location.origin}/join-games?gameId=${game._id}`;
+                            const shareData = {
+                              title: 'Kridaz Match Invite',
+                              text: `Join this ${game.gameType} match hosted by ${game.host?.name || 'a player'}!`,
+                              url: shareUrl
+                            };
+
+                            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                              navigator.share(shareData).catch(() => {
+                                navigator.clipboard.writeText(shareUrl);
+                                toast.success('Link copied to clipboard!');
+                              });
+                            } else {
+                              navigator.clipboard.writeText(shareUrl);
+                              toast.success('Link copied to clipboard!');
+                            }
+                          }}
+                          className="p-1.5 bg-black/50 border border-white/15 hover:border-[#CCFF00]/40 rounded-full flex items-center justify-center transition-all"
+                          title="Share Match"
+                        >
+                          <Share2 size={10} className="text-[#CCFF00]/70" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10">
-                      <Coins size={13} className="text-[#CCFF00]" />
-                      <span className="text-sm font-black text-white">{game.perPlayerCharge || 'FREE'}</span>
+                    <div className="flex gap-2">
+                      {game.isLive && (
+                        <div className="flex items-center gap-1.5 bg-red-600/20 backdrop-blur-sm px-3 py-1.5 rounded-full border border-red-500/50">
+                          <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                          <span className="text-xs font-black text-red-500 uppercase tracking-widest">LIVE</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10">
+                        <Coins size={13} className="text-[#CCFF00]" />
+                        <span className="text-sm font-black text-white">{game.perPlayerCharge || 'FREE'}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -259,17 +507,29 @@ const JoinGames = () => {
                     {/* Divider label */}
                     <div className="flex items-center gap-3 mb-3">
                       <div className="h-px flex-1 bg-[#CCFF00]/30" />
-                      <span className="text-[9px] font-black text-[#CCFF00]/70 uppercase tracking-[0.4em] flex items-center gap-1">
-                        <Zap size={10} className="text-[#CCFF00]" /> Rivalry Ledger
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-black text-[#CCFF00]/70 uppercase tracking-[0.4em] flex items-center gap-1">
+                          <Zap size={10} className="text-[#CCFF00]" /> {game.gameMode === 'QUICK' ? 'Casual Pool' : 'Rivalry Ledger'}
+                        </span>
+                        {game.isLive && (
+                          <div className="px-2 py-0.5 bg-red-600 rounded-md flex items-center gap-1.5 animate-pulse">
+                            <div className="w-1 h-1 rounded-full bg-white" />
+                            <span className="text-[7px] font-black text-white uppercase tracking-widest">LIVE</span>
+                          </div>
+                        )}
+                      </div>
                       <div className="h-px flex-1 bg-[#CCFF00]/30" />
                     </div>
 
-                    {/* Team Names */}
+                    {/* Team Names or Game Title */}
                     <h3 className="font-black uppercase leading-none tracking-tighter text-white font-open-sans drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" style={{ fontSize: 'clamp(1.4rem, 4vw, 2.2rem)' }}>
-                      {game.teams.teamA.name}{' '}
-                      <span className="text-[#CCFF00] italic">VS</span>{' '}
-                      {game.teams.teamB.name}
+                      {game.gameMode === 'QUICK' ? (
+                        <>Casual <span className="text-[#CCFF00]">{game.gameType}</span> Match</>
+                      ) : (
+                        <>{game.teams?.teamA?.name}{' '}
+                        <span className="text-[#CCFF00] italic">VS</span>{' '}
+                        {game.teams?.teamB?.name}</>
+                      )}
                     </h3>
 
                     {/* Venue */}
@@ -314,7 +574,10 @@ const JoinGames = () => {
                         </div>
                         <div>
                           <p className="text-[11px] font-black text-white leading-none">
-                            {game.teams.teamA.slots.filter(s => s.status === 'OPEN').length + game.teams.teamB.slots.filter(s => s.status === 'OPEN').length} OPEN
+                            {game.gameMode === 'QUICK' 
+                              ? game.quickSlots.filter(s => s.status === 'OPEN').length 
+                              : (game.teams?.teamA?.slots?.filter(s => s.status === 'OPEN').length || 0) + (game.teams?.teamB?.slots?.filter(s => s.status === 'OPEN').length || 0)
+                            } OPEN
                           </p>
                           <p className="text-[7px] font-bold text-[#CCFF00]/50 uppercase tracking-widest mt-0.5">Available Capacity</p>
                         </div>
@@ -348,8 +611,21 @@ const JoinGames = () => {
                         </div>
                       </div>
 
-                      <button className="flex items-center gap-2 px-5 py-3 bg-[#CCFF00] text-black rounded-[12px] font-black text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(204,255,0,0.4)] hover:scale-105 hover:shadow-[0_0_30px_rgba(204,255,0,0.6)] transition-all duration-300">
-                        JOIN <ChevronRight size={14} strokeWidth={3} />
+                      <button 
+                        onClick={(e) => {
+                          if (game.isLive) {
+                            e.stopPropagation();
+                            navigate(`/live-score/${game._id}`);
+                          } else {
+                            setSelectedGame(game);
+                          }
+                        }}
+                        className={`flex items-center gap-2 px-5 py-3 rounded-[12px] font-black text-[11px] uppercase tracking-widest transition-all duration-300 ${
+                        game.isLive 
+                          ? 'bg-red-600 text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_30px_rgba(220,38,38,0.6)]' 
+                          : 'bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.4)] hover:shadow-[0_0_30px_rgba(204,255,0,0.6)]'
+                      }`}>
+                        {game.isLive ? 'WATCH' : 'JOIN'} <ChevronRight size={14} strokeWidth={3} />
                       </button>
                     </div>
                   </div>
@@ -378,10 +654,20 @@ const JoinGames = () => {
               className="relative bg-[#000000] border border-[#2D2D2D] w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[32px] shadow-[0_30px_60px_rgba(0,0,0,0.8)] custom-scrollbar"
             >
               <div className="sticky top-0 z-20 bg-black/50 backdrop-blur-md border-b border-[#2D2D2D] px-8 py-6 flex items-center justify-between">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
                   <div className="px-4 py-1.5 bg-[#CCFF00] text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
                     {selectedGame.gameType} Elite
                   </div>
+                  {selectedGame.shortId && (
+                    <button
+                      onClick={() => { navigator.clipboard?.writeText(selectedGame.shortId); toast.success('Game ID copied!'); }}
+                      className="px-3 py-1.5 bg-white/5 border border-white/10 hover:border-[#CCFF00]/40 rounded-full flex items-center gap-1.5 transition-all"
+                      title="Click to copy Game ID"
+                    >
+                      <Info size={11} className="text-[#CCFF00]" />
+                      <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">ID: {selectedGame.shortId}</span>
+                    </button>
+                  )}
                   <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter font-open-sans">Match Intelligence</h2>
                 </div>
                 <button onClick={() => setSelectedGame(null)} className="w-10 h-10 bg-[#121212] border border-[#2D2D2D] rounded-full flex items-center justify-center text-[#CCFF00] hover:bg-[#CCFF00] hover:text-black transition-all">✕</button>
@@ -403,48 +689,102 @@ const JoinGames = () => {
                   ))}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                  {['teamA', 'teamB'].map((teamKey, tIdx) => (
-                    <div key={teamKey} className="space-y-6">
-                      <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-4">
-                        <h3 className="text-2xl font-black text-white uppercase tracking-tighter font-open-sans">
-                          {selectedGame.teams[teamKey].name}
-                        </h3>
-                        <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">Team {tIdx === 0 ? 'A' : 'B'}</span>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {selectedGame.teams[teamKey].slots.map((slot, sIdx) => (
-                          <button
-                            key={sIdx}
-                            disabled={slot.status !== 'OPEN'}
-                            onClick={() => {
-                              if (!isAuthenticated) {
-                                toast.error("Please login to join this game");
-                                navigate('/login');
-                                return;
-                              }
-                              setJoiningSlot({ team: teamKey === 'teamA' ? 'A' : 'B', index: sIdx, role: slot.role });
-                              setShowConfirm(true);
-                            }}
-                            className={`p-5 rounded-[20px] border transition-all duration-500 text-left group relative overflow-hidden ${
-                              slot.status === 'OPEN' 
-                              ? 'bg-[#121212] border-white/5 hover:border-[#CCFF00]/40 hover:bg-[#CCFF00]/5' 
-                              : 'bg-black/50 opacity-40 border-transparent'
-                            }`}
-                          >
-                            {slot.status === 'OPEN' && (
-                              <div className="absolute top-0 left-0 w-1 h-full bg-[#CCFF00] scale-y-0 group-hover:scale-y-100 transition-transform" />
-                            )}
-                            <p className="text-[9px] text-[#878C9F] font-black uppercase tracking-widest mb-1">{slot.role}</p>
-                            <p className="font-black text-white uppercase tracking-tight">
-                              {slot.status === 'OPEN' ? 'AVAILABLE' : slot.status === 'PENDING' ? 'RESERVED' : 'OCCUPIED'}
-                            </p>
-                          </button>
-                        ))}
-                      </div>
+                {selectedGame.gameMode === 'QUICK' ? (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-4">
+                      <h3 className="text-2xl font-black text-white uppercase tracking-tighter font-open-sans">
+                        Casual Match Pool
+                      </h3>
+                      <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">{selectedGame.quickSlots.length} Total Slots</span>
                     </div>
-                  ))}
-                </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {selectedGame.quickSlots.map((slot, sIdx) => (
+                        <button
+                          key={sIdx}
+                          disabled={slot.status !== 'OPEN'}
+                          onClick={() => {
+                            if (!isAuthenticated) {
+                              toast.error("Please login to join this game");
+                              navigate('/login');
+                              return;
+                            }
+                            setJoiningSlot({ team: 'QUICK', index: sIdx, role: slot.role });
+                            setShowConfirm(true);
+                          }}
+                          className={`p-5 rounded-[20px] border transition-all duration-500 text-left group relative overflow-hidden ${
+                            slot.status === 'OPEN' 
+                            ? 'bg-[#121212] border-white/5 hover:border-[#CCFF00]/40 hover:bg-[#CCFF00]/5' 
+                            : 'bg-black/50 opacity-40 border-transparent'
+                          }`}
+                        >
+                          {slot.status === 'OPEN' && (
+                            <div className="absolute top-0 left-0 w-1 h-full bg-[#CCFF00] scale-y-0 group-hover:scale-y-100 transition-transform" />
+                          )}
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-[9px] text-[#878C9F] font-black uppercase tracking-widest">{slot.role || 'Player'}</p>
+                            {slot.user && (
+                              <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10">
+                                {slot.user.profilePicture ? (
+                                  <img src={slot.user.profilePicture} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full bg-white/5 flex items-center justify-center text-[8px] text-white/40">
+                                    {slot.user.name?.[0]}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <p className="font-black text-white uppercase tracking-tight">
+                            {slot.status === 'OPEN' ? 'AVAILABLE' : slot.status === 'JOINED' ? (slot.user?.name || 'OCCUPIED') : slot.status}
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    {['teamA', 'teamB'].map((teamKey, tIdx) => (
+                      <div key={teamKey} className="space-y-6">
+                        <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-4">
+                          <h3 className="text-2xl font-black text-white uppercase tracking-tighter font-open-sans">
+                            {selectedGame.teams[teamKey].name}
+                          </h3>
+                          <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">Team {tIdx === 0 ? 'A' : 'B'}</span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {selectedGame.teams[teamKey].slots.map((slot, sIdx) => (
+                            <button
+                              key={sIdx}
+                              disabled={slot.status !== 'OPEN'}
+                              onClick={() => {
+                                if (!isAuthenticated) {
+                                  toast.error("Please login to join this game");
+                                  navigate('/login');
+                                  return;
+                                }
+                                setJoiningSlot({ team: teamKey === 'teamA' ? 'A' : 'B', index: sIdx, role: slot.role });
+                                setShowConfirm(true);
+                              }}
+                              className={`p-5 rounded-[20px] border transition-all duration-500 text-left group relative overflow-hidden ${
+                                slot.status === 'OPEN' 
+                                ? 'bg-[#121212] border-white/5 hover:border-[#CCFF00]/40 hover:bg-[#CCFF00]/5' 
+                                : 'bg-black/50 opacity-40 border-transparent'
+                              }`}
+                            >
+                              {slot.status === 'OPEN' && (
+                                <div className="absolute top-0 left-0 w-1 h-full bg-[#CCFF00] scale-y-0 group-hover:scale-y-100 transition-transform" />
+                              )}
+                              <p className="text-[9px] text-[#878C9F] font-black uppercase tracking-widest mb-1">{slot.role}</p>
+                              <p className="font-black text-white uppercase tracking-tight">
+                                {slot.status === 'OPEN' ? 'AVAILABLE' : slot.status === 'PENDING' ? 'RESERVED' : 'OCCUPIED'}
+                              </p>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>
@@ -496,6 +836,57 @@ const JoinGames = () => {
           fetchGames();
         }} 
       />
+
+      {/* Invite Redemption Popup */}
+      <AnimatePresence>
+        {showInvitePopup && inviteData && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowInvitePopup(false)} className="absolute inset-0 bg-black/95 backdrop-blur-md" />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative bg-[#000000] border border-[#CCFF00]/20 p-8 rounded-[32px] max-w-md w-full shadow-[0_0_50px_rgba(204,255,0,0.1)]"
+            >
+              <div className="w-20 h-20 bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Trophy size={40} className="text-[#CCFF00]" />
+              </div>
+              
+              <h2 className="text-3xl font-black text-white uppercase tracking-tighter text-center mb-2">Claim Your Slot</h2>
+              <p className="text-[#CCFF00] text-[10px] font-black uppercase tracking-[0.3em] text-center mb-6">Reserved For You</p>
+              
+              <div className="bg-[#121212] border border-white/5 rounded-2xl p-5 mb-8 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-white/40 uppercase">Match</span>
+                  <span className="text-sm font-black text-white uppercase">{inviteData.game.gameType}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-white/40 uppercase">Date/Time</span>
+                  <span className="text-sm font-black text-white">{new Date(inviteData.game.date).toLocaleDateString()} • {inviteData.game.time}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-white/40 uppercase">Location</span>
+                  <span className="text-sm font-black text-white uppercase truncate ml-4">{inviteData.game.city}, {inviteData.game.state}</span>
+                </div>
+                <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-[#CCFF00] uppercase">Cost</span>
+                  <span className="text-lg font-black text-[#CCFF00]">{inviteData.mustPay ? `${inviteData.perPlayerCharge} Coins` : 'FREE'}</span>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button onClick={() => setShowInvitePopup(false)} className="flex-1 py-4 bg-[#121212] border border-[#2D2D2D] rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Ignore</button>
+                <button
+                  onClick={handleClaimSlot}
+                  className="flex-1 py-4 bg-[#CCFF00] text-black font-black rounded-xl text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(204,255,0,0.2)] hover:scale-105 transition-all"
+                >
+                  Join Match
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

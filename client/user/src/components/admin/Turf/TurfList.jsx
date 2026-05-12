@@ -1,14 +1,27 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { PackageOpen, User, Mail, Phone, Calendar, Building2, TrendingUp, ShieldCheck, ArrowLeft } from "lucide-react";
+import { PackageOpen, User, Mail, Phone, Calendar, Building2, TrendingUp, ShieldCheck, ArrowLeft, Trash2 } from "lucide-react";
 import useTurfData from "@hooks/admin/useTurfData";
+import useOwners from "@hooks/admin/useOwners";
+import ConfirmationModal from "../../shared/ConfirmationModal";
+
 import Turf from "./Turf";
 import TurfSkeleton from "./TurfSkeleton";
 import { format } from "date-fns";
 
-export const TurfList = () => {
+const TurfList = () => {
   const { turfData, owner, loading } = useTurfData();
+  const { deleteOwner } = useOwners();
   const navigate = useNavigate();
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+
+  const handleDelete = async () => {
+    const success = await deleteOwner(owner._id);
+    if (success) {
+      navigate("/admin/owners");
+    }
+    setShowDeleteModal(false);
+  };
 
   if (loading) {
     return (
@@ -72,6 +85,15 @@ export const TurfList = () => {
                   <h1 className="text-3xl sm:text-4xl font-display uppercase tracking-tighter text-white">
                     {owner.name}
                   </h1>
+                </div>
+
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => setShowDeleteModal(true)}
+                    className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-red-500/20 transition-all flex items-center gap-2"
+                  >
+                    <Trash2 size={14} /> Terminate Partnership
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -187,6 +209,16 @@ export const TurfList = () => {
           </div>
         )}
       </div>
+
+      <ConfirmationModal 
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Terminate Partnership"
+        message={`Are you sure you want to PERMANENTLY delete ${owner?.name}? This will remove their profile and all associated data. This action is irreversible.`}
+        confirmText="Terminate Now"
+        type="danger"
+      />
     </div>
   );
 };
