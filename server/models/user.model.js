@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
     walletBalance: { type: Number, default: 0 },
     reservedBalance: { type: Number, default: 0 },
     lastSeen: { type: Date, default: Date.now },
+    status: { type: String, enum: ["active", "blocked"], default: "active" },
     stats: {
       cricket: {
         matches: { type: Number, default: 0 },

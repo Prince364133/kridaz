@@ -9,6 +9,7 @@ const hostedGameSchema = new mongoose.Schema(
     ground: { type: mongoose.Schema.Types.ObjectId, ref: "Turf" },
     umpire: { type: mongoose.Schema.Types.ObjectId, ref: "Owner" },
     perPlayerCharge: { type: Number, default: 0 },
+    perSeatCharge: { type: Number, default: 0 }, // Alias for Quick Game mode consistency
     groundCost: { type: Number, default: 0 },
     umpireCost: { type: Number, default: 0 },
     totalCost: { type: Number, default: 0 },
@@ -53,6 +54,105 @@ const hostedGameSchema = new mongoose.Schema(
     },
     city: { type: String },
     state: { type: String },
+
+    // ── Phase 1: Game Mode ────────────────────────────────────────────────────
+    /**
+     * gameMode distinguishes:
+     *   QUICK        — Casual single-pool slots; host-assignable; friends & custom invites
+     *   PROFESSIONAL — Structured Team A vs B (existing flow, unchanged)
+     */
+    gameMode: {
+      type: String,
+      enum: ["QUICK", "PROFESSIONAL"],
+      default: "PROFESSIONAL",
+    },
+
+    /**
+     * quickSlots[] — flat slot array for QUICK game mode only.
+     *
+     * Slot lifecycle:
+     *   OPEN    → any public user can request to join
+     *   HELD    → host pre-assigned to a specific user or custom player invite
+     *   PENDING → user has requested join; awaiting host confirm (public join path)
+     *   JOINED  → confirmed & paid (if applicable)
+     *
+     * addedBy      → host userId who made the assignment
+     * customPlayerRef → references the _id of a document inside customPlayers[]
+     */
+    quickSlots: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+        customPlayerRef: { type: mongoose.Schema.Types.ObjectId, default: null },
+        role: { type: String, default: "Player" },
+        status: {
+          type: String,
+          enum: ["OPEN", "HELD", "PENDING", "JOINED"],
+          default: "OPEN",
+        },
+        addedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+      },
+    ],
+
+    /**
+     * customPlayers[] — off-platform guests invited by the host.
+     *
+     * Invite flow:
+     *  1. Host fills name + email (+ phone optional) in the slot picker popup.
+     *  2. Server generates inviteToken (UUID) → emails magic link.
+     *     Link: ${CLIENT_URL}/auth/signup?invite=<token>
+     *  3. Guest signs up → token saved to localStorage.
+     *  4. After profile completion → /join-games?openGame=<gameId>&slotIndex=<n>
+     *  5. inviteStatus: PENDING → ACCEPTED (on successful join) | EXPIRED (token invalid)
+     *
+     * mustPay: when true, guest must pay perPlayerCharge before slot is JOINED.
+     *          when false, slot auto-confirmed after signup (free reservation).
+     */
+    customPlayers: [
+      {
+        name: { type: String, required: true },
+        email: { type: String, required: true },
+        phone: { type: String, default: "" },
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        slotIndex: { type: Number, required: true },
+        mustPay: { type: Boolean, default: false },
+        inviteToken: { type: String },
+        inviteStatus: {
+          type: String,
+          enum: ["PENDING", "ACCEPTED", "EXPIRED"],
+          default: "PENDING",
+        },
+        invitedAt: { type: Date, default: Date.now },
+      },
+    ],
+
+    /**
+     * customUmpire — off-platform umpire invited by the host.
+     */
+    customUmpire: {
+      name: { type: String },
+      email: { type: String },
+      phone: { type: String },
+      inviteToken: { type: String },
+      inviteStatus: {
+        type: String,
+        enum: ["PENDING", "ACCEPTED", "EXPIRED"],
+        default: "PENDING",
+      },
+      invitedAt: { type: Date },
+    },
+    isLive: { type: Boolean, default: false },
+    streamStatus: { type: String, default: 'offline' },
+    overlayConfig: { type: Object, default: { showScoreboard: true, showCommentary: true } },
+    liveStartedAt: { type: Date },
+    youtubeVideoId: { type: String },
+    youtubeLiveChatId: { type: String },
+    youtubeStreamKey: { type: String },
+    youtubeRtmpUrl: { type: String },
+    overlayToken: { type: String },
+    lastCommentary: { type: String },
+    lastCommentaryAt: { type: Date },
+    liveScoreSnapshot: { type: Object },
+    oversPerInnings: { type: Number, default: 20 }
   },
   { timestamps: true }
 );

@@ -1,12 +1,13 @@
-﻿import React, { useState, useEffect } from 'react';
-import { X, Trash2, MessageCircle, Twitter, Facebook, Link as LinkIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Trash2, Eye, Calendar, User as UserIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin }) => {
-  const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
+const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, initialIndex = 0 }) => {
+  const [currentStoryIndex, setCurrentStoryIndex] = useState(initialIndex);
+  const [showViewers, setShowViewers] = useState(false);
 
   useEffect(() => {
-    if (!storyGroup) return;
+    if (!storyGroup || showViewers) return;
     
     const timer = setTimeout(() => {
       if (currentStoryIndex < storyGroup.stories.length - 1) {
@@ -17,7 +18,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin }) =>
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [currentStoryIndex, storyGroup, onClose]);
+  }, [currentStoryIndex, storyGroup, onClose, showViewers]);
 
   if (!storyGroup) return null;
 
@@ -112,18 +113,109 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin }) =>
               <p className="text-[10px] text-[#CCFF00] font-bold uppercase tracking-widest truncate">@{storyGroup.user.username}</p>
             </Link>
           </div>
-          {(isAdmin || isOwner) && onDelete && (
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(currentStory._id);
-              }}
-              className="p-3 bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl transition-all shrink-0"
-            >
-              <Trash2 size={18} />
-            </button>
-          )}
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col items-end">
+                <div className="flex items-center gap-1.5 text-white/40 mb-1">
+                  <Calendar size={10} />
+                  <span className="text-[9px] font-bold uppercase tracking-widest">
+                    {new Date(currentStory.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                  </span>
+                </div>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowViewers(true);
+                  }}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all group"
+                >
+                  <Eye size={12} className="text-[#CCFF00]" />
+                  <span className="text-[10px] font-black text-white group-hover:text-[#CCFF00]">
+                    {currentStory.viewers?.length || 0} Views
+                  </span>
+                </button>
+              </div>
+
+              {(isAdmin || isOwner) && onDelete && (
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(currentStory._id);
+                  }}
+                  className="p-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl transition-all shrink-0 border border-red-500/20"
+                >
+                  <Trash2 size={18} />
+                </button>
+              )}
+            </div>
+          </div>
         </div>
+
+        {/* Viewers List Overlay */}
+        {showViewers && (
+          <div 
+            className="absolute inset-0 z-[120] bg-black/90 backdrop-blur-xl animate-in slide-in-from-bottom duration-300 flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b border-white/10 flex items-center justify-between bg-black/40">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#CCFF00]/10 flex items-center justify-center">
+                  <Eye size={16} className="text-[#CCFF00]" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-tighter text-white">Story Insights</h3>
+                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{currentStory.viewers?.length || 0} Total Viewers</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowViewers(false)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/60 hover:text-white"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+              {currentStory.viewers && currentStory.viewers.length > 0 ? (
+                <div className="space-y-2">
+                  {currentStory.viewers.map((viewer) => (
+                    <Link
+                      key={viewer._id}
+                      to={`/profile/${viewer._id}`}
+                      onClick={() => onClose()}
+                      className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
+                    >
+                      <div className="relative">
+                        <div className="w-12 h-12 rounded-full border-2 border-[#2D2D2D] group-hover:border-[#CCFF00] overflow-hidden transition-colors">
+                          <img 
+                            src={viewer.profilePicture || "/default-avatar.png"} 
+                            alt="" 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#111] border border-white/10 rounded-full flex items-center justify-center">
+                          <UserIcon size={10} className="text-[#CCFF00]" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-white truncate group-hover:text-[#CCFF00] transition-colors">{viewer.name}</p>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest truncate">@{viewer.username}</p>
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#CCFF00]/20 transition-all opacity-0 group-hover:opacity-100">
+                        <Eye size={14} className="text-[#CCFF00]" />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
+                  <Eye size={48} className="mb-4 text-gray-600" />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">No viewers yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
       
       <style dangerouslySetInnerHTML={{ __html: `

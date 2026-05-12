@@ -4,8 +4,11 @@ import Turf from "../../models/turf.model.js";
 import Owner from "../../models/owner.model.js";
 import WalletTransaction from "../../models/walletTransaction.model.js";
 import mongoose from "mongoose";
-import { notifyNewGame } from "../../utils/notification.service.js";
+import { randomUUID } from "crypto";
+import { notifyNewGame, sendCustomPlayerInvite, sendCustomUmpireInvite } from "../../utils/notification.service.js";
 import { generateShortId } from "../scoring/scoring.utils.js";
+import { runInTransaction } from "../../utils/transaction.js";
+import { generateUserToken } from "../../utils/generateJwtToken.js";
 
 // Helper to check usable balance
 const getUsableBalance = async (userId) => {
@@ -63,17 +66,20 @@ export const getUmpiresForHosting = async (req, res) => {
   }
 };
 
-import { runInTransaction } from "../../utils/transaction.js";
-
 export const createHostedGame = async (req, res) => {
   try {
     const result = await runInTransaction(async ({ session, isTransactional }) => {
       const hostId = req.user.id || req.user.user || req.user._id;
       console.log("Creating hosted game for host:", hostId);
 
-      const { 
+      const {
         gameType, date, time, groundId, umpireId, ground, umpire,
-        perPlayerCharge, teamA, teamB, city, state 
+        perPlayerCharge, teamA, teamB, city, state,
+        // Quick Game specific fields
+        gameMode = "PROFESSIONAL",
+        playerCount,
+        quickSlotsData = [],   // [{ role, userId, customPlayer }] from frontend
+        customUmpireData,      // { name, email, phone }
       } = req.body;
       
       console.log("Game Data:", { gameType, date, time, groundId, umpireId, city });
@@ -143,6 +149,50 @@ export const createHostedGame = async (req, res) => {
       }], opts);
 
       // 5. Create Game
+      const isQuick = gameMode === "QUICK";
+
+      // Build quickSlots array for Quick Game
+      let builtQuickSlots = [];
+      let builtCustomPlayers = [];
+
+      if (isQuick) {
+        const count = parseInt(playerCount) || quickSlotsData.length || 5;
+        for (let i = 0; i < count; i++) {
+          const provided = quickSlotsData[i];
+          if (provided?.userId) {
+            // Pre-assigned to a registered user
+            builtQuickSlots.push({
+              user: provided.userId,
+              role: provided.role || "Player",
+              status: provided.userId.toString() === hostId.toString() ? "JOINED" : "HELD",
+              addedBy: hostId,
+            });
+          } else if (provided?.customPlayer) {
+            // Off-platform invite
+            const token = randomUUID();
+            const cp = provided.customPlayer;
+            builtCustomPlayers.push({
+              name: cp.name,
+              email: cp.email,
+              phone: cp.phone || "",
+              slotIndex: i,
+              mustPay: cp.mustPay || false,
+              inviteToken: token,
+              inviteStatus: "PENDING",
+            });
+            builtQuickSlots.push({
+              user: null,
+              role: provided.role || "Player",
+              status: "HELD",
+              addedBy: hostId,
+            });
+          } else {
+            // Open slot
+            builtQuickSlots.push({ user: null, role: "Player", status: "OPEN" });
+          }
+        }
+      }
+
       const hostedGame = new HostedGame({
         host: hostId,
         gameType,
@@ -154,48 +204,80 @@ export const createHostedGame = async (req, res) => {
         groundCost,
         umpireCost,
         totalCost,
-        teams: {
-          teamA: {
-            name: teamA.name || "Team A",
-            image: sanitizeImage(teamA.image),
-            slots: teamA.slots.map(s => ({ role: s.role, status: "OPEN" }))
-          },
-          teamB: {
-            name: teamB.name || "Team B",
-            image: sanitizeImage(teamB.image),
-            slots: teamB.slots.map(s => ({ role: s.role, status: "OPEN" }))
-          }
-        },
+        gameMode,
+        ...(isQuick
+          ? {
+              quickSlots: builtQuickSlots,
+              customPlayers: builtCustomPlayers,
+              teams: {
+                teamA: { name: "Team A", slots: [] },
+                teamB: { name: "Team B", slots: [] },
+              },
+            }
+          : {
+              teams: {
+                teamA: {
+                  name: teamA?.name || "Team A",
+                  image: sanitizeImage(teamA?.image),
+                  slots: (teamA?.slots || []).map(s => ({ role: s.role, status: "OPEN" })),
+                },
+                teamB: {
+                  name: teamB?.name || "Team B",
+                  image: sanitizeImage(teamB?.image),
+                  slots: (teamB?.slots || []).map(s => ({ role: s.role, status: "OPEN" })),
+                },
+              },
+            }),
         city,
         state,
         shortId: generateShortId(),
-        status: "ACTIVE"
+        status: "ACTIVE",
+        customUmpire: customUmpireData?.email ? {
+          ...customUmpireData,
+          inviteToken: randomUUID(),
+          inviteStatus: "PENDING",
+          invitedAt: new Date()
+        } : undefined
       });
 
       await hostedGame.save(opts);
-
       return hostedGame;
     });
 
-    // Trigger Notifications (Non-blocking)
+    // Trigger notifications (non-blocking)
     const hostId = req.user.id || req.user.user;
     let host = await User.findById(hostId).select("name email phone");
-    if (!host) {
-      host = await Owner.findById(hostId).select("name email phone");
-    }
+    if (!host) host = await Owner.findById(hostId).select("name email phone");
+
     notifyNewGame(result, host).catch(e => console.error("[Notifications] Error:", e));
 
-    return res.status(201).json({ 
-      success: true, 
-      message: "Game hosted successfully. Coins reserved and local players notified!",
-      game: result 
+    // Send invite emails to custom players (non-blocking)
+    if (result.customPlayers?.length) {
+      result.customPlayers.forEach(cp => {
+        sendCustomPlayerInvite(cp, result, host).catch(e =>
+          console.error("[CustomInvite] Error:", e)
+        );
+      });
+    }
+
+    // Send invite email to custom umpire (non-blocking)
+    if (result.customUmpire?.email) {
+      sendCustomUmpireInvite(result.customUmpire, result, host).catch(e =>
+        console.error("[CustomUmpireInvite] Error:", e)
+      );
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Game hosted successfully!",
+      game: result,
     });
 
   } catch (error) {
     console.error("Error in createHostedGame (Outer):", error);
-    return res.status(error.status || 500).json({ 
-      success: false, 
-      message: error.message || "Failed to create game"
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Failed to create game",
     });
   }
 };
@@ -305,7 +387,7 @@ export const approveJoinRequest = async (req, res) => {
           $inc: { 
             walletBalance: -game.perPlayerCharge,
             reservedBalance: -game.perPlayerCharge 
-          } 
+        } 
         }, { session });
       }
 
@@ -451,7 +533,8 @@ export const getMyJoinedGames = async (req, res) => {
     const games = await HostedGame.find({
       $or: [
         { "teams.teamA.slots.user": userId },
-        { "teams.teamB.slots.user": userId }
+        { "teams.teamB.slots.user": userId },
+        { "quickSlots.user": userId }
       ]
     }).populate("host", "name profilePicture")
       .populate("ground")
@@ -469,6 +552,15 @@ export const getMyJoinedGames = async (req, res) => {
         }
       });
       
+      if (!mySlot) {
+        game.quickSlots.forEach((s, idx) => {
+          if (s.user?.toString() === userId.toString()) {
+            mySlot = s;
+            myTeam = "QUICK";
+          }
+        });
+      }
+
       if (!mySlot) {
         game.teams.teamB.slots.forEach((s, idx) => {
           if (s.user?.toString() === userId.toString()) {
@@ -503,9 +595,18 @@ export const leaveHostedGame = async (req, res) => {
 
       let teamKey = "";
       let slotIndex = -1;
+      let isQuickSlot = false;
 
       // Find user's slot
-      if (game.teams.teamA.slots.some((s, idx) => {
+      if (game.quickSlots && game.quickSlots.some((s, idx) => {
+        if (s.user?.toString() === userId.toString()) {
+          slotIndex = idx;
+          isQuickSlot = true;
+          return true;
+        }
+        return false;
+      }));
+      else if (game.teams.teamA.slots.some((s, idx) => {
         if (s.user?.toString() === userId.toString()) {
           teamKey = "teamA";
           slotIndex = idx;
@@ -524,7 +625,7 @@ export const leaveHostedGame = async (req, res) => {
 
       if (slotIndex === -1) throw new Error("You are not part of this game");
 
-      const slot = game.teams[teamKey].slots[slotIndex];
+      const slot = isQuickSlot ? game.quickSlots[slotIndex] : game.teams[teamKey].slots[slotIndex];
       
       // If pending, just release reserved coins
       if (slot.status === "PENDING") {
@@ -557,11 +658,19 @@ export const leaveHostedGame = async (req, res) => {
       }
 
       // Reset slot
-      game.teams[teamKey].slots[slotIndex] = {
-        user: null,
-        role: "",
-        status: "OPEN"
-      };
+      if (isQuickSlot) {
+        game.quickSlots[slotIndex] = {
+          user: null,
+          role: slot.role || "Player",
+          status: "OPEN"
+        };
+      } else {
+        game.teams[teamKey].slots[slotIndex] = {
+          user: null,
+          role: slot.role || "Player",
+          status: "OPEN"
+        };
+      }
 
       await game.save({ session });
     });
@@ -684,3 +793,326 @@ export const getHostedGameById = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 2B — Assign a Quick Game slot to an existing registered user (host only)
+// ─────────────────────────────────────────────────────────────────────────────
+export const assignQuickSlot = async (req, res) => {
+  try {
+    const hostId = req.user.id || req.user.user;
+    const { gameId, slotIndex, userId } = req.body;
+
+    if (slotIndex === undefined || !userId) {
+      return res.status(400).json({ message: "slotIndex and userId are required" });
+    }
+
+    const game = await HostedGame.findOne({ _id: gameId, host: hostId });
+    if (!game) return res.status(404).json({ message: "Game not found or unauthorized" });
+    if (game.gameMode !== "QUICK") {
+      return res.status(400).json({ message: "Only Quick Games support slot assignment" });
+    }
+
+    const slot = game.quickSlots[slotIndex];
+    if (!slot) return res.status(400).json({ message: "Invalid slot index" });
+    if (slot.status !== "OPEN") return res.status(400).json({ message: "Slot is not open" });
+
+    game.quickSlots[slotIndex].user = userId;
+    game.quickSlots[slotIndex].status = "HELD";
+    game.quickSlots[slotIndex].addedBy = hostId;
+    game.markModified("quickSlots");
+
+    await game.save();
+    return res.status(200).json({ success: true, message: "Slot assigned successfully" });
+  } catch (error) {
+    console.error("[assignQuickSlot]", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 2C — Invite an off-platform custom player to a Quick Game slot
+// ─────────────────────────────────────────────────────────────────────────────
+export const inviteCustomPlayer = async (req, res) => {
+  try {
+    const hostId = req.user.id || req.user.user;
+    const { gameId, slotIndex, name, email, phone, mustPay } = req.body;
+
+    if (!email || !name || slotIndex === undefined) {
+      return res.status(400).json({ message: "name, email, and slotIndex are required" });
+    }
+
+    const game = await HostedGame.findOne({ _id: gameId, host: hostId });
+    if (!game) return res.status(404).json({ message: "Game not found or unauthorized" });
+    if (game.gameMode !== "QUICK") {
+      return res.status(400).json({ message: "Only Quick Games support custom invites" });
+    }
+
+    const slot = game.quickSlots[slotIndex];
+    if (!slot) return res.status(400).json({ message: "Invalid slot index" });
+    if (slot.status !== "OPEN") return res.status(400).json({ message: "Slot is not open" });
+
+    const token = randomUUID();
+    const customPlayer = {
+      name,
+      email,
+      phone: phone || "",
+      slotIndex,
+      mustPay: !!mustPay,
+      inviteToken: token,
+      inviteStatus: "PENDING",
+    };
+
+    game.customPlayers.push(customPlayer);
+    const cpDoc = game.customPlayers[game.customPlayers.length - 1];
+
+    game.quickSlots[slotIndex].status = "HELD";
+    game.quickSlots[slotIndex].addedBy = hostId;
+    game.quickSlots[slotIndex].customPlayerRef = cpDoc._id;
+    game.markModified("quickSlots");
+    game.markModified("customPlayers");
+
+    await game.save();
+
+    // Fire invite email non-blocking
+    const host = await User.findById(hostId).select("name email phone");
+    sendCustomPlayerInvite(cpDoc, game, host).catch(e => console.error("[inviteCustomPlayer] Email Error:", e));
+
+    return res.status(200).json({ success: true, message: "Invitation sent!" });
+  } catch (error) {
+    console.error("[inviteCustomPlayer]", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 2D — Verify an invitation token (for the invite page)
+// ─────────────────────────────────────────────────────────────────────────────
+export const verifyInviteToken = async (req, res) => {
+  try {
+    const { token } = req.query;
+    if (!token) return res.status(400).json({ message: "Token is required" });
+
+    // Try finding player invite first
+    let game = await HostedGame.findOne({
+      "customPlayers.inviteToken": token,
+      "customPlayers.inviteStatus": "PENDING",
+    });
+
+    let inviteType = "PLAYER";
+    let inviteData = null;
+
+    if (game) {
+      inviteData = game.customPlayers.find(p => p.inviteToken === token);
+    } else {
+      // Try finding umpire invite
+      game = await HostedGame.findOne({
+        "customUmpire.inviteToken": token,
+        "customUmpire.inviteStatus": "PENDING",
+      });
+      if (game) {
+        inviteType = "UMPIRE";
+        inviteData = game.customUmpire;
+      }
+    }
+
+    if (!game || !inviteData) {
+      return res.status(404).json({ message: "Invite not found or already used" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      gameId: game._id,
+      shortId: game.shortId,
+      inviteType,
+      email: inviteData.email,
+      name: inviteData.name,
+      game: {
+        gameType: game.gameType,
+        date: game.date,
+        time: game.time,
+        city: game.city,
+        state: game.state,
+      },
+    });
+  } catch (error) {
+    console.error("[verifyInviteToken]", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 2E — Return followers + following for the slot picker popup
+// ─────────────────────────────────────────────────────────────────────────────
+export const getFollowersForSlot = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user.user;
+
+    const me = await User.findById(userId)
+      .select("followers following")
+      .populate("followers", "name profilePicture sportTypes city state")
+      .populate("following", "name profilePicture sportTypes city state");
+
+    if (!me) return res.status(404).json({ message: "User not found" });
+
+    // Union of followers + following, de-duped by _id
+    const seen = new Set();
+    const people = [];
+    [...(me.followers || []), ...(me.following || [])].forEach(u => {
+      const key = u._id.toString();
+      if (!seen.has(key)) {
+        seen.add(key);
+        people.push(u);
+      }
+    });
+
+    return res.status(200).json({ success: true, people });
+  } catch (error) {
+    console.error("[getFollowersForSlot]", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// -----------------------------------------------------------------------------
+// Phase 2F — Claim an invited slot (called by the invited user)
+// -----------------------------------------------------------------------------
+export const claimInviteSlot = async (req, res) => {
+  let updatedRole = null;
+  let updatedOwnerId = null;
+
+  try {
+    const result = await runInTransaction(async ({ session }) => {
+      const userId = req.user.id || req.user.user;
+      const { token } = req.body;
+
+      if (!token) throw new Error("Token is required");
+
+      let game = await HostedGame.findOne({
+        "customPlayers.inviteToken": token,
+        "customPlayers.inviteStatus": "PENDING",
+      }).session(session);
+
+      let isUmpire = false;
+
+      if (!game) {
+        game = await HostedGame.findOne({
+          "customUmpire.inviteToken": token,
+          "customUmpire.inviteStatus": "PENDING",
+        }).session(session);
+        isUmpire = true;
+      }
+
+      if (!game) throw new Error("Invite not found or already claimed");
+
+      if (isUmpire) {
+        // Handle Umpire Claim
+        game.customUmpire.inviteStatus = "ACCEPTED";
+        game.customUmpire.claimedByUser = userId;
+        
+        // Also assign as official umpire for the match
+        let owner = await Owner.findOne({ userId }).session(session);
+        
+        // If owner profile doesn't exist, create a LIMITED_UMPIRE owner profile
+        if (!owner) {
+          const userDetails = await User.findById(userId).session(session);
+          if (userDetails) {
+            owner = new Owner({
+              userId: userId,
+              name: userDetails.name || userDetails.fullName || game.customUmpire.name,
+              email: userDetails.email || game.customUmpire.email,
+              phone: userDetails.phone || game.customUmpire.phone,
+              role: "LIMITED_UMPIRE"
+            });
+            await owner.save({ session });
+            
+            // Update User role
+            userDetails.role = "LIMITED_UMPIRE";
+            userDetails.ownerDetails = owner._id;
+            await userDetails.save({ session });
+            
+            updatedRole = "LIMITED_UMPIRE";
+            updatedOwnerId = owner._id;
+          }
+        } else if (owner.role === "owner" || owner.role === "user") {
+          // Upgrade role if they only have a basic owner profile
+          owner.role = "LIMITED_UMPIRE";
+          await owner.save({ session });
+          await User.findByIdAndUpdate(userId, { role: "LIMITED_UMPIRE" }, { session });
+          
+          updatedRole = "LIMITED_UMPIRE";
+          updatedOwnerId = owner._id;
+        }
+
+        game.umpire = owner ? owner._id : userId;
+        
+        // Remove pending requests if any
+        if (game.umpireRequest) {
+          game.umpireRequest.status = "APPROVED";
+          game.umpireRequest.user = game.umpire;
+        }
+
+        game.markModified("customUmpire");
+        game.markModified("umpireRequest");
+      } else {
+        // Handle Player Claim
+        const cpIndex = game.customPlayers.findIndex(p => p.inviteToken === token);
+        const cp = game.customPlayers[cpIndex];
+        const slotIndex = cp.slotIndex;
+
+        // Handle payment if required
+        if (cp.mustPay && game.perPlayerCharge > 0) {
+          const usableBalance = await getUsableBalance(userId);
+          if (usableBalance < game.perPlayerCharge) {
+            const error = new Error("Insufficient coins. This slot requires coins.");
+            error.status = 400;
+            throw error;
+          }
+
+          // Reserve coins
+          const updatedPlayer = await User.findByIdAndUpdate(userId, { $inc: { reservedBalance: game.perPlayerCharge } }, { session });
+          if (!updatedPlayer) {
+            await Owner.findByIdAndUpdate(userId, { $inc: { reservedBalance: game.perPlayerCharge } }, { session });
+          }
+
+          await WalletTransaction.create([{
+            user: userId,
+            amount: game.perPlayerCharge,
+            type: "JOIN_GAME",
+            status: "RESERVED",
+            description: "Reserved for claiming invited slot in game"
+          }], { session });
+        }
+
+        // Update game state
+        game.customPlayers[cpIndex].inviteStatus = "CLAIMED";
+        game.customPlayers[cpIndex].claimedByUser = userId;
+        
+        // Update quickSlot
+        if (game.gameMode === "QUICK" && game.quickSlots[slotIndex]) {
+          game.quickSlots[slotIndex].user = userId;
+          game.quickSlots[slotIndex].status = "JOINED";
+        }
+
+        game.markModified("customPlayers");
+        game.markModified("quickSlots");
+      }
+
+      await game.save({ session });
+      return { success: true, updatedRole: updatedRole || null, updatedOwnerId: updatedOwnerId || null };
+    });
+
+    if (result.updatedRole && result.updatedRole !== req.user?.role) {
+      const newToken = generateUserToken(req.user.id || req.user.user, result.updatedRole, result.updatedOwnerId);
+      res.cookie("auth_token", newToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Lax",
+        maxAge: 30 * 24 * 60 * 60 * 1000
+      });
+      return res.status(200).json({ success: true, message: "Slot claimed successfully!", newToken, updatedRole: result.updatedRole });
+    }
+
+    return res.status(200).json({ success: true, message: "Slot claimed successfully!" });
+  } catch (error) {
+    console.error("[claimInviteSlot]", error);
+    return res.status(error.status || 500).json({ message: error.message });
+  }
+};

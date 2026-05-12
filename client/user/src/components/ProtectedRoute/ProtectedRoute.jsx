@@ -18,6 +18,8 @@ export default function ProtectedRoute({ children, requiredRole }) {
       isMatchingRole = isAdminRole(role);
     } else if (requiredRole.toLowerCase() === "owner") {
       isMatchingRole = isOwnerRole(role);
+    } else if (requiredRole.toLowerCase() === "umpire") {
+      isMatchingRole = role?.toLowerCase() === "umpire" || role?.toLowerCase() === "limited_umpire";
     } else {
       isMatchingRole = role?.toLowerCase() === requiredRole?.toLowerCase();
     }

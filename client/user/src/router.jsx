@@ -33,6 +33,8 @@ import ScoringApp from "@user/pages/ScoringApp";
 import MatchAnalytics from "@user/pages/MatchAnalytics";
 import MatchDetails from "@user/pages/MatchDetails";
 import Leaderboard from "@user/pages/Leaderboard";
+import LiveOverlay from "@user/pages/LiveOverlay";
+import LiveScoreboard from "@user/pages/LiveScoreboard";
 
 
 // Business Landing Pages (User Portal)
@@ -94,6 +96,7 @@ import {
   AuditLogs,
   FinancialMissionControl,
   ProfessionalDetailsPage,
+  HostedGamesPage,
 } from "@components/admin";
 import PartnerSupport from "@components/owner/Support/PartnerSupport";
 import DashboardProfile from "@components/shared/DashboardProfile";
@@ -143,6 +146,7 @@ const router = createBrowserRouter([
       { path: "marketing", element: <MarketingManagement /> },
       { path: "blogs", element: <BlogManagement /> },
       { path: "community", element: <CommunityManagement /> },
+      { path: "games", element: <HostedGamesPage /> },
       { path: "*", element: <NotFound /> },
     ],
   },
@@ -237,6 +241,8 @@ const router = createBrowserRouter([
       { index: true, element: <RootRedirect /> },
       { path: "login", element: <PublicRoute><UserLogin /></PublicRoute> },
       { path: "signup", element: <PublicRoute><UserSignUp /></PublicRoute> },
+      { path: "auth/login", element: <PublicRoute><UserLogin /></PublicRoute> },
+      { path: "auth/signup", element: <PublicRoute><UserSignUp /></PublicRoute> },
       { path: "forgot-password", element: <PublicRoute><ForgotPassword /></PublicRoute> },
       { path: "turfs", element: <UserTurf /> },
       { path: "turf/:id", element: <UserTurfDetails /> },
@@ -273,6 +279,8 @@ const router = createBrowserRouter([
       { path: "booking-invoice/:id", element: <BookingInvoice /> },
       { path: "analytics/:matchId", element: <MatchAnalytics /> },
       { path: "leaderboard", element: <Leaderboard /> },
+      { path: "live-overlay/:matchId", element: <LiveOverlay /> },
+      { path: "live-score/:matchId", element: <LiveScoreboard /> },
       { path: "*", element: <NotFound /> },
     ],
   },

@@ -11,8 +11,121 @@ import CommunityPost from "../../models/communityPost.model.js";
 import HostedGame from "../../models/hostedGame.model.js";
 import AuditLog from "../../models/auditLog.model.js";
 import Blog from "../../models/blog.model.js";
+import Story from "../../models/story.model.js";
+import Match from "../../models/match.model.js";
+import WalletTransaction from "../../models/walletTransaction.model.js";
+import Notification from "../../models/notification.model.js";
+import Chat from "../../models/chat.model.js";
+import Message from "../../models/message.model.js";
 import generateEmail from "../../utils/generateEmail.js";
 import { logAdminAction } from "../../utils/auditLogger.js";
+
+/**
+ * Helper to perform cascade deletion of all user-related data.
+ * Purges posts, stories, games, bookings, reviews, and social interactions.
+ */
+const cleanupUserData = async (userIds) => {
+  if (!Array.isArray(userIds)) userIds = [userIds];
+  
+  try {
+    // Find associated Owner IDs before User deletion
+    const owners = await Owner.find({ userId: { $in: userIds } });
+    const ownerIds = owners.map(o => o._id);
+    
+    // 1. Content: Posts & Stories
+    await CommunityPost.deleteMany({ adminId: { $in: userIds }, authorModel: 'User' });
+    await Story.deleteMany({ userId: { $in: userIds }, userModel: 'User' });
+    
+    // 2. Gameplay: Games & Matches
+    // Delete games where they are the host
+    await HostedGame.deleteMany({ host: { $in: userIds } });
+    
+    // Handle owner-specific game data (umpires)
+    if (ownerIds.length > 0) {
+      await Match.deleteMany({ umpire: { $in: ownerIds } });
+      await HostedGame.updateMany(
+        { umpire: { $in: ownerIds } },
+        { $set: { umpire: null, status: "PENDING" } }
+      );
+    }
+    
+    // 3. Transactions & Feedback
+    await Booking.deleteMany({ user: { $in: userIds } });
+    await Review.deleteMany({ user: { $in: userIds } });
+    if (ownerIds.length > 0) {
+      await Review.deleteMany({ professional: { $in: ownerIds } });
+    }
+    
+    // 4. Requests & Lifecycle
+    await OwnerRequest.deleteMany({ userId: { $in: userIds } });
+    if (ownerIds.length > 0) {
+      await WithdrawalRequest.deleteMany({ owner: { $in: ownerIds } });
+      await Turf.deleteMany({ owner: { $in: ownerIds } });
+    }
+    
+    // 5. Support & Disputes
+    await SupportTicket.deleteMany({ user: { $in: userIds } });
+    await Dispute.deleteMany({ raisedBy: { $in: userIds }, onModel: "User" });
+    
+    // 6. Wallet & Communication
+    await WalletTransaction.deleteMany({ user: { $in: userIds } });
+    await Notification.deleteMany({ recipient: { $in: userIds } });
+    
+    // 7. Social Cleanup: Pull ID from others' posts (likes/comments)
+    await CommunityPost.updateMany(
+      {},
+      { 
+        $pull: { 
+          likes: { $in: userIds },
+          comments: { userId: { $in: userIds } }
+        } 
+      }
+    );
+    
+    // 8. Social Cleanup: Followers & Following
+    await User.updateMany(
+      {},
+      { 
+        $pull: { 
+          followers: { $in: userIds },
+          following: { $in: userIds }
+        } 
+      }
+    );
+    
+    // 9. Messaging Cleanup
+    await Chat.updateMany(
+      {},
+      { $pull: { users: { user: { $in: userIds } } } }
+    );
+    await Message.deleteMany({ "sender.user": { $in: userIds }, "sender.onModel": "User" });
+    
+    // 10. Game Slot Cleanup: Free up slots in others' games
+    await HostedGame.updateMany(
+      { "teams.teamA.slots.user": { $in: userIds } },
+      { $set: { "teams.teamA.slots.$[elem].user": null, "teams.teamA.slots.$[elem].status": "OPEN" } },
+      { arrayFilters: [{ "elem.user": { $in: userIds } }] }
+    );
+    await HostedGame.updateMany(
+      { "teams.teamB.slots.user": { $in: userIds } },
+      { $set: { "teams.teamB.slots.$[elem].user": null, "teams.teamB.slots.$[elem].status": "OPEN" } },
+      { arrayFilters: [{ "elem.user": { $in: userIds } }] }
+    );
+    await HostedGame.updateMany(
+      { "quickSlots.user": { $in: userIds } },
+      { $set: { "quickSlots.$[elem].user": null, "quickSlots.$[elem].status": "OPEN" } },
+      { arrayFilters: [{ "elem.user": { $in: userIds } }] }
+    );
+
+    // 11. Final purge of Owner records
+    if (ownerIds.length > 0) {
+      await Owner.deleteMany({ _id: { $in: ownerIds } });
+    }
+  } catch (error) {
+    console.error("CASCADE_DELETION_ERROR:", error);
+    throw error; // Propagate to controller for 500 response
+  }
+};
 
 export const getAllUsers = async (req, res) => {
   const admin = req.admin.role;
@@ -678,3 +791,356 @@ export const verifyKYC = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const updateUserStatus = async (req, res) => {
+  const admin = req.admin.role;
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized access denied" });
+  }
+
+  try {
+    const user = await User.findByIdAndUpdate(id, { status }, { new: true });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    await logAdminAction(req, `USER_${status.toUpperCase()}`, "USER_MANAGEMENT", user._id, { status });
+
+    res.status(200).json({ success: true, message: `User status updated to ${status}`, user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  const admin = req.admin.role;
+  const { id } = req.params;
+
+  if (admin !== "admin" && admin !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized access denied" });
+  }
+
+  try {
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Perform cascade deletion of all related data
+    await cleanupUserData(id);
+
+    // Finally delete the user record
+    await User.findByIdAndDelete(id);
+
+    await logAdminAction(req, "DELETE_USER", "USER_MANAGEMENT", id, { 
+      name: user.name, 
+      email: user.email 
+    });
+
+    res.status(200).json({ success: true, message: "User and all associated data permanently deleted" });
+  } catch (error) {
+    console.error("Error in deleteUser:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const deleteOwner = async (req, res) => {
+  const adminRole = req.admin.role;
+  const { id } = req.params;
+
+  if (adminRole !== "admin" && adminRole !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized access denied" });
+  }
+
+  try {
+    const owner = await Owner.findById(id);
+    if (!owner) return res.status(404).json({ message: "Owner not found" });
+
+    // If there's an associated User, perform full cascade cleanup starting from User
+    if (owner.userId) {
+      await cleanupUserData(owner.userId);
+      await User.findByIdAndDelete(owner.userId);
+    } else {
+      // If no User ID (rare), just cleanup owner-specific data
+      await Turf.deleteMany({ owner: id });
+      await WithdrawalRequest.deleteMany({ owner: id });
+      await HostedGame.updateMany({ umpire: id }, { $set: { umpire: null } });
+      await Owner.findByIdAndDelete(id);
+    }
+
+    await logAdminAction(
+      req,
+      "DELETE_OWNER",
+      "USER_MANAGEMENT",
+      id,
+      { name: owner.name, email: owner.email }
+    );
+
+    res.status(200).json({ success: true, message: "Owner and all associated data permanently deleted" });
+  } catch (error) {
+    console.error("Error in deleteOwner:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+export const getAllHostedGames = async (req, res) => {
+  const adminRole = req.admin.role;
+  if (adminRole !== "admin" && adminRole !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized" });
+  }
+
+  try {
+    const games = await HostedGame.find()
+      .populate('host', 'name email profilePicture')
+      .populate('ground', 'name location')
+      .populate('umpire', 'name')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, games });
+  } catch (error) {
+    console.error("Error in getAllHostedGames:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const deleteHostedGame = async (req, res) => {
+  const adminRole = req.admin.role;
+  if (adminRole !== "admin" && adminRole !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized" });
+  }
+
+  const { id } = req.params;
+
+  try {
+    const game = await HostedGame.findByIdAndDelete(id);
+    if (!game) {
+      return res.status(404).json({ success: false, message: "Game not found" });
+    }
+
+    await logAdminAction(
+      req,
+      "DELETE_HOSTED_GAME",
+      "GAME_MANAGEMENT",
+      id,
+      { gameDetails: { id, date: game.date, type: game.gameType } }
+    );
+
+    res.status(200).json({ success: true, message: "Game deleted successfully" });
+  } catch (error) {
+    console.error("Error in deleteHostedGame:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const batchDeleteGames = async (req, res) => {
+  const adminRole = req.admin.role;
+  if (adminRole !== "admin" && adminRole !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized" });
+  }
+
+  const { gameIds } = req.body;
+  if (!gameIds || !Array.isArray(gameIds)) {
+    return res.status(400).json({ success: false, message: "Invalid game IDs" });
+  }
+
+  try {
+    const result = await HostedGame.deleteMany({ _id: { $in: gameIds } });
+
+    await logAdminAction(
+      req,
+      "BATCH_DELETE_GAMES",
+      "GAME_MANAGEMENT",
+      null,
+      { count: result.deletedCount, gameIds }
+    );
+
+    res.status(200).json({ success: true, message: `Successfully deleted ${result.deletedCount} games`, count: result.deletedCount });
+  } catch (error) {
+    console.error("Error in batchDeleteGames:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const batchUpdateGameStatus = async (req, res) => {
+  const adminRole = req.admin.role;
+  if (adminRole !== "admin" && adminRole !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized" });
+  }
+
+  const { gameIds, status } = req.body;
+  if (!gameIds || !Array.isArray(gameIds) || !status) {
+    return res.status(400).json({ success: false, message: "Invalid request parameters" });
+  }
+
+  try {
+    const result = await HostedGame.updateMany(
+      { _id: { $in: gameIds } },
+      { $set: { status } }
+    );
+
+    await logAdminAction(
+      req,
+      "BATCH_GAME_STATUS_UPDATE",
+      "GAME_MANAGEMENT",
+      null,
+      { count: result.modifiedCount, status, gameIds }
+    );
+
+    res.status(200).json({ success: true, message: `Successfully updated ${result.modifiedCount} games to ${status}`, count: result.modifiedCount });
+  } catch (error) {
+    console.error("Error in batchUpdateGameStatus:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const batchDeleteUsers = async (req, res) => {
+  const adminRole = req.admin.role;
+  if (adminRole !== "admin" && adminRole !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized" });
+  }
+
+  const { userIds } = req.body;
+  if (!userIds || !Array.isArray(userIds)) {
+    return res.status(400).json({ success: false, message: "Invalid user IDs" });
+  }
+
+  try {
+    // Perform full cascade cleanup for all users
+    await cleanupUserData(userIds);
+
+    // Finally delete the user records
+    const result = await User.deleteMany({ _id: { $in: userIds } });
+    
+    // Log the batch action
+    await logAdminAction(
+      req,
+      "BATCH_DELETE_USERS",
+      "USER_MANAGEMENT",
+      null,
+      { count: result.deletedCount, userIds }
+    );
+
+    res.status(200).json({ success: true, message: `Successfully deleted ${result.deletedCount} users and all associated data`, count: result.deletedCount });
+  } catch (error) {
+    console.error("Error in batchDeleteUsers:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const batchUpdateUserStatus = async (req, res) => {
+  const adminRole = req.admin.role;
+  if (adminRole !== "admin" && adminRole !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized" });
+  }
+
+  const { userIds, status } = req.body;
+  if (!userIds || !Array.isArray(userIds) || !status) {
+    return res.status(400).json({ success: false, message: "Invalid request parameters" });
+  }
+
+  try {
+    const result = await User.updateMany(
+      { _id: { $in: userIds } },
+      { $set: { status } }
+    );
+
+    // Log the batch action
+    await logAdminAction(
+      req.admin._id,
+      "BATCH_STATUS_UPDATE",
+      "User",
+      null,
+      { count: result.modifiedCount, status, userIds },
+      `Updated status to ${status} for ${result.modifiedCount} users via batch action`
+    );
+
+    res.status(200).json({ success: true, message: `Successfully updated ${result.modifiedCount} users to ${status}`, count: result.modifiedCount });
+  } catch (error) {
+    console.error("Error in batchUpdateUserStatus:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const batchDeleteOwners = async (req, res) => {
+  const adminRole = req.admin.role;
+  if (adminRole !== "admin" && adminRole !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized" });
+  }
+
+  const { ownerIds } = req.body;
+  if (!ownerIds || !Array.isArray(ownerIds)) {
+    return res.status(400).json({ success: false, message: "Invalid owner IDs" });
+  }
+
+  try {
+    const owners = await Owner.find({ _id: { $in: ownerIds } });
+    const userIds = owners.filter(o => o.userId).map(o => o.userId);
+
+    // Delete associated User entries if they exist
+    if (userIds.length > 0) {
+      await User.deleteMany({ _id: { $in: userIds } });
+    }
+
+    // Delete Owner entries
+    const result = await Owner.deleteMany({ _id: { $in: ownerIds } });
+    
+    // Log the batch action
+    await logAdminAction(
+      req.admin._id,
+      "BATCH_DELETE_OWNERS",
+      "Owner",
+      null,
+      { count: result.deletedCount, ownerIds },
+      `Permanently deleted ${result.deletedCount} owners/professionals via batch action`
+    );
+
+    res.status(200).json({ success: true, message: `Successfully deleted ${result.deletedCount} records`, count: result.deletedCount });
+  } catch (error) {
+    console.error("Error in batchDeleteOwners:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const batchUpdateOwnerStatus = async (req, res) => {
+  const adminRole = req.admin.role;
+  if (adminRole !== "admin" && adminRole !== "BMSP_ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized" });
+  }
+
+  const { ownerIds, status } = req.body;
+  if (!ownerIds || !Array.isArray(ownerIds) || !status) {
+    return res.status(400).json({ success: false, message: "Invalid request parameters" });
+  }
+
+  try {
+    const result = await Owner.updateMany(
+      { _id: { $in: ownerIds } },
+      { $set: { status } }
+    );
+
+    // Also update associated User status if they exist
+    const owners = await Owner.find({ _id: { $in: ownerIds } });
+    const userIds = owners.filter(o => o.userId).map(o => o.userId);
+    if (userIds.length > 0) {
+      await User.updateMany({ _id: { $in: userIds } }, { $set: { status } });
+    }
+
+    // Log the batch action
+    await logAdminAction(
+      req.admin._id,
+      "BATCH_OWNER_STATUS_UPDATE",
+      "Owner",
+      null,
+      { count: result.modifiedCount, status, ownerIds },
+      `Updated status to ${status} for ${result.modifiedCount} owners via batch action`
+    );
+
+    res.status(200).json({ success: true, message: `Successfully updated ${result.modifiedCount} records to ${status}`, count: result.modifiedCount });
+  } catch (error) {
+    console.error("Error in batchUpdateOwnerStatus:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+

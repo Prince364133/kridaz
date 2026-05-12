@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { UmpireSidebar, AuthenticatedNavbar } from "@components/layout";
 import MobileBottomNav from "@user/components/layout/MobileBottomNav";
 
@@ -7,6 +8,17 @@ const UmpireLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const toggleSidebar = () => setIsOpen(!isOpen);
+
+  const { role } = useSelector((state) => state.auth);
+  const location = useLocation();
+  const isLimitedUmpire = role?.toLowerCase() === "limited_umpire";
+
+  // Strict restriction: Limited Umpires can ONLY access the Matches page
+  if (isLimitedUmpire && 
+      location.pathname !== "/umpire/matches" && 
+      !location.pathname.startsWith("/scoring/")) {
+    return <Navigate to="/umpire/matches" replace />;
+  }
 
   const isMinimized = !isHovered;
 

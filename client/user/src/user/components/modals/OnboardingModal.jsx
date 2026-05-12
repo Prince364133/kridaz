@@ -1,9 +1,11 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Check, Trophy, Activity, Zap, Target, MapPin, Phone, User as UserIcon, ChevronRight, ChevronLeft, Loader2 } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../../redux/slices/authSlice";
+import { searchLocations } from "../../utils/locationService";
+import { useRef, useEffect } from "react";
 
 const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
   const dispatch = useDispatch();
@@ -16,6 +18,11 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
     location: "",
     sportTypes: []
   });
+
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const locationRef = useRef(null);
 
   const sports = [
     { name: "Cricket", icon: <Trophy size={18} /> },
@@ -58,6 +65,46 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
 
   const handleBack = () => {
     setStep(prev => prev - 1);
+  };
+
+  // Location Autocomplete Effect
+  useEffect(() => {
+    if (!formData.location || formData.location.length < 3) {
+      setLocationSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearchingLocation(true);
+      try {
+        const results = await searchLocations(formData.location);
+        setLocationSuggestions(results);
+        setShowSuggestions(results.length > 0);
+      } catch (error) {
+        console.error("Location search error:", error);
+      } finally {
+        setIsSearchingLocation(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [formData.location]);
+
+  // Click outside to close suggestions
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (locationRef.current && !locationRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelectLocation = (suggestion) => {
+    setFormData({ ...formData, location: suggestion.display_name });
+    setShowSuggestions(false);
   };
 
   const handleSubmit = async () => {
@@ -165,17 +212,42 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
                   </div>
                 </div>
                 
-                <label className="block">
+                <label className="block" ref={locationRef}>
                   <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Your City/Area</span>
                   <div className="mt-2 relative">
                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
                     <input
                       type="text"
                       value={formData.location}
-                      onChange={(e) => setFormData({...formData, location: e.target.value})}
+                      onChange={(e) => {
+                        setFormData({...formData, location: e.target.value});
+                        setShowSuggestions(true);
+                      }}
+                      onFocus={() => setShowSuggestions(locationSuggestions.length > 0)}
                       placeholder="e.g. Mumbai, Maharashtra"
-                      className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00] outline-none transition-all"
+                      className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-12 text-white placeholder:text-white/10 focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00] outline-none transition-all"
                     />
+                    {isSearchingLocation && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                        <Loader2 className="w-4 h-4 text-[#CCFF00] animate-spin" />
+                      </div>
+                    )}
+
+                    {/* Suggestions Dropdown */}
+                    {showSuggestions && locationSuggestions.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-[#0A0A0A] border border-[#2D2D2D] rounded-[12px] overflow-hidden z-[110] shadow-2xl max-h-[200px] overflow-y-auto custom-scrollbar">
+                        {locationSuggestions.map((suggestion, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleSelectLocation(suggestion)}
+                            className="w-full px-5 py-3 text-left hover:bg-[#CCFF00]/10 text-white/80 hover:text-white border-b border-[#2D2D2D] last:border-0 transition-colors flex flex-col gap-0.5"
+                          >
+                            <span className="text-xs font-bold uppercase tracking-wider">{suggestion.city || suggestion.display_name.split(',')[0]}</span>
+                            <span className="text-[9px] text-white/40 truncate">{suggestion.display_name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </label>
               </div>

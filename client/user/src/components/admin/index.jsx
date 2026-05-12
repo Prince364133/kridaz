@@ -45,3 +45,6 @@ export {default as ProfessionalDetailsPage} from "./ProfessionalManagement/Profe
 
 // Finance
 export {default as FinancialMissionControl} from "./Finance/FinancialMissionControl"
+
+// Hosted Games
+export {default as HostedGamesPage} from "./HostedGames/HostedGamesPage"

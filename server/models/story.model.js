@@ -39,8 +39,8 @@ const storySchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// TTL index to automatically delete the document after expiresAt
-storySchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// TTL index removed to make stories permanent
+// storySchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const Story = mongoose.model('Story', storySchema);
 

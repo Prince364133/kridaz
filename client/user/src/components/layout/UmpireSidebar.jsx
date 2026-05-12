@@ -16,18 +16,40 @@ import {
   Clock,
   User
 } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "@hooks/useAxiosInstance";
+import useUmpireDashboard from "@hooks/owner/useUmpireDashboard";
+import { toast } from "react-hot-toast";
 
 const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { role } = useSelector((state) => state.auth);
+  const { dashboardData, loading: dashLoading } = useUmpireDashboard();
+  const isLimitedUmpire = role?.toLowerCase() === "limited_umpire";
+  const upgradeRequested = dashboardData?.upgradeRequested || false;
+  const [requestLoading, setRequestLoading] = React.useState(false);
 
   const handleLogout = () => {
     dispatch(logout());
     navigate("/", { replace: true });
+  };
+
+  const handleRequestUpgrade = async () => {
+    setRequestLoading(true);
+    try {
+      const res = await axiosInstance.post("/api/user/auth/request-upgrade");
+      if (res.data.success) {
+        toast.success("Upgrade request sent to admin!");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to send upgrade request");
+    } finally {
+      setRequestLoading(false);
+    }
   };
 
   const mainNavItems = [
@@ -40,7 +62,12 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/umpire/banking", label: "Payout & Banking", icon: Landmark },
     { to: "/umpire/profile", label: "Profile", icon: User },
     { to: "/umpire/support", label: "Docs & Support", icon: HelpCircle },
-  ];
+  ].filter(item => {
+    if (isLimitedUmpire) {
+      return item.to === "/umpire/matches";
+    }
+    return true;
+  });
 
   const bottomNavItems = [];
 
@@ -127,6 +154,38 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
               <X size={20} />
             </button>
           </div>
+        </div>
+
+        {/* Status Section */}
+        <div className={`px-4 py-6 border-b border-white/5 transition-all duration-300 ${isMinimized ? "items-center" : ""}`}>
+          <div className="flex items-center gap-3">
+             <div className={`flex-shrink-0 w-2 h-2 rounded-full ${isLimitedUmpire ? "bg-amber-500 animate-pulse" : "bg-[#84CC16] shadow-[0_0_10px_rgba(132,204,22,0.5)]"}`} />
+             {!isMinimized && (
+               <div className="animate-in fade-in slide-in-from-left-2 duration-300">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 leading-none mb-1">Status</p>
+                  <p className={`text-[10px] font-black uppercase tracking-tight ${isLimitedUmpire ? "text-amber-500" : "text-[#84CC16]"}`}>
+                    {isLimitedUmpire ? "Unverified" : "Verified"}
+                  </p>
+               </div>
+             )}
+          </div>
+          {isLimitedUmpire && !isMinimized && (
+            <div className="mt-4 space-y-2">
+              <button 
+                onClick={() => navigate("/business/register?role=umpire")}
+                className="w-full py-2.5 bg-primary text-black border border-primary rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-[0_5px_15px_rgba(132,204,22,0.2)]"
+              >
+                Fill Umpire Form
+              </button>
+              <button 
+                onClick={handleRequestUpgrade}
+                disabled={requestLoading || upgradeRequested}
+                className="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest text-white transition-all active:scale-95 disabled:opacity-50"
+              >
+                {requestLoading ? "Requesting..." : upgradeRequested ? "Verification Pending" : "Request Upgrade"}
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto no-scrollbar py-6">

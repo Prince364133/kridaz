@@ -61,7 +61,7 @@ const MatchDetails = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-             <button className="p-3 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
+             <button onClick={() => { const shareUrl = window.location.href; if (navigator.share) { navigator.share({ title: "Join Match", url: shareUrl }).catch(() => { navigator.clipboard.writeText(shareUrl); toast.success("Link copied!"); }); } else { navigator.clipboard.writeText(shareUrl); toast.success("Link copied!"); } }} className="p-3 bg-white/5 rounded-2xl hover:bg-[#CCFF00]/10 hover:text-[#CCFF00] transition-all group">
                <Share2 size={18} className="text-gray-400" />
              </button>
           </div>

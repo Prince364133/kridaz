@@ -3,12 +3,24 @@ import User from '../../models/user.model.js';
 import Owner from '../../models/owner.model.js';
 import { uploadToCloudinary } from '../../utils/cloudinary.js';
 
+const resolveUserId = async (id) => {
+  if (!id) return null;
+  try {
+    const owner = await Owner.findById(id);
+    if (owner && owner.userId) return owner.userId.toString();
+    return id.toString();
+  } catch (error) {
+    return id.toString();
+  }
+};
+
 export const createStory = async (req, res) => {
   try {
     const { mediaType, durationDays, content } = req.body;
-    const userId = req.user.id;
+    const rawId = req.user.id;
+    const userId = await resolveUserId(rawId);
 
-    const userModel = req.user?.role === 'user' ? 'User' : 'Owner';
+    const userModel = 'User';
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + parseInt(durationDays || 1));
 
@@ -66,26 +78,25 @@ export const createStory = async (req, res) => {
 export const getStories = async (req, res) => {
   try {
     const { all } = req.query;
-    const userId = req.user.id;
+    const rawId = req.user.id || req.user._id;
+    const userId = await resolveUserId(rawId);
     
-    let userIds = [];
+    let userIds = [userId]; // Always include resolved current User ID
     
-    if (all === 'true') {
-      // For global community feed, we don't filter by userIds initially
-    } else {
-      let user = await User.findById(userId);
-      let following = [];
+    if (all !== 'true') {
+      const user = await User.findById(userId);
+      let networkIds = [];
       
       if (user) {
-        following = user.following || [];
-      } else {
-        user = await Owner.findById(userId);
-        if (user) {
-          following = user.following || [];
-        }
+        // Collect following and followers
+        networkIds = [...(user.following || []), ...(user.followers || [])].map(id => id.toString());
       }
+
+      // If any of these IDs are Owners, we should ALSO search for their linked User IDs
+      // because stories are now saved with User IDs.
+      const resolvedNetworkIds = await Promise.all(networkIds.map(id => resolveUserId(id)));
       
-      userIds = [...following.map(id => id.toString()), userId];
+      userIds = [...new Set([...userIds, ...resolvedNetworkIds])];
     }
 
     const query = { expiresAt: { $gt: new Date() } };
@@ -93,17 +104,23 @@ export const getStories = async (req, res) => {
       query.userId = { $in: userIds };
     }
 
+    // Select userModel to ensure refPath population works correctly
     let stories = await Story.find(query)
       .populate('userId', 'name username profilePicture')
+      .populate('viewers', 'name username profilePicture')
       .sort({ createdAt: -1 });
 
     // Group stories by user
     const groupedStories = stories.reduce((acc, story) => {
-      if (!story.userId || !story.userId._id) return acc;
-      const storyUserId = story.userId._id.toString();
+      // Robust grouping: even if userId didn't populate, we use the ID string
+      const storyUser = story.userId;
+      if (!storyUser) return acc;
+
+      const storyUserId = (storyUser._id || storyUser).toString();
+      
       if (!acc[storyUserId]) {
         acc[storyUserId] = {
-          user: story.userId,
+          user: typeof storyUser === 'object' ? storyUser : { _id: storyUser, username: 'Unknown Player' },
           stories: []
         };
       }
@@ -111,7 +128,16 @@ export const getStories = async (req, res) => {
       return acc;
     }, {});
 
-    res.status(200).json({ success: true, stories: Object.values(groupedStories) });
+    // Ensure current user's group is first in the list if it exists
+    const finalStories = Object.values(groupedStories).sort((a, b) => {
+      const aId = a.user._id.toString();
+      const bId = b.user._id.toString();
+      if (aId === userId.toString()) return -1;
+      if (bId === userId.toString()) return 1;
+      return 0;
+    });
+
+    res.status(200).json({ success: true, stories: finalStories });
   } catch (error) {
     console.error("Get Stories Error:", error);
     res.status(500).json({ success: false, message: error.message });
