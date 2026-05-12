@@ -5,9 +5,9 @@ import authReducer from "./slices/authSlice";
 import turfReducer from "./slices/turfSlice";
 
 const rootReducer = combineReducers({
-  theme: themeReducer,
-  auth: authReducer,
-  turf: turfReducer,
+ theme: themeReducer,
+ auth: authReducer,
+ turf: turfReducer,
 });
 
 export default rootReducer;

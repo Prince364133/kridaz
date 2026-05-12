@@ -49,27 +49,26 @@
 
 /* ── Typography ──────────────────────────────────────────────────── */
 h1, h2, h3, .font-display {
-  font-family: "Bebas Neue", sans-serif; /* Removed !important */
-  letter-spacing: 0.08em;
+  font-family: "Open Sans", sans-serif !important;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
+  font-weight: 800;
 }
 
-/* Scoped styles for the Admin Panel */
+h4, h5, h6, .subheading, .admin-subheading {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
 .admin-panel h1, 
 .admin-panel h2, 
-.admin-panel h3, 
-.admin-panel h4, 
-.admin-panel h5, 
-.admin-panel h6 {
+.admin-panel h3 {
   font-family: 'Open Sans', sans-serif !important;
   text-transform: uppercase;
   letter-spacing: -0.02em;
-}
-
-.admin-panel .admin-subheading {
-  font-family: 'Inter', sans-serif !important;
-  font-size: 20px !important;
-  letter-spacing: -0.01em;
 }
 
 .admin-panel .subtitle {
@@ -196,7 +195,7 @@ body {
   border-radius: 9999px !important;
   font-family: "Bebas Neue", sans-serif !important;
   font-weight: 900 !important;
-  font-style: italic !important;
+  
 }
 
 /* Card System */

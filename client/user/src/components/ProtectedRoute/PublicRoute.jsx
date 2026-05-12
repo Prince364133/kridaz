@@ -6,19 +6,19 @@ import { Navigate } from "react-router-dom";
  * Redirects them to their role-specific dashboard instead of always going to "/".
  */
 export default function PublicRoute({ children }) {
-  const { isAuthenticated, token, role } = useSelector((state) => state.auth);
+ const { isAuthenticated, token, role } = useSelector((state) => state.auth);
 
-  if (isAuthenticated && token) {
-    const normalizedRole = role?.toLowerCase();
-    
-    // Route to role-specific dashboards
-    if (normalizedRole?.includes("admin")) return <Navigate to="/admin" replace />;
-    if (normalizedRole?.includes("owner") || normalizedRole?.includes("venue")) return <Navigate to="/partner" replace />;
-    if (normalizedRole === "coach") return <Navigate to="/coach" replace />;
-    if (normalizedRole === "umpire") return <Navigate to="/umpire" replace />;
+ if (isAuthenticated && token) {
+ const normalizedRole = role?.toLowerCase();
+ 
+ // Route to role-specific dashboards
+ if (normalizedRole?.includes("admin")) return <Navigate to="/admin" replace />;
+ if (normalizedRole?.includes("owner") || normalizedRole?.includes("venue")) return <Navigate to="/partner" replace />;
+ if (normalizedRole === "coach") return <Navigate to="/coach" replace />;
+ if (normalizedRole === "umpire") return <Navigate to="/umpire" replace />;
 
-    return <Navigate to="/" replace />;
-  }
+ return <Navigate to="/" replace />;
+ }
 
-  return children;
+ return children;
 }

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700&family=Space+Mono&family=Bayon&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700&family=Space+Mono&family=Bayon&family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -46,9 +46,18 @@ body {
 
 /* ── Typography ──────────────────────────────────────────────────── */
 h1, h2, h3, .font-display {
-  font-family: "Bebas Neue", sans-serif;
-  letter-spacing: 0.08em;
+  font-family: "Open Sans", sans-serif !important;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
+  font-weight: 800;
+}
+
+h4, h5, h6, .subheading {
+  font-family: "Inter", sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
 }
 
 .font-script {
@@ -156,7 +165,7 @@ h1, h2, h3, .font-display {
   border-radius: 9999px !important;
   font-family: "Bebas Neue", sans-serif !important;
   font-weight: 900 !important;
-  font-style: italic !important;
+  
 }
 
 /* ── Card System ─────────────────────────────────────────────────── */

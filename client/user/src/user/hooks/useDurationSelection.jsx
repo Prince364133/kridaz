@@ -1,50 +1,50 @@
 import {
-  parse,
-  isAfter,
-  addHours,
-  format,
-  isBefore,
-  isEqual,
-  addDays,
+ parse,
+ isAfter,
+ addHours,
+ format,
+ isBefore,
+ isEqual,
+ addDays,
 } from "date-fns";
 
 const useDurationSelection = (
-  selectedStartTime,
-  timeSlots,
-  isTimeSlotBooked,
-  setDuration
+ selectedStartTime,
+ timeSlots,
+ isTimeSlotBooked,
+ setDuration
 ) => {
-  const handleDurationChange = (newDuration) => {
-    setDuration(newDuration);
-  };
+ const handleDurationChange = (newDuration) => {
+ setDuration(newDuration);
+ };
 
-  const isDurationAvailable = (startTime, hours) => {
-    if (!startTime || !timeSlots?.closeTime) return false;
+ const isDurationAvailable = (startTime, hours) => {
+ if (!startTime || !timeSlots?.closeTime) return false;
 
-    const start = parse(startTime, "hh:mm a", new Date());
-    const end = addHours(start, hours);
+ const start = parse(startTime, "hh:mm a", new Date());
+ const end = addHours(start, hours);
 
-    let closeTime = parse(timeSlots.closeTime, "hh:mm a", new Date());
-    if (isBefore(closeTime, start) || isEqual(closeTime, start)) {
-      closeTime = addDays(closeTime, 1);
-    }
+ let closeTime = parse(timeSlots.closeTime, "hh:mm a", new Date());
+ if (isBefore(closeTime, start) || isEqual(closeTime, start)) {
+ closeTime = addDays(closeTime, 1);
+ }
 
-    if (isAfter(end, closeTime)) return false;
+ if (isAfter(end, closeTime)) return false;
 
-    for (let i = 0; i < hours; i++) {
-      const checkTime = addHours(start, i);
-      if (isTimeSlotBooked(format(checkTime, "hh:mm a"))) {
-        return false;
-      }
-    }
+ for (let i = 0; i < hours; i++) {
+ const checkTime = addHours(start, i);
+ if (isTimeSlotBooked(format(checkTime, "hh:mm a"))) {
+ return false;
+ }
+ }
 
-    return true;
-  };
+ return true;
+ };
 
-  return {
-    handleDurationChange,
-    isDurationAvailable,
-  };
+ return {
+ handleDurationChange,
+ isDurationAvailable,
+ };
 };
 
 export default useDurationSelection;

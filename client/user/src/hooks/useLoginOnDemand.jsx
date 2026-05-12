@@ -6,18 +6,18 @@ import { openLoginModal } from "@redux/slices/uiSlice";
  * Returns a function that checks for login status before executing a callback.
  */
 const useLoginOnDemand = () => {
-  const dispatch = useDispatch();
-  const { isLoggedIn } = useSelector((state) => state.auth);
+ const dispatch = useDispatch();
+ const { isLoggedIn } = useSelector((state) => state.auth);
 
-  const gateInteraction = (callback, modalOptions = {}) => {
-    if (isLoggedIn) {
-      if (typeof callback === 'function') callback();
-    } else {
-      dispatch(openLoginModal(modalOptions));
-    }
-  };
+ const gateInteraction = (callback, modalOptions = {}) => {
+ if (isLoggedIn) {
+ if (typeof callback === 'function') callback();
+ } else {
+ dispatch(openLoginModal(modalOptions));
+ }
+ };
 
-  return { gateInteraction, isLoggedIn };
+ return { gateInteraction, isLoggedIn };
 };
 
 export default useLoginOnDemand;

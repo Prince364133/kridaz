@@ -3,52 +3,52 @@ import axios from 'axios';
 const BASE_URL = 'https://countriesnow.space/api/v0.1/countries';
 
 export const fetchStates = async () => {
-  try {
-    const response = await axios.post(`${BASE_URL}/states`, {
-      country: "India"
-    });
-    return response.data.data.states.map(s => s.name);
-  } catch (error) {
-    console.error("Error fetching states:", error);
-    return [];
-  }
+ try {
+ const response = await axios.post(`${BASE_URL}/states`, {
+ country: "India"
+ });
+ return response.data.data.states.map(s => s.name);
+ } catch (error) {
+ console.error("Error fetching states:", error);
+ return [];
+ }
 };
 
 export const fetchCities = async (state) => {
-  try {
-    const response = await axios.post(`${BASE_URL}/state/cities`, {
-      country: "India",
-      state: state
-    });
-    return response.data.data;
-  } catch (error) {
-    console.error(`Error fetching cities for ${state}:`, error);
-    return [];
-  }
+ try {
+ const response = await axios.post(`${BASE_URL}/state/cities`, {
+ country: "India",
+ state: state
+ });
+ return response.data.data;
+ } catch (error) {
+ console.error(`Error fetching cities for ${state}:`, error);
+ return [];
+ }
 };
 
 export const searchLocations = async (query) => {
-  if (!query || query.length < 3) return [];
-  try {
-    const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
-      params: {
-        q: query,
-        format: 'json',
-        addressdetails: 1,
-        limit: 5,
-        countrycodes: 'in'
-      }
-    });
-    return response.data.map(item => ({
-      display_name: item.display_name,
-      city: item.address.city || item.address.town || item.address.village || item.address.suburb || "",
-      state: item.address.state || "",
-      postcode: item.address.postcode || "",
-      suburb: item.address.suburb || item.address.neighbourhood || "",
-      road: item.address.road || ""
-    }));
-  } catch (error) {
-    console.error("Error searching locations:", error);
-    return [];
-  }
+ if (!query || query.length < 3) return [];
+ try {
+ const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
+ params: {
+ q: query,
+ format: 'json',
+ addressdetails: 1,
+ limit: 5,
+ countrycodes: 'in'
+ }
+ });
+ return response.data.map(item => ({
+ display_name: item.display_name,
+ city: item.address.city || item.address.town || item.address.village || item.address.suburb || "",
+ state: item.address.state || "",
+ postcode: item.address.postcode || "",
+ suburb: item.address.suburb || item.address.neighbourhood || "",
+ road: item.address.road || ""
+ }));
+ } catch (error) {
+ console.error("Error searching locations:", error);
+ return [];
+ }
 };

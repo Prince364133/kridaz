@@ -5,21 +5,21 @@ import rootReducer from "./rootReducers";
 import { baseApi } from "./api/baseApi";
 
 const persistConfig = {
-  key: "root",
-  storage,
-  whitelist: ["theme", "auth"],
+ key: "root",
+ storage,
+ whitelist: ["theme", "auth"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
-  reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: ["persist/PERSIST"],
-      },
-    }).concat(baseApi.middleware),
+ reducer: persistedReducer,
+ middleware: (getDefaultMiddleware) =>
+ getDefaultMiddleware({
+ serializableCheck: {
+ ignoredActions: ["persist/PERSIST"],
+ },
+ }).concat(baseApi.middleware),
 });
 
 export const persistor = persistStore(store);

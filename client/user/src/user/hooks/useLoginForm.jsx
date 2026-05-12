@@ -9,187 +9,187 @@ import { login } from "@redux/slices/authSlice";
 import { useDispatch } from "react-redux";
 
 const loginSchema = yup.object().shape({
-  email: yup
-    .string()
-    .required("Enter your email")
-    .matches(
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/gm,
-      "Enter a valid email"
-    ),
-  password: yup
-    .string()
-    .required("Enter your password")
-    .min(6, "Password must be at least 6 characters long"),
-  otp: yup.string().when("$showOtpInput", {
-    is: true,
-    then: () => yup.string().required("OTP is required").min(6, "OTP must be 6 characters"),
-    otherwise: () => yup.string().notRequired(),
-  }),
+ email: yup
+ .string()
+ .required("Enter your email")
+ .matches(
+ /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/gm,
+ "Enter a valid email"
+ ),
+ password: yup
+ .string()
+ .required("Enter your password")
+ .min(6, "Password must be at least 6 characters long"),
+ otp: yup.string().when("$showOtpInput", {
+ is: true,
+ then: () => yup.string().required("OTP is required").min(6, "OTP must be 6 characters"),
+ otherwise: () => yup.string().notRequired(),
+ }),
 });
 
 const useLoginForm = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [showOtpInput, setShowOtpInput] = useState(false);
+ const dispatch = useDispatch();
+ const navigate = useNavigate();
+ const [loading, setLoading] = useState(false);
+ const [showOtpInput, setShowOtpInput] = useState(false);
 
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [onboardingUser, setOnboardingUser] = useState(null);
+ const [showOnboarding, setShowOnboarding] = useState(false);
+ const [onboardingUser, setOnboardingUser] = useState(null);
 
-  const {
-    register,
-    handleSubmit,
-    getValues,
-    trigger,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(loginSchema),
-    context: { showOtpInput },
-  });
+ const {
+ register,
+ handleSubmit,
+ getValues,
+ trigger,
+ formState: { errors },
+ } = useForm({
+ resolver: yupResolver(loginSchema),
+ context: { showOtpInput },
+ });
 
-  const handleRoleRedirect = (role) => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const redirectUrl = searchParams.get("redirect");
+ const handleRoleRedirect = (role) => {
+ const searchParams = new URLSearchParams(window.location.search);
+ const redirectUrl = searchParams.get("redirect");
 
-    if (redirectUrl) {
-      window.location.href = redirectUrl;
-      return;
-    }
+ if (redirectUrl) {
+ window.location.href = redirectUrl;
+ return;
+ }
 
-    switch (role) {
-      case "BMSP_ADMIN":
-      case "admin":
-        window.location.href = "/admin";
-        break;
-      case "VERIFIED_VENUE_OWNER":
-      case "VENUE_OWNER":
-      case "owner":
-        window.location.href = "/partner";
-        break;
-      case "COACH":
-        window.location.href = "/coach";
-        break;
-      case "UMPIRE":
-        window.location.href = "/umpire";
-        break;
-      default:
-        navigate("/", { replace: true });
-    }
-  };
+ switch (role) {
+ case "BMSP_ADMIN":
+ case "admin":
+ window.location.href = "/admin";
+ break;
+ case "VERIFIED_VENUE_OWNER":
+ case "VENUE_OWNER":
+ case "owner":
+ window.location.href = "/partner";
+ break;
+ case "COACH":
+ window.location.href = "/coach";
+ break;
+ case "UMPIRE":
+ window.location.href = "/umpire";
+ break;
+ default:
+ navigate("/", { replace: true });
+ }
+ };
 
-  const handleLoginStep1 = async () => {
-    const isValid = await trigger(["email", "password"]);
-    if (!isValid) return;
+ const handleLoginStep1 = async () => {
+ const isValid = await trigger(["email", "password"]);
+ if (!isValid) return;
 
-    setLoading(true);
-    try {
-      const email = getValues("email");
-      const password = getValues("password");
-      const response = await axiosInstance.post("/api/user/auth/login-step1", { email, password });
-      const result = response.data;
+ setLoading(true);
+ try {
+ const email = getValues("email");
+ const password = getValues("password");
+ const response = await axiosInstance.post("/api/user/auth/login-step1", { email, password });
+ const result = response.data;
 
-      if (result.token) {
-        toast.success(result.message);
-        const { token, role } = result;
-        dispatch(login({ token, role, user: result.user }));
-        axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        handleRoleRedirect(role);
-      } else {
-        toast.success(result.message);
-        setShowOtpInput(true);
-      }
-    } catch (error) {
-      if (error.response) {
-        toast.error(error.response?.data?.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+ if (result.token) {
+ toast.success(result.message);
+ const { token, role } = result;
+ dispatch(login({ token, role, user: result.user }));
+ axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+ handleRoleRedirect(role);
+ } else {
+ toast.success(result.message);
+ setShowOtpInput(true);
+ }
+ } catch (error) {
+ if (error.response) {
+ toast.error(error.response?.data?.message);
+ }
+ } finally {
+ setLoading(false);
+ }
+ };
 
-  const onSubmit = async (data) => {
-    if (!showOtpInput) {
-      return handleLoginStep1();
-    }
+ const onSubmit = async (data) => {
+ if (!showOtpInput) {
+ return handleLoginStep1();
+ }
 
-    setLoading(true);
-    try {
-      const response = await axiosInstance.post("/api/user/auth/login", data);
-      const result = await response.data;
-      toast.success(result.message);
-      
-      const { token, role } = result;
-      dispatch(login({ token, role, user: result.user }));
-      
-      axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      handleRoleRedirect(role);
-    } catch (error) {
-      if (error.response) {
-        toast.error(error.response?.data?.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+ setLoading(true);
+ try {
+ const response = await axiosInstance.post("/api/user/auth/login", data);
+ const result = await response.data;
+ toast.success(result.message);
+ 
+ const { token, role } = result;
+ dispatch(login({ token, role, user: result.user }));
+ 
+ axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+ handleRoleRedirect(role);
+ } catch (error) {
+ if (error.response) {
+ toast.error(error.response?.data?.message);
+ }
+ } finally {
+ setLoading(false);
+ }
+ };
 
-  const handleGoogleSuccess = async (googleResponse) => {
-    setLoading(true);
-    try {
-      const payload = {
-        role: "user",
-      };
+ const handleGoogleSuccess = async (googleResponse) => {
+ setLoading(true);
+ try {
+ const payload = {
+ role: "user",
+ };
 
-      if (googleResponse.credential) {
-        payload.credential = googleResponse.credential;
-      } else if (googleResponse.access_token) {
-        payload.accessToken = googleResponse.access_token;
-      }
+ if (googleResponse.credential) {
+ payload.credential = googleResponse.credential;
+ } else if (googleResponse.access_token) {
+ payload.accessToken = googleResponse.access_token;
+ }
 
-      const response = await axiosInstance.post("/api/user/auth/google-auth", payload);
-      const result = await response.data;
-      
-      const { token, role } = result;
-      axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      dispatch(login({ token, role, user: result.user }));
+ const response = await axiosInstance.post("/api/user/auth/google-auth", payload);
+ const result = await response.data;
+ 
+ const { token, role } = result;
+ axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+ dispatch(login({ token, role, user: result.user }));
 
-      const isProfileIncomplete = !result.user.phone || !result.user.gender || !result.user.location || !result.user.sportTypes || result.user.sportTypes.length === 0;
+ const isProfileIncomplete = !result.user.phone || !result.user.gender || !result.user.location || !result.user.sportTypes || result.user.sportTypes.length === 0;
 
-      if (isProfileIncomplete) {
-        setOnboardingUser(result.user);
-        setShowOnboarding(true);
-        // Do not redirect yet
-      } else {
-        toast.success("Successfully logged in with Google!");
-        handleRoleRedirect(role);
-      }
-    } catch (error) {
-      if (error.response) {
-        toast.error(error.response?.data?.message);
-      } else {
-        toast.error("Google authentication failed");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+ if (isProfileIncomplete) {
+ setOnboardingUser(result.user);
+ setShowOnboarding(true);
+ // Do not redirect yet
+ } else {
+ toast.success("Successfully logged in with Google!");
+ handleRoleRedirect(role);
+ }
+ } catch (error) {
+ if (error.response) {
+ toast.error(error.response?.data?.message);
+ } else {
+ toast.error("Google authentication failed");
+ }
+ } finally {
+ setLoading(false);
+ }
+ };
 
-  const handleGoogleError = () => {
-    toast.error("Google authentication failed");
-  };
+ const handleGoogleError = () => {
+ toast.error("Google authentication failed");
+ };
 
-  return {
-    register,
-    handleSubmit,
-    errors,
-    onSubmit,
-    loading,
-    showOtpInput,
-    handleGoogleSuccess,
-    handleGoogleError,
-    showOnboarding,
-    setShowOnboarding,
-    onboardingUser,
-  };
+ return {
+ register,
+ handleSubmit,
+ errors,
+ onSubmit,
+ loading,
+ showOtpInput,
+ handleGoogleSuccess,
+ handleGoogleError,
+ showOnboarding,
+ setShowOnboarding,
+ onboardingUser,
+ };
 };
 
 export default useLoginForm;

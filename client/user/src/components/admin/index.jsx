@@ -1,7 +1,7 @@
-//  User Management
+// User Management
 export {default as UserManagement} from "./UserManagement/UserPage";
 
-//  Owner Requests
+// Owner Requests
 export {default as VerificationCenter} from "./OwnerRequests/VerificationCenter";
 
 // Dashboard

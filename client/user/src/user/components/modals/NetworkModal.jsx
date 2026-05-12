@@ -8,180 +8,180 @@ import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import toast from "react-hot-toast";
 
 const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
-  const dispatch = useDispatch();
-  const { user: currentUser, followingIds } = useSelector((state) => state.auth);
-  const { gateInteraction } = useLoginOnDemand();
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+ const dispatch = useDispatch();
+ const { user: currentUser, followingIds } = useSelector((state) => state.auth);
+ const { gateInteraction } = useLoginOnDemand();
+ const [users, setUsers] = useState([]);
+ const [loading, setLoading] = useState(true);
+ const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    if (isOpen && userId) {
-      fetchNetwork();
-    }
-  }, [isOpen, userId, type]);
+ useEffect(() => {
+ if (isOpen && userId) {
+ fetchNetwork();
+ }
+ }, [isOpen, userId, type]);
 
-  const fetchNetwork = async () => {
-    setLoading(true);
-    try {
-      const response = await axiosInstance.get(`/api/user/players/${userId}/network`);
-      if (response.data.success) {
-        setUsers(type === "followers" ? response.data.followers : response.data.following);
-      }
-    } catch (error) {
-      toast.error("Failed to load network");
-    } finally {
-      setLoading(false);
-    }
-  };
+ const fetchNetwork = async () => {
+ setLoading(true);
+ try {
+ const response = await axiosInstance.get(`/api/user/players/${userId}/network`);
+ if (response.data.success) {
+ setUsers(type === "followers" ? response.data.followers : response.data.following);
+ }
+ } catch (error) {
+ toast.error("Failed to load network");
+ } finally {
+ setLoading(false);
+ }
+ };
 
-  const handleFollowToggle = async (targetUser) => {
-    gateInteraction(async () => {
-      const isFollowing = followingIds.includes(targetUser._id);
-      try {
-        if (isFollowing) {
-          const response = await axiosInstance.post(`/api/user/players/${targetUser._id}/unfollow`);
-          if (response.data.success) {
-            dispatch(unfollowUser(targetUser._id));
-            toast.success(`Unfollowed ${targetUser.name}`);
-          }
-        } else {
-          const response = await axiosInstance.post(`/api/user/players/${targetUser._id}/follow`);
-          if (response.data.success) {
-            dispatch(followUser(targetUser._id));
-            toast.success(`Following ${targetUser.name}`);
-          }
-        }
-      } catch (error) {
-        toast.error("Action failed");
-      }
-    }, { 
-      title: "Follow Player", 
-      message: `Sign in to follow ${targetUser.name} and stay updated.` 
-    });
-  };
+ const handleFollowToggle = async (targetUser) => {
+ gateInteraction(async () => {
+ const isFollowing = followingIds.includes(targetUser._id);
+ try {
+ if (isFollowing) {
+ const response = await axiosInstance.post(`/api/user/players/${targetUser._id}/unfollow`);
+ if (response.data.success) {
+ dispatch(unfollowUser(targetUser._id));
+ toast.success(`Unfollowed ${targetUser.name}`);
+ }
+ } else {
+ const response = await axiosInstance.post(`/api/user/players/${targetUser._id}/follow`);
+ if (response.data.success) {
+ dispatch(followUser(targetUser._id));
+ toast.success(`Following ${targetUser.name}`);
+ }
+ }
+ } catch (error) {
+ toast.error("Action failed");
+ }
+ }, { 
+ title: "Follow Player", 
+ message: `Sign in to follow ${targetUser.name} and stay updated.` 
+ });
+ };
 
-  const filteredUsers = users.filter(user => 
-    user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user?.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user?.businessDetails?.businessName?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+ const filteredUsers = users.filter(user => 
+ user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+ user?.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+ user?.businessDetails?.businessName?.toLowerCase().includes(searchQuery.toLowerCase())
+ );
 
-  const sortedUsers = [...filteredUsers].sort((a, b) => {
-    const aIsMutual = followingIds.includes(a._id);
-    const bIsMutual = followingIds.includes(b._id);
-    if (aIsMutual && !bIsMutual) return -1;
-    if (!aIsMutual && bIsMutual) return 1;
-    return 0;
-  });
+ const sortedUsers = [...filteredUsers].sort((a, b) => {
+ const aIsMutual = followingIds.includes(a._id);
+ const bIsMutual = followingIds.includes(b._id);
+ if (aIsMutual && !bIsMutual) return -1;
+ if (!aIsMutual && bIsMutual) return 1;
+ return 0;
+ });
 
-  if (!isOpen) return null;
+ if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-[#000000] border border-[#2D2D2D] w-full max-w-md rounded-[8px] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
-        <div className="flex items-center justify-between p-4 border-b border-[#2D2D2D]">
-          <h2 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
-            {type === "followers" ? "Followers" : "Following"}
-            <span className="text-[#CCFF00] bg-[#CCFF00]/10 px-2 py-0.5 rounded-full text-[10px]">
-              {initialCount}
-            </span>
-          </h2>
-          <button onClick={onClose} className="p-2 hover:bg-[#000000] rounded-full transition-colors text-white/40 hover:text-white">
-            <X size={20} />
-          </button>
-        </div>
+ return (
+ <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+ <div className="bg-[#000000] border border-[#2D2D2D] w-full max-w-md rounded-[8px] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+ <div className="flex items-center justify-between p-4 border-b border-[#2D2D2D]">
+ <h2 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+ {type === "followers" ? "Followers" : "Following"}
+ <span className="text-[#CCFF00] bg-[#CCFF00]/10 px-2 py-0.5 rounded-full text-[10px]">
+ {initialCount}
+ </span>
+ </h2>
+ <button onClick={onClose} className="p-2 hover:bg-[#000000] rounded-full transition-colors text-white/40 hover:text-white">
+ <X size={20} />
+ </button>
+ </div>
 
-        <div className="p-4 border-b border-[#2D2D2D]">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-            <input
-              type="text"
-              placeholder="SEARCH..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[6px] py-2.5 pl-10 pr-4 text-xs text-white placeholder:text-white/20 outline-none focus:border-[#CCFF00]/50 transition-all uppercase tracking-widest"
-            />
-          </div>
-        </div>
+ <div className="p-4 border-b border-[#2D2D2D]">
+ <div className="relative">
+ <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" size={16} />
+ <input
+ type="text"
+ placeholder="SEARCH..."
+ value={searchQuery}
+ onChange={(e) => setSearchQuery(e.target.value)}
+ className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[6px] py-2.5 pl-10 pr-4 text-xs text-white placeholder:text-white/20 outline-none focus:border-[#CCFF00]/50 transition-all uppercase tracking-widest"
+ />
+ </div>
+ </div>
 
-        <div className="h-[400px] overflow-y-auto no-scrollbar p-2">
-          {loading ? (
-            <div className="h-full flex items-center justify-center">
-              <Loader2 className="animate-spin text-[#CCFF00]" size={32} />
-            </div>
-          ) : sortedUsers.length > 0 ? (
-            <div className="space-y-1">
-              {sortedUsers.map((user) => {
-                const isFollowing = followingIds.includes(user._id);
-                const isSelf = currentUser?._id === user._id;
+ <div className="h-[400px] overflow-y-auto no-scrollbar p-2">
+ {loading ? (
+ <div className="h-full flex items-center justify-center">
+ <Loader2 className="animate-spin text-[#CCFF00]" size={32} />
+ </div>
+ ) : sortedUsers.length > 0 ? (
+ <div className="space-y-1">
+ {sortedUsers.map((user) => {
+ const isFollowing = followingIds.includes(user._id);
+ const isSelf = currentUser?._id === user._id;
 
-                return (
-                  <div key={user._id} className="flex items-center justify-between p-3 hover:bg-[#000000] rounded-[8px] transition-colors group">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                      <Link to={`/profile/${user._id}`} onClick={onClose} className="shrink-0 w-10 h-10 rounded-[6px] overflow-hidden bg-[#000000] border border-[#2D2D2D]">
-                        {user.profilePicture ? (
-                          <img 
-                            src={user.profilePicture} 
-                            alt="" 
-                            className="w-full h-full object-cover" 
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                            }}
-                          />
-                        ) : null}
-                        <div 
-                          className="w-full h-full flex items-center justify-center bg-[#CCFF00]/10"
-                          style={{ display: user.profilePicture ? 'none' : 'flex' }}
-                        >
-                          <span className="text-[#CCFF00] font-black text-[10px]">
-                            {user.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
-                          </span>
-                        </div>
-                      </Link>
-                      <div className="overflow-hidden">
-                        <Link to={`/profile/${user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#CCFF00] transition-colors truncate">
-                          {user.name}
-                        </Link>
-                        <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase tracking-widest truncate">
-                          <span>@{user.username || user.businessDetails?.businessName || "player"}</span>
-                          {isFollowing && (
-                            <>
-                              <span className="text-white/20">â€¢</span>
-                              <span className="text-[#CCFF00]/60">Following</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+ return (
+ <div key={user._id} className="flex items-center justify-between p-3 hover:bg-[#000000] rounded-[8px] transition-colors group">
+ <div className="flex items-center gap-3 overflow-hidden">
+ <Link to={`/profile/${user._id}`} onClick={onClose} className="shrink-0 w-10 h-10 rounded-[6px] overflow-hidden bg-[#000000] border border-[#2D2D2D]">
+ {user.profilePicture ? (
+ <img 
+ src={user.profilePicture} 
+ alt="" 
+ className="w-full h-full object-cover" 
+ onError={(e) => {
+ e.target.style.display = 'none';
+ if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+ }}
+ />
+ ) : null}
+ <div 
+ className="w-full h-full flex items-center justify-center bg-[#CCFF00]/10"
+ style={{ display: user.profilePicture ? 'none' : 'flex' }}
+ >
+ <span className="text-[#CCFF00] font-black text-[10px]">
+ {user.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
+ </span>
+ </div>
+ </Link>
+ <div className="overflow-hidden">
+ <Link to={`/profile/${user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#CCFF00] transition-colors truncate">
+ {user.name}
+ </Link>
+ <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase tracking-widest truncate">
+ <span>@{user.username || user.businessDetails?.businessName || "player"}</span>
+ {isFollowing && (
+ <>
+ <span className="text-white/20">â€¢</span>
+ <span className="text-[#CCFF00]/60">Following</span>
+ </>
+ )}
+ </div>
+ </div>
+ </div>
 
-                    {!isSelf && (
-                      <button
-                        onClick={() => handleFollowToggle(user)}
-                        className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
-                          isFollowing
-                            ? "bg-[#000000] text-white/40 border border-[#2D2D2D] hover:bg-white/10"
-                            : "bg-[#CCFF00] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(132,204,22,0.15)]"
-                        }`}
-                      >
-                        {isFollowing ? "Following" : "Follow"}
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center text-white/20 space-y-2">
-              <Users size={40} />
-              <p className="text-[10px] uppercase tracking-[0.2em]">No users found</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+ {!isSelf && (
+ <button
+ onClick={() => handleFollowToggle(user)}
+ className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
+ isFollowing
+ ? "bg-[#000000] text-white/40 border border-[#2D2D2D] hover:bg-white/10"
+ : "bg-[#CCFF00] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(132,204,22,0.15)]"
+ }`}
+ >
+ {isFollowing ? "Following" : "Follow"}
+ </button>
+ )}
+ </div>
+ );
+ })}
+ </div>
+ ) : (
+ <div className="h-full flex flex-col items-center justify-center text-white/20 space-y-2">
+ <Users size={40} />
+ <p className="text-[10px] uppercase tracking-[0.2em]">No users found</p>
+ </div>
+ )}
+ </div>
+ </div>
+ </div>
+ );
 };
 
 export default NetworkModal;

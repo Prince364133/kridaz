@@ -6,169 +6,169 @@ import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
 
 const GuestNavbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const location = useLocation();
+ const [isOpen, setIsOpen] = useState(false);
+ const [scrolled, setScrolled] = useState(false);
+ const location = useLocation();
 
-  const { isLoggedIn, role } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:5173";
+ const { isLoggedIn, role } = useSelector((state) => state.auth);
+ const dispatch = useDispatch();
+ const navigate = useNavigate();
+ const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:5173";
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+ useEffect(() => {
+ const handleScroll = () => setScrolled(window.scrollY > 20);
+ window.addEventListener("scroll", handleScroll);
+ return () => window.removeEventListener("scroll", handleScroll);
+ }, []);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/", { replace: true });
-  };
+ const handleLogout = () => {
+ dispatch(logout());
+ navigate("/", { replace: true });
+ };
 
-  const navLinks = [
-    { name: "Business", path: "/partners", isExternal: false },
-    { name: "Venues", path: "/business/venue", isExternal: false },
-    { name: "Coaches", path: "/business/coach", isExternal: false },
-    { name: "Officials", path: "/business/official", isExternal: false },
-  ];
+ const navLinks = [
+ { name: "Business", path: "/partners", isExternal: false },
+ { name: "Venues", path: "/business/venue", isExternal: false },
+ { name: "Coaches", path: "/business/coach", isExternal: false },
+ { name: "Officials", path: "/business/official", isExternal: false },
+ ];
 
-  return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-      scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/5 py-2" : "bg-transparent py-4"
-    }`}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
-        
-        {/* Brand Logo Unit */}
-        <Link to="/" className="group flex items-center gap-4">
-          <div className="flex items-center justify-center">
-            <img src="/logo.png" alt="Kridaz" className="h-8 lg:h-10 w-auto transition-transform duration-500 group-hover:scale-105" />
-          </div>
-        </Link>
+ return (
+ <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+ scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/5 py-2" : "bg-transparent py-4"
+ }`}>
+ <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
+ 
+ {/* Brand Logo Unit */}
+ <Link to="/" className="group flex items-center gap-4">
+ <div className="flex items-center justify-center">
+ <img src="/logo.png" alt="Kridaz" className="h-8 lg:h-10 w-auto transition-transform duration-500 group-hover:scale-105" />
+ </div>
+ </Link>
 
-        {/* Navigation (Desktop) */}
-        <div className="hidden lg:flex items-center gap-8">
-          {navLinks.map((link) => (
-            link.isExternal ? (
-              <a
-                key={link.name}
-                href={link.path}
-                className="text-sm font-medium text-white/60 hover:text-white transition-all relative group"
-              >
-                {link.name}
-                <span className="absolute -bottom-1 left-0 h-[2px] bg-[#84CC16] w-0 group-hover:w-full transition-all duration-300" />
-              </a>
-            ) : (
-              <Link
-                key={link.name}
-                to={link.path}
-                className={`text-sm font-medium transition-all relative group ${
-                  location.pathname === link.path ? "text-[#84CC16]" : "text-white/60 hover:text-white"
-                }`}
-              >
-                {link.name}
-                <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#84CC16] transition-all duration-300 ${
-                  location.pathname === link.path ? "w-full" : "w-0 group-hover:w-full"
-                }`} />
-              </Link>
-            )
-          ))}
-        </div>
+ {/* Navigation (Desktop) */}
+ <div className="hidden lg:flex items-center gap-8">
+ {navLinks.map((link) => (
+ link.isExternal ? (
+ <a
+ key={link.name}
+ href={link.path}
+ className="text-sm font-medium text-white/60 hover:text-white transition-all relative group"
+ >
+ {link.name}
+ <span className="absolute -bottom-1 left-0 h-[2px] bg-[#84CC16] w-0 group-hover:w-full transition-all duration-300" />
+ </a>
+ ) : (
+ <Link
+ key={link.name}
+ to={link.path}
+ className={`text-sm font-medium transition-all relative group ${
+ location.pathname === link.path ? "text-[#84CC16]" : "text-white/60 hover:text-white"
+ }`}
+ >
+ {link.name}
+ <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#84CC16] transition-all duration-300 ${
+ location.pathname === link.path ? "w-full" : "w-0 group-hover:w-full"
+ }`} />
+ </Link>
+ )
+ ))}
+ </div>
 
-        {/* Action Unit */}
-        <div className="flex items-center gap-6">
-          {!isLoggedIn ? (
-            <>
-              <Link 
-                to="/login" 
-                className="hidden sm:flex items-center gap-2 text-sm font-medium text-white/60 hover:text-[#84CC16] transition-all"
-              >
-                <ShieldCheck size={16} className="opacity-50" />
-                Login
-              </Link>
-              
-              <Link to="/partners" className="bg-[#84CC16] text-black h-10 px-6 rounded-md text-sm font-bold flex items-center gap-2 hover:bg-[#a3e635] transition-all shadow-lg shadow-[#84CC16]/10">
-                Join Now <ArrowRight size={16} />
-              </Link>
-            </>
-          ) : (
-            <div className="flex items-center gap-4">
-              <div className="hidden md:flex flex-col items-end border-r border-white/10 pr-4">
-                <span className="text-[10px] text-white/40 uppercase tracking-wider">Account Type</span>
-                <span className="text-sm font-bold text-[#84CC16]">{role?.charAt(0).toUpperCase() + role?.slice(1) || "Partner"}</span>
-              </div>
-              <div className="dropdown dropdown-end">
-                <label tabIndex={0} className="w-10 h-10 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 rounded-full transition-all cursor-pointer group">
-                  <User size={20} className="text-white/60 group-hover:text-[#84CC16] transition-colors" />
-                </label>
-                <ul tabIndex={0} className="dropdown-content mt-4 p-2 shadow-2xl bg-[#121212] border border-white/10 rounded-xl w-56 overflow-hidden backdrop-blur-xl">
-                  <li>
-                    <Link to="/partner/profile" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                      <User size={16} /> My Profile
-                    </Link>
-                  </li>
-                  <li className="mt-1 pt-1 border-t border-white/5">
-                    <button 
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 p-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/5 rounded-lg transition-all"
-                    >
-                      <LogOut size={16} /> Logout
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          )}
+ {/* Action Unit */}
+ <div className="flex items-center gap-6">
+ {!isLoggedIn ? (
+ <>
+ <Link 
+ to="/login" 
+ className="hidden sm:flex items-center gap-2 text-sm font-medium text-white/60 hover:text-[#84CC16] transition-all"
+ >
+ <ShieldCheck size={16} className="opacity-50" />
+ Login
+ </Link>
+ 
+ <Link to="/partners" className="bg-[#84CC16] text-black h-10 px-6 rounded-md text-sm font-bold flex items-center gap-2 hover:bg-[#a3e635] transition-all shadow-lg shadow-[#84CC16]/10">
+ Join Now <ArrowRight size={16} />
+ </Link>
+ </>
+ ) : (
+ <div className="flex items-center gap-4">
+ <div className="hidden md:flex flex-col items-end border-r border-white/10 pr-4">
+ <span className="text-[10px] text-white/40 uppercase tracking-wider">Account Type</span>
+ <span className="text-sm font-bold text-[#84CC16]">{role?.charAt(0).toUpperCase() + role?.slice(1) || "Partner"}</span>
+ </div>
+ <div className="dropdown dropdown-end">
+ <label tabIndex={0} className="w-10 h-10 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 rounded-full transition-all cursor-pointer group">
+ <User size={20} className="text-white/60 group-hover:text-[#84CC16] transition-colors" />
+ </label>
+ <ul tabIndex={0} className="dropdown-content mt-4 p-2 shadow-2xl bg-[#121212] border border-white/10 rounded-xl w-56 overflow-hidden backdrop-blur-xl">
+ <li>
+ <Link to="/partner/profile" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+ <User size={16} /> My Profile
+ </Link>
+ </li>
+ <li className="mt-1 pt-1 border-t border-white/5">
+ <button 
+ onClick={handleLogout}
+ className="w-full flex items-center gap-3 p-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/5 rounded-lg transition-all"
+ >
+ <LogOut size={16} /> Logout
+ </button>
+ </li>
+ </ul>
+ </div>
+ </div>
+ )}
 
-          {/* Mobile Menu Trigger */}
-          <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden text-white/60 hover:text-white transition-colors">
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-      </div>
+ {/* Mobile Menu Trigger */}
+ <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden text-white/60 hover:text-white transition-colors">
+ {isOpen ? <X size={24} /> : <Menu size={24} />}
+ </button>
+ </div>
+ </div>
 
-      {/* Mobile Menu */}
-      <div className={`lg:hidden fixed inset-0 z-40 bg-black/98 backdrop-blur-2xl transition-all duration-500 ${
-        isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
-      }`}>
-        <div className="flex flex-col h-full pt-28 px-8 gap-8">
-          {navLinks.map((link) => (
-            link.isExternal ? (
-              <a
-                key={link.name}
-                href={link.path}
-                className="text-4xl font-bold text-white/30 hover:text-[#84CC16] transition-colors"
-              >
-                {link.name}
-              </a>
-            ) : (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={() => setIsOpen(false)}
-                className="text-4xl font-bold text-white/30 hover:text-[#84CC16] transition-colors"
-              >
-                {link.name}
-              </Link>
-            )
-          ))}
-          
-          <div className="mt-auto pb-12 space-y-6">
-            <div className="h-[1px] w-full bg-white/10" />
-            <div className="flex items-center justify-end">
-               <Link 
-                to="/login" 
-                onClick={() => setIsOpen(false)}
-                className="text-sm font-bold text-[#84CC16] border border-[#84CC16]/30 px-6 py-2 rounded-lg"
-               >
-                 Login
-               </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
+ {/* Mobile Menu */}
+ <div className={`lg:hidden fixed inset-0 z-40 bg-black/98 backdrop-blur-2xl transition-all duration-500 ${
+ isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
+ }`}>
+ <div className="flex flex-col h-full pt-28 px-8 gap-8">
+ {navLinks.map((link) => (
+ link.isExternal ? (
+ <a
+ key={link.name}
+ href={link.path}
+ className="text-4xl font-bold text-white/30 hover:text-[#84CC16] transition-colors"
+ >
+ {link.name}
+ </a>
+ ) : (
+ <Link
+ key={link.name}
+ to={link.path}
+ onClick={() => setIsOpen(false)}
+ className="text-4xl font-bold text-white/30 hover:text-[#84CC16] transition-colors"
+ >
+ {link.name}
+ </Link>
+ )
+ ))}
+ 
+ <div className="mt-auto pb-12 space-y-6">
+ <div className="h-[1px] w-full bg-white/10" />
+ <div className="flex items-center justify-end">
+ <Link 
+ to="/login" 
+ onClick={() => setIsOpen(false)}
+ className="text-sm font-bold text-[#84CC16] border border-[#84CC16]/30 px-6 py-2 rounded-lg"
+ >
+ Login
+ </Link>
+ </div>
+ </div>
+ </div>
+ </div>
+ </nav>
+ );
 };
 
 export default GuestNavbar;
