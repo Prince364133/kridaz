@@ -153,6 +153,7 @@ export const getAdminDashboardData = async (req, res) => {
       OwnerRequest.countDocuments({ status: "pending" }).catch(e => 0),
       Owner.countDocuments({ role: "coach" }).catch(e => 0),
       Owner.countDocuments({ role: "umpire" }).catch(e => 0),
+      Owner.countDocuments({ role: "streamer" }).catch(e => 0),
       WithdrawalRequest.aggregate([{ $match: { status: "COMPLETED" } }, { $group: { _id: null, total: { $sum: "$amount" } } }]).catch(e => []),
       SupportTicket.countDocuments({ status: "OPEN" }).catch(e => 0),
       Dispute.countDocuments({ status: "PENDING" }).catch(e => 0),
@@ -171,6 +172,7 @@ export const getAdminDashboardData = async (req, res) => {
       pendingRequests, 
       totalCoaches,
       totalUmpires,
+      totalStreamers,
       payoutData,
       openTickets,
       pendingDisputes,
@@ -222,6 +224,7 @@ export const getAdminDashboardData = async (req, res) => {
       pendingRequests,
       totalCoaches,
       totalUmpires,
+      totalStreamers,
       totalPayouts: payoutData[0]?.total || 0,
       openTickets,
       pendingDisputes,
@@ -352,7 +355,7 @@ export const getAllProfessionals = async (req, res) => {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
-    const professionals = await Owner.find({ role: { $in: ["coach", "umpire"] } }, { password: 0 });
+    const professionals = await Owner.find({ role: { $in: ["coach", "umpire", "streamer"] } }, { password: 0 });
     res.status(200).json({
       message: "Fetched all professionals",
       professionals,
@@ -415,11 +418,11 @@ export const getAllRequestedProfessionals = async (req, res) => {
   try {
     const professionalRequests = await OwnerRequest.find({ 
       status: "pending", 
-      role: { $in: ["coach", "umpire"] } 
+      role: { $in: ["coach", "umpire", "streamer"] } 
     }).populate("userId", "profilePicture name");
     const professionalRejectedRequests = await OwnerRequest.find({
       status: "rejected",
-      role: { $in: ["coach", "umpire"] }
+      role: { $in: ["coach", "umpire", "streamer"] }
     }).populate("userId", "profilePicture name");
     res.status(200).json({
       success: true,

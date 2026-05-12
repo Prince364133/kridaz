@@ -19,6 +19,7 @@ export const getDashboardData = async (req, res) => {
   // Redirect based on role
   if (role === "coach") return getCoachDashboardData(req, res);
   if (role?.toLowerCase().includes("umpire")) return getUmpireDashboardData(req, res);
+  if (role?.toLowerCase() === "streamer") return getStreamerDashboardData(req, res);
 
   try {
     // 1. Resolve correct owner document
@@ -382,9 +383,21 @@ export const getUmpireDashboardData = async (req, res) => {
     const userId = req.owner.id;
 
     // Fetch owner profile to check for upgradeRequested status
-    const owner = await Owner.findById(ownerId).lean();
+    let owner = null;
+    if (ownerId) {
+      owner = await Owner.findById(ownerId).lean();
+    }
+    
+    // Fallback search by userId if not found by ownerId
+    if (!owner && userId) {
+      owner = await Owner.findOne({ userId }).lean();
+      if (owner) {
+        console.log("DEBUG: Found owner by userId instead of ownerId:", userId);
+      }
+    }
+
     if (!owner) {
-      console.warn("DEBUG: Owner profile not found for ownerId:", ownerId);
+      console.warn("DEBUG: Owner profile not found for ownerId:", ownerId, "or userId:", userId);
     }
 
     // Fetch user details for email/phone fallback search
@@ -397,7 +410,6 @@ export const getUmpireDashboardData = async (req, res) => {
       HostedGame.find({
         $or: [
           { umpire: { $in: [umpireId, userId, ownerId] } },
-          { host: { $in: [umpireId, userId, ownerId] } },
           { "umpireRequest.user": { $in: [umpireId, userId, ownerId] } },
           // Robust fallback for invited umpires whose ID link might be pending
           { "customUmpire.email": userEmail },
@@ -490,6 +502,124 @@ export const getUmpireDashboardData = async (req, res) => {
     });
   }
 };
+
+export const getStreamerDashboardData = async (req, res) => {
+  const streamerId = req.owner.id;
+  console.log("DEBUG: Fetching streamer dashboard data for streamerId:", streamerId);
+  
+  try {
+    console.log("DEBUG: Querying HostedGame models...");
+    
+    // Support both User ID and Owner ID for lookup during transition
+    const ownerId = req.owner.ownerId;
+    const userId = req.owner.id;
+
+    // Fetch owner profile to check for upgradeRequested status
+    let owner = null;
+    if (ownerId) {
+      owner = await Owner.findById(ownerId).lean();
+    }
+    
+    // Fallback search by userId if not found by ownerId
+    if (!owner && userId) {
+      owner = await Owner.findOne({ userId }).lean();
+    }
+
+    // Fetch user details for email/phone fallback search
+    const userRecord = await User.findById(userId).select("email phone").lean();
+    const userEmail = userRecord?.email;
+    const userPhone = userRecord?.phone;
+
+    const hostedGames = await HostedGame.find({
+      $or: [
+        { streamer: { $in: [streamerId, userId, ownerId] } },
+        { "streamerRequest.user": { $in: [streamerId, userId, ownerId] } }
+      ],
+      status: { $ne: "CANCELLED" }
+    })
+      .populate("ground", "name location")
+      .sort({ date: 1 })
+      .lean();
+
+    // Format HostedGames to match the frontend match structure
+    const allMatches = hostedGames.map(game => ({
+      ...game,
+      name: game.name || `${game.teams?.teamA?.name || 'Team A'} VS ${game.teams?.teamB?.name || 'Team B'}`,
+      venue: game.ground?.name || game.city || "TBD Venue",
+      // Normalize status to lowercase for frontend filtering
+      status: game.status === "ACTIVE" ? "upcoming" : game.status.toLowerCase(),
+      teams: game.teams ? [game.teams.teamA.name, game.teams.teamB.name] : ["TBD", "TBD"],
+      isHostedGame: true
+    }));
+
+    console.log(`DEBUG: Found ${allMatches.length} hosted games for streamer`);
+    
+    const matchesStreamed = allMatches.filter(m => m.status === "completed").length;
+    const upcomingStreams = allMatches.filter(m => m.status === "upcoming").length;
+
+    // Fetch Real Revenue from Wallet
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const [revenueData, revenueOverTimeRaw] = await Promise.all([
+      WalletTransaction.aggregate([
+        { $match: { user: streamerId, status: "SUCCESS", type: { $ne: "DEBIT" } } },
+        { $group: { _id: null, total: { $sum: "$amount" } } }
+      ]),
+      WalletTransaction.aggregate([
+        { 
+          $match: { 
+            user: streamerId, 
+            status: "SUCCESS", 
+            type: { $ne: "DEBIT" },
+            createdAt: { $gte: sevenDaysAgo }
+          } 
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            revenue: { $sum: "$amount" },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ])
+    ]);
+
+    const totalRevenue = revenueData[0]?.total || 0;
+
+    const responseData = {
+      matchesStreamed,
+      upcomingStreams,
+      officialRating: 0,
+      earnings: totalRevenue,
+      totalRevenue,
+      revenueOverTimeRaw,
+      matchEngagement: [],
+      matches: allMatches,
+      upcomingAssignments: allMatches.filter(m => m.status === "upcoming").slice(0, 5).map(m => ({
+        _id: m._id,
+        match: m.name || "TBD Match",
+        shortId: m.shortId,
+        time: m.date ? `${new Date(m.date).toLocaleDateString()} - ${m.time || 'N/A'}` : 'TBD',
+        venue: m.venue || "TBD Venue",
+        role: "Head Streamer"
+      })),
+      upgradeRequested: owner?.upgradeRequested || false
+    };
+
+    console.log("DEBUG: Sending successful response for streamer dashboard");
+    res.json(responseData);
+  } catch (error) {
+    console.error("CRITICAL ERROR in getStreamerDashboardData:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Error fetching streamer dashboard data", 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+};
+
 
 export const getOwnerCalendarData = async (req, res) => {
   const ownerId = new mongoose.Types.ObjectId(req.owner.id);

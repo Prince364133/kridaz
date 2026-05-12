@@ -136,18 +136,54 @@ export const requestUpgrade = async (req, res) => {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const owner = await Owner.findOneAndUpdate(
+    const { city, bio, experience, specialization, phone } = req.body;
+
+    // Update payload with form details if provided
+    const updatePayload = { 
+      upgradeRequested: true,
+      ...(city && { city }),
+      ...(bio && { bio }),
+      ...(phone && { phone }),
+      ...(experience && { "businessDetails.experience": experience }),
+      ...(specialization && { "businessDetails.specialization": specialization })
+    };
+
+    // Try finding by userId first
+    let owner = await Owner.findOneAndUpdate(
       { userId },
-      { upgradeRequested: true },
+      updatePayload,
       { new: true }
     );
 
+    // Fallback: If no Owner doc exists for this userId, but the user has a professional role, create one
     if (!owner) {
-      return res.status(404).json({ success: false, message: "Owner profile not found" });
+      const user = await User.findById(userId);
+      if (user && user.role?.toLowerCase().includes("umpire")) {
+        owner = new Owner({
+          userId: user._id,
+          name: user.name,
+          email: user.email,
+          phone: phone || user.phone,
+          role: user.role,
+          city: city || "",
+          bio: bio || "",
+          businessDetails: {
+            experience: experience || "",
+            specialization: specialization || "Cricket"
+          },
+          upgradeRequested: true
+        });
+        await owner.save();
+      }
+    }
+
+    if (!owner) {
+      return res.status(404).json({ success: false, message: "Professional profile not found. Please register first." });
     }
 
     res.status(200).json({ success: true, message: "Upgrade request submitted successfully" });
   } catch (error) {
+    console.error("requestUpgrade Error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

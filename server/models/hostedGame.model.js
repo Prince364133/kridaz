@@ -8,10 +8,12 @@ const hostedGameSchema = new mongoose.Schema(
     time: { type: String, required: true },
     ground: { type: mongoose.Schema.Types.ObjectId, ref: "Turf" },
     umpire: { type: mongoose.Schema.Types.ObjectId, ref: "Owner" },
+    streamer: { type: mongoose.Schema.Types.ObjectId, ref: "Owner" },
     perPlayerCharge: { type: Number, default: 0 },
     perSeatCharge: { type: Number, default: 0 }, // Alias for Quick Game mode consistency
     groundCost: { type: Number, default: 0 },
     umpireCost: { type: Number, default: 0 },
+    streamerCost: { type: Number, default: 0 },
     totalCost: { type: Number, default: 0 },
     status: {
       type: String,
@@ -27,6 +29,17 @@ const hostedGameSchema = new mongoose.Schema(
     umpireRequest: {
       user: { type: mongoose.Schema.Types.ObjectId, ref: "Owner" },
       status: { type: String, enum: ["NONE", "PENDING", "APPROVED", "REJECTED"], default: "NONE" },
+    },
+    streamerRequest: {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "Owner" },
+      status: { type: String, enum: ["NONE", "PENDING", "APPROVED", "REJECTED"], default: "NONE" },
+    },
+    streamConfig: {
+      platform: { type: String, enum: ["YouTube", "Facebook", "Twitch", "Custom"], default: "YouTube" },
+      streamKey: { type: String, default: "" },
+      rtmpUrl: { type: String, default: "rtmp://a.rtmp.youtube.com/live2" },
+      publicUrl: { type: String, default: "" },
+      status: { type: String, enum: ["OFFLINE", "LIVE"], default: "OFFLINE" },
     },
     teams: {
       teamA: {
@@ -148,6 +161,8 @@ const hostedGameSchema = new mongoose.Schema(
     youtubeLiveChatId: { type: String },
     youtubeStreamKey: { type: String },
     youtubeRtmpUrl: { type: String },
+    youtubeBroadcastId: { type: String },
+    youtubeStreamId: { type: String },
     overlayToken: { type: String },
     lastCommentary: { type: String },
     lastCommentaryAt: { type: Date },

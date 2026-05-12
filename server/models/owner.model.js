@@ -11,7 +11,7 @@ const ownerSchema = new mongoose.Schema(
     location: { type: String },
     profilePicture: { type: String },
     bio: { type: String },
-    role: { type: String, enum: ["admin", "owner", "coach", "umpire", "LIMITED_UMPIRE", "BMSP_ADMIN", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"], default: "owner" },
+    role: { type: String, enum: ["admin", "owner", "coach", "umpire", "streamer", "LIMITED_UMPIRE", "BMSP_ADMIN", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"], default: "owner" },
     businessDetails: {
       businessName: String,
       registrationNumber: String,

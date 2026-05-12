@@ -7,6 +7,7 @@ const router = express.Router();
 // ── Public / Semi-public ───────────────────────────────────────────────────
 router.get("/grounds", controller.getGroundsForHosting);
 router.get("/umpires", controller.getUmpiresForHosting);
+router.get("/streamers", controller.getStreamersForHosting);
 router.get("/list", controller.getAllHostedGames);
 router.get("/verify-invite", controller.verifyInviteToken); // Phase 2D — magic-link verification
 
@@ -34,5 +35,9 @@ router.get("/:id", controller.getHostedGameById);
 
 router.post("/request-umpire", verifyUser, controller.requestToUmpire);
 router.post("/handle-umpire-request", verifyUser, controller.handleUmpireRequest);
+
+router.post("/request-streamer", verifyUser, controller.requestToStreamer);
+router.post("/handle-streamer-request", verifyUser, controller.handleStreamerRequest);
+router.post("/:id/stream-config", verifyUser, controller.updateStreamConfig);
 
 export default router;

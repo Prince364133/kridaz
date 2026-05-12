@@ -81,6 +81,7 @@ const HostGame = () => {
     time: '',
     groundId: null,
     umpireId: null,
+    streamerId: null,
     perPlayerCharge: 0,
     gameMode: 'PROFESSIONAL',
     quickPlayerCount: 0,
@@ -93,8 +94,10 @@ const HostGame = () => {
 
   const [grounds, setGrounds] = useState([]);
   const [umpires, setUmpires] = useState([]);
+  const [streamers, setStreamers] = useState([]);
   const [selectedGround, setSelectedGround] = useState(null);
   const [selectedUmpire, setSelectedUmpire] = useState(null);
+  const [selectedStreamer, setSelectedStreamer] = useState(null);
 
   // Location dropdown state
   const [states, setStates] = useState([]);
@@ -177,14 +180,24 @@ const HostGame = () => {
     }
   };
 
+  const fetchStreamers = async () => {
+    try {
+      const res = await axiosInstance.get(`/api/hosted-game/streamers?city=${gameData.city}&state=${gameData.state}&gameType=${gameData.gameType}`);
+      setStreamers(res.data.streamers);
+    } catch (err) {
+      toast.error("Failed to fetch streamers");
+    }
+  };
+
   useEffect(() => {
     if (step === 3 && gameData.gameType) {
       fetchGrounds();
       fetchUmpires();
+      fetchStreamers();
     }
   }, [step, gameData.gameType, gameData.city, gameData.state]);
 
-  const totalCost = (selectedGround?.pricePerHour || 0) + (selectedUmpire?.price || 0);
+  const totalCost = (selectedGround?.pricePerHour || 0) + (selectedUmpire?.price || 0) + (selectedStreamer?.price || 0);
 
   const initSlots = (sport) => {
     const defaults = SPORT_DEFAULTS[sport] || [{ role: "Player", count: 5 }];
@@ -550,7 +563,7 @@ const HostGame = () => {
         {/* Step 3: Grounds & Umpires */}
         {step === 3 && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
               {/* Grounds */}
               <section className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -671,6 +684,57 @@ const HostGame = () => {
                   )) : (
                     <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
                       <p className="text-neutral-500 text-sm italic font-medium">No {gameData.gameType} experts available in {gameData.city}, {gameData.state}.</p>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* Streamers */}
+              <section className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <label className="text-xs font-black text-neutral-400 uppercase tracking-widest">Hire Streamer</label>
+                  </div>
+                  <span className="text-[10px] text-neutral-500 font-black px-3 py-1 bg-neutral-800 rounded-full uppercase tracking-tighter">Optional</span>
+                </div>
+                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
+                  {streamers.length > 0 ? streamers.map(s => (
+                    <div 
+                      key={s._id}
+                      onClick={() => {
+                        if (selectedStreamer?._id === s._id) {
+                          setSelectedStreamer(null);
+                          setGameData({ ...gameData, streamerId: null });
+                        } else {
+                          setSelectedStreamer(s);
+                          setGameData({ ...gameData, streamerId: s._id });
+                        }
+                      }}
+                      className={`p-5 rounded-3xl border-2 transition-all cursor-pointer group ${
+                        selectedStreamer?._id === s._id 
+                        ? 'border-yellow-500 bg-yellow-500/10' 
+                        : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-5">
+                        <img src={s.profilePicture || "https://ui-avatars.com/api/?name="+s.name} className="w-16 h-16 rounded-full object-cover border-2 border-neutral-800" />
+                        <div className="flex-1">
+                          <h3 className="font-black text-base mb-1 tracking-tight">{s.name}</h3>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-yellow-500 font-black text-sm">₹{s.price}</span>
+                            <div className="flex gap-1">
+                              {s.gameTypes?.slice(0, 2).map(t => (
+                                <span key={t} className="text-[8px] px-2 py-0.5 bg-neutral-800 text-neutral-500 rounded-full font-black uppercase tracking-tighter">{t}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        {selectedStreamer?._id === s._id && <CheckCircle2 className="text-yellow-500" size={24} />}
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
+                      <p className="text-neutral-500 text-sm italic font-medium">No {gameData.gameType} streamers available in {gameData.city}, {gameData.state}.</p>
                     </div>
                   )}
                 </div>

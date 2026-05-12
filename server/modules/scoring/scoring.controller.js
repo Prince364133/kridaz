@@ -32,20 +32,27 @@ export const goLive = async (req, res) => {
     hostedGame.isLive = true;
     hostedGame.overlayToken = overlayToken;
     hostedGame.streamStatus = 'starting';
+    hostedGame.liveStartedAt = new Date();
     await hostedGame.save();
 
-    // Initialize Redis state
-    await liveStateService.setStreamStatus(matchId, 'starting');
-    await liveStateService.setOverlayConfig(matchId, hostedGame.overlayConfig);
+    // Initialize Redis state — errors here are non-fatal; log and continue
+    const overlayConfig = hostedGame.overlayConfig || { showScoreboard: true, showCommentary: true };
+    try {
+      await liveStateService.setStreamStatus(matchId, 'starting');
+      await liveStateService.setOverlayConfig(matchId, overlayConfig);
+    } catch (redisErr) {
+      console.warn("[Scoring] Redis state init failed (non-fatal):", redisErr.message);
+    }
 
+    const appBase = process.env.APP_BASE_URL || 'http://localhost:5174';
     res.status(200).json({ 
       success: true, 
       overlayToken,
       streamStatus: hostedGame.streamStatus,
       youtubeVideoId: hostedGame.youtubeVideoId,
       urls: {
-        obsOverlay: `${process.env.APP_BASE_URL || 'http://localhost:5173'}/live-overlay/${matchId}?token=${overlayToken}`,
-        publicScoreboard: `${process.env.APP_BASE_URL || 'http://localhost:5173'}/live-score/${matchId}`
+        obsOverlay: `${appBase}/live-overlay/${matchId}?token=${overlayToken}`,
+        publicScoreboard: `${appBase}/live-score/${matchId}`
       }
     });
   } catch (error) {
@@ -71,7 +78,12 @@ export const endLive = async (req, res) => {
     hostedGame.streamStatus = 'ended';
     await hostedGame.save();
 
-    await liveStateService.setStreamStatus(matchId, 'ended');
+    // Redis cleanup — non-fatal
+    try {
+      await liveStateService.setStreamStatus(matchId, 'ended');
+    } catch (redisErr) {
+      console.warn("[Scoring] Redis cleanup failed (non-fatal):", redisErr.message);
+    }
 
     res.status(200).json({ success: true, message: "Live stream ended." });
   } catch (error) {
