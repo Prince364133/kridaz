@@ -10,7 +10,8 @@ const ownerSchema = new mongoose.Schema(
     gender: { type: String, enum: ["Male", "Female", "Other", "Prefer not to say"] },
     location: { type: String },
     profilePicture: { type: String },
-    role: { type: String, enum: ["admin", "owner", "coach", "umpire", "BMSP_ADMIN", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"], default: "owner" },
+    bio: { type: String },
+    role: { type: String, enum: ["admin", "owner", "coach", "umpire", "LIMITED_UMPIRE", "BMSP_ADMIN", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"], default: "owner" },
     businessDetails: {
       businessName: String,
       registrationNumber: String,
@@ -76,6 +77,7 @@ const ownerSchema = new mongoose.Schema(
         url: String,
       },
     ],
+    upgradeRequested: { type: Boolean, default: false },
  },
  { timestamps: true }
 );

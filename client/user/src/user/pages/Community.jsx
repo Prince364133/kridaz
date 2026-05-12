@@ -21,7 +21,8 @@ import {
   Edit3,
   Twitter,
   Facebook,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Eye
 } from "lucide-react";
 import toast from "react-hot-toast";
 import StoryViewer from "../components/StoryViewer";
@@ -38,6 +39,8 @@ const Community = () => {
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
    const [isPublishing, setIsPublishing] = useState(false);
+  const [showLikesModal, setShowLikesModal] = useState(false);
+  const [viewingLikes, setViewingLikes] = useState([]);
   
   // Post modal state
   const [showPostModal, setShowPostModal] = useState(false);
@@ -59,6 +62,8 @@ const Community = () => {
   const [commentText, setCommentText] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [editingComment, setEditingComment] = useState(null); // { postId, commentId, text }
+  const [optimisticPosts, setOptimisticPosts] = useState([]);
+  const [optimisticStories, setOptimisticStories] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -94,7 +99,7 @@ const Community = () => {
 
     // Fetch stories
     try {
-      const res = await axiosInstance.get('/api/user/stories/feed?all=true');
+      const res = await axiosInstance.get('/api/user/stories/feed');
       setStories(res.data.stories || []);
     } catch (error) {
       console.error("Error fetching stories:", error);
@@ -103,13 +108,18 @@ const Community = () => {
     setLoading(false);
   };
 
-  const handleAuthorAvatarClick = async (author) => {
+  const handleAuthorAvatarClick = async (authorId) => {
     gateInteraction(async () => {
-      if (!author?.hasActiveStory) return;
-      
+      // In the feed, we usually show authors with active stories
       try {
-        const res = await axiosInstance.get(`/api/user/community/user-stories/${author._id}`);
+        const res = await axiosInstance.get(`/api/user/community/user-stories/${authorId}`);
         if (res.data.success && res.data.stories?.length > 0) {
+          // Find the user object from the first story or the posts list
+          const author = stories.find(s => s.user._id === authorId)?.user || 
+                         posts.find(p => p.adminId?._id === authorId)?.adminId;
+          
+          if (!author) return;
+
           setSelectedStoryGroup({
             user: author,
             stories: res.data.stories
@@ -142,22 +152,47 @@ const Community = () => {
     formData.append('content', newPost.content);
     if (newPost.image) formData.append('image', newPost.image);
 
-    setIsPublishing(true);
+    const tempId = Date.now().toString();
+    const optimisticPost = {
+      _id: tempId,
+      title: newPost.title,
+      content: newPost.content,
+      imageUrl: postImagePreview,
+      createdAt: new Date().toISOString(),
+      adminId: user,
+      isOptimistic: true,
+      likes: [],
+      comments: []
+    };
+
+    if (!editingPost) {
+      setOptimisticPosts(prev => [optimisticPost, ...prev]);
+      closePostModal();
+    } else {
+      setIsPublishing(true);
+    }
+
     try {
       if (editingPost) {
         await axiosInstance.put(`/api/user/community/${editingPost._id}`, formData);
         toast.success("Post updated successfully!");
+        closePostModal();
+        fetchData();
       } else {
         await axiosInstance.post('/api/user/community', formData);
         toast.success("Post created successfully!");
+        // We'll let fetchData replace the optimistic post
+        fetchData();
       }
-      closePostModal();
-      fetchData();
     } catch (error) {
       console.error("Save Post Error:", error);
       toast.error(error.response?.data?.message || error.message || "Failed to save post");
+      if (!editingPost) {
+        setOptimisticPosts(prev => prev.filter(p => p._id !== tempId));
+      }
     } finally {
       setIsPublishing(false);
+      setOptimisticPosts(prev => prev.filter(p => p._id !== tempId));
     }
   };
 
@@ -190,6 +225,21 @@ const Community = () => {
     e.preventDefault();
     if (!newStory.content && newStory.mediaFiles.length === 0) return toast.error("Story must have content or media");
 
+    const tempId = Date.now().toString();
+    const optimisticStory = {
+      _id: tempId,
+      user: user,
+      stories: [{
+        content: newStory.content,
+        mediaUrl: storyMediaPreviews[0] || null,
+        createdAt: new Date().toISOString()
+      }],
+      isOptimistic: true
+    };
+
+    setOptimisticStories(prev => [optimisticStory, ...prev]);
+    setShowStoryModal(false);
+
     const formData = new FormData();
     formData.append('content', newStory.content);
     formData.append('durationDays', newStory.durationDays);
@@ -202,15 +252,16 @@ const Community = () => {
     try {
       await axiosInstance.post('/api/user/stories', formData);
       toast.success("Story uploaded successfully!");
-      setShowStoryModal(false);
       setNewStory({ content: '', mediaFiles: [], durationDays: 1 });
       setStoryMediaPreviews([]);
       fetchData();
     } catch (error) {
       console.error("Upload Story Error:", error);
       toast.error(error.response?.data?.message || error.message || "Failed to upload story");
+      setOptimisticStories(prev => prev.filter(s => s._id !== tempId));
     } finally {
       setIsPublishing(false);
+      setOptimisticStories(prev => prev.filter(s => s._id !== tempId));
     }
   };
 
@@ -297,9 +348,7 @@ const Community = () => {
         if (res.data.success) {
           setPosts(posts.map(p => p._id === postId ? { 
             ...p, 
-            likes: res.data.isLiked 
-              ? [...(p.likes || []), user?._id] 
-              : (p.likes || []).filter(id => id !== user?._id) 
+            likes: res.data.likes || p.likes 
           } : p));
         }
       } catch (error) {
@@ -424,52 +473,82 @@ const Community = () => {
           <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-2 sm:pb-4 no-scrollbar">
             {/* Add Story Button — only shown for logged-in users */}
             {isLoggedIn && (
-              <button 
-                onClick={() => setShowStoryModal(true)}
-                className="flex flex-col items-center gap-2 sm:gap-3 flex-shrink-0 group w-[72px] sm:w-auto"
-              >
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-[#84CC16]/30 flex items-center justify-center group-hover:border-[#84CC16] transition-all relative">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#84CC16]/10 flex items-center justify-center">
-                    <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-[#84CC16]" />
+              <div className="flex flex-col items-center gap-2 sm:gap-3 flex-shrink-0">
+                <button 
+                  onClick={() => setShowStoryModal(true)}
+                  className="flex flex-col items-center gap-2 sm:gap-3 flex-shrink-0 group w-[72px] sm:w-auto"
+                >
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-[#84CC16]/30 flex items-center justify-center group-hover:border-[#84CC16] transition-all relative">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#84CC16]/10 flex items-center justify-center overflow-hidden">
+                      {user?.profilePicture || user?.profileImage ? (
+                        <img src={user.profilePicture || user.profileImage} alt="" className="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity" />
+                      ) : (
+                        <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-[#84CC16]" />
+                      )}
+                    </div>
+                    <div className="absolute bottom-0 right-0 w-5 h-5 sm:w-6 sm:h-6 bg-[#84CC16] rounded-full flex items-center justify-center border-2 border-black z-10">
+                      <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />
+                    </div>
                   </div>
-                  <div className="absolute bottom-0 right-0 w-5 h-5 sm:w-6 sm:h-6 bg-[#84CC16] rounded-full flex items-center justify-center border-2 border-black">
-                    <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />
-                  </div>
-                </div>
-                <span className="text-[9px] sm:text-[10px] font-bold text-white/40 uppercase group-hover:text-white transition-colors truncate w-16 sm:w-20 text-center">Your Story</span>
-              </button>
-            )}
-
-            {stories.length === 0 && (
-              <div className="flex items-center text-white/20 text-[10px] sm:text-xs uppercase tracking-widest px-2 sm:px-4">
-                No stories yet. Be the first!
+                  <span className="text-[9px] sm:text-[10px] font-bold text-white/40 uppercase group-hover:text-white transition-colors truncate w-16 sm:w-20 text-center">Add Story</span>
+                </button>
               </div>
             )}
 
-            {stories.map((group) => (
-              <div 
-                key={group.user._id} 
-                onClick={() => {
-                  // Stories are freely viewable by guests
-                  setSelectedStoryGroup(group);
-                  setCurrentStoryIndex(0);
-                }}
-                className="flex flex-col items-center gap-2 sm:gap-3 flex-shrink-0 cursor-pointer group w-[72px] sm:w-auto"
-              >
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-[2px] sm:p-[3px] bg-gradient-to-tr from-[#84CC16] to-[#4ade80] group-hover:scale-105 transition-all">
-                  <div className="w-full h-full rounded-full border-2 border-black overflow-hidden bg-[#1A1A1A] flex items-center justify-center">
-                    {group.stories[0].mediaUrl ? (
-                      <img src={group.stories[0].mediaUrl} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="p-1 sm:p-2 text-[6px] sm:text-[8px] text-center line-clamp-3 leading-tight font-medium break-words">{group.stories[0].content}</div>
+            {stories.length === 0 && !loading && (
+              <div className="flex items-center text-white/20 text-[10px] sm:text-xs uppercase tracking-widest px-2 sm:px-4">
+                No community stories yet. Be the first to share!
+              </div>
+            )}
+
+            {[...optimisticStories, ...stories].map((group) => {
+              const groupUserId = group.user?._id || group.user;
+              const isCurrentUser = user?._id && groupUserId && groupUserId.toString() === user._id.toString();
+              const isOptimistic = group.isOptimistic;
+
+              return (
+                <div 
+                  key={group._id || groupUserId} 
+                  onClick={() => {
+                    if (isOptimistic) return;
+                    setSelectedStoryGroup(group);
+                    setCurrentStoryIndex(0);
+                  }}
+                  className={`flex flex-col items-center gap-2 sm:gap-3 flex-shrink-0 group w-[72px] sm:w-auto ${isOptimistic ? 'opacity-70 cursor-wait' : 'cursor-pointer'} relative`}
+                >
+                  <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full p-[2px] sm:p-[3px] bg-gradient-to-tr ${isOptimistic ? 'from-white/20 to-white/10 animate-pulse' : 'from-[#84CC16] to-[#4ade80] shadow-lg shadow-[#84CC16]/10'} group-hover:scale-105 transition-all relative`}>
+                    <div className="w-full h-full rounded-full border-2 border-black overflow-hidden bg-[#1A1A1A] flex items-center justify-center relative">
+                      {isOptimistic && (
+                        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40">
+                          <Loader2 size={16} className="text-[#84CC16] animate-spin" />
+                        </div>
+                      )}
+                      {group.stories[0].mediaUrl ? (
+                        <img src={group.stories[0].mediaUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="p-1 sm:p-2 text-[6px] sm:text-[8px] text-center line-clamp-3 leading-tight font-medium break-words text-[#84CC16]">{group.stories[0].content}</div>
+                      )}
+                    </div>
+                    {!isOptimistic && (
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-black border border-white/10 rounded-full flex items-center gap-1 z-30 shadow-xl">
+                        <Eye size={8} className="text-[#84CC16]" />
+                        <span className="text-[7px] font-black text-white">{group.stories[0].viewers?.length || 0}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className={`text-[9px] sm:text-[10px] font-bold uppercase truncate w-16 sm:w-20 text-center transition-colors ${isCurrentUser ? 'text-[#84CC16]' : 'text-white/60 group-hover:text-white'}`}>
+                      {isOptimistic ? "Posting..." : (isCurrentUser ? "You" : (group.user?.username || group.user?.name || "Player"))}
+                    </span>
+                    {!isOptimistic && (
+                      <span className="text-[7px] font-bold text-white/20 uppercase tracking-widest mt-0.5">
+                        {new Date(group.stories[0].createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                      </span>
                     )}
                   </div>
                 </div>
-                <span className="text-[9px] sm:text-[10px] font-bold text-white/60 uppercase truncate w-16 sm:w-20 text-center">
-                  {group.user._id === user?._id ? "You" : (group.user.username || group.user.name || "Player")}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -482,18 +561,27 @@ const Community = () => {
               <Loader2 size={40} className="text-[#84CC16] animate-spin" />
               <p className="text-white/20 text-xs uppercase tracking-widest">Gathering news...</p>
             </div>
-          ) : posts.length === 0 ? (
+          ) : (posts.length === 0 && optimisticPosts.length === 0) ? (
             <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-20 text-center space-y-4">
               <MessageCircle size={48} className="mx-auto text-white/10" />
               <p className="text-white/20 text-sm uppercase tracking-widest">No updates from Kridaz yet.</p>
             </div>
           ) : (
-            posts.map((post) => (
+            [...optimisticPosts, ...posts].map((post) => (
               <div 
                 key={post._id} 
                 id={`post-${post._id}`}
-                className={`bg-white/[0.03] border border-white/5 rounded-[32px] overflow-hidden group hover:border-white/10 transition-all duration-500 ${highlightedPost === post._id ? 'ring-2 ring-[#84CC16] shadow-[0_0_30px_rgba(132,204,22,0.2)]' : ''}`}
+                className={`bg-white/[0.03] border border-white/5 rounded-[32px] overflow-hidden group hover:border-white/10 transition-all duration-500 relative ${highlightedPost === post._id ? 'ring-2 ring-[#84CC16] shadow-[0_0_30px_rgba(132,204,22,0.2)]' : ''} ${post.isOptimistic ? 'opacity-60 cursor-wait' : ''}`}
               >
+                {post.isOptimistic && (
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/20 backdrop-blur-[2px]">
+                    <div className="flex items-center gap-3 px-6 py-3 bg-black/60 rounded-2xl border border-white/10 shadow-2xl">
+                      <Loader2 size={20} className="text-[#84CC16] animate-spin" />
+                      <span className="text-xs font-black uppercase tracking-[0.2em] text-white">Posting Your Update...</span>
+                    </div>
+                  </div>
+                )}
+                
                 {/* Post Header */}
                 <div className="p-6 flex items-center justify-between border-b border-white/5">
                   <div className="flex items-center gap-4">
@@ -503,37 +591,26 @@ const Community = () => {
                         if (post.adminId?.hasActiveStory) {
                           e.preventDefault();
                           e.stopPropagation();
-                          handleAuthorAvatarClick(post.adminId);
+                          handleAuthorAvatarClick(post.adminId?._id || post.adminId);
                         }
                       }}
                     >
-                      <div className={`w-10 h-10 rounded-xl border overflow-hidden bg-[#84CC16]/10 flex items-center justify-center shrink-0 transition-all ${post.adminId?.hasActiveStory ? 'border-[#84CC16] ring-2 ring-[#84CC16]/20' : 'border-[#84CC16]/20'}`}>
-                        {post.adminId?.profilePicture ? (
-                          <img 
-                            src={post.adminId.profilePicture} 
-                            alt="" 
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                            }}
-                          />
-                        ) : null}
-                        <div 
-                          className="w-full h-full flex items-center justify-center"
-                          style={{ display: post.adminId?.profilePicture ? 'none' : 'flex' }}
-                        >
-                          <UserIcon size={20} className="text-[#84CC16]" />
-                        </div>
+                      <div className={`w-12 h-12 rounded-xl border overflow-hidden bg-[#84CC16]/10 flex items-center justify-center shrink-0 transition-all ${post.adminId?.hasActiveStory ? 'border-[#84CC16] ring-2 ring-[#84CC16]/20' : 'border-[#84CC16]/20'}`}>
+                        <img 
+                          src={post.adminId?.profilePicture || "/default-avatar.png"} 
+                          alt="" 
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     </div>
-                    <Link to={`/profile/${post.adminId?._id}`} className="hover:opacity-80 transition-opacity">
+                    <Link to={`/profile/${post.adminId?._id || post.adminId}`} className="hover:opacity-80 transition-opacity">
                       <h3 className="font-bold uppercase tracking-wider text-sm">{post.adminId?.name || "Kridaz Admin"}</h3>
                       <p className="text-[10px] text-white/40 uppercase tracking-widest flex items-center gap-1">
                         <Clock size={10} /> {new Date(post.createdAt).toLocaleDateString()}
                       </p>
                     </Link>
-                    {/* Follow button — only shown for logged-in users who are not the post author */}
+                    
+                    {/* Follow button */}
                     {isLoggedIn && user?._id !== (post.adminId?._id || post.adminId) && (
                       <button 
                         onClick={() => handleFollowToggle(post.adminId?._id || post.adminId)}
@@ -547,13 +624,19 @@ const Community = () => {
                       </button>
                     )}
                   </div>
-                  {(isAdmin || user?._id === post.adminId?._id) && (
+
+                  {/* Edit/Delete options for author */}
+                  {(isAdmin || user?._id === (post.adminId?._id || post.adminId)) && (
                     <div className="flex items-center gap-2">
                       <button 
-                        onClick={() => handleEditPost(post)}
+                        onClick={() => {
+                          setEditPostModal(post);
+                          setPostForm({ title: post.title, content: post.content, image: null });
+                          setPostImagePreview(post.image || post.imageUrl);
+                        }}
                         className="p-2 hover:bg-[#84CC16]/10 text-white/20 hover:text-[#84CC16] rounded-xl transition-all"
                       >
-                        <Edit size={18} />
+                        <Edit3 size={18} />
                       </button>
                       <button 
                         onClick={() => handleDeletePost(post._id)}
@@ -579,13 +662,23 @@ const Community = () => {
 
                 {/* Post Actions */}
                 <div className="p-6 bg-white/[0.01] flex items-center gap-8 border-t border-white/5">
-                  <button 
-                    onClick={() => handleLike(post._id)}
-                    className={`flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-widest ${post.likes?.includes(user?._id) ? 'text-[#84CC16]' : 'text-white/40 hover:text-[#84CC16]'}`}
-                  >
-                    <Heart size={18} fill={post.likes?.includes(user?._id) ? "currentColor" : "none"} /> 
-                    {post.likes?.length || 0}
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button 
+                      onClick={() => handleLike(post._id)}
+                      className="hover:text-[#84CC16] transition-colors"
+                    >
+                      <Heart size={18} fill={post.likes?.some(l => (l._id || l) === user?._id) ? "#84CC16" : "none"} className={post.likes?.some(l => (l._id || l) === user?._id) ? "text-[#84CC16]" : ""} />
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setViewingLikes(post.likes || []);
+                        setShowLikesModal(true);
+                      }}
+                      className="text-[10px] font-bold hover:underline"
+                    >
+                      {post.likes?.length || 0}
+                    </button>
+                  </div>
                   <button 
                     onClick={() => setActiveDiscussion(activeDiscussion === post._id ? null : post._id)}
                     className="flex items-center gap-2 text-white/40 hover:text-[#84CC16] transition-colors text-xs font-bold uppercase tracking-widest"
@@ -643,34 +736,29 @@ const Community = () => {
                       <div className="space-y-6 pt-4">
                         {post.comments.map((comment, idx) => (
                           <div key={idx} className="flex gap-4 group">
-                            <div className="w-8 h-8 rounded-lg bg-[#84CC16]/10 overflow-hidden shrink-0 border border-white/5 flex items-center justify-center">
-                              {comment.userImage ? (
-                                <img 
-                                  src={comment.userImage} 
-                                  alt="" 
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                                  }}
-                                />
-                              ) : null}
-                              <div 
-                                className="w-full h-full flex items-center justify-center"
-                                style={{ display: comment.userImage ? 'none' : 'flex' }}
-                              >
-                                <span className="text-[#84CC16] font-black text-[10px]">
-                                  {comment.userName ? comment.userName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
-                                </span>
-                              </div>
+                            <div 
+                              className="w-10 h-10 rounded-full border border-white/5 overflow-hidden flex-shrink-0 cursor-pointer"
+                              onClick={() => navigate(`/profile/${comment.userId?._id || comment.userId}`)}
+                            >
+                              {(comment.userId?.profilePicture || comment.userImage) ? (
+                                <img src={comment.userId?.profilePicture || comment.userImage} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-white/[0.03]">
+                                  <span className="text-[#84CC16] font-black text-[10px]">
+                                    {(comment.userId?.name || comment.userName)?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || '?'}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                             <div className="flex-1">
                               <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 relative group">
                                 <div className="flex items-center justify-between mb-1">
-                                  <Link to={`/profile/${comment.userId}`} className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest hover:underline">{comment.userName}</Link>
+                                  <Link to={`/profile/${comment.userId?._id || comment.userId}`} className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest hover:underline">
+                                    {comment.userId?.name || comment.userName}
+                                  </Link>
                                   <div className="flex items-center gap-3">
                                     <span className="text-[8px] text-white/20 uppercase tracking-widest">{new Date(comment.createdAt).toLocaleDateString()}</span>
-                                    {comment.userId === user?._id && (
+                                  {((comment.userId?._id || comment.userId) === user?._id) && (
                                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button 
                                           onClick={() => {
@@ -936,6 +1024,54 @@ const Community = () => {
         </div>
       )}
 
+      {/* Likes Modal */}
+      {showLikesModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowLikesModal(false)} />
+          <div className="relative w-full max-w-sm bg-[#0A0A0A] border border-white/10 rounded-[24px] overflow-hidden flex flex-col max-h-[70vh]">
+            <div className="p-5 border-b border-white/5 flex items-center justify-between">
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white/50">Liked By</h3>
+              <button onClick={() => setShowLikesModal(false)} className="text-white/20 hover:text-white">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+              {viewingLikes.length === 0 ? (
+                <div className="py-10 text-center text-white/20 text-[10px] uppercase font-bold tracking-widest">No likes yet</div>
+              ) : (
+                viewingLikes.map((liker) => (
+                  <div 
+                    key={liker._id || liker} 
+                    onClick={() => {
+                      setShowLikesModal(false);
+                      navigate(`/profile/${liker._id || liker}`);
+                    }}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/[0.03] transition-all cursor-pointer group"
+                  >
+                    <div className="w-10 h-10 rounded-full border border-white/5 overflow-hidden shrink-0">
+                      {liker.profilePicture ? (
+                        <img src={liker.profilePicture} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-white/[0.05]">
+                          <UserIcon size={16} className="text-white/20" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-[#84CC16] transition-colors truncate">
+                        {liker.name || 'Anonymous Player'}
+                      </div>
+                      <div className="text-[10px] text-white/20 font-bold uppercase tracking-widest">
+                        @{liker.username || 'unknown'}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

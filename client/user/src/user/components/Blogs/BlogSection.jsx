@@ -52,7 +52,7 @@ const BlogSection = () => {
   if (blogs.length === 0) return null;
 
   return (
-    <section className="pt-2 lg:pt-4 pb-6 lg:pb-10 px-6 max-w-screen-2xl mx-auto">
+    <section className="pt-2 lg:pt-4 pb-6 lg:pb-10 px-4 lg:px-12 w-full">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
         <div>
           <h2 className="font-display text-5xl md:text-7xl uppercase leading-none tracking-tight">
@@ -71,15 +71,15 @@ const BlogSection = () => {
       <div className="
         flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth no-scrollbar
         md:grid md:grid-cols-2 md:overflow-visible md:pb-0
-        lg:grid-cols-4
+        lg:grid-cols-5
       ">
-        {blogs.slice(0, 4).map((blog, idx) => (
+        {blogs.slice(0, 5).map((blog, idx) => (
           <Link 
             key={blog._id} 
             to={`/blogs/${blog._id}`}
             className="group relative rounded-[2rem] overflow-hidden border border-white/5 bg-zinc-900 flex flex-col snap-start
-              shrink-0 w-[75vw] aspect-[3/4.5]
-              md:w-auto md:shrink md:aspect-[3/4.5]"
+              shrink-0 w-[75vw] aspect-[3/4]
+              md:w-auto md:shrink md:aspect-[3/4]"
           >
             {/* Background Image */}
             <div className="absolute inset-0 z-0">

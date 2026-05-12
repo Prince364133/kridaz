@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   User, MapPin, Clock, IndianRupee, Calendar, Zap, Activity,
   ArrowRight, ShieldCheck, Trophy, Star, Camera, Edit2, MessageSquare, Heart, Edit3, Trash2, Loader2, Send, MessageCircle,
-  Wallet, CreditCard, Award, Target, LogOut
+  Wallet, CreditCard, Award, Target, LogOut, Plus, Eye
 } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -74,12 +74,22 @@ export default function Profile() {
   const [userStories, setUserStories] = useState([]);
   const [loadingContent, setLoadingContent] = useState(false);
   const [viewingStoryGroup, setViewingStoryGroup] = useState(null);
+  const [initialStoryIndex, setInitialStoryIndex] = useState(0);
   
   const [activity, setActivity] = useState([]);
   const [loadingActivity, setLoadingActivity] = useState(false);
   const [editingComment, setEditingComment] = useState(null);
   const [commentText, setCommentText] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+  // Post Management
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [showLikesModal, setShowLikesModal] = useState(false);
+  const [viewingLikes, setViewingLikes] = useState([]);
+  const [editingPost, setEditingPost] = useState(null);
+  const [postForm, setPostForm] = useState({ title: '', content: '', image: null });
+  const [postImagePreview, setPostImagePreview] = useState(null);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   // Network (Followers/Following)
   const [networkModal, setNetworkModal] = useState({ isOpen: false, type: "followers" });
@@ -137,6 +147,12 @@ export default function Profile() {
   };
 
   useEffect(() => {
+    if (isOwnProfile && currentUser) {
+      setProfileUser(currentUser);
+    }
+  }, [currentUser, isOwnProfile]);
+
+  useEffect(() => {
     const fetchTargetProfile = async () => {
       try {
         setLoadingProfile(true);
@@ -178,8 +194,100 @@ export default function Profile() {
     }
   };
 
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+    try {
+      const res = await axiosInstance.delete(`/api/user/community/${postId}`);
+      if (res.data.success) {
+        setUserPosts(prev => prev.filter(p => p._id !== postId));
+        toast.success("Post deleted");
+      }
+    } catch (error) {
+      toast.error("Failed to delete post");
+    }
+  };
+
+  const handleEditPost = (post) => {
+    setEditingPost(post);
+    setPostForm({ title: post.title || '', content: post.content || '', image: null });
+    setPostImagePreview(post.image || post.mediaUrl);
+    setIsPostModalOpen(true);
+  };
+
+  const handleLike = async (postId) => {
+    try {
+      const res = await axiosInstance.post(`/api/user/community/${postId}/like`);
+      if (res.data.success) {
+        setUserPosts(userPosts.map(p => p._id === postId ? { 
+          ...p, 
+          likes: res.data.likes || p.likes 
+        } : p));
+      }
+    } catch (error) {
+      toast.error("Failed to like post");
+    }
+  };
+
+  const handleUpdatePost = async (e) => {
+    e.preventDefault();
+    if (!postForm.content) return toast.error("Content is required");
+    
+    setIsPublishing(true);
+    const formData = new FormData();
+    formData.append('title', postForm.title);
+    formData.append('content', postForm.content);
+    if (postForm.image) formData.append('image', postForm.image);
+
+    // Optimistic UI for new post
+    let tempId = Date.now().toString();
+    if (!editingPost) {
+      const optimisticPost = {
+        _id: tempId,
+        title: postForm.title,
+        content: postForm.content,
+        adminId: currentUser,
+        createdAt: new Date().toISOString(),
+        likes: [],
+        comments: [],
+        isOptimistic: true,
+        image: postImagePreview
+      };
+      setUserPosts(prev => [optimisticPost, ...prev]);
+      setIsPostModalOpen(false);
+    }
+
+    try {
+      const url = editingPost 
+        ? `/api/user/community/${editingPost._id}` 
+        : '/api/user/community';
+      const method = editingPost ? 'put' : 'post';
+      
+      const res = await axiosInstance[method](url, formData);
+      
+      if (res.data.success) {
+        if (editingPost) {
+          setUserPosts(prev => prev.map(p => p._id === editingPost._id ? res.data.post : p));
+          toast.success("Post updated!");
+        } else {
+          setUserPosts(prev => prev.map(p => p._id === tempId ? res.data.post : p));
+          toast.success("Post published!");
+        }
+        setIsPostModalOpen(false);
+        setEditingPost(null);
+      }
+    } catch (error) {
+      if (!editingPost) {
+        setUserPosts(prev => prev.filter(p => p._id !== tempId));
+      }
+      toast.error(editingPost ? "Failed to update post" : "Failed to publish post");
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   const handleAvatarClick = async () => {
-    if (!profileUser?.hasActiveStory) return;
+    if (!profileUser?.hasActiveStory && (!userStories || userStories.length === 0)) return;
+    setInitialStoryIndex(0);
     
     try {
       const res = await axiosInstance.get(`/api/user/community/user-stories/${targetUserId}`);
@@ -188,9 +296,21 @@ export default function Profile() {
           user: profileUser,
           stories: res.data.stories
         });
+      } else if (userStories && userStories.length > 0) {
+        setViewingStoryGroup({
+          user: profileUser,
+          stories: userStories
+        });
       }
     } catch (error) {
-      toast.error("Failed to load stories");
+      if (userStories && userStories.length > 0) {
+        setViewingStoryGroup({
+          user: profileUser,
+          stories: userStories
+        });
+      } else {
+        toast.error("Failed to load stories");
+      }
     }
   };
 
@@ -253,19 +373,6 @@ export default function Profile() {
     }
   };
 
-  const handleDeletePost = async (postId) => {
-    if (!window.confirm("Delete this post?")) return;
-    try {
-      const res = await axiosInstance.delete(`/api/user/community/${postId}`);
-      if (res.data.success) {
-        setUserPosts(userPosts.filter(p => p._id !== postId));
-        toast.success("Post deleted!");
-      }
-    } catch (error) {
-      toast.error("Failed to delete post");
-    }
-  };
-
   const handleDeleteStory = async (storyId) => {
     if (!window.confirm("Delete this story?")) return;
     try {
@@ -322,10 +429,10 @@ export default function Profile() {
             {/* Left: Identity Row */}
             <div className="flex items-center gap-4 md:gap-8 flex-1 min-w-0">
               {/* Profile Avatar */}
-              <div className={`relative shrink-0 group ${profileUser?.hasActiveStory ? 'cursor-pointer' : ''}`} onClick={handleAvatarClick}>
+              <div className={`relative shrink-0 group ${(profileUser?.hasActiveStory || userStories?.length > 0) ? 'cursor-pointer' : ''}`} onClick={handleAvatarClick}>
                 <div
-                  className={`w-10 h-10 md:w-14 md:h-14 rounded-2xl flex items-center justify-center border overflow-hidden relative bg-[#CCFF00]/5 transition-all ${profileUser?.hasActiveStory ? 'border-[#CCFF00] ring-2 ring-[#CCFF00]/20' : ''}`}
-                  style={{ borderColor: profileUser?.hasActiveStory ? PRI : BDR }}
+                  className={`w-10 h-10 md:w-14 md:h-14 rounded-2xl flex items-center justify-center border overflow-hidden relative bg-[#CCFF00]/5 transition-all ${(profileUser?.hasActiveStory || userStories?.length > 0) ? 'border-[#CCFF00] ring-2 ring-[#CCFF00]/20' : ''}`}
+                  style={{ borderColor: (profileUser?.hasActiveStory || userStories?.length > 0) ? PRI : BDR }}
                 >
                   {profileUser?.profilePicture ? (
                     <img 
@@ -348,23 +455,19 @@ export default function Profile() {
                     </span>
                   </div>
                   
-                  {isOwnProfile && (
-                    <label htmlFor="profile-upload" className={`absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-all z-20`}>
-                      <Camera size={14} className="text-white" />
-                      <input type="file" id="profile-upload" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
-                    </label>
-                  )}
                 </div>
               </div>
 
               {/* Identity Block */}
               <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-8 min-w-0">
                 <div className="flex flex-col">
-                  <div className="flex items-center gap-3">
-                    <h1 className="text-sm md:text-lg font-black uppercase tracking-tight truncate text-white">
-                      {profileUser?.name}
-                    </h1>
-                    {/* Level Tag - Integrated */}
+                  <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight truncate">
+                {profileUser?.name || "Player Name"}
+              </h1>
+            </div>
+                  {/* Level Tag - Integrated */}
                     <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-[4px] text-[8px] font-normal uppercase tracking-widest bg-[#CCFF00]/10 border border-[#2D2D2D]" style={{ color: memberLevel.color }}>
                       <Trophy size={8} className="opacity-40" />
                       {memberLevel.label}
@@ -372,14 +475,32 @@ export default function Profile() {
                   </div>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] font-bold uppercase tracking-widest text-white/20">
                     <span className="text-[#CCFF00]/80">@{profileUser?.username}</span>
-                    <span className="hidden md:inline text-white/10">Ã¢â‚¬Â¢</span>
-                    <span className="hidden md:inline text-white/40">{profileUser?.role || "PLAYER"}</span>
-                    <span className="text-white/10">Ã¢â‚¬Â¢</span>
+                    <span className="hidden md:inline text-white/10">•</span>
+                    <span className="hidden md:inline text-white/40">{profileUser?.role?.toUpperCase() || "PLAYER"}</span>
+                    <span className="text-white/10">•</span>
                     <div className="flex items-center gap-2">
-                      {(profileUser?.sportTypes || profileUser?.interests || ['Sports']).map(sport => (
+                      {((profileUser?.interests?.length > 0 ? profileUser.interests : profileUser?.sportTypes) || ['Sports']).map(sport => (
                         <span key={sport} className="text-white/40">{sport}</span>
                       ))}
                     </div>
+                    {profileUser?.city && (
+                      <>
+                        <span className="text-white/10">•</span>
+                        <div className="flex items-center gap-1 text-white/40">
+                          <MapPin size={10} className="text-[#CCFF00]/60" />
+                          <span>{profileUser.city}{profileUser.state ? `, ${profileUser.state}` : ''}</span>
+                        </div>
+                      </>
+                    )}
+                    {profileUser?.createdAt && (
+                      <>
+                        <span className="text-white/10">•</span>
+                        <div className="flex items-center gap-1 text-white/40">
+                          <Calendar size={10} className="text-[#CCFF00]/60" />
+                          <span>Joined {new Date(profileUser.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -427,13 +548,6 @@ export default function Profile() {
                   >
                     <Edit3 size={14} />
                     <span className="hidden md:inline text-[10px] font-bold uppercase tracking-widest">Edit Profile</span>
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="p-2 md:px-4 md:py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center gap-2"
-                  >
-                    <LogOut size={14} />
-                    <span className="hidden md:inline text-[10px] font-bold uppercase tracking-widest">Sign Out</span>
                   </button>
                 </div>
               ) : (
@@ -484,6 +598,7 @@ export default function Profile() {
           onClose={() => setViewingStoryGroup(null)}
           onDelete={isOwnProfile ? handleDeleteStory : null}
           currentUser={currentUser}
+          initialIndex={initialStoryIndex}
         />
       )}
 
@@ -539,20 +654,46 @@ export default function Profile() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {userPosts.map((post) => (
-                  <div key={post._id} className="rounded-[8px] border overflow-hidden bg-[#000000] group relative" style={{ borderColor: BDR }}>
-                    {post.mediaUrl ? (
-                      <img src={post.mediaUrl} alt="" className="w-full aspect-square object-cover" />
+                  <div key={post._id} className={`rounded-[8px] border overflow-hidden bg-[#000000] group relative transition-all duration-500 ${post.isOptimistic ? 'opacity-60 cursor-wait' : ''}`} style={{ borderColor: BDR }}>
+                    {post.isOptimistic && (
+                      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/20 backdrop-blur-[2px]">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-black/60 rounded-xl border border-white/10 shadow-2xl">
+                          <Loader2 size={14} className="text-[#CCFF00] animate-spin" />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-white">Posting...</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {(post.image || post.mediaUrl) ? (
+                      <img src={post.image || post.mediaUrl} alt="" className="w-full aspect-square object-cover" />
                     ) : (
-                      <div className="w-full aspect-square flex items-center justify-center text-white/20 p-6 text-center text-sm">
+                      <div className="w-full aspect-square flex items-center justify-center text-white/20 p-6 text-center text-sm bg-white/[0.02]">
                         {post.content}
                       </div>
                     )}
                     <div className="p-4">
-                      {post.mediaUrl && <p className="text-sm text-gray-300 mb-2 truncate">{post.content}</p>}
-                      <div className="flex justify-between items-center text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                      {post.title && <h4 className="text-sm font-bold text-white mb-1 uppercase tracking-wider">{post.title}</h4>}
+                      <p className="text-xs text-gray-400 mb-3 line-clamp-2">{post.content}</p>
+                      
+                      <div className="flex justify-between items-center text-[10px] text-gray-500 font-bold uppercase tracking-widest pt-2 border-t border-white/5">
                         <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                         <div className="flex gap-3">
-                          <span className="flex items-center gap-1"><Heart size={12}/> {post.likesCount}</span>
+                          <button 
+                            onClick={() => handleLike(post._id)}
+                            className={`flex items-center gap-1 transition-colors ${post.likes?.some(l => (l._id || l) === currentUser?._id) ? 'text-[#CCFF00]' : 'hover:text-[#CCFF00]'}`}
+                          >
+                            <Heart size={12} fill={post.likes?.some(l => (l._id || l) === currentUser?._id) ? "currentColor" : "none"} /> 
+                            <span 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setViewingLikes(post.likes || []);
+                                setShowLikesModal(true);
+                              }}
+                              className="hover:underline"
+                            >
+                              {post.likes?.length || 0}
+                            </span>
+                          </button>
                           <span className="flex items-center gap-1"><MessageSquare size={12}/> {post.comments?.length || 0}</span>
                         </div>
                       </div>
@@ -560,7 +701,16 @@ export default function Profile() {
                       {/* Manage Actions */}
                       {canEdit && (
                         <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2 bg-black/60 rounded-full text-white/50 hover:text-red-500" onClick={() => handleDeletePost(post._id)}>
+                          <button 
+                            className="p-2 bg-black/80 rounded-lg text-white/50 hover:text-[#CCFF00] backdrop-blur-sm border border-white/10" 
+                            onClick={() => handleEditPost(post)}
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button 
+                            className="p-2 bg-black/80 rounded-lg text-white/50 hover:text-red-500 backdrop-blur-sm border border-white/10" 
+                            onClick={() => handleDeletePost(post._id)}
+                          >
                             <Trash2 size={14} />
                           </button>
                         </div>
@@ -584,8 +734,19 @@ export default function Profile() {
               </div>
             ) : (
               <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
-                {userStories.map((story) => (
-                  <div key={story._id} className="relative w-40 h-64 shrink-0 rounded-2xl overflow-hidden border group" style={{ borderColor: BDR }}>
+                {userStories.map((story, index) => (
+                  <div 
+                    key={story._id} 
+                    className="relative w-40 h-64 shrink-0 rounded-2xl overflow-hidden border group cursor-pointer" 
+                    style={{ borderColor: BDR }}
+                    onClick={() => {
+                      setInitialStoryIndex(index);
+                      setViewingStoryGroup({
+                        user: profileUser,
+                        stories: userStories
+                      });
+                    }}
+                  >
                     {story.mediaUrl ? (
                       <img 
                         src={story.mediaUrl} 
@@ -600,13 +761,25 @@ export default function Profile() {
                     <div className={`w-full h-full bg-[#000000] p-4 flex items-center justify-center text-center text-xs ${story.mediaUrl ? 'hidden' : 'flex'}`}>
                       {story.content}
                     </div>
-                    <div className="absolute bottom-0 left-0 w-full p-3 bg-gradient-to-t from-black/80 to-transparent text-[10px] text-white">
-                      {new Date(story.createdAt).toLocaleTimeString()}
+                    <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-1 bg-black/60 backdrop-blur-md rounded-full text-[9px] font-black text-white border border-white/10">
+                      <Eye size={10} className="text-[#CCFF00]" />
+                      {story.viewers?.length || 0}
+                    </div>
+                    <div className="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/80 to-transparent flex justify-between items-end">
+                      <span className="text-[8px] font-bold text-white/60 uppercase tracking-widest">
+                        {new Date(story.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                      </span>
+                      <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest">
+                        {new Date(story.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </div>
                     {canEdit && (
                         <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-1.5 bg-black/60 rounded-full text-white/50 hover:text-red-500" onClick={() => handleDeleteStory(story._id)}>
-                            <Trash2 size={12} />
+                          <button 
+                            className="p-1.5 bg-black/60 backdrop-blur-md rounded-full text-white/50 hover:text-red-500 transition-all border border-white/10" 
+                            onClick={(e) => { e.stopPropagation(); handleDeleteStory(story._id); }}
+                          >
+                            <Trash2 size={10} />
                           </button>
                         </div>
                       )}
@@ -913,10 +1086,162 @@ export default function Profile() {
           onSubmit={submitReview}
         />
       )}
-    </div>
+        {/* Edit Post Modal */}
+        {isPostModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+            <div className="bg-[#0A0A0A] border border-[#2D2D2D] rounded-[24px] w-full max-w-lg overflow-hidden shadow-2xl">
+              <div className="p-6 border-b border-[#2D2D2D] flex justify-between items-center">
+                <h3 className="text-lg font-bold uppercase tracking-wider">Edit Post</h3>
+                <button onClick={() => setIsPostModalOpen(false)} className="text-gray-500 hover:text-white transition-colors">
+                  <Plus size={24} className="rotate-45" />
+                </button>
+              </div>
+              <form onSubmit={handleUpdatePost} className="p-6 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Title (Optional)</label>
+                  <input
+                    type="text"
+                    value={postForm.title}
+                    onChange={(e) => setPostForm({ ...postForm, title: e.target.value })}
+                    className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-3 text-sm focus:border-[#CCFF00] transition-colors outline-none"
+                    placeholder="Enter post title..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Content</label>
+                  <textarea
+                    value={postForm.content}
+                    onChange={(e) => setPostForm({ ...postForm, content: e.target.value })}
+                    rows={4}
+                    className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-3 text-sm focus:border-[#CCFF00] transition-colors outline-none resize-none"
+                    placeholder="What's on your mind?"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Image</label>
+                  <div className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('edit-post-image').click()}
+                      className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-[#2D2D2D] rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all"
+                    >
+                      <Camera size={16} /> {postImagePreview ? "Change Image" : "Add Image"}
+                    </button>
+                    <input
+                      id="edit-post-image"
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setPostForm({ ...postForm, image: file });
+                          setPostImagePreview(URL.createObjectURL(file));
+                        }
+                      }}
+                    />
+                    {postImagePreview && (
+                      <button 
+                        type="button" 
+                        onClick={() => { setPostForm({ ...postForm, image: null }); setPostImagePreview(null); }}
+                        className="text-[10px] font-bold text-red-500 uppercase tracking-widest hover:underline"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  {postImagePreview && (
+                    <div className="mt-2 rounded-xl overflow-hidden border border-[#2D2D2D] max-h-40">
+                      <img src={postImagePreview} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
+                <div className="pt-4 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsPostModalOpen(false)}
+                    className="flex-1 py-3 border border-[#2D2D2D] rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-white/5 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isPublishing}
+                    className="flex-1 py-3 bg-[#CCFF00] text-black rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[#b3df00] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isPublishing ? <Loader2 size={16} className="animate-spin" /> : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+        {/* Likes Modal */}
+        {showLikesModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setShowLikesModal(false)} />
+            <div className="relative w-full max-w-sm bg-[#0A0A0A] border border-white/10 rounded-[24px] overflow-hidden shadow-2xl">
+              <div className="p-5 border-b border-white/5 flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white/50">Liked By</h3>
+                <button onClick={() => setShowLikesModal(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors text-white/40">
+                  <Plus size={20} className="rotate-45" />
+                </button>
+              </div>
+              <div className="max-h-[60vh] overflow-y-auto p-4 custom-scrollbar">
+                {viewingLikes.length === 0 ? (
+                  <div className="py-12 text-center">
+                    <p className="text-xs text-white/20 uppercase tracking-widest font-bold">No likes yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {viewingLikes.map((user) => {
+                      const u = typeof user === 'object' ? user : { _id: user, name: 'User' };
+                      return (
+                        <div 
+                          key={u._id}
+                          onClick={() => {
+                            setShowLikesModal(false);
+                            navigate(`/profile/${u._id}`);
+                          }}
+                          className="flex items-center gap-4 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-[#CCFF00]/30 hover:bg-[#CCFF00]/5 cursor-pointer transition-all group"
+                        >
+                          <div className="w-10 h-10 rounded-lg border border-white/10 overflow-hidden bg-white/5 shrink-0 transition-transform group-hover:scale-105">
+                            {(u.profilePicture || u.profileImage) ? (
+                              <img src={u.profilePicture || u.profileImage} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-white/[0.03]">
+                                <span className="text-[#CCFF00] font-black text-xs">
+                                  {u.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || '?'}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-xs font-bold text-white truncate uppercase tracking-wider group-hover:text-[#CCFF00] transition-colors">{u.name}</h4>
+                            <p className="text-[10px] text-white/30 truncate">@{u.username || 'member'}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Story Viewer */}
+        {viewingStoryGroup && (
+          <StoryViewer 
+            storyGroup={viewingStoryGroup}
+            onClose={() => setViewingStoryGroup(null)}
+            onDelete={handleDeleteStory}
+            currentUser={currentUser}
+            isAdmin={isAdmin}
+            initialIndex={initialStoryIndex}
+          />
+        )}
+      </div>
   );
 }
-
-
-
-

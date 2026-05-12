@@ -6,10 +6,11 @@ import connectDB from "./config/database.js";
 import http from "http";
 import socketConfig from "./config/socket.js";
 import { initSettlementWorker } from "./utils/settlementWorker.js";
+import dns from 'node:dns';
 
-// Force Node.js to use Google DNS to resolve MongoDB Atlas SRV records
-setDefaultResultOrder("ipv4first");
-setServers(["8.8.8.8", "8.8.4.4"]);
+// Set DNS resolution order and servers to bypass unreliable local network DNS
+dns.setDefaultResultOrder('ipv4first');
+dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 
 dotenv.config();
 

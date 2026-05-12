@@ -1,22 +1,19 @@
 import { Server } from "socket.io";
 import User from "../models/user.model.js";
 
+let io;
+
 const socketConfig = (server) => {
-  const io = new Server(server, {
+  io = new Server(server, {
     pingTimeout: 60000,
     cors: {
-      origin: ["http://localhost:5173", "http://localhost:5174"],
-      // credentials: true,
+      origin: ["http://localhost:5173", "http://localhost:5174", "https://kridaz.vercel.app"],
     },
   });
 
-  // Track online users: { odid: { odid, socketId, lastSeen } }
   const onlineUsers = new Map();
 
   io.on("connection", (socket) => {
-    console.log("Connected to socket.io");
-
-    // ── Setup: user comes online ──
     socket.on("setup", (userData) => {
       const userId = userData?.id || userData?._id;
       if (!userId) return;
@@ -30,30 +27,60 @@ const socketConfig = (server) => {
         lastSeen: new Date(),
       });
 
-      // Update lastSeen in DB
       User.findByIdAndUpdate(userId, { lastSeen: new Date() }).catch(err => console.log("DB Update Error:", err));
-
-      // Broadcast updated online list to everyone
       io.emit("online users", Array.from(onlineUsers.keys()));
-      console.log(`User online: ${userId}`);
       socket.emit("connected");
     });
 
-    // ── Join a chat room ──
-    socket.on("join chat", (room) => {
-      socket.join(room);
-      console.log("User Joined Room: " + room);
+    socket.on("join chat", (room) => socket.join(room));
+
+    socket.on("joinMatch", async (matchId) => {
+      socket.join(matchId);
+      console.log(`[Socket] User joined Match Room: ${matchId}`);
+
+      // Phase 3: snap-on-join — send current live score immediately
+      try {
+        const { liveStateService } = await import("../services/liveState.service.js");
+        const snapshot = await liveStateService.getLiveScore(matchId);
+        if (snapshot) socket.emit("scoreUpdated", snapshot);
+      } catch (e) {
+        console.warn("[Socket] snap-on-join failed:", e.message);
+      }
     });
 
-    // ── Typing indicators (include room so receiver can filter) ──
+    // Phase 3: OBS overlay joins with a JWT token for verification
+    socket.on("overlayJoin", async ({ matchId, token }) => {
+      try {
+        const jwt = await import("jsonwebtoken");
+        const secret = process.env.OVERLAY_TOKEN_SECRET || "fallback_secret";
+        const payload = jwt.default.verify(token, secret);
+        if (payload && payload.matchId?.toString() === matchId?.toString()) {
+          socket.join(matchId);
+          console.log(`[Socket] Verified overlay joined match room: ${matchId}`);
+          // Send current snapshot to this overlay client
+          const { liveStateService } = await import("../services/liveState.service.js");
+          const snapshot = await liveStateService.getLiveScore(matchId);
+          if (snapshot) socket.emit("scoreUpdated", snapshot);
+        } else {
+          socket.emit("overlayError", { message: "Invalid overlay token" });
+        }
+      } catch (e) {
+        console.warn("[Socket] overlayJoin token error:", e.message);
+        socket.emit("overlayError", { message: "Token verification failed" });
+      }
+    });
+
+    socket.on("scoreUpdate", (data) => {
+      const { matchId, score } = data;
+      socket.to(matchId).emit("scoreUpdated", score);
+    });
+
     socket.on("typing", (room) => socket.in(room).emit("typing", room));
     socket.on("stop typing", (room) => socket.in(room).emit("stop typing", room));
 
-    // ── New message ──
     socket.on("new message", (newMessageRecieved) => {
       var chat = newMessageRecieved.chat;
-
-      if (!chat.users) return console.log("chat.users not defined");
+      if (!chat.users) return;
 
       chat.users.forEach((u) => {
         const userId = u.user?._id || u.user;
@@ -68,28 +95,21 @@ const socketConfig = (server) => {
       });
     });
 
-    // ── Mark messages as read ──
     socket.on("messages read", ({ chatId, userId }) => {
       socket.in(chatId).emit("messages read", { chatId, userId });
     });
 
-    // ── Disconnect: user goes offline ──
     socket.on("disconnect", () => {
       if (socket.userId) {
-        // Store last seen timestamp before removing
         const lastSeen = new Date();
         onlineUsers.delete(socket.userId);
-
-        // Update lastSeen in DB
         User.findByIdAndUpdate(socket.userId, { lastSeen }).catch(err => console.log("DB Update Error:", err));
-
-        // Broadcast updated online list + last seen
         io.emit("online users", Array.from(onlineUsers.keys()));
         io.emit("user last seen", { userId: socket.userId, lastSeen });
-        console.log(`User offline: ${socket.userId}`);
       }
     });
   });
 };
 
+export const getIO = () => io;
 export default socketConfig;

@@ -1,8 +1,8 @@
 import React from "react";
 import OwnerCard from "./OwnerCard";
-import { Building, ShieldAlert } from "lucide-react";
+import { Building } from "lucide-react";
 
-const OwnerList = ({ owners }) => {
+const OwnerList = ({ owners, selectedIds, onSelect, onDelete, onToggleStatus }) => {
   return (
     <div className="relative">
       {owners.length === 0 ? (
@@ -23,10 +23,16 @@ const OwnerList = ({ owners }) => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="space-y-3">
           {owners.map((owner) => (
             <div key={owner._id} className="animate-fade-in-up">
-              <OwnerCard owner={owner} />
+              <OwnerCard 
+                owner={owner} 
+                isSelected={selectedIds.includes(owner._id)}
+                onSelect={onSelect}
+                onDelete={onDelete}
+                onToggleStatus={onToggleStatus}
+              />
             </div>
           ))}
         </div>

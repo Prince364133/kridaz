@@ -11,7 +11,7 @@ import chalk from "chalk";
 
 // Get all professionals with filters
 export const getAllProfessionals = async (req, res) => {
-  const { role, sport, city, searchTerm } = req.query;
+  const { role, sport, city, state, searchTerm } = req.query;
   try {
     let query = { 
       role: { $in: ["coach", "umpire"] }
@@ -19,7 +19,8 @@ export const getAllProfessionals = async (req, res) => {
 
     if (role && role !== "All") query.role = role.toLowerCase();
     if (sport && sport !== "All") query.gameTypes = { $regex: sport, $options: "i" };
-    if (city) query.city = { $regex: city, $options: "i" };
+    if (city && city !== "All") query.city = { $regex: city, $options: "i" };
+    if (state && state !== "All") query.state = { $regex: state, $options: "i" };
     
     if (searchTerm) {
       query.$or = [
@@ -35,6 +36,21 @@ export const getAllProfessionals = async (req, res) => {
     return res.status(200).json({ professionals });
   } catch (error) {
     console.error(chalk.red("Error in getAllProfessionals:"), error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// Get unique states and cities for filters
+export const getProfessionalFilters = async (req, res) => {
+  try {
+    const states = await Owner.distinct("state", { role: { $in: ["coach", "umpire"] } });
+    const cities = await Owner.distinct("city", { role: { $in: ["coach", "umpire"] } });
+    
+    return res.status(200).json({ 
+      states: states.filter(s => s), // Filter out null/undefined
+      cities: cities.filter(c => c) 
+    });
+  } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };

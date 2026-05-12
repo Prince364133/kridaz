@@ -72,6 +72,18 @@ export const requestPayout = async (req, res) => {
       
     if (!owner) return res.status(404).json({ message: "Owner not found" });
 
+    // Verify password
+    if (!password) {
+      return res.status(400).json({ success: false, message: "Please enter your password" });
+    }
+
+    if (!owner.password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "No master password set for this account. If you signed up via Google, please set a password in your profile settings." 
+      });
+    }
+
     // Verify password using argon2
     const isMatch = await argon2.verify(owner.password, password);
     if (!isMatch) {

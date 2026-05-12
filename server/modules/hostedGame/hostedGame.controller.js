@@ -4,16 +4,34 @@ import Turf from "../../models/turf.model.js";
 import Owner from "../../models/owner.model.js";
 import WalletTransaction from "../../models/walletTransaction.model.js";
 import mongoose from "mongoose";
-import { notifyNewGame } from "../../utils/notification.service.js";
+import { randomUUID } from "crypto";
+import { notifyNewGame, sendCustomPlayerInvite, sendCustomUmpireInvite } from "../../utils/notification.service.js";
 import { generateShortId } from "../scoring/scoring.utils.js";
+import { runInTransaction } from "../../utils/transaction.js";
+import { generateUserToken } from "../../utils/generateJwtToken.js";
 
 // Helper to check usable balance
 const getUsableBalance = async (userId) => {
-  let user = await User.findById(userId).select("walletBalance reservedBalance");
-  if (!user) {
-    user = await Owner.findById(userId).select("walletBalance reservedBalance");
+  const [user, owner] = await Promise.all([
+    User.findById(userId).select("walletBalance reservedBalance"),
+    Owner.findOne({ userId }).select("walletBalance reservedBalance")
+  ]);
+
+  const uBal = (user?.walletBalance || 0) - (user?.reservedBalance || 0);
+  const oBal = (owner?.walletBalance || 0) - (owner?.reservedBalance || 0);
+
+  // Return the higher balance available to the account
+  return Math.max(uBal, oBal);
+};
+
+// Helper: strip base64 images before saving to keep document size low
+const sanitizeImage = (img) => {
+  if (!img) return null;
+  if (img.startsWith('data:')) {
+    // base64 — truncate if > 200KB to avoid mongo doc limit
+    return img.length > 200000 ? img.substring(0, 200000) : img;
   }
-  return (user?.walletBalance || 0) - (user?.reservedBalance || 0);
+  return img; // plain URL
 };
 
 export const getGroundsForHosting = async (req, res) => {
@@ -49,109 +67,218 @@ export const getUmpiresForHosting = async (req, res) => {
 };
 
 export const createHostedGame = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
+    const result = await runInTransaction(async ({ session, isTransactional }) => {
+      const hostId = req.user.id || req.user.user || req.user._id;
+      console.log("Creating hosted game for host:", hostId);
+
+      const {
+        gameType, date, time, groundId, umpireId, ground, umpire,
+        perPlayerCharge, teamA, teamB, city, state,
+        // Quick Game specific fields
+        gameMode = "PROFESSIONAL",
+        playerCount,
+        quickSlotsData = [],   // [{ role, userId, customPlayer }] from frontend
+        customUmpireData,      // { name, email, phone }
+      } = req.body;
+      
+      console.log("Game Data:", { gameType, date, time, groundId, umpireId, city });
+
+      const finalGroundId = groundId || ground?._id;
+      const finalUmpireId = umpireId || umpire?._id;
+
+      if (!hostId) {
+         throw new Error("Host ID missing. Please login again.");
+      }
+
+      // 1. Calculate Total Costs
+      let groundCost = 0;
+      let umpireCost = 0;
+
+      if (finalGroundId) {
+        const g = await Turf.findById(finalGroundId);
+        groundCost = g?.pricePerHour || 0;
+      }
+
+      if (finalUmpireId) {
+        const u = await Owner.findById(finalUmpireId);
+        umpireCost = u?.price || 0;
+      }
+
+      const totalCost = groundCost + umpireCost;
+
+      // 2. Check Balance
+      const usableBalance = await getUsableBalance(hostId);
+      if (usableBalance < totalCost) {
+        const error = new Error(`Insufficient coins. Total cost is ${totalCost}, you have ${usableBalance}. Please top up minimum ₹500.`);
+        error.status = 400;
+        throw error;
+      }
+
+      console.log(`🔍 Session state in createHostedGame: isTransactional=${isTransactional}, sessionPresent=${!!session}`);
+      const opts = session ? { session } : {};
+
+      // 3. Reserve Coins
+      let updatedHost = await User.findByIdAndUpdate(hostId, { $inc: { reservedBalance: totalCost } }, { ...opts, new: true });
+      
+      if (!updatedHost) {
+        // Try Owner by _id directly (common if the host is an admin/coach logged in as Owner)
+        updatedHost = await Owner.findByIdAndUpdate(hostId, { $inc: { reservedBalance: totalCost } }, { ...opts, new: true });
+      }
+
+      if (!updatedHost) {
+        // Try Owner by userId (if hostId is the User ID but we need to update the professional account)
+        updatedHost = await Owner.findOneAndUpdate(
+          { userId: hostId }, 
+          { $inc: { reservedBalance: totalCost } }, 
+          { ...opts, new: true }
+        );
+      }
+
+      if (!updatedHost) {
+        throw new Error("Could not find host account to reserve coins.");
+      }
+
+      // 4. Create Transaction Record
+      await WalletTransaction.create([{
+        user: hostId,
+        amount: totalCost,
+        type: "HOST_GAME",
+        status: "RESERVED",
+        description: `Reserved for hosting ${gameType} game at ${date}`
+      }], opts);
+
+      // 5. Create Game
+      const isQuick = gameMode === "QUICK";
+
+      // Build quickSlots array for Quick Game
+      let builtQuickSlots = [];
+      let builtCustomPlayers = [];
+
+      if (isQuick) {
+        const count = parseInt(playerCount) || quickSlotsData.length || 5;
+        for (let i = 0; i < count; i++) {
+          const provided = quickSlotsData[i];
+          if (provided?.userId) {
+            // Pre-assigned to a registered user
+            builtQuickSlots.push({
+              user: provided.userId,
+              role: provided.role || "Player",
+              status: provided.userId.toString() === hostId.toString() ? "JOINED" : "HELD",
+              addedBy: hostId,
+            });
+          } else if (provided?.customPlayer) {
+            // Off-platform invite
+            const token = randomUUID();
+            const cp = provided.customPlayer;
+            builtCustomPlayers.push({
+              name: cp.name,
+              email: cp.email,
+              phone: cp.phone || "",
+              slotIndex: i,
+              mustPay: cp.mustPay || false,
+              inviteToken: token,
+              inviteStatus: "PENDING",
+            });
+            builtQuickSlots.push({
+              user: null,
+              role: provided.role || "Player",
+              status: "HELD",
+              addedBy: hostId,
+            });
+          } else {
+            // Open slot
+            builtQuickSlots.push({ user: null, role: "Player", status: "OPEN" });
+          }
+        }
+      }
+
+      const hostedGame = new HostedGame({
+        host: hostId,
+        gameType,
+        date,
+        time,
+        ground: finalGroundId,
+        umpire: finalUmpireId,
+        perPlayerCharge,
+        groundCost,
+        umpireCost,
+        totalCost,
+        gameMode,
+        ...(isQuick
+          ? {
+              quickSlots: builtQuickSlots,
+              customPlayers: builtCustomPlayers,
+              teams: {
+                teamA: { name: "Team A", slots: [] },
+                teamB: { name: "Team B", slots: [] },
+              },
+            }
+          : {
+              teams: {
+                teamA: {
+                  name: teamA?.name || "Team A",
+                  image: sanitizeImage(teamA?.image),
+                  slots: (teamA?.slots || []).map(s => ({ role: s.role, status: "OPEN" })),
+                },
+                teamB: {
+                  name: teamB?.name || "Team B",
+                  image: sanitizeImage(teamB?.image),
+                  slots: (teamB?.slots || []).map(s => ({ role: s.role, status: "OPEN" })),
+                },
+              },
+            }),
+        city,
+        state,
+        shortId: generateShortId(),
+        status: "ACTIVE",
+        customUmpire: customUmpireData?.email ? {
+          ...customUmpireData,
+          inviteToken: randomUUID(),
+          inviteStatus: "PENDING",
+          invitedAt: new Date()
+        } : undefined
+      });
+
+      await hostedGame.save(opts);
+      return hostedGame;
+    });
+
+    // Trigger notifications (non-blocking)
     const hostId = req.user.id || req.user.user;
-    const { 
-      gameType, date, time, groundId, umpireId, ground, umpire,
-      perPlayerCharge, teamA, teamB, city, state 
-    } = req.body;
+    let host = await User.findById(hostId).select("name email phone");
+    if (!host) host = await Owner.findById(hostId).select("name email phone");
 
-    const finalGroundId = groundId || ground?._id;
-    const finalUmpireId = umpireId || umpire?._id;
+    notifyNewGame(result, host).catch(e => console.error("[Notifications] Error:", e));
 
-    if (!hostId) {
-       return res.status(401).json({ success: false, message: "Host ID missing. Please login again." });
-    }
-
-    // 1. Calculate Total Costs
-    let groundCost = 0;
-    let umpireCost = 0;
-
-    if (finalGroundId) {
-      const g = await Turf.findById(finalGroundId);
-      groundCost = g?.pricePerHour || 0;
-    }
-
-    if (finalUmpireId) {
-      const u = await Owner.findById(finalUmpireId);
-      umpireCost = u?.price || 0;
-    }
-
-    const totalCost = groundCost + umpireCost;
-
-    // 2. Check Balance
-    const usableBalance = await getUsableBalance(hostId);
-    if (usableBalance < totalCost) {
-      return res.status(400).json({ 
-        success: false, 
-        message: `Insufficient coins. Total cost is ${totalCost}, you have ${usableBalance}. Please top up minimum ₹500.` 
+    // Send invite emails to custom players (non-blocking)
+    if (result.customPlayers?.length) {
+      result.customPlayers.forEach(cp => {
+        sendCustomPlayerInvite(cp, result, host).catch(e =>
+          console.error("[CustomInvite] Error:", e)
+        );
       });
     }
 
-    // 3. Reserve Coins
-    const updatedUser = await User.findByIdAndUpdate(hostId, { $inc: { reservedBalance: totalCost } }, { session });
-    if (!updatedUser) {
-      await Owner.findByIdAndUpdate(hostId, { $inc: { reservedBalance: totalCost } }, { session });
+    // Send invite email to custom umpire (non-blocking)
+    if (result.customUmpire?.email) {
+      sendCustomUmpireInvite(result.customUmpire, result, host).catch(e =>
+        console.error("[CustomUmpireInvite] Error:", e)
+      );
     }
 
-    // 4. Create Transaction Record
-    await WalletTransaction.create([{
-      user: hostId,
-      amount: totalCost,
-      type: "HOST_GAME",
-      status: "RESERVED",
-      description: `Reserved for hosting ${gameType} game at ${date}`
-    }], { session });
-
-    // 5. Create Game
-    const hostedGame = new HostedGame({
-      host: hostId,
-      gameType,
-      date,
-      time,
-      ground: finalGroundId,
-      umpire: finalUmpireId,
-      perPlayerCharge,
-      groundCost,
-      umpireCost,
-      totalCost,
-      teams: {
-        teamA: {
-          name: teamA.name || "Team A",
-          slots: teamA.slots.map(s => ({ role: s.role, status: "OPEN" }))
-        },
-        teamB: {
-          name: teamB.name || "Team B",
-          slots: teamB.slots.map(s => ({ role: s.role, status: "OPEN" }))
-        }
-      },
-      city,
-      state,
-      shortId: generateShortId(),
-      status: "ACTIVE"
-    });
-
-    await hostedGame.save({ session });
-    await session.commitTransaction();
-
-    // Trigger Notifications (Non-blocking)
-    const host = await User.findById(hostId).select("name email phone");
-    notifyNewGame(hostedGame, host).catch(e => console.error("Notification Error:", e));
-
-    return res.status(201).json({ 
-      success: true, 
-      message: "Game hosted successfully. Coins reserved and local players notified!",
-      game: hostedGame 
+    return res.status(201).json({
+      success: true,
+      message: "Game hosted successfully!",
+      game: result,
     });
 
   } catch (error) {
-    await session.abortTransaction();
-    console.error("Error in createHostedGame:", error);
-    return res.status(500).json({ success: false, message: error.message });
-  } finally {
-    session.endSession();
+    console.error("Error in createHostedGame (Outer):", error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Failed to create game",
+    });
   }
 };
 
@@ -177,112 +304,111 @@ export const getAllHostedGames = async (req, res) => {
 };
 
 export const joinHostedGame = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
-    const userId = req.user.id || req.user.user;
-    const { gameId, team, slotIndex, role } = req.body;
+    const result = await runInTransaction(async ({ session }) => {
+      const userId = req.user.id || req.user.user;
+      const { gameId, team, slotIndex, role } = req.body;
 
-    const game = await HostedGame.findById(gameId);
-    if (!game) throw new Error("Game not found");
+      const game = await HostedGame.findById(gameId);
+      if (!game) throw new Error("Game not found");
 
-    const usableBalance = await getUsableBalance(userId);
-    if (usableBalance < game.perPlayerCharge) {
-      return res.status(400).json({ message: "Insufficient coins to join this game." });
-    }
+      const usableBalance = await getUsableBalance(userId);
+      if (usableBalance < game.perPlayerCharge) {
+        const error = new Error("Insufficient coins to join this game.");
+        error.status = 400;
+        throw error;
+      }
 
-    // Update slot to PENDING
-    const teamKey = team === "A" ? "teamA" : "teamB";
-    if (game.teams[teamKey].slots[slotIndex].status !== "OPEN") {
-      return res.status(400).json({ message: "Slot already taken or pending." });
-    }
+      // Update slot to PENDING
+      const teamKey = team === "A" ? "teamA" : "teamB";
+      if (game.teams[teamKey].slots[slotIndex].status !== "OPEN") {
+        const error = new Error("Slot already taken or pending.");
+        error.status = 400;
+        throw error;
+      }
 
-    game.teams[teamKey].slots[slotIndex] = {
-      user: userId,
-      role: role,
-      status: "PENDING"
-    };
+      game.teams[teamKey].slots[slotIndex] = {
+        user: userId,
+        role: role,
+        status: "PENDING"
+      };
 
-    // Reserve coins for player
-    const updatedPlayer = await User.findByIdAndUpdate(userId, { $inc: { reservedBalance: game.perPlayerCharge } }, { session });
-    if (!updatedPlayer) {
-      await Owner.findByIdAndUpdate(userId, { $inc: { reservedBalance: game.perPlayerCharge } }, { session });
-    }
+      // Reserve coins for player
+      const updatedPlayer = await User.findByIdAndUpdate(userId, { $inc: { reservedBalance: game.perPlayerCharge } }, { session });
+      if (!updatedPlayer) {
+        await Owner.findByIdAndUpdate(userId, { $inc: { reservedBalance: game.perPlayerCharge } }, { session });
+      }
 
-    await WalletTransaction.create([{
-      user: userId,
-      amount: game.perPlayerCharge,
-      type: "JOIN_GAME",
-      status: "RESERVED",
-      description: `Reserved for joining ${game.gameType} game`
-    }], { session });
+      await WalletTransaction.create([{
+        user: userId,
+        amount: game.perPlayerCharge,
+        type: "JOIN_GAME",
+        status: "RESERVED",
+        description: `Reserved for joining ${game.gameType} game`
+      }], { session });
 
-    await game.save({ session });
-    await session.commitTransaction();
+      await game.save({ session });
+      return true;
+    });
 
     return res.status(200).json({ success: true, message: "Join request sent. Coins reserved." });
 
   } catch (error) {
-    await session.abortTransaction();
-    return res.status(500).json({ message: error.message });
-  } finally {
-    session.endSession();
+    console.error("Error in joinHostedGame:", error);
+    return res.status(error.status || 500).json({ message: error.message });
   }
 };
 
 export const approveJoinRequest = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
-    const hostId = req.user.id || req.user.user;
-    const { gameId, team, slotIndex } = req.body;
+    await runInTransaction(async ({ session }) => {
+      const hostId = req.user.id || req.user.user;
+      const { gameId, team, slotIndex } = req.body;
 
-    const game = await HostedGame.findOne({ _id: gameId, host: hostId });
-    if (!game) throw new Error("Unauthorized or game not found");
+      const game = await HostedGame.findOne({ _id: gameId, host: hostId });
+      if (!game) throw new Error("Unauthorized or game not found");
 
-    const teamKey = team === "A" ? "teamA" : "teamB";
-    const slot = game.teams[teamKey].slots[slotIndex];
-    if (slot.status !== "PENDING") throw new Error("No pending request for this slot");
+      const teamKey = team === "A" ? "teamA" : "teamB";
+      const slot = game.teams[teamKey].slots[slotIndex];
+      if (slot.status !== "PENDING") throw new Error("No pending request for this slot");
 
-    const playerUserId = slot.user;
+      const playerUserId = slot.user;
 
-    // Deduct coins from player
-    const updatedFinalPlayer = await User.findByIdAndUpdate(playerUserId, { 
-      $inc: { 
-        walletBalance: -game.perPlayerCharge,
-        reservedBalance: -game.perPlayerCharge 
-      } 
-    }, { session });
-    
-    if (!updatedFinalPlayer) {
-      await Owner.findByIdAndUpdate(playerUserId, { 
+      // Deduct coins from player
+      const updatedFinalPlayer = await User.findByIdAndUpdate(playerUserId, { 
         $inc: { 
           walletBalance: -game.perPlayerCharge,
           reservedBalance: -game.perPlayerCharge 
         } 
       }, { session });
-    }
+      
+      if (!updatedFinalPlayer) {
+        await Owner.findByIdAndUpdate(playerUserId, { 
+          $inc: { 
+            walletBalance: -game.perPlayerCharge,
+            reservedBalance: -game.perPlayerCharge 
+        } 
+        }, { session });
+      }
 
-    // Update transaction to SUCCESS
-    await WalletTransaction.findOneAndUpdate(
-      { user: playerUserId, amount: game.perPlayerCharge, status: "RESERVED", type: "JOIN_GAME" },
-      { status: "SUCCESS", description: `Joined ${game.gameType} game successfully` },
-      { session, sort: { createdAt: -1 } }
-    );
+      // Update transaction to SUCCESS
+      await WalletTransaction.findOneAndUpdate(
+        { user: playerUserId, amount: game.perPlayerCharge, status: "RESERVED", type: "JOIN_GAME" },
+        { status: "SUCCESS", description: `Joined ${game.gameType} game successfully` },
+        { session, sort: { createdAt: -1 } }
+      );
 
-    // Update slot status
-    game.teams[teamKey].slots[slotIndex].status = "JOINED";
+      // Update slot status
+      game.teams[teamKey].slots[slotIndex].status = "JOINED";
 
-    await game.save({ session });
-    await session.commitTransaction();
+      await game.save({ session });
+    });
 
     return res.status(200).json({ success: true, message: "Player approved and coins deducted." });
 
   } catch (error) {
-    await session.abortTransaction();
-    return res.status(500).json({ message: error.message });
-  } finally {
-    session.endSession();
+    console.error("Error in approveJoinRequest:", error);
+    return res.status(error.status || 500).json({ message: error.message });
   }
 };
 
@@ -292,8 +418,10 @@ export const getMyHostedGames = async (req, res) => {
     const games = await HostedGame.find({ host: hostId })
       .populate("ground")
       .populate("umpire")
+      .populate("umpireRequest.user", "name profilePicture")
       .populate("teams.teamA.slots.user", "name profilePicture")
       .populate("teams.teamB.slots.user", "name profilePicture");
+
     return res.status(200).json({ games });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -301,105 +429,99 @@ export const getMyHostedGames = async (req, res) => {
 };
 
 export const rejectJoinRequest = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
-    const hostId = req.user.id || req.user.user;
-    const { gameId, team, slotIndex } = req.body;
+    await runInTransaction(async ({ session }) => {
+      const hostId = req.user.id || req.user.user;
+      const { gameId, team, slotIndex } = req.body;
 
-    const game = await HostedGame.findOne({ _id: gameId, host: hostId });
-    if (!game) throw new Error("Unauthorized or game not found");
+      const game = await HostedGame.findOne({ _id: gameId, host: hostId });
+      if (!game) throw new Error("Unauthorized or game not found");
 
-    const teamKey = team === "A" ? "teamA" : "teamB";
-    const slot = game.teams[teamKey].slots[slotIndex];
-    if (slot.status !== "PENDING") throw new Error("No pending request for this slot");
+      const teamKey = team === "A" ? "teamA" : "teamB";
+      const slot = game.teams[teamKey].slots[slotIndex];
+      if (slot.status !== "PENDING") throw new Error("No pending request for this slot");
 
-    const playerUserId = slot.user;
+      const playerUserId = slot.user;
 
-    // Release reserved coins for player
-    const updatedPlayer = await User.findByIdAndUpdate(playerUserId, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });
-    if (!updatedPlayer) {
-      await Owner.findByIdAndUpdate(playerUserId, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });
-    }
+      // Release reserved coins for player
+      const updatedPlayer = await User.findByIdAndUpdate(playerUserId, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });
+      if (!updatedPlayer) {
+        await Owner.findByIdAndUpdate(playerUserId, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });
+      }
 
-    // Update transaction to FAILED/REJECTED
-    await WalletTransaction.findOneAndUpdate(
-      { user: playerUserId, amount: game.perPlayerCharge, status: "RESERVED", type: "JOIN_GAME" },
-      { status: "FAILED", description: `Join request for ${game.gameType} rejected by host` },
-      { session, sort: { createdAt: -1 } }
-    );
+      // Update transaction to FAILED/REJECTED
+      await WalletTransaction.findOneAndUpdate(
+        { user: playerUserId, amount: game.perPlayerCharge, status: "RESERVED", type: "JOIN_GAME" },
+        { status: "FAILED", description: `Join request for ${game.gameType} rejected by host` },
+        { session, sort: { createdAt: -1 } }
+      );
 
-    // Reset slot to OPEN
-    game.teams[teamKey].slots[slotIndex] = {
-      user: null,
-      role: "",
-      status: "OPEN"
-    };
+      // Reset slot to OPEN
+      game.teams[teamKey].slots[slotIndex] = {
+        user: null,
+        role: "",
+        status: "OPEN"
+      };
 
-    await game.save({ session });
-    await session.commitTransaction();
+      await game.save({ session });
+    });
 
     return res.status(200).json({ success: true, message: "Player request rejected and coins released." });
 
   } catch (error) {
-    await session.abortTransaction();
-    return res.status(500).json({ message: error.message });
-  } finally {
-    session.endSession();
+    console.error("Error in rejectJoinRequest:", error);
+    return res.status(error.status || 500).json({ message: error.message });
   }
 };
 
 export const cancelHostedGame = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
-    const hostId = req.user.id || req.user.user;
-    const { gameId } = req.body;
+    await runInTransaction(async ({ session }) => {
+      const hostId = req.user.id || req.user.user;
+      const { gameId } = req.body;
 
-    const game = await HostedGame.findOne({ _id: gameId, host: hostId });
-    if (!game) throw new Error("Unauthorized or game not found");
-    if (game.status === "CANCELLED") throw new Error("Game already cancelled");
+      const game = await HostedGame.findOne({ _id: gameId, host: hostId });
+      if (!game) throw new Error("Unauthorized or game not found");
+      if (game.status === "CANCELLED") throw new Error("Game already cancelled");
 
-    // Release host's reserved coins (if any - some platforms take hosting fee)
-    // If there was a host fee reserved:
-    const hostFee = 0; // Adjust if hosting costs coins
-    if (hostFee > 0) {
-      const updatedHost = await User.findByIdAndUpdate(hostId, { $inc: { reservedBalance: -hostFee } }, { session });
-      if (!updatedHost) {
-        await Owner.findByIdAndUpdate(hostId, { $inc: { reservedBalance: -hostFee } }, { session });
-      }
-    }
-
-    // Release reserved coins for all PENDING players
-    const allSlots = [...game.teams.teamA.slots, ...game.teams.teamB.slots];
-    for (const slot of allSlots) {
-      if (slot.status === "PENDING" && slot.user) {
-        const updatedPlayer = await User.findByIdAndUpdate(slot.user, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });
-        if (!updatedPlayer) {
-          await Owner.findByIdAndUpdate(slot.user, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });
+      // Release host's reserved coins (if any - some platforms take hosting fee)
+      // If there was a host fee reserved:
+      const hostFee = 0; // Adjust if hosting costs coins
+      if (hostFee > 0) {
+        const updatedHost = await User.findByIdAndUpdate(hostId, { $inc: { reservedBalance: -hostFee } }, { session });
+        if (!updatedHost) {
+          await Owner.findByIdAndUpdate(hostId, { $inc: { reservedBalance: -hostFee } }, { session });
         }
-        
-        await WalletTransaction.create([{
-          user: slot.user,
-          amount: game.perPlayerCharge,
-          type: "REFUND",
-          status: "SUCCESS",
-          description: `Refunded reserved coins due to game cancellation: ${game.gameType}`
-        }], { session });
       }
-    }
 
-    game.status = "CANCELLED";
-    await game.save({ session });
-    await session.commitTransaction();
+      // Release reserved coins for all PENDING players
+      const allSlots = [...game.teams.teamA.slots, ...game.teams.teamB.slots];
+      for (const slot of allSlots) {
+        if (slot.status === "PENDING" && slot.user) {
+          const updatedPlayer = await User.findByIdAndUpdate(slot.user, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });
+          if (!updatedPlayer) {
+            await Owner.findByIdAndUpdate(slot.user, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });
+          }
+          
+          await WalletTransaction.create([{
+            user: slot.user,
+            amount: game.perPlayerCharge,
+            type: "REFUND",
+            status: "SUCCESS",
+            description: `Refunded reserved coins due to game cancellation: ${game.gameType}`
+          }], { session });
+        }
+      }
+
+      game.status = "CANCELLED";
+      await game.save({ session });
+    });
 
     return res.status(200).json({ success: true, message: "Game cancelled and all reserved coins released." });
 
   } catch (error) {
-    await session.abortTransaction();
-    return res.status(500).json({ message: error.message });
-  } finally {
-    session.endSession();
+    console.error("Error in cancelHostedGame:", error);
+    return res.status(error.status || 500).json({ message: error.message });
   }
 };
 
@@ -411,7 +533,8 @@ export const getMyJoinedGames = async (req, res) => {
     const games = await HostedGame.find({
       $or: [
         { "teams.teamA.slots.user": userId },
-        { "teams.teamB.slots.user": userId }
+        { "teams.teamB.slots.user": userId },
+        { "quickSlots.user": userId }
       ]
     }).populate("host", "name profilePicture")
       .populate("ground")
@@ -429,6 +552,15 @@ export const getMyJoinedGames = async (req, res) => {
         }
       });
       
+      if (!mySlot) {
+        game.quickSlots.forEach((s, idx) => {
+          if (s.user?.toString() === userId.toString()) {
+            mySlot = s;
+            myTeam = "QUICK";
+          }
+        });
+      }
+
       if (!mySlot) {
         game.teams.teamB.slots.forEach((s, idx) => {
           if (s.user?.toString() === userId.toString()) {
@@ -453,87 +585,534 @@ export const getMyJoinedGames = async (req, res) => {
 };
 
 export const leaveHostedGame = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  try {
+    await runInTransaction(async ({ session }) => {
+      const userId = req.user.id || req.user.user;
+      const { gameId } = req.body;
+
+      const game = await HostedGame.findById(gameId);
+      if (!game) throw new Error("Game not found");
+
+      let teamKey = "";
+      let slotIndex = -1;
+      let isQuickSlot = false;
+
+      // Find user's slot
+      if (game.quickSlots && game.quickSlots.some((s, idx) => {
+        if (s.user?.toString() === userId.toString()) {
+          slotIndex = idx;
+          isQuickSlot = true;
+          return true;
+        }
+        return false;
+      }));
+      else if (game.teams.teamA.slots.some((s, idx) => {
+        if (s.user?.toString() === userId.toString()) {
+          teamKey = "teamA";
+          slotIndex = idx;
+          return true;
+        }
+        return false;
+      }));
+      else if (game.teams.teamB.slots.some((s, idx) => {
+        if (s.user?.toString() === userId.toString()) {
+          teamKey = "teamB";
+          slotIndex = idx;
+          return true;
+        }
+        return false;
+      }));
+
+      if (slotIndex === -1) throw new Error("You are not part of this game");
+
+      const slot = isQuickSlot ? game.quickSlots[slotIndex] : game.teams[teamKey].slots[slotIndex];
+      
+      // If pending, just release reserved coins
+      if (slot.status === "PENDING") {
+        const updatedPlayer = await User.findByIdAndUpdate(userId, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });
+        if (!updatedPlayer) {
+          await Owner.findByIdAndUpdate(userId, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });
+        }
+
+        await WalletTransaction.findOneAndUpdate(
+          { user: userId, amount: game.perPlayerCharge, status: "RESERVED", type: "JOIN_GAME" },
+          { status: "FAILED", description: `Join request for ${game.gameType} cancelled by player` },
+          { session, sort: { createdAt: -1 } }
+        );
+      } 
+      // If joined, refund coins (minus any penalty if applicable, but for now full refund)
+      else if (slot.status === "JOINED") {
+         // Since coins were already deducted from balance, we refund them
+         const updatedPlayer = await User.findByIdAndUpdate(userId, { $inc: { walletBalance: game.perPlayerCharge } }, { session });
+         if (!updatedPlayer) {
+           await Owner.findByIdAndUpdate(userId, { $inc: { walletBalance: game.perPlayerCharge } }, { session });
+         }
+
+         await WalletTransaction.create([{
+           user: userId,
+           amount: game.perPlayerCharge,
+           type: "REFUND",
+           status: "SUCCESS",
+           description: `Refunded coins for leaving ${game.gameType} game`
+         }], { session });
+      }
+
+      // Reset slot
+      if (isQuickSlot) {
+        game.quickSlots[slotIndex] = {
+          user: null,
+          role: slot.role || "Player",
+          status: "OPEN"
+        };
+      } else {
+        game.teams[teamKey].slots[slotIndex] = {
+          user: null,
+          role: slot.role || "Player",
+          status: "OPEN"
+        };
+      }
+
+      await game.save({ session });
+    });
+
+    return res.status(200).json({ success: true, message: "Left game and coins updated." });
+
+  } catch (error) {
+    console.error("Error in leaveHostedGame:", error);
+    return res.status(error.status || 500).json({ message: error.message });
+  }
+};
+
+export const getHostedGameByShortId = async (req, res) => {
+  try {
+    const { shortId } = req.query;
+    if (!shortId) return res.status(400).json({ message: "Search query is required" });
+    
+    const searchUpper = shortId.toUpperCase().trim();
+
+    // Build OR query: exact shortId match (case-insensitive), partial regex match, or ObjectId match
+    const orClauses = [
+      { shortId: new RegExp(searchUpper.replace(/[-]/g, "\\-"), "i") },
+    ];
+    
+    // If it looks like a MongoDB ID, add to query
+    if (mongoose.Types.ObjectId.isValid(shortId)) {
+      orClauses.push({ _id: shortId });
+    }
+
+    const game = await HostedGame.findOne({
+      $or: orClauses,
+      status: { $in: ["ACTIVE", "PENDING"] }, // Don't surface cancelled games
+    })
+      .populate("host", "name profilePicture")
+      .populate("ground", "name location images")
+      .populate("umpire", "name profilePicture")
+      .populate("umpireRequest.user", "name profilePicture");
+    
+    if (!game) return res.status(404).json({ message: "Game not found" });
+    
+    return res.status(200).json({ success: true, game });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const requestToUmpire = async (req, res) => {
   try {
     const userId = req.user.id || req.user.user;
     const { gameId } = req.body;
 
     const game = await HostedGame.findById(gameId);
     if (!game) throw new Error("Game not found");
-
-    let teamKey = "";
-    let slotIndex = -1;
-    let slotFound = false;
-
-    // Find user's slot
-    if (game.teams.teamA.slots.some((s, idx) => {
-      if (s.user?.toString() === userId.toString()) {
-        teamKey = "teamA";
-        slotIndex = idx;
-        return true;
-      }
-      return false;
-    }));
-    else if (game.teams.teamB.slots.some((s, idx) => {
-      if (s.user?.toString() === userId.toString()) {
-        teamKey = "teamB";
-        slotIndex = idx;
-        return true;
-      }
-      return false;
-    }));
-
-    if (slotIndex === -1) throw new Error("You are not part of this game");
-
-    const slot = game.teams[teamKey].slots[slotIndex];
     
-    // If pending, just release reserved coins
-    if (slot.status === "PENDING") {
-      const updatedPlayer = await User.findByIdAndUpdate(userId, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });
-      if (!updatedPlayer) {
-        await Owner.findByIdAndUpdate(userId, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });
-      }
+    if (game.umpire) throw new Error("This game already has an umpire assigned");
+    
+    // Check if this user already requested (check both User ID and potential Owner ID)
+    const owner = await Owner.findOne({ userId });
+    const umpireId = owner ? owner._id : userId;
 
-      await WalletTransaction.findOneAndUpdate(
-        { user: userId, amount: game.perPlayerCharge, status: "RESERVED", type: "JOIN_GAME" },
-        { status: "FAILED", description: `Join request for ${game.gameType} cancelled by player` },
-        { session, sort: { createdAt: -1 } }
-      );
-    } 
-    // If joined, refund coins (minus any penalty if applicable, but for now full refund)
-    else if (slot.status === "JOINED") {
-       // Since coins were already deducted from balance, we refund them
-       const updatedPlayer = await User.findByIdAndUpdate(userId, { $inc: { walletBalance: game.perPlayerCharge } }, { session });
-       if (!updatedPlayer) {
-         await Owner.findByIdAndUpdate(userId, { $inc: { walletBalance: game.perPlayerCharge } }, { session });
-       }
-
-       await WalletTransaction.create([{
-         user: userId,
-         amount: game.perPlayerCharge,
-         type: "REFUND",
-         status: "SUCCESS",
-         description: `Refunded coins for leaving ${game.gameType} game`
-       }], { session });
+    if (game.umpireRequest?.user?.toString() === umpireId.toString() || 
+        game.umpireRequest?.user?.toString() === userId.toString()) {
+      throw new Error("You have already sent a request for this game");
     }
 
-    // Reset slot
-    game.teams[teamKey].slots[slotIndex] = {
-      user: null,
-      role: "",
-      status: "OPEN"
+    game.umpireRequest = {
+      user: umpireId,
+      status: "PENDING"
     };
 
-    await game.save({ session });
-    await session.commitTransaction();
-
-    return res.status(200).json({ success: true, message: "Left game and coins updated." });
+    await game.save();
+    return res.status(200).json({ success: true, message: "Umpire request sent to host!" });
 
   } catch (error) {
-    await session.abortTransaction();
     return res.status(500).json({ message: error.message });
-  } finally {
-    session.endSession();
+  }
+};
+
+export const handleUmpireRequest = async (req, res) => {
+  try {
+    const hostId = req.user.id || req.user.user;
+    const { gameId, action } = req.body; // action: 'APPROVE' or 'REJECT'
+
+    const game = await HostedGame.findOne({ _id: gameId, host: hostId });
+    if (!game) throw new Error("Unauthorized or game not found");
+
+    if (action === "APPROVE") {
+      game.umpire = game.umpireRequest.user;
+      game.umpireRequest.status = "APPROVED";
+    } else {
+      game.umpireRequest.status = "REJECTED";
+      game.umpireRequest.user = null;
+    }
+
+    await game.save();
+    return res.status(200).json({ success: true, message: `Umpire request ${action.toLowerCase()}d successfully!` });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const getHostedGameById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const game = await HostedGame.findById(id)
+      .populate("host", "name profilePicture")
+      .populate("ground")
+      .populate("umpire", "name profilePicture")
+      .populate("teams.teamA.slots.user", "name profilePicture")
+      .populate("teams.teamB.slots.user", "name profilePicture")
+      .populate("umpireRequest.user", "name profilePicture");
+
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+
+    return res.status(200).json({ success: true, game });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 2B — Assign a Quick Game slot to an existing registered user (host only)
+// ─────────────────────────────────────────────────────────────────────────────
+export const assignQuickSlot = async (req, res) => {
+  try {
+    const hostId = req.user.id || req.user.user;
+    const { gameId, slotIndex, userId } = req.body;
+
+    if (slotIndex === undefined || !userId) {
+      return res.status(400).json({ message: "slotIndex and userId are required" });
+    }
+
+    const game = await HostedGame.findOne({ _id: gameId, host: hostId });
+    if (!game) return res.status(404).json({ message: "Game not found or unauthorized" });
+    if (game.gameMode !== "QUICK") {
+      return res.status(400).json({ message: "Only Quick Games support slot assignment" });
+    }
+
+    const slot = game.quickSlots[slotIndex];
+    if (!slot) return res.status(400).json({ message: "Invalid slot index" });
+    if (slot.status !== "OPEN") return res.status(400).json({ message: "Slot is not open" });
+
+    game.quickSlots[slotIndex].user = userId;
+    game.quickSlots[slotIndex].status = "HELD";
+    game.quickSlots[slotIndex].addedBy = hostId;
+    game.markModified("quickSlots");
+
+    await game.save();
+    return res.status(200).json({ success: true, message: "Slot assigned successfully" });
+  } catch (error) {
+    console.error("[assignQuickSlot]", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 2C — Invite an off-platform custom player to a Quick Game slot
+// ─────────────────────────────────────────────────────────────────────────────
+export const inviteCustomPlayer = async (req, res) => {
+  try {
+    const hostId = req.user.id || req.user.user;
+    const { gameId, slotIndex, name, email, phone, mustPay } = req.body;
+
+    if (!email || !name || slotIndex === undefined) {
+      return res.status(400).json({ message: "name, email, and slotIndex are required" });
+    }
+
+    const game = await HostedGame.findOne({ _id: gameId, host: hostId });
+    if (!game) return res.status(404).json({ message: "Game not found or unauthorized" });
+    if (game.gameMode !== "QUICK") {
+      return res.status(400).json({ message: "Only Quick Games support custom invites" });
+    }
+
+    const slot = game.quickSlots[slotIndex];
+    if (!slot) return res.status(400).json({ message: "Invalid slot index" });
+    if (slot.status !== "OPEN") return res.status(400).json({ message: "Slot is not open" });
+
+    const token = randomUUID();
+    const customPlayer = {
+      name,
+      email,
+      phone: phone || "",
+      slotIndex,
+      mustPay: !!mustPay,
+      inviteToken: token,
+      inviteStatus: "PENDING",
+    };
+
+    game.customPlayers.push(customPlayer);
+    const cpDoc = game.customPlayers[game.customPlayers.length - 1];
+
+    game.quickSlots[slotIndex].status = "HELD";
+    game.quickSlots[slotIndex].addedBy = hostId;
+    game.quickSlots[slotIndex].customPlayerRef = cpDoc._id;
+    game.markModified("quickSlots");
+    game.markModified("customPlayers");
+
+    await game.save();
+
+    // Fire invite email non-blocking
+    const host = await User.findById(hostId).select("name email phone");
+    sendCustomPlayerInvite(cpDoc, game, host).catch(e => console.error("[inviteCustomPlayer] Email Error:", e));
+
+    return res.status(200).json({ success: true, message: "Invitation sent!" });
+  } catch (error) {
+    console.error("[inviteCustomPlayer]", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 2D — Verify an invitation token (for the invite page)
+// ─────────────────────────────────────────────────────────────────────────────
+export const verifyInviteToken = async (req, res) => {
+  try {
+    const { token } = req.query;
+    if (!token) return res.status(400).json({ message: "Token is required" });
+
+    // Try finding player invite first
+    let game = await HostedGame.findOne({
+      "customPlayers.inviteToken": token,
+      "customPlayers.inviteStatus": "PENDING",
+    });
+
+    let inviteType = "PLAYER";
+    let inviteData = null;
+
+    if (game) {
+      inviteData = game.customPlayers.find(p => p.inviteToken === token);
+    } else {
+      // Try finding umpire invite
+      game = await HostedGame.findOne({
+        "customUmpire.inviteToken": token,
+        "customUmpire.inviteStatus": "PENDING",
+      });
+      if (game) {
+        inviteType = "UMPIRE";
+        inviteData = game.customUmpire;
+      }
+    }
+
+    if (!game || !inviteData) {
+      return res.status(404).json({ message: "Invite not found or already used" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      gameId: game._id,
+      shortId: game.shortId,
+      inviteType,
+      email: inviteData.email,
+      name: inviteData.name,
+      game: {
+        gameType: game.gameType,
+        date: game.date,
+        time: game.time,
+        city: game.city,
+        state: game.state,
+      },
+    });
+  } catch (error) {
+    console.error("[verifyInviteToken]", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 2E — Return followers + following for the slot picker popup
+// ─────────────────────────────────────────────────────────────────────────────
+export const getFollowersForSlot = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user.user;
+
+    const me = await User.findById(userId)
+      .select("followers following")
+      .populate("followers", "name profilePicture sportTypes city state")
+      .populate("following", "name profilePicture sportTypes city state");
+
+    if (!me) return res.status(404).json({ message: "User not found" });
+
+    // Union of followers + following, de-duped by _id
+    const seen = new Set();
+    const people = [];
+    [...(me.followers || []), ...(me.following || [])].forEach(u => {
+      const key = u._id.toString();
+      if (!seen.has(key)) {
+        seen.add(key);
+        people.push(u);
+      }
+    });
+
+    return res.status(200).json({ success: true, people });
+  } catch (error) {
+    console.error("[getFollowersForSlot]", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// -----------------------------------------------------------------------------
+// Phase 2F — Claim an invited slot (called by the invited user)
+// -----------------------------------------------------------------------------
+export const claimInviteSlot = async (req, res) => {
+  let updatedRole = null;
+  let updatedOwnerId = null;
+
+  try {
+    const result = await runInTransaction(async ({ session }) => {
+      const userId = req.user.id || req.user.user;
+      const { token } = req.body;
+
+      if (!token) throw new Error("Token is required");
+
+      let game = await HostedGame.findOne({
+        "customPlayers.inviteToken": token,
+        "customPlayers.inviteStatus": "PENDING",
+      }).session(session);
+
+      let isUmpire = false;
+
+      if (!game) {
+        game = await HostedGame.findOne({
+          "customUmpire.inviteToken": token,
+          "customUmpire.inviteStatus": "PENDING",
+        }).session(session);
+        isUmpire = true;
+      }
+
+      if (!game) throw new Error("Invite not found or already claimed");
+
+      if (isUmpire) {
+        // Handle Umpire Claim
+        game.customUmpire.inviteStatus = "ACCEPTED";
+        game.customUmpire.claimedByUser = userId;
+        
+        // Also assign as official umpire for the match
+        let owner = await Owner.findOne({ userId }).session(session);
+        
+        // If owner profile doesn't exist, create a LIMITED_UMPIRE owner profile
+        if (!owner) {
+          const userDetails = await User.findById(userId).session(session);
+          if (userDetails) {
+            owner = new Owner({
+              userId: userId,
+              name: userDetails.name || userDetails.fullName || game.customUmpire.name,
+              email: userDetails.email || game.customUmpire.email,
+              phone: userDetails.phone || game.customUmpire.phone,
+              role: "LIMITED_UMPIRE"
+            });
+            await owner.save({ session });
+            
+            // Update User role
+            userDetails.role = "LIMITED_UMPIRE";
+            userDetails.ownerDetails = owner._id;
+            await userDetails.save({ session });
+            
+            updatedRole = "LIMITED_UMPIRE";
+            updatedOwnerId = owner._id;
+          }
+        } else if (owner.role === "owner" || owner.role === "user") {
+          // Upgrade role if they only have a basic owner profile
+          owner.role = "LIMITED_UMPIRE";
+          await owner.save({ session });
+          await User.findByIdAndUpdate(userId, { role: "LIMITED_UMPIRE" }, { session });
+          
+          updatedRole = "LIMITED_UMPIRE";
+          updatedOwnerId = owner._id;
+        }
+
+        game.umpire = owner ? owner._id : userId;
+        
+        // Remove pending requests if any
+        if (game.umpireRequest) {
+          game.umpireRequest.status = "APPROVED";
+          game.umpireRequest.user = game.umpire;
+        }
+
+        game.markModified("customUmpire");
+        game.markModified("umpireRequest");
+      } else {
+        // Handle Player Claim
+        const cpIndex = game.customPlayers.findIndex(p => p.inviteToken === token);
+        const cp = game.customPlayers[cpIndex];
+        const slotIndex = cp.slotIndex;
+
+        // Handle payment if required
+        if (cp.mustPay && game.perPlayerCharge > 0) {
+          const usableBalance = await getUsableBalance(userId);
+          if (usableBalance < game.perPlayerCharge) {
+            const error = new Error("Insufficient coins. This slot requires coins.");
+            error.status = 400;
+            throw error;
+          }
+
+          // Reserve coins
+          const updatedPlayer = await User.findByIdAndUpdate(userId, { $inc: { reservedBalance: game.perPlayerCharge } }, { session });
+          if (!updatedPlayer) {
+            await Owner.findByIdAndUpdate(userId, { $inc: { reservedBalance: game.perPlayerCharge } }, { session });
+          }
+
+          await WalletTransaction.create([{
+            user: userId,
+            amount: game.perPlayerCharge,
+            type: "JOIN_GAME",
+            status: "RESERVED",
+            description: "Reserved for claiming invited slot in game"
+          }], { session });
+        }
+
+        // Update game state
+        game.customPlayers[cpIndex].inviteStatus = "CLAIMED";
+        game.customPlayers[cpIndex].claimedByUser = userId;
+        
+        // Update quickSlot
+        if (game.gameMode === "QUICK" && game.quickSlots[slotIndex]) {
+          game.quickSlots[slotIndex].user = userId;
+          game.quickSlots[slotIndex].status = "JOINED";
+        }
+
+        game.markModified("customPlayers");
+        game.markModified("quickSlots");
+      }
+
+      await game.save({ session });
+      return { success: true, updatedRole: updatedRole || null, updatedOwnerId: updatedOwnerId || null };
+    });
+
+    if (result.updatedRole && result.updatedRole !== req.user?.role) {
+      const newToken = generateUserToken(req.user.id || req.user.user, result.updatedRole, result.updatedOwnerId);
+      res.cookie("auth_token", newToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Lax",
+        maxAge: 30 * 24 * 60 * 60 * 1000
+      });
+      return res.status(200).json({ success: true, message: "Slot claimed successfully!", newToken, updatedRole: result.updatedRole });
+    }
+
+    return res.status(200).json({ success: true, message: "Slot claimed successfully!" });
+  } catch (error) {
+    console.error("[claimInviteSlot]", error);
+    return res.status(error.status || 500).json({ message: error.message });
   }
 };

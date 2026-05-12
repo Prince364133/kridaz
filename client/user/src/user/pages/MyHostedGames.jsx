@@ -98,9 +98,21 @@ const MyHostedGames = () => {
               <div className="p-6 border-b border-neutral-800">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                      {game.gameType}
-                    </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {game.gameType}
+                      </span>
+                      {game.shortId && (
+                        <button
+                          onClick={() => { navigator.clipboard?.writeText(game.shortId); toast.success('Game ID copied!'); }}
+                          className="bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-yellow-500 hover:border-yellow-500/40 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider transition-all flex items-center gap-1"
+                          title="Click to copy Game ID"
+                        >
+                          <Info size={10} />
+                          ID: {game.shortId}
+                        </button>
+                      )}
+                    </div>
                     <h2 className="text-2xl font-black mt-1 uppercase italic tracking-tighter">
                       {game.teams?.teamA?.name} vs {game.teams?.teamB?.name}
                     </h2>

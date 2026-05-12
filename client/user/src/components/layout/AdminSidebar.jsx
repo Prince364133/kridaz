@@ -17,7 +17,8 @@ import {
   HelpCircle,
   Shield,
   ShieldCheck,
-  LogOut
+  LogOut,
+  Trophy
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
@@ -52,6 +53,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       ],
     },
     { to: "/admin/turfs", label: "Venues", icon: MapPin },
+    { to: "/admin/games", label: "Hosted Games", icon: Trophy },
     {
       label: "Finance",
       icon: IndianRupee,

@@ -36,7 +36,58 @@ const useUsers = () => {
     [users]
   );
 
-  return { users: filteredUsers, loading, searchTerm, handleSearch };
+  const toggleUserStatus = async (userId, currentStatus) => {
+    try {
+      const newStatus = currentStatus === "active" ? "blocked" : "active";
+      await axiosInstance.put(`/api/admin/users/${userId}/status`, { status: newStatus });
+      setUsers(prev => prev.map(u => u._id === userId ? { ...u, status: newStatus } : u));
+      setFilteredUsers(prev => prev.map(u => u._id === userId ? { ...u, status: newStatus } : u));
+      return { success: true };
+    } catch (error) {
+      console.error("Error toggling user status:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const deleteUser = async (userId) => {
+    try {
+      await axiosInstance.delete(`/api/admin/users/${userId}`);
+      setUsers(prev => prev.filter(u => u._id !== userId));
+      setFilteredUsers(prev => prev.filter(u => u._id !== userId));
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const batchDeleteUsers = async (userIds) => {
+    try {
+      await axiosInstance.post("/api/admin/users/batch-delete", { userIds });
+      setUsers(prev => prev.filter(u => !userIds.includes(u._id)));
+      setFilteredUsers(prev => prev.filter(u => !userIds.includes(u._id)));
+      return { success: true };
+    } catch (error) {
+      console.error("Error batch deleting users:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const batchToggleStatus = async (userIds, status) => {
+    try {
+      await axiosInstance.put("/api/admin/users/batch-status", { userIds, status });
+      setUsers(prev => prev.map(u => userIds.includes(u._id) ? { ...u, status } : u));
+      setFilteredUsers(prev => prev.map(u => userIds.includes(u._id) ? { ...u, status } : u));
+      return { success: true };
+    } catch (error) {
+      console.error("Error batch updating status:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+
+  return { users: filteredUsers, loading, searchTerm, handleSearch, toggleUserStatus, deleteUser, batchDeleteUsers, batchToggleStatus, refreshUsers: fetchUsers };
+
 };
 
 export default useUsers;

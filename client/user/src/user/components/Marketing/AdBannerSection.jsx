@@ -48,7 +48,7 @@ export const AdBannerSection = ({ banners = [] }) => {
 
   return (
     <section className="relative w-full overflow-hidden bg-black py-4 md:py-6">
-      <div className="max-w-screen-2xl mx-auto px-4 md:px-10">
+      <div className="w-full px-4 lg:px-12">
         <div className="relative group aspect-[16/9] md:aspect-[21/9] rounded-2xl md:rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl">
           {/* Progress Bar */}
           <div className="absolute top-0 left-0 w-full h-1 bg-white/10 z-30">

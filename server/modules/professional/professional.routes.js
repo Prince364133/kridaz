@@ -1,6 +1,7 @@
 import express from "express";
 import { 
   getAllProfessionals, 
+  getProfessionalFilters,
   getProfessionalById, 
   bookProfessional, 
   updateAvailability, 
@@ -16,6 +17,7 @@ const router = express.Router();
 
 // User Routes
 router.get("/list", getAllProfessionals);
+router.get("/filters", getProfessionalFilters);
 router.get("/details/:id", getProfessionalById);
 router.post("/book", protect, bookProfessional);
 router.post("/review", protect, addProfessionalReview);

@@ -166,14 +166,26 @@ const useSignUpForm = (predefinedRole = "user") => {
     }
 
     setLoading(true);
-    const payload = { ...data, role: predefinedRole };
+    const inviteToken = localStorage.getItem("pendingInvite");
+    const umpireInvite = localStorage.getItem("umpireInvite");
+    const payload = { ...data, role: predefinedRole, inviteToken, umpireInvite };
     try {
       const response = await axiosInstance.post(`${apiPath}/register`, payload);
       const result = response.data;
 
       dispatch(login({ token: result.token, role: result.role, user: result.user }));
       toast.success(`Welcome to Kridaz, ${data.name}!`);
-      navigate("/");
+      
+      const role = result.role?.toLowerCase() || "";
+      if (role.includes("umpire")) {
+        navigate("/umpire");
+      } else if (role === "owner") {
+        navigate("/partner");
+      } else if (role === "coach") {
+        navigate("/coach");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Registration failed");
     } finally {
@@ -199,8 +211,12 @@ const useSignUpForm = (predefinedRole = "user") => {
   const handleGoogleSuccess = async (googleResponse) => {
     setLoading(true);
     try {
+      const inviteToken = localStorage.getItem("pendingInvite");
+      const umpireInvite = localStorage.getItem("umpireInvite");
       const payload = {
         role: predefinedRole,
+        inviteToken,
+        umpireInvite
       };
 
       if (googleResponse.credential) {
@@ -228,7 +244,16 @@ const useSignUpForm = (predefinedRole = "user") => {
         return;
       }
 
-      navigate(result.role === "owner" ? "/partner" : result.role === "coach" ? "/coach" : result.role === "umpire" ? "/umpire" : "/");
+      const role = result.role?.toLowerCase() || "";
+      if (role.includes("umpire")) {
+        navigate("/umpire");
+      } else if (role === "owner") {
+        navigate("/partner");
+      } else if (role === "coach") {
+        navigate("/coach");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Google authentication failed");
     } finally {

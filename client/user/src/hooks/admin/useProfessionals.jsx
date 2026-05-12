@@ -62,6 +62,46 @@ const useProfessionals = (roleFilter) => {
     }
   };
 
+  const deleteProfessional = async (id) => {
+    try {
+      await axiosInstance.delete(`/api/admin/professionals/${id}`);
+      setProfessionals(prev => prev.filter(p => p._id !== id));
+      setAllProfessionals(prev => prev.filter(p => p._id !== id));
+      toast.success("Professional record deleted");
+      return true;
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete record");
+      return false;
+    }
+  };
+
+  const batchDeleteProfessionals = async (ids) => {
+    try {
+      await axiosInstance.post("/api/admin/professionals/batch-delete", { ownerIds: ids });
+      setProfessionals(prev => prev.filter(p => !ids.includes(p._id)));
+      setAllProfessionals(prev => prev.filter(p => !ids.includes(p._id)));
+      toast.success(`${ids.length} records deleted`);
+      return true;
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Batch deletion failed");
+      return false;
+    }
+  };
+
+  const batchUpdateProfessionalStatus = async (ids, status) => {
+    try {
+      await axiosInstance.put("/api/admin/professionals/batch-status", { ownerIds: ids, status });
+      setProfessionals(prev => prev.map(p => ids.includes(p._id) ? { ...p, status } : p));
+      setAllProfessionals(prev => prev.map(p => ids.includes(p._id) ? { ...p, status } : p));
+      toast.success(`Status updated for ${ids.length} records`);
+      return true;
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Batch status update failed");
+      return false;
+    }
+  };
+
+
   useEffect(() => {
     fetchProfessionals();
   }, [roleFilter]);
@@ -74,6 +114,10 @@ const useProfessionals = (roleFilter) => {
     fetchProfessionalDetails,
     selectedProfessionalDetails,
     detailsLoading,
+    deleteProfessional,
+    batchDeleteProfessionals,
+    batchUpdateProfessionalStatus,
+    refresh: fetchProfessionals
   };
 };
 

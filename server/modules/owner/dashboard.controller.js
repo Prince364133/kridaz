@@ -7,6 +7,9 @@ import Match from "../../models/match.model.js";
 import Session from "../../models/session.model.js";
 import WalletTransaction from "../../models/walletTransaction.model.js";
 import Owner from "../../models/owner.model.js";
+import HostedGame from "../../models/hostedGame.model.js";
+import { format, formatDistanceToNow } from "date-fns";
+
 
 export const getDashboardData = async (req, res) => {
   const userId = req.user.id;
@@ -15,7 +18,7 @@ export const getDashboardData = async (req, res) => {
 
   // Redirect based on role
   if (role === "coach") return getCoachDashboardData(req, res);
-  if (role === "umpire") return getUmpireDashboardData(req, res);
+  if (role?.toLowerCase().includes("umpire")) return getUmpireDashboardData(req, res);
 
   try {
     // 1. Resolve correct owner document
@@ -261,7 +264,10 @@ export const getDashboardData = async (req, res) => {
 };
 
 export const getCoachDashboardData = async (req, res) => {
-  const coachId = req.owner.id;
+  const coachId = req.owner?.id || req.user?.id;
+  if (!coachId) {
+    return res.status(401).json({ success: false, message: "Unauthorized: Coach profile required" });
+  }
   console.log("DEBUG: Fetching coach dashboard data for coachId:", coachId);
   
   try {
@@ -369,12 +375,58 @@ export const getUmpireDashboardData = async (req, res) => {
   console.log("DEBUG: Fetching umpire dashboard data for umpireId:", umpireId);
   
   try {
-    console.log("DEBUG: Querying Match model...");
-    const matches = await Match.find({ umpire: umpireId }).sort({ date: 1 }).lean();
-    console.log(`DEBUG: Found ${matches.length} matches`);
+    console.log("DEBUG: Querying Match and HostedGame models...");
     
-    const matchesOfficiated = matches.filter(m => m.status === "completed").length;
-    const upcomingMatches = matches.filter(m => m.status === "upcoming").length;
+    // Support both User ID and Owner ID for lookup during transition
+    const ownerId = req.owner.ownerId;
+    const userId = req.owner.id;
+
+    // Fetch owner profile to check for upgradeRequested status
+    const owner = await Owner.findById(ownerId).lean();
+    if (!owner) {
+      console.warn("DEBUG: Owner profile not found for ownerId:", ownerId);
+    }
+
+    // Fetch user details for email/phone fallback search
+    const userRecord = await User.findById(userId).select("email phone").lean();
+    const userEmail = userRecord?.email;
+    const userPhone = userRecord?.phone;
+
+    const [legacyMatches, hostedGames] = await Promise.all([
+      Match.find({ umpire: { $in: [umpireId, ownerId] } }).sort({ date: 1 }).lean(),
+      HostedGame.find({
+        $or: [
+          { umpire: { $in: [umpireId, userId, ownerId] } },
+          { host: { $in: [umpireId, userId, ownerId] } },
+          { "umpireRequest.user": { $in: [umpireId, userId, ownerId] } },
+          // Robust fallback for invited umpires whose ID link might be pending
+          { "customUmpire.email": userEmail },
+          { "customUmpire.phone": userPhone }
+        ],
+        status: { $ne: "CANCELLED" }
+      })
+        .populate("ground", "name location")
+        .sort({ date: 1 })
+        .lean()
+    ]);
+
+    // Format HostedGames to match the frontend match structure
+    const formattedHostedGames = hostedGames.map(game => ({
+      ...game,
+      name: game.name || `${game.teams?.teamA?.name || 'Team A'} VS ${game.teams?.teamB?.name || 'Team B'}`,
+      venue: game.ground?.name || game.city || "TBD Venue",
+      // Normalize status to lowercase for frontend filtering
+      status: game.status === "ACTIVE" ? "upcoming" : game.status.toLowerCase(),
+      teams: game.teams ? [game.teams.teamA.name, game.teams.teamB.name] : ["TBD", "TBD"],
+      isHostedGame: true
+    }));
+
+    const allMatches = [...legacyMatches, ...formattedHostedGames];
+    console.log(`DEBUG: Found ${legacyMatches.length} legacy matches and ${formattedHostedGames.length} hosted games`);
+    
+    const matchesOfficiated = allMatches.filter(m => m.status === "completed").length;
+    const upcomingMatches = allMatches.filter(m => m.status === "upcoming").length;
+
 
     // Fetch Real Revenue from Wallet
     const sevenDaysAgo = new Date();
@@ -414,13 +466,16 @@ export const getUmpireDashboardData = async (req, res) => {
       totalRevenue,
       revenueOverTimeRaw,
       matchEngagement: [],
-      matches: matches,
-      upcomingAssignments: matches.filter(m => m.status === "upcoming").slice(0, 5).map(m => ({
+      matches: allMatches,
+      upcomingAssignments: allMatches.filter(m => m.status === "upcoming").slice(0, 5).map(m => ({
+        _id: m._id,
         match: m.name || "TBD Match",
+        shortId: m.shortId,
         time: m.date ? `${new Date(m.date).toLocaleDateString()} - ${m.time || 'N/A'}` : 'TBD',
         venue: m.venue || "TBD Venue",
         role: "Head Umpire"
-      }))
+      })),
+      upgradeRequested: owner?.upgradeRequested || false
     };
 
     console.log("DEBUG: Sending successful response for umpire dashboard");
@@ -742,5 +797,4 @@ export const getOwnerCustomers = async (req, res) => {
   }
 };
 
-// Helper imports needed for the new controller
-import { format, formatDistanceToNow } from "date-fns";
+
