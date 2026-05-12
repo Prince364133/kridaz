@@ -30,6 +30,8 @@ const getCookie = (name) => {
   return null;
 };
 
+import { SocketProvider } from "./context/SocketContext";
+
 export default function App() {
   console.log("App.jsx: Rendering App component...");
   const dispatch = useDispatch();
@@ -112,6 +114,10 @@ export default function App() {
     );
   }
 
-  return <RouterProvider router={router} />;
+  return (
+    <SocketProvider>
+      <RouterProvider router={router} />
+    </SocketProvider>
+  );
 }
  
