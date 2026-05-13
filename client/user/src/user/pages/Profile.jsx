@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   User, MapPin, Clock, IndianRupee, Calendar, Zap, Activity,
   ArrowRight, ShieldCheck, Trophy, Star, Camera, Edit2, MessageSquare, Heart, Edit3, Trash2, Loader2, Send, MessageCircle,
-  Wallet, CreditCard, Award, Target, LogOut, Plus, Eye, TrendingUp, Mail, Phone, Ruler, LayoutGrid, CheckCircle2, UserPlus, BarChart, ExternalLink, Crown, Shield, BarChart3, Building2, AlertTriangle, Upload, Search, Medal, Users, X, Image as ImageIcon
+  Wallet, CreditCard, Award, Target, LogOut, Plus, Eye, TrendingUp, Mail, Phone, Ruler, LayoutGrid, CheckCircle2, UserPlus, BarChart, ExternalLink, Crown, Shield, BarChart3, Building2, AlertTriangle, Upload, Search, Medal, Users
 } from "lucide-react";
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
@@ -16,6 +16,7 @@ import { login, logout, updateUser, followUser, unfollowUser } from "@redux/slic
 import useBookingHistory from "../hooks/useBookingHistory";
 import useWriteReview from "../hooks/useWriteReview";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import TurfBookingHistory from "../components/turf/TurfBookingHistory";
 import TurfBookingHistorySkeleton from "../components/ui/TurfBookingHistorySkeleton";
 import StoryViewer from "../components/StoryViewer";
 import EditProfileModal from "../components/modals/EditProfileModal";
@@ -85,13 +86,7 @@ export default function Profile() {
   const { loading, bookings } = useBookingHistory();
 
   const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState("overview"); 
-  const [showPostForm, setShowPostForm] = useState(false);
-  const [userPosts, setUserPosts] = useState([]);
-  const [loadingPosts, setLoadingPosts] = useState(false);
-  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
-  const [newPost, setNewPost] = useState({ title: '', content: '', image: null });
-  const [postImagePreview, setPostImagePreview] = useState(null);
+  const [activeTab, setActiveTab] = useState("posts"); 
   const [userStories, setUserStories] = useState([]);
   const [viewingStoryGroup, setViewingStoryGroup] = useState(null);
   const [initialStoryIndex, setInitialStoryIndex] = useState(0);
@@ -128,25 +123,7 @@ export default function Profile() {
         setLoadingProfile(false);
       }
     };
-
-    const fetchUserPosts = async () => {
-      try {
-        setLoadingPosts(true);
-        const res = await axiosInstance.get(`/api/user/community/user-posts/${targetUserId}`);
-        if (res.data.success) {
-          setUserPosts(res.data.posts || []);
-        }
-      } catch (error) {
-        console.error("Failed to load user posts:", error);
-      } finally {
-        setLoadingPosts(false);
-      }
-    };
-
-    if (targetUserId) {
-      fetchTargetProfile();
-      fetchUserPosts();
-    }
+    if (targetUserId) fetchTargetProfile();
   }, [targetUserId, isOwnProfile, dispatch]);
 
   const handleFollowToggle = async () => {
@@ -166,41 +143,6 @@ export default function Profile() {
       }
     } catch (error) {
       toast.error("Action failed");
-    }
-  };
-
-  const handleCreatePost = async () => {
-    if (!newPost.content.trim()) return toast.error("Content is required");
-    
-    setIsSubmittingPost(true);
-    const formData = new FormData();
-    formData.append('title', newPost.title);
-    formData.append('content', newPost.content);
-    if (newPost.image) formData.append('image', newPost.image);
-
-    try {
-      const res = await axiosInstance.post('/api/user/community', formData);
-      if (res.data.success) {
-        toast.success("Post shared successfully!");
-        setNewPost({ title: '', content: '', image: null });
-        setPostImagePreview(null);
-        setShowPostForm(false);
-        const resPosts = await axiosInstance.get(`/api/user/community/user-posts/${targetUserId}`);
-        if (resPosts.data.success) setUserPosts(resPosts.data.posts || []);
-        setActiveTab('posts');
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to share post");
-    } finally {
-      setIsSubmittingPost(false);
-    }
-  };
-
-  const handlePostImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setNewPost({ ...newPost, image: file });
-      setPostImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -296,10 +238,6 @@ export default function Profile() {
 
               <div className="flex flex-wrap items-center gap-4 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
                 <span className="flex items-center gap-1.5">
-                  <span className="text-[#00ff41]">{userPosts.length}</span> Posts
-                </span>
-                <span className="w-1 h-1 bg-zinc-700 rounded-full" />
-                <span className="flex items-center gap-1.5">
                   <span className="text-[#00ff41]">{profileUser?.followers?.length || 0}</span> Followers
                 </span>
                 <span className="w-1 h-1 bg-zinc-700 rounded-full" />
@@ -327,26 +265,38 @@ export default function Profile() {
                       <ArrowRight size={14} />
                       Share
                     </button>
-                    <button onClick={() => navigate('/messages')} className="px-4 py-2.5 bg-white/5 text-white rounded-xl font-black uppercase tracking-wider text-[11px] hover:bg-white/10 transition-all backdrop-blur-md border border-white/10 flex items-center gap-2">
-                      <MessageCircle size={14} />
-                      Messages
+                    <button 
+                      onClick={() => setActiveTab('overview')}
+                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'overview' ? 'bg-[#00ff41] text-black border-[#00ff41] shadow-[0_0_15px_rgba(0,255,65,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+                    >
+                      <LayoutGrid size={14} />
+                      Overview
                     </button>
                     <button 
-                      onClick={() => setShowPostForm(!showPostForm)}
-                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${showPostForm ? 'bg-[#00ff41] text-black border-[#00ff41]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+                      onClick={() => setActiveTab('posts')}
+                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'posts' ? 'bg-[#00ff41] text-black border-[#00ff41] shadow-[0_0_15px_rgba(0,255,65,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
                     >
                       <Plus size={14} />
                       Post
                     </button>
-                    <button className="px-4 py-2.5 bg-white/5 text-white rounded-xl font-black uppercase tracking-wider text-[11px] hover:bg-white/10 transition-all backdrop-blur-md border border-white/10 flex items-center gap-2">
+                    <button 
+                      onClick={() => setActiveTab('stories')}
+                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'stories' ? 'bg-[#00ff41] text-black border-[#00ff41] shadow-[0_0_15px_rgba(0,255,65,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+                    >
                       <Camera size={14} />
                       Stories
                     </button>
-                    <button className="px-4 py-2.5 bg-white/5 text-white rounded-xl font-black uppercase tracking-wider text-[11px] hover:bg-white/10 transition-all backdrop-blur-md border border-white/10 flex items-center gap-2">
+                    <button 
+                      onClick={() => setActiveTab('activity')}
+                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'activity' ? 'bg-[#00ff41] text-black border-[#00ff41] shadow-[0_0_15px_rgba(0,255,65,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+                    >
                       <Activity size={14} />
                       Activity
                     </button>
-                    <button className="px-4 py-2.5 bg-white/5 text-white rounded-xl font-black uppercase tracking-wider text-[11px] hover:bg-white/10 transition-all backdrop-blur-md border border-white/10 flex items-center gap-2">
+                    <button 
+                      onClick={() => setActiveTab('bookings')}
+                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'bookings' ? 'bg-[#00ff41] text-black border-[#00ff41] shadow-[0_0_15px_rgba(0,255,65,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+                    >
                       <Calendar size={14} />
                       Bookings
                     </button>
@@ -378,134 +328,206 @@ export default function Profile() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 mt-20">
-        {/* Tab Navigation */}
-        <div className="flex items-center gap-8 border-b border-white/10 mb-8 overflow-x-auto no-scrollbar">
-          {[
-            { id: 'overview', label: 'Overview', icon: LayoutGrid },
-            { id: 'posts', label: 'Posts', count: userPosts.length, icon: MessageSquare },
-            { id: 'network', label: 'Network', icon: Users },
-            { id: 'bookings', label: 'Bookings', icon: Calendar },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`pb-4 px-2 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative whitespace-nowrap ${activeTab === tab.id ? 'text-[#00ff41]' : 'text-gray-500 hover:text-white'}`}
-            >
-              <tab.icon size={14} />
-              {tab.label}
-              {tab.count !== undefined && (
-                <span className={`px-1.5 py-0.5 rounded-full text-[8px] ${activeTab === tab.id ? 'bg-[#00ff41] text-black' : 'bg-white/5 text-gray-500'}`}>
-                  {tab.count}
-                </span>
-              )}
-              {activeTab === tab.id && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00ff41] shadow-[0_0_10px_rgba(0,255,65,0.5)]" />
-              )}
-            </button>
-          ))}
+        <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl border border-white/10 mb-8 overflow-hidden">
+          <div className="flex flex-wrap md:flex-nowrap divide-x divide-white/10">
+            {[
+              { label: "Matches Played", value: profileUser?.stats?.cricket?.matches || "120", icon: Calendar },
+              { label: "Wins", value: "89", icon: Trophy },
+              { label: "Goals", value: profileUser?.stats?.cricket?.runs || "67", icon: Target },
+              { label: "Assists", value: "45", icon: Activity },
+              { label: "Accuracy", value: "92%", icon: ShieldCheck },
+              { label: "MVP Awards", value: "14", icon: Award },
+            ].map((stat, idx, arr) => (
+              <QuickStatCard key={idx} {...stat} showDivider={idx < arr.length - 1} />
+            ))}
+          </div>
         </div>
 
-        {showPostForm && (
-          <div className="bg-gradient-to-br from-white/10 to-white/[0.02] backdrop-blur-md rounded-2xl border border-[#00ff41]/20 mb-8 overflow-hidden animate-in slide-in-from-top duration-500">
-            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+        {activeTab === 'posts' && (
+          <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
                 <Plus className="w-5 h-5 text-[#00ff41]" />
-                Share Your Update
+                User Posts
               </h2>
-              <button 
-                onClick={() => setShowPostForm(false)}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <X size={20} />
-              </button>
+              {isOwnProfile && (
+                <button className="px-4 py-2 bg-[#00ff41]/10 text-[#00ff41] rounded-lg border border-[#00ff41]/20 text-[10px] font-black uppercase tracking-widest hover:bg-[#00ff41]/20 transition-all">
+                  Create New Post
+                </button>
+              )}
             </div>
-            <div className="p-6 space-y-4">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center shrink-0">
-                  {profileUser?.profilePicture ? (
-                    <img src={profileUser.profilePicture} alt="" className="w-full h-full rounded-xl object-cover" />
-                  ) : (
-                    <User className="w-6 h-6 text-[#00ff41]" />
-                  )}
-                </div>
-                <div className="flex-1 space-y-3">
-                  <input 
-                    type="text"
-                    value={newPost.title}
-                    onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-                    placeholder="Headline (Optional)"
-                    className="w-full bg-white/5 border border-white/5 focus:border-[#00ff41]/30 rounded-lg px-4 py-2 text-white text-xs outline-none transition-all"
-                  />
-                  <textarea 
-                    value={newPost.content}
-                    onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                    placeholder="What's happening on the field?"
-                    className="w-full bg-black/40 border border-white/5 focus:border-[#00ff41]/50 rounded-xl p-4 text-white text-sm outline-none transition-all resize-none min-h-[120px]"
-                  />
-                  {postImagePreview && (
-                    <div className="relative w-full max-h-60 rounded-xl overflow-hidden border border-white/10">
-                      <img src={postImagePreview} alt="Preview" className="w-full h-full object-cover" />
-                      <button 
-                        onClick={() => { setPostImagePreview(null); setNewPost({ ...newPost, image: null }); }}
-                        className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black transition-all"
-                      >
-                        <X size={14} />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { title: 'Victory at the Arena', desc: 'Incredible match today! The team spirit was at an all-time high.', img: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2070', likes: 24, comments: 5, date: '2h ago' },
+                { title: 'Training Sessions', desc: 'Focusing on my agility and speed today. Getting ready.', img: 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?q=80&w=2070', likes: 18, comments: 2, date: '1d ago' },
+                { title: 'New Gear!', desc: 'Finally got the new Predator boots. The grip is insane.', img: 'https://images.unsplash.com/photo-1431324155629-1a6eda1eed2d?q=80&w=2070', likes: 42, comments: 12, date: '3d ago' },
+                { title: 'Game Day', desc: 'Pre-match ritual. feeling focused and ready to win.', img: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=2070', likes: 56, comments: 8, date: '4d ago' },
+              ].map((post, idx) => (
+                <div key={idx} className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden hover:border-[#00ff41]/30 transition-all group">
+                  <div className="h-40 relative overflow-hidden">
+                    <img src={post.img} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <div className="absolute top-3 right-3 px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded-md text-[8px] font-black text-white uppercase tracking-widest border border-white/10">
+                      Post
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <img src={profileUser?.profilePicture} className="w-5 h-5 rounded-full border border-[#00ff41]/30" />
+                      <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tight truncate flex-1">{profileUser?.name}</span>
+                      <span className="text-[8px] text-gray-600 font-bold">{post.date}</span>
+                    </div>
+                    <h3 className="text-[11px] font-black text-white mb-1 uppercase tracking-tight truncate" style={HEADING_STYLE}>{post.title}</h3>
+                    <p className="text-[10px] text-gray-500 mb-3 line-clamp-2 leading-relaxed">{post.desc}</p>
+                    <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                      <div className="flex items-center gap-3">
+                        <button className="flex items-center gap-1 text-gray-500 hover:text-[#00ff41] transition-colors">
+                          <Heart size={12} />
+                          <span className="text-[9px] font-bold">{post.likes}</span>
+                        </button>
+                        <button className="flex items-center gap-1 text-gray-500 hover:text-[#00ff41] transition-colors">
+                          <MessageSquare size={12} />
+                          <span className="text-[9px] font-bold">{post.comments}</span>
+                        </button>
+                      </div>
+                      <button className="text-gray-500 hover:text-white transition-colors">
+                        <ArrowRight size={12} />
                       </button>
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center justify-between pt-2">
-                <div className="flex items-center gap-2">
-                  <input 
-                    type="file" 
-                    id="post-image" 
-                    hidden 
-                    accept="image/*"
-                    onChange={handlePostImageChange} 
-                  />
-                  <label 
-                    htmlFor="post-image"
-                    className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 text-gray-400 hover:text-[#00ff41] transition-all flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer"
-                  >
-                    <ImageIcon size={16} />
-                    {newPost.image ? 'Change Photo' : 'Add Photo'}
-                  </label>
-                  <button className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 text-gray-400 hover:text-[#00ff41] transition-all flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
-                    <MapPin size={16} />
-                    Location
-                  </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'stories' && (
+          <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                <Camera className="w-5 h-5 text-[#00ff41]" />
+                Recent Stories
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {[
+                { title: 'Morning Grind', time: '2h ago', img: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=2070' },
+                { title: 'Training Day', time: '5h ago', img: 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?q=80&w=2070' },
+                { title: 'Game Ready', time: '12h ago', img: 'https://images.unsplash.com/photo-1431324155629-1a6eda1eed2d?q=80&w=2070' },
+              ].map((story, idx) => (
+                <div key={idx} className="aspect-[9/16] relative rounded-2xl overflow-hidden border border-white/10 group cursor-pointer hover:border-[#00ff41]/50 transition-all">
+                  <img src={story.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
+                  <div className="absolute bottom-3 left-3">
+                    <p className="text-[10px] font-black text-white uppercase tracking-tight">{story.title}</p>
+                    <p className="text-[8px] font-bold text-[#00ff41] uppercase tracking-widest">{story.time}</p>
+                  </div>
                 </div>
-                <button 
-                  onClick={handleCreatePost}
-                  disabled={isSubmittingPost || !newPost.content.trim()}
-                  className="px-8 py-2.5 bg-[#00ff41] text-black rounded-xl font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(0,255,65,0.2)] flex items-center gap-2 disabled:opacity-50 disabled:hover:scale-100"
-                >
-                  {isSubmittingPost ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} strokeWidth={3} />}
-                  {isSubmittingPost ? 'Sharing...' : 'Post Update'}
-                </button>
-              </div>
+              ))}
+              {isOwnProfile && (
+                <div className="aspect-[9/16] relative rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-3 group cursor-pointer hover:border-[#00ff41]/30 transition-all bg-white/5">
+                  <div className="w-10 h-10 rounded-full bg-[#00ff41]/10 flex items-center justify-center text-[#00ff41] group-hover:scale-110 transition-transform">
+                    <Plus size={20} />
+                  </div>
+                  <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Add Story</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'activity' && (
+          <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+            <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+              <Activity className="w-5 h-5 text-[#00ff41]" />
+              Detailed Activity Feed
+            </h2>
+            <div className="space-y-4 max-w-4xl">
+              {[
+                { icon: Trophy, title: 'Tournament Victory', desc: 'Won the Elite Champions Trophy with Manchester United', time: 'Yesterday' },
+                { icon: Star, title: 'High Performance', desc: 'Achieved 95% passing accuracy in the last match', time: '2 days ago' },
+                { icon: MessageSquare, title: 'New Review', desc: 'Received a 5-star review for sportsmanship', time: '3 days ago' },
+                { icon: Users, title: 'Team Collaboration', desc: 'Joined a new training session with Elite Athletes', time: '1 week ago' },
+              ].map((activity, index) => (
+                <div key={index} className="flex items-start gap-4 p-5 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-[#00ff41]/20 transition-all group">
+                  <div className="w-12 h-12 rounded-xl bg-[#00ff41]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                    <activity.icon className="w-5 h-5 text-[#00ff41]" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="text-white font-black text-sm uppercase tracking-tight" style={HEADING_STYLE}>{activity.title}</h3>
+                      <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">{activity.time}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 leading-relaxed">{activity.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'bookings' && (
+          <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                <Calendar className="w-5 h-5 text-[#00ff41]" />
+                Your Bookings
+              </h2>
+            </div>
+            
+            <div className="space-y-4">
+              {bookings && bookings.length > 0 ? (
+                <TurfBookingHistory />
+              ) : (
+                <>
+                  {[
+                    { name: 'Elite Football Arena', date: '24 May 2024', time: '18:00 - 19:30', price: '₹1,200', status: 'Confirmed', sport: 'Football', img: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2070' },
+                    { name: 'Thunder Cricket Ground', date: '20 May 2024', time: '09:00 - 12:00', price: '₹2,500', status: 'Completed', sport: 'Cricket', img: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2070' },
+                  ].map((mock, idx) => (
+                    <div key={idx} className="bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row gap-6 hover:border-[#00ff41]/30 transition-all group overflow-hidden">
+                      <div className="w-full md:w-48 h-32 shrink-0 rounded-xl overflow-hidden bg-white/5">
+                        <img src={mock.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
+                      </div>
+                      <div className="flex-1 flex flex-col justify-between py-1">
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="px-1.5 py-0.5 bg-[#00ff41]/10 text-[#00ff41] rounded text-[8px] font-black uppercase tracking-widest border border-[#00ff41]/20">{mock.sport}</span>
+                            <span className="text-[8px] font-bold text-gray-600 uppercase tracking-widest">ID: #B{8402 + idx}</span>
+                          </div>
+                          <h3 className="text-lg font-black text-white uppercase tracking-tight mb-2" style={HEADING_STYLE}>{mock.name}</h3>
+                          <div className="flex flex-wrap items-center gap-4 text-[9px] font-black text-gray-500 uppercase tracking-widest">
+                            <div className="flex items-center gap-1.5"><Clock size={12} className="text-[#00ff41]" /> {mock.time}</div>
+                            <div className="flex items-center gap-1.5"><Calendar size={12} className="text-[#00ff41]" /> {mock.date}</div>
+                            <div className="flex items-center gap-1.5"><MapPin size={12} className="text-[#00ff41]" /> Manchester</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-4">
+                          <button className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-[8px] font-black uppercase tracking-widest hover:bg-[#00ff41] hover:text-black transition-all">View Pass</button>
+                          <button className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-[8px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">Invoice</button>
+                        </div>
+                      </div>
+                      <div className="flex flex-col justify-between items-end py-1 shrink-0 border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6">
+                        <div className="text-right">
+                          <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-1">Total Paid</p>
+                          <p className="text-xl font-black text-white">{mock.price}</p>
+                        </div>
+                        <div className={`px-3 py-1 rounded text-[8px] font-black uppercase tracking-widest border ${mock.status === 'Confirmed' ? 'text-[#00ff41] bg-[#00ff41]/10 border-[#00ff41]/20' : 'text-gray-400 bg-white/5 border-white/10'}`}>
+                          {mock.status}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="pt-4 text-center">
+                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Showing Sample Bookings UI</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
 
         {activeTab === 'overview' && (
-          <div className="animate-in fade-in duration-500">
-            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl border border-white/10 mb-8 overflow-hidden">
-              <div className="flex flex-wrap md:flex-nowrap divide-x divide-white/10">
-                {[
-                  { label: "Matches Played", value: profileUser?.stats?.cricket?.matches || "120", icon: Calendar },
-                  { label: "Wins", value: "89", icon: Trophy },
-                  { label: "Goals", value: profileUser?.stats?.cricket?.runs || "67", icon: Target },
-                  { label: "Assists", value: "45", icon: Activity },
-                  { label: "Accuracy", value: "92%", icon: ShieldCheck },
-                  { label: "MVP Awards", value: "14", icon: Award },
-                ].map((stat, idx, arr) => (
-                  <QuickStatCard key={idx} {...stat} showDivider={idx < arr.length - 1} />
-                ))}
-              </div>
-            </div>
-
+          <>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
               <div className="lg:col-span-2 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10">
                 <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
@@ -622,205 +644,180 @@ export default function Profile() {
                       <img src={cert.img} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                     </div>
                     <div className="p-4">
-                      <h4 className="text-white font-bold text-xs mb-1 truncate">{cert.title}</h4>
-                      <p className="text-[10px] text-[#00ff41] font-bold uppercase tracking-widest">{cert.org}</p>
-                      <p className="text-[8px] text-gray-500 mt-2 uppercase">{cert.date}</p>
+                      <h3 className="text-white font-bold text-xs mb-0.5 truncate" style={HEADING_STYLE}>{cert.title}</h3>
+                      <p className="text-[10px] text-gray-500 mb-0.5">{cert.org}</p>
+                      <p className="text-[9px] text-[#00ff41] font-bold uppercase tracking-widest">{cert.date}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10 mb-8">
+              <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                <Trophy className="w-5 h-5 text-[#00ff41]" />
+                Achievements
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <AchievementCard icon={Crown} title="National Champion" rarity="platinum" year="2024" />
+                <AchievementCard icon={Trophy} title="MVP Winner" rarity="gold" year="2024" />
+                <AchievementCard icon={Award} title="Best Striker" rarity="gold" year="2023" />
+                <AchievementCard icon={Star} title="Golden Boot" rarity="gold" year="2023" />
+              </div>
+            </div>
+
+            <div className="space-y-6 mb-8">
+              <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                <BarChart3 className="w-5 h-5 text-[#00ff41]" />
+                Career Summary
+              </h2>
+              
+              <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10 mb-6">
+                <h3 className="text-xs font-black text-white mb-4 uppercase tracking-widest" style={HEADING_STYLE}>Career Statistics</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {[
+                    { icon: Calendar, label: 'Years Active', value: '12', color: '#00ff41' },
+                    { icon: Target, label: 'Total Matches', value: '287', color: '#00ff41' },
+                    { icon: Building2, label: 'Total Clubs', value: '4', color: '#00ff41' },
+                    { icon: Zap, label: 'Total Goals', value: '145', color: '#00ff41' },
+                    { icon: Users, label: 'Assists', value: '89', color: '#00ff41' },
+                    { icon: Award, label: 'Tournaments', value: '18', color: '#00ff41' },
+                    { icon: Medal, label: 'MOTM Awards', value: '34', color: '#00ff41' },
+                    { icon: AlertTriangle, label: 'Red Cards', value: '2', color: '#ff4444' },
+                    { icon: AlertTriangle, label: 'Yellow Cards', value: '23', color: '#ffaa00' },
+                    { icon: BarChart3, label: 'Win Ratio', value: '69%', color: '#00ff41' },
+                    { icon: Target, label: 'Pass Accuracy', value: '87%', color: '#00ff41' },
+                    { icon: BarChart3, label: 'Season Goals', value: '28', color: '#00ff41' },
+                  ].map((stat, idx) => (
+                    <div key={idx} className="bg-black/40 rounded-xl p-4 border border-white/5 hover:border-[#00ff41]/30 transition-all group">
+                      <div className="w-9 h-9 rounded-lg bg-[#00ff41]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                        <stat.icon className="w-4 h-4 text-[#00ff41]" />
+                      </div>
+                      <p className="text-xl font-black mb-0.5" style={{ color: stat.color }}>{stat.value}</p>
+                      <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+                  <h3 className="text-xs font-black text-white mb-4 flex items-center gap-2 uppercase tracking-widest" style={HEADING_STYLE}>
+                    <Building2 className="w-4 h-4 text-[#00ff41]" />
+                    Previous Clubs
+                  </h3>
+                  <div className="space-y-2">
+                    {[
+                      { name: 'Manchester United', years: '2022-Present', logo: '🔴' },
+                      { name: 'Chelsea FC', years: '2019-2022', logo: '🔵' },
+                      { name: 'Liverpool FC', years: '2016-2019', logo: '🔴' },
+                      { name: 'Arsenal Youth', years: '2012-2016', logo: '🔴' },
+                    ].map((club, idx) => (
+                      <div key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-black/40 border border-white/5 hover:border-[#00ff41]/30 transition-all">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#00ff41]/10 to-transparent flex items-center justify-center text-lg border border-white/5">
+                          {club.logo}
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-bold text-white tracking-tight">{club.name}</p>
+                          <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">{club.years}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+                  <h3 className="text-xs font-black text-white mb-4 flex items-center gap-2 uppercase tracking-widest" style={HEADING_STYLE}>
+                    <Clock className="w-4 h-4 text-[#00ff41]" />
+                    Career Milestones
+                  </h3>
+                  <div className="space-y-2">
+                    {[
+                      { year: '2024', event: 'National Championship Winner' },
+                      { year: '2023', event: 'Golden Boot Award' },
+                      { year: '2022', event: 'Signed with Manchester United' },
+                      { year: '2021', event: '100th Career Goal' },
+                      { year: '2019', event: 'First International Cap' },
+                    ].map((m, idx) => (
+                      <div key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-black/40 border border-white/5">
+                        <div className="w-10 h-10 rounded-lg bg-[#00ff41]/10 flex items-center justify-center flex-shrink-0 border border-[#00ff41]/20">
+                          <span className="text-[#00ff41] font-black text-[10px]">{m.year}</span>
+                        </div>
+                        <p className="text-white font-bold text-[10px] tracking-tight">{m.event}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10">
                 <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                  <Trophy className="w-5 h-5 text-[#00ff41]" />
-                  Top Achievements
+                  <Calendar className="w-5 h-5 text-[#00ff41]" />
+                  Next Match
                 </h2>
-                <div className="grid grid-cols-2 gap-4">
-                  <AchievementCard icon={Award} title="Best Striker" rarity="gold" year="2023" />
-                  <AchievementCard icon={Star} title="Golden Boot" rarity="gold" year="2023" />
-                </div>
-              </div>
-              <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-                <h3 className="text-xs font-black text-white mb-4 flex items-center gap-2 uppercase tracking-widest" style={HEADING_STYLE}>
-                  <Clock className="w-4 h-4 text-[#00ff41]" />
-                  Career Milestones
-                </h3>
-                <div className="space-y-2">
-                  {[
-                    { year: '2024', event: 'National Championship Winner' },
-                    { year: '2023', event: 'Golden Boot Award' },
-                    { year: '2022', event: 'Signed with Manchester United' },
-                    { year: '2021', event: '100th Career Goal' },
-                    { year: '2019', event: 'First International Cap' },
-                  ].map((m, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-black/40 border border-white/5">
-                      <div className="w-10 h-10 rounded-lg bg-[#00ff41]/10 flex items-center justify-center flex-shrink-0 border border-[#00ff41]/20">
-                        <span className="text-[#00ff41] font-black text-[10px]">{m.year}</span>
-                      </div>
-                      <p className="text-white font-bold text-[10px] tracking-tight">{m.event}</p>
+                <div className="bg-black/40 rounded-xl p-6 border border-white/5">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="text-center space-y-1">
+                      <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center text-3xl border border-red-500/30">🔴</div>
+                      <p className="text-[9px] font-black text-white uppercase">Man Utd</p>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'posts' && (
-          <div className="animate-in slide-in-from-bottom duration-500">
-            <div className="space-y-6 mb-8">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                  <LayoutGrid className="w-5 h-5 text-[#00ff41]" />
-                  Shared Updates
-                </h2>
-                {isOwnProfile && (
-                  <button 
-                    onClick={() => setShowPostForm(true)}
-                    className="px-4 py-2 bg-[#00ff41]/10 text-[#00ff41] rounded-xl font-black uppercase tracking-widest text-[9px] border border-[#00ff41]/20 hover:bg-[#00ff41]/20 transition-all flex items-center gap-2"
-                  >
-                    <Plus size={14} />
-                    New Post
+                    <div className="text-center">
+                      <p className="text-3xl font-black text-[#00ff41] tracking-tighter mb-0.5 italic">VS</p>
+                      <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Premier League</p>
+                    </div>
+                    <div className="text-center space-y-1">
+                      <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center text-3xl border border-blue-500/30">🔵</div>
+                      <p className="text-[9px] font-black text-white uppercase">Chelsea</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 mb-6">
+                    {Object.entries(timeLeft).map(([unit, val]) => (
+                      <div key={unit} className="bg-[#00ff41]/10 rounded-lg p-3 text-center border border-[#00ff41]/20">
+                        <p className="text-xl font-black text-[#00ff41] leading-none mb-0.5">{val}</p>
+                        <p className="text-[7px] font-black text-gray-500 uppercase tracking-widest">{unit}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <button className="w-full bg-[#00ff41] text-black py-3 rounded-xl font-black uppercase tracking-wider text-[10px] hover:scale-[1.02] transition-all shadow-[0_5px_15px_rgba(0,255,65,0.1)]">
+                    Watch Match Live
                   </button>
-                )}
+                </div>
               </div>
-              
-              {loadingPosts ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="h-72 rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
-                  ))}
-                </div>
-              ) : userPosts.length === 0 ? (
-                <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-24 border border-white/10 text-center">
-                  <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6 border border-white/10">
-                    <MessageSquare size={32} className="text-gray-700" />
-                  </div>
-                  <h3 className="text-white font-bold uppercase tracking-tight mb-2">No Posts Shared</h3>
-                  <p className="text-gray-500 text-xs uppercase tracking-widest max-w-xs mx-auto">Start sharing your sports journey with the community.</p>
-                  {isOwnProfile && (
-                    <button 
-                      onClick={() => setShowPostForm(true)}
-                      className="mt-8 px-8 py-3 bg-[#00ff41] text-black rounded-xl font-black uppercase tracking-wider text-[10px] hover:scale-105 transition-all shadow-lg shadow-[#00ff41]/20"
-                    >
-                      Create First Post
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {userPosts.map((post) => (
-                    <div key={post._id} className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden group hover:border-[#00ff41]/30 transition-all hover:shadow-[0_10px_30px_rgba(0,0,0,0.4)]">
-                      {(post.image || post.imageUrl) && (
-                        <div className="h-44 overflow-hidden relative">
-                          <img src={post.image || post.imageUrl} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                        </div>
-                      )}
-                      <div className="p-5">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-[#00ff41]/10 flex items-center justify-center border border-[#00ff41]/20">
-                              <User size={12} className="text-[#00ff41]" />
-                            </div>
-                            <div>
-                              <p className="text-[9px] font-black text-white uppercase tracking-wider">{profileUser?.name}</p>
-                              <p className="text-[7px] text-gray-500 font-bold uppercase tracking-widest">{new Date(post.createdAt).toLocaleDateString()}</p>
-                            </div>
-                          </div>
-                        </div>
-                        {post.title && <h3 className="text-white font-bold text-sm mb-2 uppercase tracking-tight truncate" style={HEADING_STYLE}>{post.title}</h3>}
-                        <p className="text-gray-400 text-[11px] leading-relaxed line-clamp-3 mb-4 h-[4.5em]">{post.content}</p>
-                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1.5 text-gray-500 group/item cursor-pointer hover:text-[#00ff41] transition-colors">
-                              <Heart size={14} className="group-hover/item:fill-[#00ff41]" />
-                              <span className="text-[10px] font-black">{post.likes?.length || 0}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-gray-500 group/item cursor-pointer hover:text-blue-400 transition-colors">
-                              <MessageCircle size={14} />
-                              <span className="text-[10px] font-black">{post.comments?.length || 0}</span>
-                            </div>
-                          </div>
-                        </div>
+
+              <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+                <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                  <UserPlus className="w-5 h-5 text-[#00ff41]" />
+                  Invite Players
+                </h2>
+                <div className="space-y-3">
+                  {[
+                    { name: 'James Rodriguez', pos: 'Midfielder', rat: 92, img: 'https://images.unsplash.com/photo-1663576748377-cafb47103042?q=80&w=2070' },
+                    { name: 'David Silva', pos: 'Forward', rat: 89, img: 'https://images.unsplash.com/photo-1663576748367-4ff6bec25639?q=80&w=2070' },
+                    { name: 'Chris Johnson', pos: 'Defender', rat: 85, img: 'https://images.unsplash.com/photo-1776416817016-f4b64cc132b1?q=80&w=2070' },
+                  ].map((player, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-3.5 bg-black/40 rounded-xl border border-white/10 hover:border-[#00ff41]/30 transition-all group">
+                      <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
+                        <img src={player.img} alt="" className="w-full h-full object-cover" />
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-white font-bold tracking-tight truncate text-[11px]" style={HEADING_STYLE}>{player.name}</h3>
+                        <p className="text-[9px] text-gray-500 font-medium">{player.pos}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#00ff41]/10 rounded-full border border-[#00ff41]/20">
+                        <Star size={10} className="text-[#00ff41]" fill="currentColor" />
+                        <span className="text-[#00ff41] font-black text-[9px]">{player.rat}</span>
+                      </div>
+                      <button className="p-2 bg-[#00ff41]/10 text-[#00ff41] rounded-lg hover:bg-[#00ff41]/20 transition-all border border-[#00ff41]/20">
+                        <UserPlus size={14} />
+                      </button>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {(activeTab === 'overview' || activeTab === 'bookings') && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
-            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-              <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                <Calendar className="w-5 h-5 text-[#00ff41]" />
-                Next Match
-              </h2>
-              <div className="bg-black/40 rounded-xl p-6 border border-white/5">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="text-center space-y-1">
-                    <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center text-3xl border border-red-500/30">🔴</div>
-                    <p className="text-[9px] font-black text-white uppercase">Man Utd</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-3xl font-black text-[#00ff41] tracking-tighter mb-0.5 italic">VS</p>
-                    <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Premier League</p>
-                  </div>
-                  <div className="text-center space-y-1">
-                    <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center text-3xl border border-blue-500/30">🔵</div>
-                    <p className="text-[9px] font-black text-white uppercase">Chelsea</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-4 gap-2 mb-6">
-                  {Object.entries(timeLeft).map(([unit, val]) => (
-                    <div key={unit} className="bg-[#00ff41]/10 rounded-lg p-3 text-center border border-[#00ff41]/20">
-                      <p className="text-xl font-black text-[#00ff41] leading-none mb-0.5">{val}</p>
-                      <p className="text-[7px] font-black text-gray-500 uppercase tracking-widest">{unit}</p>
-                    </div>
-                  ))}
-                </div>
-                <button className="w-full bg-[#00ff41] text-black py-3 rounded-xl font-black uppercase tracking-wider text-[10px] hover:scale-[1.02] transition-all shadow-[0_5px_15px_rgba(0,255,65,0.1)]">
-                  Watch Match Live
-                </button>
               </div>
             </div>
-
-            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-              <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                <UserPlus className="w-5 h-5 text-[#00ff41]" />
-                Invite Players
-              </h2>
-              <div className="space-y-3">
-                {[
-                  { name: 'James Rodriguez', pos: 'Midfielder', rat: 92, img: 'https://images.unsplash.com/photo-1663576748377-cafb47103042?q=80&w=2070' },
-                  { name: 'David Silva', pos: 'Forward', rat: 89, img: 'https://images.unsplash.com/photo-1663576748367-4ff6bec25639?q=80&w=2070' },
-                  { name: 'Chris Johnson', pos: 'Defender', rat: 85, img: 'https://images.unsplash.com/photo-1776416817016-f4b64cc132b1?q=80&w=2070' },
-                ].map((player, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-3.5 bg-black/40 rounded-xl border border-white/10 hover:border-[#00ff41]/30 transition-all group">
-                    <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
-                      <img src={player.img} alt="" className="w-full h-full object-cover" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-white font-bold tracking-tight truncate text-[11px]" style={HEADING_STYLE}>{player.name}</h3>
-                      <p className="text-[9px] text-gray-500 font-medium">{player.pos}</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#00ff41]/10 rounded-full border border-[#00ff41]/20">
-                      <Star size={10} className="text-[#00ff41]" fill="currentColor" />
-                      <span className="text-[#00ff41] font-black text-[9px]">{player.rat}</span>
-                    </div>
-                    <button className="p-2 bg-[#00ff41]/10 text-[#00ff41] rounded-lg hover:bg-[#00ff41]/20 transition-all border border-[#00ff41]/20">
-                      <UserPlus size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          </>
         )}
       </div>
 
