@@ -127,16 +127,15 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("profilePicture", file);
+    const imageFormData = new FormData();
+    imageFormData.append("profilePicture", file);
 
     setUploading(true);
     try {
-      const response = await axiosInstance.post("/api/user/auth/profile-picture", formData, {
+      const response = await axiosInstance.post("/api/user/auth/profile-picture", imageFormData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
-      
-      dispatch(updateUser({ profilePicture: response.data.profilePicture }));
+      dispatch(updateUser(response.data.user));
       toast.success("Profile picture updated!");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to upload image");

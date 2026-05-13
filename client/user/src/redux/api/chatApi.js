@@ -52,12 +52,18 @@ export const chatApi = baseApi.injectEndpoints({
         method: "PUT",
       }),
     }),
-    renameGroup: builder.mutation({
-      query: (data) => ({
-        url: "/api/chat/rename",
-        method: "PUT",
-        body: data,
-      }),
+    updateGroup: builder.mutation({
+      async queryFn(data, _queryApi, _extraOptions, fetchWithBQ) {
+        // If data is FormData (image upload), pass it directly.
+        // fetchBaseQuery auto-detects FormData and skips JSON serialization
+        // and lets the browser set the correct multipart/form-data Content-Type.
+        const result = await fetchWithBQ({
+          url: "/api/chat/group/update",
+          method: "PUT",
+          body: data,
+        });
+        return result.data ? { data: result.data } : { error: result.error };
+      },
       invalidatesTags: ["Chat"],
     }),
     addToGroup: builder.mutation({
@@ -76,6 +82,14 @@ export const chatApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Chat"],
     }),
+    togglePinChat: builder.mutation({
+      query: (data) => ({
+        url: "/api/chat/pin",
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Chat"],
+    }),
     deleteMessages: builder.mutation({
       query: (data) => ({
         url: "/api/chat/message/delete",
@@ -84,12 +98,36 @@ export const chatApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, { chatId }) => [{ type: "Message", id: chatId }, "Chat"],
     }),
+    forwardMessage: builder.mutation({
+      query: (data) => ({
+        url: "/api/chat/message/forward",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Chat"],
+    }),
+    broadcastMessage: builder.mutation({
+      query: (data) => ({
+        url: "/api/chat/message/broadcast",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Chat"],
+    }),
     deleteChat: builder.mutation({
       query: (chatId) => ({
         url: `/api/chat/${chatId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Chat"],
+    }),
+    clearChat: builder.mutation({
+      query: (chatId) => ({
+        url: "/api/chat/message/clear",
+        method: "POST",
+        body: { chatId },
+      }),
+      invalidatesTags: (result, error, chatId) => [{ type: "Message", id: chatId }, "Chat"],
     }),
     addGroupsToCommunity: builder.mutation({
       query: (data) => ({
@@ -98,6 +136,26 @@ export const chatApi = baseApi.injectEndpoints({
         body: data,
       }),
       invalidatesTags: ["Chat"],
+    }),
+    makeGroupAdmin: builder.mutation({
+      query: (data) => ({
+        url: "/api/chat/groupadmin",
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Chat"],
+    }),
+    dismissGroupAdmin: builder.mutation({
+      query: (data) => ({
+        url: "/api/chat/dismissadmin",
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Chat"],
+    }),
+    getChatMedia: builder.query({
+      query: (chatId) => `/api/chat/message/${chatId}/media`,
+      providesTags: ["Message"],
     }),
   }),
 });
@@ -111,10 +169,17 @@ export const {
   useRespondToInvitationMutation,
   useGetFollowersFollowingQuery,
   useMarkMessagesReadMutation,
-  useRenameGroupMutation,
+  useUpdateGroupMutation,
   useAddToGroupMutation,
   useRemoveFromGroupMutation,
   useDeleteMessagesMutation,
+  useForwardMessageMutation,
+  useBroadcastMessageMutation,
   useDeleteChatMutation,
-  useAddGroupsToCommunityMutation
+  useClearChatMutation,
+  useAddGroupsToCommunityMutation,
+  useMakeGroupAdminMutation,
+  useDismissGroupAdminMutation,
+  useGetChatMediaQuery,
+  useTogglePinChatMutation
 } = chatApi;

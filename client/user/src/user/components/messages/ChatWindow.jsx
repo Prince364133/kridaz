@@ -1,17 +1,21 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useGetMessagesQuery, useSendMessageMutation, useMarkMessagesReadMutation, useRemoveFromGroupMutation, useDeleteMessagesMutation, useCreateGroupChatMutation, useDeleteChatMutation, useGetChatsQuery } from '../../../redux/api/chatApi';
+import { useGetMessagesQuery, useSendMessageMutation, useMarkMessagesReadMutation, useRemoveFromGroupMutation, useDeleteMessagesMutation, useCreateGroupChatMutation, useDeleteChatMutation, useGetChatsQuery, useClearChatMutation } from '../../../redux/api/chatApi';
 import { useSocket } from '../../../context/SocketContext';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import GroupInfoModal from './GroupInfoModal';
 import { Plus, Users, MessageSquare, ChevronLeft, Search, MoreVertical, Send, CheckCheck, Trash2, Globe } from 'lucide-react';
 import AddGroupToCommunityModal from './AddGroupToCommunityModal';
+import ConfirmModal from '../modals/ConfirmModal';
+import ForwardModal from '../modals/ForwardModal';
 
 const ChatWindow = ({ chat, onBack, onSelectChat }) => {
   const { user } = useSelector((state) => state.auth);
   const { socket, isUserOnline, getLastSeen } = useSocket();
   const navigate = useNavigate();
   const [message, setMessage] = useState('');
+  const [messageDropdownId, setMessageDropdownId] = useState(null);
+  
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
@@ -23,12 +27,35 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
   const [selectedMessages, setSelectedMessages] = useState([]);
   const [showDeleteOptions, setShowDeleteOptions] = useState(false);
   const [isAddGroupToCommunityOpen, setIsAddGroupToCommunityOpen] = useState(false);
+  
+  const [forwardModalConfig, setForwardModalConfig] = useState({
+    isOpen: false,
+    messageId: null,
+  });
+
+  const [confirmModalConfig, setConfirmModalConfig] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
+
+  const openConfirmModal = (title, message, onConfirm) => {
+    setConfirmModalConfig({
+      isOpen: true,
+      title,
+      message,
+      onConfirm,
+    });
+  };
+
   const scrollRef = useRef();
   const typingTimeoutRef = useRef(null);
   const dropdownRef = useRef(null);
 
   const [removeFromGroup] = useRemoveFromGroupMutation();
   const [deleteMessages] = useDeleteMessagesMutation();
+  const [clearChat] = useClearChatMutation();
   const [deleteChatMutation] = useDeleteChatMutation();
   const { data: chatData } = useGetChatsQuery();
 
@@ -54,6 +81,14 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [chat]);
+
+  useEffect(() => {
+    const handleFocusSearch = () => {
+      setIsSearchOpen(true);
+    };
+    window.addEventListener('focus-chat-search', handleFocusSearch);
+    return () => window.removeEventListener('focus-chat-search', handleFocusSearch);
+  }, []);
 
   // Notify server we've read messages when chat opens or new messages arrive
   useEffect(() => {
@@ -110,12 +145,16 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
       socket.on('message recieved', handleNewMessage);
       socket.on('typing', handleTyping);
       socket.on('stop typing', handleStopTyping);
+      socket.on('message deleted', ({ messageIds }) => {
+        setMessages(prev => prev.filter(m => !messageIds.includes(m._id)));
+      });
       socket.on('messages read', handleMessagesRead);
 
       return () => {
         socket.off('message recieved', handleNewMessage);
         socket.off('typing', handleTyping);
         socket.off('stop typing', handleStopTyping);
+        socket.off('message deleted');
         socket.off('messages read', handleMessagesRead);
       };
     }
@@ -305,9 +344,13 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
         >
           <div className="w-10 h-10 rounded-full border border-white/20 overflow-hidden bg-[#84CC16]/10 flex items-center justify-center">
             {chat.isGroupChat ? (
-              <svg className="w-5 h-5 text-[#84CC16]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+              chat.groupImage ? (
+                <img src={chat.groupImage} className="w-full h-full object-cover" alt="" />
+              ) : (
+                <svg className="w-5 h-5 text-[#84CC16]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              )
             ) : (
               <>
                 {imageUrl ? (
@@ -394,133 +437,213 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
             </button>
 
             {/* Dropdown Menu */}
-            {isDropdownOpen && (
-              <div className="absolute top-12 right-0 w-48 bg-[#232323] border border-white/10 rounded-lg shadow-xl py-2 z-50 animate-fade-in">
-                <button 
-                  onClick={() => {
-                    setIsDropdownOpen(false);
-                    if (chat.isGroupChat) setIsGroupInfoOpen(true);
-                    else if (otherUserObj?._id) navigate(`/profile/${otherUserObj._id}`);
-                  }}
-                  className="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/[0.05] hover:text-white transition-colors"
-                >
-                  {chat.isGroupChat ? 'Group info' : 'Contact info'}
-                </button>
-                <button 
-                  onClick={() => {
-                    setIsDropdownOpen(false);
-                    setIsSearchOpen(true);
-                  }}
-                  className="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/[0.05] hover:text-white transition-colors"
-                >
-                  Search
-                </button>
-                <button 
-                  onClick={() => {
-                    setIsDropdownOpen(false);
-                    setIsSelectionMode(true);
-                    setSelectedMessages([]);
-                  }}
-                  className="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/[0.05] hover:text-white transition-colors"
-                >
-                  Select messages
-                </button>
-                {chat.isCommunity && (
+            {isDropdownOpen && (() => {
+              const myId = user?._id || user?.id || user?.userId;
+              const isAdmin = myId && chat.groupAdmins?.some(admin => {
+                const adminUserId = (admin.user?._id || admin.user)?.toString();
+                return String(myId) === String(adminUserId);
+              });
+
+              return (
+                <div className="absolute top-12 right-0 w-48 bg-[#232323] border border-white/10 rounded-lg shadow-xl py-2 z-50 animate-fade-in">
+                  {/* Info */}
                   <button 
                     onClick={() => {
                       setIsDropdownOpen(false);
-                      setIsAddGroupToCommunityOpen(true);
+                      if (chat.isGroupChat) setIsGroupInfoOpen(true);
+                      else if (otherUserObj?._id) navigate(`/profile/${otherUserObj._id}`);
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-[#84CC16] hover:bg-white/[0.05] transition-colors"
+                    className="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/[0.05] hover:text-white transition-colors"
                   >
-                    Add group to community
+                    {chat.isGroupChat ? 'Group info' : 'Contact info'}
                   </button>
-                )}
-                <button 
-                  onClick={() => {
-                    setIsDropdownOpen(false);
-                    onBack();
-                  }}
-                  className="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/[0.05] hover:text-white transition-colors"
-                >
-                  Close chat
-                </button>
-                <button 
-                  onClick={() => {
-                    setIsDropdownOpen(false);
-                    alert("Clear chat functionality coming soon!");
-                  }}
-                  className="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/[0.05] hover:text-white transition-colors"
-                >
-                  Clear chat
-                </button>
-                {chat.isCommunity && (
-                  <>
+
+                  {/* Search */}
+                  <button 
+                    onClick={() => { setIsDropdownOpen(false); setIsSearchOpen(true); }}
+                    className="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/[0.05] hover:text-white transition-colors"
+                  >
+                    Search
+                  </button>
+
+                  {/* Select messages */}
+                  <button 
+                    onClick={() => { setIsDropdownOpen(false); setIsSelectionMode(true); setSelectedMessages([]); }}
+                    className="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/[0.05] hover:text-white transition-colors"
+                  >
+                    Select messages
+                  </button>
+
+                  {/* Add group to community (community only) */}
+                  {chat.isCommunity && (
                     <button 
-                      onClick={async () => {
-                        setIsDropdownOpen(false);
-                        if (window.confirm("Are you sure you want to exit this community? This will remove you from all community groups.")) {
+                      onClick={() => { setIsDropdownOpen(false); setIsAddGroupToCommunityOpen(true); }}
+                      className="w-full text-left px-4 py-2 text-sm text-[#84CC16] hover:bg-white/[0.05] transition-colors"
+                    >
+                      Add group to community
+                    </button>
+                  )}
+
+                  {/* Close chat */}
+                  <button 
+                    onClick={() => { setIsDropdownOpen(false); onBack(); }}
+                    className="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/[0.05] hover:text-white transition-colors"
+                  >
+                    Close chat
+                  </button>
+
+                  {/* Clear chat */}
+                  <button 
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      openConfirmModal(
+                        "Clear Chat",
+                        "Clear all messages? This only removes them for you.",
+                        async () => {
                           try {
-                            const myId = user?._id || user?.id || user?.userId;
-                            await removeFromGroup({ chatId: chat._id, userId: myId }).unwrap();
-                            onBack();
+                            await clearChat(chat._id).unwrap();
+                            setMessages([]);
                           } catch (err) {
-                            console.error("Failed to exit community", err);
+                            console.error("Failed to clear chat", err);
                           }
                         }
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/[0.05] transition-colors"
-                    >
-                      Exit community
-                    </button>
-                    {(() => {
-                      const myId = user?._id || user?.id || user?.userId;
-                      const adminId = chat.groupAdmin?.user?._id || chat.groupAdmin?.user || chat.groupAdmin;
-                      const isAdmin = myId && adminId && String(myId) === String(adminId);
-                      
-                      return isAdmin && (
-                        <button 
-                          onClick={async () => {
-                          setIsDropdownOpen(false);
-                          if (window.confirm("Are you sure you want to PERMANENTLY delete this community? All child groups and messages will be removed.")) {
+                      );
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/[0.05] hover:text-white transition-colors"
+                  >
+                    Clear chat
+                  </button>
+
+                  {/* Divider before destructive actions */}
+                  <div className="border-t border-white/5 my-1" />
+
+                  {/* --- 1-on-1 Chat: Delete --- */}
+                  {!chat.isGroupChat && (
+                    <button 
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        openConfirmModal(
+                          "Delete Chat",
+                          "Delete this entire conversation?",
+                          async () => {
                             try {
                               await deleteChatMutation(chat._id).unwrap();
                               onBack();
                             } catch (err) {
-                              console.error("Failed to delete community", err);
-                              alert("Failed to delete community: " + (err.data?.message || err.error));
+                              console.error("Failed to delete chat:", err);
+                              alert(err.data?.message || "Failed to delete chat");
                             }
                           }
+                        );
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                    >
+                      Delete chat
+                    </button>
+                  )}
+
+                  {/* --- Group (not community): Exit + Delete --- */}
+                  {chat.isGroupChat && !chat.isCommunity && (
+                    <>
+                      <button 
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          openConfirmModal(
+                            "Delete Group",
+                            "Are you sure you want to exit and permanently delete this group and all its messages?",
+                            async () => {
+                              try {
+                                await deleteChatMutation(chat._id).unwrap();
+                                onBack();
+                              } catch (err) {
+                                console.error("Failed to delete group:", err);
+                                alert(err.data?.message || "Failed to delete group");
+                              }
+                            }
+                          );
                         }}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 font-bold hover:bg-white/[0.05] transition-colors"
+                        className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
                       >
-                        Delete community
+                        Exit and delete group
                       </button>
-                      );
-                    })()}
-                  </>
-                )}
-                {chat.isGroupChat && !chat.isCommunity && (
-                  <button 
-                    onClick={async () => {
-                      setIsDropdownOpen(false);
-                      if (window.confirm("Are you sure you want to leave this group?")) {
-                        try {
-                          const myId = user?._id || user?.id || user?.userId;
-                          await removeFromGroup({ chatId: chat._id, userId: myId }).unwrap();
-                          onBack();
-                        } catch (err) {
-                          console.error("Failed to leave group", err);
-                        }
-                      }
-                    }}
-                    className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-white/[0.05] transition-colors"
-                  >
-                    Exit group
-                  </button>
-                )}
-              </div>
-            )}
+                      {isAdmin && (
+                        <button 
+                          onClick={() => {
+                            setIsDropdownOpen(false);
+                            openConfirmModal(
+                              "Delete Group",
+                              "Permanently delete this group and all messages for everyone?",
+                              async () => {
+                                try {
+                                  await deleteChatMutation(chat._id).unwrap();
+                                  onBack();
+                                } catch (err) {
+                                  console.error("Failed to delete group:", err);
+                                  alert(err.data?.message || "Failed to delete group");
+                                }
+                              }
+                            );
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-red-500 font-bold hover:bg-red-500/10 transition-colors"
+                        >
+                          Delete group
+                        </button>
+                      )}
+                    </>
+                  )}
+
+                  {/* --- Community: Exit + Delete --- */}
+                  {chat.isCommunity && (
+                    <>
+                      <button 
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          openConfirmModal(
+                            "Delete Community",
+                            "Are you sure you want to permanently delete this community? All child groups and messages will be wiped.",
+                            async () => {
+                              try {
+                                await deleteChatMutation(chat._id).unwrap();
+                                onBack();
+                              } catch (err) {
+                                console.error("Failed to delete community:", err);
+                                alert(err.data?.message || "Failed to delete community");
+                              }
+                            }
+                          );
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                      >
+                        Exit and delete community
+                      </button>
+                      {isAdmin && (
+                        <button 
+                          onClick={() => {
+                            setIsDropdownOpen(false);
+                            openConfirmModal(
+                              "Delete Community",
+                              "Permanently delete this community and ALL its groups and messages?",
+                              async () => {
+                                try {
+                                  await deleteChatMutation(chat._id).unwrap();
+                                  onBack();
+                                } catch (err) {
+                                  console.error("Failed to delete community:", err);
+                                  alert(err.data?.message || "Failed to delete community");
+                                }
+                              }
+                            );
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 font-bold hover:bg-red-500/10 transition-colors"
+                        >
+                          Delete community
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })()}
           </div>
       </div>
 
@@ -605,8 +728,11 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
                 const regularGroups = childGroups.filter(g => !g.isAnnouncementGroup && g.chatName !== "Announcements");
 
                 const myId = user?._id || user?.id || user?.userId;
-                const adminId = chat.groupAdmin?.user?._id || chat.groupAdmin?.user || chat.groupAdmin;
-                const isAdmin = myId && adminId && String(myId) === String(adminId);
+                const groupAdmins = chat.groupAdmins || [];
+                const isAdmin = myId && groupAdmins.some(admin => {
+                  const adminUserId = admin.user?._id || admin.user;
+                  return String(myId) === String(adminUserId);
+                });
                 const canMessage = !chat.adminOnlyMessages || isAdmin;
 
                 return (
@@ -756,13 +882,22 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
                 >
                   {/* Receiver Profile Picture */}
                   {!isMine && (
-                    <div className="w-8 h-8 shrink-0 mb-1">
+                    <div 
+                      className="w-8 h-8 shrink-0 mb-1 cursor-pointer hover:scale-105 active:scale-95 transition-all group/avatar"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (senderId) navigate(`/profile/${senderId}`);
+                      }}
+                    >
                       {!isSameDirection ? (
-                        <img 
-                          src={m.sender?.user?.profilePicture || m.sender?.user?.profileImage || `https://ui-avatars.com/api/?name=${senderName}&background=random`} 
-                          alt="" 
-                          className="w-full h-full rounded-full object-cover shadow-md"
-                        />
+                        <div className="relative w-full h-full">
+                          <img 
+                            src={m.sender?.user?.profilePicture || m.sender?.user?.profileImage || `https://ui-avatars.com/api/?name=${senderName}&background=random`} 
+                            alt="" 
+                            className="w-full h-full rounded-full object-cover shadow-md border border-white/5"
+                          />
+                          <div className="absolute inset-0 bg-[#84CC16]/0 group-hover/avatar:bg-[#84CC16]/10 rounded-full transition-colors" />
+                        </div>
                       ) : (
                         <div className="w-full h-full" />
                       )}
@@ -781,11 +916,81 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
                       )}
                       
                       {/* Message Bubble */}
-                      <div className={`relative px-3 py-1.5 shadow-md border bg-[#84CC16]/10 border-[#84CC16]/30 text-[#84CC16] rounded-[8px] ${
+                      <div className={`relative px-3 py-1.5 shadow-md border bg-[#84CC16]/10 border-[#84CC16]/30 text-[#84CC16] rounded-[8px] group/bubble ${
                         isMine 
                           ? (!isSameDirection ? 'rounded-tr-none' : '') 
                           : (!isSameDirection ? 'rounded-tl-none' : '')
                       }`}>
+                        {/* Hover Dropdown Button (WhatsApp Style) */}
+                        {!isSelectionMode && (
+                          <div className={`absolute top-1 right-1 opacity-0 group-hover/bubble:opacity-100 transition-opacity z-10`}>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setMessageDropdownId(messageDropdownId === m._id ? null : m._id);
+                              }}
+                              className="p-1 hover:bg-black/20 rounded text-[#84CC16]/40 hover:text-[#84CC16]"
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </button>
+                            
+                            {messageDropdownId === m._id && (
+                              <div className="absolute top-full right-0 mt-1 w-32 bg-[#232323] border border-white/10 rounded shadow-xl py-1 z-20 overflow-hidden">
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setMessageDropdownId(null);
+                                    setSelectedMessages([m._id]);
+                                    setShowDeleteOptions(true);
+                                  }}
+                                  className="w-full text-left px-3 py-1.5 text-[11px] text-white/80 hover:bg-[#84CC16] hover:text-black transition-colors"
+                                >
+                                  Delete
+                                </button>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setMessageDropdownId(null);
+                                    // Handle reply or other actions here
+                                  }}
+                                  className="w-full text-left px-3 py-1.5 text-[11px] text-white/80 hover:bg-white/[0.05] transition-colors border-b border-white/5"
+                                >
+                                  Reply
+                                </button>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setMessageDropdownId(null);
+                                    setForwardModalConfig({ isOpen: true, messageId: m._id });
+                                  }}
+                                  className="w-full text-left px-3 py-1.5 text-[11px] text-white/80 hover:bg-white/[0.05] transition-colors"
+                                >
+                                  Forward
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {m.isForwarded && (
+                          <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-[#84CC16]/60 mb-1">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                            Forwarded
+                          </div>
+                        )}
+                        {chat.isGroupChat && !isMine && !isSameDirection && (
+                          <p 
+                            className="text-[11px] font-black uppercase tracking-wider mb-0.5 opacity-60 cursor-pointer hover:text-[#84CC16] hover:opacity-100 transition-all"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (senderId) navigate(`/profile/${senderId}`);
+                            }}
+                          >
+                            {senderName}
+                          </p>
+                        )}
                         <p className="text-[14.2px] leading-[19px] break-words whitespace-pre-wrap">{m.content}</p>
                         <div className="flex items-center justify-end gap-1 mt-1 -mb-1 float-right ml-4 text-[#84CC16]/60">
                           <span className="text-[11px]">
@@ -846,13 +1051,22 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
       {!chat.isCommunity && (
         (() => {
           const myId = user?._id || user?.id || user?.userId;
-          const adminId = chat.groupAdmin?.user?._id || chat.groupAdmin?.user || chat.groupAdmin;
-          const isAdmin = myId && adminId && String(myId) === String(adminId);
+          const groupAdmins = chat.groupAdmins || [];
+          const isAdmin = myId && groupAdmins.some(admin => {
+            const adminUserId = admin.user?._id || admin.user;
+            return String(myId) === String(adminUserId);
+          });
           const canMessage = !chat.adminOnlyMessages || isAdmin;
 
           return canMessage ? (
             <form onSubmit={handleSendMessage} className="p-3 bg-black/60 border-t border-white/10 z-10 relative">
               <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-2xl px-4 py-1 focus-within:border-[#84CC16]/40 transition-all">
+                <button 
+                  type="button"
+                  className="p-2 text-white/40 hover:text-[#84CC16] transition-colors"
+                >
+                  <Plus size={20} />
+                </button>
                 <input
                   type="text"
                   value={message}
@@ -883,6 +1097,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
       {isGroupInfoOpen && (
         <GroupInfoModal 
+          key={chat?._id}
           isOpen={isGroupInfoOpen}
           onClose={() => setIsGroupInfoOpen(false)}
           chat={chat}
@@ -896,6 +1111,25 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
           communityId={chat._id}
         />
       )}
+
+      {/* Custom Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModalConfig.isOpen}
+        onClose={() => setConfirmModalConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModalConfig.onConfirm}
+        title={confirmModalConfig.title}
+        message={confirmModalConfig.message}
+        confirmText="Delete"
+        cancelText="Cancel"
+        isDestructive={true}
+      />
+
+      {/* Forward Modal */}
+      <ForwardModal
+        isOpen={forwardModalConfig.isOpen}
+        onClose={() => setForwardModalConfig({ isOpen: false, messageId: null })}
+        messageId={forwardModalConfig.messageId}
+      />
 
       {showDeleteOptions && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -911,6 +1145,12 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
                 onClick={async () => {
                   try {
                     await deleteMessages({ messageIds: selectedMessages, chatId: chat._id, deleteType: 'everyone' }).unwrap();
+                    // Emit socket event for everyone deletion
+                    if (socket) {
+                      socket.emit('delete message', { chatId: chat._id, messageIds: selectedMessages });
+                    }
+                    // Remove deleted messages from local state immediately
+                    setMessages(prev => prev.filter(m => !selectedMessages.includes(m._id)));
                     setShowDeleteOptions(false);
                     setIsSelectionMode(false);
                     setSelectedMessages([]);
@@ -927,6 +1167,8 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
                 onClick={async () => {
                   try {
                     await deleteMessages({ messageIds: selectedMessages, chatId: chat._id, deleteType: 'me' }).unwrap();
+                    // Remove from local state immediately
+                    setMessages(prev => prev.filter(m => !selectedMessages.includes(m._id)));
                     setShowDeleteOptions(false);
                     setIsSelectionMode(false);
                     setSelectedMessages([]);

@@ -11,6 +11,7 @@ import cloudinary, { uploadToCloudinary } from "../../utils/cloudinary.js";
 import WalletTransaction from "../../models/walletTransaction.model.js";
 import { sendWhatsAppMessage } from "../../utils/notification.service.js";
 import { notifyAdmins } from "../../utils/notificationHelper.js";
+import { getIO } from "../../config/socket.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -970,10 +971,27 @@ export const updateProfilePicture = async (req, res) => {
       return res.status(404).json({ success: false, message: "Account not found" });
     }
 
+    if (role !== "user") {
+      // Return the updated Owner doc instead of User doc
+      const targetOwnerId = ownerId || (account && account.ownerDetails);
+      if (targetOwnerId) {
+        account = await Owner.findById(targetOwnerId).select("-password").lean();
+      } else {
+        account = await Owner.findOne({ userId: id }).select("-password").lean();
+      }
+    }
+
+    // Real-time update for profile changes
+    const io = getIO();
+    if (io) {
+      io.emit("user profile updated", { userId: account._id, updatedUser: account });
+    }
+
     return res.status(200).json({
       success: true,
       message: "Profile picture updated successfully",
-      profilePicture: uploadResult.secure_url
+      profilePicture: uploadResult.secure_url,
+      user: account
     });
   } catch (err) {
     console.error(chalk.red("updateProfilePicture Error:"), err);
@@ -1058,6 +1076,16 @@ export const updateProfile = async (req, res) => {
         await Owner.findByIdAndUpdate(targetOwnerId, ownerUpdate);
       } else {
         await Owner.findOneAndUpdate({ userId: id }, ownerUpdate);
+      }
+    }
+
+    if (role !== "user") {
+      // Return the updated Owner doc instead of User doc
+      const targetOwnerId = ownerId || (account && account.ownerDetails);
+      if (targetOwnerId) {
+        account = await Owner.findById(targetOwnerId).select("-password").lean();
+      } else {
+        account = await Owner.findOne({ userId: id }).select("-password").lean();
       }
     }
 

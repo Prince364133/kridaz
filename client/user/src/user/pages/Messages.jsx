@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import ChatSidebar from '../components/messages/ChatSidebar';
 import ChatWindow from '../components/messages/ChatWindow';
 import CreateGroupModal from '../components/messages/CreateGroupModal';
 import CreateCommunityModal from '../components/messages/CreateCommunityModal';
+import EditProfileModal from '../components/modals/EditProfileModal';
 import { useSearchParams } from 'react-router-dom';
 import { useGetChatsQuery, useAccessChatMutation } from '../../redux/api/chatApi';
 
@@ -12,7 +14,9 @@ const Messages = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCommunityModalOpen, setIsCommunityModalOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   
+  const { user } = useSelector((state) => state.auth);
   const { data: chatData } = useGetChatsQuery();
   const [accessChat] = useAccessChatMutation();
 
@@ -52,6 +56,8 @@ const Messages = () => {
           selectedChatId={selectedChat?._id}
           onCreateGroup={() => setIsModalOpen(true)}
           onCreateCommunity={() => setIsCommunityModalOpen(true)}
+          onEditProfile={() => setIsEditProfileOpen(true)}
+          onChatDeleted={() => setSelectedChat(null)}
         />
       </div>
       
@@ -73,6 +79,13 @@ const Messages = () => {
           isOpen={isCommunityModalOpen}
           onClose={() => setIsCommunityModalOpen(false)}
           onSuccess={(newChat) => setSelectedChat(newChat)}
+        />
+      )}
+      {isEditProfileOpen && (
+        <EditProfileModal 
+          isOpen={isEditProfileOpen} 
+          onClose={() => setIsEditProfileOpen(false)} 
+          user={user}
         />
       )}
     </div>

@@ -7,7 +7,9 @@ const socketConfig = (server) => {
   io = new Server(server, {
     pingTimeout: 60000,
     cors: {
-      origin: ["http://localhost:5173", "http://localhost:5174", "https://kridaz.vercel.app"],
+      origin: process.env.CLIENT_URLS 
+        ? process.env.CLIENT_URLS.split(",").map((url) => url.trim()) 
+        : ["http://localhost:5173", "http://localhost:5174", "https://kridaz.vercel.app"],
     },
   });
 
@@ -97,6 +99,11 @@ const socketConfig = (server) => {
 
     socket.on("messages read", ({ chatId, userId }) => {
       socket.in(chatId).emit("messages read", { chatId, userId });
+    });
+
+    socket.on("delete message", (data) => {
+      const { chatId, messageIds } = data;
+      socket.in(chatId).emit("message deleted", { chatId, messageIds });
     });
 
     socket.on("disconnect", () => {

@@ -6,6 +6,7 @@ const chatSchema = new mongoose.Schema(
     isGroupChat: { type: Boolean, default: false },
     isCommunity: { type: Boolean, default: false },
     description: { type: String, trim: true },
+    groupImage: { type: String },
     parentCommunity: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
     isAnnouncementGroup: { type: Boolean, default: false },
     adminOnlyMessages: { type: Boolean, default: false },
@@ -19,15 +20,20 @@ const chatSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Message"
     },
-    groupAdmin: {
-      user: { type: mongoose.Schema.Types.ObjectId, refPath: "groupAdmin.onModel" },
-      onModel: { type: String, enum: ["User", "Owner"] }
-    },
+    groupAdmins: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, refPath: "groupAdmins.onModel" },
+        onModel: { type: String, enum: ["User", "Owner"] }
+      }
+    ],
     pendingMembers: [
       {
         user: { type: mongoose.Schema.Types.ObjectId, refPath: "pendingMembers.onModel" },
         onModel: { type: String, enum: ["User", "Owner"] }
       }
+    ],
+    pinnedBy: [
+      { type: mongoose.Schema.Types.ObjectId }
     ]
   },
   { timestamps: true }
