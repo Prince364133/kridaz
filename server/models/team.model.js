@@ -4,10 +4,14 @@ const teamSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     description: { type: String },
-    sportType: { type: String, required: true },
+    teamCode: { type: String, unique: true, sparse: true },
+    image: { type: String }, // Team profile picture/logo URL
+    logo: { type: String },  // Alias for image
+    city: { type: String },
+    visibility: { type: String, enum: ["PUBLIC", "PRIVATE"], default: "PUBLIC" },
+    sportType: { type: String, required: true, default: "CRICKET" },
     captainName: { type: String },
     captainPhone: { type: String },
-    teamCode: { type: String, unique: true, sparse: true },
     owner: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // The user who created the team
     opponents: [{ type: mongoose.Schema.Types.ObjectId, ref: "Team" }],
     opponentRequests: [

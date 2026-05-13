@@ -37,7 +37,7 @@ const createUniqueTeamCode = async () => {
 // @desc    Create a new team with a unique team code
 export const createTeam = async (req, res) => {
   try {
-    const { name, description, sport, captainName, captainPhone } = req.body;
+    const { name, description, sport, captainName, captainPhone, image, city } = req.body;
 
     const teamCode = await createUniqueTeamCode();
 
@@ -47,6 +47,9 @@ export const createTeam = async (req, res) => {
       sportType: sport || "CRICKET",
       captainName,
       captainPhone,
+      image,
+      logo: image,
+      city,
       teamCode,
       owner: req.user._id,
       members: [{ user: req.user._id, role: "CAPTAIN", status: "JOINED" }],
@@ -462,7 +465,7 @@ export const joinTeam = async (req, res) => {
   }
 };
 
-exports.getOpponentTeams = async (req, res) => {
+export const getOpponentTeams = async (req, res) => {
   try {
     // 1. Get all teams user is part of
     const myTeams = await Team.find({

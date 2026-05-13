@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useCreateTeamMutation } from '../../../redux/api/teamApi';
-import { X, Camera, Loader2, Users } from 'lucide-react';
+import { useUploadFileMutation } from '../../../redux/api/uploadApi';
+import { X, Camera, Loader2, Users, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 
 const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
-  const [createTeam, { isLoading }] = useCreateTeamMutation();
+  const [createTeam, { isLoading: isCreating }] = useCreateTeamMutation();
+  const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation();
+  const fileInputRef = useRef(null);
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -13,11 +17,36 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
     captainName: '',
     captainPhone: '',
     image: '',
-    type: 'MY_TEAM' // 'MY_TEAM' or 'OPPONENT'
+    city: ''
   });
+
+  const [preview, setPreview] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const response = await uploadFile(file).unwrap();
+      if (response.success) {
+        setFormData(prev => ({ ...prev, image: response.url }));
+        toast.success('Logo uploaded successfully');
+      }
+    } catch (err) {
+      toast.error('Failed to upload logo');
+      setPreview(null);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -25,10 +54,23 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
     if (!formData.name) return toast.error('Team name is required');
     
     try {
-      const response = await createTeam(formData).unwrap();
+      const response = await createTeam({
+        ...formData,
+        type: 'MY_TEAM'
+      }).unwrap();
       toast.success('Team created successfully!');
       if (onSuccess) onSuccess(response.team);
       onClose();
+      setFormData({
+        name: '',
+        description: '',
+        sport: 'CRICKET',
+        captainName: '',
+        captainPhone: '',
+        image: '',
+        city: ''
+      });
+      setPreview(null);
     } catch (err) {
       toast.error(err.data?.message || 'Failed to create team');
     }
@@ -62,49 +104,52 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Avatar Upload Placeholder */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+          {/* Logo Upload */}
           <div className="flex justify-center mb-6">
             <div className="relative">
-              <div className="w-24 h-24 rounded-2xl bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center group cursor-pointer hover:border-primary/50 transition-colors">
-                <Camera className="text-white/20 group-hover:text-primary transition-colors text-2xl" />
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                className="hidden" 
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="w-28 h-28 rounded-2xl bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center group cursor-pointer hover:border-primary/50 transition-colors overflow-hidden"
+              >
+                {preview ? (
+                  <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                ) : isUploading ? (
+                  <Loader2 className="text-primary animate-spin" size={32} />
+                ) : (
+                  <div className="flex flex-col items-center gap-2">
+                    <Camera className="text-white/20 group-hover:text-primary transition-colors text-2xl" />
+                    <span className="text-[10px] text-white/30">Upload Logo</span>
+                  </div>
+                )}
+                
+                {preview && !isUploading && (
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Upload className="text-white" size={24} />
+                  </div>
+                )}
               </div>
-              <p className="text-[10px] text-center text-white/30 mt-2">Upload Team Logo</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-white/50 uppercase tracking-wider ml-1">Team Name *</label>
-              <input 
-                type="text" 
-                name="name"
-                placeholder="e.g. Royal Strikers"
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-white/50 uppercase tracking-wider ml-1">Team Type</label>
-              <div className="flex gap-2 p-1 bg-white/5 rounded-xl border border-white/10">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, type: 'MY_TEAM' })}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${formData.type === 'MY_TEAM' ? 'bg-primary text-black' : 'text-white/50 hover:text-white'}`}
-                >
-                  My Team
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, type: 'OPPONENT' })}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${formData.type === 'OPPONENT' ? 'bg-primary text-black' : 'text-white/50 hover:text-white'}`}
-                >
-                  Opponent
-                </button>
-              </div>
-            </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-white/50 uppercase tracking-wider ml-1">Team Name *</label>
+            <input 
+              type="text" 
+              name="name"
+              placeholder="e.g. Royal Strikers"
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -122,6 +167,17 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                 <option value="VOLLEYBALL">Volleyball</option>
                 <option value="BASKETBALL">Basketball</option>
               </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-white/50 uppercase tracking-wider ml-1">City</label>
+              <input 
+                type="text" 
+                name="city"
+                placeholder="e.g. Mumbai"
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                value={formData.city}
+                onChange={handleChange}
+              />
             </div>
           </div>
 
@@ -164,10 +220,10 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
 
           <button 
             type="submit" 
-            disabled={isLoading}
-            className="w-full bg-primary hover:bg-primary-hover text-black font-bold py-3.5 rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 mt-4"
+            disabled={isCreating || isUploading}
+            className="w-full bg-primary hover:bg-primary-hover text-black font-bold py-3.5 rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? <Loader2 className="animate-spin" /> : 'Create Team'}
+            {isCreating ? <Loader2 className="animate-spin" /> : 'Create Team'}
           </button>
         </form>
       </motion.div>
