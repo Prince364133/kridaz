@@ -489,8 +489,6 @@ export default function Profile() {
           </div>
         )}
 
-        )}
-
         {activeTab === 'overview' && (
           <div className="animate-in fade-in duration-500">
             <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl border border-white/10 mb-8 overflow-hidden">
@@ -726,12 +724,10 @@ export default function Profile() {
                     <p className="text-white font-bold text-[10px] tracking-tight">{m.event}</p>
                   </div>
                 ))}
-              </div>
             </div>
           </div>
-            </div>
-          </div>
-        )}
+        </div>
+      )}
 
         {activeTab === 'posts' && (
           <div className="animate-in slide-in-from-bottom duration-500">
@@ -790,9 +786,9 @@ export default function Profile() {
                 </div>
               ))}
             </div>
-          )}
           </div>
-        )}
+        </div>
+      )}
 
         {(activeTab === 'overview' || activeTab === 'bookings') && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
