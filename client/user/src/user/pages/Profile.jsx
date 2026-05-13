@@ -89,6 +89,9 @@ export default function Profile() {
   const [showPostForm, setShowPostForm] = useState(false);
   const [userPosts, setUserPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
+  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
+  const [newPost, setNewPost] = useState({ title: '', content: '', image: null });
+  const [postImagePreview, setPostImagePreview] = useState(null);
   const [userStories, setUserStories] = useState([]);
   const [viewingStoryGroup, setViewingStoryGroup] = useState(null);
   const [initialStoryIndex, setInitialStoryIndex] = useState(0);
@@ -163,6 +166,41 @@ export default function Profile() {
       }
     } catch (error) {
       toast.error("Action failed");
+    }
+  };
+
+  const handleCreatePost = async () => {
+    if (!newPost.content.trim()) return toast.error("Content is required");
+    
+    setIsSubmittingPost(true);
+    const formData = new FormData();
+    formData.append('title', newPost.title);
+    formData.append('content', newPost.content);
+    if (newPost.image) formData.append('image', newPost.image);
+
+    try {
+      const res = await axiosInstance.post('/api/user/community', formData);
+      if (res.data.success) {
+        toast.success("Post shared successfully!");
+        setNewPost({ title: '', content: '', image: null });
+        setPostImagePreview(null);
+        setShowPostForm(false);
+        const resPosts = await axiosInstance.get(`/api/user/community/user-posts/${targetUserId}`);
+        if (resPosts.data.success) setUserPosts(resPosts.data.posts || []);
+        setActiveTab('posts');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to share post");
+    } finally {
+      setIsSubmittingPost(false);
+    }
+  };
+
+  const handlePostImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewPost({ ...newPost, image: file });
+      setPostImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -339,6 +377,33 @@ export default function Profile() {
         </div>
       </div>
 
+        {/* Tab Navigation */}
+        <div className="flex items-center gap-8 border-b border-white/10 mb-8 overflow-x-auto no-scrollbar">
+          {[
+            { id: 'overview', label: 'Overview', icon: LayoutGrid },
+            { id: 'posts', label: 'Posts', count: userPosts.length, icon: MessageSquare },
+            { id: 'network', label: 'Network', icon: Users },
+            { id: 'bookings', label: 'Bookings', icon: Calendar },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`pb-4 px-2 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all relative whitespace-nowrap ${activeTab === tab.id ? 'text-[#00ff41]' : 'text-gray-500 hover:text-white'}`}
+            >
+              <tab.icon size={14} />
+              {tab.label}
+              {tab.count !== undefined && (
+                <span className={`px-1.5 py-0.5 rounded-full text-[8px] ${activeTab === tab.id ? 'bg-[#00ff41] text-black' : 'bg-white/5 text-gray-500'}`}>
+                  {tab.count}
+                </span>
+              )}
+              {activeTab === tab.id && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00ff41] shadow-[0_0_10px_rgba(0,255,65,0.5)]" />
+              )}
+            </button>
+          ))}
+        </div>
+
       <div className="max-w-7xl mx-auto px-6 mt-20">
         {showPostForm && (
           <div className="bg-gradient-to-br from-white/10 to-white/[0.02] backdrop-blur-md rounded-2xl border border-[#00ff41]/20 mb-8 overflow-hidden animate-in slide-in-from-top duration-500">
@@ -363,32 +428,72 @@ export default function Profile() {
                     <User className="w-6 h-6 text-[#00ff41]" />
                   )}
                 </div>
-                <textarea 
-                  placeholder="What's happening on the field?"
-                  className="w-full bg-black/40 border border-white/5 focus:border-[#00ff41]/50 rounded-xl p-4 text-white text-sm outline-none transition-all resize-none min-h-[120px]"
-                />
+                <div className="flex-1 space-y-3">
+                  <input 
+                    type="text"
+                    value={newPost.title}
+                    onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+                    placeholder="Headline (Optional)"
+                    className="w-full bg-white/5 border border-white/5 focus:border-[#00ff41]/30 rounded-lg px-4 py-2 text-white text-xs outline-none transition-all"
+                  />
+                  <textarea 
+                    value={newPost.content}
+                    onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
+                    placeholder="What's happening on the field?"
+                    className="w-full bg-black/40 border border-white/5 focus:border-[#00ff41]/50 rounded-xl p-4 text-white text-sm outline-none transition-all resize-none min-h-[120px]"
+                  />
+                  {postImagePreview && (
+                    <div className="relative w-full max-h-60 rounded-xl overflow-hidden border border-white/10">
+                      <img src={postImagePreview} alt="Preview" className="w-full h-full object-cover" />
+                      <button 
+                        onClick={() => { setPostImagePreview(null); setNewPost({ ...newPost, image: null }); }}
+                        className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black transition-all"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center gap-2">
-                  <button className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 text-gray-400 hover:text-[#00ff41] transition-all flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+                  <input 
+                    type="file" 
+                    id="post-image" 
+                    hidden 
+                    accept="image/*"
+                    onChange={handlePostImageChange} 
+                  />
+                  <label 
+                    htmlFor="post-image"
+                    className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 text-gray-400 hover:text-[#00ff41] transition-all flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer"
+                  >
                     <ImageIcon size={16} />
-                    Add Photo
-                  </button>
+                    {newPost.image ? 'Change Photo' : 'Add Photo'}
+                  </label>
                   <button className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 text-gray-400 hover:text-[#00ff41] transition-all flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
                     <MapPin size={16} />
                     Location
                   </button>
                 </div>
-                <button className="px-8 py-2.5 bg-[#00ff41] text-black rounded-xl font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(0,255,65,0.2)] flex items-center gap-2">
-                  <Send size={14} strokeWidth={3} />
-                  Post Update
+                <button 
+                  onClick={handleCreatePost}
+                  disabled={isSubmittingPost || !newPost.content.trim()}
+                  className="px-8 py-2.5 bg-[#00ff41] text-black rounded-xl font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(0,255,65,0.2)] flex items-center gap-2 disabled:opacity-50 disabled:hover:scale-100"
+                >
+                  {isSubmittingPost ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} strokeWidth={3} />}
+                  {isSubmittingPost ? 'Sharing...' : 'Post Update'}
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl border border-white/10 mb-8 overflow-hidden">
+        )}
+
+        {activeTab === 'overview' && (
+          <div className="animate-in fade-in duration-500">
+            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl border border-white/10 mb-8 overflow-hidden">
           <div className="flex flex-wrap md:flex-nowrap divide-x divide-white/10">
             {[
               { label: "Matches Played", value: profileUser?.stats?.cricket?.matches || "120", icon: Calendar },
@@ -624,7 +729,12 @@ export default function Profile() {
               </div>
             </div>
           </div>
-        </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'posts' && (
+          <div className="animate-in slide-in-from-bottom duration-500">
 
         <div className="space-y-6 mb-8">
           <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
@@ -681,74 +791,77 @@ export default function Profile() {
               ))}
             </div>
           )}
-        </div>
+          </div>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-            <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-              <Calendar className="w-5 h-5 text-[#00ff41]" />
-              Next Match
-            </h2>
-            <div className="bg-black/40 rounded-xl p-6 border border-white/5">
-              <div className="flex items-center justify-between mb-6">
-                <div className="text-center space-y-1">
-                  <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center text-3xl border border-red-500/30">🔴</div>
-                  <p className="text-[9px] font-black text-white uppercase">Man Utd</p>
+        {(activeTab === 'overview' || activeTab === 'bookings') && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
+            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+              <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                <Calendar className="w-5 h-5 text-[#00ff41]" />
+                Next Match
+              </h2>
+              <div className="bg-black/40 rounded-xl p-6 border border-white/5">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="text-center space-y-1">
+                    <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center text-3xl border border-red-500/30">🔴</div>
+                    <p className="text-[9px] font-black text-white uppercase">Man Utd</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-black text-[#00ff41] tracking-tighter mb-0.5 italic">VS</p>
+                    <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Premier League</p>
+                  </div>
+                  <div className="text-center space-y-1">
+                    <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center text-3xl border border-blue-500/30">🔵</div>
+                    <p className="text-[9px] font-black text-white uppercase">Chelsea</p>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <p className="text-3xl font-black text-[#00ff41] tracking-tighter mb-0.5 italic">VS</p>
-                  <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Premier League</p>
+                <div className="grid grid-cols-4 gap-2 mb-6">
+                  {Object.entries(timeLeft).map(([unit, val]) => (
+                    <div key={unit} className="bg-[#00ff41]/10 rounded-lg p-3 text-center border border-[#00ff41]/20">
+                      <p className="text-xl font-black text-[#00ff41] leading-none mb-0.5">{val}</p>
+                      <p className="text-[7px] font-black text-gray-500 uppercase tracking-widest">{unit}</p>
+                    </div>
+                  ))}
                 </div>
-                <div className="text-center space-y-1">
-                  <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center text-3xl border border-blue-500/30">🔵</div>
-                  <p className="text-[9px] font-black text-white uppercase">Chelsea</p>
-                </div>
+                <button className="w-full bg-[#00ff41] text-black py-3 rounded-xl font-black uppercase tracking-wider text-[10px] hover:scale-[1.02] transition-all shadow-[0_5px_15px_rgba(0,255,65,0.1)]">
+                  Watch Match Live
+                </button>
               </div>
-              <div className="grid grid-cols-4 gap-2 mb-6">
-                {Object.entries(timeLeft).map(([unit, val]) => (
-                  <div key={unit} className="bg-[#00ff41]/10 rounded-lg p-3 text-center border border-[#00ff41]/20">
-                    <p className="text-xl font-black text-[#00ff41] leading-none mb-0.5">{val}</p>
-                    <p className="text-[7px] font-black text-gray-500 uppercase tracking-widest">{unit}</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+              <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                <UserPlus className="w-5 h-5 text-[#00ff41]" />
+                Invite Players
+              </h2>
+              <div className="space-y-3">
+                {[
+                  { name: 'James Rodriguez', pos: 'Midfielder', rat: 92, img: 'https://images.unsplash.com/photo-1663576748377-cafb47103042?q=80&w=2070' },
+                  { name: 'David Silva', pos: 'Forward', rat: 89, img: 'https://images.unsplash.com/photo-1663576748367-4ff6bec25639?q=80&w=2070' },
+                  { name: 'Chris Johnson', pos: 'Defender', rat: 85, img: 'https://images.unsplash.com/photo-1776416817016-f4b64cc132b1?q=80&w=2070' },
+                ].map((player, idx) => (
+                  <div key={idx} className="flex items-center gap-3 p-3.5 bg-black/40 rounded-xl border border-white/10 hover:border-[#00ff41]/30 transition-all group">
+                    <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
+                      <img src={player.img} alt="" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-white font-bold tracking-tight truncate text-[11px]" style={HEADING_STYLE}>{player.name}</h3>
+                      <p className="text-[9px] text-gray-500 font-medium">{player.pos}</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#00ff41]/10 rounded-full border border-[#00ff41]/20">
+                      <Star size={10} className="text-[#00ff41]" fill="currentColor" />
+                      <span className="text-[#00ff41] font-black text-[9px]">{player.rat}</span>
+                    </div>
+                    <button className="p-2 bg-[#00ff41]/10 text-[#00ff41] rounded-lg hover:bg-[#00ff41]/20 transition-all border border-[#00ff41]/20">
+                      <UserPlus size={14} />
+                    </button>
                   </div>
                 ))}
               </div>
-              <button className="w-full bg-[#00ff41] text-black py-3 rounded-xl font-black uppercase tracking-wider text-[10px] hover:scale-[1.02] transition-all shadow-[0_5px_15px_rgba(0,255,65,0.1)]">
-                Watch Match Live
-              </button>
             </div>
           </div>
-
-          <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-            <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-              <UserPlus className="w-5 h-5 text-[#00ff41]" />
-              Invite Players
-            </h2>
-            <div className="space-y-3">
-              {[
-                { name: 'James Rodriguez', pos: 'Midfielder', rat: 92, img: 'https://images.unsplash.com/photo-1663576748377-cafb47103042?q=80&w=2070' },
-                { name: 'David Silva', pos: 'Forward', rat: 89, img: 'https://images.unsplash.com/photo-1663576748367-4ff6bec25639?q=80&w=2070' },
-                { name: 'Chris Johnson', pos: 'Defender', rat: 85, img: 'https://images.unsplash.com/photo-1776416817016-f4b64cc132b1?q=80&w=2070' },
-              ].map((player, idx) => (
-                <div key={idx} className="flex items-center gap-3 p-3.5 bg-black/40 rounded-xl border border-white/10 hover:border-[#00ff41]/30 transition-all group">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
-                    <img src={player.img} alt="" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-white font-bold tracking-tight truncate text-[11px]" style={HEADING_STYLE}>{player.name}</h3>
-                    <p className="text-[9px] text-gray-500 font-medium">{player.pos}</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#00ff41]/10 rounded-full border border-[#00ff41]/20">
-                    <Star size={10} className="text-[#00ff41]" fill="currentColor" />
-                    <span className="text-[#00ff41] font-black text-[9px]">{player.rat}</span>
-                  </div>
-                  <button className="p-2 bg-[#00ff41]/10 text-[#00ff41] rounded-lg hover:bg-[#00ff41]/20 transition-all border border-[#00ff41]/20">
-                    <UserPlus size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       <EditProfileModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} user={currentUser} />
