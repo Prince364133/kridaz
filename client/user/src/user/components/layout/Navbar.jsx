@@ -51,7 +51,6 @@ const Navbar = () => {
     { name: "Community", path: "/community" },
     { name: "Leaderboard", path: "/leaderboard" },
     { name: "Players", path: "/players" },
-    { name: "Teams", path: "/my-teams" },
     { name: "Business", path: "#" },
   ];
 
