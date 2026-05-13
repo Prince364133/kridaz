@@ -104,6 +104,29 @@ export default function App() {
     };
   }, [dispatch]);
 
+  // Refetch user data on window focus to catch role upgrades (e.g. approved by admin in another tab)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (authState.isLoggedIn) {
+        axiosInstance.get("/api/user/auth/getMe").then(res => {
+          if (res.data.success) {
+            dispatch(restoreAuth({
+              user: res.data.user,
+              role: res.data.role,
+              token: res.data.token,
+              followingIds: authState.followingIds
+            }));
+          }
+        }).catch(err => {
+          console.warn("App.jsx: Background auth check on focus failed.", err.message);
+        });
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [authState.isLoggedIn, authState.followingIds, dispatch]);
+
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999]">

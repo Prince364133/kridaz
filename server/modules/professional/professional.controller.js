@@ -14,7 +14,7 @@ export const getAllProfessionals = async (req, res) => {
   const { role, sport, city, state, searchTerm } = req.query;
   try {
     let query = { 
-      role: { $in: ["coach", "umpire"] }
+      role: { $in: ["coach", "umpire", "scorer", "streamer"] }
     };
 
     if (role && role !== "All") query.role = role.toLowerCase();
@@ -43,8 +43,8 @@ export const getAllProfessionals = async (req, res) => {
 // Get unique states and cities for filters
 export const getProfessionalFilters = async (req, res) => {
   try {
-    const states = await Owner.distinct("state", { role: { $in: ["coach", "umpire"] } });
-    const cities = await Owner.distinct("city", { role: { $in: ["coach", "umpire"] } });
+    const states = await Owner.distinct("state", { role: { $in: ["coach", "umpire", "scorer", "streamer"] } });
+    const cities = await Owner.distinct("city", { role: { $in: ["coach", "umpire", "scorer", "streamer"] } });
     
     return res.status(200).json({ 
       states: states.filter(s => s), // Filter out null/undefined

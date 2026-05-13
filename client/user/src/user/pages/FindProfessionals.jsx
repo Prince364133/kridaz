@@ -10,7 +10,7 @@ const PRI = "#84CC16";
 const BDR = "#2A2A2A";
 
 const sports = ["ALL SPORTS", "CRICKET", "BADMINTON", "FOOTBALL", "TENNIS", "PICKLEBALL"];
-const roles = ["All", "Coach", "Umpire", "Streamer"];
+const roles = ["All", "Coach", "Umpire", "Scorer", "Streamer"];
 
 export default function FindProfessionals() {
   const navigate = useNavigate();
@@ -238,7 +238,10 @@ export default function FindProfessionals() {
                     {/* Role Badge */}
                     <div className="absolute top-2 left-2 z-20">
                       <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white text-[8px] font-black tracking-widest gap-1 shadow-lg">
-                        {pro.role === 'umpire' ? <Shield size={8} className="text-[#84CC16]" /> : pro.role === 'streamer' ? <Video size={8} className="text-[#84CC16]" /> : <Trophy size={8} className="text-[#84CC16]" />}
+                        {pro.role === 'umpire' ? <Shield size={8} className="text-[#84CC16]" /> : 
+                         pro.role === 'streamer' ? <Video size={8} className="text-[#84CC16]" /> : 
+                         pro.role === 'scorer' ? <Activity size={8} className="text-[#84CC16]" /> : 
+                         <Trophy size={8} className="text-[#84CC16]" />}
                         <span className="text-[#84CC16]">{pro.role?.toUpperCase()}</span>
                       </div>
                     </div>

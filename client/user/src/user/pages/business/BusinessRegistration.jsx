@@ -101,6 +101,8 @@ export default function BusinessRegistration() {
         navigate("/signup/official");
       } else if (roleFromUrl === 'streamer') {
         navigate("/signup/streamer");
+      } else if (roleFromUrl === 'scorer') {
+        navigate("/signup/scorer");
       } else {
         toast.error("Please login first to register your business");
         navigate("/login?redirect=" + encodeURIComponent("/business/register?role=" + roleFromUrl));
@@ -125,11 +127,12 @@ export default function BusinessRegistration() {
     }
 
     // Check if user already has a professional role
-    const professionalRoles = ["owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "streamer", "admin", "bmsp_admin"];
+    const professionalRoles = ["owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "streamer", "admin", "bmsp_admin", "scorer"];
     const isLimitedUmpire = user?.role?.toLowerCase() === "limited_umpire";
+    const isLimitedScorer = user?.role?.toLowerCase() === "limited_scorer";
     
     // limited_umpire is only a conflict if they aren't applying for umpire upgrade
-    if (user?.role && (professionalRoles.includes(user.role.toLowerCase()) || (isLimitedUmpire && roleFromUrl !== "umpire"))) {
+    if (user?.role && (professionalRoles.includes(user.role.toLowerCase()) || (isLimitedUmpire && roleFromUrl !== "umpire") || (isLimitedScorer && roleFromUrl !== "scorer"))) {
       setHasRoleConflict(true);
       setExistingRole(user.role);
     }
@@ -289,6 +292,7 @@ export default function BusinessRegistration() {
             onClick={() => {
               if (existingRole?.toLowerCase() === "coach") navigate("/coach");
               else if (existingRole?.toLowerCase() === "umpire") navigate("/umpire");
+              else if (existingRole?.toLowerCase() === "scorer") navigate("/scorer");
               else if (existingRole?.toLowerCase() === "streamer") navigate("/streamer");
               else if (["owner", "venue_owner", "verified_venue_owner"].includes(existingRole?.toLowerCase())) navigate("/partner");
               else if (["admin", "bmsp_admin"].includes(existingRole?.toLowerCase())) navigate("/admin");
