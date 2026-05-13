@@ -30,4 +30,6 @@ const ownerRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+ownerRequestSchema.index({ userId: 1 });
+
 export default mongoose.model("OwnerRequest", ownerRequestSchema);

@@ -82,4 +82,6 @@ const ownerSchema = new mongoose.Schema(
  { timestamps: true }
 );
 
+ownerSchema.index({ userId: 1 });
+
 export default mongoose.model("Owner", ownerSchema);

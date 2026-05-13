@@ -57,12 +57,14 @@ export default function App() {
     const initAuth = async () => {
       console.log("App.jsx: Starting auth check...");
       try {
-        const meResponse = await axiosInstance.get("/api/user/auth/getMe");
+        // Run getMe and network checks in parallel to save time
+        const [meResponse, networkResponse] = await Promise.all([
+          axiosInstance.get("/api/user/auth/getMe"),
+          axiosInstance.get("/api/user/players/network").catch(() => ({ data: { success: false } }))
+        ]);
         
         if (isMounted && meResponse.data.success) {
           console.log("App.jsx: Session verified successfully.");
-          // Only fetch network if getMe succeeds
-          const networkResponse = await axiosInstance.get("/api/user/players/network").catch(() => ({ data: { success: false } }));
           
           dispatch(restoreAuth({
             user: meResponse.data.user,
@@ -77,8 +79,6 @@ export default function App() {
         if (isMounted) {
           // 401/403 means session is definitively invalid or guest access
           if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-            // ONLY logout if we THOUGHT we were logged in. 
-            // If we're already logged out (guest), don't trigger anything.
             if (authState.isLoggedIn) {
               console.warn("App.jsx: Session expired, logging out.");
               dispatch(logout());
