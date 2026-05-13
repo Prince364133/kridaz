@@ -13,6 +13,7 @@ import youtubeRouter from "../modules/youtube/youtube.routes.js";
 import facebookRouter from "../modules/facebook/facebook.routes.js";
 import teamRouter from "../modules/team/team.routes.js";
 import locationRouter from "./location.routes.js";
+import storyRouter from "../modules/story/story.routes.js";
 
 const rootRouter = Router();
 
@@ -30,5 +31,6 @@ rootRouter.use("/scoring", scoringRouter);
 rootRouter.use("/scorer", scorerRouter);
 rootRouter.use("/youtube", youtubeRouter);
 rootRouter.use("/facebook", facebookRouter);
+rootRouter.use("/story", storyRouter);
 
 export default rootRouter;
