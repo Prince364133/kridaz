@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   User, MapPin, Clock, IndianRupee, Calendar, Zap, Activity,
   ArrowRight, ShieldCheck, Trophy, Star, Camera, Edit2, MessageSquare, Heart, Edit3, Trash2, Loader2, Send, MessageCircle,
-  Wallet, CreditCard, Award, Target, LogOut, Plus, Eye, TrendingUp, Mail, Phone, Ruler, LayoutGrid, CheckCircle2, UserPlus, BarChart, ExternalLink, Crown, Shield, BarChart3, Building2, AlertTriangle, Upload, Search, Medal, Users
+  Wallet, CreditCard, Award, Target, LogOut, Plus, Eye, TrendingUp, Mail, Phone, Ruler, LayoutGrid, CheckCircle2, UserPlus, BarChart, ExternalLink, Crown, Shield, BarChart3, Building2, AlertTriangle, Upload, Search, Medal, Users, X, Image as ImageIcon
 } from "lucide-react";
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
@@ -86,6 +86,7 @@ export default function Profile() {
 
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("overview"); 
+  const [showPostForm, setShowPostForm] = useState(false);
   const [userStories, setUserStories] = useState([]);
   const [viewingStoryGroup, setViewingStoryGroup] = useState(null);
   const [initialStoryIndex, setInitialStoryIndex] = useState(0);
@@ -268,7 +269,10 @@ export default function Profile() {
                       <MessageCircle size={14} />
                       Messages
                     </button>
-                    <button className="px-4 py-2.5 bg-white/5 text-white rounded-xl font-black uppercase tracking-wider text-[11px] hover:bg-white/10 transition-all backdrop-blur-md border border-white/10 flex items-center gap-2">
+                    <button 
+                      onClick={() => setShowPostForm(!showPostForm)}
+                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${showPostForm ? 'bg-[#00ff41] text-black border-[#00ff41]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+                    >
                       <Plus size={14} />
                       Post
                     </button>
@@ -312,6 +316,54 @@ export default function Profile() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 mt-20">
+        {showPostForm && (
+          <div className="bg-gradient-to-br from-white/10 to-white/[0.02] backdrop-blur-md rounded-2xl border border-[#00ff41]/20 mb-8 overflow-hidden animate-in slide-in-from-top duration-500">
+            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+              <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                <Plus className="w-5 h-5 text-[#00ff41]" />
+                Share Your Update
+              </h2>
+              <button 
+                onClick={() => setShowPostForm(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="flex gap-4">
+                <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center shrink-0">
+                  {profileUser?.profilePicture ? (
+                    <img src={profileUser.profilePicture} alt="" className="w-full h-full rounded-xl object-cover" />
+                  ) : (
+                    <User className="w-6 h-6 text-[#00ff41]" />
+                  )}
+                </div>
+                <textarea 
+                  placeholder="What's happening on the field?"
+                  className="w-full bg-black/40 border border-white/5 focus:border-[#00ff41]/50 rounded-xl p-4 text-white text-sm outline-none transition-all resize-none min-h-[120px]"
+                />
+              </div>
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-2">
+                  <button className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 text-gray-400 hover:text-[#00ff41] transition-all flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+                    <ImageIcon size={16} />
+                    Add Photo
+                  </button>
+                  <button className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 text-gray-400 hover:text-[#00ff41] transition-all flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+                    <MapPin size={16} />
+                    Location
+                  </button>
+                </div>
+                <button className="px-8 py-2.5 bg-[#00ff41] text-black rounded-xl font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(0,255,65,0.2)] flex items-center gap-2">
+                  <Send size={14} strokeWidth={3} />
+                  Post Update
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl border border-white/10 mb-8 overflow-hidden">
           <div className="flex flex-wrap md:flex-nowrap divide-x divide-white/10">
             {[
