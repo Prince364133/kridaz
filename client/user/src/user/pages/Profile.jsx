@@ -87,6 +87,8 @@ export default function Profile() {
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("overview"); 
   const [showPostForm, setShowPostForm] = useState(false);
+  const [userPosts, setUserPosts] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
   const [userStories, setUserStories] = useState([]);
   const [viewingStoryGroup, setViewingStoryGroup] = useState(null);
   const [initialStoryIndex, setInitialStoryIndex] = useState(0);
@@ -123,7 +125,25 @@ export default function Profile() {
         setLoadingProfile(false);
       }
     };
-    if (targetUserId) fetchTargetProfile();
+
+    const fetchUserPosts = async () => {
+      try {
+        setLoadingPosts(true);
+        const res = await axiosInstance.get(`/api/user/community/user-posts/${targetUserId}`);
+        if (res.data.success) {
+          setUserPosts(res.data.posts || []);
+        }
+      } catch (error) {
+        console.error("Failed to load user posts:", error);
+      } finally {
+        setLoadingPosts(false);
+      }
+    };
+
+    if (targetUserId) {
+      fetchTargetProfile();
+      fetchUserPosts();
+    }
   }, [targetUserId, isOwnProfile, dispatch]);
 
   const handleFollowToggle = async () => {
@@ -237,6 +257,10 @@ export default function Profile() {
               </div>
 
               <div className="flex flex-wrap items-center gap-4 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
+                <span className="flex items-center gap-1.5">
+                  <span className="text-[#00ff41]">{userPosts.length}</span> Posts
+                </span>
+                <span className="w-1 h-1 bg-zinc-700 rounded-full" />
                 <span className="flex items-center gap-1.5">
                   <span className="text-[#00ff41]">{profileUser?.followers?.length || 0}</span> Followers
                 </span>
@@ -600,6 +624,63 @@ export default function Profile() {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="space-y-6 mb-8">
+          <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+            <LayoutGrid className="w-5 h-5 text-[#00ff41]" />
+            Posts Feed
+          </h2>
+          
+          {loadingPosts ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[1, 2].map(i => (
+                <div key={i} className="h-64 rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
+              ))}
+            </div>
+          ) : userPosts.length === 0 ? (
+            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl p-20 border border-white/10 text-center">
+              <MessageSquare size={48} className="mx-auto text-gray-700 mb-4" />
+              <p className="text-gray-500 font-bold uppercase tracking-widest text-sm">No posts yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {userPosts.map((post) => (
+                <div key={post._id} className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden group hover:border-[#00ff41]/20 transition-all">
+                  {(post.image || post.imageUrl) && (
+                    <div className="h-48 overflow-hidden">
+                      <img src={post.image || post.imageUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-[#00ff41]/10 flex items-center justify-center border border-[#00ff41]/20">
+                          <User size={14} className="text-[#00ff41]" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black text-white uppercase tracking-wider">{profileUser?.name}</p>
+                          <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">{new Date(post.createdAt).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                    {post.title && <h3 className="text-white font-bold text-sm mb-2 uppercase tracking-tight" style={HEADING_STYLE}>{post.title}</h3>}
+                    <p className="text-gray-400 text-xs leading-relaxed line-clamp-3 mb-4">{post.content}</p>
+                    <div className="flex items-center gap-4 pt-4 border-t border-white/5">
+                      <div className="flex items-center gap-1.5 text-gray-500">
+                        <Heart size={14} />
+                        <span className="text-[10px] font-bold">{post.likes?.length || 0}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-gray-500">
+                        <MessageCircle size={14} />
+                        <span className="text-[10px] font-bold">{post.comments?.length || 0}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
