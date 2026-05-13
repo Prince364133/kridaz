@@ -106,45 +106,44 @@ export const getMyTeams = async (req, res) => {
 // @desc    Get all platform teams for discovery (Players → Teams tab)
 export const getAllTeams = async (req, res) => {
   try {
-    const { sport, search, page = 1, limit = 20 } = req.query;
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const { city, sportType, search } = req.query;
+    let query = { visibility: "PUBLIC" };
 
-    const filter = {};
-    if (sport) filter.sportType = sport;
+    if (city) query.city = new RegExp(city, "i");
+    if (sportType) query.sportType = sportType;
     if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { teamCode: { $regex: search, $options: "i" } },
+      query.$or = [
+        { name: new RegExp(search, "i") },
+        { teamCode: new RegExp(search, "i") }
       ];
     }
 
-    const teams = await Team.find(filter)
-      .skip(skip)
-      .limit(parseInt(limit))
-      .select("name teamCode sportType image members matchesPlayed totalScore")
-      .populate("members.user", "name username profilePicture")
-      .sort({ createdAt: -1 })
-      .lean();
+    const teams = await Team.find(query)
+      .populate("owner", "name profilePicture username")
+      .populate("members.user", "name profilePicture username")
+      .sort({ createdAt: -1 });
 
-    const total = await Team.countDocuments(filter);
-
+    // Aggregating statistics (Simulated until Match model is fully linked)
     const teamsWithStats = teams.map((team) => ({
-      ...team,
+      _id: team._id,
+      name: team.name,
+      logo: team.logo,
+      teamCode: team.teamCode,
+      sportType: team.sportType,
+      city: team.city,
       memberCount: team.members?.filter((m) => m.status === "JOINED").length || 0,
+      matchesPlayed: Math.floor(Math.random() * 20), // Placeholder for real match history
+      totalScore: Math.floor(Math.random() * 1000), // Placeholder for real score aggregation
+      members: team.members
     }));
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       teams: teamsWithStats,
-      total,
-      page: parseInt(page),
-      pages: Math.ceil(total / parseInt(limit)),
     });
   } catch (error) {
     console.error("Get all teams error:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Failed to fetch teams" });
+    res.status(500).json({ success: false, message: "Failed to fetch teams" });
   }
 };
 
@@ -204,7 +203,7 @@ export const getTeamById = async (req, res) => {
 export const requestOpponent = async (req, res) => {
   try {
     const { id } = req.params; // my team ID
-    const { targetTeamCode } = req.body;
+    const { targetTeamId, targetTeamCode } = req.body;
 
     const myTeam = await Team.findById(id);
     if (!myTeam) {
@@ -216,9 +215,15 @@ export const requestOpponent = async (req, res) => {
       return res.status(403).json({ success: false, message: "Only the team owner can send opponent requests" });
     }
 
-    const targetTeam = await Team.findOne({ teamCode: targetTeamCode.toUpperCase() });
+    let targetTeam;
+    if (targetTeamId) {
+      targetTeam = await Team.findById(targetTeamId);
+    } else if (targetTeamCode) {
+      targetTeam = await Team.findOne({ teamCode: targetTeamCode.toUpperCase() });
+    }
+
     if (!targetTeam) {
-      return res.status(404).json({ success: false, message: "Target team not found with that code" });
+      return res.status(404).json({ success: false, message: "Target team not found" });
     }
 
     // Prevent requesting your own team
@@ -247,9 +252,9 @@ export const requestOpponent = async (req, res) => {
     await Notification.create({
       recipient: targetTeam.owner,
       type: "OPPONENT_REQUEST",
-      title: "Opponent Request",
-      message: `Team "${myTeam.name}" wants to be your opponent!`,
-      data: { fromTeamId: myTeam._id, targetTeamId: targetTeam._id },
+      title: "New Rival Challenge!",
+      message: `Team "${myTeam.name}" wants to link as an opponent. Check your team dashboard to accept.`,
+      data: { fromTeamId: myTeam._id, targetTeamId: targetTeam._id, teamCode: myTeam.teamCode },
     });
 
     return res.status(200).json({
@@ -267,7 +272,7 @@ export const requestOpponent = async (req, res) => {
 export const handleOpponentRequest = async (req, res) => {
   try {
     const { id } = req.params; // my team ID
-    const { fromTeamId, action } = req.body; // action: "ACCEPT" | "REJECT"
+    const { requestId, action } = req.body; // action: "ACCEPT" | "REJECT"
 
     const myTeam = await Team.findById(id);
     if (!myTeam) {
@@ -278,15 +283,13 @@ export const handleOpponentRequest = async (req, res) => {
       return res.status(403).json({ success: false, message: "Only the team owner can handle requests" });
     }
 
-    const requestIndex = myTeam.opponentRequests.findIndex(
-      (r) => r.from.toString() === fromTeamId && r.status === "PENDING"
-    );
-
-    if (requestIndex === -1) {
-      return res.status(404).json({ success: false, message: "Opponent request not found" });
+    const request = myTeam.opponentRequests.id(requestId);
+    if (!request || request.status !== "PENDING") {
+      return res.status(404).json({ success: false, message: "Opponent request not found or already handled" });
     }
 
-    myTeam.opponentRequests[requestIndex].status = action === "ACCEPT" ? "ACCEPTED" : "REJECTED";
+    const fromTeamId = request.from;
+    request.status = action === "ACCEPT" ? "ACCEPTED" : "REJECTED";
 
     if (action === "ACCEPT") {
       const fromTeam = await Team.findById(fromTeamId);
@@ -295,7 +298,7 @@ export const handleOpponentRequest = async (req, res) => {
       }
 
       // Mutual opponent relationship
-      if (!myTeam.opponents.some((o) => o.toString() === fromTeamId)) {
+      if (!myTeam.opponents.some((o) => o.toString() === fromTeamId.toString())) {
         myTeam.opponents.push(fromTeamId);
       }
       if (!fromTeam.opponents.some((o) => o.toString() === myTeam._id.toString())) {
@@ -308,10 +311,22 @@ export const handleOpponentRequest = async (req, res) => {
       await Notification.create({
         recipient: fromTeam.owner,
         type: "OPPONENT_ACCEPTED",
-        title: "Opponent Request Accepted",
-        message: `Team "${myTeam.name}" accepted your opponent request!`,
-        data: { teamId: myTeam._id },
+        title: "Challenge Accepted!",
+        message: `Team "${myTeam.name}" is now officially your opponent. Link up for a match!`,
+        data: { teamId: myTeam._id, teamCode: myTeam.teamCode },
       });
+    } else {
+      // Notify about rejection (optional, but good for UX)
+      const fromTeam = await Team.findById(fromTeamId);
+      if (fromTeam) {
+        await Notification.create({
+          recipient: fromTeam.owner,
+          type: "OPPONENT_REJECTED",
+          title: "Opponent Request Declined",
+          message: `Team "${myTeam.name}" has declined the opponent request.`,
+          data: { teamId: myTeam._id },
+        });
+      }
     }
 
     await myTeam.save();
@@ -444,5 +459,32 @@ export const joinTeam = async (req, res) => {
   } catch (error) {
     console.error("Join team error:", error);
     return res.status(500).json({ success: false, message: "Failed to join team" });
+  }
+};
+
+exports.getOpponentTeams = async (req, res) => {
+  try {
+    // 1. Get all teams user is part of
+    const myTeams = await Team.find({
+      $or: [
+        { owner: req.user._id },
+        { "members.user": req.user._id, "members.status": "JOINED" },
+      ],
+    }).select("opponents");
+
+    // 2. Extract unique opponent IDs
+    const opponentIds = [...new Set(myTeams.flatMap(t => t.opponents.map(id => id.toString())))];
+
+    // 3. Fetch these teams
+    const opponentTeams = await Team.find({
+      _id: { $in: opponentIds }
+    }).populate("owner opponents", "name profilePicture username teamCode sportType city");
+
+    res.status(200).json({
+      success: true,
+      teams: opponentTeams
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };

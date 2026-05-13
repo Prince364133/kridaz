@@ -105,11 +105,27 @@ const ForwardModal = ({ isOpen, onClose, messageId }) => {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <img 
-                      src={user.profilePicture || user.profileImage || `https://ui-avatars.com/api/?name=${user.name}&background=random`} 
-                      alt={user.name} 
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
+                    <div className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden">
+                      {user.profilePicture || user.profileImage ? (
+                        <img 
+                          src={user.profilePicture || user.profileImage} 
+                          alt={user.name} 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextElementSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div 
+                        className="w-full h-full flex items-center justify-center bg-gradient-to-br from-white/10 to-white/5"
+                        style={{ display: (user.profilePicture || user.profileImage) ? 'none' : 'flex' }}
+                      >
+                        <span className="text-[#84CC16] font-black text-xs tracking-tighter">
+                          {user.name ? user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "?"}
+                        </span>
+                      </div>
+                    </div>
                     <div>
                       <p className="text-white text-sm font-semibold">{user.name}</p>
                       <p className="text-white/40 text-xs">@{user.username || user.name.toLowerCase().replace(' ', '')}</p>

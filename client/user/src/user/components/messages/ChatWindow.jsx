@@ -360,15 +360,15 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       e.target.style.display = 'none';
-                      if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                      e.target.nextElementSibling.style.display = 'flex';
                     }}
                   />
                 ) : null}
                 <div 
-                  className="w-full h-full flex items-center justify-center"
+                  className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#84CC16]/20 to-[#84CC16]/5"
                   style={{ display: imageUrl ? 'none' : 'flex' }}
                 >
-                  <span className="text-[#84CC16] font-black text-xs">
+                  <span className="text-[#84CC16] font-black text-xs tracking-tighter">
                     {otherUserObj?.name ? otherUserObj.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "U"}
                   </span>
                 </div>
@@ -377,7 +377,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
           </div>
           {/* Online indicator dot */}
           {!chat.isGroupChat && otherOnline && (
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-black" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#84CC16] rounded-full border-[3px] border-[#0a0a0a] shadow-sm animate-pulse" />
           )}
         </div>
 
@@ -890,12 +890,26 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
                       }}
                     >
                       {!isSameDirection ? (
-                        <div className="relative w-full h-full">
-                          <img 
-                            src={m.sender?.user?.profilePicture || m.sender?.user?.profileImage || `https://ui-avatars.com/api/?name=${senderName}&background=random`} 
-                            alt="" 
-                            className="w-full h-full rounded-full object-cover shadow-md border border-white/5"
-                          />
+                        <div className="relative w-full h-full rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden">
+                          {m.sender?.user?.profilePicture || m.sender?.user?.profileImage ? (
+                            <img 
+                              src={m.sender?.user?.profilePicture || m.sender?.user?.profileImage} 
+                              alt="" 
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextElementSibling.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div 
+                            className="w-full h-full flex items-center justify-center bg-gradient-to-br from-white/10 to-white/5"
+                            style={{ display: (m.sender?.user?.profilePicture || m.sender?.user?.profileImage) ? 'none' : 'flex' }}
+                          >
+                            <span className="text-[#84CC16] font-black text-[10px] tracking-tighter">
+                              {senderName ? senderName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "?"}
+                            </span>
+                          </div>
                           <div className="absolute inset-0 bg-[#84CC16]/0 group-hover/avatar:bg-[#84CC16]/10 rounded-full transition-colors" />
                         </div>
                       ) : (

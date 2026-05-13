@@ -33,6 +33,36 @@ export const teamApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Team"],
     }),
+    getAllTeams: builder.query({
+      query: (params) => ({
+        url: "/api/team/all",
+        params,
+      }),
+      providesTags: ["Team"],
+    }),
+    findTeamByCode: builder.query({
+      query: (code) => `/api/team/find-by-code/${code}`,
+    }),
+    requestOpponent: builder.mutation({
+      query: ({ teamId, targetTeamId }) => ({
+        url: `/api/team/${teamId}/request-opponent`,
+        method: "POST",
+        body: { targetTeamId },
+      }),
+      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }],
+    }),
+    handleOpponentRequest: builder.mutation({
+      query: ({ teamId, requestId, action }) => ({
+        url: `/api/team/${teamId}/handle-opponent-request`,
+        method: "POST",
+        body: { requestId, action },
+      }),
+      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }],
+    }),
+    getOpponentTeams: builder.query({
+      query: () => "/api/team/opponents",
+      providesTags: ["Team"],
+    }),
     getNetwork: builder.query({
       query: () => '/api/players/network',
     }),
@@ -45,5 +75,11 @@ export const {
   useGetTeamByIdQuery,
   useInviteMembersMutation,
   useJoinTeamMutation,
+  useGetAllTeamsQuery,
+  useFindTeamByCodeQuery,
+  useLazyFindTeamByCodeQuery,
+  useRequestOpponentMutation,
+  useHandleOpponentRequestMutation,
+  useGetOpponentTeamsQuery,
   useGetNetworkQuery,
 } = teamApi;

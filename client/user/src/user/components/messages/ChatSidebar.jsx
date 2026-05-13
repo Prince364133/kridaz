@@ -164,15 +164,33 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
     const otherUser = getChatOtherUser(chat);
     const online = otherUser?._id ? isUserOnline(otherUser._id) : false;
 
+    const getInitials = (name) => {
+      if (!name) return "?";
+      return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+    };
+
     if (chat.isGroupChat) {
+      const groupImg = chat.groupImage;
       return (
         <div className="relative">
-          <div className="w-12 h-12 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center overflow-hidden">
-            {chat.groupImage ? (
-              <img src={chat.groupImage} className="w-full h-full object-cover" alt="" />
-            ) : (
-              <Users size={22} className="text-[#84CC16]" />
-            )}
+          <div className="w-12 h-12 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center overflow-hidden shadow-lg">
+            {groupImg ? (
+              <img 
+                src={groupImg} 
+                className="w-full h-full object-cover" 
+                alt={chat.chatName}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextElementSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div 
+              className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#84CC16]/20 to-[#84CC16]/5"
+              style={{ display: groupImg ? 'none' : 'flex' }}
+            >
+              <Users size={22} className="text-[#84CC16] opacity-80" />
+            </div>
           </div>
         </div>
       );
@@ -182,7 +200,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
 
     return (
       <div className="relative">
-        <div className="w-12 h-12 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center overflow-hidden">
+        <div className="w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden shadow-lg group-hover/chat:border-[#84CC16]/30 transition-all">
           {imageUrl ? (
             <img 
               src={imageUrl} 
@@ -190,22 +208,22 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.target.style.display = 'none';
-                if (e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'flex';
+                e.target.nextElementSibling.style.display = 'flex';
               }}
             />
           ) : null}
           <div 
-            className="w-full h-full flex items-center justify-center"
+            className="w-full h-full flex items-center justify-center bg-gradient-to-br from-white/10 to-white/5"
             style={{ display: imageUrl ? 'none' : 'flex' }}
           >
-            <span className="text-[#84CC16] font-black text-sm">
-              {otherUser?.name ? otherUser.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : <User size={20} />}
+            <span className="text-[#84CC16] font-black text-sm tracking-tighter">
+              {getInitials(otherUser?.name)}
             </span>
           </div>
         </div>
         {/* Online dot */}
         {online && (
-          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0a0a0a]" />
+          <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#84CC16] rounded-full border-[3px] border-[#0a0a0a] shadow-sm animate-pulse" />
         )}
       </div>
     );
@@ -319,34 +337,34 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
 
         {/* User Profile Avatar - Clickable to edit profile */}
         <div 
-          className="relative group cursor-pointer"
+          className="relative group cursor-pointer shrink-0"
           onClick={onEditProfile}
         >
-          <div className="w-10 h-10 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center overflow-hidden hover:border-[#84CC16]/50 transition-all shadow-lg active:scale-95">
+          <div className="w-10 h-10 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center overflow-hidden hover:border-[#84CC16]/50 transition-all shadow-lg active:scale-95 group-hover:shadow-[#84CC16]/10">
             {(user?.profilePicture || user?.profileImage) ? (
               <img 
                 src={user.profilePicture || user.profileImage} 
                 alt="My Profile" 
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 onError={(e) => {
                   e.target.style.display = 'none';
-                  if (e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'flex';
+                  e.target.nextElementSibling.style.display = 'flex';
                 }}
               />
             ) : null}
             <div 
-              className="w-full h-full flex items-center justify-center"
+              className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#84CC16]/20 to-[#84CC16]/5"
               style={{ display: (user?.profilePicture || user?.profileImage) ? 'none' : 'flex' }}
             >
-              <span className="text-[#84CC16] font-black text-xs">
-                {user?.name ? user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "U"}
+              <span className="text-[#84CC16] font-black text-xs tracking-tighter">
+                {user?.name ? user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "ME"}
               </span>
             </div>
           </div>
           
           {/* Tooltip */}
-          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-white text-[9px] font-black uppercase tracking-widest rounded border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-[100]">
-            Edit My Profile
+          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-[#1a1a1a] text-[#84CC16] text-[9px] font-black uppercase tracking-[0.2em] rounded-lg border border-[#84CC16]/20 shadow-2xl opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-y-1 whitespace-nowrap pointer-events-none z-[100] backdrop-blur-md">
+            My Profile
           </div>
         </div>
       </div>

@@ -1,19 +1,28 @@
 import React, { useState } from 'react';
-import { useGetMyTeamsQuery } from '../../../redux/api/teamApi';
+import { useGetMyTeamsQuery, useGetOpponentTeamsQuery } from '../../../redux/api/teamApi';
 import { Plus, Users, Search, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AddOpponentModal from './AddOpponentModal';
 
 const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
-  const { data, isLoading } = useGetMyTeamsQuery();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('myTeams'); // 'myTeams' or 'opponentTeams'
+  const [isAddOpponentOpen, setIsAddOpponentOpen] = useState(false);
+
+  const { data: myData, isLoading: isMyLoading } = useGetMyTeamsQuery();
+  const { data: oppData, isLoading: isOppLoading } = useGetOpponentTeamsQuery(undefined, {
+    skip: activeTab !== 'opponentTeams'
+  });
+
+  const data = activeTab === 'myTeams' ? myData : oppData;
+  const isLoading = activeTab === 'myTeams' ? isMyLoading : isOppLoading;
 
   const teams = data?.teams || [];
+  const currentUserId = data?.currentUserId;
 
   const filteredTeams = teams.filter(team => {
-    const matchesSearch = team.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const isCorrectTab = activeTab === 'myTeams' ? team.type === 'MY_TEAM' : team.type === 'OPPONENT';
-    return matchesSearch && isCorrectTab;
+    return team.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+           team.teamCode?.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   return (
@@ -22,15 +31,19 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
       <div className="p-5 border-b border-white/10 bg-black/40">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-xl font-black text-white tracking-tight italic uppercase">My Teams</h2>
-            <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] mt-0.5">Manage Your Squads</p>
+            <h2 className="text-xl font-black text-white tracking-tight italic uppercase">
+              {activeTab === 'myTeams' ? 'My Teams' : 'Opponents'}
+            </h2>
+            <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] mt-0.5">
+              {activeTab === 'myTeams' ? 'Manage Your Squads' : 'Rival Discovery'}
+            </p>
           </div>
           <button 
-            onClick={onCreateTeam}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-black text-xs font-black rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all hover:-translate-y-0.5"
+            onClick={activeTab === 'myTeams' ? onCreateTeam : () => setIsAddOpponentOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#CCFF00] text-black text-xs font-black rounded-xl shadow-lg shadow-[#CCFF00]/20 hover:bg-[#b8e600] transition-all hover:-translate-y-0.5"
           >
             <Plus size={16} />
-            <span className="uppercase tracking-widest">Create</span>
+            <span className="uppercase tracking-widest">{activeTab === 'myTeams' ? 'Create' : 'Add'}</span>
           </button>
         </div>
 
@@ -39,8 +52,8 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm" />
           <input 
             type="text" 
-            placeholder="Search teams..." 
-            className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
+            placeholder="Search teams or ID..." 
+            className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-[#CCFF00]/50 transition-colors uppercase font-bold tracking-widest"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -51,7 +64,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
           <button 
             onClick={() => setActiveTab('myTeams')}
             className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-              activeTab === 'myTeams' ? 'bg-primary text-black shadow-lg' : 'text-white/40 hover:text-white'
+              activeTab === 'myTeams' ? 'bg-[#CCFF00] text-black shadow-lg' : 'text-white/40 hover:text-white'
             }`}
           >
             My Teams
@@ -59,10 +72,10 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
           <button 
             onClick={() => setActiveTab('opponentTeams')}
             className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-              activeTab === 'opponentTeams' ? 'bg-primary text-black shadow-lg' : 'text-white/40 hover:text-white'
+              activeTab === 'opponentTeams' ? 'bg-[#CCFF00] text-black shadow-lg' : 'text-white/40 hover:text-white'
             }`}
           >
-            Opponent
+            Opponents
           </button>
         </div>
       </div>
@@ -86,33 +99,36 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                 onClick={() => onSelectTeam(team)}
                 className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all group ${
                   isSelected 
-                    ? 'bg-primary/10 border border-primary/20 shadow-[0_0_15px_rgba(var(--primary-rgb),0.1)]' 
+                    ? 'bg-[#CCFF00]/10 border border-[#CCFF00]/20 shadow-[0_0_15px_rgba(204,255,0,0.1)]' 
                     : 'hover:bg-white/[0.03] border border-transparent'
                 }`}
               >
                 <div className="relative shrink-0">
-                  <div className={`w-12 h-12 rounded-2xl bg-black border-2 flex items-center justify-center text-primary font-bold overflow-hidden transition-colors ${isSelected ? 'border-primary' : 'border-white/10 group-hover:border-primary/50'}`}>
+                  <div className={`w-12 h-12 rounded-2xl bg-black border-2 flex items-center justify-center text-[#CCFF00] font-bold overflow-hidden transition-colors ${isSelected ? 'border-[#CCFF00]' : 'border-white/10 group-hover:border-[#CCFF00]/50'}`}>
                     {team.image ? (
                       <img src={team.image} alt={team.name} className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-lg">{team.name.charAt(0).toUpperCase()}</span>
                     )}
                   </div>
-                  <div className="absolute -bottom-1 -right-1 bg-black text-primary text-[8px] px-1.5 py-0.5 rounded-full border border-white/10 font-black uppercase">
+                  <div className="absolute -bottom-1 -right-1 bg-black text-[#CCFF00] text-[8px] px-1.5 py-0.5 rounded-full border border-white/10 font-black uppercase">
                     {team.sport?.slice(0, 3)}
                   </div>
                 </div>
                 <div className="flex-1 text-left overflow-hidden">
-                  <h4 className={`font-black truncate transition-colors ${isSelected ? 'text-primary' : 'text-white/80 group-hover:text-white'}`}>
-                    {team.name}
-                  </h4>
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className={`font-black truncate transition-colors ${isSelected ? 'text-[#CCFF00]' : 'text-white/80 group-hover:text-white'}`}>
+                      {team.name}
+                    </h4>
+                    <span className="text-[8px] font-black text-white/20 uppercase bg-white/5 px-1 rounded">{team.teamCode}</span>
+                  </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">{team.sport}</span>
                     <span className="w-1 h-1 rounded-full bg-white/20" />
                     <span className="text-[10px] text-white/40 font-bold">{team.members?.length + (team.customMembers?.length || 0)} Members</span>
                   </div>
                 </div>
-                <ChevronRight size={14} className={`transition-all ${isSelected ? 'text-primary' : 'text-white/20 -rotate-90 md:rotate-0'}`} />
+                <ChevronRight size={14} className={`transition-all ${isSelected ? 'text-[#CCFF00]' : 'text-white/20 -rotate-90 md:rotate-0'}`} />
               </motion.button>
             );
           })
@@ -122,10 +138,16 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
               <Users className="text-white/10 text-2xl" />
             </div>
             <p className="text-white/40 text-sm font-bold">No teams found</p>
-            <p className="text-white/20 text-xs mt-1">Start by creating your first squad.</p>
+            <p className="text-white/20 text-xs mt-1">Start by creating your first squad or adding an opponent.</p>
           </div>
         )}
       </div>
+
+      <AddOpponentModal 
+        isOpen={isAddOpponentOpen}
+        onClose={() => setIsAddOpponentOpen(false)}
+        myTeams={teams.filter(t => t.members?.some(m => m.user === currentUserId || m._id === currentUserId || (typeof m === 'string' && m === currentUserId)))}
+      />
     </div>
   );
 };

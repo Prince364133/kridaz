@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCreateTeamMutation } from '../../../redux/api/teamApi';
-import { FaTimes, FaCamera, FaSpinner, FaUsers } from 'react-icons/fa';
+import { X, Camera, Loader2, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 
@@ -55,10 +55,10 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
         {/* Header */}
         <div className="p-6 border-b border-white/10 flex items-center justify-between">
           <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            <FaUsers className="text-primary" /> Create New Team
+            <Users className="text-primary" /> Create New Team
           </h3>
           <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full text-white/50 hover:text-white transition-colors">
-            <FaTimes />
+            <X size={20} />
           </button>
         </div>
 
@@ -67,7 +67,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
           <div className="flex justify-center mb-6">
             <div className="relative">
               <div className="w-24 h-24 rounded-2xl bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center group cursor-pointer hover:border-primary/50 transition-colors">
-                <FaCamera className="text-white/20 group-hover:text-primary transition-colors text-2xl" />
+                <Camera className="text-white/20 group-hover:text-primary transition-colors text-2xl" />
               </div>
               <p className="text-[10px] text-center text-white/30 mt-2">Upload Team Logo</p>
             </div>
@@ -167,7 +167,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
             disabled={isLoading}
             className="w-full bg-primary hover:bg-primary-hover text-black font-bold py-3.5 rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 mt-4"
           >
-            {isLoading ? <FaSpinner className="animate-spin" /> : 'Create Team'}
+            {isLoading ? <Loader2 className="animate-spin" /> : 'Create Team'}
           </button>
         </form>
       </motion.div>

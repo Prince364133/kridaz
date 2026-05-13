@@ -404,6 +404,22 @@ export const joinHostedGame = async (req, res) => {
       }], { session });
 
       await game.save({ session });
+
+      // Notify Host
+      try {
+        await createNotification({
+          recipient: game.host,
+          sender: userId,
+          type: "GAME_JOIN_REQUEST",
+          title: "New Join Request",
+          message: `A player has requested to join your ${game.gameType} match.`,
+          relatedId: game._id,
+          onModel: "HostedGame"
+        });
+      } catch (notifErr) {
+        console.error("Failed to send join request notification:", notifErr);
+      }
+
       return true;
     });
 
@@ -457,13 +473,32 @@ export const approveJoinRequest = async (req, res) => {
         }, { session });
       }
 
-      // Update transaction to SUCCESS
+      // Update player transaction to SUCCESS
       await WalletTransaction.findOneAndUpdate(
         { user: playerUserId, amount: game.perPlayerCharge, status: "RESERVED", type: "JOIN_GAME" },
         { status: "SUCCESS", description: `Joined ${game.gameType} game successfully` },
         { session, sort: { createdAt: -1 } }
       );
 
+      // Transfer coins to Host (to offset hosting cost)
+      const updatedHost = await User.findByIdAndUpdate(hostId, { 
+        $inc: { walletBalance: game.perPlayerCharge } 
+      }, { session });
+
+      if (!updatedHost) {
+        await Owner.findByIdAndUpdate(hostId, { 
+          $inc: { walletBalance: game.perPlayerCharge } 
+        }, { session });
+      }
+
+      // Add Host transaction record
+      await WalletTransaction.create([{
+        user: hostId,
+        amount: game.perPlayerCharge,
+        type: "SLOT_INCOME",
+        status: "SUCCESS",
+        description: `Received payment from player for slot in ${game.gameType} game`
+      }], { session });
 
       await game.save({ session });
     });

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useInviteMembersMutation, useGetNetworkQuery } from '../../../redux/api/teamApi';
 import { 
-  FaTimes, FaQrcode, FaLink, FaUserFriends, FaUserPlus, 
-  FaShareAlt, FaCopy, FaCheck, FaSpinner, FaSearch 
-} from 'react-icons/fa';
+  X, QrCode, Link2, Users, UserPlus, 
+  Share2, Copy, Check, Loader2, Search 
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useSelector } from 'react-redux';
@@ -64,11 +64,11 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
   if (!isOpen) return null;
 
   const tabs = [
-    { id: 'link', label: 'Link', icon: <FaLink /> },
-    { id: 'qr', label: 'QR Code', icon: <FaQrcode /> },
-    { id: 'followers', label: 'Followers', icon: <FaUserFriends /> },
-    { id: 'following', label: 'Following', icon: <FaUserFriends /> },
-    { id: 'custom', label: 'Custom', icon: <FaUserPlus /> },
+    { id: 'link', label: 'Link', icon: <Link2 size={16} /> },
+    { id: 'qr', label: 'QR Code', icon: <QrCode size={16} /> },
+    { id: 'followers', label: 'Followers', icon: <Users size={16} /> },
+    { id: 'following', label: 'Following', icon: <Users size={16} /> },
+    { id: 'custom', label: 'Custom', icon: <UserPlus size={16} /> },
   ];
 
   return (
@@ -94,7 +94,7 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
             <p className="text-white/40 text-xs mt-1">Invite players to join <span className="text-primary font-bold">{teamName}</span></p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full text-white/50 hover:text-white transition-colors">
-            <FaTimes />
+            <X size={20} />
           </button>
         </div>
 
@@ -126,7 +126,7 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
                 className="w-full space-y-6"
               >
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-2xl mx-auto">
-                  <FaLink />
+                  <Link2 />
                 </div>
                 <div>
                   <h4 className="text-white font-bold mb-2">Share Invitation Link</h4>
@@ -142,7 +142,7 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
                     onClick={handleCopyLink}
                     className="p-3 bg-primary text-black rounded-xl hover:bg-primary-hover transition-all"
                   >
-                    {copied ? <FaCheck /> : <FaCopy />}
+                    {copied ? <Check size={16} /> : <Copy size={16} />}
                   </button>
                 </div>
               </motion.div>
@@ -157,7 +157,7 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
                 <div className="p-4 bg-white rounded-3xl mx-auto w-48 h-48 flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.1)]">
                   {/* Real QR would go here */}
                   <div className="w-full h-full border-4 border-black/5 flex flex-col items-center justify-center">
-                    <FaQrcode className="text-black text-6xl" />
+                    <QrCode className="text-black text-6xl" />
                     <p className="text-[10px] text-black/50 font-bold mt-2">SCAN TO JOIN</p>
                   </div>
                 </div>
@@ -166,7 +166,7 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
                   <p className="text-white/40 text-sm">Players can scan this code with their camera to join your team.</p>
                 </div>
                 <button className="flex items-center gap-2 text-primary font-bold text-sm mx-auto hover:underline">
-                  <FaShareAlt /> Share Image
+                  <Share2 size={16} /> Share Image
                 </button>
               </motion.div>
             )}
@@ -178,7 +178,7 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
                 className="w-full h-full flex flex-col gap-4"
               >
                 <div className="relative">
-                  <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={14} />
                   <input 
                     type="text" 
                     placeholder={`Search ${activeTab}...`} 
@@ -190,7 +190,7 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
                 <div className="flex-1 max-h-64 overflow-y-auto custom-scrollbar space-y-2 text-left">
                   {isLoadingNetwork ? (
                     <div className="flex justify-center py-10">
-                      <FaSpinner className="animate-spin text-primary" />
+                      <Loader2 className="animate-spin text-primary" />
                     </div>
                   ) : (networkData?.[activeTab] || [])
                     .filter(p => p.name?.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -210,7 +210,7 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
                               onClick={() => handleInvitePlayer(person)}
                               className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary hover:text-black transition-all"
                             >
-                              <FaUserPlus />
+                              <UserPlus size={16} />
                             </button>
                           </div>
                         ))
@@ -254,7 +254,7 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
                   disabled={isLoading}
                   className="w-full bg-primary hover:bg-primary-hover text-black font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 mt-4"
                 >
-                  {isLoading ? <FaSpinner className="animate-spin" /> : 'Send Invite'}
+                  {isLoading ? <Loader2 className="animate-spin" /> : 'Send Invite'}
                 </button>
                 <p className="text-[10px] text-white/30 italic">An invitation link will be sent to the player.</p>
               </motion.div>

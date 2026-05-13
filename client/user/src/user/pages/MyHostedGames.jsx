@@ -201,6 +201,107 @@ const MyHostedGames = () => {
                 </div>
               </div>
 
+              {/* Player Slot Management Section */}
+              <div className="p-6 border-t border-neutral-800">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-widest flex items-center gap-2">
+                    <Users size={16} /> Player Slot Management
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Team A Slots */}
+                  <div className="space-y-3">
+                    <h4 className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-2 px-2">TEAM A SLOTS</h4>
+                    {game.teams?.teamA?.map((slot, index) => (
+                      <div key={`A-${index}`} className="flex items-center justify-between p-3 bg-neutral-900 rounded-2xl border border-neutral-800/50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center overflow-hidden">
+                            {slot.user?.profilePicture ? (
+                              <img src={slot.user.profilePicture} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <User size={14} className="text-neutral-500" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-white uppercase tracking-tighter">
+                              {slot.user?.name || "OPEN SLOT"}
+                            </p>
+                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase ${
+                              slot.status === 'RESERVED' ? 'bg-amber-500/10 text-amber-500' : 
+                              slot.status === 'JOINED' ? 'bg-green-500/10 text-green-500' : 'text-neutral-600'
+                            }`}>
+                              {slot.status || 'EMPTY'}
+                            </span>
+                          </div>
+                        </div>
+                        {slot.status === 'RESERVED' && (
+                          <div className="flex gap-1">
+                            <button 
+                              onClick={() => handleReject(game._id, 'teamA', index)}
+                              className="p-1.5 hover:bg-red-500/10 text-neutral-500 hover:text-red-500 rounded-lg transition-all"
+                            >
+                              <X size={14} />
+                            </button>
+                            <button 
+                              onClick={() => handleApprove(game._id, 'teamA', index)}
+                              className="p-1.5 bg-yellow-500 text-black rounded-lg hover:scale-105 transition-all"
+                            >
+                              <Check size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Team B Slots */}
+                  <div className="space-y-3">
+                    <h4 className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-2 px-2">TEAM B SLOTS</h4>
+                    {game.teams?.teamB?.map((slot, index) => (
+                      <div key={`B-${index}`} className="flex items-center justify-between p-3 bg-neutral-900 rounded-2xl border border-neutral-800/50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center overflow-hidden">
+                            {slot.user?.profilePicture ? (
+                              <img src={slot.user.profilePicture} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <User size={14} className="text-neutral-500" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-white uppercase tracking-tighter">
+                              {slot.user?.name || "OPEN SLOT"}
+                            </p>
+                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase ${
+                              slot.status === 'RESERVED' ? 'bg-amber-500/10 text-amber-500' : 
+                              slot.status === 'JOINED' ? 'bg-green-500/10 text-green-500' : 'text-neutral-600'
+                            }`}>
+                              {slot.status || 'EMPTY'}
+                            </span>
+                          </div>
+                        </div>
+                        {slot.status === 'RESERVED' && (
+                          <div className="flex gap-1">
+                            <button 
+                              onClick={() => handleReject(game._id, 'teamB', index)}
+                              className="p-1.5 hover:bg-red-500/10 text-neutral-500 hover:text-red-500 rounded-lg transition-all"
+                            >
+                              <X size={14} />
+                            </button>
+                            <button 
+                              onClick={() => handleApprove(game._id, 'teamB', index)}
+                              className="p-1.5 bg-yellow-500 text-black rounded-lg hover:scale-105 transition-all"
+                            >
+                              <Check size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
                {/* Professional Requests Section */}
                <div id={`pro-services-${game._id}`} className="p-6 bg-neutral-900/30 border-t border-neutral-800">
                  <div className="flex items-center justify-between mb-4">

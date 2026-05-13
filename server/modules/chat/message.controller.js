@@ -303,7 +303,7 @@ export const deleteMessages = async (req, res) => {
     return res.status(400).json({ message: "Invalid message IDs" });
   }
 
-  const { currentUserId, currentUserModel } = resolveCurrentUser(req);
+  const { currentUserId, currentUserModel, allUserIds } = resolveCurrentUser(req);
 
   try {
     if (deleteType === "everyone") {
