@@ -104,7 +104,7 @@ const UserFooter = () => {
               { name: "FAQ", path: "#" },
               { name: "Terms of Service", path: "/terms-of-service" },
               { name: "Privacy Policy", path: "/privacy-policy" },
-              { name: "User Data Deletion", path: "/user-data-deletion" },
+              { name: "Data Deletion Instructions", path: "/data-deletion-instructions" },
             ].map((link) => (
               <Link
                 key={link.name}

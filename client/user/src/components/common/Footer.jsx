@@ -16,8 +16,8 @@ const Footer = () => {
           <Link to="/terms-of-service" className="text-gray-400 hover:text-primary transition-colors text-xs uppercase tracking-wider">
             Terms of Service
           </Link>
-          <Link to="/user-data-deletion" className="text-gray-400 hover:text-primary transition-colors text-xs uppercase tracking-wider">
-            User Data Deletion
+          <Link to="/data-deletion-instructions" className="text-gray-400 hover:text-primary transition-colors text-xs uppercase tracking-wider">
+            Data Deletion Instructions
           </Link>
         </div>
         <p className="text-gray-600 text-[10px] font-mono uppercase tracking-[0.2em]">

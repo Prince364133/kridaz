@@ -122,7 +122,7 @@ const PartnerFooter = () => {
             <div className="flex gap-6">
               <Link to="/privacy-policy" className="text-xs text-white/30 hover:text-white transition-colors">Privacy Policy</Link>
               <Link to="/terms-of-service" className="text-xs text-white/30 hover:text-white transition-colors">Terms of Service</Link>
-              <Link to="/user-data-deletion" className="text-xs text-white/30 hover:text-white transition-colors">User Data Deletion</Link>
+              <Link to="/data-deletion-instructions" className="text-xs text-white/30 hover:text-white transition-colors">Data Deletion Instructions</Link>
               <Link to="#" className="text-xs text-white/30 hover:text-white transition-colors">Cookie Policy</Link>
             </div>
           </div>

@@ -48,7 +48,7 @@ import BusinessRegistration from "@user/pages/business/BusinessRegistration";
 // Legal Pages
 import PrivacyPolicy from "@user/pages/legal/PrivacyPolicy";
 import TermsOfService from "@user/pages/legal/TermsOfService";
-import UserDataDeletion from "@user/pages/legal/UserDataDeletion";
+import DataDeletionInstructions from "@user/pages/legal/DataDeletionInstructions";
 // Owner Portal Pages
 import PartnersGateway from "@pages/PartnersGateway";
 import VenueOwnerSignUp from "@pages/VenueOwnerSignUp";
@@ -369,7 +369,7 @@ const router = createBrowserRouter([
       { path: "live-score/:matchId", element: <LiveScoreboard /> },
       { path: "privacy-policy", element: <PrivacyPolicy /> },
       { path: "terms-of-service", element: <TermsOfService /> },
-      { path: "user-data-deletion", element: <UserDataDeletion /> },
+      { path: "data-deletion-instructions", element: <DataDeletionInstructions /> },
       { path: "*", element: <NotFound /> },
     ],
   },

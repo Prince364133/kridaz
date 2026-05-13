@@ -31,7 +31,7 @@ import MyTeams from "./pages/MyTeams";
 // Legal Pages
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import TermsOfService from "./pages/legal/TermsOfService";
-import UserDataDeletion from "./pages/legal/UserDataDeletion";
+import DataDeletionInstructions from "./pages/legal/DataDeletionInstructions";
 
 
 // Owner Portal Imports (via @owner alias)
@@ -137,7 +137,7 @@ const router = createBrowserRouter([
       { path: "my-teams", element: <ProtectedRoute><MyTeams /></ProtectedRoute> },
       { path: "privacy-policy", element: <PrivacyPolicy /> },
       { path: "terms-of-service", element: <TermsOfService /> },
-      { path: "user-data-deletion", element: <UserDataDeletion /> },
+      { path: "data-deletion-instructions", element: <DataDeletionInstructions /> },
       { path: "*", element: <NotFound /> },
     ],
   },
