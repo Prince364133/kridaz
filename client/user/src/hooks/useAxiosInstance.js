@@ -5,7 +5,7 @@ import { logout } from "../redux/slices/authSlice";
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "",
   withCredentials: true,
-  timeout: 10000,
+  timeout: 30000,
 });
 
 // Request interceptor: attach JWT token from Redux-Persist storage (Optional fallback)

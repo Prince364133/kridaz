@@ -48,6 +48,10 @@ const useLoginForm = () => {
       navigate("/coach");
     } else if (normalizedRole === "umpire") {
       navigate("/umpire");
+    } else if (normalizedRole === "scorer") {
+      navigate("/scorer");
+    } else if (normalizedRole === "streamer") {
+      navigate("/streamer");
     } else {
       navigate("/");
     }
