@@ -39,7 +39,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
  return (
  <div
  onClick={() => navigate(to)}
- className="group relative h-[280px] md:h-[360px] w-full rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden cursor-pointer bg-[#0d0d0d] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 hover:border-[#84CC16]/30"
+ className="group relative h-[280px] md:h-[360px] w-full rounded-[1.25rem] md:rounded-[2rem] overflow-hidden cursor-pointer bg-[#0d0d0d] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 hover:border-[#84CC16]/30"
  >
  {/* ── Background Image ── */}
  <div className="absolute inset-0">
@@ -111,7 +111,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
  <div className="space-y-3 md:space-y-4">
  {/* Name & Location */}
  <div className="space-y-1 md:space-y-1.5">
- <h3 className="text-lg md:text-2xl font-bold text-white tracking-tight leading-tight group-hover:text-[#84CC16] transition-colors line-clamp-1">
+ <h3 className="text-base md:text-xl font-bold text-white tracking-tight leading-tight group-hover:text-[#84CC16] transition-colors line-clamp-1">
  {turf.name}
  </h3>
  <div className="flex items-center justify-between gap-2">

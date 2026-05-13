@@ -519,8 +519,8 @@ export default function Home() {
  </button>
  </div>
  ) : (
- <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-5">
- {(turfs || []).slice(0, 10).map((t, i) => (
+ <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+ {(turfs || []).slice(0, 8).map((t, i) => (
  <TurfCard 
  key={t._id} 
  turf={t} 
@@ -633,22 +633,15 @@ export default function Home() {
  </div>
  </div>
  
- <p className="text-white/30 text-[10px] font-medium leading-tight mb-4 line-clamp-2">
- Competitive {p.preferredSport || "Athlete"} • {p.city || "Nearby"}
- </p>
+  <p className="text-white/30 text-[10px] font-medium leading-tight mb-4 line-clamp-2 flex items-center gap-1.5">
+  <MapPin size={10} className="text-[#84CC16]" /> {p.distance ? `${(p.distance/1000).toFixed(1)} km Away` : (p.city || "Nearby Player")}
+  </p>
 
  {/* Bottom Bar */}
  <div className="flex items-center justify-between">
- <div className="flex items-center gap-3">
- <div className="flex items-center gap-1 text-white/20">
- <Users size={12} />
- <span className="text-[10px] font-bold">{p.followersCount || Math.floor(Math.random() * 500) + 50}</span>
- </div>
- <div className="flex items-center gap-1 text-white/20">
- <LayoutGrid size={12} />
- <span className="text-[10px] font-bold">{p.postsCount || Math.floor(Math.random() * 100) + 5}</span>
- </div>
- </div>
+ <div className="px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black text-white/50 uppercase tracking-widest truncate max-w-[80px]">
+  {p.preferredSport || "ATHLETE"}
+  </div>
 
  <button 
  onClick={(e) => handleFollowToggle(e, p)}

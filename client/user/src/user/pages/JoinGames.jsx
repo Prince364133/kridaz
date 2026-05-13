@@ -394,12 +394,12 @@ const JoinGames = () => {
  animate={{ opacity: 1, y: 0 }}
  whileHover={{ y: -6, scale: 1.01 }}
  transition={{ duration: 0.3 }}
- className="group relative rounded-[24px] overflow-hidden cursor-pointer shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/5 hover:border-[#CCFF00]/30 transition-all duration-500"
+ className="group relative rounded-[32px] overflow-hidden cursor-pointer bg-[#0A0A0A] border border-white/5 hover:border-[#CCFF00]/30 transition-all duration-500"
  style={{ minHeight: '480px' }}
  onClick={() => setSelectedGame(game)}
  >
- {/* ── Background: Split Team Images ── */}
- <div className="absolute inset-0 z-0 overflow-hidden">
+ {/* ── Background: Split Team Images (Top Half) ── */}
+ <div className="absolute inset-x-0 top-0 h-[48%] z-0 overflow-hidden">
  {/* Team A — Left Half */}
  <div className="absolute inset-y-0 left-0 w-1/2 overflow-hidden">
  <img
@@ -453,14 +453,7 @@ const JoinGames = () => {
  )}
  </div>
  <div className="flex items-center gap-1.5">
- <button
- onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(game.shortId || game._id); toast.success('Game ID copied!'); }}
- className="px-2.5 py-1 bg-black/50 border border-white/15 hover:border-[#CCFF00]/40 rounded-full inline-flex items-center gap-1 transition-all"
- title="Click to copy"
- >
- <Info size={9} className="text-[#CCFF00]/70" />
- <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">ID: {game.shortId || game._id.slice(-6).toUpperCase()}</span>
- </button>
+
  <button
  onClick={(e) => { 
  e.stopPropagation();
@@ -522,48 +515,38 @@ const JoinGames = () => {
  </div>
 
  {/* Team Names or Game Title */}
- <h3 className="font-black uppercase leading-none tracking-tighter text-white font-open-sans drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" style={{ fontSize: 'clamp(1.4rem, 4vw, 2.2rem)' }}>
+ <h3 className="flex items-center flex-wrap gap-x-3 font-black uppercase leading-none tracking-tighter text-white font-open-sans drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" style={{ fontSize: 'clamp(1.1rem, 3.5vw, 1.8rem)' }}>
  {game.gameMode === 'QUICK' ? (
  <>Casual <span className="text-[#CCFF00]">{game.gameType}</span> Match</>
  ) : (
- <>{game.teams?.teamA?.name}{' '}
- <span className="text-[#CCFF00] ">VS</span>{' '}
- {game.teams?.teamB?.name}</>
+ <div className="flex items-baseline gap-2 flex-wrap">
+ <span>{game.teams?.teamA?.name}</span>
+ <span className="text-[#CCFF00] text-sm">VS</span>
+ <span>{game.teams?.teamB?.name}</span>
+ </div>
  )}
  </h3>
 
- {/* Venue */}
- <div className="flex items-center gap-2 mt-3 text-white/70 text-xs font-medium">
- <MapPin size={13} className="text-[#CCFF00] shrink-0" />
- <span className="truncate">{game.ground?.name || 'Self-Arranged Venue'}</span>
- </div>
  </div>
 
  {/* Bottom Panel */}
  <div className="bg-black/60 backdrop-blur-md rounded-[16px] border border-white/10 p-4 space-y-4 mt-auto">
 
  {/* Date + Time boxes */}
- <div className="grid grid-cols-2 gap-3">
- <div className="bg-black/50 border border-[#CCFF00]/20 rounded-[12px] p-3">
- <div className="flex items-center gap-1.5 mb-1.5">
- <div className="w-6 h-6 rounded-lg bg-[#CCFF00]/10 border border-[#CCFF00]/20 flex items-center justify-center">
- <Calendar size={12} className="text-[#CCFF00]" />
+ {/* Consolidated Date & Time */}
+ <div className="bg-black/50 border border-[#CCFF00]/20 rounded-[12px] p-3 flex items-center justify-between">
+ <div className="flex items-center gap-3">
+ <div className="w-8 h-8 rounded-lg bg-[#CCFF00]/10 border border-[#CCFF00]/20 flex items-center justify-center">
+ <Calendar size={14} className="text-[#CCFF00]" />
  </div>
- </div>
- <p className="text-[7px] font-black text-[#CCFF00]/60 uppercase tracking-widest mb-0.5">Kickoff Date</p>
+ <div>
+ <p className="text-[7px] font-black text-[#CCFF00]/60 uppercase tracking-widest mb-0.5">Start Date & Time</p>
  <p className="text-[13px] font-black text-white">
- {new Date(game.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+ {new Date(game.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {game.time}
  </p>
  </div>
- <div className="bg-black/50 border border-[#CCFF00]/20 rounded-[12px] p-3">
- <div className="flex items-center gap-1.5 mb-1.5">
- <div className="w-6 h-6 rounded-lg bg-[#CCFF00]/10 border border-[#CCFF00]/20 flex items-center justify-center">
- <Clock size={12} className="text-[#CCFF00]" />
  </div>
- </div>
- <p className="text-[7px] font-black text-[#CCFF00]/60 uppercase tracking-widest mb-0.5">Precision Time</p>
- <p className="text-[13px] font-black text-white">{game.time}</p>
- </div>
+ <Clock size={14} className="text-[#CCFF00]/40" />
  </div>
 
  {/* Slots */}
@@ -589,6 +572,20 @@ const JoinGames = () => {
  </div>
  ))}
  </div>
+ </div>
+
+ {/* Venue & ID Row */}
+ <div className="flex items-center justify-between gap-3 pt-1 border-t border-white/5">
+ <div className="flex items-center gap-2 text-white/50 text-[10px] font-bold uppercase tracking-tight truncate max-w-[150px]">
+ <MapPin size={10} className="text-[#CCFF00] shrink-0" />
+ <span className="truncate">{game.ground?.name || 'Self-Arranged Venue'}</span>
+ </div>
+ <button
+ onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(game.shortId || game._id); toast.success('Game ID copied!'); }}
+ className="text-[8px] font-black text-white/30 hover:text-[#CCFF00] uppercase tracking-widest transition-colors flex items-center gap-1"
+ >
+ <Info size={8} /> ID: {game.shortId || game._id.slice(-6).toUpperCase()}
+ </button>
  </div>
 
  {/* Host + Join */}
