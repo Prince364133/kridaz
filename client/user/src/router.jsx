@@ -45,6 +45,10 @@ import UserUmpireLanding from "@user/pages/business/UmpireLanding";
 import UserStreamerLanding from "@user/pages/business/StreamerLanding";
 import UserScorerLanding from "@user/pages/business/ScorerLanding";
 import BusinessRegistration from "@user/pages/business/BusinessRegistration";
+// Legal Pages
+import PrivacyPolicy from "@user/pages/legal/PrivacyPolicy";
+import TermsOfService from "@user/pages/legal/TermsOfService";
+import UserDataDeletion from "@user/pages/legal/UserDataDeletion";
 // Owner Portal Pages
 import PartnersGateway from "@pages/PartnersGateway";
 import VenueOwnerSignUp from "@pages/VenueOwnerSignUp";
@@ -363,6 +367,9 @@ const router = createBrowserRouter([
       { path: "leaderboard", element: <Leaderboard /> },
       { path: "live-overlay/:matchId", element: <LiveOverlay /> },
       { path: "live-score/:matchId", element: <LiveScoreboard /> },
+      { path: "privacy-policy", element: <PrivacyPolicy /> },
+      { path: "terms-of-service", element: <TermsOfService /> },
+      { path: "user-data-deletion", element: <UserDataDeletion /> },
       { path: "*", element: <NotFound /> },
     ],
   },

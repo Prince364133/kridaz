@@ -1,16 +1,28 @@
 import React from 'react';
-import { FaUsers, FaUserPlus, FaTrophy, FaCalendarAlt, FaEnvelope, FaPhone, FaShieldAlt } from 'react-icons/fa';
+import { FaUsers, FaUserPlus, FaTrophy, FaCalendarAlt, FaEnvelope, FaPhone, FaShieldAlt, FaChevronRight } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
-const TeamDetails = ({ team, onInviteClick }) => {
+const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
   if (!team) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-[#0a0a0a]">
-        <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-6">
-          <FaUsers className="text-white/10 text-4xl" />
+      <div className="flex-1 flex flex-col items-center justify-center bg-[#0a0a0a] text-white/40 p-12">
+        <div className="w-24 h-24 rounded-[32px] bg-white/[0.03] border border-white/5 flex items-center justify-center mb-8 shadow-2xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <FaUsers className="text-white/20 text-4xl group-hover:text-primary/50 transition-colors duration-500 relative z-10" />
         </div>
-        <h2 className="text-2xl font-bold text-white mb-2">Select a Team</h2>
-        <p className="text-white/40 max-w-xs">Choose a team from the sidebar to view details, members, and manage invitations.</p>
+        <h2 className="text-3xl font-black text-white mb-3 tracking-tight italic uppercase">Select a Team</h2>
+        <p className="text-white/30 max-w-sm text-center text-sm font-medium leading-relaxed mb-10">
+          Choose a team from the sidebar to manage members, view stats, and organize your squad for upcoming matches.
+        </p>
+        
+        <button 
+          onClick={onCreateClick}
+          className="group relative px-8 py-4 bg-primary hover:bg-primary-hover text-black font-black rounded-2xl flex items-center gap-3 shadow-[0_10px_30px_rgba(var(--primary-rgb),0.2)] transition-all hover:-translate-y-1 active:translate-y-0 overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-[30deg]" />
+          <FaUserPlus className="text-lg" />
+          <span className="uppercase tracking-widest text-xs">Create New Team</span>
+        </button>
       </div>
     );
   }
@@ -19,7 +31,15 @@ const TeamDetails = ({ team, onInviteClick }) => {
   const customMembers = team.customMembers || [];
 
   return (
-    <div className="h-full flex flex-col bg-[#0a0a0a] overflow-hidden">
+    <div className="h-full flex flex-col bg-[#0a0a0a] overflow-hidden relative">
+      {/* Mobile Back Button */}
+      <button 
+        onClick={onBack}
+        className="md:hidden absolute top-4 left-4 z-20 p-2.5 bg-black/40 backdrop-blur-md rounded-xl text-white border border-white/10 shadow-lg"
+      >
+        <FaChevronRight className="rotate-180" />
+      </button>
+
       {/* Team Header Banner */}
       <div className="relative h-48 md:h-64 shrink-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/20 to-[#0a0a0a]" />

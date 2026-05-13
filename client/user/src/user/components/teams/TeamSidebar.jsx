@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useGetMyTeamsQuery } from '../../redux/api/teamApi';
-import { FaPlus, FaUsers, FaSearch, FaChevronRight } from 'react-icons/fa';
+import { useGetMyTeamsQuery } from '../../../redux/api/teamApi';
+import { Plus, Users, Search, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
@@ -12,56 +12,54 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
 
   const filteredTeams = teams.filter(team => {
     const matchesSearch = team.name.toLowerCase().includes(searchTerm.toLowerCase());
-    // For now, filtering is simple. In a real scenario, we might have a flag or logic to distinguish.
-    // If team.owner is current user, it's "myTeam". If not, but user is member, it's also "myTeam" for this view.
-    // Opponent teams might be teams the user has played against or public teams.
-    // Let's stick to the user's request: "filter between 'my teams' and 'opponent teams'".
-    // Since we don't have an "opponent" flag yet, let's assume all joined teams are "myTeams".
-    return matchesSearch;
+    const isCorrectTab = activeTab === 'myTeams' ? team.type === 'MY_TEAM' : team.type === 'OPPONENT';
+    return matchesSearch && isCorrectTab;
   });
 
   return (
-    <div className="flex flex-col h-full bg-[#121212] border-r border-white/10">
+    <div className="w-full md:w-80 h-full border-r border-white/10 bg-black/20 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-white/10">
+      <div className="p-5 border-b border-white/10 bg-black/40">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <FaUsers className="text-primary" /> Teams
-          </h2>
+          <div>
+            <h2 className="text-xl font-black text-white tracking-tight italic uppercase">My Teams</h2>
+            <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] mt-0.5">Manage Your Squads</p>
+          </div>
           <button 
             onClick={onCreateTeam}
-            className="p-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-full transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-black text-xs font-black rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all hover:-translate-y-0.5"
           >
-            <FaPlus />
+            <Plus size={16} />
+            <span className="uppercase tracking-widest">Create</span>
           </button>
         </div>
 
         {/* Search */}
         <div className="relative mb-4">
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm" />
           <input 
             type="text" 
             placeholder="Search teams..." 
-            className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-2 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
+            className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 p-1 bg-white/5 rounded-xl">
+        <div className="flex gap-2 p-1 bg-white/[0.03] rounded-xl border border-white/5">
           <button 
             onClick={() => setActiveTab('myTeams')}
-            className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all ${
-              activeTab === 'myTeams' ? 'bg-primary text-black shadow-lg' : 'text-white/50 hover:text-white'
+            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+              activeTab === 'myTeams' ? 'bg-primary text-black shadow-lg' : 'text-white/40 hover:text-white'
             }`}
           >
             My Teams
           </button>
           <button 
             onClick={() => setActiveTab('opponentTeams')}
-            className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all ${
-              activeTab === 'opponentTeams' ? 'bg-primary text-black shadow-lg' : 'text-white/50 hover:text-white'
+            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+              activeTab === 'opponentTeams' ? 'bg-primary text-black shadow-lg' : 'text-white/40 hover:text-white'
             }`}
           >
             Opponent
@@ -74,44 +72,57 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
         {isLoading ? (
           <div className="flex flex-col gap-2 p-2">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-16 bg-white/5 animate-pulse rounded-xl" />
+              <div key={i} className="h-20 bg-white/[0.03] animate-pulse rounded-2xl" />
             ))}
           </div>
         ) : filteredTeams.length > 0 ? (
-          filteredTeams.map((team) => (
-            <motion.button
-              key={team._id}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => onSelectTeam(team)}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
-                selectedTeamId === team._id 
-                  ? 'bg-primary/10 border border-primary/20 shadow-[0_0_15px_rgba(var(--primary-rgb),0.1)]' 
-                  : 'hover:bg-white/5 border border-transparent'
-              }`}
-            >
-              <div className="relative">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-primary border border-primary/20 overflow-hidden">
-                  {team.image ? (
-                    <img src={team.image} alt={team.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-lg font-bold">{team.name.charAt(0).toUpperCase()}</span>
-                  )}
+          filteredTeams.map((team) => {
+            const isSelected = selectedTeamId === team._id;
+            return (
+              <motion.button
+                key={team._id}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onSelectTeam(team)}
+                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all group ${
+                  isSelected 
+                    ? 'bg-primary/10 border border-primary/20 shadow-[0_0_15px_rgba(var(--primary-rgb),0.1)]' 
+                    : 'hover:bg-white/[0.03] border border-transparent'
+                }`}
+              >
+                <div className="relative shrink-0">
+                  <div className={`w-12 h-12 rounded-2xl bg-black border-2 flex items-center justify-center text-primary font-bold overflow-hidden transition-colors ${isSelected ? 'border-primary' : 'border-white/10 group-hover:border-primary/50'}`}>
+                    {team.image ? (
+                      <img src={team.image} alt={team.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-lg">{team.name.charAt(0).toUpperCase()}</span>
+                    )}
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 bg-black text-primary text-[8px] px-1.5 py-0.5 rounded-full border border-white/10 font-black uppercase">
+                    {team.sport?.slice(0, 3)}
+                  </div>
                 </div>
-              </div>
-              <div className="flex-1 text-left overflow-hidden">
-                <h4 className="text-white font-medium truncate">{team.name}</h4>
-                <p className="text-white/40 text-xs truncate capitalize">{team.sport} • {team.members?.length + (team.customMembers?.length || 0)} Members</p>
-              </div>
-              <FaChevronRight className={`text-xs transition-transform ${selectedTeamId === team._id ? 'text-primary rotate-0' : 'text-white/20 -rotate-90 md:rotate-0'}`} />
-            </motion.button>
-          ))
+                <div className="flex-1 text-left overflow-hidden">
+                  <h4 className={`font-black truncate transition-colors ${isSelected ? 'text-primary' : 'text-white/80 group-hover:text-white'}`}>
+                    {team.name}
+                  </h4>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">{team.sport}</span>
+                    <span className="w-1 h-1 rounded-full bg-white/20" />
+                    <span className="text-[10px] text-white/40 font-bold">{team.members?.length + (team.customMembers?.length || 0)} Members</span>
+                  </div>
+                </div>
+                <ChevronRight size={14} className={`transition-all ${isSelected ? 'text-primary' : 'text-white/20 -rotate-90 md:rotate-0'}`} />
+              </motion.button>
+            );
+          })
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-center p-4">
-            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-              <FaUsers className="text-white/20 text-2xl" />
+          <div className="flex flex-col items-center justify-center h-full text-center p-8">
+            <div className="w-16 h-16 rounded-[20px] bg-white/[0.03] border border-white/5 flex items-center justify-center mb-4">
+              <Users className="text-white/10 text-2xl" />
             </div>
-            <p className="text-white/40 text-sm">No teams found</p>
+            <p className="text-white/40 text-sm font-bold">No teams found</p>
+            <p className="text-white/20 text-xs mt-1">Start by creating your first squad.</p>
           </div>
         )}
       </div>

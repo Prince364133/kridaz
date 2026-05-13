@@ -25,6 +25,8 @@ import BusinessRegistration from "./pages/business/BusinessRegistration";
 import JoinGames from "./pages/JoinGames";
 import HostGame from "./pages/HostGame";
 import MyHostedGames from "./pages/MyHostedGames";
+import MyJoinedGames from "./pages/MyJoinedGames";
+import MyTeams from "./pages/MyTeams";
 
 // Legal Pages
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
@@ -131,6 +133,8 @@ const router = createBrowserRouter([
       { path: "join-games", element: <ProtectedRoute><JoinGames /></ProtectedRoute> },
       { path: "host-game", element: <ProtectedRoute><HostGame /></ProtectedRoute> },
       { path: "my-hosted-games", element: <ProtectedRoute><MyHostedGames /></ProtectedRoute> },
+      { path: "my-joined-games", element: <ProtectedRoute><MyJoinedGames /></ProtectedRoute> },
+      { path: "my-teams", element: <ProtectedRoute><MyTeams /></ProtectedRoute> },
       { path: "privacy-policy", element: <PrivacyPolicy /> },
       { path: "terms-of-service", element: <TermsOfService /> },
       { path: "user-data-deletion", element: <UserDataDeletion /> },

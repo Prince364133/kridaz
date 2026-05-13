@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCreateTeamMutation } from '../../redux/api/teamApi';
+import { useCreateTeamMutation } from '../../../redux/api/teamApi';
 import { FaTimes, FaCamera, FaSpinner, FaUsers } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
@@ -12,7 +12,8 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
     sport: 'CRICKET',
     captainName: '',
     captainPhone: '',
-    image: ''
+    image: '',
+    type: 'MY_TEAM' // 'MY_TEAM' or 'OPPONENT'
   });
 
   const handleChange = (e) => {
@@ -85,6 +86,28 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                 required
               />
             </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-white/50 uppercase tracking-wider ml-1">Team Type</label>
+              <div className="flex gap-2 p-1 bg-white/5 rounded-xl border border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, type: 'MY_TEAM' })}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${formData.type === 'MY_TEAM' ? 'bg-primary text-black' : 'text-white/50 hover:text-white'}`}
+                >
+                  My Team
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, type: 'OPPONENT' })}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${formData.type === 'OPPONENT' ? 'bg-primary text-black' : 'text-white/50 hover:text-white'}`}
+                >
+                  Opponent
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-xs font-medium text-white/50 uppercase tracking-wider ml-1">Sport</label>
               <select 

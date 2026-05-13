@@ -360,19 +360,34 @@ export const joinHostedGame = async (req, res) => {
         throw error;
       }
 
-      // Update slot to PENDING
-      const teamKey = team === "A" ? "teamA" : "teamB";
-      if (game.teams[teamKey].slots[slotIndex].status !== "OPEN") {
-        const error = new Error("Slot already taken or pending.");
-        error.status = 400;
-        throw error;
-      }
+      if (game.gameMode === "QUICK") {
+        if (!game.quickSlots[slotIndex]) throw new Error("Invalid slot index");
+        if (game.quickSlots[slotIndex].status !== "OPEN") {
+          const error = new Error("Slot already taken or pending.");
+          error.status = 400;
+          throw error;
+        }
 
-      game.teams[teamKey].slots[slotIndex] = {
-        user: userId,
-        role: role,
-        status: "PENDING"
-      };
+        game.quickSlots[slotIndex].user = userId;
+        game.quickSlots[slotIndex].role = role || "Player";
+        game.quickSlots[slotIndex].status = "PENDING";
+        game.markModified("quickSlots");
+      } else {
+        const teamKey = team === "A" ? "teamA" : "teamB";
+        if (!game.teams[teamKey].slots[slotIndex]) throw new Error("Invalid slot index");
+        if (game.teams[teamKey].slots[slotIndex].status !== "OPEN") {
+          const error = new Error("Slot already taken or pending.");
+          error.status = 400;
+          throw error;
+        }
+
+        game.teams[teamKey].slots[slotIndex] = {
+          user: userId,
+          role: role,
+          status: "PENDING"
+        };
+        game.markModified(`teams.${teamKey}.slots`);
+      }
 
       // Reserve coins for player
       const updatedPlayer = await User.findByIdAndUpdate(userId, { $inc: { reservedBalance: game.perPlayerCharge } }, { session });
@@ -409,11 +424,21 @@ export const approveJoinRequest = async (req, res) => {
       const game = await HostedGame.findOne({ _id: gameId, host: hostId });
       if (!game) throw new Error("Unauthorized or game not found");
 
-      const teamKey = team === "A" ? "teamA" : "teamB";
-      const slot = game.teams[teamKey].slots[slotIndex];
-      if (slot.status !== "PENDING") throw new Error("No pending request for this slot");
-
-      const playerUserId = slot.user;
+      let playerUserId;
+      if (game.gameMode === "QUICK") {
+        const slot = game.quickSlots[slotIndex];
+        if (!slot || slot.status !== "PENDING") throw new Error("No pending request for this slot");
+        playerUserId = slot.user;
+        game.quickSlots[slotIndex].status = "JOINED";
+        game.markModified("quickSlots");
+      } else {
+        const teamKey = team === "A" ? "teamA" : "teamB";
+        const slot = game.teams[teamKey].slots[slotIndex];
+        if (!slot || slot.status !== "PENDING") throw new Error("No pending request for this slot");
+        playerUserId = slot.user;
+        game.teams[teamKey].slots[slotIndex].status = "JOINED";
+        game.markModified(`teams.${teamKey}.slots`);
+      }
 
       // Deduct coins from player
       const updatedFinalPlayer = await User.findByIdAndUpdate(playerUserId, { 
@@ -439,8 +464,6 @@ export const approveJoinRequest = async (req, res) => {
         { session, sort: { createdAt: -1 } }
       );
 
-      // Update slot status
-      game.teams[teamKey].slots[slotIndex].status = "JOINED";
 
       await game.save({ session });
     });
@@ -482,11 +505,29 @@ export const rejectJoinRequest = async (req, res) => {
       const game = await HostedGame.findOne({ _id: gameId, host: hostId });
       if (!game) throw new Error("Unauthorized or game not found");
 
-      const teamKey = team === "A" ? "teamA" : "teamB";
-      const slot = game.teams[teamKey].slots[slotIndex];
-      if (slot.status !== "PENDING") throw new Error("No pending request for this slot");
-
-      const playerUserId = slot.user;
+      let playerUserId;
+      if (game.gameMode === "QUICK") {
+        const slot = game.quickSlots[slotIndex];
+        if (!slot || slot.status !== "PENDING") throw new Error("No pending request for this slot");
+        playerUserId = slot.user;
+        game.quickSlots[slotIndex] = {
+          user: null,
+          role: "Player",
+          status: "OPEN"
+        };
+        game.markModified("quickSlots");
+      } else {
+        const teamKey = team === "A" ? "teamA" : "teamB";
+        const slot = game.teams[teamKey].slots[slotIndex];
+        if (!slot || slot.status !== "PENDING") throw new Error("No pending request for this slot");
+        playerUserId = slot.user;
+        game.teams[teamKey].slots[slotIndex] = {
+          user: null,
+          role: "Player",
+          status: "OPEN"
+        };
+        game.markModified(`teams.${teamKey}.slots`);
+      }
 
       // Release reserved coins for player
       const updatedPlayer = await User.findByIdAndUpdate(playerUserId, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });
@@ -501,12 +542,6 @@ export const rejectJoinRequest = async (req, res) => {
         { session, sort: { createdAt: -1 } }
       );
 
-      // Reset slot to OPEN
-      game.teams[teamKey].slots[slotIndex] = {
-        user: null,
-        role: "",
-        status: "OPEN"
-      };
 
       await game.save({ session });
     });
@@ -540,7 +575,12 @@ export const cancelHostedGame = async (req, res) => {
       }
 
       // Release reserved coins for all PENDING players
-      const allSlots = [...game.teams.teamA.slots, ...game.teams.teamB.slots];
+      let allSlots = [];
+      if (game.gameMode === "QUICK") {
+        allSlots = game.quickSlots || [];
+      } else {
+        allSlots = [...(game.teams?.teamA?.slots || []), ...(game.teams?.teamB?.slots || [])];
+      }
       for (const slot of allSlots) {
         if (slot.status === "PENDING" && slot.user) {
           const updatedPlayer = await User.findByIdAndUpdate(slot.user, { $inc: { reservedBalance: -game.perPlayerCharge } }, { session });

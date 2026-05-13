@@ -51,6 +51,7 @@ const MyTeams = () => {
           team={selectedTeam} 
           onBack={() => setSelectedTeam(null)} 
           onInviteClick={() => setIsInviteModalOpen(true)}
+          onCreateClick={() => setIsCreateModalOpen(true)}
         />
       </div>
 
@@ -58,7 +59,10 @@ const MyTeams = () => {
       <CreateTeamModal 
         isOpen={isCreateModalOpen} 
         onClose={() => setIsCreateModalOpen(false)} 
-        onSuccess={(newTeam) => setSelectedTeam(newTeam)}
+        onSuccess={(newTeam) => {
+          setSelectedTeam(newTeam);
+          setIsInviteModalOpen(true);
+        }}
       />
 
       <InviteMemberModal 

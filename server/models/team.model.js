@@ -5,9 +5,18 @@ const teamSchema = new mongoose.Schema(
     name: { type: String, required: true },
     description: { type: String },
     sportType: { type: String, required: true },
-    captainName: { type: String, required: true },
+    captainName: { type: String },
     captainPhone: { type: String },
+    teamCode: { type: String, unique: true, sparse: true },
     owner: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // The user who created the team
+    opponents: [{ type: mongoose.Schema.Types.ObjectId, ref: "Team" }],
+    opponentRequests: [
+      {
+        from: { type: mongoose.Schema.Types.ObjectId, ref: "Team" },
+        status: { type: String, enum: ["PENDING", "ACCEPTED", "REJECTED"], default: "PENDING" },
+        createdAt: { type: Date, default: Date.now }
+      }
+    ],
     members: [
       {
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
