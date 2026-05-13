@@ -38,7 +38,7 @@ const ProfessionalManagement = ({ role }) => {
       isOpen: true,
       type: "DELETE_SINGLE",
       target: prof,
-      title: `Delete ${role === "coach" ? "Coach" : "Umpire"}`,
+      title: `Delete ${role.charAt(0).toUpperCase() + role.slice(1)}`,
       message: `Are you sure you want to PERMANENTLY delete ${prof.name}? This will remove their professional profile and system access.`,
       confirmText: "Delete Record"
     });
@@ -82,7 +82,7 @@ const ProfessionalManagement = ({ role }) => {
           <div className="relative">
             <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#CCFF00] rounded-full shadow-[0_0_20px_rgba(204,255,0,0.4)]"></div>
             <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none">
-              Manage <span className="text-[#CCFF00]">{role === "coach" ? "Coaches" : "Umpires"}</span>
+              Manage <span className="text-[#CCFF00]">{role}s</span>
             </h1>
             <p className="admin-subheading mt-4 ml-1">
               Active Professional Roster • System Telemetry

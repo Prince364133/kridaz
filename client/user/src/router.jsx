@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 
 // Layouts
-import { AdminLayout, PartnerLayout, GuestLayout, CoachLayout, UmpireLayout, StreamerLayout } from "@layouts";
+import { AdminLayout, PartnerLayout, GuestLayout, CoachLayout, UmpireLayout, StreamerLayout, ScorerLayout } from "@layouts";
 import UserRoot from "@user/layouts/Root";
 
 // User Portal Pages (via @user alias)
@@ -28,6 +28,7 @@ import MyJoinedGames from "@user/pages/MyJoinedGames";
 import FindProfessionals from "@user/pages/FindProfessionals";
 import ProfessionalDetails from "@user/pages/ProfessionalDetails";
 import Messages from "@user/pages/Messages";
+import MyTeams from "@user/pages/MyTeams";
 import CheckoutPage from "@user/pages/checkout/CheckoutPage";
 import ScoringApp from "@user/pages/ScoringApp";
 import MatchAnalytics from "@user/pages/MatchAnalytics";
@@ -42,16 +43,21 @@ import UserVenueOwnerLanding from "@user/pages/business/VenueOwnerLanding";
 import UserCoachLanding from "@user/pages/business/CoachLanding";
 import UserUmpireLanding from "@user/pages/business/UmpireLanding";
 import UserStreamerLanding from "@user/pages/business/StreamerLanding";
+import UserScorerLanding from "@user/pages/business/ScorerLanding";
 import BusinessRegistration from "@user/pages/business/BusinessRegistration";
 // Owner Portal Pages
 import PartnersGateway from "@pages/PartnersGateway";
 import VenueOwnerSignUp from "@pages/VenueOwnerSignUp";
 import CoachSignUp from "@pages/CoachSignUp";
 import UmpireSignUp from "@pages/UmpireSignUp";
+import ScorerSignUp from "@pages/ScorerSignUp";
 import StreamerSignUp from "@user/pages/auth/StreamerSignUp";
 
 import StreamSetup from "./components/streamer/StreamSetup";
+import ManageStream from "./pages/ManageStream";
+import TickerGallery from "./components/streamer/TickerGallery";
 import { YouTubeConnected, YouTubeError } from "@pages/YouTubeAuthStatus";
+import { FacebookConnected, FacebookError } from "@pages/FacebookAuthStatus";
 
 import {
   AddTurf,
@@ -79,6 +85,8 @@ import StreamerDashboard from "./components/streamer/StreamerDashboard";
 import StreamerMatches from "./components/streamer/StreamerMatches";
 import StreamerSchedule from "./components/streamer/StreamerSchedule";
 import UmpireFeedback from "./components/umpire/UmpireFeedback";
+import ScorerDashboard from "./components/scorer/ScorerDashboard";
+import ScorerMatches from "./components/scorer/ScorerMatches";
 
 import ProfessionalAvailability from "./components/professional/ProfessionalAvailability";
 import ProfessionalBookings from "./components/professional/ProfessionalBookings";
@@ -132,6 +140,7 @@ const router = createBrowserRouter([
         children: [
           { path: "coaches", element: <ProfessionalManagement role="coach" /> },
           { path: "umpires", element: <ProfessionalManagement role="umpire" /> },
+          { path: "streamers", element: <ProfessionalManagement role="streamer" /> },
           { path: ":id", element: <ProfessionalDetailsPage /> }
         ],
       },
@@ -244,7 +253,32 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <StreamerDashboard /> },
       { path: "matches", element: <StreamerMatches /> },
+      { path: "manage/:matchId", element: <ManageStream /> },
+      { path: "ticker-gallery/:matchId?", element: <TickerGallery /> },
       { path: "schedule", element: <StreamerSchedule /> },
+      { path: "revenue", element: <OwnerRevenue /> },
+      { path: "support", element: <PartnerSupport /> },
+      { path: "banking", element: <PayoutBanking /> },
+      { path: "profile", element: <ProfessionalProfile /> },
+      { path: "*", element: <NotFound /> },
+    ],
+  },
+
+  // ── SCORER PORTAL ──
+  {
+    path: "/scorer",
+    element: (
+      <ProtectedRoute requiredRole="scorer">
+        <ScorerLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <ScorerDashboard /> },
+      { path: "matches", element: <ScorerMatches /> },
+      { path: "schedule", element: <UmpireSchedule /> },
+      { path: "availability", element: <ProfessionalAvailability /> },
+      { path: "bookings", element: <ProfessionalBookings /> },
+      { path: "reviews", element: <ProfessionalReviews /> },
       { path: "revenue", element: <OwnerRevenue /> },
       { path: "support", element: <PartnerSupport /> },
       { path: "banking", element: <PayoutBanking /> },
@@ -265,7 +299,7 @@ const router = createBrowserRouter([
   {
     path: "/scoring/:matchId",
     element: (
-      <ProtectedRoute requiredRole="umpire">
+      <ProtectedRoute requiredRole={["scorer"]}>
         <ScoringApp />
       </ProtectedRoute>
     ),
@@ -294,6 +328,8 @@ const router = createBrowserRouter([
       { path: "matches/:matchId/stream-setup", element: <ProtectedRoute><StreamSetup /></ProtectedRoute> },
       { path: "youtube-connected", element: <YouTubeConnected /> },
       { path: "youtube-error", element: <YouTubeError /> },
+      { path: "facebook-connected", element: <FacebookConnected /> },
+      { path: "facebook-error", element: <FacebookError /> },
       { path: "my-hosted-games", element: <ProtectedRoute><MyHostedGames /></ProtectedRoute> },
       { path: "my-joined-games", element: <ProtectedRoute><MyJoinedGames /></ProtectedRoute> },
       { path: "match/:matchId", element: <ProtectedRoute><MatchDetails /></ProtectedRoute> },
@@ -301,6 +337,7 @@ const router = createBrowserRouter([
       { path: "professionals", element: <FindProfessionals /> },
       { path: "professionals/:id", element: <ProfessionalDetails /> },
       { path: "messages", element: <ProtectedRoute><Messages /></ProtectedRoute> },
+      { path: "my-teams", element: <ProtectedRoute><MyTeams /></ProtectedRoute> },
 
       
       // Business Landings
@@ -308,6 +345,7 @@ const router = createBrowserRouter([
       { path: "business/coach", element: <UserCoachLanding /> },
       { path: "business/official", element: <UserUmpireLanding /> },
       { path: "business/streamer", element: <UserStreamerLanding /> },
+      { path: "business/scorer", element: <UserScorerLanding /> },
       { path: "business/register", element: <BusinessRegistration /> },
       
       // Business Auth
@@ -315,6 +353,7 @@ const router = createBrowserRouter([
       { path: "signup/coach", element: <PublicRoute><CoachSignUp /></PublicRoute> },
       { path: "signup/official", element: <PublicRoute><UmpireSignUp /></PublicRoute> },
       { path: "signup/streamer", element: <PublicRoute><StreamerSignUp /></PublicRoute> },
+      { path: "signup/scorer", element: <PublicRoute><ScorerSignUp /></PublicRoute> },
       { path: "wallet", element: <ProtectedRoute><UserWallet /></ProtectedRoute> },
       { path: "booking-history", element: <ProtectedRoute><UserTurfBookingHistory /></ProtectedRoute> },
       { path: "checkout/:turfId", element: <ProtectedRoute><CheckoutPage /></ProtectedRoute> },

@@ -8,7 +8,10 @@ import Session from "../../models/session.model.js";
 import WalletTransaction from "../../models/walletTransaction.model.js";
 import Owner from "../../models/owner.model.js";
 import HostedGame from "../../models/hostedGame.model.js";
+import CricketScoring from "../../models/cricketScoring.model.js";
 import { format, formatDistanceToNow } from "date-fns";
+import { getChannelStats } from "../../services/youtubeService.js";
+import { getFacebookPageStats } from "../../services/facebookService.js";
 
 
 export const getDashboardData = async (req, res) => {
@@ -20,6 +23,7 @@ export const getDashboardData = async (req, res) => {
   if (role === "coach") return getCoachDashboardData(req, res);
   if (role?.toLowerCase().includes("umpire")) return getUmpireDashboardData(req, res);
   if (role?.toLowerCase() === "streamer") return getStreamerDashboardData(req, res);
+  if (role?.toLowerCase() === "scorer") return getScorerDashboardData(req, res);
 
   try {
     // 1. Resolve correct owner document
@@ -372,15 +376,15 @@ export const getCoachDashboardData = async (req, res) => {
 };
 
 export const getUmpireDashboardData = async (req, res) => {
-  const umpireId = req.owner.id;
+  const umpireId = req.owner?.id || req.user?.id;
   console.log("DEBUG: Fetching umpire dashboard data for umpireId:", umpireId);
   
   try {
     console.log("DEBUG: Querying Match and HostedGame models...");
     
     // Support both User ID and Owner ID for lookup during transition
-    const ownerId = req.owner.ownerId;
-    const userId = req.owner.id;
+    const ownerId = req.owner?.ownerId;
+    const userId = req.owner?.id || req.user?.id;
 
     // Fetch owner profile to check for upgradeRequested status
     let owner = null;
@@ -504,15 +508,15 @@ export const getUmpireDashboardData = async (req, res) => {
 };
 
 export const getStreamerDashboardData = async (req, res) => {
-  const streamerId = req.owner.id;
+  const streamerId = req.owner?.id || req.user?.id;
   console.log("DEBUG: Fetching streamer dashboard data for streamerId:", streamerId);
   
   try {
     console.log("DEBUG: Querying HostedGame models...");
     
     // Support both User ID and Owner ID for lookup during transition
-    const ownerId = req.owner.ownerId;
-    const userId = req.owner.id;
+    const ownerId = req.owner?.ownerId;
+    const userId = req.owner?.id || req.user?.id;
 
     // Fetch owner profile to check for upgradeRequested status
     let owner = null;
@@ -604,7 +608,21 @@ export const getStreamerDashboardData = async (req, res) => {
         venue: m.venue || "TBD Venue",
         role: "Head Streamer"
       })),
-      upgradeRequested: owner?.upgradeRequested || false
+      upgradeRequested: owner?.upgradeRequested || false,
+      socialStats: {
+        youtube: await (async () => {
+          console.log(`[Dashboard] Getting YouTube stats for ${streamerId}`);
+          const stats = await getChannelStats(streamerId);
+          console.log(`[Dashboard] YouTube stats for ${streamerId}:`, stats ? 'Found' : 'Not Found');
+          return stats;
+        })(),
+        facebook: await (async () => {
+          console.log(`[Dashboard] Getting Facebook stats for ${streamerId}`);
+          const stats = await getFacebookPageStats(streamerId);
+          console.log(`[Dashboard] Facebook stats for ${streamerId}:`, stats ? 'Found' : 'Not Found');
+          return stats;
+        })()
+      }
     };
 
     console.log("DEBUG: Sending successful response for streamer dashboard");
@@ -614,6 +632,115 @@ export const getStreamerDashboardData = async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: "Error fetching streamer dashboard data", 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+};
+
+export const getScorerDashboardData = async (req, res) => {
+  const scorerId = req.owner?.id || req.user?.id;
+  console.log("DEBUG: Fetching scorer dashboard data for scorerId:", scorerId);
+  
+  try {
+    const userId = scorerId;
+    
+    // Support both User ID and Owner ID for lookup during transition
+    const ownerId = req.owner?.ownerId;
+
+    // Fetch user details for email/phone fallback search
+    const userRecord = await User.findById(userId).select("email phone").lean();
+    const userEmail = userRecord?.email;
+    const userPhone = userRecord?.phone;
+
+    const hostedGames = await HostedGame.find({
+      $or: [
+        { scorer: { $in: [scorerId, userId, ownerId] } },
+        { "scorerRequest.user": { $in: [scorerId, userId, ownerId] } },
+        { "customScorer.email": userEmail },
+        { "customScorer.phone": userPhone }
+      ],
+      status: { $ne: "CANCELLED" }
+    })
+      .populate("ground", "name location")
+      .sort({ date: 1 })
+      .lean();
+
+    // Format HostedGames to match the frontend match structure
+    const allMatches = hostedGames.map(game => ({
+      ...game,
+      name: game.name || `${game.teams?.teamA?.name || 'Team A'} VS ${game.teams?.teamB?.name || 'Team B'}`,
+      venue: game.ground?.name || game.city || "TBD Venue",
+      // Normalize status to lowercase for frontend filtering
+      status: game.status === "ACTIVE" ? "upcoming" : game.status.toLowerCase(),
+      teams: game.teams ? [game.teams.teamA.name, game.teams.teamB.name] : ["TBD", "TBD"],
+      isHostedGame: true
+    }));
+
+    console.log(`DEBUG: Found ${allMatches.length} hosted games for scorer`);
+    
+    const matchesScored = allMatches.filter(m => m.status === "completed").length;
+    const upcomingMatches = allMatches.filter(m => m.status === "upcoming").length;
+
+    // Fetch Real Revenue from Wallet
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const [revenueData, revenueOverTimeRaw] = await Promise.all([
+      WalletTransaction.aggregate([
+        { $match: { user: scorerId, status: "SUCCESS", type: { $ne: "DEBIT" } } },
+        { $group: { _id: null, total: { $sum: "$amount" } } }
+      ]),
+      WalletTransaction.aggregate([
+        { 
+          $match: { 
+            user: scorerId, 
+            status: "SUCCESS", 
+            type: { $ne: "DEBIT" },
+            createdAt: { $gte: sevenDaysAgo }
+          } 
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            revenue: { $sum: "$amount" },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ])
+    ]);
+
+    const totalRevenue = revenueData[0]?.total || 0;
+
+    const responseData = {
+      success: true,
+      data: {
+        matchesScored,
+        upcomingMatches,
+        officialRating: 0,
+        earnings: totalRevenue,
+        totalRevenue,
+        revenueOverTimeRaw,
+        matchEngagement: [],
+        matches: allMatches,
+        upcomingAssignments: allMatches.filter(m => m.status === "upcoming").slice(0, 5).map(m => ({
+          _id: m._id,
+          match: m.name || "TBD Match",
+          shortId: m.shortId,
+          time: m.date ? `${new Date(m.date).toLocaleDateString()} - ${m.time || 'N/A'}` : 'TBD',
+          venue: m.venue || "TBD Venue",
+          role: "Official Scorer"
+        }))
+      }
+    };
+
+    console.log("DEBUG: Sending successful response for scorer dashboard");
+    res.json(responseData);
+  } catch (error) {
+    console.error("CRITICAL ERROR in getScorerDashboardData:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Error fetching scorer dashboard data", 
       error: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });

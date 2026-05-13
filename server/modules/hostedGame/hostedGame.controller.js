@@ -6,6 +6,7 @@ import WalletTransaction from "../../models/walletTransaction.model.js";
 import mongoose from "mongoose";
 import { randomUUID } from "crypto";
 import { notifyNewGame, sendCustomPlayerInvite, sendCustomUmpireInvite } from "../../utils/notification.service.js";
+import { createNotification } from "../../utils/notificationHelper.js";
 import { generateShortId } from "../scoring/scoring.utils.js";
 import { runInTransaction } from "../../utils/transaction.js";
 import { generateUserToken } from "../../utils/generateJwtToken.js";
@@ -36,12 +37,19 @@ const sanitizeImage = (img) => {
 
 export const getGroundsForHosting = async (req, res) => {
   try {
-    const { city, state, sportType } = req.query;
+    const { city, state, sportType, query: searchTerm } = req.query;
     let query = { status: "approved", isActive: true };
     
     if (city) query.city = new RegExp(city, "i");
     if (state) query.state = new RegExp(state, "i");
     if (sportType) query.sportTypes = sportType;
+    if (searchTerm) {
+      query.$or = [
+        { name: new RegExp(searchTerm, "i") },
+        { city: new RegExp(searchTerm, "i") },
+        { state: new RegExp(searchTerm, "i") }
+      ];
+    }
 
     const grounds = await Turf.find(query).select("name location city state images pricePerHour sportTypes");
     return res.status(200).json({ grounds });
@@ -244,12 +252,20 @@ export const createHostedGame = async (req, res) => {
                 teamA: {
                   name: teamA?.name || "Team A",
                   image: sanitizeImage(teamA?.image),
-                  slots: (teamA?.slots || []).map(s => ({ role: s.role, status: "OPEN" })),
+                  slots: (teamA?.slots || []).map(s => ({ 
+                    user: s.user || null,
+                    role: s.role || "Player", 
+                    status: s.status || (s.user ? "JOINED" : "OPEN") 
+                  })),
                 },
                 teamB: {
                   name: teamB?.name || "Team B",
                   image: sanitizeImage(teamB?.image),
-                  slots: (teamB?.slots || []).map(s => ({ role: s.role, status: "OPEN" })),
+                  slots: (teamB?.slots || []).map(s => ({ 
+                    user: s.user || null,
+                    role: s.role || "Player", 
+                    status: s.status || (s.user ? "JOINED" : "OPEN") 
+                  })),
                 },
               },
             }),
@@ -444,7 +460,9 @@ export const getMyHostedGames = async (req, res) => {
       .populate("ground")
       .populate("umpire")
       .populate("streamer")
+      .populate("scorer")
       .populate("umpireRequest.user", "name profilePicture")
+      .populate("scorerRequest.user", "name profilePicture")
       .populate("streamerRequest.user", "name profilePicture")
       .populate("teams.teamA.slots.user", "name profilePicture")
       .populate("teams.teamB.slots.user", "name profilePicture");
@@ -735,8 +753,10 @@ export const getHostedGameByShortId = async (req, res) => {
       .populate("host", "name profilePicture")
       .populate("ground", "name location images")
       .populate("umpire", "name profilePicture")
+      .populate("scorer", "name profilePicture")
       .populate("streamer", "name profilePicture")
       .populate("umpireRequest.user", "name profilePicture")
+      .populate("scorerRequest.user", "name profilePicture")
       .populate("streamerRequest.user", "name profilePicture");
     
     if (!game) return res.status(404).json({ message: "Game not found" });
@@ -856,6 +876,244 @@ export const handleStreamerRequest = async (req, res) => {
   }
 };
 
+export const requestToScorer = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user.user;
+    const { gameId } = req.body;
+
+    const game = await HostedGame.findById(gameId);
+    if (!game) throw new Error("Game not found");
+    
+    if (game.scorer) throw new Error("This game already has a scorer assigned");
+    
+    const owner = await Owner.findOne({ userId });
+    const scorerId = owner ? owner._id : userId;
+
+    if (game.scorerRequest?.user?.toString() === scorerId.toString() || 
+        game.scorerRequest?.user?.toString() === userId.toString()) {
+      throw new Error("You have already sent a request for this game");
+    }
+
+    game.scorerRequest = {
+      user: scorerId,
+      status: "PENDING"
+    };
+
+    await game.save();
+    return res.status(200).json({ success: true, message: "Scorer request sent to host!" });
+
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const handleScorerRequest = async (req, res) => {
+  try {
+    const hostId = req.user.id || req.user.user;
+    const { gameId, action } = req.body;
+
+    const game = await HostedGame.findOne({ _id: gameId, host: hostId });
+    if (!game) throw new Error("Unauthorized or game not found");
+
+    if (action === "APPROVE") {
+      game.scorer = game.scorerRequest.user;
+      game.scorerRequest.status = "APPROVED";
+    } else {
+      game.scorerRequest.status = "REJECTED";
+      game.scorerRequest.user = null;
+    }
+
+    await game.save();
+    return res.status(200).json({ success: true, message: `Scorer request ${action.toLowerCase()}d successfully!` });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// Host invites Scorer/Umpire directly
+export const inviteOfficial = async (req, res) => {
+  try {
+    const hostId = req.user.id || req.user.user;
+    const { gameId, officialId, type } = req.body; // type: 'UMPIRE' or 'SCORER'
+
+    const game = await HostedGame.findOne({ _id: gameId, host: hostId });
+    if (!game) throw new Error("Unauthorized or game not found");
+
+    const official = await User.findById(officialId);
+    if (!official) throw new Error("User not found");
+
+    if (type === "UMPIRE") {
+      if (game.umpire) throw new Error("Umpire already assigned");
+      game.umpireRequest = { user: officialId, status: "PENDING" };
+    } else if (type === "SCORER") {
+      if (game.scorer) throw new Error("Scorer already assigned");
+      game.scorerRequest = { user: officialId, status: "PENDING" };
+    } else if (type === "STREAMER") {
+      if (game.streamer) throw new Error("Streamer already assigned");
+      game.streamerRequest = { user: officialId, status: "PENDING" };
+    }
+
+    await game.save();
+
+    // Send Notification
+    try {
+      const { createNotification } = await import("../../utils/notificationHelper.js");
+      await createNotification({
+        recipientId: officialId,
+        recipientModel: "User",
+        title: "Match Official Invitation",
+        message: `You have been invited to be a ${type} for the match: ${game.teams?.teamA?.name || 'A'} vs ${game.teams?.teamB?.name || 'B'}.`,
+        type: "SYSTEM",
+        link: `/my-hosted-games`,
+        metadata: { gameId, type }
+      });
+    } catch (notifErr) {
+      console.error("Invitation notification error:", notifErr);
+    }
+
+    return res.status(200).json({ success: true, message: `${type} invitation sent!` });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+
+// Official (Scorer/Umpire/Streamer) responds to invitation
+export const respondToOfficialInvitation = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user.user;
+    const { gameId, type, action } = req.body; // type: 'UMPIRE', 'SCORER', 'STREAMER', action: 'APPROVE', 'REJECT'
+
+    const game = await HostedGame.findById(gameId);
+    if (!game) throw new Error("Game not found");
+
+    if (type === "UMPIRE") {
+      if (game.umpireRequest.user?.toString() !== userId.toString()) throw new Error("Unauthorized");
+      if (action === "APPROVE") {
+        game.umpire = userId;
+        game.umpireRequest.status = "APPROVED";
+        // Update user role if needed
+        await User.findByIdAndUpdate(userId, { role: "umpire" });
+      } else {
+        game.umpireRequest.status = "REJECTED";
+        game.umpireRequest.user = null;
+      }
+    } else if (type === "SCORER") {
+      if (game.scorerRequest.user?.toString() !== userId.toString()) throw new Error("Unauthorized");
+      if (action === "APPROVE") {
+        game.scorer = userId;
+        game.scorerRequest.status = "APPROVED";
+        // Update user role to scorer
+        await User.findByIdAndUpdate(userId, { role: "scorer" });
+      } else {
+        game.scorerRequest.status = "REJECTED";
+        game.scorerRequest.user = null;
+      }
+    } else if (type === "STREAMER") {
+      if (game.streamerRequest.user?.toString() !== userId.toString()) throw new Error("Unauthorized");
+      if (action === "APPROVE") {
+        game.streamer = userId;
+        game.streamerRequest.status = "APPROVED";
+        // Update user role to streamer
+        await User.findByIdAndUpdate(userId, { role: "streamer" });
+      } else {
+        game.streamerRequest.status = "REJECTED";
+        game.streamerRequest.user = null;
+      }
+    }
+
+    await game.save();
+
+    // ── Notify Host ──────────────────────────────────────────────────────────
+    try {
+      const responder = await User.findById(userId).select("name");
+      const roleName = type.toLowerCase();
+      const statusMsg = action === "APPROVE" ? "accepted" : "rejected";
+      
+      await createNotification({
+        recipientId: game.host,
+        recipientModel: "User",
+        title: `Official Invitation ${action === "APPROVE" ? "Accepted" : "Rejected"}`,
+        message: `${responder?.name || "Someone"} has ${statusMsg} your invitation to be the ${roleName} for the match on ${new Date(game.date).toDateString()}.`,
+        type: "SYSTEM",
+        link: `/hosted-game/${game._id}`
+      });
+    } catch (notifErr) {
+      console.error("[Notification] Error notifying host:", notifErr);
+    }
+
+    // Generate new token to reflect role change immediately
+    const updatedUser = await User.findById(userId);
+    const token = generateUserToken(updatedUser._id, updatedUser.role);
+
+    return res.status(200).json({ 
+      success: true, 
+      message: `Invitation ${action.toLowerCase()}d successfully!`,
+      token,
+      user: {
+        id: updatedUser._id,
+        name: updatedUser.name,
+        role: updatedUser.role,
+        email: updatedUser.email
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateVenue = async (req, res) => {
+  try {
+    const hostId = req.user.id || req.user.user;
+    const { gameId, groundId } = req.body;
+
+    const game = await HostedGame.findOne({ _id: gameId, host: hostId });
+    if (!game) throw new Error("Unauthorized or game not found");
+
+    game.ground = groundId;
+    await game.save();
+    
+    const populatedGame = await HostedGame.findById(gameId).populate("ground");
+    return res.status(200).json({ success: true, message: "Venue updated successfully!", ground: populatedGame.ground });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const searchOfficials = async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) return res.status(200).json({ success: true, officials: [] });
+
+    // Search in User and Owner models
+    // First find matching users
+    const users = await User.find({
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { username: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } },
+        { phone: { $regex: query, $options: 'i' } }
+      ]
+    })
+    .select('name username profilePicture city state email')
+    .limit(20)
+    .lean();
+
+    // Map them for frontend
+    const officials = users.map(u => ({
+      _id: u._id,
+      name: u.name,
+      username: u.username || u.email.split('@')[0],
+      profilePicture: u.profilePicture,
+      location: u.city ? `${u.city}, ${u.state}` : 'Unknown'
+    }));
+
+    return res.status(200).json({ success: true, officials });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 export const updateStreamConfig = async (req, res) => {
   try {
     const { id } = req.params;
@@ -896,15 +1154,33 @@ export const getHostedGameById = async (req, res) => {
       .populate("host", "name profilePicture")
       .populate("ground")
       .populate("umpire", "name profilePicture")
+      .populate("scorer", "name profilePicture")
+      .populate("streamer", "name profilePicture")
       .populate("teams.teamA.slots.user", "name profilePicture")
       .populate("teams.teamB.slots.user", "name profilePicture")
-      .populate("umpireRequest.user", "name profilePicture");
+      .populate("umpireRequest.user", "name profilePicture")
+      .populate("scorerRequest.user", "name profilePicture")
+      .populate("streamerRequest.user", "name profilePicture");
 
     if (!game) {
       return res.status(404).json({ message: "Game not found" });
     }
 
-    return res.status(200).json({ success: true, game });
+    // Official setup status for gating (Phase 3 logic)
+    const officialSetupStatus = {
+      hasUmpire: !!game.umpire,
+      hasScorer: !!game.scorer,
+      isUmpireApproved: game.umpireRequest?.status === 'APPROVED' || !!game.umpire,
+      isScorerApproved: game.scorerRequest?.status === 'APPROVED' || !!game.scorer,
+      streamingEnabled: (!!game.umpire || game.umpireRequest?.status === 'APPROVED') && 
+                         (!!game.scorer || game.scorerRequest?.status === 'APPROVED')
+    };
+
+    return res.status(200).json({ 
+      success: true, 
+      game,
+      officialSetupStatus 
+    });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -1231,5 +1507,28 @@ export const claimInviteSlot = async (req, res) => {
   } catch (error) {
     console.error("[claimInviteSlot]", error);
     return res.status(error.status || 500).json({ message: error.message });
+  }
+};
+
+export const updateTickerTheme = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { tickerTheme } = req.body;
+    const userId = req.user.id || req.user.user;
+
+    const game = await HostedGame.findById(id);
+    if (!game) throw new Error("Game not found");
+
+    // Authorization: Only Host or assigned Streamer
+    if (game.host?.toString() !== userId.toString() && game.streamer?.toString() !== userId.toString()) {
+      return res.status(403).json({ success: false, message: "Unauthorized to update ticker theme" });
+    }
+
+    game.tickerTheme = tickerTheme;
+    await game.save();
+    
+    return res.status(200).json({ success: true, game });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };

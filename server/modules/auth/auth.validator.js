@@ -61,5 +61,12 @@ export const ownerRequestSchema = z.object({
     email: z.string().email("Email is invalid"),
     phone: z.string().regex(/^[0-9]{10}$/, "Phone number must be 10 digits"),
     role: z.string().optional(),
+    businessDetails: z.object({}).passthrough().optional(),
+    documents: z.array(z.any()).optional(),
+    username: z.string().optional(),
+    gender: z.string().optional(),
+    location: z.string().optional(),
+    password: z.string().optional(),
+    confirmPassword: z.string().optional(),
   }),
 });

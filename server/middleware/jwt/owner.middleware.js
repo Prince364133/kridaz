@@ -28,7 +28,7 @@ const verifyOwnerToken = async (req, res, next) => {
 
     // Support both {id, role} and {user: {role}} or similar structures
     const role = decoded.role?.toLowerCase() || "";
-    const isAllowed = ["owner", "coach", "umpire", "admin"].some(r => role.includes(r));
+    const isAllowed = ["owner", "coach", "umpire", "admin", "streamer", "scorer"].some(r => role.includes(r));
 
     if (!isAllowed) {
         return res.status(403).json({ success: false, message: "Unauthorized role" });

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ArrowRight, ShieldCheck, User, LogOut } from "lucide-react";
+import { Menu, X, ArrowRight, ShieldCheck, User, LogOut, ChevronDown } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
@@ -27,10 +27,14 @@ const GuestNavbar = () => {
   };
 
   const navLinks = [
-    { name: "Business", path: "/partners", isExternal: false },
-    { name: "Venues", path: "/business/venue", isExternal: false },
-    { name: "Coaches", path: "/business/coach", isExternal: false },
-    { name: "Officials", path: "/business/official", isExternal: false },
+    { name: "Partner Overview", path: "/partners" },
+    { name: "Venues", path: "/business/venue" },
+    { name: "Coaches", path: "/business/coach" },
+    { name: "Umpires", path: "/business/official" },
+    { name: "Scorers", path: "/business/scorer" },
+    { name: "Streamers", path: "/business/streamer" },
+    { name: "Community", path: "/community" },
+    { name: "Find Players", path: "/players" },
   ];
 
   return (
@@ -48,31 +52,77 @@ const GuestNavbar = () => {
 
         {/* Navigation (Desktop) */}
         <div className="hidden lg:flex items-center gap-8">
-          {navLinks.map((link) => (
-            link.isExternal ? (
-              <a
-                key={link.name}
-                href={link.path}
-                className="text-sm font-medium text-white/60 hover:text-white transition-all relative group"
-              >
-                {link.name}
-                <span className="absolute -bottom-1 left-0 h-[2px] bg-[#84CC16] w-0 group-hover:w-full transition-all duration-300" />
-              </a>
-            ) : (
-              <Link
-                key={link.name}
-                to={link.path}
-                className={`text-sm font-medium transition-all relative group ${
-                  location.pathname === link.path ? "text-[#84CC16]" : "text-white/60 hover:text-white"
-                }`}
-              >
-                {link.name}
-                <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#84CC16] transition-all duration-300 ${
-                  location.pathname === link.path ? "w-full" : "w-0 group-hover:w-full"
-                }`} />
-              </Link>
-            )
-          ))}
+          {/* Business Dropdown */}
+          <div className="dropdown dropdown-hover group">
+            <div 
+              tabIndex={0} 
+              className={`flex items-center gap-1 text-sm font-medium transition-all cursor-pointer ${
+                location.pathname.startsWith("/business") || location.pathname === "/partners" ? "text-[#84CC16]" : "text-white/60 hover:text-white"
+              }`}
+            >
+              Business <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-300" />
+              <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#84CC16] transition-all duration-300 ${
+                location.pathname.startsWith("/business") || location.pathname === "/partners" ? "w-full" : "w-0 group-hover:w-full"
+              }`} />
+            </div>
+            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-2xl bg-[#0d0d0d] border border-white/5 rounded-xl w-52 mt-0">
+              <li>
+                <Link to="/partners" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                  Partner Overview
+                </Link>
+              </li>
+              <div className="h-px bg-white/5 my-1 mx-2" />
+              <li>
+                <Link to="/business/venue" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                  Venues
+                </Link>
+              </li>
+              <li>
+                <Link to="/business/coach" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                  Coaches
+                </Link>
+              </li>
+              <li>
+                <Link to="/business/official" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                  Umpires
+                </Link>
+              </li>
+              <li>
+                <Link to="/business/scorer" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                  Scorers
+                </Link>
+              </li>
+              <li>
+                <Link to="/business/streamer" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                  Streamers
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <Link
+            to="/community"
+            className={`text-sm font-medium transition-all relative group ${
+              location.pathname === "/community" ? "text-[#84CC16]" : "text-white/60 hover:text-white"
+            }`}
+          >
+            Community
+            <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#84CC16] transition-all duration-300 ${
+              location.pathname === "/community" ? "w-full" : "w-0 group-hover:w-full"
+            }`} />
+          </Link>
+
+          <Link
+            to="/players"
+            className={`text-sm font-medium transition-all relative group ${
+              location.pathname === "/players" ? "text-[#84CC16]" : "text-white/60 hover:text-white"
+            }`}
+          >
+            Find Players
+            <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#84CC16] transition-all duration-300 ${
+              location.pathname === "/players" ? "w-full" : "w-0 group-hover:w-full"
+            }`} />
+          </Link>
         </div>
 
         {/* Action Unit */}

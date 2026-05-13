@@ -31,6 +31,7 @@ const getCookie = (name) => {
 };
 
 import { SocketProvider } from "./context/SocketContext";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export default function App() {
   console.log("App.jsx: Rendering App component...");
@@ -115,9 +116,12 @@ export default function App() {
   }
 
   return (
-    <SocketProvider>
-      <RouterProvider router={router} />
-    </SocketProvider>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <SocketProvider>
+        <RouterProvider router={router} />
+      </SocketProvider>
+    </GoogleOAuthProvider>
   );
 }
+
  

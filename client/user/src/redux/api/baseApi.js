@@ -27,5 +27,5 @@ export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
   endpoints: () => ({}),
-  tagTypes: ["Chat", "Message", "User"],
+  tagTypes: ["Chat", "Message", "User", "Team"],
 });

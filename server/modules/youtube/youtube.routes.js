@@ -13,6 +13,7 @@ import {
   deleteBroadcast,
   fetchAndStoreYoutubeChannel
 } from '../../services/youtubeService.js';
+import { createFacebookLiveStream, endFacebookLiveStream } from '../../services/facebookService.js';
 import crypto from 'crypto';
 
 const router = express.Router();
@@ -35,10 +36,11 @@ const thumbnailUpload = multer({
 
 // OAuth Initialization
 router.get('/oauth/start', verifyAuth, (req, res) => {
+  const userId = req.user.id || req.user.user;
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    process.env.YOUTUBE_REDIRECT_URI || `${process.env.APP_BASE_URL || 'http://localhost:5000'}/api/youtube/oauth/callback`
+    process.env.YOUTUBE_REDIRECT_URI || `${process.env.APP_BASE_URL || 'http://localhost:6001'}/api/youtube/oauth/callback`
   );
 
   const url = oauth2Client.generateAuthUrl({
@@ -48,10 +50,56 @@ router.get('/oauth/start', verifyAuth, (req, res) => {
       'https://www.googleapis.com/auth/youtube',
       'https://www.googleapis.com/auth/youtube.upload'
     ],
-    state: req.user._id // Pass user ID through state to link the callback
+    state: userId.toString()
   });
 
+  if (req.headers.accept?.includes('application/json')) {
+    return res.json({ url });
+  }
+  res.redirect(url);
+});
+
+router.get('/oauth/url', verifyAuth, (req, res) => {
+  const userId = req.user.id || req.user.user;
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.YOUTUBE_REDIRECT_URI || `${process.env.APP_BASE_URL || 'http://localhost:6001'}/api/youtube/oauth/callback`
+  );
+  const url = oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    prompt: 'consent',
+    scope: [
+      'https://www.googleapis.com/auth/youtube',
+      'https://www.googleapis.com/auth/youtube.upload'
+    ],
+    state: userId.toString()
+  });
   res.json({ url });
+});
+
+router.get('/accounts', verifyAuth, async (req, res) => {
+  try {
+    const userId = req.user.id || req.user.user;
+    const user = await User.findById(userId).select('socialAccounts');
+    const accounts = user.socialAccounts.filter(acc => acc.platform === 'youtube');
+    res.json(accounts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.delete('/account/:accountId', verifyAuth, async (req, res) => {
+  try {
+    const { accountId } = req.params;
+    const userId = req.user.id || req.user.user;
+    await User.findByIdAndUpdate(userId, {
+      $pull: { socialAccounts: { platform: 'youtube', accountId } }
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 // OAuth Callback
@@ -62,27 +110,62 @@ router.get('/oauth/callback', async (req, res) => {
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.YOUTUBE_REDIRECT_URI || `${process.env.APP_BASE_URL || 'http://localhost:5000'}/api/youtube/oauth/callback`
+      process.env.YOUTUBE_REDIRECT_URI || `${process.env.APP_BASE_URL || 'http://localhost:6001'}/api/youtube/oauth/callback`
     );
 
     const { tokens } = await oauth2Client.getToken(code);
     
     if (tokens.access_token) {
-      const user = await User.findById(userId);
-      await User.findByIdAndUpdate(userId, {
-        youtubeAccessToken:  tokens.access_token,
-        youtubeRefreshToken: tokens.refresh_token || user?.youtubeRefreshToken,
-        youtubeTokenExpiry:  new Date(tokens.expiry_date || Date.now() + 3600 * 1000)
+      // Fetch channel info first to get unique ID
+      const oauth2ClientInfo = new google.auth.OAuth2();
+      oauth2ClientInfo.setCredentials(tokens);
+      const youtube = google.youtube({ version: 'v3', auth: oauth2ClientInfo });
+      const channelRes = await youtube.channels.list({
+        part: 'snippet,contentDetails,statistics',
+        mine: true
       });
+      const channelData = channelRes.data.items[0];
 
-      await fetchAndStoreYoutubeChannel(userId, tokens.access_token);
+      if (channelData) {
+        const accountId = channelData.id;
+        const accountName = channelData.snippet.title;
+        const thumbnail = channelData.snippet.thumbnails?.default?.url;
+
+        await User.findByIdAndUpdate(userId, {
+          $pull: { socialAccounts: { platform: 'youtube', accountId } }
+        });
+
+        const updateData = {
+          youtubeChannelId: accountId,
+          youtubeChannelName: accountName,
+          youtubeChannelThumb: thumbnail,
+          $push: {
+            socialAccounts: {
+              platform: 'youtube',
+              accountId,
+              accountName,
+              thumbnail,
+              accessToken: tokens.access_token,
+              refreshToken: tokens.refresh_token,
+              expiry: new Date(tokens.expiry_date || Date.now() + 3600 * 1000),
+              metadata: {
+                statistics: channelData.statistics
+              }
+            }
+          }
+        };
+
+        await User.findByIdAndUpdate(userId, updateData);
+      }
     }
 
     // Redirect to frontend setup page (pass a success flag)
-    res.redirect(`${process.env.VITE_APP_URL || 'http://localhost:5173'}/youtube-connected`);
+    const frontendUrl = process.env.VITE_APP_URL || process.env.APP_FRONTEND_URL || 'http://localhost:5174';
+    res.redirect(`${frontendUrl}/youtube-connected`);
   } catch (error) {
     console.error('YouTube OAuth Error:', error);
-    res.redirect(`${process.env.VITE_APP_URL || 'http://localhost:5173'}/youtube-error`);
+    const frontendUrl = process.env.VITE_APP_URL || process.env.APP_FRONTEND_URL || 'http://localhost:5174';
+    res.redirect(`${frontendUrl}/youtube-error`);
   }
 });
 
@@ -109,15 +192,16 @@ router.get('/channel', verifyAuth, async (req, res) => {
 router.post('/stream/create', verifyAuth, thumbnailUpload.single('thumbnail'), async (req, res) => {
   try {
     const { title, description, scheduledStart, privacy, resolution, matchId } = req.body;
-    const userId = req.user._id;
-
+    const userId = req.user.id || req.user.user;
     const user = await User.findById(userId);
-    if (!user.youtubeRefreshToken) {
+    
+    const hasYouTube = user.socialAccounts.some(acc => acc.platform === 'youtube');
+    const hasFacebook = user.socialAccounts.some(acc => acc.platform === 'facebook');
+    
+    if (!hasYouTube && !hasFacebook) {
       return res.status(401).json({
-        error: 'youtube_not_connected',
-        message: 'Please connect your YouTube channel first.',
-        action: 'Connect YouTube',
-        actionUrl: '/api/youtube/oauth/start'
+        error: 'no_social_connected',
+        message: 'Please connect your YouTube or Facebook account first.',
       });
     }
 
@@ -138,18 +222,76 @@ router.post('/stream/create', verifyAuth, thumbnailUpload.single('thumbnail'), a
       });
     }
 
-    const result = await createYoutubeLiveStream(userId, {
-      title,
-      description,
-      scheduledStartTime: scheduledStart,
-      privacy,
-      resolution
-    });
+    const selectedAccounts = req.body.selectedAccounts ? JSON.parse(req.body.selectedAccounts) : [];
+    
+    if (selectedAccounts.length === 0) {
+      return res.status(400).json({ success: false, message: 'No accounts selected for streaming' });
+    }
 
-    let thumbnailUploaded = false;
-    if (req.file) {
-      const thumbResult = await uploadThumbnail(userId, result.broadcastId, req.file.buffer, req.file.mimetype);
-      thumbnailUploaded = thumbResult.success;
+    const broadcastsResults = [];
+
+    for (const accountId of selectedAccounts) {
+      const account = user.socialAccounts.find(acc => acc.accountId === accountId);
+      if (!account) continue;
+
+      if (account.platform === 'youtube') {
+        try {
+          const ytResult = await createYoutubeLiveStream(userId, {
+            title,
+            description,
+            scheduledStartTime: scheduledStart,
+            privacy,
+            resolution,
+            accountId: account.accountId
+          });
+
+          if (req.file) {
+            await uploadThumbnail(userId, ytResult.broadcastId, req.file.buffer, req.file.mimetype);
+          }
+
+          broadcastsResults.push({
+            platform: 'youtube',
+            accountId: account.accountId,
+            accountName: account.accountName,
+            broadcastId: ytResult.broadcastId,
+            streamId: ytResult.streamId,
+            videoId: ytResult.youtubeVideoId,
+            streamKey: ytResult.streamKey,
+            rtmpUrl: ytResult.rtmpUrl,
+            watchUrl: ytResult.watchUrl,
+            status: 'live'
+          });
+        } catch (err) {
+          console.error(`YouTube Error for ${account.accountName}:`, err.message);
+        }
+      }
+
+      if (account.platform === 'facebook') {
+        try {
+          const fbResult = await createFacebookLiveStream(userId, { 
+            title, 
+            description,
+            accountId: account.accountId 
+          });
+
+          broadcastsResults.push({
+            platform: 'facebook',
+            accountId: account.accountId,
+            accountName: account.accountName,
+            videoId: fbResult.id,
+            streamKey: fbResult.streamKey,
+            rtmpUrl: fbResult.rtmpUrl,
+            watchUrl: fbResult.watchUrl,
+            status: 'live'
+          });
+        } catch (err) {
+          console.error(`Facebook Error for ${account.accountName}:`, err.message);
+        }
+      }
+    }
+
+    if (broadcastsResults.length === 0) {
+      return res.status(500).json({ success: false, message: 'Failed to create any broadcasts' });
     }
 
     const overlayTokenSecret = process.env.OVERLAY_TOKEN_SECRET || 'fallback-secret-for-overlay';
@@ -157,27 +299,22 @@ router.post('/stream/create', verifyAuth, thumbnailUpload.single('thumbnail'), a
                                .update(matchId.toString())
                                .digest('hex');
 
-    await HostedGame.findByIdAndUpdate(matchId, {
-      youtubeBroadcastId: result.broadcastId,
-      youtubeStreamId:    result.streamId,
-      youtubeVideoId:     result.youtubeVideoId,
-      youtubeLiveChatId:  result.liveChatId,
-      youtubeStreamKey:   result.streamKey,
-      youtubeRtmpUrl:     result.rtmpUrl,
+    const updateData = {
       overlayToken:       overlayToken,
       isLive:             true,
-      streamStatus:       'starting'
-    });
+      streamStatus:       'live',
+      broadcasts:         broadcastsResults
+    };
 
+    const updatedMatch = await HostedGame.findByIdAndUpdate(matchId, updateData, { new: true });
+
+    const frontendUrl = process.env.VITE_APP_URL || process.env.APP_FRONTEND_URL || 'http://localhost:5173';
     res.json({
       success: true,
-      broadcastId: result.broadcastId,
-      rtmpUrl: result.rtmpUrl,
-      streamKey: result.streamKey,
-      watchUrl: result.watchUrl,
-      overlayUrl: `${process.env.VITE_APP_URL || 'http://localhost:5173'}/live-overlay/${matchId}?token=${overlayToken}`,
-      scoreboardUrl: `${process.env.VITE_APP_URL || 'http://localhost:5173'}/live-score/${matchId}`,
-      thumbnailUploaded
+      broadcasts: broadcastsResults,
+      overlayUrl: `${frontendUrl}/live-overlay/${matchId}?token=${overlayToken}`,
+      scoreboardUrl: `${frontendUrl}/live-score/${matchId}`,
+      streamConfig: updatedMatch
     });
 
   } catch (error) {
@@ -221,13 +358,29 @@ router.post('/stream/end/:matchId', verifyAuth, async (req, res) => {
     const match = await HostedGame.findById(req.params.matchId);
     if (!match) return res.status(404).json({ success: false, message: 'Match not found' });
 
-    if (match.youtubeBroadcastId) {
-      await endBroadcast(req.user._id, match.youtubeBroadcastId);
+    if (match.broadcasts && match.broadcasts.length > 0) {
+      for (const broadcast of match.broadcasts) {
+        if (broadcast.platform === 'youtube' && broadcast.broadcastId) {
+          try {
+            await endBroadcast(req.user._id, broadcast.broadcastId, broadcast.accountId);
+          } catch (err) {
+            console.error(`Failed to end YouTube broadcast ${broadcast.broadcastId}:`, err.message);
+          }
+        }
+        if (broadcast.platform === 'facebook' && broadcast.videoId) {
+          try {
+            await endFacebookLiveStream(req.user._id, broadcast.videoId, broadcast.accountId);
+          } catch (err) {
+            console.error(`Failed to end Facebook broadcast ${broadcast.videoId}:`, err.message);
+          }
+        }
+      }
     }
 
     await HostedGame.findByIdAndUpdate(req.params.matchId, {
       isLive: false,
-      streamStatus: 'offline'
+      streamStatus: 'offline',
+      'broadcasts.$[].status': 'offline'
     });
 
     res.json({ success: true, message: 'Stream ended successfully' });

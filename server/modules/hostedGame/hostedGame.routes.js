@@ -13,6 +13,7 @@ router.get("/verify-invite", controller.verifyInviteToken); // Phase 2D — magi
 
 // ── Authenticated — read ───────────────────────────────────────────────────
 router.get("/my-hosted", verifyUser, controller.getMyHostedGames);
+router.get("/search-officials", verifyUser, controller.searchOfficials);
 router.get("/my-joined", verifyUser, controller.getMyJoinedGames);
 router.get("/followers-for-slot", verifyUser, controller.getFollowersForSlot); // Phase 2E
 
@@ -38,6 +39,12 @@ router.post("/handle-umpire-request", verifyUser, controller.handleUmpireRequest
 
 router.post("/request-streamer", verifyUser, controller.requestToStreamer);
 router.post("/handle-streamer-request", verifyUser, controller.handleStreamerRequest);
+router.post("/request-scorer", verifyUser, controller.requestToScorer);
+router.post("/handle-scorer-request", verifyUser, controller.handleScorerRequest);
+router.post("/invite-official", verifyUser, controller.inviteOfficial);
+router.post("/respond-to-official-invitation", verifyUser, controller.respondToOfficialInvitation);
 router.post("/:id/stream-config", verifyUser, controller.updateStreamConfig);
+router.post("/update-ticker-theme/:id", verifyUser, controller.updateTickerTheme);
+router.post("/update-venue", verifyUser, controller.updateVenue);
 
 export default router;

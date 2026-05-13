@@ -7,13 +7,18 @@ import { Readable } from 'stream';
  * Builds an authenticated Google API client for a given user.
  * Handles token refresh automatically.
  */
-export async function getYoutubeClientForUser(userId) {
-  const user = await User.findById(userId).select(
-    'youtubeAccessToken youtubeRefreshToken youtubeTokenExpiry'
-  );
+export async function getYoutubeClientForUser(userId, accountId = null) {
+  const user = await User.findById(userId).select('socialAccounts');
+  
+  let account;
+  if (accountId) {
+    account = user.socialAccounts.find(acc => acc.platform === 'youtube' && acc.accountId === accountId);
+  } else {
+    account = user.socialAccounts.find(acc => acc.platform === 'youtube');
+  }
 
-  if (!user?.youtubeRefreshToken) {
-    throw new Error('YouTube not connected. User must re-authorize.');
+  if (!account?.accessToken) {
+    throw new Error('YouTube account not found or not connected.');
   }
 
   const oauth2Client = new google.auth.OAuth2(
@@ -23,33 +28,28 @@ export async function getYoutubeClientForUser(userId) {
   );
 
   oauth2Client.setCredentials({
-    access_token:  user.youtubeAccessToken,
-    refresh_token: user.youtubeRefreshToken,
-    expiry_date:   user.youtubeTokenExpiry?.getTime()
+    access_token: account.accessToken,
+    refresh_token: account.refreshToken,
+    expiry_date: account.expiry?.getTime()
   });
 
-  // Auto-refresh: if token is expired or expiring in next 5 min, refresh now
-  const expiresAt = user.youtubeTokenExpiry?.getTime() || 0;
-  const fiveMinFromNow = Date.now() + 5 * 60 * 1000;
-
-  if (expiresAt < fiveMinFromNow) {
+  // Auto-refresh logic (simplified for multi-account)
+  const expiresAt = account.expiry?.getTime() || 0;
+  if (expiresAt < Date.now() + 5 * 60 * 1000 && account.refreshToken) {
     try {
       const { credentials } = await oauth2Client.refreshAccessToken();
-      await User.findByIdAndUpdate(userId, {
-        youtubeAccessToken: credentials.access_token,
-        youtubeTokenExpiry: new Date(credentials.expiry_date)
-      });
+      await User.updateOne(
+        { _id: userId, 'socialAccounts.accountId': account.accountId },
+        { 
+          $set: { 
+            'socialAccounts.$.accessToken': credentials.access_token,
+            'socialAccounts.$.expiry': new Date(credentials.expiry_date)
+          } 
+        }
+      );
       oauth2Client.setCredentials(credentials);
     } catch (err) {
-      if (err.message.includes('invalid_grant') || err.message.includes('Token has been expired')) {
-        await User.findByIdAndUpdate(userId, {
-          youtubeAccessToken:  null,
-          youtubeRefreshToken: null,
-          youtubeTokenExpiry:  null
-        });
-        throw new Error('YouTube access has been revoked. Please reconnect your YouTube channel.');
-      }
-      throw err;
+      console.error("Token refresh failed", err);
     }
   }
 
@@ -65,9 +65,10 @@ export async function createYoutubeLiveStream(userId, {
   description,
   scheduledStartTime,
   privacy,
-  resolution
+  resolution,
+  accountId = null
 }) {
-  const youtube = await getYoutubeClientForUser(userId);
+  const youtube = await getYoutubeClientForUser(userId, accountId);
 
   try {
     // STEP A: Create the broadcast
@@ -239,8 +240,8 @@ export async function updateBroadcast(userId, broadcastId, { title, description,
  * Transitions the broadcast to "complete" status
  * This archives it on YouTube as a regular video
  */
-export async function endBroadcast(userId, broadcastId) {
-  const youtube = await getYoutubeClientForUser(userId);
+export async function endBroadcast(userId, broadcastId, accountId = null) {
+  const youtube = await getYoutubeClientForUser(userId, accountId);
 
   try {
     await youtube.liveBroadcasts.transition({
@@ -282,12 +283,83 @@ export async function fetchAndStoreYoutubeChannel(userId, accessToken) {
     const channel = response.data.items?.[0];
     if (!channel) return;
 
-    await User.findByIdAndUpdate(userId, {
-      youtubeChannelId:    channel.id,
-      youtubeChannelName:  channel.snippet.title,
-      youtubeChannelThumb: channel.snippet.thumbnails?.default?.url || null
-    });
+    const user = await User.findById(userId);
+    if (!user) return;
+
+    user.youtubeChannelId = channel.id;
+    user.youtubeChannelName = channel.snippet.title;
+    user.youtubeChannelThumb = channel.snippet.thumbnails?.default?.url || null;
+
+    const existingIndex = user.socialAccounts.findIndex(acc => acc.accountId === channel.id && acc.platform === 'youtube');
+    const accountData = {
+      platform: 'youtube',
+      accountId: channel.id,
+      accountName: channel.snippet.title,
+      accessToken: accessToken,
+      thumbnail: channel.snippet.thumbnails?.default?.url || null,
+      expiry: new Date(Date.now() + 3600 * 1000)
+    };
+
+    if (existingIndex > -1) {
+      user.socialAccounts[existingIndex] = { ...user.socialAccounts[existingIndex].toObject(), ...accountData };
+    } else {
+      user.socialAccounts.push(accountData);
+    }
+
+    await user.save();
   } catch (err) {
     console.warn('[YouTube] Could not fetch channel info:', err.message);
+  }
+}
+export async function getChannelStats(userId) {
+  try {
+    console.log(`[YouTube] Fetching stats for user: ${userId}`);
+    const youtube = await getYoutubeClientForUser(userId);
+    console.log(`[YouTube] Client created for user: ${userId}`);
+    const response = await youtube.channels.list({
+      part: ['statistics', 'snippet'],
+      mine: true
+    });
+
+    const channel = response.data.items?.[0];
+    if (!channel) {
+      console.warn(`[YouTube] No channel found for user: ${userId}`);
+      return null;
+    }
+
+    console.log(`[YouTube] Found channel: ${channel.snippet.title} for user: ${userId}`);
+
+    return {
+      subscribers: parseInt(channel.statistics.subscriberCount) || 0,
+      views: parseInt(channel.statistics.viewCount) || 0,
+      videos: parseInt(channel.statistics.videoCount) || 0,
+      name: channel.snippet.title,
+      thumbnail: channel.snippet.thumbnails?.default?.url || null
+    };
+  } catch (err) {
+    console.warn('[YouTube] Could not fetch live channel stats:', err.message);
+    
+    // Fallback: Try to get from cached data in User model
+    try {
+      const user = await User.findById(userId).select('socialAccounts youtubeChannelName youtubeChannelThumb');
+      const account = user?.socialAccounts?.find(acc => acc.platform === 'youtube');
+      
+      if (account || user?.youtubeChannelName) {
+        console.log('[YouTube] Returning cached statistics for user:', userId);
+        const stats = account?.metadata?.statistics || {};
+        return {
+          subscribers: parseInt(stats.subscriberCount) || 0,
+          views: parseInt(stats.viewCount) || 0,
+          videos: parseInt(stats.videoCount) || 0,
+          name: account?.accountName || user?.youtubeChannelName || 'YouTube Channel',
+          thumbnail: account?.thumbnail || user?.youtubeChannelThumb || null,
+          isCached: true
+        };
+      }
+    } catch (fallbackErr) {
+      console.error('[YouTube] Fallback stats retrieval failed:', fallbackErr.message);
+    }
+    
+    return null;
   }
 }

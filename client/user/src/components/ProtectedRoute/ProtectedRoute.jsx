@@ -13,15 +13,19 @@ export default function ProtectedRoute({ children, requiredRole }) {
     const isAdminRole = (r) => r?.toLowerCase().includes("admin");
     const isOwnerRole = (r) => r?.toLowerCase().includes("owner") || r?.toLowerCase().includes("venue");
     
+    const checkRole = (req) => {
+      if (req.toLowerCase() === "admin") return isAdminRole(role);
+      if (req.toLowerCase() === "owner") return isOwnerRole(role);
+      if (req.toLowerCase() === "umpire") return role?.toLowerCase() === "umpire" || role?.toLowerCase() === "limited_umpire";
+      if (req.toLowerCase() === "scorer") return role?.toLowerCase() === "scorer" || role?.toLowerCase() === "limited_scorer";
+      return role?.toLowerCase() === req?.toLowerCase();
+    };
+
     let isMatchingRole = false;
-    if (requiredRole.toLowerCase() === "admin") {
-      isMatchingRole = isAdminRole(role);
-    } else if (requiredRole.toLowerCase() === "owner") {
-      isMatchingRole = isOwnerRole(role);
-    } else if (requiredRole.toLowerCase() === "umpire") {
-      isMatchingRole = role?.toLowerCase() === "umpire" || role?.toLowerCase() === "limited_umpire";
+    if (Array.isArray(requiredRole)) {
+      isMatchingRole = requiredRole.some(r => checkRole(r));
     } else {
-      isMatchingRole = role?.toLowerCase() === requiredRole?.toLowerCase();
+      isMatchingRole = checkRole(requiredRole);
     }
     
     if (!isMatchingRole) {

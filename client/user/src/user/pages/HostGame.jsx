@@ -10,8 +10,9 @@ import {
   Users, UserCheck, ChevronRight, Search,
   ArrowLeft, Coins, CheckCircle2, AlertCircle,
   ShieldCheck, Zap, Trash2, Plus, ImageIcon, ChevronUp, ChevronDown,
-  Gift, Mail, Info
+  Gift, Mail, Info, ShieldAlert
 } from 'lucide-react';
+import { useGetMyTeamsQuery } from '@redux/api/teamApi';
 import CoinAnimation from '../components/CoinAnimation';
 import { fetchStates, fetchCities } from '../utils/locationService';
 
@@ -118,6 +119,50 @@ const HostGame = () => {
   const [clockHour, setClockHour] = useState(9);
   const [clockMinute, setClockMinute] = useState(0);
   const [clockAmPm, setClockAmPm] = useState('AM');
+
+  // Team Fill state
+  const [showTeamFillModal, setShowTeamFillModal] = useState(false);
+  const [fillingTeamKey, setFillingTeamKey] = useState(null); // 'teamA', 'teamB', or 'quick'
+  const { data: teamsData } = useGetMyTeamsQuery();
+  const myTeams = teamsData?.teams || [];
+
+  const handleFillFromTeam = (team) => {
+    if (fillingTeamKey === 'quick') {
+      const newSlots = [...gameData.quickSlotsData];
+      let slotIdx = 1; // Start from slot 2 (index 1) as slot 1 is host
+      
+      team.members.forEach(member => {
+        if (slotIdx < newSlots.length && member.user?._id !== user?._id) {
+          if (member.user) {
+            newSlots[slotIdx] = { ...newSlots[slotIdx], userId: member.user._id, name: member.user.name, status: 'HELD' };
+          } else {
+            newSlots[slotIdx] = { ...newSlots[slotIdx], customPlayer: { name: member.name, email: member.email }, status: 'HELD' };
+          }
+          slotIdx++;
+        }
+      });
+      setGameData({ ...gameData, quickSlotsData: newSlots });
+    } else {
+      // Professional mode
+      const teamKey = fillingTeamKey;
+      const newSlots = [...gameData[teamKey].slots];
+      let slotIdx = 0;
+      
+      team.members.forEach(member => {
+        if (slotIdx < newSlots.length) {
+          if (member.user) {
+            newSlots[slotIdx] = { ...newSlots[slotIdx], userId: member.user._id, name: member.user.name, status: 'HELD' };
+          } else {
+            newSlots[slotIdx] = { ...newSlots[slotIdx], customPlayer: { name: member.name, email: member.email }, status: 'HELD' };
+          }
+          slotIdx++;
+        }
+      });
+      setGameData({ ...gameData, [teamKey]: { ...gameData[teamKey], slots: newSlots } });
+    }
+    setShowTeamFillModal(false);
+    toast.success(`Slots filled from ${team.name}`);
+  };
 
   const formatTime = (h, m, ampm) => {
     const hour24 = ampm === 'PM' ? (h === 12 ? 12 : h + 12) : (h === 12 ? 0 : h);
@@ -835,9 +880,20 @@ const HostGame = () => {
         {/* Step 4.5: Quick Slot Setup */}
         {step === 4.5 && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-12">
-            <div className="text-center space-y-4">
-              <h2 className="text-4xl font-black tracking-tight">Manage Slots</h2>
-              <p className="text-neutral-500 font-medium italic">Assign players to slots or leave them open for the community</p>
+            <div className="flex items-center justify-between gap-4">
+              <div className="text-left space-y-1">
+                <h2 className="text-4xl font-black tracking-tight">Manage Slots</h2>
+                <p className="text-neutral-500 font-medium italic">Assign players to slots or leave them open for the community</p>
+              </div>
+              <button 
+                onClick={() => {
+                  setFillingTeamKey('quick');
+                  setShowTeamFillModal(true);
+                }}
+                className="flex items-center gap-2 px-6 py-3 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl text-yellow-500 font-black text-xs uppercase tracking-widest hover:bg-yellow-500 hover:text-black transition-all"
+              >
+                <ShieldCheck size={16} /> Fill from My Team
+              </button>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -915,21 +971,33 @@ const HostGame = () => {
                 {["teamA", "teamB"].map((teamKey) => (
                   <div key={teamKey} className="space-y-8">
                     {/* Team Header */}
-                    <div className="flex items-center gap-5">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl ${teamKey === 'teamA' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}`}>
-                        {teamKey === 'teamA' ? 'A' : 'B'}
+                    <div className="flex items-center justify-between gap-5">
+                      <div className="flex items-center gap-5">
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl ${teamKey === 'teamA' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}`}>
+                          {teamKey === 'teamA' ? 'A' : 'B'}
+                        </div>
+                        <div className="flex-1">
+                          <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest block mb-1">Team Name</label>
+                          <input 
+                            className="bg-transparent text-2xl font-black border-none outline-none focus:ring-0 w-full p-0 tracking-tight"
+                            value={gameData[teamKey].name}
+                            onChange={(e) => setGameData({
+                              ...gameData,
+                              [teamKey]: { ...gameData[teamKey], name: e.target.value }
+                            })}
+                          />
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest block mb-1">Team Name</label>
-                        <input 
-                          className="bg-transparent text-2xl font-black border-none outline-none focus:ring-0 w-full p-0 tracking-tight"
-                          value={gameData[teamKey].name}
-                          onChange={(e) => setGameData({
-                            ...gameData,
-                            [teamKey]: { ...gameData[teamKey], name: e.target.value }
-                          })}
-                        />
-                      </div>
+                      <button 
+                        onClick={() => {
+                          setFillingTeamKey(teamKey);
+                          setShowTeamFillModal(true);
+                        }}
+                        className="p-3 bg-neutral-800 rounded-2xl text-neutral-500 hover:text-yellow-500 transition-all border border-white/5"
+                        title="Fill from My Team"
+                      >
+                        <ShieldCheck size={20} />
+                      </button>
                     </div>
 
                     {/* Team Image Upload */}
@@ -1166,6 +1234,70 @@ const HostGame = () => {
         )}
 
       </div>
+
+      <AnimatePresence>
+        {showTeamFillModal && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowTeamFillModal(false)} className="absolute inset-0 bg-black/90 backdrop-blur-md" />
+            <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 30 }} className="relative bg-[#0a0a0a] border border-neutral-800 p-8 rounded-[40px] max-w-md w-full shadow-2xl overflow-hidden">
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-yellow-500/10 blur-[100px] rounded-full" />
+              
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center">
+                  <ShieldCheck size={24} className="text-yellow-500" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black tracking-tight text-white">Fill from Team</h2>
+                  <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest mt-1">Bulk slot assignment</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {myTeams.length > 0 ? myTeams.map(team => (
+                  <div 
+                    key={team._id}
+                    onClick={() => handleFillFromTeam(team)}
+                    className="p-4 bg-neutral-900 border border-white/5 rounded-2xl flex items-center justify-between group hover:border-yellow-500/50 transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-neutral-800 border border-white/5 overflow-hidden">
+                        <img src={team.logo || `https://api.dicebear.com/7.x/initials/svg?seed=${team.name}`} alt={team.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-sm group-hover:text-yellow-500 transition-colors">{team.name}</h4>
+                        <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest">{team.members?.length || 0} Members</p>
+                      </div>
+                    </div>
+                    <div className="p-2 bg-yellow-500/10 rounded-lg text-yellow-500 group-hover:bg-yellow-500 group-hover:text-black transition-all">
+                      <Plus size={16} />
+                    </div>
+                  </div>
+                )) : (
+                  <div className="text-center py-12 space-y-4 bg-neutral-900/50 rounded-3xl border border-dashed border-neutral-800">
+                    <ShieldAlert className="mx-auto text-neutral-700" size={48} />
+                    <div className="space-y-1">
+                      <p className="text-sm text-neutral-500 font-medium italic">No teams found in your profile</p>
+                      <p className="text-[10px] text-neutral-600 font-black uppercase tracking-widest">Create a team in the My Teams section first</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-8 flex flex-col gap-3">
+                <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest text-center px-4">
+                  Note: This will fill empty slots with team members. Host slot will not be overwritten.
+                </p>
+                <button 
+                  onClick={() => setShowTeamFillModal(false)}
+                  className="w-full py-4 bg-neutral-800 rounded-2xl font-black text-xs uppercase tracking-widest text-neutral-400 hover:bg-neutral-700 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Confirmation Modal */}
       {/* Slot Picker Popup */}

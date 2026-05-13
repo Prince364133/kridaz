@@ -27,7 +27,7 @@ const registerSchema = yup.object().shape({
     .required("Enter your phone number")
     .matches(/^[0-9]{10}$/, "Enter a valid 10-digit phone number"),
   gender: yup.string().required("Select your gender"),
-  sportTypes: yup.array().min(1, "Select at least one sport"),
+  sportTypes: yup.array().optional(),
   location: yup.string().required("Enter your location"),
   password: yup
     .string()
@@ -183,6 +183,8 @@ const useSignUpForm = (predefinedRole = "user") => {
         navigate("/partner");
       } else if (role === "coach") {
         navigate("/coach");
+      } else if (role === "streamer") {
+        navigate("/streamer");
       } else {
         navigate("/");
       }
@@ -251,6 +253,8 @@ const useSignUpForm = (predefinedRole = "user") => {
         navigate("/partner");
       } else if (role === "coach") {
         navigate("/coach");
+      } else if (role === "streamer") {
+        navigate("/streamer");
       } else {
         navigate("/");
       }

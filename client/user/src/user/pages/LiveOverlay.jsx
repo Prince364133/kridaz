@@ -58,6 +58,41 @@ const BADGE_CFG = {
 const GLOBAL_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
+  :root {
+    --theme-primary: #a3e635;
+    --theme-bg: rgba(5,5,5,0.88);
+    --theme-text: #fff;
+    --theme-accent: #a3e635;
+  }
+
+  .theme-classic {
+    --theme-primary: #a3e635;
+    --theme-bg: rgba(5,5,5,0.88);
+    --theme-text: #fff;
+    --theme-accent: #a3e635;
+  }
+
+  .theme-premium {
+    --theme-primary: #d4af37;
+    --theme-bg: rgba(10, 15, 30, 0.9);
+    --theme-text: #fff;
+    --theme-accent: #d4af37;
+  }
+
+  .theme-energy {
+    --theme-primary: #ef4444;
+    --theme-bg: rgba(20, 0, 0, 0.9);
+    --theme-text: #fff;
+    --theme-accent: #fff;
+  }
+
+  .theme-minimal {
+    --theme-primary: #fff;
+    --theme-bg: rgba(0, 0, 0, 0.8);
+    --theme-text: #fff;
+    --theme-accent: #fff;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body, html {
@@ -104,7 +139,7 @@ const GLOBAL_CSS = `
   }
   @keyframes scoreFlash {
     0%,100% { color: #fff; }
-    50%      { color: #a3e635; }
+    50%      { color: var(--theme-primary); }
   }
   @keyframes scrollText {
     0%   { transform: translateX(100%); }
@@ -116,7 +151,7 @@ const GLOBAL_CSS = `
     left: 0;
     right: 0;
     height: 34px;
-    background: rgba(163, 230, 53, 0.95);
+    background: var(--theme-primary);
     display: flex;
     align-items: center;
     overflow: hidden;
@@ -127,7 +162,7 @@ const GLOBAL_CSS = `
   }
   .ticker-label {
     background: #000;
-    color: #a3e635;
+    color: var(--theme-primary);
     padding: 0 16px;
     height: 100%;
     display: flex;
@@ -149,6 +184,17 @@ const GLOBAL_CSS = `
     text-transform: uppercase;
     animation: scrollText 15s linear infinite;
   }
+  .main-ticker-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 90px;
+    background: var(--theme-bg);
+    backdrop-filter: blur(20px);
+    border-top: 2px solid var(--theme-primary);
+    display: flex; alignItems: stretch;
+    animation: tickerIn 0.6s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .theme-accent-text { color: var(--theme-primary); }
+  .theme-accent-bg { background: var(--theme-primary); }
 `;
 
 function injectCSS(css) {
@@ -394,7 +440,7 @@ const LiveOverlay = () => {
   const strikerSR  = striker  ? `SR ${striker.strikeRate  || ((striker.balls  ? ((striker.runs /striker.balls)*100).toFixed(0)  : 0))}` : '';
 
   return (
-    <div style={{ width: 1920, height: 1080, background: 'transparent', position: 'relative', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
+    <div className={`theme-${score.tickerTheme || 'classic'}`} style={{ width: 1920, height: 1080, background: 'transparent', position: 'relative', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
 
       {/* ── Event badge ─────────────────────────────────────────────────────── */}
       {badge && <EventBadge event={badge} />}
@@ -421,25 +467,17 @@ const LiveOverlay = () => {
       )}
 
       {/* ── Ticker bar (fixed bottom) ───────────────────────────────────────── */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        height: 90,
-        background: 'rgba(5,5,5,0.88)',
-        backdropFilter: 'blur(20px)',
-        borderTop: '2px solid #a3e635',
-        display: 'flex', alignItems: 'stretch',
-        animation: 'tickerIn 0.6s cubic-bezier(0.16,1,0.3,1) both',
-      }}>
+      <div className="main-ticker-bar">
 
         {/* ── TEAM + SCORE (left) ─────────────────────────────────────────── */}
         <div style={{
           minWidth: 260,
-          background: 'rgba(163,230,53,0.08)',
+          background: 'rgba(255,255,255,0.05)',
           borderRight: '1px solid rgba(255,255,255,0.06)',
           padding: '0 24px',
           display: 'flex', flexDirection: 'column', justifyContent: 'center',
         }}>
-          <div style={{ fontSize: 9, fontWeight: 900, color: '#a3e635', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 4 }}>
+          <div className="theme-accent-text" style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 4 }}>
             LIVE MATCH
           </div>
           <div style={{ fontSize: 15, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '-0.5px', lineHeight: 1.1 }}>
@@ -457,7 +495,7 @@ const LiveOverlay = () => {
             <span style={{ fontSize: 46, fontWeight: 900, fontStyle: 'italic', lineHeight: 1, color: '#fff', letterSpacing: -2 }}>
               {score.totalRuns}
             </span>
-            <span style={{ fontSize: 30, fontWeight: 900, color: '#a3e635', fontStyle: 'italic' }}>/</span>
+            <span className="theme-accent-text" style={{ fontSize: 30, fontWeight: 900, fontStyle: 'italic' }}>/</span>
             <span style={{ fontSize: 38, fontWeight: 900, fontStyle: 'italic', color: '#fff', letterSpacing: -1 }}>
               {score.totalWickets}
             </span>
@@ -466,15 +504,15 @@ const LiveOverlay = () => {
             <div style={{ fontSize: 9, color: '#6b7280', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.25em' }}>OVERS</div>
             <div style={{ fontSize: 20, fontWeight: 900, color: '#e5e7eb' }}>{score.overString}</div>
             {score.crr && (
-              <div style={{ fontSize: 11, color: '#a3e635', fontWeight: 700 }}>CRR {score.crr}</div>
+              <div className="theme-accent-text" style={{ fontSize: 11, fontWeight: 700 }}>CRR {score.crr}</div>
             )}
           </div>
           {score.target && (
             <div style={{
-              padding: '6px 14px', background: 'rgba(163,230,53,0.12)', borderRadius: 8,
-              border: '1px solid rgba(163,230,53,0.25)',
+              padding: '6px 14px', background: 'rgba(255,255,255,0.05)', borderRadius: 8,
+              border: '1px solid var(--theme-primary)',
             }}>
-              <div style={{ fontSize: 9, color: '#a3e635', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>TARGET</div>
+              <div className="theme-accent-text" style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>TARGET</div>
               <div style={{ fontSize: 22, fontWeight: 900, color: '#fff' }}>{score.target}</div>
             </div>
           )}
@@ -489,13 +527,13 @@ const LiveOverlay = () => {
         }}>
           {striker && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#a3e635', flexShrink: 0 }} />
+              <div className="theme-accent-bg" style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0 }} />
               <span style={{ fontSize: 13, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: -0.3, flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                 {striker.name}
               </span>
               <span style={{ fontSize: 16, fontWeight: 900, color: '#fff' }}>{striker.runs}</span>
               <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 700 }}>({striker.balls})</span>
-              <span style={{ fontSize: 10, color: '#a3e635', fontWeight: 700 }}>{strikerSR}</span>
+              <span className="theme-accent-text" style={{ fontSize: 10, fontWeight: 700 }}>{strikerSR}</span>
             </div>
           )}
           {nonStriker && (

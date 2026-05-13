@@ -41,6 +41,8 @@ const Navbar = () => {
     { name: "Venues", path: "/business/venue" },
     { name: "Coaches", path: "/business/coach" },
     { name: "Officials", path: "/business/official" },
+    { name: "Scorers", path: "/business/scorer" },
+    { name: "Streamers", path: "/business/streamer" },
   ] : [
     { name: "Home", path: "/" },
     { name: "Venues", path: "/turfs" },
@@ -49,6 +51,7 @@ const Navbar = () => {
     { name: "Community", path: "/community" },
     { name: "Leaderboard", path: "/leaderboard" },
     { name: "Players", path: "/players" },
+    { name: "Teams", path: "/my-teams" },
     { name: "Business", path: "#" },
   ];
 
@@ -107,6 +110,16 @@ const Navbar = () => {
                       <li>
                         <Link to="/business/official" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
                           Umpire
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/business/scorer" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                          Scorer
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/business/streamer" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                          YouTube Streamer
                         </Link>
                       </li>
                     </ul>
@@ -206,8 +219,8 @@ const Navbar = () => {
                         <div className="h-[1px] bg-white/5 my-1" />
 
                         {/* DASHBOARDS SECTION */}
-                        {(["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "limited_umpire"].some(r => role?.toLowerCase().includes(r)) || 
-                          ["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "limited_umpire"].some(r => user?.role?.toLowerCase().includes(r))) && (
+                        {(["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "limited_umpire", "scorer", "limited_scorer", "streamer"].some(r => role?.toLowerCase().includes(r)) || 
+                          ["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "limited_umpire", "scorer", "limited_scorer", "streamer"].some(r => user?.role?.toLowerCase().includes(r))) && (
                           <>
                             {(role?.toLowerCase() === "admin" || role?.toLowerCase().includes("bmsp_admin") || user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase().includes("bmsp_admin")) && (
                               <Link to="/admin" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
@@ -227,10 +240,22 @@ const Navbar = () => {
                                 <span className="text-sm font-medium">Coach Portal</span>
                               </Link>
                             )}
-                            {(role?.toLowerCase().includes("umpire") || user?.role?.toLowerCase().includes("umpire")) && (
+                             {(role?.toLowerCase().includes("umpire") || user?.role?.toLowerCase().includes("umpire")) && (
                               <Link to="/umpire" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                 <Zap size={18} className="text-white/40" />
                                 <span className="text-sm font-medium">Umpire Portal</span>
+                              </Link>
+                            )}
+                            {(role?.toLowerCase().includes("scorer") || user?.role?.toLowerCase().includes("scorer")) && (
+                              <Link to="/scorer" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                <Zap size={18} className="text-white/40" />
+                                <span className="text-sm font-medium">Scorer Portal</span>
+                              </Link>
+                            )}
+                            {(role?.toLowerCase().includes("streamer") || user?.role?.toLowerCase().includes("streamer")) && (
+                              <Link to="/streamer" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                <Zap size={18} className="text-white/40" />
+                                <span className="text-sm font-medium">Streamer Portal</span>
                               </Link>
                             )}
                             <div className="h-[1px] bg-white/5 my-1" />
@@ -244,6 +269,14 @@ const Navbar = () => {
                         >
                           <MessageCircle size={18} className="text-white/40" />
                           <span className="text-sm font-medium">Messages</span>
+                        </Link>
+                        
+                        <Link 
+                          to="/my-teams" 
+                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all"
+                        >
+                          <Users size={18} className="text-white/40" />
+                          <span className="text-sm font-medium">My Teams</span>
                         </Link>
                         
                         <Link 

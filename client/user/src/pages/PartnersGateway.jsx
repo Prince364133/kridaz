@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRight, Store, Award, Shield, Globe, Building2, Layout, BarChart3, Users } from "lucide-react";
+import { ArrowRight, Store, Award, Shield, Globe, Building2, Layout, BarChart3, Users, Tv } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const PRI = "#84CC16";
@@ -37,6 +37,28 @@ const partners = [
     id: "UMPIRE-03",
     accent: "#F59E0B",
     status: "Coming Soon",
+  },
+  {
+    role: "YouTube Streamer",
+    title: "BROADCAST THE ACTION",
+    desc: "Broadcast matches live to your audience with integrated scoring overlays. Manage your streaming schedule and connect with match organizers.",
+    link: "/signup/streamer",
+    icon: Tv,
+    stat: "Live Broadcasting",
+    id: "STREAM-04",
+    accent: "#EF4444",
+    status: "Live",
+  },
+  {
+    role: "Certified Scorer",
+    title: "DIGITIZE EVERY BALL",
+    desc: "Provide professional scoring services for tournaments and matches. Use our advanced scoring app to track every ball in real-time.",
+    link: "/signup/scorer",
+    icon: Layout,
+    stat: "Match Digitizer",
+    id: "SCORER-05",
+    accent: "#A855F7",
+    status: "Live",
   },
 ];
 
@@ -84,6 +106,12 @@ export default function PartnersGateway() {
               </Link>
               <Link to="/signup/official" className="bg-amber-500 hover:bg-amber-400 text-black h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
                 <Shield className="w-4 h-4" /> Umpire
+              </Link>
+              <Link to="/signup/streamer" className="bg-red-500 hover:bg-red-400 text-white h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
+                <Tv className="w-4 h-4" /> Streamer
+              </Link>
+              <Link to="/signup/scorer" className="bg-purple-500 hover:bg-purple-400 text-white h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
+                <Layout className="w-4 h-4" /> Scorer
               </Link>
               <div className="hidden sm:flex items-center gap-10 border-l border-white/10 pl-10">
                 <div className="space-y-1">

@@ -43,9 +43,9 @@ const Root = () => {
       <main className="flex-grow pb-20 lg:pb-0">
         <Outlet />
       </main>
-      {!location.pathname.startsWith('/messages') && <MobileBottomNav />}
-      {/* Footer only visible on desktop OR if it's the home page on mobile (and hidden entirely on messages) */}
-      <div className={location.pathname.startsWith('/messages') ? 'hidden' : (location.pathname === '/' ? 'block' : 'hidden lg:block')}>
+      {!location.pathname.startsWith('/messages') && !location.pathname.startsWith('/my-teams') && <MobileBottomNav />}
+      {/* Footer only visible on desktop OR if it's the home page on mobile (and hidden entirely on messages/teams) */}
+      <div className={(location.pathname.startsWith('/messages') || location.pathname.startsWith('/my-teams')) ? 'hidden' : (location.pathname === '/' ? 'block' : 'hidden lg:block')}>
         <UserFooter />
       </div>
     </div>

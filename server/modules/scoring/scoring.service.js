@@ -3,20 +3,23 @@ import User from "../../models/user.model.js";
 /**
  * Aggregates and updates player statistics after a match is completed.
  * @param {Object} matchScoring - The completed CricketScoring document.
+ * @param {Object} hostedGame - The corresponding HostedGame document.
  */
-export const aggregatePlayerStats = async (matchScoring) => {
+export const aggregatePlayerStats = async (matchScoring, hostedGame) => {
   try {
     const userUpdates = new Map();
 
     const getUserData = async (userId) => {
-      if (userUpdates.has(userId.toString())) {
-        return userUpdates.get(userId.toString());
+      const idStr = userId?.toString();
+      if (!idStr) return null;
+      if (userUpdates.has(idStr)) {
+        return userUpdates.get(idStr);
       }
       const user = await User.findById(userId);
       if (user) {
         if (!user.stats) user.stats = { cricket: {} };
         if (!user.stats.cricket) user.stats.cricket = {};
-        userUpdates.set(userId.toString(), user);
+        userUpdates.set(idStr, user);
       }
       return user;
     };
@@ -81,15 +84,43 @@ export const aggregatePlayerStats = async (matchScoring) => {
         if (!user) continue;
 
         const cricket = user.stats.cricket;
-        if (ball.wicketType === "Caught") {
+        const wType = ball.wicketType?.toUpperCase();
+        if (wType === "CAUGHT") {
           cricket.catches = (cricket.catches || 0) + 1;
-        } else if (ball.wicketType === "Stumped") {
+        } else if (wType === "STUMPED") {
           cricket.stumpings = (cricket.stumpings || 0) + 1;
         }
       }
     }
 
-    // 4. Check for Badges
+    // 4. Update Official Stats (Umpire, Scorer, Streamer)
+    if (hostedGame) {
+      const umpireId = hostedGame.umpire || hostedGame.umpireRequest?.user;
+      if (umpireId) {
+        const user = await getUserData(umpireId);
+        if (user) {
+          user.stats.matchesOfficiated = (user.stats.matchesOfficiated || 0) + 1;
+        }
+      }
+
+      const scorerId = hostedGame.scorer || hostedGame.scorerRequest?.user;
+      if (scorerId) {
+        const user = await getUserData(scorerId);
+        if (user) {
+          user.stats.matchesScored = (user.stats.matchesScored || 0) + 1;
+        }
+      }
+
+      const streamerId = hostedGame.streamer || hostedGame.streamerRequest?.user;
+      if (streamerId) {
+        const user = await getUserData(streamerId);
+        if (user) {
+          user.stats.streamsHosted = (user.stats.streamsHosted || 0) + 1;
+        }
+      }
+    }
+
+    // 5. Check for Badges
     const earnedBadges = [];
     for (const user of userUpdates.values()) {
       const newBadges = checkAndAwardBadges(user);

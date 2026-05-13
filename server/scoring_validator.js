@@ -41,7 +41,8 @@ async function runTests() {
         teamB: { 
           name: "Titans", 
           slots: [
-            { user: new mongoose.Types.ObjectId(), role: 'Bowler', status: 'JOINED' }
+            { user: new mongoose.Types.ObjectId(), role: 'Bowler', status: 'JOINED' },
+            { user: new mongoose.Types.ObjectId(), role: 'Batsman', status: 'JOINED' }
           ] 
         }
       }
@@ -51,6 +52,7 @@ async function runTests() {
     const teamA_User1 = match.teams.teamA.slots[0].user;
     const teamA_User2 = match.teams.teamA.slots[1].user;
     const teamB_User1 = match.teams.teamB.slots[0].user;
+    const teamB_User2 = match.teams.teamB.slots[1].user;
 
     // Mock IO
     const ioMock = {
@@ -96,23 +98,27 @@ async function runTests() {
       { ballData: { runs: 4, isBoundary: true } },
       { ballData: { runs: 1, isExtra: true, extraType: 'WIDE' } }, 
       { ballData: { runs: 6, isBoundary: true } },
-      { ballData: { runs: 0 } },
-      { ballData: { runs: 0 } },
+      { ballData: { runs: 0, isWicket: true, wicketType: 'BOWLED' } }, // 4th legal ball
       { ballData: { runs: 0 } },
       { ballData: { runs: 0 } }, // 6th legal ball
     ];
 
+    console.log(`🏏 Scoring 1st Innings (3 balls)...`);
     for (const ball of scoreBalls) {
-      await wrap(updateScore, { ...ball, scoringId, batsmanId: teamA_User1, bowlerId: teamB_User1 }, { matchId: match._id });
+      const res = await wrap(updateScore, { scoringId, ballData: { ...ball.ballData, batterId: teamA_User1, bowlerId: teamB_User1 } }, { matchId: match._id });
+      if (!res?.success) {
+        throw new Error(`Ball update failed: ${res?.message || 'Unknown error'}`);
+      }
+      console.log(`  ✅ Ball recorded: ${ball.ballData.isExtra ? ball.ballData.extraType : ball.ballData.runs + ' runs'}`);
     }
 
-    let scoring = await CricketScoring.findOne({ matchId: match._id });
-    console.log(`\n📊 1st Innings End: ${scoring.innings[0].totalRuns}/${scoring.innings[0].totalWickets} in ${scoring.innings[0].totalBalls/6} overs`);
+    let scoring = await CricketScoring.findById(scoringId);
+    console.log(`📊 1st Innings Score: ${scoring.innings[0].totalRuns}/${scoring.innings[0].totalWickets} in ${scoring.innings[0].totalBalls} balls`);
 
-    if (scoring.innings[0].totalRuns !== 11) {
-      console.error("❌ BUG FOUND: Total runs should be 11 (4 + 1 wide + 6)");
+    if (scoring.innings[0].totalRuns !== 11 || scoring.innings[0].totalWickets !== 1) {
+      console.error(`❌ BUG FOUND: Score should be 11/1. Got ${scoring.innings[0].totalRuns}/${scoring.innings[0].totalWickets}`);
     } else {
-      console.log("✅ 1st Innings Scoring Correct");
+      console.log("✅ 1st Innings score calculation is CORRECT (11/1)");
     }
 
     // 6. Start 2nd Innings
@@ -121,7 +127,7 @@ async function runTests() {
 
     // 7. Set 2nd Innings Players
     console.log("\n🏏 Setting 2nd Innings Players...");
-    await wrap(setPlayers, { scoringId, strikerId: teamB_User1, nonStrikerId: teamB_User1, bowlerId: teamA_User1 }, { matchId: match._id });
+    await wrap(setPlayers, { scoringId, strikerId: teamB_User1, nonStrikerId: teamB_User2, bowlerId: teamA_User1 }, { matchId: match._id });
 
     // 8. Score 2nd Innings (Scenario: Target Reach)
     console.log("\n🏏 Scoring 2nd Innings Chase...");
@@ -131,7 +137,11 @@ async function runTests() {
     ];
 
     for (const ball of chaseBalls) {
-      await wrap(updateScore, { ...ball, scoringId, batsmanId: teamB_User1, bowlerId: teamA_User1 }, { matchId: match._id });
+      const res = await wrap(updateScore, { scoringId, ballData: { ...ball.ballData, batterId: teamB_User1, bowlerId: teamA_User1 } }, { matchId: match._id });
+      if (!res?.success) {
+        throw new Error(`Chase update failed: ${res?.message || 'Unknown error'}`);
+      }
+      console.log(`  ✅ Chase Ball recorded: ${ball.ballData.runs} runs`);
     }
 
     const finalMatch = await HostedGame.findById(match._id);

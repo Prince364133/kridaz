@@ -26,6 +26,12 @@ import JoinGames from "./pages/JoinGames";
 import HostGame from "./pages/HostGame";
 import MyHostedGames from "./pages/MyHostedGames";
 
+// Legal Pages
+import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
+import TermsOfService from "./pages/legal/TermsOfService";
+import UserDataDeletion from "./pages/legal/UserDataDeletion";
+
+
 // Owner Portal Imports (via @owner alias)
 import { AdminLayout, PartnerLayout, CoachLayout, UmpireLayout } from "@owner/layouts";
 import { OwnerDashboard, AddTurf, EditTurf, TurfManagement, TurfDetails as OwnerTurfDetails, OwnerReviews, OwnerBookings } from "@owner/components/owner";
@@ -125,6 +131,9 @@ const router = createBrowserRouter([
       { path: "join-games", element: <ProtectedRoute><JoinGames /></ProtectedRoute> },
       { path: "host-game", element: <ProtectedRoute><HostGame /></ProtectedRoute> },
       { path: "my-hosted-games", element: <ProtectedRoute><MyHostedGames /></ProtectedRoute> },
+      { path: "privacy-policy", element: <PrivacyPolicy /> },
+      { path: "terms-of-service", element: <TermsOfService /> },
+      { path: "user-data-deletion", element: <UserDataDeletion /> },
       { path: "*", element: <NotFound /> },
     ],
   },

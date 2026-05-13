@@ -132,6 +132,7 @@ export const computeScoreSnapshot = (scoringDoc, matchDoc) => {
     bowler: currentBowler,
     partnership: { runs: partnershipRuns, balls: partnershipBalls },
     commentary: matchDoc.lastCommentary || null,
+    tickerTheme: matchDoc.tickerTheme || "classic",
     result
   };
 };

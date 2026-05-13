@@ -1,5 +1,5 @@
 import React from "react";
-import { Video, Calendar, MapPin, Users, CheckCircle2, Zap, Search, Loader2, Hand, Clock, Shield, Activity, MonitorPlay } from "lucide-react";
+import { Video, Calendar, MapPin, Users, CheckCircle2, Zap, Search, Loader2, Hand, Clock, Shield, Activity, MonitorPlay, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useStreamerDashboard from "@hooks/owner/useStreamerDashboard";
@@ -291,17 +291,17 @@ export default function StreamerMatches() {
               </div>
               <div className="flex items-center gap-3">
                 {globalMatch.streamer ? (
-                   <div className="flex flex-col md:flex-row items-center gap-3">
-                     <div className="flex items-center gap-2 px-6 py-4 bg-violet-500/10 rounded-2xl text-[10px] font-black text-violet-500 uppercase tracking-widest border border-violet-500/20 shadow-[0_0_20px_rgba(139,92,246,0.1)]">
-                       <MonitorPlay size={16} className="fill-violet-500/20" /> Streamer Hired
+                     <div className="flex flex-col md:flex-row items-center gap-3">
+                       <div className="flex items-center gap-2 px-6 py-4 bg-violet-500/10 rounded-2xl text-[10px] font-black text-violet-500 uppercase tracking-widest border border-violet-500/20 shadow-[0_0_20px_rgba(139,92,246,0.1)]">
+                         <MonitorPlay size={16} className="fill-violet-500/20" /> Streamer Hired
+                       </div>
+                         <button 
+                           onClick={() => navigate(`/streamer/manage/${globalMatch._id}`)}
+                           className="h-14 px-8 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3"
+                         >
+                           Manage Stream <Settings size={16} />
+                         </button>
                      </div>
-                     <button 
-                       onClick={() => window.open(`/matches/${globalMatch._id}/stream-setup`, '_blank', 'noopener,noreferrer')}
-                       className="h-14 px-8 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3"
-                     >
-                       Stream Setup <Video size={16} fill="currentColor" />
-                     </button>
-                   </div>
                 ) : globalMatch.streamerRequest?.status === "PENDING" ? (
                    <div className="flex items-center gap-2 px-6 py-4 bg-white/5 rounded-2xl text-[10px] font-black text-gray-500 uppercase tracking-widest border border-white/5">
                       <Clock size={16} /> Request Pending Approval
@@ -358,15 +358,15 @@ export default function StreamerMatches() {
                     </div>
                   </div>
                   <div className="flex flex-col sm:flex-row items-center gap-3">
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(`/matches/${match._id}/stream-setup`, '_blank', 'noopener,noreferrer');
-                      }}
-                      className="w-full sm:w-auto h-14 px-10 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3 group-hover:scale-[1.02]"
-                    >
-                      Stream Setup <Video size={16} fill="currentColor" />
-                    </button>
+                     <button 
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         navigate(`/streamer/manage/${match._id}`);
+                       }}
+                       className="w-full sm:w-auto h-14 px-10 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3 group-hover:scale-[1.02]"
+                     >
+                       Manage Match <Settings size={16} />
+                     </button>
                   </div>
                 </div>
               </div>

@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Mail, Gift, Users, X, Check, Loader2, Send } from 'lucide-react';
+import { Search, Mail, Gift, Users, X, Check, Loader2, Send, ShieldCheck } from 'lucide-react';
 import axiosInstance from '@hooks/useAxiosInstance';
 import { toast } from 'react-hot-toast';
 
 const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
-  const [activeTab, setActiveTab] = useState('followers'); // 'followers' | 'email'
+  const [activeTab, setActiveTab] = useState('followers'); // 'followers' | 'email' | 'teams'
   const [searchTerm, setSearchTerm] = useState('');
   const [email, setEmail] = useState('');
   const [followers, setFollowers] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       fetchFollowers();
+      fetchTeams();
     }
   }, [isOpen]);
 
@@ -29,6 +31,17 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
       toast.error('Failed to fetch followers');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTeams = async () => {
+    try {
+      const res = await axiosInstance.get('/api/v1/team');
+      if (res.data.success) {
+        setTeams(res.data.teams || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch teams');
     }
   };
 
@@ -129,19 +142,27 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
             <div className="flex p-2 bg-black/40 mx-8 mt-6 rounded-2xl border border-white/5">
               <button
                 onClick={() => setActiveTab('followers')}
-                className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-black transition-all ${
+                className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black transition-all ${
                   activeTab === 'followers' ? 'bg-yellow-500 text-black' : 'text-neutral-500 hover:text-white'
                 }`}
               >
-                <Users size={16} /> Followers
+                <Users size={14} /> Followers
+              </button>
+              <button
+                onClick={() => setActiveTab('teams')}
+                className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black transition-all ${
+                  activeTab === 'teams' ? 'bg-yellow-500 text-black' : 'text-neutral-500 hover:text-white'
+                }`}
+              >
+                <ShieldCheck size={14} /> My Teams
               </button>
               <button
                 onClick={() => setActiveTab('email')}
-                className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-black transition-all ${
+                className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black transition-all ${
                   activeTab === 'email' ? 'bg-yellow-500 text-black' : 'text-neutral-500 hover:text-white'
                 }`}
               >
-                <Mail size={16} /> Invite via Email
+                <Mail size={14} /> Email
               </button>
             </div>
 
@@ -193,6 +214,57 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                       <div className="text-center py-12 space-y-3">
                         <Users className="mx-auto text-neutral-800" size={48} />
                         <p className="text-sm text-neutral-500 font-medium italic">No followers found matching "{searchTerm}"</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : activeTab === 'teams' ? (
+                <div className="space-y-6">
+                  <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                    {teams.length > 0 ? (
+                      teams.map(team => (
+                        <div key={team._id} className="space-y-2">
+                          <div className="px-4 py-2 bg-neutral-800/50 rounded-xl flex items-center gap-2">
+                            <ShieldCheck size={14} className="text-yellow-500" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">{team.name} Members</span>
+                          </div>
+                          <div className="grid grid-cols-1 gap-2">
+                            {team.members?.map(member => (
+                              <div 
+                                key={member.user?._id || member._id}
+                                className="group p-3 bg-black/20 border border-white/5 rounded-2xl flex items-center justify-between hover:border-yellow-500/30 transition-all"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-lg bg-neutral-800 border border-white/5 overflow-hidden">
+                                    <img 
+                                      src={member.user?.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.user?.name || member.name}`} 
+                                      alt={member.user?.name || member.name} 
+                                      className="w-full h-full object-cover" 
+                                    />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-black text-xs">{member.user?.name || member.name}</h4>
+                                    <p className="text-[8px] text-neutral-500 uppercase font-black tracking-widest">
+                                      {member.role === 'CAPTAIN' ? 'Captain' : 'Player'}
+                                    </p>
+                                  </div>
+                                </div>
+                                <button
+                                  disabled={sending}
+                                  onClick={() => handleInvitePlayer(member.user || { _id: member._id, name: member.name, isCustom: true })}
+                                  className="p-2 bg-yellow-500/10 text-yellow-500 rounded-lg hover:bg-yellow-500 hover:text-black transition-all disabled:opacity-50"
+                                >
+                                  <Check size={16} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-12 space-y-3">
+                        <ShieldCheck className="mx-auto text-neutral-800" size={48} />
+                        <p className="text-sm text-neutral-500 font-medium italic">You haven't created any teams yet</p>
                       </div>
                     )}
                   </div>

@@ -170,84 +170,99 @@ export default function BusinessRegistration() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (hasRoleConflict || isPending) return;
+    console.log("Submitting registration bundle...", { formData, files });
+
+    if (hasRoleConflict) {
+      toast.error("Role conflict detected. Please contact support.");
+      return;
+    }
     
+    if (isPending) {
+      toast.error("You already have a pending application.");
+      return;
+    }
+
     setLoading(true);
-    
-    // Consolidated Document validation
-    const requiredDocs = isOwner 
-      ? ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST', 'VENUE']
-      : ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST'];
-
-    const missingDocs = requiredDocs.filter(doc => !files[doc]);
-    if (missingDocs.length > 0) {
-      toast.error(`Please upload all required documents: ${missingDocs.join(", ")}`);
-      setLoading(false);
-      return;
-    }
-
-    const data = new FormData();
-    data.append("name", formData.name);
-    data.append("email", formData.email);
-    data.append("phone", formData.phone);
-    data.append("role", formData.role);
-    data.append("portfolioUrl", formData.portfolioUrl);
-    data.append("businessDetails", JSON.stringify(formData.businessDetails));
-
-    // Mandatory field check
-    const { businessName, registrationNumber, address, city } = formData.businessDetails;
-    const { portfolioUrl } = formData;
-
-    if (!portfolioUrl) {
-      toast.error("Portfolio link is mandatory");
-      setLoading(false);
-      return;
-    }
-    
-    if (isOwner) {
-      if (!businessName || !registrationNumber) {
-        toast.error("Please fill in all business details (Name & Registration Number)");
-        setLoading(false);
-        return;
-      }
-    } else {
-      if (!formData.businessDetails.specialization || !formData.businessDetails.experience) {
-        toast.error("Please fill in your specialization and experience");
-        setLoading(false);
-        return;
-      }
-    }
-
-    if (!address || !city) {
-      toast.error("Please provide your full address");
-      setLoading(false);
-      return;
-    }
-
-    if (!formData.portfolioUrl) {
-      toast.error("Please provide a portfolio or social media link");
-      setLoading(false);
-      return;
-    }
-
-
-    // Append files with specific names for the backend to identify
-    Object.keys(files).forEach(key => {
-      if (files[key]) {
-        data.append("documents", files[key], `${key}_${files[key].name}`);
-      }
-    });
 
     try {
+      // Consolidated Document validation
+      const requiredDocs = isOwner 
+        ? ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST', 'VENUE']
+        : ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST'];
+
+      const missingDocs = requiredDocs.filter(doc => !files[doc]);
+      if (missingDocs.length > 0) {
+        toast.error(`Please upload all required documents: ${missingDocs.join(", ")}`);
+        setLoading(false);
+        return;
+      }
+
+      // Mandatory field check
+      const { businessName, registrationNumber, address, city, state, zipCode, specialization, experience } = formData.businessDetails;
+      const { portfolioUrl, phone } = formData;
+
+      if (!portfolioUrl) {
+        toast.error("Portfolio link is mandatory");
+        setLoading(false);
+        return;
+      }
+
+      if (!phone) {
+        toast.error("Contact phone number is mandatory");
+        setLoading(false);
+        return;
+      }
+
+      // Address validation for everyone
+      if (!address || !city || !state || !zipCode) {
+        toast.error("Please provide your full address details");
+        setLoading(false);
+        return;
+      }
+
+      if (isOwner) {
+        if (!businessName || !registrationNumber) {
+          toast.error("Please fill in all business details");
+          setLoading(false);
+          return;
+        }
+      } else {
+        if (!specialization || !experience) {
+          toast.error("Please fill in your specialization and experience");
+          setLoading(false);
+          return;
+        }
+      }
+
+      const data = new FormData();
+      data.append("name", formData.name);
+      data.append("email", formData.email);
+      data.append("phone", phone);
+      data.append("role", formData.role);
+      data.append("portfolioUrl", portfolioUrl);
+      data.append("businessDetails", JSON.stringify(formData.businessDetails));
+
+      // Append all selected documents
+      Object.keys(files).forEach(key => {
+        if (files[key]) {
+          data.append("documents", files[key], `${key}_${files[key].name}`);
+        }
+      });
+
+      console.log("Sending request to backend...");
       const response = await axiosInstance.post("/api/user/auth/upgrade-request", data, {
         headers: { "Content-Type": "multipart/form-data" }
       });
+
       if (response.data.success) {
+        toast.success("Application submitted successfully!");
         setSubmitted(true);
-        toast.success(response.data.message);
+      } else {
+        toast.error(response.data.message || "Submission failed. Please try again.");
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.message || "Failed to submit application";
+      console.error("Submission Error:", error);
+      const errorMsg = error.response?.data?.message || "Failed to submit application. Check your connection.";
       toast.error(errorMsg);
     } finally {
       setLoading(false);
@@ -387,7 +402,8 @@ export default function BusinessRegistration() {
                           Business Name <span className="text-red-500">*</span>
                         </label>
                         <input 
-                          type="text" name="businessDetails.businessName" required
+                          type="text" name="businessDetails.businessName"
+                          value={formData.businessDetails.businessName}
                           onChange={handleChange}
                           placeholder="e.g. Dream Sports Arena"
                           className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
@@ -398,7 +414,8 @@ export default function BusinessRegistration() {
                           Registration Number <span className="text-red-500">*</span>
                         </label>
                         <input 
-                          type="text" name="businessDetails.registrationNumber" required
+                          type="text" name="businessDetails.registrationNumber"
+                          value={formData.businessDetails.registrationNumber}
                           onChange={handleChange}
                           placeholder="GSTIN or License No."
                           className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
@@ -409,7 +426,8 @@ export default function BusinessRegistration() {
                           Business Phone <span className="text-red-500">*</span>
                         </label>
                         <input 
-                          type="text" name="phone" required
+                          type="text" name="phone"
+                          value={formData.phone}
                           onChange={handleChange}
                           placeholder="+91 00000 00000"
                           className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
@@ -423,7 +441,8 @@ export default function BusinessRegistration() {
                           Specialization <span className="text-red-500">*</span>
                         </label>
                         <input 
-                          type="text" name="businessDetails.specialization" required
+                          type="text" name="businessDetails.specialization"
+                          value={formData.businessDetails.specialization}
                           onChange={handleChange}
                           placeholder="e.g. Advanced Cricket Coaching"
                           className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
@@ -434,7 +453,8 @@ export default function BusinessRegistration() {
                           Years of Experience <span className="text-red-500">*</span>
                         </label>
                         <input 
-                          type="text" name="businessDetails.experience" required
+                          type="text" name="businessDetails.experience"
+                          value={formData.businessDetails.experience}
                           onChange={handleChange}
                           placeholder="e.g. 5+ Years"
                           className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
@@ -445,7 +465,8 @@ export default function BusinessRegistration() {
                           Contact Phone <span className="text-red-500">*</span>
                         </label>
                         <input 
-                          type="text" name="phone" required
+                          type="text" name="phone"
+                          value={formData.phone}
                           onChange={handleChange}
                           placeholder="+91 00000 00000"
                           className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
@@ -462,7 +483,7 @@ export default function BusinessRegistration() {
                   <div className="relative">
                     <MapPin size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00]" />
                     <input 
-                      type="text" name="businessDetails.address" required
+                      type="text" name="businessDetails.address"
                       value={formData.businessDetails.address}
                       onChange={handleChange}
                       autoComplete="off"
@@ -512,7 +533,7 @@ export default function BusinessRegistration() {
                 <div className="grid grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <input 
-                      type="text" name="businessDetails.city" required
+                      type="text" name="businessDetails.city"
                       value={formData.businessDetails.city}
                       onChange={handleChange}
                       placeholder="City"
@@ -521,7 +542,7 @@ export default function BusinessRegistration() {
                   </div>
                   <div className="space-y-2">
                     <input 
-                      type="text" name="businessDetails.state" required
+                      type="text" name="businessDetails.state"
                       value={formData.businessDetails.state}
                       onChange={handleChange}
                       placeholder="State"
@@ -530,7 +551,7 @@ export default function BusinessRegistration() {
                   </div>
                   <div className="space-y-2">
                     <input 
-                      type="text" name="businessDetails.zipCode" required
+                      type="text" name="businessDetails.zipCode"
                       value={formData.businessDetails.zipCode}
                       onChange={handleChange}
                       placeholder="Zip Code"
@@ -594,6 +615,7 @@ export default function BusinessRegistration() {
                    <input 
                      type="url"
                      name="portfolioUrl"
+                     value={formData.portfolioUrl || ''}
                      onChange={handleChange}
                      placeholder="e.g. Behance, Personal Website, or Instagram"
                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all text-sm"

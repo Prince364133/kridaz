@@ -18,8 +18,8 @@ const MobileBottomNav = () => {
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Venues", path: "/turfs", icon: Search },
-    { name: "Pros", path: "/professionals", icon: Users },
     { name: "Games", path: "/join-games", icon: Zap },
+    { name: "Teams", path: "/my-teams", icon: Users },
     { name: "Profile", path: "/profile", icon: User },
   ];
 

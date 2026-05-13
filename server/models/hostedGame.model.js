@@ -7,8 +7,9 @@ const hostedGameSchema = new mongoose.Schema(
     date: { type: Date, required: true },
     time: { type: String, required: true },
     ground: { type: mongoose.Schema.Types.ObjectId, ref: "Turf" },
-    umpire: { type: mongoose.Schema.Types.ObjectId, ref: "Owner" },
-    streamer: { type: mongoose.Schema.Types.ObjectId, ref: "Owner" },
+    umpire: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    scorer: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    streamer: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     perPlayerCharge: { type: Number, default: 0 },
     perSeatCharge: { type: Number, default: 0 }, // Alias for Quick Game mode consistency
     groundCost: { type: Number, default: 0 },
@@ -27,11 +28,15 @@ const hostedGameSchema = new mongoose.Schema(
       default: "NOT_STARTED",
     },
     umpireRequest: {
-      user: { type: mongoose.Schema.Types.ObjectId, ref: "Owner" },
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      status: { type: String, enum: ["NONE", "PENDING", "APPROVED", "REJECTED"], default: "NONE" },
+    },
+    scorerRequest: {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       status: { type: String, enum: ["NONE", "PENDING", "APPROVED", "REJECTED"], default: "NONE" },
     },
     streamerRequest: {
-      user: { type: mongoose.Schema.Types.ObjectId, ref: "Owner" },
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       status: { type: String, enum: ["NONE", "PENDING", "APPROVED", "REJECTED"], default: "NONE" },
     },
     streamConfig: {
@@ -157,17 +162,26 @@ const hostedGameSchema = new mongoose.Schema(
     streamStatus: { type: String, default: 'offline' },
     overlayConfig: { type: Object, default: { showScoreboard: true, showCommentary: true } },
     liveStartedAt: { type: Date },
-    youtubeVideoId: { type: String },
-    youtubeLiveChatId: { type: String },
-    youtubeStreamKey: { type: String },
-    youtubeRtmpUrl: { type: String },
-    youtubeBroadcastId: { type: String },
-    youtubeStreamId: { type: String },
-    overlayToken: { type: String },
+    broadcasts: [
+      {
+        platform: { type: String, enum: ["youtube", "facebook"] },
+        accountId: { type: String },
+        accountName: { type: String },
+        videoId: { type: String },
+        broadcastId: { type: String },
+        streamId: { type: String },
+        streamKey: { type: String },
+        rtmpUrl: { type: String },
+        watchUrl: { type: String },
+        status: { type: String, default: 'offline' }
+      }
+    ],
+    overlayToken:       { type: String },
     lastCommentary: { type: String },
     lastCommentaryAt: { type: Date },
     liveScoreSnapshot: { type: Object },
-    oversPerInnings: { type: Number, default: 20 }
+    oversPerInnings: { type: Number, default: 20 },
+    tickerTheme: { type: String, default: "classic" }
   },
   { timestamps: true }
 );

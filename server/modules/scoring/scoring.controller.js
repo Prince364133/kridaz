@@ -143,7 +143,7 @@ export const completeMatch = async (req, res) => {
     }
 
     // Trigger aggregation
-    const earnedBadges = await aggregatePlayerStats(scoring);
+    const earnedBadges = await aggregatePlayerStats(scoring, match);
 
     res.status(200).json({ 
       success: true, 
@@ -403,8 +403,9 @@ export const undoLastBall = async (req, res) => {
 
     // Reverse innings totals
     currentInnings.totalRuns -= (lastBall.runs ?? 0);
-    if (!lastBall.isExtra || lastBall.extraType === "NO_BALL") {
-      if (lastBall.extraType !== "WIDE") currentInnings.totalBalls = Math.max(0, currentInnings.totalBalls - 1);
+    const isLegalBall = !lastBall.isExtra || lastBall.extraType === "BYE" || lastBall.extraType === "LEG_BYE";
+    if (isLegalBall) {
+      currentInnings.totalBalls = Math.max(0, currentInnings.totalBalls - 1);
     }
     if (lastBall.isWicket) currentInnings.totalWickets = Math.max(0, currentInnings.totalWickets - 1);
 
@@ -420,11 +421,10 @@ export const undoLastBall = async (req, res) => {
     if (batterId && !["WIDE", "BYE", "LEG_BYE"].includes(lastBall.extraType)) {
       const batStat = scoring.battingStats.find(b => b.user?.toString() === batterId);
       if (batStat) {
-        const runsToRemove = lastBall.extraType === "NO_BALL" ? (lastBall.runs ?? 0) : (lastBall.runs ?? 0);
-        batStat.runs = Math.max(0, batStat.runs - runsToRemove);
-        if (lastBall.extraType !== "NO_BALL") batStat.balls = Math.max(0, batStat.balls - 1);
-        if (lastBall.isBoundary && runs === 4) batStat.fours = Math.max(0, batStat.fours - 1);
-        if (lastBall.isBoundary && runs === 6) batStat.sixes = Math.max(0, batStat.sixes - 1);
+        batStat.runs = Math.max(0, batStat.runs - (lastBall.runs || 0));
+        if (lastBall.extraType !== "WIDE") batStat.balls = Math.max(0, batStat.balls - 1);
+        if (lastBall.isBoundary && lastBall.runs === 4) batStat.fours = Math.max(0, batStat.fours - 1);
+        if (lastBall.isBoundary && lastBall.runs === 6) batStat.sixes = Math.max(0, batStat.sixes - 1);
         if (lastBall.isWicket) batStat.outStatus = "NOT_OUT";
         batStat.strikeRate = batStat.balls > 0 ? parseFloat(((batStat.runs / batStat.balls) * 100).toFixed(2)) : 0;
       }
@@ -435,14 +435,16 @@ export const undoLastBall = async (req, res) => {
     if (bowlerId) {
       const bowlStat = scoring.bowlingStats.find(b => b.user?.toString() === bowlerId);
       if (bowlStat) {
-        if (lastBall.extraType !== "WIDE") bowlStat.balls = Math.max(0, bowlStat.balls - 1);
+        if (isLegalBall) {
+          bowlStat.balls = Math.max(0, bowlStat.balls - 1);
+        }
         if (lastBall.extraType === "WIDE") bowlStat.wides = Math.max(0, bowlStat.wides - 1);
         if (lastBall.extraType === "NO_BALL") bowlStat.noBalls = Math.max(0, bowlStat.noBalls - 1);
         // Only non-bye/legbye runs are charged to bowler
         if (!["BYE", "LEG_BYE"].includes(lastBall.extraType)) {
           bowlStat.runs = Math.max(0, bowlStat.runs - (lastBall.runs ?? 0));
         }
-        if (lastBall.isWicket && !["RUN_OUT", "RETIRED_HURT", "OBSTRUCTING"].includes(lastBall.wicketType)) {
+        if (lastBall.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "OBSTRUCTING", "TIMED_OUT"].includes(lastBall.wicketType)) {
           bowlStat.wickets = Math.max(0, bowlStat.wickets - 1);
         }
         bowlStat.overs = Math.floor(bowlStat.balls / 6);
@@ -510,7 +512,7 @@ export const updateScore = async (req, res) => {
 
     // ── 3. Update innings totals ─────────────────────────────────────────────
     currentInnings.totalRuns += runs;
-    if (!isWide) currentInnings.totalBalls += 1; // wides don't count as legal balls
+    if (!isWide && !isNoBall) currentInnings.totalBalls += 1; // wides and no-balls don't count as legal balls
     if (ballData.isWicket) currentInnings.totalWickets += 1;
 
     // ── 4. Update extras breakdown ───────────────────────────────────────────
@@ -527,10 +529,12 @@ export const updateScore = async (req, res) => {
         scoring.battingStats.push({ user: strikerId, inningsIndex: inningsIdx });
         batStat = scoring.battingStats[scoring.battingStats.length - 1];
       }
-      batStat.runs += runs;
-      if (!isNoBall) batStat.balls += 1; // NB doesn't count as a ball faced
-      if (ballData.isBoundary && runs === 4) batStat.fours += 1;
-      if (ballData.isBoundary && runs === 6) batStat.sixes += 1;
+      if (!isWide && !isBye && !isLegBye) {
+        batStat.runs += (ballData.runs || 0);
+      }
+      if (!isWide) batStat.balls += 1; 
+      if (ballData.isBoundary && ballData.runs === 4) batStat.fours += 1;
+      if (ballData.isBoundary && ballData.runs === 6) batStat.sixes += 1;
       batStat.strikeRate = batStat.balls > 0 ? parseFloat(((batStat.runs / batStat.balls) * 100).toFixed(2)) : 0;
 
       // Record dismissal
@@ -551,7 +555,7 @@ export const updateScore = async (req, res) => {
         scoring.bowlingStats.push({ user: bowlerId, inningsIndex: inningsIdx });
         bowlStat = scoring.bowlingStats[scoring.bowlingStats.length - 1];
       }
-      if (!isWide) bowlStat.balls += 1;
+      if (!isWide && !isNoBall) bowlStat.balls += 1;
       if (isWide) bowlStat.wides += 1;
       if (isNoBall) bowlStat.noBalls += 1;
       // Byes/legbyes don't charge runs to bowler
@@ -688,6 +692,9 @@ export const updateScore = async (req, res) => {
         match.liveScoreSnapshot = { ...liveData, result: matchResult, isCompleted: true };
         await match.save();
         
+        // Finalize stats on automatic completion
+        await aggregatePlayerStats(scoring, match);
+        
         if (io) {
           io.to(scoring.matchId.toString()).emit("matchCompleted", { matchResult, liveData: match.liveScoreSnapshot });
         }
@@ -724,7 +731,9 @@ export const getMatchStatus = async (req, res) => {
     // Check if scoring exists
     const scoring = await CricketScoring.findOne({ matchId })
       .populate("matchId")
-      .populate("umpire", "name")
+      .populate("umpire", "name profilePicture")
+      .populate("scorer", "name profilePicture")
+      .populate("streamer", "name profilePicture")
       .populate("battingStats.user", "name profilePicture")
       .populate("bowlingStats.user", "name profilePicture");
 
@@ -735,6 +744,8 @@ export const getMatchStatus = async (req, res) => {
         .populate("host", "name profilePicture")
         .populate("ground", "name location city")
         .populate("umpire", "name profilePicture")
+        .populate("scorer", "name profilePicture")
+        .populate("streamer", "name profilePicture")
         .populate("teams.teamA.slots.user", "name profilePicture")
         .populate("teams.teamB.slots.user", "name profilePicture");
 
