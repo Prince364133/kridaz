@@ -27,8 +27,20 @@ const registerSchema = yup.object().shape({
     .required("Enter your phone number")
     .matches(/^[0-9]{10}$/, "Enter a valid 10-digit phone number"),
   gender: yup.string().required("Select your gender"),
-  sportTypes: yup.array().optional(),
-  location: yup.string().required("Enter your location"),
+  dob: yup.string().required("Date of Birth is required"),
+  address: yup.string().required("Address is required"),
+  city: yup.string().required("City is required"),
+  state: yup.string().required("State is required"),
+  pinCode: yup.string().required("PIN Code is required").matches(/^[0-9]{6}$/, "Enter a valid 6-digit PIN code"),
+  sportTypes: yup.array().min(1, "Select at least one sport expertise").required("Sport expertise is required"),
+  experience: yup.string().required("Years of experience is required"),
+  coachingLevel: yup.string().required("Coaching level is required"),
+  sessionFee: yup.number().typeError("Session fee must be a number").required("Session fee is required"),
+  availabilityTimings: yup.string().required("Availability timings are required"),
+  availabilityMode: yup.string().required("Select availability mode"),
+  preferredLocations: yup.string().required("Preferred training locations are required"),
+  bio: yup.string().required("Bio/About is required").min(20, "Bio should be at least 20 characters"),
+  location: yup.string().optional(),
   password: yup
     .string()
     .required("Enter your password")
@@ -44,15 +56,9 @@ const registerSchema = yup.object().shape({
   }),
   role: yup.string().required("Role is required"),
   businessDetails: yup.object().shape({
-    businessName: yup.string().required("Business / Professional Name is required"),
-    registrationNumber: yup.string().required("Registration / Certification Number is required"),
-    address: yup.string().required("Full Address is required"),
-    city: yup.string().required("City is required"),
-    state: yup.string().required("State is required"),
-    zipCode: yup.string().required("Zip Code is required"),
-    experience: yup.string().required("Experience / Years in field is required"),
-    specialization: yup.string().required("Specialization / Expertise is required"),
-  }),
+    businessName: yup.string().optional(),
+    registrationNumber: yup.string().optional(),
+  }).optional(),
   documents: yup.array()
     .min(3, "At least 3 verification documents are required")
     .of(
@@ -98,6 +104,9 @@ const useSignUpForm = (predefinedRole = "user") => {
       sportTypes: [],
       businessDetails: {},
       documents: [],
+      availabilityMode: "Both",
+      gender: "",
+      coachingLevel: "Beginner",
     },
   });
 

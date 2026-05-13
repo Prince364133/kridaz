@@ -317,22 +317,42 @@ export const updateProfessionalProfile = async (req, res) => {
   if (!professionalId) return res.status(403).json({ message: "Unauthorized" });
   const { 
     name, bio, hourlyPrice, gameTypes, city, state, 
-    specialization, experience, certifications 
+    specialization, experience, certifications,
+    gender, dob, address, pinCode, coachingLevel,
+    availabilityTimings, availabilityMode, preferredLocations,
+    trainingTypes, ageGroups, languages, achievements
   } = req.body;
 
   try {
+    const updateData = {
+      name,
+      price: hourlyPrice,
+      gameTypes,
+      city,
+      state,
+      gender,
+      dob,
+      bio,
+      coachingLevel,
+      availabilityTimings,
+      availabilityMode,
+      preferredLocations,
+      trainingTypes,
+      ageGroups,
+      languages,
+      achievements,
+      "businessDetails.specialization": specialization,
+      "businessDetails.experience": experience,
+      "businessDetails.address": address,
+      "businessDetails.pinCode": pinCode,
+      "businessDetails.city": city,
+      "businessDetails.state": state,
+      certifications
+    };
+
     const professional = await Owner.findByIdAndUpdate(
       professionalId,
-      {
-        name,
-        price: hourlyPrice,
-        gameTypes,
-        city,
-        state,
-        "businessDetails.specialization": specialization,
-        "businessDetails.experience": experience,
-        certifications
-      },
+      { $set: updateData },
       { new: true }
     );
 
@@ -340,6 +360,7 @@ export const updateProfessionalProfile = async (req, res) => {
 
     return res.status(200).json({ message: "Profile updated successfully", professional });
   } catch (error) {
+    console.error(chalk.red("Error in updateProfessionalProfile:"), error);
     return res.status(500).json({ message: error.message });
   }
 };

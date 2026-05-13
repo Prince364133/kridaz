@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useSignUpForm from "@hooks/useSignUpForm";
-import { GoogleLogin } from "@react-oauth/google";
 import FileUpload from "../components/common/FileUpload";
 import {
   ArrowRight,
@@ -27,13 +26,15 @@ import {
   Dumbbell,
   Trophy,
   Users,
-  BookOpen
+  BookOpen,
+  Camera,
+  Loader2,
+  X
 } from "lucide-react";
 import toast from "react-hot-toast";
 
-const ACCENT = "#3B82F6"; // Blue for coaches
-
 const CoachSignUp = () => {
+  const navigate = useNavigate();
   const { 
     register, 
     handleSubmit, 
@@ -45,61 +46,53 @@ const CoachSignUp = () => {
     watch,
     trigger,
     showOtpInput,
-    handleGoogleSuccess,
-    handleGoogleError,
     currentStep,
     setCurrentStep,
     user,
-    role,
-    navigate
+    role
   } = useSignUpForm("coach");
 
-  const [mounted, setMounted] = useState(false);
-  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
-  const [docs, setDocs] = useState([]);
-
   useEffect(() => {
-    setMounted(true);
     // Redirect if already a coach
     if (user?.role === "coach" || role === "coach") {
       navigate("/coach");
     }
   }, [user, role, navigate]);
 
+  const handlePhotoUpload = (url) => {
+    setValue("profilePicture", url);
+  };
+
   const handleDocUpload = (url, name) => {
+    const currentDocs = getValues("documents") || [];
     if (!url) {
-      const updatedDocs = docs.filter(d => d.name !== name);
-      setDocs(updatedDocs);
+      const updatedDocs = currentDocs.filter(d => d.name !== name);
       setValue("documents", updatedDocs);
     } else {
       const newDoc = { name, url };
-      const updatedDocs = [...docs, newDoc];
-      setDocs(updatedDocs);
-      setValue("documents", updatedDocs);
+      setValue("documents", [...currentDocs, newDoc]);
     }
   };
 
   const nextStep = async () => {
     let fields = [];
     if (currentStep === 1) {
-      fields = ["name", "username", "email", "phone", "gender", "location", "password", "confirmPassword"];
-    } else if (currentStep === 2) {
       fields = [
-        "businessDetails.businessName", 
-        "businessDetails.address", 
-        "businessDetails.registrationNumber",
-        "businessDetails.experience",
-        "businessDetails.specialization",
-        "businessDetails.city",
-        "businessDetails.state",
-        "businessDetails.zipCode"
+        "name", "email", "phone", "gender", "dob", "address", "city", "state", "pinCode",
+        "sportTypes", "experience", "coachingLevel", "sessionFee", 
+        "availabilityTimings", "availabilityMode", "preferredLocations", "bio",
+        "password", "confirmPassword"
       ];
     }
 
     const isValid = await trigger(fields);
     if (isValid) {
-      setCurrentStep(currentStep + 1);
-      window.scrollTo(0, 0);
+      if (currentStep === 1 && !showOtpInput) {
+        handleSubmit(onSubmit)();
+      } else {
+        setCurrentStep(currentStep + 1);
+        window.scrollTo(0, 0);
+      }
     }
   };
 
@@ -108,360 +101,324 @@ const CoachSignUp = () => {
     window.scrollTo(0, 0);
   };
 
-  const fetchLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser");
-      return;
-    }
-
-    setIsFetchingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-          const data = await response.json();
-          if (data && data.address) {
-            const city = data.address.city || data.address.town || data.address.village || "";
-            const state = data.address.state || "";
-            const locationString = [city, state].filter(Boolean).join(", ");
-            setValue("location", locationString, { shouldValidate: true });
-            toast.success("Location fetched successfully");
-          } else {
-            toast.error("Could not determine location");
-          }
-        } catch (error) {
-          toast.error("Error fetching location details");
-        } finally {
-          setIsFetchingLocation(false);
-        }
-      },
-      (error) => {
-        setIsFetchingLocation(false);
-        toast.error("Location access denied or unavailable");
-      }
-    );
-  };
-
   return (
-    <div className="min-h-screen bg-[#000] relative overflow-hidden flex flex-col items-center justify-start pt-24 lg:pt-32 pb-20 font-sans">
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-black/95 to-blue-900/10" />
-        <div className="absolute top-1/3 right-0 w-[600px] h-[600px] bg-blue-900/10 blur-[150px] rounded-full pointer-events-none" />
+    <div className="min-h-screen bg-[#000000] text-white font-open-sans selection:bg-[#CCFF00] selection:text-black">
+      {/* Background Gradients */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-[#CCFF00]/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#CCFF00]/5 blur-[120px] rounded-full" />
       </div>
 
-      <div className={`relative z-10 w-full max-w-[1300px] grid lg:grid-cols-5 gap-0 lg:gap-24 items-center px-6 transition-all duration-1000 transform ${mounted ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
-
-        {/* Left Side */}
-        <div className="hidden lg:flex lg:col-span-2 flex-col space-y-12">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/20 bg-blue-500/5">
-              <Dumbbell size={12} className="text-blue-400" />
-              <span className="text-[10px] font-bold tracking-[0.2em] text-blue-400 uppercase">Coach Network</span>
-            </div>
-            <h1 className="text-7xl xl:text-8xl font-bold text-white leading-[0.9] tracking-tight uppercase">
-              COACH <br />
-              <span style={{ color: ACCENT }}>SMARTER.</span>
-            </h1>
-            <p className="text-sm text-white/40 uppercase tracking-widest max-w-sm leading-relaxed">
-              Join the Kridaz coach network. Connect with players, manage sessions, and grow your coaching career.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6">
-            {[
-              { icon: Users, title: "Client Base", desc: "Access thousands of active sports players" },
-              { icon: Trophy, title: "Reputation", desc: "Build your coaching brand with verified reviews" },
-              { icon: BookOpen, title: "Tools", desc: "Professional session management & tracking" }
-            ].map((item, i) => (
-              <div key={i} className="flex gap-4 group cursor-default">
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 group-hover:bg-blue-500/10 group-hover:border-blue-500/30 transition-all duration-500">
-                  <item.icon size={20} className="text-blue-400" />
-                </div>
-                <div>
-                  <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-1">{item.title}</h4>
-                  <p className="text-gray-500 text-xs leading-relaxed max-w-[200px]">{item.desc}</p>
-                </div>
+      <div className="relative z-10 max-w-[1200px] mx-auto px-6 py-20 lg:py-32">
+        <div className="flex flex-col lg:flex-row gap-16 items-start">
+          
+          {/* Left Side: Branding & Info */}
+          <div className="lg:w-1/3 space-y-8 sticky top-32">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-full">
+                <Dumbbell size={14} className="text-[#CCFF00]" />
+                <span className="text-[10px] font-bold tracking-[0.2em] text-[#CCFF00] uppercase font-inter">Partner Portal</span>
               </div>
-            ))}
-          </div>
-        </div>
+              <h1 className="text-5xl xl:text-6xl font-bold font-inter leading-[1.1] tracking-tight">
+                JOIN THE <br />
+                <span className="text-[#CCFF00]">ELITE COACH</span> <br />
+                NETWORK.
+              </h1>
+              <p className="text-[#999999] text-sm leading-relaxed font-open-sans max-w-sm">
+                Scale your coaching business with Kridaz. Get verified, manage students, and automate your bookings.
+              </p>
+            </div>
 
-        {/* Right Side - Form */}
-        <div className="lg:col-span-3 w-full">
-          <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[40px] p-8 lg:p-12 shadow-2xl relative overflow-hidden">
-            {/* Step Progress */}
-            <div className="flex items-center justify-between mb-12 relative px-4">
-              <div className="absolute top-1/2 left-0 w-full h-[1px] bg-white/10 -z-0" />
-              {[1, 2, 3].map((step) => (
-                <div 
-                  key={step}
-                  className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-500 ${
-                    currentStep >= step 
-                      ? "bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.5)]" 
-                      : "bg-black border border-white/20 text-gray-500"
-                  }`}
-                >
-                  {currentStep > step ? <CheckCircle2 size={18} /> : step}
+            <div className="space-y-6 pt-4">
+              {[
+                { icon: Trophy, title: "Pro Reputation", desc: "Build trust with verified reviews and badges." },
+                { icon: Users, title: "Massive Reach", desc: "Connect with thousands of active players in your city." },
+                { icon: Zap, title: "Instant Bookings", desc: "Seamless availability and payment settlement." }
+              ].map((item, i) => (
+                <div key={i} className="flex gap-4 group">
+                  <div className="w-12 h-12 flex-shrink-0 rounded-[8px] bg-[#111111] border border-[#2D2D2D] flex items-center justify-center group-hover:border-[#CCFF00]/50 transition-all">
+                    <item.icon size={20} className="text-[#CCFF00]" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-1 font-inter">{item.title}</h4>
+                    <p className="text-[#666666] text-[11px] leading-relaxed">{item.desc}</p>
+                  </div>
                 </div>
               ))}
             </div>
+          </div>
 
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-white mb-2 uppercase tracking-tight">
-                {currentStep === 1 ? "Personal Profile" : currentStep === 2 ? "Professional Details" : "Verification Documents"}
-              </h2>
-              <p className="text-gray-500 text-sm">Step {currentStep} of 3 • Mandatory Information</p>
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {currentStep === 1 && (
-                <div className="grid md:grid-cols-2 gap-5">
-                  <div className="md:col-span-2 relative group">
-                    <User className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("name")}
-                      placeholder="FULL NAME"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.name && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.name.message}</p>}
-                  </div>
-
-                  <div className="md:col-span-2 relative group">
-                    <UserSquare2 className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("username")}
-                      onInput={(e) => { e.target.value = e.target.value.toLowerCase(); }}
-                      placeholder="USERNAME"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.username && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.username.message}</p>}
-                  </div>
-
-                  <div className="relative group">
-                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("email")}
-                      type="email"
-                      placeholder="EMAIL ADDRESS"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.email && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.email.message}</p>}
-                  </div>
-
-                  <div className="relative group">
-                    <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("phone")}
-                      placeholder="PHONE NUMBER"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.phone && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.phone.message}</p>}
-                  </div>
-
-                  <div className="relative group">
-                    <UserSquare2 className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <select
-                      {...register("gender")}
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest appearance-none"
-                    >
-                      <option value="" className="bg-black">SELECT GENDER</option>
-                      <option value="male" className="bg-black">MALE</option>
-                      <option value="female" className="bg-black">FEMALE</option>
-                      <option value="other" className="bg-black">OTHER</option>
-                    </select>
-                    {errors.gender && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.gender.message}</p>}
-                  </div>
-
-                  <div className="relative group">
-                    <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("location")}
-                      placeholder="LOCATION"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-14 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    <button
-                      type="button"
-                      onClick={fetchLocation}
-                      disabled={isFetchingLocation}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-xl transition-all text-blue-400 disabled:opacity-50"
-                    >
-                      <Locate size={18} className={isFetchingLocation ? "animate-spin" : ""} />
-                    </button>
-                    {errors.location && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.location.message}</p>}
-                  </div>
-
-                  <div className="relative group">
-                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("password")}
-                      type="password"
-                      placeholder="CREATE PASSWORD"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.password && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.password.message}</p>}
-                  </div>
-
-                  <div className="relative group">
-                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("confirmPassword")}
-                      type="password"
-                      placeholder="CONFIRM PASSWORD"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.confirmPassword && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.confirmPassword.message}</p>}
-                  </div>
+          {/* Right Side: Multi-step Form */}
+          <div className="lg:w-2/3 w-full">
+            <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-8 lg:p-12 shadow-[var(--shadow-2)] relative overflow-hidden">
+              
+              {/* Progress Header */}
+              <div className="mb-12">
+                <div className="flex items-center gap-4 mb-8">
+                  {[1, 2, 3].map((step) => (
+                    <div key={step} className="flex items-center gap-2">
+                      <div className={`w-8 h-8 rounded-[4px] flex items-center justify-center text-[11px] font-bold transition-all ${
+                        currentStep === step ? "bg-[#CCFF00] text-black shadow-[0_0_15px_rgba(204,255,0,0.3)]" : 
+                        currentStep > step ? "bg-[#2D2D2D] text-[#CCFF00]" : "bg-[#111111] border border-[#2D2D2D] text-[#444]"
+                      }`}>
+                        {currentStep > step ? <CheckCircle2 size={16} /> : step}
+                      </div>
+                      {step < 3 && <div className="w-8 h-[1px] bg-[#2D2D2D]" />}
+                    </div>
+                  ))}
                 </div>
-              )}
+                <h2 className="text-3xl font-bold text-white uppercase tracking-tight font-inter">
+                  {currentStep === 1 ? "Registration Details" : currentStep === 2 ? "Professional Docs" : "Final Verification"}
+                </h2>
+                <p className="text-[#878C9F] text-xs mt-1 uppercase tracking-widest font-inter">Step {currentStep} of 3 • {currentStep === 1 ? "Basic Information" : "Documents & KYC"}</p>
+              </div>
 
-              {currentStep === 2 && (
-                <div className="grid md:grid-cols-2 gap-5">
-                  <div className="md:col-span-2 relative group">
-                    <Building2 className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("businessDetails.businessName")}
-                      placeholder="COACHING ACADEMY / BRAND NAME"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.businessDetails?.businessName && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.businessName.message}</p>}
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                {currentStep === 1 && (
+                  <div className="space-y-10 animate-fade-in">
+                    
+                    {/* Profile Photo Section */}
+                    <div className="flex flex-col md:flex-row items-center gap-8 p-6 bg-[#111111] border border-[#2D2D2D] rounded-[8px]">
+                      <div className="relative group">
+                        <div className="w-32 h-32 rounded-[8px] border-2 border-[#2D2D2D] bg-[#000000] overflow-hidden flex items-center justify-center">
+                          {watch("profilePicture") ? (
+                            <img src={watch("profilePicture")} className="w-full h-full object-cover" alt="Profile" />
+                          ) : (
+                            <User size={48} className="text-[#2D2D2D]" />
+                          )}
+                        </div>
+                        <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-[8px]">
+                          <Camera size={24} className="text-[#CCFF00]" />
+                          <input type="file" className="hidden" accept="image/*" onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              toast.promise(
+                                Promise.resolve("https://ui-avatars.com/api/?name=Coach"), // Placeholder for actual upload
+                                { loading: 'Uploading...', success: 'Photo uploaded!', error: 'Upload failed.' }
+                              ).then(url => handlePhotoUpload(url));
+                            }
+                          }} />
+                        </label>
+                      </div>
+                      <div className="space-y-1 text-center md:text-left">
+                        <h4 className="text-[13px] font-bold text-white uppercase font-inter">Profile Photo</h4>
+                        <p className="text-[11px] text-[#666666]">Upload a professional headshot for your public profile. (Max 2MB)</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Full Name */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Full Name</label>
+                        <input {...register("name")} placeholder="John Doe" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" />
+                        {errors.name && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.name.message}</p>}
+                      </div>
+
+                      {/* Mobile Number */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Mobile Number</label>
+                        <div className="relative">
+                          <input {...register("phone")} placeholder="9876543210" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" />
+                          <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-[#CCFF00] uppercase hover:underline">Verify</button>
+                        </div>
+                        {errors.phone && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.phone.message}</p>}
+                      </div>
+
+                      {/* Email Address */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Email Address</label>
+                        <input {...register("email")} placeholder="coach@kridaz.com" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" />
+                        {errors.email && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.email.message}</p>}
+                      </div>
+
+                      {/* Date of Birth */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Date of Birth</label>
+                        <input {...register("dob")} type="date" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans color-scheme-dark" />
+                        {errors.dob && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.dob.message}</p>}
+                      </div>
+
+                      {/* Gender */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Gender</label>
+                        <select {...register("gender")} className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans">
+                          <option value="">Select Gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                        {errors.gender && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.gender.message}</p>}
+                      </div>
+
+                      {/* Address */}
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Street Address</label>
+                        <input {...register("address")} placeholder="123 Sports Complex Road" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" />
+                        {errors.address && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.address.message}</p>}
+                      </div>
+
+                      {/* City, State, PIN */}
+                      <div className="grid grid-cols-3 gap-4 md:col-span-2">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">City</label>
+                          <input {...register("city")} placeholder="Mumbai" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">State</label>
+                          <input {...register("state")} placeholder="MH" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">PIN Code</label>
+                          <input {...register("pinCode")} placeholder="400001" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" />
+                        </div>
+                      </div>
+
+                      {/* Sport Expertise */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Sport Expertise</label>
+                        <input placeholder="e.g. Cricket, Football" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const val = e.target.value.trim();
+                            if (val) {
+                              const current = getValues("sportTypes") || [];
+                              if (!current.includes(val)) setValue("sportTypes", [...current, val]);
+                              e.target.value = '';
+                            }
+                          }
+                        }} />
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {(watch("sportTypes") || []).map(sport => (
+                            <span key={sport} className="px-2 py-1 bg-[#2D2D2D] rounded-[4px] text-[10px] font-bold flex items-center gap-2">
+                              {sport}
+                              <button type="button" onClick={() => setValue("sportTypes", watch("sportTypes").filter(s => s !== sport))}><X size={10} /></button>
+                            </span>
+                          ))}
+                        </div>
+                        {errors.sportTypes && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.sportTypes.message}</p>}
+                      </div>
+
+                      {/* Years of Experience */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Years of Experience</label>
+                        <input {...register("experience")} placeholder="e.g. 5 Years" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" />
+                        {errors.experience && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.experience.message}</p>}
+                      </div>
+
+                      {/* Coaching Level */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Coaching Level</label>
+                        <select {...register("coachingLevel")} className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans">
+                          <option value="Beginner">Beginner / Grassroots</option>
+                          <option value="Intermediate">Intermediate / Club</option>
+                          <option value="Elite">Elite / Professional</option>
+                        </select>
+                      </div>
+
+                      {/* Session Fee */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Session Fee (₹)</label>
+                        <input {...register("sessionFee")} type="number" placeholder="500" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" />
+                        {errors.sessionFee && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.sessionFee.message}</p>}
+                      </div>
+
+                      {/* Availability Timings */}
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Availability Timings</label>
+                        <input {...register("availabilityTimings")} placeholder="e.g. Mon-Fri: 6AM-9AM, Weekends: Full Day" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" />
+                        {errors.availabilityTimings && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.availabilityTimings.message}</p>}
+                      </div>
+
+                      {/* Availability Mode */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Availability Mode</label>
+                        <select {...register("availabilityMode")} className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans">
+                          <option value="Offline">Offline / On-field</option>
+                          <option value="Online">Online / Remote</option>
+                          <option value="Both">Both (Online & Offline)</option>
+                        </select>
+                      </div>
+
+                      {/* Preferred Training Locations */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Preferred Locations</label>
+                        <input {...register("preferredLocations")} placeholder="e.g. Bandra, Juhu, Andheri" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" />
+                        {errors.preferredLocations && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.preferredLocations.message}</p>}
+                      </div>
+
+                      {/* Bio / About */}
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Bio / About Yourself</label>
+                        <textarea {...register("bio")} rows={4} placeholder="Describe your coaching philosophy and career..." className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans resize-none" />
+                        {errors.bio && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.bio.message}</p>}
+                      </div>
+
+                      {/* Password Section */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Password</label>
+                        <input {...register("password")} type="password" placeholder="••••••••" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" />
+                        {errors.password && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.password.message}</p>}
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider ml-1 font-inter">Confirm Password</label>
+                        <input {...register("confirmPassword")} type="password" placeholder="••••••••" className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[6px] px-4 py-3.5 text-[13px] text-white focus:border-[#CCFF00] outline-none transition-all font-open-sans" />
+                        {errors.confirmPassword && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 ml-1">{errors.confirmPassword.message}</p>}
+                      </div>
+                    </div>
+
+                    {/* OTP Section (Only if triggered) */}
+                    {showOtpInput && (
+                      <div className="p-6 bg-[#CCFF00]/5 border border-[#CCFF00]/20 rounded-[8px] space-y-4 animate-in slide-in-from-top-4 duration-300">
+                        <div className="flex items-center gap-3">
+                          <ShieldCheck className="text-[#CCFF00]" size={20} />
+                          <h4 className="text-[13px] font-bold uppercase tracking-wider font-inter">Verify Identity</h4>
+                        </div>
+                        <p className="text-[11px] text-[#878C9F]">Enter the 6-digit OTP sent to your registered email.</p>
+                        <input {...register("otp")} placeholder="000000" className="w-full bg-[#000000] border border-[#CCFF00]/40 rounded-[6px] px-4 py-3.5 text-center text-2xl font-bold tracking-[1em] text-[#CCFF00] outline-none focus:border-[#CCFF00] transition-all font-inter" />
+                        {errors.otp && <p className="text-red-500 text-[10px] font-bold uppercase mt-1 text-center">{errors.otp.message}</p>}
+                      </div>
+                    )}
                   </div>
-
-                  <div className="relative group">
-                    <BarChart3 className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("businessDetails.experience")}
-                      placeholder="YEARS OF EXPERIENCE"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.businessDetails?.experience && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.experience.message}</p>}
-                  </div>
-
-                  <div className="relative group">
-                    <Trophy className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("businessDetails.specialization")}
-                      placeholder="PRIMARY SPORT / SPECIALIZATION"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.businessDetails?.specialization && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.specialization.message}</p>}
-                  </div>
-
-                  <div className="md:col-span-2 relative group">
-                    <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("businessDetails.address")}
-                      placeholder="OFFICE / ACADEMY ADDRESS"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.businessDetails?.address && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.address.message}</p>}
-                  </div>
-
-                  <div className="relative group">
-                    <Locate className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("businessDetails.city")}
-                      placeholder="CITY"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.businessDetails?.city && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.city.message}</p>}
-                  </div>
-
-                  <div className="relative group">
-                    <Globe className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("businessDetails.state")}
-                      placeholder="STATE"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.businessDetails?.state && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.state.message}</p>}
-                  </div>
-
-                  <div className="relative group">
-                    <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("businessDetails.zipCode")}
-                      placeholder="ZIP CODE"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.businessDetails?.zipCode && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.zipCode.message}</p>}
-                  </div>
-
-                  <div className="relative group">
-                    <FileText className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
-                    <input
-                      {...register("businessDetails.registrationNumber")}
-                      placeholder="CERTIFICATION / REG ID"
-                      className="w-full bg-white/5 border border-white/10 focus:border-blue-500/50 rounded-2xl h-16 pl-14 pr-5 text-white outline-none transition-all uppercase text-xs font-bold tracking-widest"
-                    />
-                    {errors.businessDetails?.registrationNumber && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.businessDetails.registrationNumber.message}</p>}
-                  </div>
-                </div>
-              )}
-
-              {currentStep === 3 && (
-                <div className="grid md:grid-cols-2 gap-5">
-                  <div className="md:col-span-2 p-6 rounded-2xl bg-blue-500/5 border border-blue-500/20 mb-4">
-                    <p className="text-[10px] text-blue-400 uppercase font-bold tracking-[0.2em] mb-2">Upload Instructions</p>
-                    <p className="text-xs text-gray-400 leading-relaxed">Please upload your professional certifications, ID proof, and address proof for verification. All documents are mandatory for elite status.</p>
-                  </div>
-
-                  <FileUpload label="Professional Certificate" onUploadSuccess={(url) => handleDocUpload(url, "Certification")} />
-                  <FileUpload label="Identity Proof (PAN/Aadhar)" onUploadSuccess={(url) => handleDocUpload(url, "ID Proof")} />
-                  <FileUpload label="Address Proof" onUploadSuccess={(url) => handleDocUpload(url, "Address Proof")} />
-                  <FileUpload label="Sports Achievements (Optional)" onUploadSuccess={(url) => handleDocUpload(url, "Achievements")} />
-
-                  <div className="md:col-span-2">
-                    {errors.documents && <p className="text-red-500 text-[10px] mt-1 ml-2 uppercase font-bold">{errors.documents.message}</p>}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex gap-4 pt-6">
-                {currentStep > 1 && (
-                  <button
-                    type="button"
-                    onClick={prevStep}
-                    className="flex-1 h-16 rounded-2xl border border-white/10 text-white font-bold uppercase tracking-widest text-xs hover:bg-white/5 transition-all flex items-center justify-center gap-2"
-                  >
-                    <ChevronLeft size={16} />
-                    Back
-                  </button>
                 )}
-                
-                {currentStep < 3 ? (
-                  <button
-                    type="button"
-                    onClick={nextStep}
-                    className="flex-[2] h-16 rounded-2xl bg-blue-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(37,99,235,0.3)]"
-                  >
-                    Continue
-                    <ChevronRight size={16} />
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-[2] h-16 rounded-2xl bg-blue-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(37,99,235,0.3)] disabled:opacity-50"
-                  >
-                    {loading ? "Creating Profile..." : "Complete Registration"}
+
+                {currentStep === 2 && (
+                  <div className="space-y-8 animate-fade-in">
+                    <div className="p-6 rounded-[8px] bg-[#CCFF00]/5 border border-[#CCFF00]/10">
+                      <p className="text-[10px] text-[#CCFF00] uppercase font-bold tracking-[0.2em] mb-2 font-inter">Verification Protocol</p>
+                      <p className="text-[12px] text-[#878C9F] leading-relaxed">Please upload your professional credentials. All documents are encrypted and reviewed by our verification team.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FileUpload label="Coaching Certificate" onUploadSuccess={(url) => handleDocUpload(url, "Certification")} />
+                      <FileUpload label="Identity Proof (Aadhar/PAN)" onUploadSuccess={(url) => handleDocUpload(url, "ID Proof")} />
+                      <FileUpload label="Address Proof (Bill/Statement)" onUploadSuccess={(url) => handleDocUpload(url, "Address Proof")} />
+                      <FileUpload label="Sports Achievements" onUploadSuccess={(url) => handleDocUpload(url, "Achievements")} />
+                    </div>
+                    {errors.documents && <p className="text-red-500 text-[10px] font-bold uppercase text-center">{errors.documents.message}</p>}
+                  </div>
+                )}
+
+                <div className="flex gap-4 pt-10">
+                  {currentStep > 1 && (
+                    <button type="button" onClick={prevStep} className="flex-1 h-14 rounded-[6px] border border-[#2D2D2D] text-[#878C9F] font-bold uppercase tracking-widest text-[11px] hover:text-white transition-all flex items-center justify-center gap-2 font-inter">
+                      <ChevronLeft size={16} /> Back
+                    </button>
+                  )}
+                  
+                  <button type="button" onClick={nextStep} disabled={loading} className="flex-[2] h-14 rounded-[6px] bg-[#CCFF00] text-black font-bold uppercase tracking-widest text-[11px] hover:bg-white transition-all flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(204,255,0,0.2)] disabled:opacity-50 font-inter">
+                    {loading ? <Loader2 className="animate-spin" size={16} /> : (currentStep === 1 && !showOtpInput) ? "Send OTP & Continue" : currentStep < 3 ? "Next Step" : "Submit Application"}
                     <ArrowRight size={16} />
                   </button>
-                )}
-              </div>
-            </form>
+                </div>
+              </form>
 
-            <div className="mt-8 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
-               <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-green-500/10">
-                    <ShieldCheck size={16} className="text-green-400" />
-                  </div>
-                  <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Secure Verification</span>
-               </div>
-               <div className="flex items-center gap-6">
-                  <Link to="/login" className="text-[10px] text-gray-500 hover:text-white uppercase font-bold tracking-widest transition-colors">Already registered?</Link>
-                  <Link to="/partners" className="text-[10px] text-blue-400 hover:text-blue-300 uppercase font-bold tracking-widest transition-colors">Not a coach?</Link>
-               </div>
+              <div className="mt-10 pt-10 border-t border-[#2D2D2D] flex flex-col sm:flex-row items-center justify-between gap-6">
+                <Link to="/login" className="text-[10px] text-[#666666] hover:text-[#CCFF00] uppercase font-bold tracking-widest transition-colors font-inter">Already a partner? Login</Link>
+                <div className="flex items-center gap-2 text-[#444]">
+                  <Globe size={14} />
+                  <span className="text-[10px] uppercase font-bold tracking-widest font-inter">Global Talent Network</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
