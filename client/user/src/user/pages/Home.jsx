@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import useTurfData from "../hooks/useTurfData";
-import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, MessageSquare, MessageSquareShare, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus, Loader2, LayoutGrid } from "lucide-react";
+import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, MessageSquare, MessageSquareShare, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus, Loader2, LayoutGrid, Video } from "lucide-react";
 import toast from "react-hot-toast";
 import { AdBannerSection } from "../components/Marketing/AdBannerSection";
 import { VideoSection } from "../components/Marketing/VideoSection";
@@ -290,7 +290,7 @@ export default function Home() {
  const fetchProfessionals = async () => {
  try {
  setProfessionalsLoading(true);
- const res = await axiosInstance.get("/api/professional/list", { params: { limit: 4 } });
+ const res = await axiosInstance.get("/api/professional/list", { params: { limit: 12 } });
  setProfessionals(res.data.professionals || []);
  } catch (error) {
  console.error("Error fetching professionals:", error);
@@ -1012,7 +1012,10 @@ export default function Home() {
  {/* Role Badge */}
  <div className="absolute top-2 left-2 z-20">
  <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white text-[8px] font-black tracking-widest gap-1 shadow-lg">
- {pro.role === 'umpire' ? <Shield size={8} className="text-[#84CC16]" /> : <Trophy size={8} className="text-[#84CC16]" />}
+ {pro.role === 'umpire' ? <Shield size={8} className="text-[#84CC16]" /> : 
+ pro.role === 'streamer' ? <Video size={8} className="text-[#84CC16]" /> : 
+ pro.role === 'scorer' ? <Activity size={8} className="text-[#84CC16]" /> : 
+ <Award size={8} className="text-[#84CC16]" />}
  <span className="text-[#84CC16]">{pro.role?.toUpperCase()}</span>
  </div>
  </div>
@@ -1212,7 +1215,7 @@ export default function Home() {
  <div>
  <h3 className="font-display text-2xl mb-1 leading-none uppercase">PRO COACHES</h3>
  <p className="text-gray-400 text-xs mb-4">Expert training.</p>
- <Link to="/turfs" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Find Coach <ArrowRight size={14} /></Link>
+ <Link to="/professionals" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Find Coach <ArrowRight size={14} /></Link>
  </div>
  </div>
  </div>
@@ -1226,9 +1229,9 @@ export default function Home() {
  <Shield size={20} style={{ color: "#60A5FA" }} />
  </div>
  <div>
- <h3 className="font-display text-2xl mb-1 leading-none uppercase">REFEREES</h3>
- <p className="text-gray-400 text-xs mb-4">Hire officials.</p>
- <Link to="/turfs" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Book Now <ArrowRight size={14} /></Link>
+ <h3 className="font-display text-2xl mb-1 leading-none uppercase">OFFICIALS</h3>
+ <p className="text-gray-400 text-[10px] mb-4 uppercase tracking-tighter">Umpires • Scorers • Streamers</p>
+ <Link to="/professionals" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Hire Now <ArrowRight size={14} /></Link>
  </div>
  </div>
  </div>

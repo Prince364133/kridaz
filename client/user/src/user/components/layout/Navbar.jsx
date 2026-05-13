@@ -8,6 +8,7 @@ import axiosInstance from "@hooks/useAxiosInstance";
 
 const Navbar = () => {
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);
+  console.log("Navbar Auth State:", { isLoggedIn, role, userRole: user?.role });
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
