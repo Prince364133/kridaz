@@ -10,6 +10,7 @@ const ownerSchema = new mongoose.Schema(
     gender: { type: String, enum: ["Male", "Female", "Other", "Prefer not to say"] },
     location: { type: String },
     profilePicture: { type: String },
+    bannerImage: { type: String },
     bio: { type: String },
     role: { type: String, enum: ["admin", "owner", "coach", "umpire", "LIMITED_UMPIRE", "BMSP_ADMIN", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"], default: "owner" },
     businessDetails: {
@@ -46,8 +47,8 @@ const ownerSchema = new mongoose.Schema(
     // withdrawnBalance   : Cumulative total of approved withdrawal payouts.
     //                      Read-only accounting field — never decremented.
     inProgressBalance: { type: Number, default: 0 },
-    disputeBalance:    { type: Number, default: 0 },
-    withdrawnBalance:  { type: Number, default: 0 },
+    disputeBalance: { type: Number, default: 0 },
+    withdrawnBalance: { type: Number, default: 0 },
     certifications: [{ type: String }],
     rating: { type: Number, default: 0 },
     numReviews: { type: Number, default: 0 },
@@ -59,10 +60,10 @@ const ownerSchema = new mongoose.Schema(
       bankName: String,
       upiId: String,
       cancelledCheckUrl: String,
-      kycStatus: { 
-        type: String, 
-        enum: ["NOT_SUBMITTED", "PENDING", "VERIFIED", "REJECTED"], 
-        default: "NOT_SUBMITTED" 
+      kycStatus: {
+        type: String,
+        enum: ["NOT_SUBMITTED", "PENDING", "VERIFIED", "REJECTED"],
+        default: "NOT_SUBMITTED"
       },
       payoutMode: { type: String, enum: ["BANK", "UPI"], default: "BANK" }
     },
@@ -78,8 +79,8 @@ const ownerSchema = new mongoose.Schema(
       },
     ],
     upgradeRequested: { type: Boolean, default: false },
- },
- { timestamps: true }
+  },
+  { timestamps: true }
 );
 
 export default mongoose.model("Owner", ownerSchema);

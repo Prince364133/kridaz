@@ -19,11 +19,11 @@ const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString()
 const generateUniqueUsername = async (baseName) => {
   let username = baseName ? baseName.toLowerCase().replace(/[^a-z0-9]/g, '') : "player";
   if (!username) username = "player";
-  
+
   let isUnique = false;
   let counter = 0;
   let finalUsername = username;
-  
+
   while (!isUnique) {
     const existing = await User.findOne({ username: finalUsername });
     if (!existing) {
@@ -57,7 +57,7 @@ export const sendOtp = async (req, res) => {
   try {
     const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
     const existingOwner = await Owner.findOne({ $or: [{ email }, { phone }] });
-    
+
     if (existingUser || existingOwner) {
       return res.status(400).json({ success: false, message: "Email or Phone already registered" });
     }
@@ -92,9 +92,9 @@ export const sendOtp = async (req, res) => {
       );
     }
 
-    return res.status(200).json({ 
-      success: true, 
-      message: "OTPs sent to your email and WhatsApp successfully" 
+    return res.status(200).json({
+      success: true,
+      message: "OTPs sent to your email and WhatsApp successfully"
     });
   } catch (err) {
     console.error(chalk.red(err.message));
@@ -115,14 +115,14 @@ export const getUmpireInviteDetails = async (req, res) => {
     if (!game) {
       return res.status(404).json({ success: false, message: "Invitation not found or expired" });
     }
-    return res.status(200).json({ 
-      success: true, 
+    return res.status(200).json({
+      success: true,
       invite: {
         name: game.customUmpire.name,
         email: game.customUmpire.email,
         phone: game.customUmpire.phone,
         gameId: game._id
-      } 
+      }
     });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -136,9 +136,22 @@ export const requestUpgrade = async (req, res) => {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const owner = await Owner.findOneAndUpdate(
+    const { city, bio, experience, specialization, phone } = req.body;
+
+    // Update payload with form details if provided
+    const updatePayload = {
+      upgradeRequested: true,
+      ...(city && { city }),
+      ...(bio && { bio }),
+      ...(phone && { phone }),
+      ...(experience && { "businessDetails.experience": experience }),
+      ...(specialization && { "businessDetails.specialization": specialization })
+    };
+
+    // Try finding by userId first
+    let owner = await Owner.findOneAndUpdate(
       { userId },
-      { upgradeRequested: true },
+      updatePayload,
       { new: true }
     );
 
@@ -188,20 +201,20 @@ export const registerUser = async (req, res) => {
       }
     }
 
-    const newUser = new User({ 
-      name, 
-      username: finalUsername, 
-      email, 
-      password: hashedPassword, 
-      phone, 
-      gender, 
-      location, 
+    const newUser = new User({
+      name,
+      username: finalUsername,
+      email,
+      password: hashedPassword,
+      phone,
+      gender,
+      location,
       sportTypes,
       role,
       walletBalance: 50 // Welcome Bonus
     });
     await newUser.save();
-    
+
     // If it's an umpire invite, create an Owner document as well
     if (role === "LIMITED_UMPIRE") {
       const newOwner = new Owner({
@@ -216,7 +229,7 @@ export const registerUser = async (req, res) => {
         gameTypes: sportTypes
       });
       await newOwner.save();
-      
+
       newUser.ownerDetails = newOwner._id;
       await newUser.save();
 
@@ -224,9 +237,9 @@ export const registerUser = async (req, res) => {
       if (inviteGame) {
         await HostedGame.findOneAndUpdate(
           { "customUmpire.inviteToken": umpireInvite },
-          { 
+          {
             umpire: newOwner._id,
-            "customUmpire.inviteStatus": "ACCEPTED" 
+            "customUmpire.inviteStatus": "ACCEPTED"
           },
           { new: true }
         );
@@ -241,7 +254,7 @@ export const registerUser = async (req, res) => {
         const inviteEntry = game.customPlayers.find(cp => cp.inviteToken === inviteToken);
         if (inviteEntry) {
           const sIdx = inviteEntry.slotIndex;
-          
+
           // Update the customPlayers entry
           inviteEntry.inviteStatus = "ACCEPTED";
           inviteEntry.user = newUser._id;
@@ -336,7 +349,7 @@ export const registerOwner = async (req, res) => {
       waitlistPosition,
     });
     await newOwner.save();
-    
+
     // Link owner back to user
     newUser.ownerDetails = newOwner._id;
     await newUser.save();
@@ -411,13 +424,13 @@ export const loginStep1 = async (req, res) => {
       return res.status(403).json({ success: false, message: "Your account has been blocked by an administrator." });
     }
 
-    return res.status(200).json({ 
-      success: true, 
-      message: "Login successful", 
-      token, 
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token,
       role,
       user: account,
-      requiresOtp: false 
+      requiresOtp: false
     });
   } catch (err) {
     console.error(chalk.red(err.message));
@@ -472,10 +485,10 @@ export const login = async (req, res) => {
       return res.status(403).json({ success: false, message: "Your account has been blocked by an administrator." });
     }
 
-    return res.status(200).json({ 
-      success: true, 
-      message: "Login successful", 
-      token, 
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token,
       role,
       user: account
     });
@@ -504,7 +517,7 @@ export const googleAuth = async (req, res) => {
     } else {
       return res.status(400).json({ success: false, message: "No Google credentials provided" });
     }
-    
+
     const { name, email, sub: googleId } = payload;
 
     let owner = await Owner.findOne({ email });
@@ -538,10 +551,10 @@ export const googleAuth = async (req, res) => {
         token = generateOwnerToken(owner.userId || owner._id, owner.role, owner._id);
       } else {
         const generatedUsername = await generateUniqueUsername(name);
-        user = new User({ 
-          name, 
-          username: generatedUsername, 
-          email, 
+        user = new User({
+          name,
+          username: generatedUsername,
+          email,
           googleId,
           walletBalance: 50 // Welcome Bonus
         });
@@ -611,15 +624,15 @@ export const googleAuth = async (req, res) => {
           // Link match regardless of if owner already existed
           await HostedGame.findOneAndUpdate(
             { "customUmpire.inviteToken": umpireInvite },
-            { 
-              umpire: targetOwner._id, 
-              "customUmpire.inviteStatus": "ACCEPTED" 
+            {
+              umpire: targetOwner._id,
+              "customUmpire.inviteStatus": "ACCEPTED"
             },
             { new: true }
           );
 
           // Update credentials for the response
-          roleToReturn = "LIMITED_UMPIRE"; 
+          roleToReturn = "LIMITED_UMPIRE";
           token = generateOwnerToken(user?._id || owner.userId, roleToReturn, targetOwner._id);
         }
       }
@@ -637,10 +650,10 @@ export const googleAuth = async (req, res) => {
       return res.status(403).json({ success: false, message: "Your account has been blocked by an administrator." });
     }
 
-    return res.status(200).json({ 
-      success: true, 
-      message: "Google authentication successful", 
-      token, 
+    return res.status(200).json({
+      success: true,
+      message: "Google authentication successful",
+      token,
       role: roleToReturn,
       user: authAccount
     });
@@ -720,9 +733,9 @@ export const upgradeRequest = async (req, res) => {
     if (email) {
       const ownerAccount = await Owner.findOne({ email: email.toLowerCase() });
       if (ownerAccount) {
-        return res.status(400).json({ 
-          success: false, 
-          message: `Account already has a professional role (${ownerAccount.role}).` 
+        return res.status(400).json({
+          success: false,
+          message: `Account already has a professional role (${ownerAccount.role}).`
         });
       }
     } else {
@@ -731,19 +744,19 @@ export const upgradeRequest = async (req, res) => {
 
     // 3. Check for existing requests
     const existingRequest = await OwnerRequest.findOne({ email: email.toLowerCase() });
-    
+
     if (existingRequest) {
       if (existingRequest.status === "pending") {
-        return res.status(400).json({ 
-          success: false, 
-          message: "You already have a pending application. Please wait for our team to review it." 
+        return res.status(400).json({
+          success: false,
+          message: "You already have a pending application. Please wait for our team to review it."
         });
       }
-      
+
       if (existingRequest.status === "approved") {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Your application has already been approved." 
+        return res.status(400).json({
+          success: false,
+          message: "Your application has already been approved."
         });
       }
 
@@ -754,10 +767,10 @@ export const upgradeRequest = async (req, res) => {
 
     // 4. Handle File Uploads
     const documents = [];
-    
+
     console.log("[UPGRADE] User ID:", userId);
     console.log("[UPGRADE] Request Files:", req.files ? `Count: ${req.files.length}` : "NONE");
-    
+
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         try {
@@ -798,24 +811,24 @@ export const upgradeRequest = async (req, res) => {
     } catch (notifyErr) {
       console.error("[UPGRADE] Notification error (non-fatal):", notifyErr);
     }
-    
+
     return res.status(201).json({
       success: true,
       message: "Your application has been submitted and is under review. Our team will verify your documents shortly.",
     });
   } catch (err) {
     console.error(chalk.red("Upgrade Request Error:"), err);
-    
+
     if (err.code === 11000) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "An application with this email already exists." 
+      return res.status(400).json({
+        success: false,
+        message: "An application with this email already exists."
       });
     }
 
-    return res.status(500).json({ 
-      success: false, 
-      message: err.message || "Internal server error" 
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error"
     });
   }
 };
@@ -826,7 +839,7 @@ export const getMe = async (req, res) => {
     // req.user is attached by user.middleware.js
     // req.owner is attached by owner.middleware.js
     const decoded = req.user || req.owner;
-    
+
     if (!decoded) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
@@ -878,9 +891,9 @@ export const getMe = async (req, res) => {
 
     const token = req.cookies.auth_token || req.headers.authorization?.split(" ")[1];
 
-    return res.status(200).json({ 
-      success: true, 
-      user: account, 
+    return res.status(200).json({
+      success: true,
+      user: account,
       role: account.role || role,
       token
     });
@@ -903,7 +916,7 @@ export const updateProfilePicture = async (req, res) => {
     }
 
     const { id, role, ownerId } = decoded;
-    
+
     // Upload to Cloudinary
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
@@ -945,12 +958,76 @@ export const updateProfilePicture = async (req, res) => {
   }
 };
 
+export const updateBannerImage = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "No image file provided" });
+  }
+
+  try {
+    const decoded = req.user || req.owner;
+    if (!decoded) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const { id, role, ownerId } = decoded;
+
+    // Upload to Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: `kridaz/banners/${role}` },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      uploadStream.end(req.file.buffer);
+    });
+
+    let account;
+    // Unified update: always update User document
+    account = await User.findByIdAndUpdate(id, { bannerImage: uploadResult.secure_url }, { new: true });
+
+    // For partners, sync with Owner document
+    if (role !== "user") {
+      const targetOwnerId = ownerId || (account && account.ownerDetails);
+      if (targetOwnerId) {
+        await Owner.findByIdAndUpdate(targetOwnerId, { bannerImage: uploadResult.secure_url });
+      } else {
+        await Owner.findOneAndUpdate({ userId: id }, { bannerImage: uploadResult.secure_url });
+      }
+    }
+
+    if (!account) {
+      return res.status(404).json({ success: false, message: "Account not found" });
+    }
+
+    if (role !== "user") {
+      const targetOwnerId = ownerId || (account && account.ownerDetails);
+      if (targetOwnerId) {
+        account = await Owner.findById(targetOwnerId).select("-password").lean();
+      } else {
+        account = await Owner.findOne({ userId: id }).select("-password").lean();
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Banner image updated successfully",
+      bannerImage: uploadResult.secure_url,
+      user: account
+    });
+  } catch (err) {
+    console.error(chalk.red("updateBannerImage Error:"), err);
+    return res.status(500).json({ success: false, message: "Failed to upload banner image" });
+  }
+};
+
 export const updateInterests = async (req, res) => {
   const { sportTypes } = req.body;
   try {
     const { id, role, ownerId } = req.user;
     let account = await User.findByIdAndUpdate(id, { sportTypes }, { new: true });
-    
+
     if (role !== "user") {
       const targetOwnerId = ownerId || (account && account.ownerDetails);
       const ownerUpdate = { interests: sportTypes, gameTypes: sportTypes };
@@ -964,14 +1041,14 @@ export const updateInterests = async (req, res) => {
     if (!account) {
       return res.status(404).json({ success: false, message: "Account not found" });
     }
-    
+
     return res.status(200).json({ success: true, message: "Interests updated", sportTypes: account.sportTypes });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
 export const updateProfile = async (req, res) => {
-  const { name, username, phone, bio, gender, city, state, location, sportTypes, interests } = req.body;
+  const { name, username, phone, bio, gender, city, state, location, sportTypes, interests, bannerImage } = req.body;
   try {
     const decoded = req.user || req.owner;
     if (!decoded) {
@@ -982,13 +1059,13 @@ export const updateProfile = async (req, res) => {
 
     // Check if username is taken by another user
     if (username) {
-      const existingUser = await User.findOne({ 
-        username: username.toLowerCase(), 
-        _id: { $ne: id } 
+      const existingUser = await User.findOne({
+        username: username.toLowerCase(),
+        _id: { $ne: id }
       });
-      const existingOwner = await Owner.findOne({ 
-        username: username.toLowerCase(), 
-        _id: { $ne: id } 
+      const existingOwner = await Owner.findOne({
+        username: username.toLowerCase(),
+        _id: { $ne: id }
       });
       if (existingUser || existingOwner) {
         return res.status(400).json({ success: false, message: "Username already taken" });
@@ -1007,11 +1084,12 @@ export const updateProfile = async (req, res) => {
       state,
       location,
       sportTypes: finalInterests,
-      interests: finalInterests
+      interests: finalInterests,
+      bannerImage
     };
 
     account = await User.findByIdAndUpdate(id, updateData, { new: true }).select("-password");
-    
+
     if (role !== "user") {
       // Keep Owner in sync
       const targetOwnerId = ownerId || (account && account.ownerDetails);
