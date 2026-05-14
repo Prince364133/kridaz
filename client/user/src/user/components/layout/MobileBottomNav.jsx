@@ -9,7 +9,7 @@ const MobileBottomNav = () => {
   const getDashboardPath = () => {
     const roleStr = role?.toLowerCase() || "";
     if (roleStr.includes("admin")) return "/admin";
-    if (["owner", "venue_owner", "verified_venue_owner"].some(r => roleStr.includes(r))) return "/partner";
+    if (["venu_owners", "owner", "venue_owner", "verified_venue_owner"].some(r => roleStr.includes(r))) return "/partner";
     if (roleStr.includes("coach")) return "/coach";
     if (roleStr.includes("umpire")) return "/umpire";
     return "/profile";

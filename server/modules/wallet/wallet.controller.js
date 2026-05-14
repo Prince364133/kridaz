@@ -162,7 +162,7 @@ export const checkPaymentStatus = async (req, res) => {
       if (transaction) {
         // Find the user to check their role
         const userDoc = await User.findById(transaction.user);
-        const isPartner = userDoc && ["owner", "coach", "umpire", "admin", "streamer"].includes(userDoc.role?.toLowerCase());
+        const isPartner = userDoc && ["venu_owners", "owner", "coach", "umpire", "admin", "streamer", "scorer"].some(r => userDoc.role?.toLowerCase().includes(r));
 
         let account;
         if (isPartner) {

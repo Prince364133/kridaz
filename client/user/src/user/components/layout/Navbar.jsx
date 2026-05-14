@@ -219,8 +219,8 @@ const Navbar = () => {
                         <div className="h-[1px] bg-white/5 my-1" />
 
                         {/* DASHBOARDS SECTION */}
-                        {(["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "limited_umpire", "scorer", "limited_scorer", "streamer"].some(r => role?.toLowerCase().includes(r)) || 
-                          ["bmsp_admin", "admin", "owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "limited_umpire", "scorer", "limited_scorer", "streamer"].some(r => user?.role?.toLowerCase().includes(r))) && (
+                        {(["bmsp_admin", "admin", "venu_owners", "venue_owners", "venue", "coach", "umpire", "limited_umpire", "scorer", "limited_scorer", "streamer"].some(r => role?.toLowerCase().includes(r)) || 
+                          ["bmsp_admin", "admin", "venu_owners", "venue_owners", "venue", "coach", "umpire", "limited_umpire", "scorer", "limited_scorer", "streamer"].some(r => user?.role?.toLowerCase().includes(r))) && (
                           <>
                             {(role?.toLowerCase() === "admin" || role?.toLowerCase().includes("bmsp_admin") || user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase().includes("bmsp_admin")) && (
                               <Link to="/admin" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
@@ -228,7 +228,7 @@ const Navbar = () => {
                                 <span className="text-sm font-medium">Admin Panel</span>
                               </Link>
                             )}
-                            {(role?.toLowerCase().includes("owner") || user?.role?.toLowerCase().includes("owner") || role?.toLowerCase().includes("venue") || user?.role?.toLowerCase().includes("venue")) && (
+                            {(role?.toLowerCase().includes("venu_owners") || user?.role?.toLowerCase().includes("venu_owners") || role?.toLowerCase().includes("venue") || user?.role?.toLowerCase().includes("venue") || role?.toLowerCase().includes("owner") || user?.role?.toLowerCase().includes("owner")) && (
                               <Link to="/partner" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                 <Activity size={18} className="text-white/40" />
                                 <span className="text-sm font-medium">Partner Dashboard</span>

@@ -34,7 +34,7 @@ const registerSchema = yup.object().shape({
   role: yup.string().required("Role is required"),
 });
 
-const usePartnerSignUpForm = (predefinedRole = "owner") => {
+const usePartnerSignUpForm = (predefinedRole = "venu_owners") => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -58,7 +58,7 @@ const usePartnerSignUpForm = (predefinedRole = "owner") => {
       const response = await axiosInstance.post("/api/owner/auth/register", payload);
       const result = response.data;
 
-      if (predefinedRole === "owner") {
+      if (predefinedRole === "venu_owners" || predefinedRole === "owner") {
         dispatch(login({ token: result.token, role: result.role }));
         toast.success("Welcome to Kridaz!");
         window.location.href = "/partner";

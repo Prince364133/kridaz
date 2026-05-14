@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useUpdateGroupMutation, useRemoveFromGroupMutation, useAddToGroupMutation, useGetFollowersFollowingQuery } from '../../../redux/api/chatApi';
+import { 
+  useUpdateGroupMutation, 
+  useRemoveFromGroupMutation, 
+  useAddToGroupMutation, 
+  useGetFollowersFollowingQuery, 
+  useMakeGroupAdminMutation, 
+  useDismissGroupAdminMutation,
+  useGetChatsQuery 
+} from '../../../redux/api/chatApi';
 
 const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  const { user } = useSelector((state) => state.auth);
@@ -11,13 +19,17 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  const [renameGroup] = useUpdateGroupMutation();
  const [removeFromGroup] = useRemoveFromGroupMutation();
  const [addToGroup] = useAddToGroupMutation();
+ const [makeAdmin] = useMakeGroupAdminMutation();
+ const [dismissAdmin] = useDismissGroupAdminMutation();
  const { data: networkData } = useGetFollowersFollowingQuery();
 
  if (!isOpen || !chat) return null;
 
- const myIds = [user?._id, user?.id, user?.userId].filter(Boolean);
- const adminId = chat.groupAdmin?.user?._id || chat.groupAdmin?.user;
- const isAdmin = myIds.includes(adminId);
+  const myIds = [user?._id, user?.id, user?.userId].filter(Boolean).map(id => id.toString());
+  const isAdmin = chat.groupAdmins?.some(admin => {
+    const adminId = (admin.user?._id || admin.user)?.toString();
+    return myIds.includes(adminId);
+  }) || myIds.includes((chat.groupAdmin?._id || chat.groupAdmin?.user?._id || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy)?.toString());
 
  const handleRename = async () => {
  if (!groupName || groupName === chat.chatName) {
@@ -55,18 +67,39 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  }
  };
 
- const handleAddUser = async (userId) => {
- try {
- await addToGroup({ chatId: chat._id, userId }).unwrap();
- } catch (err) {
- console.error("Failed to add user", err);
- }
- };
+  const handleAddUser = async (userId) => {
+    try {
+      await addToGroup({ chatId: chat._id, userId }).unwrap();
+    } catch (err) {
+      console.error("Failed to add user", err);
+    }
+  };
+
+  const handleMakeAdmin = async (userId) => {
+    try {
+      await makeAdmin({ chatId: chat._id, userId }).unwrap();
+    } catch (err) {
+      console.error("Failed to make admin", err);
+    }
+  };
+
+  const handleDismissAdmin = async (userId) => {
+    try {
+      await dismissAdmin({ chatId: chat._id, userId }).unwrap();
+    } catch (err) {
+      console.error("Failed to dismiss admin", err);
+    }
+  };
 
  const connections = [
  ...(networkData?.followers || []),
  ...(networkData?.following || [])
  ].filter((v, i, a) => a.findIndex(t => t._id === v._id) === i);
+
+  const { data: chatData } = useGetChatsQuery();
+  const childGroups = chat.isCommunity 
+    ? chatData?.chats?.filter(g => g.parentCommunity === chat._id || g.parentCommunity?._id === chat._id)
+    : [];
 
  // Users not currently in the group
  const availableUsers = connections.filter(c => 
@@ -97,7 +130,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
  </svg>
  </button>
- <h2 className="text-base font-bold text-white tracking-wide">Group info</h2>
+        <h2 className="text-base font-bold text-white tracking-wide">{chat.isCommunity ? "Community info" : "Group info"}</h2>
  </div>
 
  <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -105,9 +138,13 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  {/* Main Info Section (Avatar + Name) */}
  <div className="bg-[#111111] py-8 px-6 flex flex-col items-center mb-2 shadow-sm">
  <div className="w-40 h-40 rounded-full border border-white/5 bg-[#84CC16]/10 flex items-center justify-center mb-6 overflow-hidden">
+ {chat.groupImage ? (
+ <img src={chat.groupImage} className="w-full h-full object-cover" alt="" />
+ ) : (
  <svg className="w-20 h-20 text-[#84CC16] opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
  </svg>
+ )}
  </div>
  
  {isEditingName ? (
@@ -139,15 +176,64 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  </button>
  )}
  </div>
- <p className="text-white/40 text-sm mt-1">{chat.users?.length} participants</p>
- </div>
- )}
- </div>
+          <p className="text-white/40 text-sm mt-1">{chat.users?.length} {chat.isCommunity ? "members" : "participants"}</p>
+          {chat.description && (
+            <p className="text-white/60 text-sm mt-4 text-center px-4 leading-relaxed">
+              {chat.description}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+
+  {/* Groups in this community */}
+  {chat.isCommunity && childGroups?.length > 0 && (
+    <div className="bg-[#111111] py-4 px-6 mb-2 shadow-sm space-y-4">
+      <h4 className="text-[13px] font-medium text-[#84CC16]">Groups in this community</h4>
+      <div className="space-y-3">
+        {childGroups.map(group => (
+          <div key={group._id} className="flex items-center gap-3 p-2 hover:bg-white/[0.03] rounded-lg transition-colors cursor-pointer">
+            <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center shrink-0 overflow-hidden">
+              {group.groupImage ? (
+                <img src={group.groupImage} className="w-full h-full object-cover" alt="" />
+              ) : (
+                <svg className="w-5 h-5 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              )}
+            </div>
+            <div>
+              <p className="text-white text-[15px] font-medium leading-tight">{group.chatName}</p>
+              <p className="text-white/40 text-xs mt-0.5">{group.users?.length} participants</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+
+  {/* Parent Community Info */}
+  {chat.parentCommunity && (
+    <div className="bg-[#111111] py-4 px-6 mb-2 shadow-sm">
+      <h4 className="text-[13px] font-medium text-white/50 mb-3">Parent Community</h4>
+      <div className="flex items-center gap-3 bg-[#1A1A1A] p-3 rounded-xl border border-white/5">
+        <div className="w-10 h-10 rounded-full bg-[#84CC16]/10 flex items-center justify-center shrink-0">
+          <svg className="w-5 h-5 text-[#84CC16]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </div>
+        <div>
+          <p className="text-white text-[15px] font-medium leading-tight">{typeof chat.parentCommunity === 'object' ? chat.parentCommunity.chatName : "Community"}</p>
+          <p className="text-white/40 text-xs mt-0.5">Parent of this group</p>
+        </div>
+      </div>
+    </div>
+  )}
 
  {/* Add Members Section (Admin only) */}
  {isAdmin && availableUsers.length > 0 && (
  <div className="bg-[#111111] py-4 px-6 mb-2 shadow-sm space-y-4">
- <h4 className="text-[13px] font-medium text-[#84CC16]">Add Members</h4>
+ <h4 className="text-[13px] font-medium text-[#84CC16]">{chat.isCommunity ? "Add Members" : "Add Participants"}</h4>
  <div className="relative">
  <input
  type="text"
@@ -173,7 +259,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  <button 
  onClick={() => handleAddUser(user._id)}
  className="text-[#84CC16] opacity-0 group-hover:opacity-100 p-1.5 rounded-full hover:bg-[#84CC16]/10 transition-all"
- title="Add to group"
+ title="Add"
  >
  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -187,13 +273,16 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
 
  {/* Participants List */}
  <div className="bg-[#111111] py-4 shadow-sm mb-2">
- <h4 className="text-[13px] font-medium text-white/50 px-6 mb-3">{chat.users?.length || 0} participants</h4>
+      <h4 className="text-[13px] font-medium text-white/50 px-6 mb-3">{chat.users?.length || 0} {chat.isCommunity ? "members" : "participants"}</h4>
  
  <div className="flex flex-col">
  {/* Active Members */}
  {chat.users?.map((u, i) => {
  const uid = u.user?._id || u.user;
- const isThisAdmin = uid === adminId;
+ const isThisAdmin = chat.groupAdmins?.some(admin => {
+    const adminId = (admin.user?._id || admin.user)?.toString();
+    return adminId === uid.toString();
+  });
  const isMe = myIds.includes(uid);
 
  return (
@@ -219,20 +308,42 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  <div className="flex items-center gap-3">
  {isThisAdmin && (
  <span className="border border-[#84CC16]/40 text-[#84CC16] text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-sm">
- Group Admin
+ {chat.isCommunity ? "Community Admin" : "Group Admin"}
  </span>
  )}
- {isAdmin && !isThisAdmin && !isMe && (
- <button 
- onClick={(e) => { e.stopPropagation(); handleRemove(uid); }}
- className="text-red-500 opacity-0 group-hover/member:opacity-100 hover:bg-red-500/10 p-1.5 rounded-full transition-all"
- title="Remove member"
- >
- <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
- </svg>
- </button>
- )}
+                {isAdmin && !isThisAdmin && !isMe && (
+                  <div className="flex items-center gap-1 opacity-0 group-hover/member:opacity-100 transition-opacity">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleMakeAdmin(uid); }}
+                      className="text-[#84CC16] hover:bg-[#84CC16]/10 p-1.5 rounded-full transition-all"
+                      title="Make Admin"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleRemove(uid); }}
+                      className="text-red-500 hover:bg-red-500/10 p-1.5 rounded-full transition-all"
+                      title="Remove member"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+                {isAdmin && isThisAdmin && !isMe && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handleDismissAdmin(uid); }}
+                    className="text-white/40 opacity-0 group-hover/member:opacity-100 hover:bg-white/10 p-1.5 rounded-full transition-all"
+                    title="Dismiss Admin"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </button>
+                )}
  </div>
  </div>
  );

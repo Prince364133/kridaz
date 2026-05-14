@@ -5,7 +5,7 @@ import { getIO } from "../../config/socket.js";
 
 // Helper: resolve the correct user IDs and model for the current request
 function resolveCurrentUser(req) {
-  const isOwner = req.user?.role === "owner" || req.owner?.role === "owner";
+  const isOwner = req.user?.role?.includes("venu_owners") || req.user?.role === "owner" || req.owner?.role?.includes("venu_owners") || req.owner?.role === "owner";
   
   // Collect all possible IDs for this user
   const ids = new Set();
@@ -270,7 +270,7 @@ export const broadcastMessage = async (req, res) => {
  */
 export const markMessagesRead = async (req, res) => {
   const { chatId } = req.params;
-  const isOwner = req.user?.role === "owner" || req.owner?.role === "owner";
+  const isOwner = req.user?.role?.includes("venu_owners") || req.user?.role === "owner" || req.owner?.role?.includes("venu_owners") || req.owner?.role === "owner";
   const currentUserId = isOwner
     ? (req.user?.ownerId || req.owner?.ownerId || req.user?.id || req.owner?.id)
     : (req.user?.id || req.owner?.id);

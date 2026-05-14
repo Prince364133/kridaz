@@ -1499,7 +1499,7 @@ export const claimInviteSlot = async (req, res) => {
             updatedRole = "LIMITED_UMPIRE";
             updatedOwnerId = owner._id;
           }
-        } else if (owner.role === "owner" || owner.role === "user") {
+        } else if (owner.role === "venu_owners" || owner.role === "owner" || owner.role === "user") {
           // Upgrade role if they only have a basic owner profile
           owner.role = "LIMITED_UMPIRE";
           await owner.save({ session });

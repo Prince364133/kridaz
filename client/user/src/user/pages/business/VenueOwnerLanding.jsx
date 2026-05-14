@@ -52,7 +52,7 @@ export default function VenueOwnerLanding() {
               Transform your sports facility into a fully automated, high-yield business. Kridaz connects you with thousands of local players actively looking for venues.
             </p>
             <Link
-              to="/business/register?role=owner"
+              to="/business/register?role=venu_owners"
               className="inline-flex items-center gap-3 font-bold text-black rounded-full px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest text-sm md:text-base"
               style={{ backgroundColor: PRI }}
             >

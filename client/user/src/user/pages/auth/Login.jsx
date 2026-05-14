@@ -47,7 +47,7 @@ const Login = () => {
     if (isLoggedIn && !showOnboarding) {
       const normalizedRole = role?.toLowerCase();
       if (normalizedRole === "admin" || normalizedRole === "bmsp_admin") navigate("/admin");
-      else if (normalizedRole === "owner") navigate("/partner");
+      else if (normalizedRole === "venu_owners" || normalizedRole === "owner") navigate("/partner");
       else if (normalizedRole === "coach") navigate("/coach");
       else if (normalizedRole === "umpire") navigate("/umpire");
       else if (normalizedRole === "scorer") navigate("/scorer");

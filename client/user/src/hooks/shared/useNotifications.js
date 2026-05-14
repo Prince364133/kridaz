@@ -16,7 +16,7 @@ const useNotifications = () => {
       let baseUrl = '/api/user/notifications';
       if (user.role === 'admin' || user.role === 'BMSP_ADMIN') {
         baseUrl = '/api/admin/notifications';
-      } else if (user.role === 'owner' || user.role === 'VERIFIED_VENUE_OWNER' || user.role === 'BMSP_OWNER' || user.role === 'coach' || user.role === 'umpire') {
+      } else if (['venu_owners', 'owner', 'VERIFIED_VENUE_OWNER', 'BMSP_OWNER', 'coach', 'umpire', 'scorer', 'streamer'].some(r => user.role?.includes(r))) {
         baseUrl = '/api/owner/notifications';
       }
 

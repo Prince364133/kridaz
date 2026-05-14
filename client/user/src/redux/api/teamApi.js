@@ -66,6 +66,13 @@ export const teamApi = baseApi.injectEndpoints({
     getNetwork: builder.query({
       query: () => '/api/players/network',
     }),
+    requestToJoin: builder.mutation({
+      query: (id) => ({
+        url: `/api/team/join-request/${id}`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [{ type: "Team", id }],
+    }),
   }),
 });
 
@@ -82,4 +89,5 @@ export const {
   useHandleOpponentRequestMutation,
   useGetOpponentTeamsQuery,
   useGetNetworkQuery,
+  useRequestToJoinMutation,
 } = teamApi;

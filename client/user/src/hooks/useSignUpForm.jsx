@@ -66,7 +66,7 @@ const registerSchema = yup.object().shape({
 
 /**
  * useSignUpForm - handles form logic for role-based signup pages.
- * @param {string} predefinedRole - "user" | "owner" | "coach" | "umpire" — pre-selects the role.
+ * @param {string} predefinedRole - "user" | "venu_owners" | "coach" | "umpire" | "streamer" | "scorer" — pre-selects the role.
  */
 const useSignUpForm = (predefinedRole = "user") => {
   const dispatch = useDispatch();
@@ -179,7 +179,7 @@ const useSignUpForm = (predefinedRole = "user") => {
       const role = result.role?.toLowerCase() || "";
       if (role.includes("umpire")) {
         navigate("/umpire");
-      } else if (role === "owner") {
+      } else if ((role === "owner" || role === "venu_owners")) {
         navigate("/partner");
       } else if (role === "coach") {
         navigate("/coach");
@@ -249,7 +249,7 @@ const useSignUpForm = (predefinedRole = "user") => {
       const role = result.role?.toLowerCase() || "";
       if (role.includes("umpire")) {
         navigate("/umpire");
-      } else if (role === "owner") {
+      } else if ((role === "owner" || role === "venu_owners")) {
         navigate("/partner");
       } else if (role === "coach") {
         navigate("/coach");

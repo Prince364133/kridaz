@@ -48,7 +48,7 @@ export const ownerRegisterSchema = z.object({
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(1, "Confirm Password is required"),
     otp: z.string().min(6, "OTP must be 6 characters"),
-    role: z.enum(["owner", "coach", "umpire"]).optional(),
+    role: z.enum(["venu_owners", "owner", "coach", "umpire", "streamer", "scorer"]).optional(),
   }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],

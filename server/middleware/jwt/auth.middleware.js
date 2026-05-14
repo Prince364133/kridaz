@@ -25,7 +25,9 @@ const verifyAuth = async (req, res, next) => {
     const role = decoded.role?.toLowerCase() || "";
     
     // Check if it's a partner/business role
-    const isBusinessRole = ["owner", "coach", "umpire", "admin", "streamer", "scorer"].some(r => role.includes(r));
+    const isBusinessRole = ["admin", "venu_owners", "coach", "umpire", "streamer", "scorer"].some(r => role.includes(r));
+    
+
 
     // Unified Identity: Always use 'id' as User ID, and 'ownerId' for business document reference
     const normalizedUser = {
@@ -61,10 +63,14 @@ export const authorizeRoles = (...roles) => {
     
     const userRole = req.user.role.toLowerCase();
     // Support matching both exact role or sub-role (e.g. 'limited_umpire' matches 'umpire')
-    const hasRole = roles.some(r => userRole.includes(r.toLowerCase()));
+    const hasRole = roles.some(r => {
+        const targetRole = r.toLowerCase();
+        // Special case for 'owner' to match 'venu_owners' if needed, 
+        // but user wants 'venu_owners' everywhere.
+        return userRole.includes(targetRole);
+    });
     
     if (!hasRole) {
-      console.warn(`Access Denied: User role '${userRole}' not in allowed roles [${roles.join(", ")}]`);
       return res.status(403).json({ 
         message: `Forbidden: Access restricted to ${roles.join(", ")} roles` 
       });

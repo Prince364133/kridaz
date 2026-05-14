@@ -80,7 +80,7 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
           <div className="flex-1 pb-2">
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl md:text-4xl font-bold text-white uppercase tracking-tight italic">{team.name}</h1>
-              <span className="px-3 py-1 rounded-full bg-[#CCFF00]/20 text-[#CCFF00] text-[10px] font-black uppercase tracking-widest">{team.sport}</span>
+              <span className="px-3 py-1 rounded-full bg-[#CCFF00]/20 text-[#CCFF00] text-[10px] font-black uppercase tracking-widest">{team.sportType}</span>
             </div>
             <p className="text-white/60 text-sm md:text-base max-w-2xl line-clamp-2">{team.description || "No description provided."}</p>
           </div>

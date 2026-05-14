@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useInviteMembersMutation, useGetNetworkQuery } from '../../../redux/api/teamApi';
+import { useInviteMembersMutation, useGetNetworkQuery, useGetTeamByIdQuery } from '../../../redux/api/teamApi';
 import { 
   X, QrCode, Link2, Users, UserPlus, 
   Share2, Copy, Check, Loader2, Search 
@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
   const { user } = useSelector(state => state.auth);
   const [inviteMembers, { isLoading }] = useInviteMembersMutation();
+  const { data: teamData, isLoading: isLoadingTeam } = useGetTeamByIdQuery(teamId, { skip: !teamId });
   const { data: networkData, isLoading: isLoadingNetwork } = useGetNetworkQuery();
   const [activeTab, setActiveTab] = useState('link'); // 'qr', 'link', 'followers', 'following', 'custom'
   const [searchTerm, setSearchTerm] = useState('');
@@ -19,13 +20,23 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
   // Custom member state
   const [customMember, setCustomMember] = useState({ name: '', contact: '' });
   
-  const inviteLink = `${window.location.origin}/signup?teamInvite=${teamId}`;
+  const inviteLink = `${window.location.origin}/team-pass/${teamId}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(inviteLink);
     setCopied(true);
     toast.success('Link copied!');
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownloadQR = () => {
+    if (!teamData?.team?.qrCode) return;
+    const link = document.createElement('a');
+    link.href = teamData.team.qrCode;
+    link.download = `${teamName}_Invite_QR.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleInvitePlayer = async (player) => {
@@ -154,19 +165,27 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
                 initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
                 className="w-full space-y-6"
               >
-                <div className="p-4 bg-white rounded-3xl mx-auto w-48 h-48 flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-                  {/* Real QR would go here */}
-                  <div className="w-full h-full border-4 border-black/5 flex flex-col items-center justify-center">
-                    <QrCode className="text-black text-6xl" />
-                    <p className="text-[10px] text-black/50 font-bold mt-2">SCAN TO JOIN</p>
-                  </div>
+                <div className="p-4 bg-white rounded-3xl mx-auto w-48 h-48 flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.1)] overflow-hidden">
+                  {isLoadingTeam ? (
+                    <Loader2 className="animate-spin text-black" size={32} />
+                  ) : teamData?.team?.qrCode ? (
+                    <img src={teamData.team.qrCode} alt="Team Invite QR" className="w-full h-full object-contain" />
+                  ) : (
+                    <div className="w-full h-full border-4 border-black/5 flex flex-col items-center justify-center">
+                      <QrCode className="text-black text-6xl" />
+                      <p className="text-[10px] text-black/50 font-bold mt-2">QR NOT READY</p>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <h4 className="text-white font-bold mb-2">Scan QR Code</h4>
                   <p className="text-white/40 text-sm">Players can scan this code with their camera to join your team.</p>
                 </div>
-                <button className="flex items-center gap-2 text-primary font-bold text-sm mx-auto hover:underline">
-                  <Share2 size={16} /> Share Image
+                <button 
+                  onClick={handleDownloadQR}
+                  className="flex items-center gap-2 text-primary font-bold text-sm mx-auto hover:underline"
+                >
+                  <Share2 size={16} /> Download & Share
                 </button>
               </motion.div>
             )}

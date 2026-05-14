@@ -354,7 +354,7 @@ export const registerOwner = async (req, res) => {
       email,
       phone,
       password: hashedPassword,
-      role: role || "owner",
+      role: role || "venu_owners",
       gender,
       location,
       isEmailVerified: true
@@ -367,7 +367,7 @@ export const registerOwner = async (req, res) => {
       email,
       phone,
       password: hashedPassword,
-      role: role || "owner",
+      role: role || "venu_owners",
       gender,
       location,
       waitlistPosition,
@@ -712,7 +712,7 @@ export const ownerRequest = async (req, res) => {
       name,
       email,
       phone,
-      role: role || "owner",
+      role: role || "venu_owners",
       businessDetails,
       documents
     });
@@ -721,7 +721,7 @@ export const ownerRequest = async (req, res) => {
     // Notify Admin
     await notifyAdmins({
       title: "New Partner Inquiry",
-      message: `New request from ${name} for role: ${role || "owner"}`,
+      message: `New request from ${name} for role: ${role || "venu_owners"}`,
       type: "SYSTEM",
       link: "/admin/partners"
     });
@@ -816,7 +816,7 @@ export const upgradeRequest = async (req, res) => {
       name,
       email: email.toLowerCase(),
       phone,
-      role: role || "owner",
+      role: role || "venu_owners",
       businessDetails,
       documents,
       portfolioUrl,
@@ -829,7 +829,7 @@ export const upgradeRequest = async (req, res) => {
     try {
       await notifyAdmins({
         title: "Role Upgrade Request",
-        message: `User ${name} requested upgrade to ${role || "owner"}`,
+        message: `User ${name} requested upgrade to ${role || "venu_owners"}`,
         type: "SYSTEM",
         link: "/admin/partners"
       });

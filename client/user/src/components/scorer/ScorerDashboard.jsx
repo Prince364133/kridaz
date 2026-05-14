@@ -38,7 +38,7 @@ export default function ScorerDashboard() {
   const {
     matchesScored = 0,
     upcomingMatches = 0,
-    scorerRating = 0,
+    officialRating = 0,
     earnings = 0,
     matchEngagement = [],
     upcomingAssignments = [],
@@ -52,7 +52,7 @@ export default function ScorerDashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           <StatCard title="Matches Scored" value={matchesScored} icon={Trophy} />
           <StatCard title="Upcoming Matches" value={upcomingMatches} icon={Calendar} />
-          <StatCard title="Scorer Rating" value={scorerRating} icon={Star} />
+          <StatCard title="Official Rating" value={officialRating} icon={Star} />
           <StatCard title="Earnings" value={earnings} icon={DollarSign} prefix="₹" />
         </div>
 

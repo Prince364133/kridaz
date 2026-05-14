@@ -69,7 +69,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/partner",
-    element: <ProtectedRoute allowedRoles={["owner", "admin"]}><PartnerLayout /></ProtectedRoute>,
+    element: <ProtectedRoute allowedRoles={["venu_owners", "admin"]}><PartnerLayout /></ProtectedRoute>,
     children: [
       { index: true, element: <OwnerDashboard /> },
       { path: "add-turf", element: <AddTurf /> },

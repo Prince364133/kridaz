@@ -34,7 +34,11 @@ const chatSchema = new mongoose.Schema(
     ],
     pinnedBy: [
       { type: mongoose.Schema.Types.ObjectId }
-    ]
+    ],
+    createdBy: {
+      user: { type: mongoose.Schema.Types.ObjectId, refPath: "createdBy.onModel" },
+      onModel: { type: String, enum: ["User", "Owner"] }
+    }
   },
   { timestamps: true }
 );

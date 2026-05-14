@@ -10,8 +10,8 @@ import Owner from "../../models/owner.model.js";
 import HostedGame from "../../models/hostedGame.model.js";
 import CricketScoring from "../../models/cricketScoring.model.js";
 import { format, formatDistanceToNow } from "date-fns";
-import { getChannelStats } from "../../services/youtubeService.js";
-import { getFacebookPageStats } from "../../services/facebookService.js";
+import * as youtubeService from "../../services/youtubeService.js";
+import * as facebookService from "../../services/facebookService.js";
 
 
 export const getDashboardData = async (req, res) => {
@@ -269,13 +269,42 @@ export const getDashboardData = async (req, res) => {
 };
 
 export const getCoachDashboardData = async (req, res) => {
-  const coachId = req.owner?.id || req.user?.id;
-  if (!coachId) {
-    return res.status(401).json({ success: false, message: "Unauthorized: Coach profile required" });
-  }
-  console.log("DEBUG: Fetching coach dashboard data for coachId:", coachId);
-  
+  const ownerId = req.owner?.ownerId || req.user?.ownerId;
+  const userId = req.owner?.userId || req.user?.id;
+
   try {
+    console.log(`[DASHBOARD_COACH] Resolving for ownerId: ${ownerId}, userId: ${userId}`);
+    
+    // Find coach profile
+    let coach = null;
+    if (ownerId) {
+      coach = await Owner.findById(ownerId).lean();
+    }
+    if (!coach && userId) {
+      coach = await Owner.findOne({ userId }).lean();
+    }
+
+    if (!coach) {
+      console.warn(`[DASHBOARD_COACH] Profile not found for userId: ${userId}, returning default empty state`);
+      return res.json({
+        activeTrainees: 0,
+        totalSessions: 0,
+        totalRevenue: 0,
+        revenueOverTimeRaw: [],
+        liveStreamMins: 0,
+        performanceIndex: 0,
+        studentProgress: [],
+        sessions: [],
+        trainees: [],
+        coach: null,
+        upcomingSessions: []
+      });
+    }
+
+    const coachId = coach._id;
+    const coachUserId = coach.userId;
+    console.log(`[DASHBOARD_COACH] Profile found: ${coachId}, userId: ${coachUserId}`);
+
     // 1. Fetch sessions
     console.log("DEBUG: Querying Session model...");
     const sessions = await Session.find({ coach: coachId })
@@ -306,18 +335,28 @@ export const getCoachDashboardData = async (req, res) => {
     }
 
     // 4. Fetch Real Revenue from Wallet
+    const coachProfile = await Owner.findOne({ userId: coachUserId });
+    const cId = coachProfile?._id;
+
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+    // 2. Fetch Core Metrics
     const [revenueData, revenueOverTimeRaw] = await Promise.all([
       WalletTransaction.aggregate([
-        { $match: { user: coachId, status: "SUCCESS", type: { $ne: "DEBIT" } } },
+        { 
+          $match: { 
+            user: new mongoose.Types.ObjectId(coachUserId), 
+            status: "SUCCESS", 
+            type: { $ne: "DEBIT" } 
+          } 
+        },
         { $group: { _id: null, total: { $sum: "$amount" } } }
       ]),
       WalletTransaction.aggregate([
         { 
           $match: { 
-            user: coachId, 
+            user: new mongoose.Types.ObjectId(coachUserId), 
             status: "SUCCESS", 
             type: { $ne: "DEBIT" },
             createdAt: { $gte: sevenDaysAgo }
@@ -335,8 +374,21 @@ export const getCoachDashboardData = async (req, res) => {
 
     const totalRevenue = revenueData[0]?.total || 0;
 
-    // 5. Fetch Coach Profile Details
-    const coachProfile = await Owner.findById(coachId).select("-password").lean();
+    if (!sessions || sessions.length === 0) {
+      return res.json({
+        activeTrainees: 0,
+        totalSessions: 0,
+        totalRevenue: totalRevenue,
+        revenueOverTimeRaw: revenueOverTimeRaw,
+        liveStreamMins: 0,
+        performanceIndex: 0,
+        studentProgress: [],
+        sessions: [],
+        trainees: [],
+        coach: coachProfile,
+        upcomingSessions: []
+      });
+    }
 
     // 6. Assemble response
     console.log("DEBUG: Assembling coach dashboard response...");
@@ -350,7 +402,7 @@ export const getCoachDashboardData = async (req, res) => {
       studentProgress: [],
       sessions: sessions,
       trainees: detailedTrainees,
-      coach: coachProfile, // Include the coach's profile details
+      coach: coachProfile,
       upcomingSessions: sessions
         .filter(s => s && s.status === 'upcoming')
         .slice(0, 5)
@@ -376,36 +428,43 @@ export const getCoachDashboardData = async (req, res) => {
 };
 
 export const getUmpireDashboardData = async (req, res) => {
-  const umpireId = req.owner?.id || req.user?.id;
-  console.log("DEBUG: Fetching umpire dashboard data for umpireId:", umpireId);
-  
   try {
-    console.log("DEBUG: Querying Match and HostedGame models...");
-    
-    // Support both User ID and Owner ID for lookup during transition
-    const ownerId = req.owner?.ownerId;
-    const userId = req.owner?.id || req.user?.id;
+    const ownerId = req.owner?.ownerId || req.user?.ownerId;
+    const userId = req.owner?.userId || req.user?.id;
 
-    // Fetch owner profile to check for upgradeRequested status
-    let owner = null;
+    console.log(`[DASHBOARD_UMPIRE] Resolving for ownerId: ${ownerId}, userId: ${userId}`);
+    
+    // Find umpire profile
+    let umpire = null;
     if (ownerId) {
-      owner = await Owner.findById(ownerId).lean();
+      umpire = await Owner.findById(ownerId).lean();
     }
-    
-    // Fallback search by userId if not found by ownerId
-    if (!owner && userId) {
-      owner = await Owner.findOne({ userId }).lean();
-      if (owner) {
-        console.log("DEBUG: Found owner by userId instead of ownerId:", userId);
-      }
+    if (!umpire && userId) {
+      umpire = await Owner.findOne({ userId }).lean();
     }
 
-    if (!owner) {
-      console.warn("DEBUG: Owner profile not found for ownerId:", ownerId, "or userId:", userId);
+    if (!umpire) {
+      console.warn(`[DASHBOARD_UMPIRE] Profile not found for userId: ${userId}, returning default empty state`);
+      return res.json({
+        matchesOfficiated: 0,
+        upcomingMatches: 0,
+        officialRating: 0,
+        earnings: 0,
+        totalRevenue: 0,
+        revenueOverTimeRaw: [],
+        matchEngagement: [],
+        matches: [],
+        upcomingAssignments: [],
+        upgradeRequested: false
+      });
     }
+
+    const umpireId = umpire._id;
+    const umpireUserId = umpire.userId;
+    console.log(`[DASHBOARD_UMPIRE] Profile found: ${umpireId}, userId: ${umpireUserId}`);
 
     // Fetch user details for email/phone fallback search
-    const userRecord = await User.findById(userId).select("email phone").lean();
+    const userRecord = await User.findById(umpireUserId).select("email phone").lean();
     const userEmail = userRecord?.email;
     const userPhone = userRecord?.phone;
 
@@ -413,9 +472,8 @@ export const getUmpireDashboardData = async (req, res) => {
       Match.find({ umpire: { $in: [umpireId, ownerId] } }).sort({ date: 1 }).lean(),
       HostedGame.find({
         $or: [
-          { umpire: { $in: [umpireId, userId, ownerId] } },
-          { "umpireRequest.user": { $in: [umpireId, userId, ownerId] } },
-          // Robust fallback for invited umpires whose ID link might be pending
+          { umpire: { $in: [umpireId, umpireUserId, ownerId] } },
+          { "umpireRequest.user": { $in: [umpireId, umpireUserId, ownerId] } },
           { "customUmpire.email": userEmail },
           { "customUmpire.phone": userPhone }
         ],
@@ -440,23 +498,19 @@ export const getUmpireDashboardData = async (req, res) => {
     const allMatches = [...legacyMatches, ...formattedHostedGames];
     console.log(`DEBUG: Found ${legacyMatches.length} legacy matches and ${formattedHostedGames.length} hosted games`);
     
-    const matchesOfficiated = allMatches.filter(m => m.status === "completed").length;
-    const upcomingMatches = allMatches.filter(m => m.status === "upcoming").length;
-
-
     // Fetch Real Revenue from Wallet
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     const [revenueData, revenueOverTimeRaw] = await Promise.all([
       WalletTransaction.aggregate([
-        { $match: { user: umpireId, status: "SUCCESS", type: { $ne: "DEBIT" } } },
+        { $match: { user: new mongoose.Types.ObjectId(umpireUserId), status: "SUCCESS", type: { $ne: "DEBIT" } } },
         { $group: { _id: null, total: { $sum: "$amount" } } }
       ]),
       WalletTransaction.aggregate([
         { 
           $match: { 
-            user: umpireId, 
+            user: new mongoose.Types.ObjectId(umpireUserId), 
             status: "SUCCESS", 
             type: { $ne: "DEBIT" },
             createdAt: { $gte: sevenDaysAgo }
@@ -474,10 +528,28 @@ export const getUmpireDashboardData = async (req, res) => {
 
     const totalRevenue = revenueData[0]?.total || 0;
 
+    if (!hostedGames || hostedGames.length === 0) {
+      return res.json({
+        matchesOfficiated: 0,
+        upcomingMatches: 0,
+        officialRating: umpire?.rating || 0,
+        earnings: totalRevenue,
+        totalRevenue,
+        revenueOverTimeRaw,
+        matchEngagement: [],
+        matches: [],
+        upcomingAssignments: [],
+        upgradeRequested: umpire?.upgradeRequested || false
+      });
+    }
+
+    const matchesOfficiated = allMatches.filter(m => m.status === "completed").length;
+    const upcomingMatches = allMatches.filter(m => m.status === "upcoming").length;
+
     const responseData = {
       matchesOfficiated,
       upcomingMatches,
-      officialRating: 0,
+      officialRating: umpire.rating || 0,
       earnings: totalRevenue,
       totalRevenue,
       revenueOverTimeRaw,
@@ -491,7 +563,7 @@ export const getUmpireDashboardData = async (req, res) => {
         venue: m.venue || "TBD Venue",
         role: "Head Umpire"
       })),
-      upgradeRequested: owner?.upgradeRequested || false
+      upgradeRequested: umpire.upgradeRequested || false
     };
 
     console.log("DEBUG: Sending successful response for umpire dashboard");
@@ -508,36 +580,46 @@ export const getUmpireDashboardData = async (req, res) => {
 };
 
 export const getStreamerDashboardData = async (req, res) => {
-  const streamerId = req.owner?.id || req.user?.id;
-  console.log("DEBUG: Fetching streamer dashboard data for streamerId:", streamerId);
-  
   try {
-    console.log("DEBUG: Querying HostedGame models...");
-    
-    // Support both User ID and Owner ID for lookup during transition
-    const ownerId = req.owner?.ownerId;
-    const userId = req.owner?.id || req.user?.id;
+    const ownerId = req.owner?.ownerId || req.user?.ownerId;
+    const userId = req.owner?.userId || req.user?.id;
 
-    // Fetch owner profile to check for upgradeRequested status
+    console.log(`[DASHBOARD_STREAMER] Fetching for ownerId: ${ownerId}, userId: ${userId}`);
+    
+    // Attempt to find streamer profile by ownerId or userId
     let owner = null;
     if (ownerId) {
       owner = await Owner.findById(ownerId).lean();
     }
-    
-    // Fallback search by userId if not found by ownerId
     if (!owner && userId) {
       owner = await Owner.findOne({ userId }).lean();
     }
 
-    // Fetch user details for email/phone fallback search
-    const userRecord = await User.findById(userId).select("email phone").lean();
-    const userEmail = userRecord?.email;
-    const userPhone = userRecord?.phone;
+    // Resilience: If no streamer profile found, return default empty dashboard
+    if (!owner) {
+      console.warn(`[DASHBOARD_STREAMER] Profile not found, returning default empty state for userId: ${userId}`);
+      return res.json({
+        matchesStreamed: 0,
+        upcomingStreams: 0,
+        officialRating: 0,
+        earnings: 0,
+        totalRevenue: 0,
+        revenueOverTimeRaw: [],
+        matchEngagement: [],
+        matches: [],
+        upcomingAssignments: [],
+        upgradeRequested: false,
+        socialStats: { youtube: null, facebook: null }
+      });
+    }
+
+    const streamerId = owner._id;
+    const streamerUserId = owner.userId;
 
     const hostedGames = await HostedGame.find({
       $or: [
-        { streamer: { $in: [streamerId, userId, ownerId] } },
-        { "streamerRequest.user": { $in: [streamerId, userId, ownerId] } }
+        { streamer: { $in: [streamerId, streamerUserId, ownerId] } },
+        { "streamerRequest.user": { $in: [streamerId, streamerUserId, ownerId] } }
       ],
       status: { $ne: "CANCELLED" }
     })
@@ -558,22 +640,19 @@ export const getStreamerDashboardData = async (req, res) => {
 
     console.log(`DEBUG: Found ${allMatches.length} hosted games for streamer`);
     
-    const matchesStreamed = allMatches.filter(m => m.status === "completed").length;
-    const upcomingStreams = allMatches.filter(m => m.status === "upcoming").length;
-
     // Fetch Real Revenue from Wallet
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     const [revenueData, revenueOverTimeRaw] = await Promise.all([
       WalletTransaction.aggregate([
-        { $match: { user: streamerId, status: "SUCCESS", type: { $ne: "DEBIT" } } },
+        { $match: { user: new mongoose.Types.ObjectId(streamerUserId), status: "SUCCESS", type: { $ne: "DEBIT" } } },
         { $group: { _id: null, total: { $sum: "$amount" } } }
       ]),
       WalletTransaction.aggregate([
         { 
           $match: { 
-            user: streamerId, 
+            user: new mongoose.Types.ObjectId(streamerUserId), 
             status: "SUCCESS", 
             type: { $ne: "DEBIT" },
             createdAt: { $gte: sevenDaysAgo }
@@ -591,10 +670,50 @@ export const getStreamerDashboardData = async (req, res) => {
 
     const totalRevenue = revenueData[0]?.total || 0;
 
+    if (!hostedGames || hostedGames.length === 0) {
+      return res.json({
+        matchesStreamed: 0,
+        upcomingStreams: 0,
+        officialRating: owner?.rating || 0,
+        earnings: totalRevenue,
+        totalRevenue,
+        revenueOverTimeRaw,
+        matchEngagement: [],
+        matches: [],
+        upcomingAssignments: [],
+        upgradeRequested: owner?.upgradeRequested || false,
+        socialStats: {
+          youtube: null,
+          facebook: null
+        }
+      });
+    }
+
+    const matchesStreamed = allMatches.filter(m => m.status === "completed").length;
+    const upcomingStreams = allMatches.filter(m => m.status === "upcoming").length;
+
+    // Fetch Social Stats (Non-blocking and resilient)
+    let socialStats = { youtube: null, facebook: null };
+    try {
+      const [ytStats, fbStats] = await Promise.all([
+        youtubeService.getChannelStats(streamerUserId).catch(err => {
+          console.warn(`[DASHBOARD_STREAMER] YT Stats failed: ${err.message}`);
+          return null;
+        }),
+        facebookService.getFacebookPageStats(streamerUserId).catch(err => {
+          console.warn(`[DASHBOARD_STREAMER] FB Stats failed: ${err.message}`);
+          return null;
+        })
+      ]);
+      socialStats = { youtube: ytStats, facebook: fbStats };
+    } catch (socialErr) {
+      console.warn(`[DASHBOARD_STREAMER] Social stats aggregation failed: ${socialErr.message}`);
+    }
+
     const responseData = {
       matchesStreamed,
       upcomingStreams,
-      officialRating: 0,
+      officialRating: owner.rating || 0,
       earnings: totalRevenue,
       totalRevenue,
       revenueOverTimeRaw,
@@ -609,20 +728,7 @@ export const getStreamerDashboardData = async (req, res) => {
         role: "Head Streamer"
       })),
       upgradeRequested: owner?.upgradeRequested || false,
-      socialStats: {
-        youtube: await (async () => {
-          console.log(`[Dashboard] Getting YouTube stats for ${streamerId}`);
-          const stats = await getChannelStats(streamerId);
-          console.log(`[Dashboard] YouTube stats for ${streamerId}:`, stats ? 'Found' : 'Not Found');
-          return stats;
-        })(),
-        facebook: await (async () => {
-          console.log(`[Dashboard] Getting Facebook stats for ${streamerId}`);
-          const stats = await getFacebookPageStats(streamerId);
-          console.log(`[Dashboard] Facebook stats for ${streamerId}:`, stats ? 'Found' : 'Not Found');
-          return stats;
-        })()
-      }
+      socialStats
     };
 
     console.log("DEBUG: Sending successful response for streamer dashboard");
@@ -639,26 +745,50 @@ export const getStreamerDashboardData = async (req, res) => {
 };
 
 export const getScorerDashboardData = async (req, res) => {
-  const scorerId = req.owner?.id || req.user?.id;
-  console.log("DEBUG: Fetching scorer dashboard data for scorerId:", scorerId);
-  
-  try {
-    const userId = scorerId;
-    
-    // Support both User ID and Owner ID for lookup during transition
-    const ownerId = req.owner?.ownerId;
+  const userId = req.user?.id || req.owner?.userId;
+  const ownerId = req.owner?.ownerId || req.user?.ownerId;
 
-    // Fetch user details for email/phone fallback search
-    const userRecord = await User.findById(userId).select("email phone").lean();
-    const userEmail = userRecord?.email;
-    const userPhone = userRecord?.phone;
+  try {
+    console.log(`[DASHBOARD_SCORER] Resolving for userId: ${userId}, ownerId: ${ownerId}`);
+
+    // Try to find scorer profile in Owner model
+    let scorerProfile = null;
+    if (ownerId) {
+      scorerProfile = await Owner.findById(ownerId).lean();
+    }
+    if (!scorerProfile && userId) {
+      scorerProfile = await Owner.findOne({ userId }).lean();
+    }
+
+    // Resilience: If no scorer profile found, return default empty dashboard instead of 404
+    if (!scorerProfile) {
+      console.warn(`[DASHBOARD_SCORER] Profile not found for userId: ${userId}, returning default empty state`);
+      return res.json({
+        activeMatches: 0,
+        matchesScored: 0,
+        upcomingMatches: 0,
+        officialRating: scorerProfile?.rating || 0,
+        earnings: 0,
+        totalRevenue: 0,
+        revenueOverTimeRaw: [],
+        matchEngagement: [],
+        matches: [],
+        upcomingAssignments: []
+      });
+    }
+
+    const scorerId = scorerProfile._id;
+    const scorerUserId = scorerProfile.userId;
+    console.log(`[DASHBOARD_SCORER] Profile found: ${scorerId}, userId: ${scorerUserId}`);
 
     const hostedGames = await HostedGame.find({
       $or: [
-        { scorer: { $in: [scorerId, userId, ownerId] } },
-        { "scorerRequest.user": { $in: [scorerId, userId, ownerId] } },
-        { "customScorer.email": userEmail },
-        { "customScorer.phone": userPhone }
+        { scorer: new mongoose.Types.ObjectId(scorerUserId) },
+        { "scorerRequest.user": new mongoose.Types.ObjectId(scorerUserId) },
+        ...(scorerId ? [{ scorer: new mongoose.Types.ObjectId(scorerId) }] : []),
+        ...(scorerId ? [{ "scorerRequest.user": new mongoose.Types.ObjectId(scorerId) }] : []),
+        ...(scorerProfile.phone ? [{ "customScorer.phone": scorerProfile.phone }] : []),
+        ...(scorerProfile.email ? [{ "customScorer.email": scorerProfile.email }] : [])
       ],
       status: { $ne: "CANCELLED" }
     })
@@ -688,50 +818,48 @@ export const getScorerDashboardData = async (req, res) => {
 
     const [revenueData, revenueOverTimeRaw] = await Promise.all([
       WalletTransaction.aggregate([
-        { $match: { user: scorerId, status: "SUCCESS", type: { $ne: "DEBIT" } } },
+        { $match: { user: new mongoose.Types.ObjectId(scorerUserId), status: "SUCCESS", type: { $ne: "DEBIT" } } },
         { $group: { _id: null, total: { $sum: "$amount" } } }
       ]),
       WalletTransaction.aggregate([
         { 
           $match: { 
-            user: scorerId, 
+            user: new mongoose.Types.ObjectId(scorerUserId), 
             status: "SUCCESS", 
             type: { $ne: "DEBIT" },
             createdAt: { $gte: sevenDaysAgo }
           } 
         },
-        {
-          $group: {
-            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-            revenue: { $sum: "$amount" },
-          },
+        { 
+          $group: { 
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, 
+            revenue: { $sum: "$amount" } 
+          } 
         },
-        { $sort: { _id: 1 } },
+        { $sort: { "_id": 1 } }
       ])
     ]);
 
     const totalRevenue = revenueData[0]?.total || 0;
 
     const responseData = {
-      success: true,
-      data: {
-        matchesScored,
-        upcomingMatches,
-        officialRating: 0,
-        earnings: totalRevenue,
-        totalRevenue,
-        revenueOverTimeRaw,
-        matchEngagement: [],
-        matches: allMatches,
-        upcomingAssignments: allMatches.filter(m => m.status === "upcoming").slice(0, 5).map(m => ({
-          _id: m._id,
-          match: m.name || "TBD Match",
-          shortId: m.shortId,
-          time: m.date ? `${new Date(m.date).toLocaleDateString()} - ${m.time || 'N/A'}` : 'TBD',
-          venue: m.venue || "TBD Venue",
-          role: "Official Scorer"
-        }))
-      }
+      activeMatches: 0, // Default for now
+      matchesScored,
+      upcomingMatches,
+      officialRating: scorerProfile.rating || 0,
+      earnings: totalRevenue,
+      totalRevenue,
+      revenueOverTimeRaw,
+      matchEngagement: [],
+      matches: allMatches,
+      upcomingAssignments: allMatches.filter(m => m.status === "upcoming").slice(0, 5).map(m => ({
+        _id: m._id,
+        match: m.name || "TBD Match",
+        shortId: m.shortId,
+        time: m.date ? `${new Date(m.date).toLocaleDateString()} - ${m.time || 'N/A'}` : 'TBD',
+        venue: m.venue || "TBD Venue",
+        role: "Official Scorer"
+      }))
     };
 
     console.log("DEBUG: Sending successful response for scorer dashboard");

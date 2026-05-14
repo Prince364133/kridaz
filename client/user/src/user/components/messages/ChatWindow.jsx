@@ -399,12 +399,12 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  <button 
  onClick={() => {
  setIsDropdownOpen(false);
- if (chat.isGroupChat) setIsGroupInfoOpen(true);
+ if (chat.isGroupChat || chat.isCommunity) setIsGroupInfoOpen(true);
  else if (otherUserObj?._id) navigate(`/profile/${otherUserObj._id}`);
  }}
  className="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/[0.05] hover:text-white transition-colors"
  >
- {chat.isGroupChat ? 'Group info' : 'Contact info'}
+ {chat.isCommunity ? 'Community info' : chat.isGroupChat ? 'Group info' : 'Contact info'}
  </button>
  <button 
  onClick={() => {
@@ -474,9 +474,11 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  Exit community
  </button>
  {(() => {
- const myId = user?._id || user?.id || user?.userId;
- const adminId = chat.groupAdmin?.user?._id || chat.groupAdmin?.user || chat.groupAdmin;
- const isAdmin = myId && adminId && String(myId) === String(adminId);
+ const myId = (user?._id || user?.id || user?.userId)?.toString();
+ const isAdmin = chat.groupAdmins?.some(admin => {
+   const adminId = (admin.user?._id || admin.user)?.toString();
+   return adminId === myId;
+ });
  
  return isAdmin && (
  <button 
@@ -605,9 +607,13 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  const regularGroups = childGroups.filter(g => !g.isAnnouncementGroup && g.chatName !== "Announcements");
 
  const myId = user?._id || user?.id || user?.userId;
- const adminId = chat.groupAdmin?.user?._id || chat.groupAdmin?.user || chat.groupAdmin;
+ const adminId = chat.groupAdmin?.user?._id || chat.groupAdmin?.user || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy;
  const isAdmin = myId && adminId && String(myId) === String(adminId);
- const canMessage = !chat.adminOnlyMessages || isAdmin;
+ const isActuallyAdmin = isAdmin || chat.groupAdmins?.some(admin => {
+   const aid = (admin.user?._id || admin.user)?.toString();
+   return aid === myId?.toString();
+ });
+ const canMessage = !chat.adminOnlyMessages || isActuallyAdmin;
 
  return (
  <div className="flex-1 flex flex-col p-6 animate-fade-in">
@@ -696,6 +702,42 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  <p className="text-white/10 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
  Groups added to the community will appear here.<br/>Community members can join these groups.
  </p>
+ </div>
+
+ {/* Community Members Section */}
+ <div className="max-w-2xl mx-auto w-full pt-12 pb-20 space-y-6">
+ <div className="flex items-center justify-between px-2">
+ <h3 className="text-[10px] font-black text-[#84CC16] uppercase tracking-[0.3em]">Community Members</h3>
+ <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{chat.users?.length || 0} Members</span>
+ </div>
+ 
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+ {chat.users?.map((u, i) => {
+ const member = u.user;
+ if (!member) return null;
+ const isMemberAdmin = chat.groupAdmins?.some(admin => (admin.user?._id || admin.user)?.toString() === member._id?.toString()) || 
+ String(member._id) === String(chat.groupAdmin?.user?._id || chat.groupAdmin?.user || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy);
+ 
+ return (
+ <div key={`member-${member._id}-${i}`} className="flex items-center gap-3 p-3 bg-white/[0.02] border border-white/5 rounded-2xl">
+ <img 
+ src={member.profilePicture || `https://ui-avatars.com/api/?name=${member.name}&background=random`} 
+ className="w-10 h-10 rounded-full object-cover border border-white/10" 
+ alt="" 
+ />
+ <div className="flex-1 min-w-0">
+ <p className="text-white font-bold text-sm truncate">{member.name}</p>
+ <div className="flex items-center gap-2">
+ <p className="text-white/30 text-[10px] truncate">@{member.username || "user"}</p>
+ {isMemberAdmin && (
+ <span className="text-[8px] bg-[#84CC16]/20 text-[#84CC16] px-1.5 py-0.5 rounded font-black uppercase tracking-wider">Admin</span>
+ )}
+ </div>
+ </div>
+ </div>
+ );
+ })}
+ </div>
  </div>
  </div>
  </div>
@@ -845,40 +887,69 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {/* Input Area */}
  {!chat.isCommunity && (
  (() => {
- const myId = user?._id || user?.id || user?.userId;
- const adminId = chat.groupAdmin?.user?._id || chat.groupAdmin?.user || chat.groupAdmin;
- const isAdmin = myId && adminId && String(myId) === String(adminId);
- const canMessage = !chat.adminOnlyMessages || isAdmin;
+    const myId = (user?._id || user?.id || user?.userId)?.toString();
+    
+    // Check if user is an admin of the current group
+    const isAdmin = chat.groupAdmins?.some(admin => {
+      const adminId = (admin.user?._id || admin.user)?.toString();
+      return adminId === myId;
+    }) || (chat.groupAdmin?._id || chat.groupAdmin?.user?._id || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy)?.toString() === myId;
+    
+    // Check if user is admin of parent community for announcement groups
+    let isParentCommunityAdmin = false;
+    const isAnnouncement = chat.isAnnouncementGroup || chat.chatName === "Announcements";
+    
+    if (isAnnouncement && chat.parentCommunity) {
+      // If parentCommunity is populated (object), use it directly
+      const pChat = typeof chat.parentCommunity === 'object' && chat.parentCommunity !== null
+        ? chat.parentCommunity
+        : (chatData?.chats || chatData || [])?.find(c => c._id === chat.parentCommunity.toString());
+        
+      if (pChat) {
+        isParentCommunityAdmin = pChat.groupAdmins?.some(admin => {
+          const adminId = (admin.user?._id || admin.user)?.toString();
+          return adminId === myId;
+        });
+        
+        // Also check if I'm the creator of the parent community
+        const parentCreatorId = (pChat.createdBy?.user?._id || pChat.createdBy?.user || pChat.createdBy)?.toString();
+        if (parentCreatorId === myId) {
+          isParentCommunityAdmin = true;
+        }
+      }
+    }
 
- return canMessage ? (
- <form onSubmit={handleSendMessage} className="p-3 bg-black/60 border-t border-white/10 z-10 relative">
- <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-2xl px-4 py-1 focus-within:border-[#84CC16]/40 transition-all">
- <input
- type="text"
- value={message}
- onChange={typingHandler}
- placeholder="Type a message..."
- className="flex-1 bg-transparent border-none text-white py-2.5 focus:ring-0 focus:outline-none text-sm placeholder:text-white/20"
- />
- <button
- type="submit"
- disabled={!message.trim()}
- className="p-2 bg-[#84CC16] text-black rounded-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:bg-white/10 disabled:text-white/30"
- >
- <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
- </svg>
- </button>
- </div>
- </form>
- ) : (
- <div className="p-6 bg-black/60 border-t border-white/10 text-center relative z-10">
- <p className="text-xs text-[#84CC16]/60 font-bold uppercase tracking-widest ">
- Only admins can send messages to this group
- </p>
- </div>
- );
- })()
+    const canMessage = !chat.adminOnlyMessages || isAdmin || isParentCommunityAdmin;
+
+    return canMessage ? (
+      <form onSubmit={handleSendMessage} className="p-3 bg-black/60 border-t border-white/10 z-10 relative">
+        <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-2xl px-4 py-1 focus-within:border-[#84CC16]/40 transition-all">
+          <input
+            type="text"
+            value={message}
+            onChange={typingHandler}
+            placeholder="Type a message..."
+            className="flex-1 bg-transparent border-none text-white py-2.5 focus:ring-0 focus:outline-none text-sm placeholder:text-white/20"
+          />
+          <button
+            type="submit"
+            disabled={!message.trim()}
+            className="p-2 bg-[#84CC16] text-black rounded-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:bg-white/10 disabled:text-white/30"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </button>
+        </div>
+      </form>
+    ) : (
+      <div className="p-6 bg-black/60 border-t border-white/10 text-center relative z-10">
+        <p className="text-xs text-[#84CC16]/60 font-bold uppercase tracking-widest ">
+          Only admins can send messages to this group
+        </p>
+      </div>
+    );
+  })()
  )}
 
  {isGroupInfoOpen && (

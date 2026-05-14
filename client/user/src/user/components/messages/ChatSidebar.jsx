@@ -512,6 +512,9 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                   return adminId === myId;
                 });
 
+                const creatorId = (chat.createdBy?.user?._id || chat.createdBy?.user)?.toString();
+                const isCreator = creatorId === myId;
+
                 const handleDelete = async () => {
                   setActiveMenu(null);
                   try {
@@ -608,24 +611,24 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                             e.stopPropagation(); 
                             setActiveMenu(null);
                             openConfirmModal(
-                              "Delete Community",
-                              "Are you sure you want to permanently delete this community? All child groups and messages will be wiped.",
-                              handleDelete
+                              "Exit Community",
+                              "Are you sure you want to exit this community? You will be removed from all its sub-groups as well.",
+                              handleExit
                             );
                           }}
                           className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                          Exit and delete community
+                          Exit community
                         </button>
-                        {isGroupAdmin && (
+                        {isCreator && (
                           <button 
                             onClick={(e) => { 
                               e.stopPropagation(); 
                               setActiveMenu(null);
                               openConfirmModal(
                                 "Delete Community",
-                                "Permanently delete this community and ALL its groups and messages?",
+                                "Permanently delete this community and ALL its groups and messages for everyone?",
                                 handleDelete
                               );
                             }}

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 const VenueOwnerSignUp = () => {
-  const { register, handleSubmit, errors, onSubmit, loading } = usePartnerSignUpForm("owner");
+  const { register, handleSubmit, errors, onSubmit, loading } = usePartnerSignUpForm("venu_owners");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

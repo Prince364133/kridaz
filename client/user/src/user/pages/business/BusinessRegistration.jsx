@@ -26,7 +26,7 @@ const PRI = "#CCFF00";
 export default function BusinessRegistration() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const roleFromUrl = searchParams.get("role") || "owner";
+  const roleFromUrl = searchParams.get("role") || "venu_owners";
   
   const { user, isLoggedIn } = useSelector((state) => state.auth);
   const [step, setStep] = useState(1);
@@ -63,7 +63,7 @@ export default function BusinessRegistration() {
     VENUE: null
   });
 
-  const isOwner = formData.role === 'owner' || formData.role === 'VENUE_OWNER';
+  const isOwner = formData.role === 'venu_owners' || formData.role === 'venue_owners' || formData.role === 'venue';
 
   const handleFileChange = (type, file) => {
     setFiles(prev => ({ ...prev, [type]: file }));
@@ -93,7 +93,7 @@ export default function BusinessRegistration() {
   useEffect(() => {
     if (!isLoggedIn) {
       // If guest, redirect to specific professional signup pages based on the role
-      if (roleFromUrl === 'owner' || roleFromUrl === 'VENUE_OWNER') {
+      if (roleFromUrl === 'venu_owners' || roleFromUrl === 'venue_owners' || roleFromUrl === 'venue') {
         navigate("/signup/venue");
       } else if (roleFromUrl === 'coach') {
         navigate("/signup/coach");
@@ -127,7 +127,7 @@ export default function BusinessRegistration() {
     }
 
     // Check if user already has a professional role
-    const professionalRoles = ["owner", "venue_owner", "verified_venue_owner", "coach", "umpire", "streamer", "admin", "bmsp_admin", "scorer"];
+    const professionalRoles = ["venu_owners", "venue_owners", "venue", "coach", "umpire", "streamer", "admin", "bmsp_admin", "scorer"];
     const isLimitedUmpire = user?.role?.toLowerCase() === "limited_umpire";
     const isLimitedScorer = user?.role?.toLowerCase() === "limited_scorer";
     
@@ -294,7 +294,7 @@ export default function BusinessRegistration() {
               else if (existingRole?.toLowerCase() === "umpire") navigate("/umpire");
               else if (existingRole?.toLowerCase() === "scorer") navigate("/scorer");
               else if (existingRole?.toLowerCase() === "streamer") navigate("/streamer");
-              else if (["owner", "venue_owner", "verified_venue_owner"].includes(existingRole?.toLowerCase())) navigate("/partner");
+              else if (["venu_owners", "venue_owners", "venue"].includes(existingRole?.toLowerCase())) navigate("/partner");
               else if (["admin", "bmsp_admin"].includes(existingRole?.toLowerCase())) navigate("/admin");
               else navigate("/");
             }}
@@ -394,12 +394,12 @@ export default function BusinessRegistration() {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px] pointer-events-none" />
                 
                 <h3 className="text-lg font-semibold uppercase tracking-tight flex items-center gap-3">
-                  {formData.role === 'owner' ? <Building2 className="text-[#CCFF00]" /> : <Award className="text-[#CCFF00]" />}
-                  {formData.role === 'owner' ? 'Business Details' : 'Professional Profile'}
+                  {formData.role === 'venu_owners' ? <Building2 className="text-[#CCFF00]" /> : <Award className="text-[#CCFF00]" />}
+                  {formData.role === 'venu_owners' ? 'Business Details' : 'Professional Profile'}
                 </h3>
 
                 <div className="grid grid-cols-2 gap-6">
-                  {formData.role === 'owner' || formData.role === 'VENUE_OWNER' ? (
+                  {formData.role === 'venu_owners' || formData.role === 'venue' ? (
                     <>
                       <div className="space-y-2 group col-span-2">
                         <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">

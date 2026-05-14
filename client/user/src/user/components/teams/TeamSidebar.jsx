@@ -112,7 +112,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                     )}
                   </div>
                   <div className="absolute -bottom-1 -right-1 bg-black text-[#CCFF00] text-[8px] px-1.5 py-0.5 rounded-full border border-white/10 font-black uppercase">
-                    {team.sport?.slice(0, 3)}
+                    {team.sportType?.slice(0, 3)}
                   </div>
                 </div>
                 <div className="flex-1 text-left overflow-hidden">
@@ -123,7 +123,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                     <span className="text-[8px] font-black text-white/20 uppercase bg-white/5 px-1 rounded">{team.teamCode}</span>
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">{team.sport}</span>
+                    <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">{team.sportType}</span>
                     <span className="w-1 h-1 rounded-full bg-white/20" />
                     <span className="text-[10px] text-white/40 font-bold">{team.members?.length + (team.customMembers?.length || 0)} Members</span>
                   </div>

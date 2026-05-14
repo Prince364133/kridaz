@@ -49,6 +49,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         { to: "/admin/owners", label: "Venue Owners" },
         { to: "/admin/professionals/coaches", label: "Coaches" },
         { to: "/admin/professionals/umpires", label: "Umpires" },
+        { to: "/admin/professionals/scorers", label: "Scorers" },
         { to: "/admin/professionals/streamers", label: "Streamers" },
         { to: "/admin/users", label: "General Users" },
       ],

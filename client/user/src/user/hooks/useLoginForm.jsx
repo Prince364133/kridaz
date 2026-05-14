@@ -56,21 +56,31 @@ const useLoginForm = () => {
       return;
     }
 
-    switch (role) {
-      case "BMSP_ADMIN":
+    const normalizedRole = role?.toLowerCase();
+    switch (normalizedRole) {
+      case "bmsp_admin":
       case "admin":
         window.location.href = "/admin";
         break;
-      case "VERIFIED_VENUE_OWNER":
-      case "VENUE_OWNER":
+      case "venu_owners":
       case "owner":
+      case "venue_owner":
+      case "verified_venue_owner":
         window.location.href = "/partner";
         break;
-      case "COACH":
+      case "coach":
         window.location.href = "/coach";
         break;
-      case "UMPIRE":
+      case "umpire":
+      case "limited_umpire":
         window.location.href = "/umpire";
+        break;
+      case "scorer":
+      case "limited_scorer":
+        window.location.href = "/scorer";
+        break;
+      case "streamer":
+        window.location.href = "/streamer";
         break;
       default:
         navigate("/", { replace: true });

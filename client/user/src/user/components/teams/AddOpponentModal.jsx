@@ -129,7 +129,7 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
                   <div className="flex-1 overflow-hidden">
                     <h3 className="text-white font-black uppercase tracking-tight truncate">{foundTeam.name}</h3>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] text-[#CCFF00] font-black uppercase tracking-widest">{foundTeam.game}</span>
+                      <span className="text-[10px] text-[#CCFF00] font-black uppercase tracking-widest">{foundTeam.sportType}</span>
                       <span className="w-1 h-1 rounded-full bg-white/10" />
                       <span className="text-[10px] text-white/40 font-bold">{foundTeam.city}</span>
                     </div>
@@ -149,7 +149,7 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
                   >
                     <option value="" className="bg-[#1a1a1a]">Select Your Team...</option>
                     {myTeams.map(t => (
-                      <option key={t._id} value={t._id} className="bg-[#1a1a1a]">{t.name} ({t.game})</option>
+                      <option key={t._id} value={t._id} className="bg-[#1a1a1a]">{t.name} ({t.sportType})</option>
                     ))}
                   </select>
                 </div>

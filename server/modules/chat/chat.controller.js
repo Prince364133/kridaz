@@ -8,8 +8,8 @@ import { getIO } from "../../config/socket.js";
 
 // Helper: resolve the correct user IDs and model for the current request
 function resolveCurrentUser(req) {
-  const isOwner = req.user?.role === "owner" || req.owner?.role === "owner";
-  
+  const isOwner = req.user?.role?.includes("venu_owners") || req.user?.role === "owner" || req.owner?.role?.includes("venu_owners") || req.owner?.role === "owner";
+
   // Collect all possible IDs for this user
   const ids = new Set();
   if (req.user?._id) ids.add(req.user._id.toString());
@@ -19,11 +19,11 @@ function resolveCurrentUser(req) {
   if (req.owner?._id) ids.add(req.owner._id.toString());
   if (req.owner?.id) ids.add(req.owner.id.toString());
   if (req.owner?.ownerId) ids.add(req.owner.ownerId.toString());
-  
+
   const currentUserId = isOwner
     ? (req.user?.ownerId || req.owner?.ownerId || req.user?.id || req.owner?.id)
     : (req.user?._id || req.user?.id || req.user?.userId);
-    
+
   const currentUserModel = isOwner ? "Owner" : "User";
   return { currentUserId, currentUserModel, allUserIds: Array.from(ids) };
 }
@@ -94,7 +94,8 @@ export const fetchChats = async (req, res) => {
   const { currentUserId } = resolveCurrentUser(req);
 
   try {
-    const chats = await Chat.find({
+    // 1. Get all chats where user is a member or pending
+    const initialChats = await Chat.find({
       $or: [
         { users: { $elemMatch: { user: currentUserId } } },
         { pendingMembers: { $elemMatch: { user: currentUserId } } }
@@ -103,95 +104,194 @@ export const fetchChats = async (req, res) => {
       .populate("users.user", "-password")
       .populate("groupAdmins.user", "-password")
       .populate("pendingMembers.user", "-password")
-      .populate("latestMessage")
-      .sort({ updatedAt: -1 });
+      .populate("createdBy.user", "-password")
+      .populate({
+        path: "parentCommunity",
+        populate: [
+          { path: "createdBy.user", select: "-password" },
+          { path: "groupAdmins.user", select: "-password" }
+        ]
+      })
+      .populate("latestMessage");
 
-    const results = await User.populate(chats, {
+    // 2. Identify all parent community IDs from the user's groups
+    const communityIds = new Set();
+    initialChats.forEach(chat => {
+      if (chat.isCommunity) communityIds.add(chat._id.toString());
+      if (chat.parentCommunity) {
+        const pId = chat.parentCommunity._id || chat.parentCommunity;
+        communityIds.add(pId.toString());
+      }
+    });
+
+    // 3. Fetch all community-related chats:
+    //    - The communities themselves
+    //    - All other groups belonging to those communities
+    const allRelatedChats = await Chat.find({
+      $or: [
+        { _id: { $in: Array.from(communityIds) } }, // The communities
+        { parentCommunity: { $in: Array.from(communityIds) } } // All sub-groups
+      ]
+    })
+      .populate("users.user", "-password")
+      .populate("groupAdmins.user", "-password")
+      .populate("pendingMembers.user", "-password")
+      .populate("createdBy.user", "-password")
+      .populate({
+        path: "parentCommunity",
+        populate: [
+          { path: "createdBy.user", select: "-password" },
+          { path: "groupAdmins.user", select: "-password" }
+        ]
+      })
+      .populate("latestMessage");
+
+    // Merge results, avoiding duplicates
+    const chatMap = new Map();
+    initialChats.forEach(c => chatMap.set(c._id.toString(), c));
+    allRelatedChats.forEach(c => chatMap.set(c._id.toString(), c));
+
+    const results = await User.populate(Array.from(chatMap.values()), {
       path: "latestMessage.sender.user",
       select: "name pic email",
     });
 
+    // Sort merged results by latest message or update time
+    results.sort((a, b) => {
+      const timeA = a.latestMessage ? new Date(a.latestMessage.createdAt) : new Date(a.updatedAt);
+      const timeB = b.latestMessage ? new Date(b.latestMessage.createdAt) : new Date(b.updatedAt);
+      return timeB - timeA;
+    });
+
     // Separate active chats and invitations
-    const invitations = results.filter(chat => 
-      chat.pendingMembers.some(m => m.user?._id?.toString() === currentUserId.toString()) &&
-      !chat.users.some(m => m.user?._id?.toString() === currentUserId.toString())
+    const invitations = results.filter(chat =>
+      chat.pendingMembers.some(m => (m.user?._id || m.user)?.toString() === currentUserId.toString()) &&
+      !chat.users.some(m => (m.user?._id || m.user)?.toString() === currentUserId.toString())
     );
-    
-    const activeChats = results.filter(chat => 
-      chat.users.some(m => m.user?._id?.toString() === currentUserId.toString())
+
+    // Active chats for sidebar:
+    // - One-on-one chats where user is a member
+    // - Communities where user is a member of at least one group
+    // - Sub-groups where user is a member
+    // - Sub-groups of communities I'm in (so I can see to join)
+    const activeChats = results.filter(chat =>
+      chat.users.some(m => (m.user?._id || m.user)?.toString() === currentUserId.toString()) ||
+      chat.parentCommunity // Show sub-groups so they can be joined
     );
 
     res.status(200).send({ chats: activeChats, invitations });
   } catch (error) {
+    console.error("Error fetching chats:", error);
     res.status(400).json({ message: error.message });
   }
 };
 
 /**
- * Create a group chat
+ * Create a new Group Chat or Community
  */
 export const createGroupChat = async (req, res) => {
-  if (!req.body.users || !req.body.name) {
+  const { name, users, isCommunity, description, groupImage } = req.body;
+  const { currentUserId, currentUserModel } = resolveCurrentUser(req);
+
+  if (!name || !users) {
     return res.status(400).send({ message: "Please fill all the fields" });
   }
 
-  const { currentUserId, currentUserModel } = resolveCurrentUser(req);
-
-  let userIds = [];
+  let usersList;
   try {
-    userIds = JSON.parse(req.body.users); // Array of IDs from frontend
-  } catch(e) {
-    return res.status(400).send({ message: "Invalid users format" });
+    usersList = typeof users === "string" ? JSON.parse(users) : users;
+  } catch (e) {
+    usersList = users;
   }
 
-  const { isCommunity, description, parentCommunity } = req.body;
-
-  if (!isCommunity && !parentCommunity && (!Array.isArray(userIds) || userIds.length < 2)) {
-    return res
-      .status(400)
-      .send({ message: "More than 2 users are required to form a group chat" });
-  }
+  const chatData = {
+    chatName: name,
+    isGroupChat: true,
+    isCommunity: !!isCommunity,
+    description: description || "",
+    groupImage: groupImage || "",
+    users: [{ user: currentUserId, onModel: currentUserModel }],
+    groupAdmins: [{ user: currentUserId, onModel: currentUserModel }],
+    createdBy: { user: currentUserId, onModel: currentUserModel },
+    pendingMembers: usersList.map(u => {
+      const uid = u.user?._id || u.user || u;
+      const model = u.onModel || "User";
+      return { user: uid, onModel: model };
+    })
+  };
 
   try {
-    // Resolve onModel for each invited user
-    const usersWithModel = await Promise.all(userIds.map(async (id) => {
-      const isUser = await User.exists({ _id: id });
-      return { user: id, onModel: isUser ? "User" : "Owner" };
-    }));
+    const groupChat = await Chat.create(chatData);
 
-    // Add current user as admin and verified member
-    const groupChat = await Chat.create({
-      chatName: req.body.name,
-      users: [{ user: currentUserId, onModel: currentUserModel }],
-      isGroupChat: true,
-      isCommunity: !!isCommunity,
-      description: description || "",
-      parentCommunity: parentCommunity || null,
-      groupAdmins: [{ user: currentUserId, onModel: currentUserModel }],
-      pendingMembers: usersWithModel
-    });
-
-    // If it's a community, create an Announcements group automatically
     if (isCommunity) {
+      // Create a default announcement group for the community
       await Chat.create({
         chatName: "Announcements",
-        users: [{ user: currentUserId, onModel: currentUserModel }],
         isGroupChat: true,
-        isCommunity: false,
         parentCommunity: groupChat._id,
         isAnnouncementGroup: true,
         adminOnlyMessages: true,
+        users: [{ user: currentUserId, onModel: currentUserModel }],
         groupAdmins: [{ user: currentUserId, onModel: currentUserModel }],
-        description: `Announcements for ${req.body.name}`
+        createdBy: { user: currentUserId, onModel: currentUserModel }
       });
     }
 
     const fullGroupChat = await Chat.findOne({ _id: groupChat._id })
       .populate("users.user", "-password")
       .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password");
+      .populate("pendingMembers.user", "-password")
+      .populate("createdBy.user", "-password");
 
     res.status(200).json(fullGroupChat);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+
+/**
+ * Join a group directly (e.g. from community dashboard)
+ */
+export const joinChat = async (req, res) => {
+  const { chatId } = req.body;
+  const { currentUserId, currentUserModel } = resolveCurrentUser(req);
+
+  try {
+    const chat = await Chat.findById(chatId);
+    if (!chat) return res.status(404).json({ message: "Chat not found" });
+
+    // If it's an announcement group, only admins can usually "join" if they weren't in it, 
+    // but typically users are added automatically. 
+    // For now, allow direct join if part of community
+    if (chat.parentCommunity) {
+      // Check if user is in the community (any group or community itself)
+      const inCommunity = await Chat.findOne({
+        $or: [
+          { _id: chat.parentCommunity, users: { $elemMatch: { user: currentUserId } } },
+          { parentCommunity: chat.parentCommunity, users: { $elemMatch: { user: currentUserId } } }
+        ]
+      });
+
+      if (!inCommunity) {
+        return res.status(403).json({ message: "Must be a member of the community to join this group" });
+      }
+    }
+
+    const updatedChat = await Chat.findByIdAndUpdate(
+      chatId,
+      {
+        $pull: { pendingMembers: { user: currentUserId } },
+        $addToSet: { users: { user: currentUserId, onModel: currentUserModel } },
+      },
+      { new: true }
+    )
+      .populate("users.user", "-password")
+      .populate("groupAdmins.user", "-password")
+      .populate("pendingMembers.user", "-password")
+      .populate("createdBy.user", "-password");
+
+    res.status(200).json(updatedChat);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -239,7 +339,7 @@ export const respondToInvite = async (req, res) => {
  */
 export const updateGroup = async (req, res) => {
   const { chatId, chatName, description } = req.body;
-    const { currentUserId, allUserIds } = resolveCurrentUser(req);
+  const { currentUserId, allUserIds } = resolveCurrentUser(req);
 
   try {
     const chat = await Chat.findById(chatId);
@@ -273,7 +373,8 @@ export const updateGroup = async (req, res) => {
     )
       .populate("users.user", "-password")
       .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password");
+      .populate("pendingMembers.user", "-password")
+      .populate("createdBy.user", "-password");
 
     // Real-time update for all participants
     const io = getIO();
@@ -310,7 +411,8 @@ export const addToGroup = async (req, res) => {
     )
       .populate("users.user", "-password")
       .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password");
+      .populate("pendingMembers.user", "-password")
+      .populate("createdBy.user", "-password");
 
     if (!added) {
       res.status(404);
@@ -333,16 +435,17 @@ export const removeFromGroup = async (req, res) => {
     const removed = await Chat.findByIdAndUpdate(
       chatId,
       {
-        $pull: { 
-          users: { user: new mongoose.Types.ObjectId(userId) }, 
-          pendingMembers: { user: new mongoose.Types.ObjectId(userId) } 
+        $pull: {
+          users: { user: new mongoose.Types.ObjectId(userId) },
+          pendingMembers: { user: new mongoose.Types.ObjectId(userId) }
         },
       },
       { new: true }
     )
       .populate("users.user", "-password")
       .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password");
+      .populate("pendingMembers.user", "-password")
+      .populate("createdBy.user", "-password");
 
     if (!removed) {
       res.status(404);
@@ -353,11 +456,11 @@ export const removeFromGroup = async (req, res) => {
     if (removed.isCommunity) {
       await Chat.updateMany(
         { parentCommunity: chatId },
-        { 
-          $pull: { 
-            users: { user: new mongoose.Types.ObjectId(userId) }, 
-            pendingMembers: { user: new mongoose.Types.ObjectId(userId) } 
-          } 
+        {
+          $pull: {
+            users: { user: new mongoose.Types.ObjectId(userId) },
+            pendingMembers: { user: new mongoose.Types.ObjectId(userId) }
+          }
         }
       );
     }
@@ -390,9 +493,20 @@ export const deleteChat = async (req, res) => {
     const chat = await Chat.findById(chatId);
     if (!chat) return res.status(404).json({ message: "Chat not found" });
 
-    // Remove the admin restriction to allow anyone to delete the group/community
-    // For 1-on-1 chats, still verify the user is a participant
-    if (!chat.isGroupChat) {
+    const isGroupAdmin = checkIsAdmin(chat, allUserIds);
+    const creatorId = (chat.createdBy?.user?._id || chat.createdBy?.user)?.toString();
+    const isCreator = creatorId === currentUserId.toString();
+
+    // Restrict deletion
+    if (chat.isGroupChat) {
+      if (chat.isCommunity && !isCreator) {
+        return res.status(403).json({ message: "Only the creator can delete this community" });
+      }
+      if (!isGroupAdmin) {
+        return res.status(403).json({ message: "Only admins can delete this group" });
+      }
+    } else {
+      // 1-on-1 chat
       const isParticipant = chat.users.some(u => {
         const uid = (u.user?._id || u.user)?.toString();
         return allUserIds.includes(uid);
@@ -416,8 +530,8 @@ export const deleteChat = async (req, res) => {
       if (io) {
         childGroups.forEach(g => {
           g.users.forEach(u => {
-             const uid = (u.user?._id || u.user)?.toString();
-             io.to(uid).emit("chat deleted", g._id);
+            const uid = (u.user?._id || u.user)?.toString();
+            io.to(uid).emit("chat deleted", g._id);
           });
         });
       }
@@ -500,7 +614,8 @@ export const makeGroupAdmin = async (req, res) => {
     )
       .populate("users.user", "-password")
       .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password");
+      .populate("pendingMembers.user", "-password")
+      .populate("createdBy.user", "-password");
 
     res.status(200).json(updatedChat);
   } catch (error) {
@@ -538,7 +653,8 @@ export const dismissGroupAdmin = async (req, res) => {
     )
       .populate("users.user", "-password")
       .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password");
+      .populate("pendingMembers.user", "-password")
+      .populate("createdBy.user", "-password");
 
     res.status(200).json(updatedChat);
   } catch (error) {
@@ -569,7 +685,8 @@ export const togglePinChat = async (req, res) => {
     )
       .populate("users.user", "-password")
       .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password");
+      .populate("pendingMembers.user", "-password")
+      .populate("createdBy.user", "-password");
 
     res.status(200).json(updatedChat);
   } catch (error) {

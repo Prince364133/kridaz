@@ -9,6 +9,9 @@ import { Readable } from 'stream';
  */
 export async function getYoutubeClientForUser(userId, accountId = null) {
   const user = await User.findById(userId).select('socialAccounts');
+  if (!user || !user.socialAccounts) {
+    throw new Error('User not found or social accounts missing.');
+  }
   
   let account;
   if (accountId) {

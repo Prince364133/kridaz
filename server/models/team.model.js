@@ -36,7 +36,8 @@ const teamSchema = new mongoose.Schema(
         inviteToken: { type: String },
         status: { type: String, enum: ["PENDING", "JOINED", "EXPIRED"], default: "PENDING" },
       }
-    ]
+    ],
+    qrCode: { type: String }
   },
   { timestamps: true }
 );

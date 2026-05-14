@@ -36,6 +36,8 @@ import MatchDetails from "@user/pages/MatchDetails";
 import Leaderboard from "@user/pages/Leaderboard";
 import LiveOverlay from "@user/pages/LiveOverlay";
 import LiveScoreboard from "@user/pages/LiveScoreboard";
+import TeamPass from "@user/pages/TeamPass";
+import TeamProfile from "@user/pages/TeamProfile";
 
 
 // Business Landing Pages (User Portal)
@@ -144,6 +146,7 @@ const router = createBrowserRouter([
         children: [
           { path: "coaches", element: <ProfessionalManagement role="coach" /> },
           { path: "umpires", element: <ProfessionalManagement role="umpire" /> },
+          { path: "scorers", element: <ProfessionalManagement role="scorer" /> },
           { path: "streamers", element: <ProfessionalManagement role="streamer" /> },
           { path: ":id", element: <ProfessionalDetailsPage /> }
         ],
@@ -176,7 +179,7 @@ const router = createBrowserRouter([
   {
     path: "/partner",
     element: (
-      <ProtectedRoute requiredRole="owner">
+      <ProtectedRoute requiredRole="venu_owners">
         <PartnerLayout />
       </ProtectedRoute>
     ),
@@ -245,7 +248,7 @@ const router = createBrowserRouter([
       { path: "*", element: <NotFound /> },
     ],
   },
-  
+
   // ── STREAMER PORTAL ──
   {
     path: "/streamer",
@@ -315,6 +318,7 @@ const router = createBrowserRouter([
     errorElement: <ErrorBoundary />,
     children: [
       { index: true, element: <RootRedirect /> },
+      { path: "team/:id", element: <TeamProfile /> },
       { path: "login", element: <PublicRoute><UserLogin /></PublicRoute> },
       { path: "signup", element: <PublicRoute><UserSignUp /></PublicRoute> },
       { path: "auth/login", element: <PublicRoute><UserLogin /></PublicRoute> },
@@ -343,7 +347,7 @@ const router = createBrowserRouter([
       { path: "messages", element: <ProtectedRoute><Messages /></ProtectedRoute> },
       { path: "my-teams", element: <ProtectedRoute><MyTeams /></ProtectedRoute> },
 
-      
+
       // Business Landings
       { path: "business/venue", element: <UserVenueOwnerLanding /> },
       { path: "business/coach", element: <UserCoachLanding /> },
@@ -351,7 +355,7 @@ const router = createBrowserRouter([
       { path: "business/streamer", element: <UserStreamerLanding /> },
       { path: "business/scorer", element: <UserScorerLanding /> },
       { path: "business/register", element: <BusinessRegistration /> },
-      
+
       // Business Auth
       { path: "signup/venue", element: <PublicRoute><VenueOwnerSignUp /></PublicRoute> },
       { path: "signup/coach", element: <PublicRoute><CoachSignUp /></PublicRoute> },
@@ -362,6 +366,8 @@ const router = createBrowserRouter([
       { path: "booking-history", element: <ProtectedRoute><UserTurfBookingHistory /></ProtectedRoute> },
       { path: "checkout/:turfId", element: <ProtectedRoute><CheckoutPage /></ProtectedRoute> },
       { path: "booking-pass/:id", element: <BookingPass /> },
+      { path: "team-pass/:id", element: <TeamPass /> },
+      { path: "team/:id", element: <TeamProfile /> },
       { path: "booking-invoice/:id", element: <BookingInvoice /> },
       { path: "analytics/:matchId", element: <MatchAnalytics /> },
       { path: "leaderboard", element: <Leaderboard /> },
@@ -380,7 +386,7 @@ const router = createBrowserRouter([
   { path: "/coach-landing", element: <Navigate to="/business/coach" replace /> },
   { path: "/umpire-landing", element: <Navigate to="/business/official" replace /> },
   { path: "/partners", element: <PartnersGateway /> },
-  
+
   // Catch-all (Global)
   { path: "*", element: <NotFound /> },
 ]);

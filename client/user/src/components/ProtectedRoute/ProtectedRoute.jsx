@@ -11,14 +11,17 @@ export default function ProtectedRoute({ children, requiredRole }) {
 
   if (requiredRole) {
     const isAdminRole = (r) => r?.toLowerCase().includes("admin");
-    const isOwnerRole = (r) => r?.toLowerCase().includes("owner") || r?.toLowerCase().includes("venue");
+    const isOwnerRole = (r) => r?.toLowerCase().includes("venu_owners") || r?.toLowerCase().includes("venue");
     
     const checkRole = (req) => {
-      if (req.toLowerCase() === "admin") return isAdminRole(role);
-      if (req.toLowerCase() === "owner") return isOwnerRole(role);
-      if (req.toLowerCase() === "umpire") return role?.toLowerCase() === "umpire" || role?.toLowerCase() === "limited_umpire";
-      if (req.toLowerCase() === "scorer") return role?.toLowerCase() === "scorer" || role?.toLowerCase() === "limited_scorer";
-      return role?.toLowerCase() === req?.toLowerCase();
+      const targetRole = req.toLowerCase();
+      const currentRole = role?.toLowerCase();
+
+      if (targetRole === "admin") return isAdminRole(role);
+      if (targetRole === "venu_owners" || targetRole === "owner") return isOwnerRole(role);
+      
+      // Generic check for limited versions (e.g. 'limited_umpire' matches 'umpire')
+      return currentRole === targetRole || currentRole === `limited_${targetRole}`;
     };
 
     let isMatchingRole = false;

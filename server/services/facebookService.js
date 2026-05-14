@@ -3,6 +3,7 @@ import User from '../models/user.model.js';
 
 export async function getFacebookPageStats(userId, accountId = null) {
   const user = await User.findById(userId).select('socialAccounts');
+  if (!user || !user.socialAccounts) return null;
   
   let account;
   if (accountId) {
@@ -58,6 +59,7 @@ export async function getFacebookPageStats(userId, accountId = null) {
 
 export async function createFacebookLiveStream(userId, { title, description, accountId = null }) {
   const user = await User.findById(userId).select('socialAccounts');
+  if (!user || !user.socialAccounts) throw new Error("User not found or social accounts missing");
   
   let account;
   if (accountId) {
@@ -104,6 +106,7 @@ export async function createFacebookLiveStream(userId, { title, description, acc
 
 export async function endFacebookLiveStream(userId, liveVideoId, accountId = null) {
   const user = await User.findById(userId).select('socialAccounts');
+  if (!user || !user.socialAccounts) throw new Error("User not found or social accounts missing");
   
   let account;
   if (accountId) {

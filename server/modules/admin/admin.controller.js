@@ -146,7 +146,7 @@ export const getAdminDashboardData = async (req, res) => {
   try {
     const counts = await Promise.all([
       User.countDocuments().catch(e => 0),
-      Owner.countDocuments({ role: { $in: ["owner", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"] } }).catch(e => 0),
+      Owner.countDocuments({ role: { $in: ["venu_owners", "owner", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"] } }).catch(e => 0),
       Turf.countDocuments().catch(e => 0),
       Turf.countDocuments({ status: "pending" }).catch(e => 0),
       Booking.countDocuments().catch(e => 0),
@@ -154,6 +154,7 @@ export const getAdminDashboardData = async (req, res) => {
       Owner.countDocuments({ role: "coach" }).catch(e => 0),
       Owner.countDocuments({ role: "umpire" }).catch(e => 0),
       Owner.countDocuments({ role: "streamer" }).catch(e => 0),
+      Owner.countDocuments({ role: "scorer" }).catch(e => 0),
       WithdrawalRequest.aggregate([{ $match: { status: "COMPLETED" } }, { $group: { _id: null, total: { $sum: "$amount" } } }]).catch(e => []),
       SupportTicket.countDocuments({ status: "OPEN" }).catch(e => 0),
       Dispute.countDocuments({ status: "PENDING" }).catch(e => 0),
@@ -173,6 +174,7 @@ export const getAdminDashboardData = async (req, res) => {
       totalCoaches,
       totalUmpires,
       totalStreamers,
+      totalScorers,
       payoutData,
       openTickets,
       pendingDisputes,
@@ -225,6 +227,7 @@ export const getAdminDashboardData = async (req, res) => {
       totalCoaches,
       totalUmpires,
       totalStreamers,
+      totalScorers,
       totalPayouts: payoutData[0]?.total || 0,
       openTickets,
       pendingDisputes,
@@ -279,7 +282,7 @@ export const getAllOwners = async (req, res) => {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
-    const owners = await Owner.find({ role: { $in: ["owner", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"] } }, { password: 0 });
+    const owners = await Owner.find({ role: { $in: ["venu_owners", "owner", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"] } }, { password: 0 });
     res.status(200).json({
       message: "Fetched all owners",
       owners,
@@ -332,10 +335,10 @@ export const getAllRequestedOwners = async (req, res) => {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
-    const ownerRequests = await OwnerRequest.find({ status: "pending", role: "owner" }).populate("userId", "profilePicture name");
+    const ownerRequests = await OwnerRequest.find({ status: "pending", role: { $in: ["venu_owners", "owner"] } }).populate("userId", "profilePicture name");
     const ownerRejectedRequests = await OwnerRequest.find({
       status: "rejected",
-      role: "owner"
+      role: { $in: ["venu_owners", "owner"] }
     }).populate("userId", "profilePicture name");
     res.status(200).json({
       success: true,
@@ -355,7 +358,7 @@ export const getAllProfessionals = async (req, res) => {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
-    const professionals = await Owner.find({ role: { $in: ["coach", "umpire", "streamer"] } }, { password: 0 });
+    const professionals = await Owner.find({ role: { $in: ["coach", "umpire", "streamer", "scorer"] } }, { password: 0 });
     res.status(200).json({
       message: "Fetched all professionals",
       professionals,
@@ -418,11 +421,11 @@ export const getAllRequestedProfessionals = async (req, res) => {
   try {
     const professionalRequests = await OwnerRequest.find({ 
       status: "pending", 
-      role: { $in: ["coach", "umpire", "streamer"] } 
+      role: { $in: ["coach", "umpire", "streamer", "scorer"] } 
     }).populate("userId", "profilePicture name");
     const professionalRejectedRequests = await OwnerRequest.find({
       status: "rejected",
-      role: { $in: ["coach", "umpire", "streamer"] }
+      role: { $in: ["coach", "umpire", "streamer", "scorer"] }
     }).populate("userId", "profilePicture name");
     res.status(200).json({
       success: true,

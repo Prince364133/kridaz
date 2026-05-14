@@ -50,6 +50,7 @@ const VerificationCenter = () => {
     { id: "owner", label: "VENUE OWNERS" },
     { id: "coach", label: "COACHES" },
     { id: "umpire", label: "UMPIRES" },
+    { id: "scorer", label: "SCORERS" },
     { id: "streamer", label: "STREAMERS" }
   ];
 

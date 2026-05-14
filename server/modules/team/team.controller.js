@@ -2,6 +2,8 @@ import crypto from "crypto";
 import Team from "../../models/team.model.js";
 import User from "../../models/user.model.js";
 import Notification from "../../models/notification.model.js";
+import { uploadToCloudinary } from "../../utils/cloudinary.js";
+import generateQRCode from "../../utils/generateQRCode.js";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -37,25 +39,54 @@ const createUniqueTeamCode = async () => {
 // @desc    Create a new team with a unique team code
 export const createTeam = async (req, res) => {
   try {
-    const { name, description, sport, captainName, captainPhone, image, city } = req.body;
+    const { name, description, sport, sportType, captainName, captainPhone, city } = req.body;
+    
+    console.log("Creating team for user:", req.user?.id, "Body:", req.body);
+
+    if (!req.user?.id) {
+      console.error("Team creation failed: No user ID in request");
+      return res.status(401).json({ success: false, message: "Authentication required" });
+    }
+
+    if (!name) {
+      return res.status(400).json({ success: false, message: "Team name is required" });
+    }
 
     const teamCode = await createUniqueTeamCode();
+
+    let imageUrl = req.body.image || req.body.logo || "";
+    if (req.file) {
+      console.log("Uploading team image to Cloudinary...");
+      imageUrl = await uploadToCloudinary(req.file.buffer, "teams");
+    }
 
     const newTeam = new Team({
       name,
       description,
-      sportType: sport || "CRICKET",
-      captainName,
-      captainPhone,
-      image,
-      logo: image,
-      city,
+      sportType: sport || sportType || "CRICKET",
+      captainName: captainName || req.user.name || "N/A",
+      captainPhone: captainPhone || req.user.phone || "N/A",
+      logo: imageUrl,
+      image: imageUrl,
+      city: city || "N/A",
       teamCode,
-      owner: req.user._id,
-      members: [{ user: req.user._id, role: "CAPTAIN", status: "JOINED" }],
+      owner: req.user.id,
+      members: [{ user: req.user.id, role: "CAPTAIN", status: "JOINED" }],
     });
 
+    // Generate QR Code for join link
+    const frontendUrl = process.env.CLIENT_URLS?.split(",")[1] || "http://localhost:5174";
+    const qrUrl = `${frontendUrl}/team-pass/${newTeam._id}`;
+    try {
+      console.log("Generating QR code for team join link:", qrUrl);
+      const qrCodeUrl = await generateQRCode(qrUrl);
+      newTeam.qrCode = qrCodeUrl;
+    } catch (qrError) {
+      console.error("Failed to generate team QR code:", qrError);
+    }
+
     await newTeam.save();
+    console.log("Team created successfully:", newTeam._id);
 
     return res.status(201).json({
       success: true,
@@ -66,7 +97,7 @@ export const createTeam = async (req, res) => {
     console.error("Create team error:", error);
     return res
       .status(500)
-      .json({ success: false, message: "Failed to create team" });
+      .json({ success: false, message: error.message || "Failed to create team" });
   }
 };
 
@@ -74,7 +105,7 @@ export const createTeam = async (req, res) => {
 // @desc    Get my teams (owned + joined, excluding opponent-linked-only teams)
 export const getMyTeams = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const teams = await Team.find({
       $or: [{ owner: userId }, { "members.user": userId }],
@@ -113,7 +144,7 @@ export const getAllTeams = async (req, res) => {
     let query = { visibility: "PUBLIC" };
 
     if (city) query.city = new RegExp(city, "i");
-    if (sportType) query.sportType = sportType;
+    if (sportType) query.sportType = new RegExp(`^${sportType}$`, "i");
     if (search) {
       query.$or = [
         { name: new RegExp(search, "i") },
@@ -180,7 +211,13 @@ export const findTeamByCode = async (req, res) => {
 // @desc    Get team by DB ID
 export const getTeamById = async (req, res) => {
   try {
-    const team = await Team.findById(req.params.id)
+    const { id } = req.params;
+
+    // Validate ObjectId
+    if (id.length !== 24) {
+      return res.status(400).json({ success: false, message: "Invalid team ID format" });
+    }
+    const team = await Team.findById(id)
       .populate("members.user", "name username profilePicture phone email")
       .populate("opponents", "name teamCode sportType image members")
       .populate("opponentRequests.from", "name teamCode sportType image")
@@ -190,6 +227,20 @@ export const getTeamById = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "Team not found" });
+    }
+
+    // Generate QR code if missing
+    if (!team.qrCode) {
+      const frontendUrl = process.env.CLIENT_URLS?.split(",")[1] || "http://localhost:5174";
+      const qrUrl = `${frontendUrl}/team-pass/${team._id}`;
+      try {
+        console.log("Generating missing QR code for team:", team._id);
+        const qrCodeUrl = await generateQRCode(qrUrl);
+        team.qrCode = qrCodeUrl;
+        await team.save();
+      } catch (qrError) {
+        console.error("Failed to generate team QR code:", qrError);
+      }
     }
 
     return res.status(200).json({ success: true, team });
@@ -214,7 +265,7 @@ export const requestOpponent = async (req, res) => {
     }
 
     // Only owner can send opponent request
-    if (myTeam.owner.toString() !== req.user._id.toString()) {
+    if (myTeam.owner.toString() !== req.user.id.toString()) {
       return res.status(403).json({ success: false, message: "Only the team owner can send opponent requests" });
     }
 
@@ -282,7 +333,7 @@ export const handleOpponentRequest = async (req, res) => {
       return res.status(404).json({ success: false, message: "Team not found" });
     }
 
-    if (myTeam.owner.toString() !== req.user._id.toString()) {
+    if (myTeam.owner.toString() !== req.user.id.toString()) {
       return res.status(403).json({ success: false, message: "Only the team owner can handle requests" });
     }
 
@@ -356,7 +407,7 @@ export const inviteMembers = async (req, res) => {
       return res.status(404).json({ success: false, message: "Team not found" });
     }
 
-    if (team.owner.toString() !== req.user._id.toString()) {
+    if (team.owner.toString() !== req.user.id.toString()) {
       return res.status(403).json({ success: false, message: "Not authorized to invite" });
     }
 
@@ -445,10 +496,10 @@ export const joinTeam = async (req, res) => {
 
     if (req.user) {
       const exists = team.members.find(
-        (m) => m.user?.toString() === req.user._id.toString()
+        (m) => m.user?.toString() === req.user.id.toString()
       );
       if (!exists) {
-        team.members.push({ user: req.user._id, role: "PLAYER", status: "JOINED" });
+        team.members.push({ user: req.user.id, role: "PLAYER", status: "JOINED" });
       }
     }
 
@@ -464,14 +515,49 @@ export const joinTeam = async (req, res) => {
     return res.status(500).json({ success: false, message: "Failed to join team" });
   }
 };
+export const requestToJoin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const team = await Team.findById(id);
+    if (!team) return res.status(404).json({ success: false, message: "Team not found" });
+
+    // Check if already a member or pending
+    const existingMember = team.members.find(m => m.user?.toString() === userId.toString());
+    if (existingMember) {
+       return res.status(400).json({ success: false, message: "You are already a member or have a pending request" });
+    }
+
+    team.members.push({ user: userId, role: "PLAYER", status: "PENDING" });
+    await team.save();
+
+    // Create notification for owner
+    try {
+      await Notification.create({
+        recipient: team.owner,
+        type: "TEAM_JOIN_REQUEST",
+        title: "Join Request",
+        message: `${req.user.name || req.user.username || "A user"} wants to join your team "${team.name}"`,
+        data: { teamId: team._id, userId: userId },
+      });
+    } catch (notifError) {
+      console.warn("Failed to create join request notification:", notifError.message);
+    }
+
+    res.status(200).json({ success: true, message: "Join request sent successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 export const getOpponentTeams = async (req, res) => {
   try {
     // 1. Get all teams user is part of
     const myTeams = await Team.find({
       $or: [
-        { owner: req.user._id },
-        { "members.user": req.user._id, "members.status": "JOINED" },
+        { owner: req.user.id },
+        { "members.user": req.user.id, "members.status": "JOINED" },
       ],
     }).select("opponents");
 

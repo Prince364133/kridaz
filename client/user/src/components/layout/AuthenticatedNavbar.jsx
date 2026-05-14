@@ -42,7 +42,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const getBasePath = () => {
     const r = role?.toLowerCase();
     if (r === "admin" || r === "bmsp_admin") return "/admin";
-    if (r === "owner" || r === "bmsp_owner" || r === "verified_venue_owner" || r === "venue_owner") return "/partner";
+    if (r === "venu_owners" || r?.includes("venu_owners") || r === "owner" || r === "bmsp_owner" || r === "verified_venue_owner" || r === "venue_owner") return "/partner";
     if (r === "coach" || r === "bmsp_coach") return "/coach";
     if (r?.includes("umpire")) return "/umpire";
     return "";
@@ -147,7 +147,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
         <div className="flex items-center gap-3 sm:gap-5 lg:min-w-[200px] justify-end">
           
           {/* Manual Booking Button (For Owners) */}
-          {["owner", "venue_owner", "verified_venue_owner", "bmsp_owner"].includes(role?.toLowerCase()) && (
+          {["venu_owners", "owner", "venue_owner", "verified_venue_owner", "bmsp_owner"].some(r => role?.toLowerCase()?.includes(r)) && (
             <>
               <button 
                 onClick={() => setIsManualBookingOpen(true)}

@@ -46,7 +46,7 @@ const VenueOwnerSignUp = () => {
     user,
     role,
     navigate
-  } = useSignUpForm("owner");
+  } = useSignUpForm("venu_owners");
 
   const [mounted, setMounted] = useState(false);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
@@ -55,7 +55,7 @@ const VenueOwnerSignUp = () => {
   useEffect(() => {
     setMounted(true);
     // Redirect if already an owner
-    if (user?.role === "owner" || role === "owner") {
+    if (user?.role?.includes("venu_owners") || user?.role === "owner" || role?.includes("venu_owners") || role === "owner") {
       navigate("/partner");
     }
   }, [user, role, navigate]);
