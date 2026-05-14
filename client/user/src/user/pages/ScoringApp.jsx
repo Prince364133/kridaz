@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Settings, History, Users, Zap, CheckCircle2, AlertCircle, User, Undo2, Trophy } from 'lucide-react';
+import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import useCricketScoring from '@hooks/shared/useCricketScoring';
@@ -102,10 +102,11 @@ function HistoryTab({ matchData }) {
 const ScoringApp = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+  const { role } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState('scoring');
   const [showSettings, setShowSettings] = useState(false);
   const [liveEnabled, setLiveEnabled] = useState(false);
+  const [liveUrls, setLiveUrls] = useState(null);
   const [liveLoading, setLiveLoading] = useState(false);
 
   const {
@@ -599,6 +600,25 @@ const ScoringApp = () => {
                         Authorize Stream
                       </button>
                     </div>
+
+                    {liveUrls && (
+                      <div className="space-y-4 pt-4 border-t border-white/5">
+                        <div className="space-y-1.5">
+                          <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">OBS Overlay (Copy this)</p>
+                          <div className="flex gap-2">
+                            <input readOnly value={liveUrls.obsOverlay} className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[9px] text-neutral-400 font-bold truncate outline-none" />
+                            <button onClick={() => { navigator.clipboard.writeText(liveUrls.obsOverlay); toast.success('Copied!'); }} className="px-4 py-2 bg-[#00C187]/10 text-[#00C187] text-[8px] font-black uppercase rounded-xl border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Public Scoreboard</p>
+                          <div className="flex gap-2">
+                            <input readOnly value={liveUrls.publicScoreboard} className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[9px] text-neutral-400 font-bold truncate outline-none" />
+                            <button onClick={() => { navigator.clipboard.writeText(liveUrls.publicScoreboard); toast.success('Copied!'); }} className="px-4 py-2 bg-[#00C187]/10 text-[#00C187] text-[8px] font-black uppercase rounded-xl border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
