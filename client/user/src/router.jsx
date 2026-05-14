@@ -57,6 +57,9 @@ const LiveOverlay            = lazy(() => import("@user/pages/LiveOverlay"));
 const LiveScoreboard         = lazy(() => import("@user/pages/LiveScoreboard"));
 const TeamPass               = lazy(() => import("@user/pages/TeamPass"));
 const TeamProfile            = lazy(() => import("@user/pages/TeamProfile"));
+const ReelsFeed              = lazy(() => import("@user/pages/reels/ReelsFeed"));
+const UploadReel             = lazy(() => import("@user/pages/reels/UploadReel"));
+const ReelAnalytics          = lazy(() => import("@user/pages/reels/ReelAnalytics"));
 
 // ── Lazy: Business Landing Pages ─────────────────────────────────────────────
 const UserVenueOwnerLanding  = lazy(() => import("@user/pages/business/VenueOwnerLanding"));
@@ -399,6 +402,10 @@ const router = createBrowserRouter([
       { path: "team/:id",         element: <S><TeamProfile /></S> },
       { path: "booking-invoice/:id", element: <S><BookingInvoice /></S> },
       { path: "analytics/:matchId",  element: <S><MatchAnalytics /></S> },
+      { path: "reels",               element: <S><ReelsFeed /></S> },
+      { path: "shorts/:id",          element: <S><ReelsFeed /></S> },
+      { path: "reels/upload",        element: <ProtectedRoute><S><UploadReel /></S></ProtectedRoute> },
+      { path: "reels/analytics",     element: <ProtectedRoute><S><ReelAnalytics /></S></ProtectedRoute> },
       { path: "leaderboard",         element: <S><Leaderboard /></S> },
       { path: "live-overlay/:matchId",  element: <S><LiveOverlay /></S> },
       { path: "live-score/:matchId",    element: <S><LiveScoreboard /></S> },

@@ -14,9 +14,12 @@ import facebookRouter from "../modules/facebook/facebook.routes.js";
 import teamRouter from "../modules/team/team.routes.js";
 import locationRouter from "./location.routes.js";
 import storyRouter from "../modules/story/story.routes.js";
+import reelsRouter from "../modules/reels/reels.routes.js";
+import paymentRouter from "../modules/payment/payment.routes.js";
 
 const rootRouter = Router();
 
+rootRouter.use("/payment", paymentRouter);
 rootRouter.use("/team", teamRouter);
 rootRouter.use("/features", featureRouter);
 rootRouter.use("/location", locationRouter);
@@ -32,5 +35,6 @@ rootRouter.use("/scorer", scorerRouter);
 rootRouter.use("/youtube", youtubeRouter);
 rootRouter.use("/facebook", facebookRouter);
 rootRouter.use("/story", storyRouter);
+rootRouter.use("/reels", reelsRouter);
 
 export default rootRouter;

@@ -1,22 +1,19 @@
-import { setDefaultResultOrder } from "dns";
-import { setServers } from "dns";
 import dotenv from "dotenv";
+dotenv.config();
+
 import app from "./app.js";
 import connectDB from "./config/database.js";
 import http from "http";
 import socketConfig from "./config/socket.js";
 import { initSettlementWorker } from "./utils/settlementWorker.js";
 import { initSettlementJobs } from "./queues/settlement.queue.js";
-import dns from 'node:dns';
-
-// Set DNS resolution order and servers to bypass unreliable local network DNS
-dns.setDefaultResultOrder('ipv4first');
-dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
-
-dotenv.config();
 
 const port = process.env.PORT || 4000;
 const server = http.createServer(app);
+
+// Disable timeout for large video uploads
+server.timeout = 0;
+server.keepAliveTimeout = 0;
 
 // Initialize Socket.io
 socketConfig(server);
@@ -29,8 +26,15 @@ const startServer = () => {
     // Connect to database in the background
     connectDB().then(async () => {
       console.log("[DATABASE] Connection established successfully.");
+      
+      // Initialize Workers & Queues
       initSettlementWorker();           // startup runs + backfill (immediate)
       await initSettlementJobs();       // recurring jobs via BullMQ (singleton)
+      
+      // Start Reels Worker
+      const { reelWorker } = await import("./queues/reel.queue.js");
+      console.log("[REELS] Worker initialized and listening for jobs.");
+
     }).catch(err => {
       console.error("[DATABASE] Background connection error:", err.message);
     });

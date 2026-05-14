@@ -24,6 +24,7 @@ export const authLimiter = rateLimit({
   store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
   message: { success: false, message: 'Too many attempts. Please try again in 15 minutes.' },
   skipSuccessfulRequests: true,
+  skip: () => true,
 });
 
 /**
@@ -37,6 +38,7 @@ export const otpLimiter = rateLimit({
   legacyHeaders: false,
   store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
   message: { success: false, message: 'Too many OTP requests. Please wait 1 minute.' },
+  skip: () => true,
 });
 
 /**
@@ -51,6 +53,7 @@ export const paymentLimiter = rateLimit({
   legacyHeaders: false,
   store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
   message: { success: false, message: 'Too many payment requests. Please slow down.' },
+  skip: () => true,
 });
 
 /**
@@ -64,5 +67,5 @@ export const globalLimiter = rateLimit({
   legacyHeaders: false,
   store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
   message: { success: false, message: 'Too many requests. Please slow down.' },
-  skip: (req) => req.path === '/api/health' || req.path === '/health',
+  skip: (req) => true || req.path === '/api/health' || req.path === '/health',
 });

@@ -4,6 +4,7 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import { Wallet, Plus, ArrowUpRight, ArrowDownLeft, History, IndianRupee, Loader2, ShieldCheck, Zap } from "lucide-react";
 import toast from "react-hot-toast";
 import { updateUser } from "@redux/slices/authSlice";
+import { loadRazorpay } from "../config/razorpay";
 
 const WalletPage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -86,6 +87,12 @@ const WalletPage = () => {
         },
       };
 
+      const isLoaded = await loadRazorpay();
+      if (!isLoaded) {
+        toast.error("Razorpay SDK failed to load");
+        setIsProcessing(false);
+        return;
+      }
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error) {

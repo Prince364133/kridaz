@@ -24,6 +24,9 @@ const Root = () => {
     }
   }, [isAuthenticated, user]);
 
+  const isReelsPage = location.pathname.startsWith('/reels') || location.pathname.startsWith('/shorts');
+  const hideNav = isReelsPage || location.pathname.startsWith('/messages') || location.pathname.startsWith('/my-teams');
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Global Login-on-Demand Modal — rendered here so useNavigate() works inside router context */}
@@ -39,13 +42,13 @@ const Root = () => {
         onComplete={() => setShowOnboarding(false)}
       />
       <ScrollToTop />
-      <Navbar />
-      <main className="flex-grow pb-20 lg:pb-0">
+      {!isReelsPage && <Navbar />}
+      <main className={`flex-grow ${isReelsPage ? 'pb-0' : 'pb-20 lg:pb-0'}`}>
         <Outlet />
       </main>
-      {!location.pathname.startsWith('/messages') && !location.pathname.startsWith('/my-teams') && <MobileBottomNav />}
-      {/* Footer only visible on desktop OR if it's the home page on mobile (and hidden entirely on messages/teams) */}
-      <div className={(location.pathname.startsWith('/messages') || location.pathname.startsWith('/my-teams')) ? 'hidden' : (location.pathname === '/' ? 'block' : 'hidden lg:block')}>
+      {!hideNav && <MobileBottomNav />}
+      {/* Footer only visible on desktop OR if it's the home page on mobile (and hidden entirely on messages/teams/reels) */}
+      <div className={hideNav ? 'hidden' : (location.pathname === '/' ? 'block' : 'hidden lg:block')}>
         <UserFooter />
       </div>
     </div>

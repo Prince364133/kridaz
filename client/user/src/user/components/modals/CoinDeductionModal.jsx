@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -21,7 +21,7 @@ import CountUp from "react-countup";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
-import { handlePayment, createOrder } from "../../config/razorpay";
+import { handlePayment, createOrder, loadRazorpay } from "../../config/razorpay";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -193,6 +193,12 @@ const CoinDeductionModal = ({
         theme: { color: "#CCFF00" }
       };
       
+      const isLoaded = await loadRazorpay();
+      if (!isLoaded) {
+        toast.error("Razorpay SDK failed to load");
+        setIsRecharging(false);
+        return;
+      }
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error) {

@@ -32,6 +32,7 @@ const getCookie = (name) => {
 
 import { SocketProvider } from "./context/SocketContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { Toaster } from "react-hot-toast";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -141,6 +142,17 @@ export default function App() {
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <SocketProvider>
         <RouterProvider router={router} />
+        <Toaster 
+          position="top-center"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: '#18181b',
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.1)',
+            },
+          }}
+        />
       </SocketProvider>
     </GoogleOAuthProvider>
   );

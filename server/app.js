@@ -16,7 +16,11 @@ dotenv.config();
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(cookieParser());
 
 
@@ -83,7 +87,6 @@ app.get("/api/health", (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
-
 
 app.get("/", (req, res) => {
   res.send("Kridaz API is running");

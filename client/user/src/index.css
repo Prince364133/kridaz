@@ -138,6 +138,41 @@ body {
   background: var(--primary);
 }
 
+/* Reels Feed System */
+.reels-feed-container {
+  height: 100vh;
+  height: 100dvh;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  background-color: #000;
+  position: relative;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE/Edge */
+}
+.reels-feed-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.reels-item {
+  height: 100vh;
+  height: 100dvh;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overscroll-behavior-y: contain;
+  background-color: #000;
+}
+
 /* ── Component Systems ───────────────────────────────────────────── */
 
 /* Button System */
@@ -253,6 +288,23 @@ body {
 }
 .animate-shimmer {
   animation: shimmer 2s infinite linear;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+.animate-marquee {
+  display: inline-block;
+  animation: marquee 10s linear infinite;
 }
 
 /* ── Utility Classes ─────────────────────────────────────────────── */
