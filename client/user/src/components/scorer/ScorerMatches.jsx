@@ -1,5 +1,20 @@
 import React from "react";
-import { Trophy, Calendar, MapPin, Users, CheckCircle2, Zap, Search, Loader2, Hand, Clock, Shield, Activity } from "lucide-react";
+import { 
+  Trophy, 
+  Calendar, 
+  MapPin, 
+  Users, 
+  CheckCircle2, 
+  Zap, 
+  Search, 
+  Loader2, 
+  Hand, 
+  Clock, 
+  Shield, 
+  Activity,
+  ArrowRight,
+  Plus
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useScorerDashboard from "@hooks/owner/useScorerDashboard";
@@ -7,7 +22,7 @@ import DashboardSkeleton from "../owner/Dashboard/DashboardSkeleton";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { toast } from "react-hot-toast";
 
-const ACCENT = "#84CC16"; // Lime Green
+const ACCENT = "#00C187";
 
 export default function ScorerMatches() {
   const { dashboardData, loading, error } = useScorerDashboard();
@@ -54,7 +69,6 @@ export default function ScorerMatches() {
       if (res.data.success) {
         toast.success("Scorer request sent to host!");
         setSearchId("");
-        // In a real app, we'd trigger a refresh here
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to send request");
@@ -88,28 +102,29 @@ export default function ScorerMatches() {
   };
 
   return (
-    <div className="space-y-12 animate-fade-in pb-20">
+    <div className="space-y-10 animate-fade-in pb-24 font-inter max-w-[1600px] mx-auto">
+      
+      {/* PROFESSIONAL STATUS BANNER */}
       {isLimitedScorer && (
-        <div className="bg-gradient-to-r from-[#84CC16]/20 via-[#84CC16]/5 to-transparent border border-[#84CC16]/20 rounded-[2rem] p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_0_50px_rgba(132,204,22,0.05)]">
-          <div className="flex items-center gap-6">
-            <div className="w-16 h-16 rounded-2xl bg-[#84CC16]/10 flex items-center justify-center shrink-0 border border-[#84CC16]/20">
-              <Shield className={`text-[#84CC16] ${!upgradeRequested ? "animate-pulse" : ""}`} size={32} />
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 flex flex-col md:flex-row items-center justify-between gap-8 group hover:border-[#00C187]/20 transition-all duration-500 shadow-[var(--shadow-2)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-[60px]"></div>
+          <div className="flex items-center gap-6 relative z-10">
+            <div className="w-16 h-16 rounded-[8px] bg-[#00C187]/10 flex items-center justify-center shrink-0 border border-[#00C187]/20 shadow-sm">
+              <Shield className={`text-[#00C187] ${!upgradeRequested ? "animate-pulse" : ""}`} size={32} />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {upgradeRequested ? (
                 <>
-                  <h3 className="text-xl font-black text-white uppercase tracking-tight">Profile Under Review</h3>
-                  <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                    Your professional scorer application is <span className="text-[#84CC16]">under review</span>.<br />
-                    Full matching and payment features will unlock soon.
+                  <h3 className="text-xl font-bold text-white tracking-tight font-inter">PRO APPLICATION PENDING</h3>
+                  <p className="text-[#999999] text-xs font-medium uppercase tracking-wider font-inter">
+                    Your professional scorer application is <span className="text-[#00C187]">under review</span>.
                   </p>
                 </>
               ) : (
                 <>
-                  <h3 className="text-xl font-black text-white uppercase tracking-tight">Incomplete Profile</h3>
-                  <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                    You are currently in <span className="text-[#84CC16]">Quick-Scoring Mode</span>. <br />
-                    Complete your professional registration to appear in search and earn from matches.
+                  <h3 className="text-xl font-bold text-white tracking-tight font-inter">QUICK-SCORING MODE</h3>
+                  <p className="text-[#999999] text-xs font-medium uppercase tracking-wider font-inter">
+                    Complete your professional registration to <span className="text-[#00C187]">earn from matches</span>.
                   </p>
                 </>
               )}
@@ -119,9 +134,9 @@ export default function ScorerMatches() {
             <button 
               onClick={() => setShowUpgradeModal(true)}
               disabled={requestingUpgrade}
-              className="w-full md:w-auto h-14 px-10 bg-white text-black font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-gray-100 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 disabled:opacity-60 flex items-center gap-3"
+              className="w-full md:w-auto px-8 py-3.5 bg-[#00C187] text-black font-bold uppercase text-[11px] tracking-widest rounded-[6px] hover:scale-[0.98] transition-all shadow-[var(--shadow-2)] relative z-10 font-inter"
             >
-              Apply for Full Access
+              Unlock Professional Access
             </button>
           )}
         </div>
@@ -131,48 +146,48 @@ export default function ScorerMatches() {
       {showUpgradeModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={() => setShowUpgradeModal(false)} />
-          <div className="relative w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-2xl bg-[#000000] border border-[#2D2D2D] rounded-[8px] shadow-[var(--shadow-4)] overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 md:p-12 space-y-8">
               <div className="space-y-2">
-                <h2 className="text-3xl font-black text-white uppercase tracking-tight">Scorer <span className="text-[#84CC16]">Registration</span></h2>
-                <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Upgrade to a professional digital scorer</p>
+                <h2 className="text-3xl font-bold text-white tracking-tight font-inter">Scorer <span className="text-[#00C187]">Registration</span></h2>
+                <p className="text-[#999999] text-xs font-semibold uppercase tracking-wider font-inter">Upgrade to a professional digital scorer</p>
               </div>
 
               <form onSubmit={handleRequestUpgrade} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">Phone Number</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-[#878C9F] ml-1 font-inter">Phone Number</label>
                     <input 
                       type="text" 
                       required
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      placeholder="CONTACT NUMBER"
-                      className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-[#84CC16]/50 outline-none transition-all"
+                      placeholder="Contact Number"
+                      className="w-full h-12 bg-transparent border border-[#2D2D2D] rounded-[6px] px-4 text-sm text-white focus:border-[#00C187]/50 outline-none transition-all font-inter"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">City / Region</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-[#878C9F] ml-1 font-inter">City / Region</label>
                     <input 
                       type="text" 
                       required
                       value={formData.city}
                       onChange={(e) => setFormData({...formData, city: e.target.value})}
-                      placeholder="LOCATION"
-                      className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-[#84CC16]/50 outline-none transition-all"
+                      placeholder="Current Location"
+                      className="w-full h-12 bg-transparent border border-[#2D2D2D] rounded-[6px] px-4 text-sm text-white focus:border-[#00C187]/50 outline-none transition-all font-inter"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">Professional Bio</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#878C9F] ml-1 font-inter">Professional Bio</label>
                   <textarea 
                     rows="4"
                     required
                     value={formData.bio}
                     onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                    placeholder="TELL US ABOUT YOUR SCORING EXPERIENCE..."
-                    className="w-full bg-white/5 border border-white/10 rounded-3xl p-6 text-xs font-bold uppercase tracking-widest text-white focus:border-[#84CC16]/50 outline-none transition-all resize-none"
+                    placeholder="Tell us about your scoring experience..."
+                    className="w-full bg-transparent border border-[#2D2D2D] rounded-[6px] p-4 text-sm text-white focus:border-[#00C187]/50 outline-none transition-all resize-none font-inter"
                   />
                 </div>
 
@@ -180,14 +195,14 @@ export default function ScorerMatches() {
                   <button 
                     type="button"
                     onClick={() => setShowUpgradeModal(false)}
-                    className="flex-1 h-14 bg-white/5 text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-white/10 transition-all"
+                    className="flex-1 h-12 bg-transparent border border-[#2D2D2D] text-[#999999] font-bold uppercase text-[11px] tracking-widest rounded-[6px] hover:bg-white/5 transition-all font-inter"
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit"
                     disabled={requestingUpgrade}
-                    className="flex-[2] h-14 bg-[#84CC16] text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-[#84CC16]/40 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-60"
+                    className="flex-[2] h-12 bg-[#00C187] text-black font-bold uppercase text-[11px] tracking-widest rounded-[6px] shadow-[var(--shadow-2)] hover:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-60 font-inter"
                   >
                     {requestingUpgrade ? <Loader2 size={16} className="animate-spin" /> : "Submit Application"}
                   </button>
@@ -198,107 +213,138 @@ export default function ScorerMatches() {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b border-white/5">
-        <div className="space-y-2">
-          <h1 className="text-5xl font-black uppercase tracking-tighter text-white">
-            Scoring <span className="text-[#84CC16]">Center</span>
+      {/* HEADER & SEARCH */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-white/5">
+        <div className="space-y-1">
+          <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-white font-inter">
+            Scoring <span className="text-[#00C187]">Center</span>
           </h1>
-          <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Live Match Management & Analytics</p>
+          <p className="text-[#999999] text-xs font-semibold uppercase tracking-wider font-inter mt-1">Live Match Management & Digital Analytics</p>
         </div>
         
         <div className="w-full md:w-80 relative group">
           <input 
             type="text" 
-            placeholder="ENTER MATCH ID (KRZ-XXXX)"
+            placeholder="Search Match ID (KRZ-XXXX)"
             value={searchId}
             onChange={(e) => setSearchId(e.target.value.toUpperCase())}
-            className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-[#84CC16]/50 outline-none transition-all pr-12"
+            className="w-full h-12 bg-transparent border border-[#2D2D2D] rounded-[6px] px-4 text-sm text-white focus:border-[#00C187]/50 outline-none transition-all pr-12 font-inter"
           />
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#84CC16] transition-colors">
-            <Trophy size={18} />
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#878C9F] group-focus-within:text-[#00C187] transition-colors">
+            <Search size={18} />
           </div>
         </div>
       </div>
 
-      {/* Active Assignments */}
-      <section className="space-y-6">
-        <h2 className="text-xs font-black uppercase tracking-[0.25em] text-gray-500 flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-[#84CC16] animate-pulse" /> {searchId ? "Search Results" : "Assigned Matches"}
-        </h2>
+      {/* MATCH ASSIGNMENTS */}
+      <section className="space-y-8">
+        <div className="flex items-center gap-3">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#00C187] animate-pulse" />
+          <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#878C9F] font-inter">
+            {searchId ? "Search Results" : "Current Assignments"}
+          </h2>
+        </div>
         
         {searching && (
-          <div className="p-12 bg-white/[0.02] border border-white/5 rounded-[2.5rem] text-center flex flex-col items-center gap-4">
-             <Loader2 className="animate-spin text-[#84CC16]" size={24} />
-             <p className="text-[10px] font-black uppercase tracking-widest text-gray-600">Verifying match in network...</p>
+          <div className="p-20 bg-[#000000] border border-[#2D2D2D] border-dashed rounded-[8px] text-center flex flex-col items-center gap-4">
+             <Loader2 className="animate-spin text-[#00C187]" size={32} />
+             <p className="text-[11px] font-bold uppercase tracking-widest text-[#555] font-inter">Synchronizing Network Data...</p>
           </div>
         )}
 
+        {/* Global Search Result */}
         {!searching && globalMatch && !activeMatches.some(m => m._id === globalMatch._id) && (
-          <div className="bg-gradient-to-r from-[#84CC16]/10 to-transparent border border-[#84CC16]/20 rounded-[2rem] p-8 group shadow-[0_0_50px_rgba(132,204,22,0.05)] animate-in slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col md:flex-row justify-between gap-8">
-              <div className="space-y-4 cursor-pointer" onClick={() => navigate(`/match/${globalMatch._id}`)}>
-                <div className="flex items-center gap-4">
-                  <span className="px-3 py-1 bg-[#84CC16] text-black text-[10px] font-black uppercase tracking-widest rounded-full">
-                    FOUND MATCH: {globalMatch.shortId}
+          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 group hover:border-[#00C187]/30 transition-all duration-500 shadow-[var(--shadow-2)] relative overflow-hidden animate-in slide-in-from-bottom-4">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-[60px]"></div>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
+              <div className="space-y-3 flex-1">
+                <div className="flex items-center gap-3">
+                  <span className="px-2 py-0.5 bg-[#00C187]/10 text-[#00C187] text-[9px] font-bold uppercase tracking-widest rounded-[4px] border border-[#00C187]/20">
+                    NETWORK MATCH: {globalMatch.shortId}
                   </span>
                 </div>
-                <h3 className="text-2xl font-black text-white uppercase tracking-tight">
+                <h3 className="text-2xl font-bold text-white tracking-tight font-inter">
                   {globalMatch.name || "Match Found"}
                 </h3>
               </div>
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => handleRequestScorer(globalMatch._id)}
-                  className="w-full md:w-auto h-14 px-10 bg-[#84CC16] text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-[#84CC16]/40 transition-all flex items-center justify-center gap-3"
-                >
-                  Request to Score <Zap size={16} fill="currentColor" />
-                </button>
-              </div>
+              <button 
+                onClick={() => handleRequestScorer(globalMatch._id)}
+                className="w-full md:w-auto px-8 py-3 bg-[#00C187] text-black font-bold uppercase text-[11px] tracking-widest rounded-[6px] hover:scale-[0.98] transition-all flex items-center justify-center gap-2 font-inter"
+              >
+                Request Access <Zap size={14} fill="currentColor" />
+              </button>
             </div>
           </div>
         )}
 
+        {/* Assignments List */}
         {(filteredMatches.length === 0 && !globalMatch && !searching) ? (
-          <div className="p-12 bg-white/[0.02] border border-white/5 border-dashed rounded-[2.5rem] text-center">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-600">
-              {searchId.length >= 4 ? `No match found for "${searchId}"` : "No matches currently assigned to you"}
+          <div className="flex flex-col items-center justify-center min-h-[300px] bg-[#000000] rounded-[8px] border border-dashed border-[#2D2D2D] p-12 text-center">
+            <Trophy size={32} className="text-[#2D2D2D] mb-4" />
+            <h3 className="text-[13px] font-semibold text-[#555] uppercase tracking-wider font-inter">No Match Assignments</h3>
+            <p className="text-[11px] text-[#444] font-inter max-w-xs mx-auto mt-2">
+              {searchId.length >= 4 ? `No match found for "${searchId}"` : "You don't have any live matches assigned at the moment."}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 gap-5">
             {filteredMatches.map((match) => (
               <div 
                 key={match._id} 
-                onClick={() => navigate(`/match/${match._id}`)}
-                className="cursor-pointer bg-gradient-to-r from-white/[0.03] to-transparent border border-white/10 rounded-[2rem] p-8 hover:border-[#84CC16]/20 transition-all group"
+                className="group relative bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 hover:border-[#00C187]/30 transition-all duration-500 shadow-[var(--shadow-2)]"
               >
-                <div className="flex flex-col md:flex-row justify-between gap-8">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      <span className="px-3 py-1 bg-[#84CC16]/10 text-[#84CC16] text-[10px] font-black uppercase tracking-widest rounded-full border border-[#84CC16]/20">
-                        {match.shortId || 'KRZ-XXXX'}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                  <div className="flex gap-6 flex-1">
+                    {/* Date Block */}
+                    <div className="flex flex-col items-center justify-center w-20 h-20 bg-[#2D2D2D]/30 rounded-[6px] border border-[#2D2D2D] text-center shrink-0">
+                      <span className="text-[#00C187] text-[9px] font-bold uppercase tracking-wider mb-1 font-inter">
+                        {new Date(match.date).toLocaleString('default', { month: 'short' })}
                       </span>
-                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                        {new Date(match.date).toLocaleDateString()} • {match.time}
+                      <span className="text-xl font-bold text-white leading-none font-inter">
+                        {new Date(match.date).getDate()}
                       </span>
                     </div>
 
-                    <h3 className="text-2xl font-black text-white uppercase tracking-tight">{match.name || "Untitled Match"}</h3>
-                    <div className="flex flex-wrap gap-6">
-                       <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
-                          <MapPin size={14} className="text-[#84CC16]" /> {match.venue || "Global Arena"}
-                       </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="px-2 py-0.5 bg-[#00C187]/10 text-[#00C187] text-[9px] font-bold uppercase tracking-widest rounded-[4px] border border-[#00C187]/20 font-inter">
+                          {match.shortId || 'KRZ-XXXX'}
+                        </div>
+                        <div className="flex items-center gap-2 text-[#878C9F] text-xs font-medium font-inter">
+                          <Clock size={14} className="text-[#00C187]" />
+                          {match.time}
+                        </div>
+                      </div>
+                      
+                      <h3 className="text-lg font-bold text-white group-hover:text-[#00C187] transition-colors font-inter tracking-tight leading-tight">
+                        {match.name || "Untitled Match"}
+                      </h3>
+                      
+                      <div className="flex flex-wrap gap-6 text-[13px] text-[#878C9F] font-inter">
+                        <div className="flex items-center gap-2">
+                          <MapPin size={14} className="text-[#00C187]" />
+                          {match.venue || "Global Arena"}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Activity size={14} className="text-[#00C187]" />
+                          Live Status Ready
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row items-center gap-3">
+
+                  <div className="w-full md:w-auto flex flex-col items-stretch gap-3">
                     <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(`/scoring/${match._id}`, '_blank', 'noopener,noreferrer');
-                      }}
-                      className="w-full sm:w-auto h-14 px-10 bg-[#84CC16] text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-[#84CC16]/40 transition-all flex items-center justify-center gap-3 group-hover:scale-[1.02]"
+                      onClick={() => window.open(`/scoring/${match._id}`, '_blank', 'noopener,noreferrer')}
+                      className="px-6 py-2.5 bg-[#00C187] text-black text-xs font-bold uppercase tracking-widest rounded-[6px] shadow-[var(--shadow-2)] hover:scale-[0.98] transition-all flex items-center justify-center gap-2 font-inter"
                     >
-                      Open Console <Zap size={16} fill="currentColor" />
+                      Open Console <Zap size={14} fill="currentColor" />
+                    </button>
+                    <button 
+                      onClick={() => navigate(`/match/${match._id}`)}
+                      className="px-6 py-2.5 bg-transparent hover:bg-[#00C187]/10 text-[#999999] hover:text-[#00C187] text-xs font-bold uppercase tracking-widest rounded-[6px] border border-[#2D2D2D] hover:border-[#00C187]/30 transition-all flex items-center justify-center gap-2 font-inter"
+                    >
+                      Match Details <ArrowRight size={14} />
                     </button>
                   </div>
                 </div>
@@ -308,29 +354,29 @@ export default function ScorerMatches() {
         )}
       </section>
 
-      {/* History */}
-      <section className="space-y-6">
-        <h2 className="text-xs font-black uppercase tracking-[0.25em] text-gray-500">Scoring History</h2>
-        <div className="grid grid-cols-1 gap-4 opacity-60 hover:opacity-100 transition-opacity">
-          {completedMatches.map((match) => (
-            <div 
-              key={match._id} 
-              className="bg-[#0D0D0D] border border-white/5 rounded-[1.5rem] p-6 flex justify-between items-center"
-            >
-               <div className="space-y-1">
-                 <h4 className="text-sm font-bold text-white uppercase">{match.name}</h4>
-                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{new Date(match.date).toLocaleDateString()}</p>
-               </div>
-               <div className="text-right">
-                  <p className="text-[10px] font-black text-[#84CC16] uppercase tracking-widest">Completed</p>
-               </div>
-            </div>
-          ))}
-          {completedMatches.length === 0 && (
-            <p className="text-[10px] text-gray-600 uppercase font-black tracking-widest py-4">No completed records found</p>
-          )}
-        </div>
-      </section>
+      {/* COMPLETED RECORDS */}
+      {completedMatches.length > 0 && (
+        <section className="space-y-6 pt-6">
+          <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#555] font-inter">Scoring History</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-70 hover:opacity-100 transition-opacity">
+            {completedMatches.map((match) => (
+              <div 
+                key={match._id} 
+                className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex justify-between items-center group hover:border-[#00C187]/20 transition-all shadow-sm"
+              >
+                 <div className="space-y-1">
+                   <h4 className="text-sm font-bold text-white uppercase font-inter tracking-tight group-hover:text-[#00C187] transition-colors">{match.name}</h4>
+                   <p className="text-[10px] text-[#878C9F] font-semibold uppercase tracking-widest font-inter">{new Date(match.date).toLocaleDateString()}</p>
+                 </div>
+                 <div className="flex items-center gap-2 text-[#00C187]">
+                    <CheckCircle2 size={16} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest font-inter">Verified</span>
+                 </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

@@ -6,7 +6,14 @@ import {
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 
+import { useSelector } from "react-redux";
+
 const PartnerSupport = () => {
+  const { role } = useSelector((state) => state.auth);
+  const isScorer = role?.toLowerCase().includes("scorer");
+  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const portalTitle = isScorer ? "Scorer Help Center" : "Help & Support";
+
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
@@ -115,45 +122,46 @@ const PartnerSupport = () => {
   };
 
   return (
-    <div className="h-full custom-scrollbar bg-[#000000] text-white">
+    <div className="h-full custom-scrollbar bg-[#000000] text-white font-inter">
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
 
         {/* Header Section */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 border-b border-[#2D2D2D] pb-6">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 border-b border-white/5 pb-6">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <div className="w-1.5 h-8 bg-[#CCFF00] rounded-full" />
-              <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
-                Help & <span className="text-[#CCFF00]">Support</span>
+              <div className="w-1.5 h-8 rounded-full" style={{ backgroundColor: themeColor }} />
+              <h1 className="text-[28px] lg:text-[32px] font-bold font-inter text-white tracking-tight leading-none uppercase">
+                {portalTitle.split(' ')[0]} {portalTitle.split(' ')[1]} <span style={{ color: themeColor }}>{portalTitle.split(' ').slice(2).join(' ')}</span>
               </h1>
             </div>
-            <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
+            <p className="text-[#878C9F] font-inter text-[14px] mt-2 ml-4 uppercase tracking-widest font-semibold">
               Get assistance from the Kridaz Admin Team
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="bg-[#000000] px-5 py-2.5 rounded-[8px] border border-[#2D2D2D] flex items-center gap-3 shadow-[var(--shadow-2)]">
-              <div className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse" />
-              <span className="text-[12px] font-bold text-white uppercase tracking-widest">Support Line Active</span>
+            <div className="bg-[#000000] px-5 py-2.5 rounded-[4px] border border-white/5 flex items-center gap-3 shadow-2xl">
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: themeColor }} />
+              <span className="text-[10px] font-bold text-white uppercase tracking-widest">Support Line Active</span>
             </div>
           </div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* New Ticket Form / Chat Box */}
-          <div className="lg:col-span-5 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-8 shadow-[var(--shadow-2)] relative overflow-hidden h-fit">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px] pointer-events-none" />
+          <div className="lg:col-span-5 bg-[#000000] border border-white/5 rounded-[8px] p-8 shadow-2xl relative overflow-hidden h-fit">
+            <div className="absolute top-0 right-0 w-32 h-32 blur-[60px] pointer-events-none" style={{ backgroundColor: `${themeColor}0D` }} />
 
             {selectedTicket ? (
               <div className="relative z-10 flex flex-col h-full min-h-[500px]">
-                <div className="flex justify-between items-center mb-6 border-b border-[#2D2D2D] pb-4">
-                  <h3 className="text-[14px] font-bold text-[#CCFF00] uppercase tracking-[2px]">
+                <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
+                  <h3 className="text-[12px] font-bold uppercase tracking-[2px] font-inter" style={{ color: themeColor }}>
                     Ticket: {selectedTicket.subject}
                   </h3>
                   <button 
                     onClick={() => setSelectedTicket(null)}
-                    className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest hover:underline"
+                    className="text-[10px] font-bold uppercase tracking-widest hover:underline font-inter"
+                    style={{ color: themeColor }}
                   >
                     Close Chat
                   </button>
@@ -162,32 +170,34 @@ const PartnerSupport = () => {
                 <div className="flex-1 overflow-y-auto space-y-6 pr-2 no-scrollbar max-h-[400px]">
                   {/* Initial Message */}
                   <div className="flex flex-col items-start max-w-[90%]">
-                    <div className="bg-[#111] p-4 rounded-[8px] border border-[#2D2D2D]">
-                      <p className="text-[10px] font-bold text-[#CCFF00] mb-2 uppercase tracking-widest">YOU (Initial Request)</p>
-                      <p className="text-[13px] text-white/90">{selectedTicket.message}</p>
+                    <div className="bg-[#111] p-4 rounded-[4px] border border-white/5">
+                      <p className="text-[10px] font-bold mb-2 uppercase tracking-widest font-inter" style={{ color: themeColor }}>YOU (Initial Request)</p>
+                      <p className="text-[13px] text-white/90 font-inter">{selectedTicket.message}</p>
                       {selectedTicket.images?.length > 0 && (
                         <div className="grid grid-cols-2 gap-2 mt-3">
                           {selectedTicket.images.map((img, i) => (
-                            <img key={i} src={img} alt="" className="rounded-[4px] border border-[#2D2D2D] w-full h-24 object-cover" />
+                            <img key={i} src={img} alt="" className="rounded-[2px] border border-white/5 w-full h-24 object-cover" />
                           ))}
                         </div>
                       )}
                     </div>
-                    <span className="text-[8px] text-[#555] mt-2 font-bold uppercase">{new Date(selectedTicket.createdAt).toLocaleString()}</span>
+                    <span className="text-[8px] text-[#555] mt-2 font-bold uppercase font-inter">{new Date(selectedTicket.createdAt).toLocaleString()}</span>
                   </div>
 
                   {/* Replies */}
                   {selectedTicket.replies?.map((reply, idx) => (
                     <div key={idx} className={`flex flex-col ${reply.sender === 'OWNER' ? 'items-start' : 'items-end'} max-w-full`}>
-                      <div className={`p-4 rounded-[8px] border ${reply.sender === 'OWNER' 
-                        ? 'bg-[#111] border-[#2D2D2D] max-w-[90%]' 
-                        : 'bg-[#CCFF00]/5 border-[#CCFF00]/20 max-w-[90%]'}`}>
-                        <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${reply.sender === 'OWNER' ? 'text-[#555]' : 'text-[#CCFF00]'}`}>
+                      <div className={`p-4 rounded-[4px] border ${reply.sender === 'OWNER' 
+                        ? 'bg-[#111] border-white/5 max-w-[90%]' 
+                        : 'border-white/10 max-w-[90%]'}`}
+                        style={{ backgroundColor: reply.sender !== 'OWNER' ? `${themeColor}0D` : undefined, borderColor: reply.sender !== 'OWNER' ? `${themeColor}33` : undefined }}>
+                        <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 font-inter ${reply.sender === 'OWNER' ? 'text-[#555]' : ''}`}
+                           style={{ color: reply.sender !== 'OWNER' ? themeColor : undefined }}>
                           {reply.sender === 'OWNER' ? 'YOU' : 'SUPPORT AGENT'}
                         </p>
-                        <p className="text-[13px] text-white/90">{reply.message}</p>
+                        <p className="text-[13px] text-white/90 font-inter">{reply.message}</p>
                       </div>
-                      <span className="text-[8px] text-[#555] mt-2 font-bold uppercase">{new Date(reply.createdAt).toLocaleString()}</span>
+                      <span className="text-[8px] text-[#555] mt-2 font-bold uppercase font-inter">{new Date(reply.createdAt).toLocaleString()}</span>
                     </div>
                   ))}
                 </div>
@@ -214,13 +224,14 @@ const PartnerSupport = () => {
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         placeholder="Type your message..."
-                        className="flex-1 bg-[#111] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-sm text-white focus:outline-none focus:border-[#CCFF00]/60 transition-all"
+                        className="flex-1 bg-[#111] border border-white/5 rounded-[4px] px-4 py-3 text-sm text-white focus:outline-none transition-all font-inter"
                         onKeyPress={(e) => e.key === 'Enter' && handleReply()}
                       />
                       <button 
                         onClick={handleReply}
                         disabled={!replyText.trim() || loading}
-                        className="bg-[#CCFF00] text-black px-6 rounded-[8px] font-bold uppercase tracking-widest text-[10px] hover:bg-white transition-all disabled:opacity-50"
+                        className="text-black px-8 rounded-[4px] font-bold uppercase tracking-widest text-[11px] transition-all disabled:opacity-50 font-inter shadow-lg"
+                        style={{ backgroundColor: themeColor, boxShadow: `0 5px 15px ${themeColor}33` }}
                       >
                         Send
                       </button>
@@ -230,7 +241,7 @@ const PartnerSupport = () => {
               </div>
             ) : (
               <>
-                <h2 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-4 mb-8 uppercase tracking-[3px] flex items-center gap-2">
+                <h2 className="text-[13px] font-bold border-b border-white/5 pb-4 mb-8 uppercase tracking-[3px] flex items-center gap-2 font-inter" style={{ color: themeColor }}>
                   <MessageSquare size={18} />
                   Raise a New Ticket
                 </h2>
@@ -239,7 +250,8 @@ const PartnerSupport = () => {
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Category</label>
                     <select
-                      className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00]/60 transition-all appearance-none text-sm"
+                      className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-white focus:outline-none transition-all appearance-none text-sm"
+                      style={{ borderColor: themeColor }}
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     >
@@ -255,7 +267,8 @@ const PartnerSupport = () => {
                     <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Subject</label>
                     <input
                       type="text" required
-                      className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00]/60 transition-all text-sm"
+                      className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-white focus:outline-none transition-all text-sm"
+                      style={{ focusBorderColor: themeColor }}
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       placeholder="Brief summary of the issue"
@@ -266,7 +279,8 @@ const PartnerSupport = () => {
                     <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Message</label>
                     <textarea
                       required rows="5"
-                      className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00]/60 transition-all text-sm custom-scrollbar"
+                      className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-white focus:outline-none transition-all text-sm custom-scrollbar"
+                      style={{ focusBorderColor: themeColor }}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       placeholder="Describe your problem in detail..."
@@ -289,8 +303,11 @@ const PartnerSupport = () => {
                         </div>
                       ))}
                       {formData.images.length < 5 && (
-                        <label className="aspect-square rounded-[4px] border border-dashed border-[#2D2D2D] flex items-center justify-center cursor-pointer hover:border-[#CCFF00] hover:bg-[#CCFF00]/5 transition-all">
-                          {uploading ? <div className="w-4 h-4 border-2 border-[#CCFF00] border-t-transparent rounded-full animate-spin" /> : <Plus size={18} className="text-[#555]" />}
+                        <label 
+                          className="aspect-square rounded-[4px] border border-dashed border-[#2D2D2D] flex items-center justify-center cursor-pointer hover:bg-white/[0.02] transition-all"
+                          style={{ borderColor: uploading ? themeColor : '#2D2D2D' }}
+                        >
+                          {uploading ? <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: themeColor }} /> : <Plus size={18} className="text-[#555]" />}
                           <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
                         </label>
                       )}
@@ -300,7 +317,8 @@ const PartnerSupport = () => {
                   <button
                     type="submit"
                     disabled={loading || uploading}
-                    className="w-full py-4 bg-[#CCFF00] hover:bg-white text-black rounded-[8px] font-bold uppercase tracking-[2px] transition-all transform hover:scale-[1.01] active:scale-[0.99] shadow-[0_10px_30px_rgba(204,255,0,0.15)] disabled:opacity-50 mt-4"
+                    className="w-full py-4 text-black rounded-[4px] font-bold uppercase tracking-[2px] transition-all transform hover:scale-[1.01] active:scale-[0.99] shadow-lg disabled:opacity-50 mt-4 font-inter"
+                    style={{ backgroundColor: themeColor, boxShadow: `0 10px 30px ${themeColor}33` }}
                   >
                     {loading ? 'SYNCHRONIZING...' : 'Initialize Ticket'}
                   </button>
@@ -310,10 +328,10 @@ const PartnerSupport = () => {
           </div>
 
           {/* Ticket History */}
-          <div className="lg:col-span-7 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-8 shadow-[var(--shadow-2)] relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px] pointer-events-none" />
+          <div className="lg:col-span-7 bg-[#000000] border border-white/5 rounded-[8px] p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-32 h-32 blur-[60px] pointer-events-none" style={{ backgroundColor: `${themeColor}0D` }} />
 
-            <h2 className="text-[14px] font-bold text-[#CCFF00] border-b border-[#2D2D2D] pb-4 mb-8 uppercase tracking-[3px] flex items-center gap-2">
+            <h2 className="text-[13px] font-bold border-b border-white/5 pb-4 mb-8 uppercase tracking-[3px] flex items-center gap-2 font-inter" style={{ color: themeColor }}>
               <Clock size={18} />
               Ticket History
             </h2>
@@ -321,7 +339,7 @@ const PartnerSupport = () => {
             <div className="space-y-4 max-h-[600px] overflow-y-auto no-scrollbar pr-2 relative z-10">
               {fetching ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="w-10 h-10 border-2 border-[#CCFF00] border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <div className="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin mb-4" style={{ borderColor: themeColor }}></div>
                   <p className="text-[10px] font-bold text-[#444] uppercase tracking-widest">Decrypting Records...</p>
                 </div>
               ) : tickets.length === 0 ? (
@@ -335,7 +353,8 @@ const PartnerSupport = () => {
                   <div 
                     key={ticket._id} 
                     onClick={() => setSelectedTicket(ticket)}
-                    className="p-5 bg-[#111111] border border-[#2D2D2D] rounded-[8px] hover:border-[#CCFF00]/30 transition-all group cursor-pointer"
+                    className="p-5 bg-[#111111] border border-[#2D2D2D] rounded-[8px] transition-all group cursor-pointer"
+                    style={{ '--hover-border': themeColor }}
                   >
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center gap-3">
@@ -346,8 +365,8 @@ const PartnerSupport = () => {
                           {ticket.status}
                         </span>
                         {ticket.isAgentOnline ? (
-                          <span className="flex items-center gap-1.5 text-[9px] font-bold text-[#CCFF00] uppercase tracking-widest">
-                            <span className="w-1.5 h-1.5 bg-[#CCFF00] rounded-full animate-pulse" />
+                          <span className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest" style={{ color: themeColor }}>
+                            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: themeColor }} />
                             Agent Online
                           </span>
                         ) : (
@@ -359,7 +378,7 @@ const PartnerSupport = () => {
                       </div>
                       <span className="text-[10px] text-[#555] font-bold uppercase tracking-widest">{new Date(ticket.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                     </div>
-                    <h3 className="font-bold text-white text-[15px] mb-2 uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">{ticket.subject}</h3>
+                    <h3 className="font-bold text-white text-[15px] mb-2 uppercase tracking-tight transition-colors" style={{ color: selectedTicket?._id === ticket._id ? themeColor : 'white' }}>{ticket.subject}</h3>
                     <p className="text-[13px] text-[#878C9F] leading-relaxed line-clamp-1">{ticket.message}</p>
 
                     <div className="mt-4 pt-4 border-t border-[#2D2D2D] flex items-center justify-between">
@@ -367,7 +386,7 @@ const PartnerSupport = () => {
                         <span className="flex items-center gap-1"><MessageSquare size={12} /> {ticket.replies?.length || 0} Replies</span>
                         {ticket.images?.length > 0 && <span className="flex items-center gap-1"><Shield size={12} /> {ticket.images.length} Attachments</span>}
                       </div>
-                      <button className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest hover:text-white transition-colors">Enter Chat ↗</button>
+                      <button className="text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors" style={{ color: themeColor }}>Enter Chat ↗</button>
                     </div>
                   </div>
                 ))

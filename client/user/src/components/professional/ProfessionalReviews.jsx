@@ -1,11 +1,21 @@
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { Star, MessageSquare, Send, User, Loader2, Calendar, Reply } from "lucide-react";
+import { Star, MessageSquare, Send, User, Loader2, Calendar, Reply, X, BadgeCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * ProfessionalReviews — High-fidelity feedback management.
+ * Fully rebranded for the Scorer Portal with Teal Green (#00C187) and Inter font.
+ */
+
 export default function ProfessionalReviews() {
+  const { role, user: authUser } = useSelector((state) => state.auth);
+  const isScorer = role?.toLowerCase().includes("scorer");
+  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [replyText, setReplyText] = useState("");
@@ -20,7 +30,9 @@ export default function ProfessionalReviews() {
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get(`/api/professional/details/${localStorage.getItem('userId')}?date=${format(new Date(), 'yyyy-MM-dd')}`);
+      const profId = authUser?._id || authUser?.id || authUser?.user;
+      if (!profId) return;
+      const res = await axiosInstance.get(`/api/professional/details/${profId}?date=${format(new Date(), 'yyyy-MM-dd')}`);
       setReviews(res.data.reviews || []);
     } catch (error) {
       console.error("Error fetching reviews:", error);
@@ -34,52 +46,68 @@ export default function ProfessionalReviews() {
     try {
       setActionLoading(true);
       await axiosInstance.post("/api/professional/review/reply", { reviewId, reply: replyText });
-      toast.success("Reply posted successfully");
+      toast.success("Response dispatched to client", {
+        style: { background: "#000", color: "#fff", border: `1px solid ${themeColor}`, fontSize: "10px", fontWeight: "black" }
+      });
       setReplyText("");
       setReplyingTo(null);
       fetchReviews();
     } catch (error) {
-      console.error("Error replying:", error);
-      toast.error("Failed to post reply");
+      toast.error("Dispatch failed");
     } finally {
       setActionLoading(false);
     }
   };
 
   if (loading) return (
-    <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-primary" size={40} /></div>
+    <div className="py-24 flex justify-center"><Loader2 className="animate-spin" style={{ color: themeColor }} size={48} /></div>
   );
 
   return (
-    <div className="space-y-8 animate-fade-in font-open-sans">
-      <div className="pb-6 border-b border-[#2D2D2D]">
-        <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-white font-inter">
-          User <span className="text-[#CCFF00]">Reviews</span>
-        </h1>
-        <p className="text-[#999999] text-xs font-semibold uppercase tracking-wider font-inter mt-1">Engage with your students and players</p>
+    <div className="space-y-10 animate-fade-in font-inter h-full custom-scrollbar pb-32">
+      <div className="pb-8 border-b border-white/5 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+            <h1 className="text-4xl lg:text-6xl font-black tracking-tighter text-white font-inter uppercase">
+            User <span style={{ color: themeColor }}>FEEDBACK</span>
+            </h1>
+            <p className="text-neutral-500 text-[10px] font-black uppercase tracking-[0.3em] font-inter mt-2">Engage with verified clients and maintain your professional standing</p>
+        </div>
+        <div className="px-6 py-3 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5">
+                <Star size={20} style={{ color: themeColor, fill: themeColor }} />
+            </div>
+            <div>
+                <p className="text-[14px] font-black text-white leading-none">
+                    {(reviews.reduce((acc, curr) => acc + curr.rating, 0) / (reviews.length || 1)).toFixed(1)}
+                </p>
+                <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest mt-1">Average Index</p>
+            </div>
+        </div>
       </div>
 
       {reviews.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#000000] rounded-[8px] border border-[#2D2D2D] border-dashed p-12 text-center shadow-[var(--shadow-2)]">
-          <MessageSquare size={48} className="text-[#2D2D2D] mb-4" />
-          <h3 className="text-[13px] font-semibold text-[#555] uppercase tracking-wider font-inter mb-2">No Reviews Yet</h3>
-          <p className="text-[11px] text-[#444] font-inter">Feedback from your clients will appear here.</p>
+        <div className="flex flex-col items-center justify-center py-32 bg-black rounded-[3rem] border-2 border-white/5 border-dashed p-12 text-center shadow-2xl relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#00C187]/5 to-transparent opacity-50" />
+          <MessageSquare size={64} className="text-neutral-900 mb-6 relative z-10" />
+          <h3 className="text-[12px] font-black text-neutral-700 uppercase tracking-[0.4em] font-inter mb-2 relative z-10">Feedback Vault Empty</h3>
+          <p className="text-[11px] text-neutral-800 font-inter relative z-10 max-w-xs mx-auto">Client appraisals and performance metrics will be archived here upon receipt.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-8">
           {reviews.map((review) => (
-            <div key={review._id} className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-[#CCFF00]/30 transition-all shadow-[var(--shadow-2)]">
-              <div className="p-6 lg:p-8">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex gap-4">
+            <div key={review._id} className="bg-black border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-[#00C187]/20 transition-all duration-500 shadow-2xl relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
+              <div className="p-8 lg:p-10 relative z-10">
+                <div className="flex flex-col md:flex-row justify-between items-start mb-10 gap-6">
+                  <div className="flex gap-5">
                     <div 
                       onClick={() => review.user?._id && navigate(`/profile/${review.user._id}`)}
-                      className="w-12 h-12 rounded-[6px] border border-[#2D2D2D] overflow-hidden cursor-pointer hover:border-[#CCFF00] transition-all"
+                      className="w-16 h-16 rounded-2xl border border-white/5 overflow-hidden cursor-pointer hover:border-[#00C187]/50 transition-all shadow-xl group-hover:scale-105"
                     >
                       {review.user?.profilePicture ? (
                         <img src={review.user.profilePicture} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full bg-[#2D2D2D]/30 flex items-center justify-center text-[10px] font-bold text-[#878C9F] font-inter">
+                        <div className="w-full h-full bg-white/5 flex items-center justify-center text-[18px] font-black text-neutral-500 font-inter uppercase">
                           {review.user?.name?.charAt(0)}
                         </div>
                       )}
@@ -87,54 +115,67 @@ export default function ProfessionalReviews() {
                     <div>
                       <h4 
                         onClick={() => review.user?._id && navigate(`/profile/${review.user._id}`)}
-                        className="text-[15px] font-bold text-white tracking-tight cursor-pointer hover:text-[#CCFF00] transition-colors font-inter"
+                        className="text-[18px] font-black text-white tracking-tight cursor-pointer hover:opacity-80 transition-opacity font-inter uppercase"
+                        style={{ '--hover-color': themeColor } as any}
                       >
                         {review.user?.name}
                       </h4>
-                      <div className="flex items-center gap-2 mt-1">
-                         <p className="text-[10px] font-medium text-[#CCFF00] uppercase tracking-wider font-inter">Verified Player</p>
-                         <span className="text-[8px] text-[#2D2D2D]">•</span>
-                         <p className="text-[10px] font-medium text-[#878C9F] uppercase tracking-wider font-inter">{format(new Date(review.createdAt), 'MMMM dd, yyyy')}</p>
+                      <div className="flex items-center gap-3 mt-2">
+                         <div className="flex items-center gap-1.5 px-3 py-1 bg-[#00C187]/10 rounded-full border border-[#00C187]/20">
+                            <BadgeCheck size={12} style={{ color: themeColor }} />
+                            <p className="text-[9px] font-black uppercase tracking-[0.1em] font-inter" style={{ color: themeColor }}>Verified Client</p>
+                         </div>
+                         <p className="text-[10px] font-black text-neutral-600 uppercase tracking-widest font-inter">{format(new Date(review.createdAt), 'MMM dd, yyyy')}</p>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 bg-white/[0.02] p-3 rounded-2xl border border-white/5">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={14} className={i < review.rating ? "fill-[#CCFF00] text-[#CCFF00]" : "text-[#2D2D2D]"} />
+                      <Star key={i} size={18} className={i < review.rating ? "" : "text-neutral-800"} 
+                            style={{ color: i < review.rating ? themeColor : undefined, fill: i < review.rating ? themeColor : "none" }} />
                     ))}
                   </div>
                 </div>
 
-                <div className="relative p-5 bg-[#2D2D2D]/20 border border-[#2D2D2D] rounded-[6px] mb-6">
-                   <p className="text-[13px] text-[#999999] italic font-open-sans">"{review.comment}"</p>
+                <div className="relative p-8 bg-white/[0.02] border border-white/5 rounded-3xl mb-10 group-hover:border-[#00C187]/10 transition-all">
+                   <p className="text-[15px] text-neutral-400 font-inter leading-relaxed italic">"{review.comment}"</p>
                 </div>
 
                 {review.reply ? (
-                  <div className="ml-8 p-5 bg-[#CCFF00]/5 border-l-4 border-[#CCFF00] rounded-r-[6px]">
-                    <p className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-wider mb-2 flex items-center gap-2 font-inter">
-                      <Reply size={12} /> Your Response
+                  <div className="ml-6 md:ml-12 p-8 bg-white/[0.03] border-l-4 rounded-r-[2rem] shadow-inner" style={{ borderLeftColor: themeColor }}>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-3 flex items-center gap-3 font-inter" style={{ color: themeColor }}>
+                      <Reply size={14} /> Official Response
                     </p>
-                    <p className="text-[13px] text-[#999999] italic font-open-sans">"{review.reply}"</p>
+                    <p className="text-[14px] text-neutral-300 font-inter leading-relaxed">"{review.reply}"</p>
                   </div>
                 ) : replyingTo === review._id ? (
-                  <div className="ml-8 space-y-4 animate-in slide-in-from-top-4 duration-300">
-                    <textarea 
-                      placeholder="Type your response..."
-                      className="w-full bg-[#2D2D2D]/30 border border-[#2D2D2D] rounded-[6px] p-4 text-[13px] text-white focus:border-[#CCFF00] outline-none h-24 resize-none font-open-sans"
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                    />
-                    <div className="flex gap-3">
+                  <div className="ml-6 md:ml-12 space-y-6 animate-in slide-in-from-top-4 duration-300 relative z-20">
+                    <div className="relative">
+                        <textarea 
+                        placeholder="Draft your official response..."
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-[2rem] p-6 text-[14px] text-white focus:border-[#00C187]/50 outline-none h-32 resize-none font-inter font-medium transition-all"
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        />
+                        <button 
+                            onClick={() => setReplyingTo(null)}
+                            className="absolute top-4 right-4 p-2 text-neutral-600 hover:text-white transition-colors"
+                        >
+                            <X size={18} />
+                        </button>
+                    </div>
+                    <div className="flex gap-4">
                       <button 
                         onClick={() => handleReply(review._id)}
                         disabled={actionLoading}
-                        className="flex-1 h-12 bg-[#CCFF00] text-black rounded-[6px] font-bold uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 hover:scale-[0.98] transition-all font-inter shadow-[var(--shadow-2)]"
+                        className="flex-[2] h-14 text-black rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] flex items-center justify-center gap-3 transition-all active:scale-95 shadow-2xl"
+                        style={{ backgroundColor: themeColor, boxShadow: `0 10px 25px ${themeColor}33` }}
                       >
-                        {actionLoading ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />} Post Reply
+                        {actionLoading ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />} Dispatch Response
                       </button>
                       <button 
                         onClick={() => setReplyingTo(null)}
-                        className="px-6 h-12 bg-transparent text-[#999999] border border-[#2D2D2D] rounded-[6px] font-bold uppercase text-[11px] tracking-widest hover:text-white hover:border-white/20 font-inter"
+                        className="flex-1 h-14 bg-white/5 text-neutral-500 border border-white/5 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] hover:bg-white/10 hover:text-white transition-all"
                       >
                         Cancel
                       </button>
@@ -143,9 +184,10 @@ export default function ProfessionalReviews() {
                 ) : (
                   <button 
                     onClick={() => setReplyingTo(review._id)}
-                    className="ml-8 text-[11px] font-bold text-[#CCFF00] uppercase tracking-wider flex items-center gap-2 hover:translate-x-2 transition-transform font-inter"
+                    className="ml-6 md:ml-12 px-6 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-[#00C187]/10 hover:border-[#00C187]/30 transition-all font-inter"
+                    style={{ color: themeColor }}
                   >
-                    <MessageSquare size={14} /> Reply to Review
+                    <MessageSquare size={16} /> Lodge Official Reply
                   </button>
                 )}
               </div>
