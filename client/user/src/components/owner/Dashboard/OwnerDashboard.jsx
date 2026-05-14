@@ -280,7 +280,7 @@ const OwnerDashboard = () => {
                         type="text"
                         placeholder="Filter player..."
                         className="bg-[#2D2D2D] border border-[#404040] rounded-[6px] py-2 pl-9 pr-4 text-[14px] text-white focus:outline-none transition-all font-inter"
-                        style={{ '--tw-ring-color': themeColor } as any}
+                        style={{ '--tw-ring-color': themeColor }}
                       />
                     </div>
                   </div>
@@ -401,7 +401,7 @@ const OwnerDashboard = () => {
                   )}
 
                   <Link to="/partner/bookings" className="w-full mt-8 py-3 bg-transparent border border-[#2D2D2D] hover:text-white text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter flex items-center justify-center"
-                        style={{ '--hover-bg': `${themeColor}1A`, '--hover-color': themeColor } as any}>
+                        style={{ '--hover-bg': `${themeColor}1A`, '--hover-color': themeColor }}>
                     View Full Activity History
                   </Link>
                 </div>

@@ -116,7 +116,7 @@ export default function ProfessionalReviews() {
                       <h4 
                         onClick={() => review.user?._id && navigate(`/profile/${review.user._id}`)}
                         className="text-[18px] font-black text-white tracking-tight cursor-pointer hover:opacity-80 transition-opacity font-inter uppercase"
-                        style={{ '--hover-color': themeColor } as any}
+                        style={{ '--hover-color': themeColor }}
                       >
                         {review.user?.name}
                       </h4>
