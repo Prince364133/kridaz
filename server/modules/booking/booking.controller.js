@@ -345,9 +345,22 @@ export const bookWithWallet = async (req, res) => {
         throw new Error("This time slot is already booked. Please select another time.");
       }
 
-      // 3. Deduct balance
-      user.walletBalance -= amountToDeduct;
-      await user.save({ session });
+      // 3. Deduct balance — atomic operation with overdraft guard
+      const isUserModel = user.constructor.modelName === "User";
+      const debitedUser = isUserModel
+        ? await User.findOneAndUpdate(
+            { _id: userId, walletBalance: { $gte: amountToDeduct } },
+            { $inc: { walletBalance: -amountToDeduct } },
+            { new: true, session }
+          )
+        : await Owner.findOneAndUpdate(
+            { _id: userId, walletBalance: { $gte: amountToDeduct } },
+            { $inc: { walletBalance: -amountToDeduct } },
+            { new: true, session }
+          );
+      if (!debitedUser) {
+        throw new Error("Insufficient wallet balance. Please top up your wallet.");
+      }
 
       // 3. Create objects
       const bookingId = new mongoose.Types.ObjectId();
@@ -406,8 +419,13 @@ export const bookWithWallet = async (req, res) => {
       const cashbackPercentage = settings.cashbackPercentage || 5;
       const cashbackAmount = Math.round(finalPrice * (cashbackPercentage / 100));
       if (cashbackAmount > 0) {
-        user.walletBalance += cashbackAmount;
-        await user.save({ session });
+        // Atomic credit — no overdraft risk on credit, safe to always apply
+        const isUserModelCb = user.constructor.modelName === "User";
+        if (isUserModelCb) {
+          await User.findByIdAndUpdate(userId, { $inc: { walletBalance: cashbackAmount } }, { session });
+        } else {
+          await Owner.findByIdAndUpdate(userId, { $inc: { walletBalance: cashbackAmount } }, { session });
+        }
         
         // Create cashback transaction
         await WalletTransaction.create(

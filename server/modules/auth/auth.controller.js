@@ -204,9 +204,9 @@ export const registerUser = async (req, res) => {
     }
 
     // Verify Email OTP (with bypass)
-    const isEmailValid = (otp === otpRecord.emailOtp || otp === "123456");
+    const isEmailValid = (otp === otpRecord.emailOtp);
     // Verify Phone OTP (with bypass)
-    const isPhoneValid = (phoneOtp === otpRecord.phoneOtp || phoneOtp === "123456");
+    const isPhoneValid = (phoneOtp === otpRecord.phoneOtp);
 
     if (!isEmailValid || !isPhoneValid) {
       return res.status(400).json({ success: false, message: "Invalid OTPs provided" });
@@ -483,7 +483,7 @@ export const login = async (req, res) => {
     }
 
     const otpRecord = await OTP.findOne({ email });
-    const isOtpValid = otpRecord && (otp === otpRecord.emailOtp || otp === "123456");
+    const isOtpValid = otpRecord && (otp === otpRecord.emailOtp);
     if (!isOtpValid) {
       return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
     }

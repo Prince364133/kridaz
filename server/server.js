@@ -6,6 +6,7 @@ import connectDB from "./config/database.js";
 import http from "http";
 import socketConfig from "./config/socket.js";
 import { initSettlementWorker } from "./utils/settlementWorker.js";
+import { initSettlementJobs } from "./queues/settlement.queue.js";
 import dns from 'node:dns';
 
 // Set DNS resolution order and servers to bypass unreliable local network DNS
@@ -26,9 +27,10 @@ const startServer = () => {
     console.log(`[SERVER] Running on http://localhost:${port}`);
     
     // Connect to database in the background
-    connectDB().then(() => {
+    connectDB().then(async () => {
       console.log("[DATABASE] Connection established successfully.");
-      initSettlementWorker();
+      initSettlementWorker();           // startup runs + backfill (immediate)
+      await initSettlementJobs();       // recurring jobs via BullMQ (singleton)
     }).catch(err => {
       console.error("[DATABASE] Background connection error:", err.message);
     });

@@ -264,7 +264,10 @@ export const getMyActivity = async (req, res) => {
         { 'comments.userId': userId },
         { 'likes': userId }
       ]
-    }).populate('adminId', 'name profilePicture');
+    })
+      .populate('adminId', 'name profilePicture')
+      .sort({ createdAt: -1 })
+      .limit(50); // safety cap
 
     // Filter and format for profile view
     const activity = posts.map(post => ({
@@ -303,7 +306,8 @@ export const getUserPosts = async (req, res) => {
       .populate('adminId', 'name profilePicture username')
       .populate('likes', 'name profilePicture username')
       .populate('comments.userId', 'name profilePicture username')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(50); // safety cap
 
     res.status(200).json({ success: true, posts });
   } catch (error) {
@@ -329,7 +333,8 @@ export const getUserStories = async (req, res) => {
 
     const stories = await Story.find({ userId: { $in: searchIds } })
       .populate('viewers', 'name username profilePicture')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(50); // safety cap
 
     // Enforce privacy: only allow viewing if own stories OR in social network
     const isOwnContent = req.user?.id && searchIds.some(id => id === req.user.id.toString());

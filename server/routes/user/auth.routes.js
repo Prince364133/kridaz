@@ -13,7 +13,9 @@ import {
   updateInterests,
   updateProfile,
   forgotPasswordOtp,
-  resetPassword
+  resetPassword,
+  checkUsername,
+  getUmpireInviteDetails
 } from "../../modules/auth/auth.controller.js";
 import { 
   userRegisterSchema, 
@@ -42,5 +44,9 @@ router.post("/update-interests", userAuth, updateInterests);
 router.put("/updateProfile", userAuth, updateProfile);
 router.post("/forgot-password-otp", forgotPasswordOtp);
 router.post("/reset-password", resetPassword);
+
+// ── Public utility endpoints (previously only in the now-retired modules/auth/auth.routes.js) ──
+router.get("/check-username", checkUsername);           // GET /api/user/auth/check-username?username=
+router.get("/umpire-invite-details", getUmpireInviteDetails); // GET /api/user/auth/umpire-invite-details?token=
 
 export default router;

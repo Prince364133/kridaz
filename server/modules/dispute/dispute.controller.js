@@ -290,9 +290,15 @@ export const resolveDispute = async (req, res) => {
       if (resolutionAction === "RELEASE_TO_OWNER") {
         // 1. Move funds from disputeBalance to walletBalance
         if (owner) {
-          owner.disputeBalance -= dispute.bookingDetails.ownerRevenue;
-          owner.walletBalance += dispute.bookingDetails.ownerRevenue;
-          await owner.save({ session });
+          // Atomic: deduct disputeBalance, credit walletBalance
+          await Owner.findByIdAndUpdate(
+            dispute.turfOwner,
+            { $inc: {
+                disputeBalance: -dispute.bookingDetails.ownerRevenue,
+                walletBalance: dispute.bookingDetails.ownerRevenue
+            }},
+            { session }
+          );
 
           await WalletTransaction.create(
             [
@@ -319,8 +325,12 @@ export const resolveDispute = async (req, res) => {
       } else if (resolutionAction === "REFUND_TO_USER") {
         // 1. Deduct funds from owner's dispute balance (money vanishes from owner)
         if (owner) {
-          owner.disputeBalance -= dispute.bookingDetails.ownerRevenue;
-          await owner.save({ session });
+          // Atomic: deduct disputeBalance only (funds do not go to wallet — refund policy)
+          await Owner.findByIdAndUpdate(
+            dispute.turfOwner,
+            { $inc: { disputeBalance: -dispute.bookingDetails.ownerRevenue } },
+            { session }
+          );
         }
 
         // 2. We do NOT refund standard user wallet directly right now unless requested by Kridaz policy
@@ -337,9 +347,15 @@ export const resolveDispute = async (req, res) => {
         const amountToOwner = dispute.bookingDetails.ownerRevenue - partialAmount;
         
         if (owner) {
-          owner.disputeBalance -= dispute.bookingDetails.ownerRevenue;
-          owner.walletBalance += amountToOwner;
-          await owner.save({ session });
+          // Atomic: deduct full disputeBalance, credit only partial amount to wallet
+          await Owner.findByIdAndUpdate(
+            dispute.turfOwner,
+            { $inc: {
+                disputeBalance: -dispute.bookingDetails.ownerRevenue,
+                walletBalance: amountToOwner
+            }},
+            { session }
+          );
 
           await WalletTransaction.create([
             {
@@ -361,9 +377,15 @@ export const resolveDispute = async (req, res) => {
       } else if (resolutionAction === "CLOSE_NO_ACTION") {
         // Just release all to owner (standard close)
         if (owner) {
-          owner.disputeBalance -= dispute.bookingDetails.ownerRevenue;
-          owner.walletBalance += dispute.bookingDetails.ownerRevenue;
-          await owner.save({ session });
+          // Atomic: deduct disputeBalance, credit walletBalance (no action = standard release)
+          await Owner.findByIdAndUpdate(
+            dispute.turfOwner,
+            { $inc: {
+                disputeBalance: -dispute.bookingDetails.ownerRevenue,
+                walletBalance: dispute.bookingDetails.ownerRevenue
+            }},
+            { session }
+          );
         }
         booking.status = "COMPLETED";
         booking.revenueStatus = "SETTLED";

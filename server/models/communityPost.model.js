@@ -35,6 +35,10 @@ const communityPostSchema = new mongoose.Schema({
   }]
 }, { timestamps: true });
 
+// ── Performance indexes ───────────────────────────────────────────────────────
+communityPostSchema.index({ createdAt: -1 });
+communityPostSchema.index({ adminId: 1, createdAt: -1 });
+
 const CommunityPost = mongoose.model('CommunityPost', communityPostSchema);
 
 export default CommunityPost;

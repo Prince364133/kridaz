@@ -26,4 +26,10 @@ const notificationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// ── Performance indexes ───────────────────────────────────────────────────────
+notificationSchema.index({ recipient: 1, isRead: 1, createdAt: -1 });
+
+// TTL: auto-delete notifications older than 30 days
+notificationSchema.index({ createdAt: 1 }, { expireAfterSeconds: 30 * 24 * 3600 });
+
 export default mongoose.model("Notification", notificationSchema);

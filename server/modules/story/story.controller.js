@@ -108,7 +108,8 @@ export const getStories = async (req, res) => {
     let stories = await Story.find(query)
       .populate('userId', 'name username profilePicture')
       .populate('viewers', 'name username profilePicture')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(50); // safety cap per feed load
 
     // Group stories by user
     const groupedStories = stories.reduce((acc, story) => {
@@ -222,7 +223,8 @@ export const getAllStoriesAdmin = async (req, res) => {
   try {
     let stories = await Story.find()
       .populate('userId', 'name username email profilePicture')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(100); // admin safety cap
 
     const formattedStories = stories.map(story => {
       const storyObj = story.toObject();

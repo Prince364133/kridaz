@@ -84,7 +84,14 @@ const userSchema = new mongoose.Schema({
     }]
  }, {timestamps: true});
 
-userSchema.index({ locationData: "2dsphere" }, { sparse: true });
+userSchema.index({ locationData: "2dsphere" }, { sparse: true }); // already present — geospatial queries
+
+// ── Performance indexes ───────────────────────────────────────────────────────
+userSchema.index({ role: 1 });
+userSchema.index({ status: 1 });
+userSchema.index({ city: 1, sportTypes: 1 });
+userSchema.index({ createdAt: -1 });
+userSchema.index({ role: 1, status: 1 });
 
 const User = mongoose.model("User", userSchema);
 

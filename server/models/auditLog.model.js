@@ -13,4 +13,8 @@ const auditLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// ── Performance indexes ───────────────────────────────────────────────────────
+// TTL: auto-delete audit logs after 1 year (365 days)
+auditLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 365 * 24 * 3600 });
+
 export default mongoose.model("AuditLog", auditLogSchema);

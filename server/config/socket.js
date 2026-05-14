@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+import Redis from "ioredis";
 import User from "../models/user.model.js";
 
 let io;
@@ -13,7 +14,27 @@ const socketConfig = (server) => {
     },
   });
 
-  const onlineUsers = new Map();
+  const onlineUsers = new Map(); // Local fallback — kept for within-process lookups
+
+  // ── Redis presence tracking ─────────────────────────────────────────────────
+  const redis = new Redis(process.env.REDIS_URL, {
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+  });
+
+  // Debounce: batch all presence changes within a 2-second window into one broadcast
+  let presenceTimer = null;
+  const schedulePresenceBroadcast = async () => {
+    if (presenceTimer) return;
+    presenceTimer = setTimeout(async () => {
+      try {
+        const count = await redis.scard('kridaz:online:users');
+        io.emit('online_users_count', { count });
+      } catch (e) { /* silent — presence is non-critical */ } finally {
+        presenceTimer = null;
+      }
+    }, 2000);
+  };
 
   io.on("connection", (socket) => {
     socket.on("setup", (userData) => {
@@ -30,7 +51,12 @@ const socketConfig = (server) => {
       });
 
       User.findByIdAndUpdate(userId, { lastSeen: new Date() }).catch(err => console.log("DB Update Error:", err));
-      io.emit("online users", Array.from(onlineUsers.keys()));
+
+      // Redis-backed presence — cross-instance, debounced broadcast
+      redis.sadd('kridaz:online:users', userId.toString())
+        .then(() => redis.expire('kridaz:online:users', 86400)) // 24-hr TTL safety net
+        .then(() => schedulePresenceBroadcast())
+        .catch(() => { /* non-critical */ });
       socket.emit("connected");
     });
 
@@ -38,7 +64,7 @@ const socketConfig = (server) => {
 
     socket.on("joinMatch", async (matchId) => {
       socket.join(matchId);
-      console.log(`[Socket] User joined Match Room: ${matchId}`);
+
 
       // Phase 3: snap-on-join — send current live score immediately
       try {
@@ -54,11 +80,15 @@ const socketConfig = (server) => {
     socket.on("overlayJoin", async ({ matchId, token }) => {
       try {
         const jwt = await import("jsonwebtoken");
-        const secret = process.env.OVERLAY_TOKEN_SECRET || "fallback_secret";
+        const secret = process.env.OVERLAY_TOKEN_SECRET;
+        if (!secret) {
+          console.error('[FATAL] OVERLAY_TOKEN_SECRET env var is not set.');
+          socket.emit('overlayError', { message: 'Server configuration error' });
+          return;
+        }
         const payload = jwt.default.verify(token, secret);
         if (payload && payload.matchId?.toString() === matchId?.toString()) {
           socket.join(matchId);
-          console.log(`[Socket] Verified overlay joined match room: ${matchId}`);
           // Send current snapshot to this overlay client
           const { liveStateService } = await import("../services/liveState.service.js");
           const snapshot = await liveStateService.getLiveScore(matchId);
@@ -111,8 +141,13 @@ const socketConfig = (server) => {
         const lastSeen = new Date();
         onlineUsers.delete(socket.userId);
         User.findByIdAndUpdate(socket.userId, { lastSeen }).catch(err => console.log("DB Update Error:", err));
-        io.emit("online users", Array.from(onlineUsers.keys()));
-        io.emit("user last seen", { userId: socket.userId, lastSeen });
+
+        // Redis-backed presence — remove and debounce the broadcast
+        redis.srem('kridaz:online:users', socket.userId.toString())
+          .then(() => schedulePresenceBroadcast())
+          .catch(() => { /* non-critical */ });
+
+        io.emit("user last seen", { userId: socket.userId, lastSeen }); // kept as-is
       }
     });
   });

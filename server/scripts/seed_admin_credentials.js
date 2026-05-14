@@ -1,3 +1,4 @@
+if (process.env.NODE_ENV === 'production') { console.error('ERROR: This script cannot run in production. Exiting.'); process.exit(1); }
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import * as argon2 from "argon2";

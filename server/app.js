@@ -5,6 +5,12 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import rootRouter from "./routes/index.js";
 import { errorHandler, notFound } from "./middleware/error.middleware.js";
+import {
+  authLimiter,
+  otpLimiter,
+  paymentLimiter,
+  globalLimiter,
+} from "./middleware/rateLimiter.middleware.js";
 
 dotenv.config();
 
@@ -13,11 +19,6 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-// Request Logger
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
 
 const allowedOrigins = process.env.CLIENT_URLS
   ? process.env.CLIENT_URLS.split(",").map((url) => url.trim())
@@ -37,6 +38,39 @@ app.use(
   })
 );
 
+// ── Rate Limiters ─────────────────────────────────────────────────────────────
+// Global — all /api routes (health check excluded via skip in the middleware)
+app.use('/api', globalLimiter);
+
+// Auth routes — user
+app.use('/api/user/auth/send-otp',           otpLimiter);
+app.use('/api/user/auth/login-step1',         otpLimiter);  // OTP verification entry
+app.use('/api/user/auth/login',               authLimiter);
+app.use('/api/user/auth/register',            authLimiter);
+app.use('/api/user/auth/google-auth',         authLimiter);
+app.use('/api/user/auth/forgot-password-otp', authLimiter);
+app.use('/api/user/auth/reset-password',      authLimiter);
+
+// Auth routes — owner
+app.use('/api/owner/auth/send-otp',    otpLimiter);
+app.use('/api/owner/auth/login-step1', otpLimiter);  // OTP verification entry
+app.use('/api/owner/auth/login',       authLimiter);
+app.use('/api/owner/auth/register',    authLimiter);
+app.use('/api/owner/auth/google-auth', authLimiter);
+
+// Payment routes — user bookings
+app.use('/api/user/booking/create-order',       paymentLimiter);
+app.use('/api/user/booking/verify-payment',     paymentLimiter);
+app.use('/api/user/booking/book-with-wallet',   paymentLimiter);
+
+// Payment routes — user wallet top-up
+app.use('/api/user/wallet/topup/create-order',  paymentLimiter);
+app.use('/api/user/wallet/topup/verify',        paymentLimiter);
+
+// Payment routes — owner banking & wallet
+app.use('/api/owner/banking/payout',    paymentLimiter);
+app.use('/api/owner/wallet/withdraw',   paymentLimiter);
+
 // routes
 app.use("/api", rootRouter);
 
@@ -50,39 +84,6 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Deep Debug route
-app.get("/api/debug", async (req, res) => {
-  try {
-    const dbState = mongoose.connection.readyState;
-    const states = ["disconnected", "connected", "connecting", "disconnecting"];
-    
-    let collections = [];
-    let turfCount = 0;
-    
-    if (dbState === 1) {
-      collections = await mongoose.connection.db.listCollections().toArray();
-      const collectionsNames = collections.map(c => c.name);
-      if (collectionsNames.includes("turves")) {
-        turfCount = await mongoose.connection.db.collection("turves").countDocuments();
-      }
-    }
-
-    res.json({
-      serverStatus: "RUNNING",
-      databaseStatus: states[dbState] || "unknown",
-      readyState: dbState,
-      collections: collections.map(c => c.name),
-      turfCount,
-      env: {
-        PORT: process.env.PORT,
-        MONGO_URI_SET: !!process.env.MONGO_URI,
-        CLIENT_URLS: process.env.CLIENT_URLS
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 app.get("/", (req, res) => {
   res.send("Kridaz API is running");

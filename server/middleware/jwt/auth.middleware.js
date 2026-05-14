@@ -9,8 +9,6 @@ const verifyAuth = async (req, res, next) => {
       token = header.split(" ")[1];
     } else if (req.cookies && req.cookies.auth_token) {
       token = req.cookies.auth_token;
-    } else if (req.query && req.query.token) {
-      token = req.query.token;
     }
 
     if (!token) {
@@ -62,12 +60,14 @@ export const authorizeRoles = (...roles) => {
     }
     
     const userRole = req.user.role.toLowerCase();
-    // Support matching both exact role or sub-role (e.g. 'limited_umpire' matches 'umpire')
+    // Support exact role match. One intentional alias: 'limited_umpire' IS an umpire role.
     const hasRole = roles.some(r => {
-        const targetRole = r.toLowerCase();
-        // Special case for 'owner' to match 'venu_owners' if needed, 
-        // but user wants 'venu_owners' everywhere.
-        return userRole.includes(targetRole);
+      const targetRole = r.toLowerCase();
+      // Exact match
+      if (userRole === targetRole) return true;
+      // Intentional product alias: limited_umpire satisfies umpire role checks
+      if (targetRole === 'umpire' && userRole === 'limited_umpire') return true;
+      return false;
     });
     
     if (!hasRole) {

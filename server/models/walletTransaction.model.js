@@ -51,5 +51,8 @@ const walletTransactionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// ── Performance indexes ───────────────────────────────────────────────────────
+walletTransactionSchema.index({ user: 1, createdAt: -1 });
+
 export default mongoose.model("WalletTransaction", walletTransactionSchema);
 

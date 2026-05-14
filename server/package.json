@@ -23,6 +23,7 @@
   "dependencies": {
     "argon2": "^0.40.3",
     "axios": "^1.7.9",
+    "bullmq": "^5.76.8",
     "chalk": "^5.3.0",
     "cloudinary": "^2.3.0",
     "cookie-parser": "^1.4.7",
@@ -31,6 +32,7 @@
     "date-fns-tz": "^3.2.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-rate-limit": "^8.5.1",
     "express-validator": "^7.1.0",
     "google-auth-library": "^9.15.1",
     "googleapis": "^171.4.0",
@@ -42,6 +44,7 @@
     "openai": "^6.37.0",
     "pdfkit": "^0.15.0",
     "qrcode": "^1.5.3",
+    "rate-limit-redis": "^5.0.0",
     "razorpay": "^2.9.4",
     "redis": "^5.12.1",
     "sharp": "^0.34.5",

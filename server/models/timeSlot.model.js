@@ -7,4 +7,8 @@ const timeSlotSchema = new mongoose.Schema({
     price: { type: Number }, // Individual slot pricing
  }, { timestamps: true });
 
+// ── Performance indexes ───────────────────────────────────────────────────────
+// NOTE: schema has no 'date' or 'isBooked' fields; indexing actual query fields instead
+timeSlotSchema.index({ turf: 1, startTime: 1, endTime: 1 });
+
 export default mongoose.model("TimeSlot", timeSlotSchema);

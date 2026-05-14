@@ -23,9 +23,13 @@ export const goLive = async (req, res) => {
     }
 
     // Generate secure token for OBS overlay
+    if (!process.env.OVERLAY_TOKEN_SECRET) {
+      console.error('[FATAL] OVERLAY_TOKEN_SECRET env var is not set.');
+      return res.status(500).json({ success: false, message: 'Server configuration error: overlay token secret not set.' });
+    }
     const overlayToken = jwt.sign(
       { matchId: hostedGame._id, type: 'OBS_OVERLAY' }, 
-      process.env.OVERLAY_TOKEN_SECRET || 'fallback_secret', 
+      process.env.OVERLAY_TOKEN_SECRET, 
       { expiresIn: '12h' }
     );
 

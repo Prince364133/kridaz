@@ -91,9 +91,17 @@ const bookingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index to speed up the cron job queries
+// ── Performance indexes ───────────────────────────────────────────────────────
+// Cron job queries (already present)
 bookingSchema.index({ status: 1, playStartTime: 1 });
 bookingSchema.index({ status: 1, reviewWindowEndsAt: 1 });
+
+// User booking history
+bookingSchema.index({ user: 1, createdAt: -1 });
+
+// Owner revenue queries
+bookingSchema.index({ turf: 1, status: 1 });
+bookingSchema.index({ owner: 1, revenueStatus: 1 });
 
 export default mongoose.model("Booking", bookingSchema);
 

@@ -34,7 +34,6 @@ import { SocketProvider } from "./context/SocketContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export default function App() {
-  console.log("App.jsx: Rendering App component...");
   const dispatch = useDispatch();
   const theme = useSelector((state) => state.theme.current);
   const authState = useSelector((state) => state.auth);

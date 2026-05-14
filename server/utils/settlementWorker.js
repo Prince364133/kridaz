@@ -355,13 +355,11 @@ export const initSettlementWorker = () => {
   runLegacySettlement();
 
   // Phase A: CONFIRMED → PLAYING → IN_REVIEW_WINDOW  (every 5 min)
-  setInterval(runPlayingTransition, 5 * 60 * 1000);
-
   // Phase B: IN_REVIEW_WINDOW → COMPLETED  (every 15 min)
-  setInterval(runAutoSettle, 15 * 60 * 1000);
-
   // Legacy: old 12-hr PENDING→SETTLED flow  (every 60 min)
-  setInterval(runLegacySettlement, 60 * 60 * 1000);
+  // NOTE: Recurring scheduling is handled by BullMQ (server/queues/settlement.queue.js).
+  //       setInterval calls have been removed to prevent duplicate execution across
+  //       multiple server instances.
 
-  console.log(chalk.magenta("[SETTLEMENT] Worker scheduled ✓ (Phase A: 5m | Phase B: 15m | Legacy: 60m)"));
+  console.log(chalk.magenta('[SETTLEMENT] Worker functions ready. Scheduling handled by BullMQ.'));
 };

@@ -98,9 +98,12 @@ const turfSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-turfSchema.index({ locationData: "2dsphere" }, { sparse: true });
+turfSchema.index({ locationData: "2dsphere" }, { sparse: true }); // already present — geospatial queries
 
-// The index is already defined on the coordinates field above.
+// ── Performance indexes ───────────────────────────────────────────────────────
+turfSchema.index({ owner: 1, isActive: 1 });
+turfSchema.index({ city: 1, state: 1, status: 1, isActive: 1 });
+turfSchema.index({ sportTypes: 1, city: 1 });
 
 // Slugify helper
 const slugify = (text) => {

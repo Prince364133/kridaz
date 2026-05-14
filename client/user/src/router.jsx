@@ -1,130 +1,162 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { useEffect } from "react";
+import { lazy, Suspense } from "react";
 
-// Layouts
+// ── Eager: Layouts (used on nearly every route — small files, no split benefit) ──
 import { AdminLayout, PartnerLayout, GuestLayout, CoachLayout, UmpireLayout, StreamerLayout, ScorerLayout } from "@layouts";
 import UserRoot from "@user/layouts/Root";
 
-// User Portal Pages (via @user alias)
-import UserHome from "@user/pages/Home";
-import UserLogin from "@user/pages/auth/Login";
-import UserSignUp from "@user/pages/auth/SignUp";
-import ForgotPassword from "@user/pages/auth/ForgotPassword";
-import UserTurf from "@user/components/turf/Turf";
-import UserTurfDetails from "@user/components/turf/TurfDetails";
-import UserTurfBookingHistory from "@user/components/turf/TurfBookingHistory";
-import UserProfile from "@user/pages/Profile";
-import UserBlogs from "@user/pages/Blogs";
-import UserBlogDetail from "@user/pages/BlogDetail";
-import Community from "@user/pages/Community";
-import FindPlayers from "@user/pages/FindPlayers";
-import UserWallet from "@user/pages/Wallet";
-import BookingPass from "@user/pages/BookingPass";
-import BookingInvoice from "@user/pages/BookingInvoice";
-import HostGame from "@user/pages/HostGame";
-import JoinGames from "@user/pages/JoinGames";
-import MyHostedGames from "@user/pages/MyHostedGames";
-import MyJoinedGames from "@user/pages/MyJoinedGames";
-import FindProfessionals from "@user/pages/FindProfessionals";
-import ProfessionalDetails from "@user/pages/ProfessionalDetails";
-import Messages from "@user/pages/Messages";
-import MyTeams from "@user/pages/MyTeams";
-import CheckoutPage from "@user/pages/checkout/CheckoutPage";
-import ScoringApp from "@user/pages/ScoringApp";
-import MatchAnalytics from "@user/pages/MatchAnalytics";
-import MatchDetails from "@user/pages/MatchDetails";
-import Leaderboard from "@user/pages/Leaderboard";
-import LiveOverlay from "@user/pages/LiveOverlay";
-import LiveScoreboard from "@user/pages/LiveScoreboard";
-import TeamPass from "@user/pages/TeamPass";
-import TeamProfile from "@user/pages/TeamProfile";
-
-
-// Business Landing Pages (User Portal)
-import UserVenueOwnerLanding from "@user/pages/business/VenueOwnerLanding";
-import UserCoachLanding from "@user/pages/business/CoachLanding";
-import UserUmpireLanding from "@user/pages/business/UmpireLanding";
-import UserStreamerLanding from "@user/pages/business/StreamerLanding";
-import UserScorerLanding from "@user/pages/business/ScorerLanding";
-import BusinessRegistration from "@user/pages/business/BusinessRegistration";
-// Legal Pages
-import PrivacyPolicy from "@user/pages/legal/PrivacyPolicy";
-import TermsOfService from "@user/pages/legal/TermsOfService";
-import DataDeletionInstructions from "@user/pages/legal/DataDeletionInstructions";
-// Owner Portal Pages
-import PartnersGateway from "@pages/PartnersGateway";
-import VenueOwnerSignUp from "@pages/VenueOwnerSignUp";
-import CoachSignUp from "@pages/CoachSignUp";
-import UmpireSignUp from "@pages/UmpireSignUp";
-import ScorerSignUp from "@pages/ScorerSignUp";
-import StreamerSignUp from "@user/pages/auth/StreamerSignUp";
-
-import StreamSetup from "./components/streamer/StreamSetup";
-import ManageStream from "./pages/ManageStream";
-import TickerGallery from "./components/streamer/TickerGallery";
-import { YouTubeConnected, YouTubeError } from "@pages/YouTubeAuthStatus";
-import { FacebookConnected, FacebookError } from "@pages/FacebookAuthStatus";
-
-import {
-  AddTurf,
-  EditTurf,
-  TurfManagement,
-  TurfDetails,
-  OwnerDashboard,
-  OwnerReviews as PartnerReviews,
-  OwnerBookings as PartnerBookings,
-  CustomerDirectory,
-  VenueIntelligence,
-  OwnerRevenue,
-  OwnerPromotions,
-  PayoutBanking,
-} from "@components/owner";
-import CoachDashboard from "./components/coach/CoachDashboard";
-import CoachStudents from "./components/coach/CoachStudents";
-import CoachSessions from "./components/coach/CoachSessions";
-import CoachMasterclass from "./components/coach/CoachMasterclass";
-import UmpireDashboard from "./components/umpire/UmpireDashboard";
-import UmpireMatches from "./components/umpire/UmpireMatches";
-import UmpireSchedule from "./components/umpire/UmpireSchedule";
-
-import StreamerDashboard from "./components/streamer/StreamerDashboard";
-import StreamerMatches from "./components/streamer/StreamerMatches";
-import StreamerSchedule from "./components/streamer/StreamerSchedule";
-import UmpireFeedback from "./components/umpire/UmpireFeedback";
-import ScorerDashboard from "./components/scorer/ScorerDashboard";
-import ScorerMatches from "./components/scorer/ScorerMatches";
-
-import ProfessionalAvailability from "./components/professional/ProfessionalAvailability";
-import ProfessionalBookings from "./components/professional/ProfessionalBookings";
-import ProfessionalReviews from "./components/professional/ProfessionalReviews";
-import ProfessionalProfile from "./components/professional/ProfessionalProfile";
-
-import {
-  UserManagement,
-  VerificationCenter,
-  AdminDashboard,
-  OwnerViewer as PartnerViewer,
-  TurfList,
-  AllTurf,
-  VenueApprovalDetail,
-  TransactionSection,
-  FeatureFlags,
-  MarketingManagement,
-  BlogManagement,
-  CommunityManagement,
-  ProfessionalManagement,
-  SupportCenter,
-  DisputeManager,
-  AuditLogs,
-  FinancialMissionControl,
-  ProfessionalDetailsPage,
-  HostedGamesPage,
-} from "@components/admin";
-import PartnerSupport from "@components/owner/Support/PartnerSupport";
-import DashboardProfile from "@components/shared/DashboardProfile";
+// ── Eager: Route guards & error utilities (must be synchronous) ──
 import ProtectedRoute from "@components/ProtectedRoute/ProtectedRoute";
 import PublicRoute from "@components/ProtectedRoute/PublicRoute";
 import { NotFound, RootRedirect, ErrorBoundary } from "@components/common";
+
+// ── Spinner shown while any lazy chunk loads ──────────────────────────────────
+const PageLoader = () => (
+  <>
+    <style>{`@keyframes _pg_spin { to { transform: rotate(360deg); } }`}</style>
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{
+        width: 32, height: 32, borderRadius: "50%",
+        border: "3px solid #e5e7eb", borderTopColor: "#10b981",
+        animation: "_pg_spin 0.8s linear infinite"
+      }} />
+    </div>
+  </>
+);
+
+// ── Lazy: User Portal Pages ───────────────────────────────────────────────────
+const UserHome               = lazy(() => import("@user/pages/Home"));
+const UserLogin              = lazy(() => import("@user/pages/auth/Login"));
+const UserSignUp             = lazy(() => import("@user/pages/auth/SignUp"));
+const ForgotPassword         = lazy(() => import("@user/pages/auth/ForgotPassword"));
+const UserTurf               = lazy(() => import("@user/components/turf/Turf"));
+const UserTurfDetails        = lazy(() => import("@user/components/turf/TurfDetails"));
+const UserTurfBookingHistory = lazy(() => import("@user/components/turf/TurfBookingHistory"));
+const UserProfile            = lazy(() => import("@user/pages/Profile"));
+const UserBlogs              = lazy(() => import("@user/pages/Blogs"));
+const UserBlogDetail         = lazy(() => import("@user/pages/BlogDetail"));
+const Community              = lazy(() => import("@user/pages/Community"));
+const FindPlayers            = lazy(() => import("@user/pages/FindPlayers"));
+const UserWallet             = lazy(() => import("@user/pages/Wallet"));
+const BookingPass            = lazy(() => import("@user/pages/BookingPass"));
+const BookingInvoice         = lazy(() => import("@user/pages/BookingInvoice"));
+const HostGame               = lazy(() => import("@user/pages/HostGame"));
+const JoinGames              = lazy(() => import("@user/pages/JoinGames"));
+const MyHostedGames          = lazy(() => import("@user/pages/MyHostedGames"));
+const MyJoinedGames          = lazy(() => import("@user/pages/MyJoinedGames"));
+const FindProfessionals      = lazy(() => import("@user/pages/FindProfessionals"));
+const ProfessionalDetails    = lazy(() => import("@user/pages/ProfessionalDetails"));
+const Messages               = lazy(() => import("@user/pages/Messages"));
+const MyTeams                = lazy(() => import("@user/pages/MyTeams"));
+const CheckoutPage           = lazy(() => import("@user/pages/checkout/CheckoutPage"));
+const ScoringApp             = lazy(() => import("@user/pages/ScoringApp"));
+const MatchAnalytics         = lazy(() => import("@user/pages/MatchAnalytics"));
+const MatchDetails           = lazy(() => import("@user/pages/MatchDetails"));
+const Leaderboard            = lazy(() => import("@user/pages/Leaderboard"));
+const LiveOverlay            = lazy(() => import("@user/pages/LiveOverlay"));
+const LiveScoreboard         = lazy(() => import("@user/pages/LiveScoreboard"));
+const TeamPass               = lazy(() => import("@user/pages/TeamPass"));
+const TeamProfile            = lazy(() => import("@user/pages/TeamProfile"));
+
+// ── Lazy: Business Landing Pages ─────────────────────────────────────────────
+const UserVenueOwnerLanding  = lazy(() => import("@user/pages/business/VenueOwnerLanding"));
+const UserCoachLanding       = lazy(() => import("@user/pages/business/CoachLanding"));
+const UserUmpireLanding      = lazy(() => import("@user/pages/business/UmpireLanding"));
+const UserStreamerLanding     = lazy(() => import("@user/pages/business/StreamerLanding"));
+const UserScorerLanding      = lazy(() => import("@user/pages/business/ScorerLanding"));
+const BusinessRegistration   = lazy(() => import("@user/pages/business/BusinessRegistration"));
+
+// ── Lazy: Legal Pages ─────────────────────────────────────────────────────────
+const PrivacyPolicy              = lazy(() => import("@user/pages/legal/PrivacyPolicy"));
+const TermsOfService             = lazy(() => import("@user/pages/legal/TermsOfService"));
+const DataDeletionInstructions   = lazy(() => import("@user/pages/legal/DataDeletionInstructions"));
+
+// ── Lazy: Owner / Partner Portal Pages ───────────────────────────────────────
+const PartnersGateway  = lazy(() => import("@pages/PartnersGateway"));
+const VenueOwnerSignUp = lazy(() => import("@pages/VenueOwnerSignUp"));
+const CoachSignUp      = lazy(() => import("@pages/CoachSignUp"));
+const UmpireSignUp     = lazy(() => import("@pages/UmpireSignUp"));
+const ScorerSignUp     = lazy(() => import("@pages/ScorerSignUp"));
+const StreamerSignUp   = lazy(() => import("@user/pages/auth/StreamerSignUp"));
+
+// ── Lazy: Streamer Components ─────────────────────────────────────────────────
+const StreamSetup    = lazy(() => import("./components/streamer/StreamSetup"));
+const ManageStream   = lazy(() => import("./pages/ManageStream"));
+const TickerGallery  = lazy(() => import("./components/streamer/TickerGallery"));
+
+// ── Lazy: YouTube / Facebook Auth Status ─────────────────────────────────────
+// Named exports — use .then() to map to default for lazy()
+const YouTubeConnected  = lazy(() => import("@pages/YouTubeAuthStatus").then(m => ({ default: m.YouTubeConnected })));
+const YouTubeError      = lazy(() => import("@pages/YouTubeAuthStatus").then(m => ({ default: m.YouTubeError })));
+const FacebookConnected = lazy(() => import("@pages/FacebookAuthStatus").then(m => ({ default: m.FacebookConnected })));
+const FacebookError     = lazy(() => import("@pages/FacebookAuthStatus").then(m => ({ default: m.FacebookError })));
+
+// ── Lazy: Owner (Partner) Portal Components ───────────────────────────────────
+const AddTurf            = lazy(() => import("@components/owner/TurfManagement/AddTurf"));
+const EditTurf           = lazy(() => import("@components/owner/TurfManagement/EditTurf"));
+const TurfManagement     = lazy(() => import("@components/owner/TurfManagement/TurfManagement"));
+const TurfDetails        = lazy(() => import("@components/owner/TurfManagement/TurfDetails"));
+const OwnerDashboard     = lazy(() => import("@components/owner/Dashboard/OwnerDashboard"));
+const PartnerReviews     = lazy(() => import("@components/owner/Review/OwnerReviews"));
+const PartnerBookings    = lazy(() => import("@components/owner/Bookings/OwnerBookings"));
+const CustomerDirectory  = lazy(() => import("@components/owner/Customers/CustomerDirectory"));
+const VenueIntelligence  = lazy(() => import("@components/owner/Intelligence/VenueIntelligence"));
+const OwnerRevenue       = lazy(() => import("@components/owner/Revenue/OwnerRevenue"));
+const OwnerPromotions    = lazy(() => import("@components/owner/Promotions/OwnerPromotions"));
+const PayoutBanking      = lazy(() => import("@components/owner/Banking/PayoutBanking"));
+const PartnerSupport     = lazy(() => import("@components/owner/Support/PartnerSupport"));
+
+// ── Lazy: Coach Portal Components ────────────────────────────────────────────
+const CoachDashboard   = lazy(() => import("./components/coach/CoachDashboard"));
+const CoachStudents    = lazy(() => import("./components/coach/CoachStudents"));
+const CoachSessions    = lazy(() => import("./components/coach/CoachSessions"));
+const CoachMasterclass = lazy(() => import("./components/coach/CoachMasterclass"));
+
+// ── Lazy: Umpire Portal Components ───────────────────────────────────────────
+const UmpireDashboard = lazy(() => import("./components/umpire/UmpireDashboard"));
+const UmpireMatches   = lazy(() => import("./components/umpire/UmpireMatches"));
+const UmpireSchedule  = lazy(() => import("./components/umpire/UmpireSchedule"));
+const UmpireFeedback  = lazy(() => import("./components/umpire/UmpireFeedback"));
+
+// ── Lazy: Streamer Portal Components ─────────────────────────────────────────
+const StreamerDashboard = lazy(() => import("./components/streamer/StreamerDashboard"));
+const StreamerMatches   = lazy(() => import("./components/streamer/StreamerMatches"));
+const StreamerSchedule  = lazy(() => import("./components/streamer/StreamerSchedule"));
+
+// ── Lazy: Scorer Portal Components ───────────────────────────────────────────
+const ScorerDashboard = lazy(() => import("./components/scorer/ScorerDashboard"));
+const ScorerMatches   = lazy(() => import("./components/scorer/ScorerMatches"));
+
+// ── Lazy: Shared Professional Components ─────────────────────────────────────
+const ProfessionalAvailability = lazy(() => import("./components/professional/ProfessionalAvailability"));
+const ProfessionalBookings     = lazy(() => import("./components/professional/ProfessionalBookings"));
+const ProfessionalReviews      = lazy(() => import("./components/professional/ProfessionalReviews"));
+const ProfessionalProfile      = lazy(() => import("./components/professional/ProfessionalProfile"));
+const DashboardProfile         = lazy(() => import("@components/shared/DashboardProfile"));
+
+// ── Lazy: Admin Portal Components ────────────────────────────────────────────
+const UserManagement         = lazy(() => import("@components/admin/UserManagement/UserPage"));
+const VerificationCenter     = lazy(() => import("@components/admin/OwnerRequests/VerificationCenter"));
+const AdminDashboard         = lazy(() => import("@components/admin/Dashboard/AdminDashboard"));
+const PartnerViewer          = lazy(() => import("@components/admin/OwnerManagement/OwnerViewer"));
+const TurfList               = lazy(() => import("@components/admin/Turf/TurfList"));
+const AllTurf                = lazy(() => import("@components/admin/Turf/AllTurf"));
+const VenueApprovalDetail    = lazy(() => import("@components/admin/Turf/VenueApprovalDetail"));
+const TransactionSection     = lazy(() => import("@components/admin/Transactions/TransactionSection"));
+const FeatureFlags           = lazy(() => import("@components/admin/FeatureFlags").then(m => ({ default: m.FeatureFlags })));
+const MarketingManagement    = lazy(() => import("@components/admin/Marketing/MarketingManagement").then(m => ({ default: m.MarketingManagement })));
+const BlogManagement         = lazy(() => import("@components/admin/Blogs/BlogManagement").then(m => ({ default: m.BlogManagement })));
+const CommunityManagement    = lazy(() => import("@components/admin/Community/CommunityManagement"));
+const ProfessionalManagement = lazy(() => import("@components/admin/ProfessionalManagement/ProfessionalManagement"));
+const SupportCenter          = lazy(() => import("@components/admin/Resolution/SupportCenter"));
+const DisputeManager         = lazy(() => import("@components/admin/Resolution/DisputeManager"));
+const AuditLogs              = lazy(() => import("@components/admin/Audit/AuditLogs"));
+const FinancialMissionControl = lazy(() => import("@components/admin/Finance/FinancialMissionControl"));
+const ProfessionalDetailsPage = lazy(() => import("@components/admin/ProfessionalManagement/ProfessionalDetailsPage"));
+const HostedGamesPage         = lazy(() => import("@components/admin/HostedGames/HostedGamesPage"));
+
+// ── Shorthand wrapper — keeps route definitions terse ────────────────────────
+const S = ({ children }) => <Suspense fallback={<PageLoader />}>{children}</Suspense>;
 
 const router = createBrowserRouter([
   // ── ADMIN PORTAL (High Priority) ──
@@ -136,42 +168,39 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <AdminDashboard /> },
-      {
-        path: "verification-center",
-        element: <VerificationCenter />,
-      },
+      { index: true, element: <S><AdminDashboard /></S> },
+      { path: "verification-center", element: <S><VerificationCenter /></S> },
       {
         path: "professionals",
         children: [
-          { path: "coaches", element: <ProfessionalManagement role="coach" /> },
-          { path: "umpires", element: <ProfessionalManagement role="umpire" /> },
-          { path: "scorers", element: <ProfessionalManagement role="scorer" /> },
-          { path: "streamers", element: <ProfessionalManagement role="streamer" /> },
-          { path: ":id", element: <ProfessionalDetailsPage /> }
+          { path: "coaches",   element: <S><ProfessionalManagement role="coach" /></S> },
+          { path: "umpires",   element: <S><ProfessionalManagement role="umpire" /></S> },
+          { path: "scorers",   element: <S><ProfessionalManagement role="scorer" /></S> },
+          { path: "streamers", element: <S><ProfessionalManagement role="streamer" /></S> },
+          { path: ":id",       element: <S><ProfessionalDetailsPage /></S> },
         ],
       },
-      { path: "users", element: <UserManagement /> },
+      { path: "users",              element: <S><UserManagement /></S> },
       {
         path: "owners",
         children: [
-          { path: "", element: <PartnerViewer /> },
-          { path: ":ownerId/turf", element: <TurfList /> },
+          { path: "",              element: <S><PartnerViewer /></S> },
+          { path: ":ownerId/turf", element: <S><TurfList /></S> },
         ],
       },
-      { path: "turfs", element: <AllTurf /> },
-      { path: "turfs/:id", element: <VenueApprovalDetail /> },
-      { path: "transactions", element: <TransactionSection /> },
-      { path: "support", element: <SupportCenter /> },
-      { path: "disputes", element: <DisputeManager /> },
-      { path: "audit", element: <AuditLogs /> },
-      { path: "finance", element: <FinancialMissionControl /> },
-      { path: "features", element: <FeatureFlags /> },
-      { path: "marketing", element: <MarketingManagement /> },
-      { path: "blogs", element: <BlogManagement /> },
-      { path: "community", element: <CommunityManagement /> },
-      { path: "games", element: <HostedGamesPage /> },
-      { path: "*", element: <NotFound /> },
+      { path: "turfs",        element: <S><AllTurf /></S> },
+      { path: "turfs/:id",    element: <S><VenueApprovalDetail /></S> },
+      { path: "transactions", element: <S><TransactionSection /></S> },
+      { path: "support",      element: <S><SupportCenter /></S> },
+      { path: "disputes",     element: <S><DisputeManager /></S> },
+      { path: "audit",        element: <S><AuditLogs /></S> },
+      { path: "finance",      element: <S><FinancialMissionControl /></S> },
+      { path: "features",     element: <S><FeatureFlags /></S> },
+      { path: "marketing",    element: <S><MarketingManagement /></S> },
+      { path: "blogs",        element: <S><BlogManagement /></S> },
+      { path: "community",    element: <S><CommunityManagement /></S> },
+      { path: "games",        element: <S><HostedGamesPage /></S> },
+      { path: "*",            element: <NotFound /> },
     ],
   },
 
@@ -184,21 +213,21 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <OwnerDashboard /> },
-      { path: "add-turf", element: <AddTurf /> },
-      { path: "turfs", element: <TurfManagement /> },
-      { path: "turf/:id", element: <TurfDetails /> },
-      { path: "edit-turf/:id", element: <EditTurf /> },
-      { path: "reviews", element: <PartnerReviews /> },
-      { path: "bookings", element: <PartnerBookings /> },
-      { path: "customers", element: <CustomerDirectory /> },
-      { path: "intelligence", element: <VenueIntelligence /> },
-      { path: "revenue", element: <OwnerRevenue /> },
-      { path: "promotions", element: <OwnerPromotions /> },
-      { path: "support", element: <PartnerSupport /> },
-      { path: "banking", element: <PayoutBanking /> },
-      { path: "profile", element: <DashboardProfile /> },
-      { path: "*", element: <NotFound /> },
+      { index: true,           element: <S><OwnerDashboard /></S> },
+      { path: "add-turf",      element: <S><AddTurf /></S> },
+      { path: "turfs",         element: <S><TurfManagement /></S> },
+      { path: "turf/:id",      element: <S><TurfDetails /></S> },
+      { path: "edit-turf/:id", element: <S><EditTurf /></S> },
+      { path: "reviews",       element: <S><PartnerReviews /></S> },
+      { path: "bookings",      element: <S><PartnerBookings /></S> },
+      { path: "customers",     element: <S><CustomerDirectory /></S> },
+      { path: "intelligence",  element: <S><VenueIntelligence /></S> },
+      { path: "revenue",       element: <S><OwnerRevenue /></S> },
+      { path: "promotions",    element: <S><OwnerPromotions /></S> },
+      { path: "support",       element: <S><PartnerSupport /></S> },
+      { path: "banking",       element: <S><PayoutBanking /></S> },
+      { path: "profile",       element: <S><DashboardProfile /></S> },
+      { path: "*",             element: <NotFound /> },
     ],
   },
 
@@ -211,18 +240,18 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <CoachDashboard /> },
-      { path: "students", element: <CoachStudents /> },
-      { path: "sessions", element: <CoachSessions /> },
-      { path: "masterclass", element: <CoachMasterclass /> },
-      { path: "availability", element: <ProfessionalAvailability /> },
-      { path: "bookings", element: <ProfessionalBookings /> },
-      { path: "reviews", element: <ProfessionalReviews /> },
-      { path: "revenue", element: <OwnerRevenue /> },
-      { path: "support", element: <PartnerSupport /> },
-      { path: "banking", element: <PayoutBanking /> },
-      { path: "profile", element: <ProfessionalProfile /> },
-      { path: "*", element: <NotFound /> },
+      { index: true,          element: <S><CoachDashboard /></S> },
+      { path: "students",     element: <S><CoachStudents /></S> },
+      { path: "sessions",     element: <S><CoachSessions /></S> },
+      { path: "masterclass",  element: <S><CoachMasterclass /></S> },
+      { path: "availability", element: <S><ProfessionalAvailability /></S> },
+      { path: "bookings",     element: <S><ProfessionalBookings /></S> },
+      { path: "reviews",      element: <S><ProfessionalReviews /></S> },
+      { path: "revenue",      element: <S><OwnerRevenue /></S> },
+      { path: "support",      element: <S><PartnerSupport /></S> },
+      { path: "banking",      element: <S><PayoutBanking /></S> },
+      { path: "profile",      element: <S><ProfessionalProfile /></S> },
+      { path: "*",            element: <NotFound /> },
     ],
   },
 
@@ -235,17 +264,17 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <UmpireDashboard /> },
-      { path: "matches", element: <UmpireMatches /> },
-      { path: "schedule", element: <UmpireSchedule /> },
-      { path: "availability", element: <ProfessionalAvailability /> },
-      { path: "bookings", element: <ProfessionalBookings /> },
-      { path: "reviews", element: <ProfessionalReviews /> },
-      { path: "revenue", element: <OwnerRevenue /> },
-      { path: "support", element: <PartnerSupport /> },
-      { path: "banking", element: <PayoutBanking /> },
-      { path: "profile", element: <ProfessionalProfile /> },
-      { path: "*", element: <NotFound /> },
+      { index: true,          element: <S><UmpireDashboard /></S> },
+      { path: "matches",      element: <S><UmpireMatches /></S> },
+      { path: "schedule",     element: <S><UmpireSchedule /></S> },
+      { path: "availability", element: <S><ProfessionalAvailability /></S> },
+      { path: "bookings",     element: <S><ProfessionalBookings /></S> },
+      { path: "reviews",      element: <S><ProfessionalReviews /></S> },
+      { path: "revenue",      element: <S><OwnerRevenue /></S> },
+      { path: "support",      element: <S><PartnerSupport /></S> },
+      { path: "banking",      element: <S><PayoutBanking /></S> },
+      { path: "profile",      element: <S><ProfessionalProfile /></S> },
+      { path: "*",            element: <NotFound /> },
     ],
   },
 
@@ -258,16 +287,16 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <StreamerDashboard /> },
-      { path: "matches", element: <StreamerMatches /> },
-      { path: "manage/:matchId", element: <ManageStream /> },
-      { path: "ticker-gallery/:matchId?", element: <TickerGallery /> },
-      { path: "schedule", element: <StreamerSchedule /> },
-      { path: "revenue", element: <OwnerRevenue /> },
-      { path: "support", element: <PartnerSupport /> },
-      { path: "banking", element: <PayoutBanking /> },
-      { path: "profile", element: <ProfessionalProfile /> },
-      { path: "*", element: <NotFound /> },
+      { index: true,                        element: <S><StreamerDashboard /></S> },
+      { path: "matches",                    element: <S><StreamerMatches /></S> },
+      { path: "manage/:matchId",            element: <S><ManageStream /></S> },
+      { path: "ticker-gallery/:matchId?",   element: <S><TickerGallery /></S> },
+      { path: "schedule",                   element: <S><StreamerSchedule /></S> },
+      { path: "revenue",                    element: <S><OwnerRevenue /></S> },
+      { path: "support",                    element: <S><PartnerSupport /></S> },
+      { path: "banking",                    element: <S><PayoutBanking /></S> },
+      { path: "profile",                    element: <S><ProfessionalProfile /></S> },
+      { path: "*",                          element: <NotFound /> },
     ],
   },
 
@@ -280,17 +309,17 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <ScorerDashboard /> },
-      { path: "matches", element: <ScorerMatches /> },
-      { path: "schedule", element: <UmpireSchedule /> },
-      { path: "availability", element: <ProfessionalAvailability /> },
-      { path: "bookings", element: <ProfessionalBookings /> },
-      { path: "reviews", element: <ProfessionalReviews /> },
-      { path: "revenue", element: <OwnerRevenue /> },
-      { path: "support", element: <PartnerSupport /> },
-      { path: "banking", element: <PayoutBanking /> },
-      { path: "profile", element: <ProfessionalProfile /> },
-      { path: "*", element: <NotFound /> },
+      { index: true,          element: <S><ScorerDashboard /></S> },
+      { path: "matches",      element: <S><ScorerMatches /></S> },
+      { path: "schedule",     element: <S><UmpireSchedule /></S> },
+      { path: "availability", element: <S><ProfessionalAvailability /></S> },
+      { path: "bookings",     element: <S><ProfessionalBookings /></S> },
+      { path: "reviews",      element: <S><ProfessionalReviews /></S> },
+      { path: "revenue",      element: <S><OwnerRevenue /></S> },
+      { path: "support",      element: <S><PartnerSupport /></S> },
+      { path: "banking",      element: <S><PayoutBanking /></S> },
+      { path: "profile",      element: <S><ProfessionalProfile /></S> },
+      { path: "*",            element: <NotFound /> },
     ],
   },
 
@@ -298,7 +327,7 @@ const router = createBrowserRouter([
     path: "/matches/:id/stream-setup",
     element: (
       <ProtectedRoute requiredRole="streamer">
-        <StreamSetup />
+        <S><StreamSetup /></S>
       </ProtectedRoute>
     ),
   },
@@ -307,85 +336,85 @@ const router = createBrowserRouter([
     path: "/scoring/:matchId",
     element: (
       <ProtectedRoute requiredRole={["scorer"]}>
-        <ScoringApp />
+        <S><ScoringApp /></S>
       </ProtectedRoute>
     ),
   },
+
   // ── USER PORTAL (Fall-through Priority) ──
   {
     path: "/",
     element: <UserRoot />,
     errorElement: <ErrorBoundary />,
     children: [
-      { index: true, element: <RootRedirect /> },
-      { path: "team/:id", element: <TeamProfile /> },
-      { path: "login", element: <PublicRoute><UserLogin /></PublicRoute> },
-      { path: "signup", element: <PublicRoute><UserSignUp /></PublicRoute> },
-      { path: "auth/login", element: <PublicRoute><UserLogin /></PublicRoute> },
-      { path: "auth/signup", element: <PublicRoute><UserSignUp /></PublicRoute> },
-      { path: "forgot-password", element: <PublicRoute><ForgotPassword /></PublicRoute> },
-      { path: "turfs", element: <UserTurf /> },
-      { path: "turf/:id", element: <UserTurfDetails /> },
-      { path: "profile/:userId?", element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
-      { path: "blogs", element: <UserBlogs /> },
-      { path: "blogs/:id", element: <UserBlogDetail /> },
-      { path: "community", element: <Community /> },
-      { path: "players", element: <FindPlayers /> },
-      { path: "host-game", element: <ProtectedRoute><HostGame /></ProtectedRoute> },
-      { path: "join-games", element: <JoinGames /> },
-      { path: "matches/:matchId/stream-setup", element: <ProtectedRoute><StreamSetup /></ProtectedRoute> },
-      { path: "youtube-connected", element: <YouTubeConnected /> },
-      { path: "youtube-error", element: <YouTubeError /> },
-      { path: "facebook-connected", element: <FacebookConnected /> },
-      { path: "facebook-error", element: <FacebookError /> },
-      { path: "my-hosted-games", element: <ProtectedRoute><MyHostedGames /></ProtectedRoute> },
-      { path: "my-joined-games", element: <ProtectedRoute><MyJoinedGames /></ProtectedRoute> },
-      { path: "match/:matchId", element: <ProtectedRoute><MatchDetails /></ProtectedRoute> },
-
-      { path: "professionals", element: <FindProfessionals /> },
-      { path: "professionals/:id", element: <ProfessionalDetails /> },
-      { path: "messages", element: <ProtectedRoute><Messages /></ProtectedRoute> },
-      { path: "my-teams", element: <ProtectedRoute><MyTeams /></ProtectedRoute> },
-
+      { index: true,    element: <RootRedirect /> },
+      { path: "team/:id", element: <S><TeamProfile /></S> },
+      { path: "login",        element: <PublicRoute><S><UserLogin /></S></PublicRoute> },
+      { path: "signup",       element: <PublicRoute><S><UserSignUp /></S></PublicRoute> },
+      { path: "auth/login",   element: <PublicRoute><S><UserLogin /></S></PublicRoute> },
+      { path: "auth/signup",  element: <PublicRoute><S><UserSignUp /></S></PublicRoute> },
+      { path: "forgot-password", element: <PublicRoute><S><ForgotPassword /></S></PublicRoute> },
+      { path: "turfs",        element: <S><UserTurf /></S> },
+      { path: "turf/:id",     element: <S><UserTurfDetails /></S> },
+      { path: "profile/:userId?", element: <ProtectedRoute><S><UserProfile /></S></ProtectedRoute> },
+      { path: "blogs",        element: <S><UserBlogs /></S> },
+      { path: "blogs/:id",    element: <S><UserBlogDetail /></S> },
+      { path: "community",    element: <S><Community /></S> },
+      { path: "players",      element: <S><FindPlayers /></S> },
+      { path: "host-game",    element: <ProtectedRoute><S><HostGame /></S></ProtectedRoute> },
+      { path: "join-games",   element: <S><JoinGames /></S> },
+      { path: "matches/:matchId/stream-setup", element: <ProtectedRoute><S><StreamSetup /></S></ProtectedRoute> },
+      { path: "youtube-connected",  element: <S><YouTubeConnected /></S> },
+      { path: "youtube-error",      element: <S><YouTubeError /></S> },
+      { path: "facebook-connected", element: <S><FacebookConnected /></S> },
+      { path: "facebook-error",     element: <S><FacebookError /></S> },
+      { path: "my-hosted-games",    element: <ProtectedRoute><S><MyHostedGames /></S></ProtectedRoute> },
+      { path: "my-joined-games",    element: <ProtectedRoute><S><MyJoinedGames /></S></ProtectedRoute> },
+      { path: "match/:matchId",     element: <ProtectedRoute><S><MatchDetails /></S></ProtectedRoute> },
+      { path: "professionals",      element: <S><FindProfessionals /></S> },
+      { path: "professionals/:id",  element: <S><ProfessionalDetails /></S> },
+      { path: "messages",           element: <ProtectedRoute><S><Messages /></S></ProtectedRoute> },
+      { path: "my-teams",           element: <ProtectedRoute><S><MyTeams /></S></ProtectedRoute> },
 
       // Business Landings
-      { path: "business/venue", element: <UserVenueOwnerLanding /> },
-      { path: "business/coach", element: <UserCoachLanding /> },
-      { path: "business/official", element: <UserUmpireLanding /> },
-      { path: "business/streamer", element: <UserStreamerLanding /> },
-      { path: "business/scorer", element: <UserScorerLanding /> },
-      { path: "business/register", element: <BusinessRegistration /> },
+      { path: "business/venue",     element: <S><UserVenueOwnerLanding /></S> },
+      { path: "business/coach",     element: <S><UserCoachLanding /></S> },
+      { path: "business/official",  element: <S><UserUmpireLanding /></S> },
+      { path: "business/streamer",  element: <S><UserStreamerLanding /></S> },
+      { path: "business/scorer",    element: <S><UserScorerLanding /></S> },
+      { path: "business/register",  element: <S><BusinessRegistration /></S> },
 
       // Business Auth
-      { path: "signup/venue", element: <PublicRoute><VenueOwnerSignUp /></PublicRoute> },
-      { path: "signup/coach", element: <PublicRoute><CoachSignUp /></PublicRoute> },
-      { path: "signup/official", element: <PublicRoute><UmpireSignUp /></PublicRoute> },
-      { path: "signup/streamer", element: <PublicRoute><StreamerSignUp /></PublicRoute> },
-      { path: "signup/scorer", element: <PublicRoute><ScorerSignUp /></PublicRoute> },
-      { path: "wallet", element: <ProtectedRoute><UserWallet /></ProtectedRoute> },
-      { path: "booking-history", element: <ProtectedRoute><UserTurfBookingHistory /></ProtectedRoute> },
-      { path: "checkout/:turfId", element: <ProtectedRoute><CheckoutPage /></ProtectedRoute> },
-      { path: "booking-pass/:id", element: <BookingPass /> },
-      { path: "team-pass/:id", element: <TeamPass /> },
-      { path: "team/:id", element: <TeamProfile /> },
-      { path: "booking-invoice/:id", element: <BookingInvoice /> },
-      { path: "analytics/:matchId", element: <MatchAnalytics /> },
-      { path: "leaderboard", element: <Leaderboard /> },
-      { path: "live-overlay/:matchId", element: <LiveOverlay /> },
-      { path: "live-score/:matchId", element: <LiveScoreboard /> },
-      { path: "privacy-policy", element: <PrivacyPolicy /> },
-      { path: "terms-of-service", element: <TermsOfService /> },
-      { path: "data-deletion-instructions", element: <DataDeletionInstructions /> },
+      { path: "signup/venue",    element: <PublicRoute><S><VenueOwnerSignUp /></S></PublicRoute> },
+      { path: "signup/coach",    element: <PublicRoute><S><CoachSignUp /></S></PublicRoute> },
+      { path: "signup/official", element: <PublicRoute><S><UmpireSignUp /></S></PublicRoute> },
+      { path: "signup/streamer", element: <PublicRoute><S><StreamerSignUp /></S></PublicRoute> },
+      { path: "signup/scorer",   element: <PublicRoute><S><ScorerSignUp /></S></PublicRoute> },
+
+      { path: "wallet",           element: <ProtectedRoute><S><UserWallet /></S></ProtectedRoute> },
+      { path: "booking-history",  element: <ProtectedRoute><S><UserTurfBookingHistory /></S></ProtectedRoute> },
+      { path: "checkout/:turfId", element: <ProtectedRoute><S><CheckoutPage /></S></ProtectedRoute> },
+      { path: "booking-pass/:id", element: <S><BookingPass /></S> },
+      { path: "team-pass/:id",    element: <S><TeamPass /></S> },
+      { path: "team/:id",         element: <S><TeamProfile /></S> },
+      { path: "booking-invoice/:id", element: <S><BookingInvoice /></S> },
+      { path: "analytics/:matchId",  element: <S><MatchAnalytics /></S> },
+      { path: "leaderboard",         element: <S><Leaderboard /></S> },
+      { path: "live-overlay/:matchId",  element: <S><LiveOverlay /></S> },
+      { path: "live-score/:matchId",    element: <S><LiveScoreboard /></S> },
+      { path: "privacy-policy",              element: <S><PrivacyPolicy /></S> },
+      { path: "terms-of-service",            element: <S><TermsOfService /></S> },
+      { path: "data-deletion-instructions",  element: <S><DataDeletionInstructions /></S> },
       { path: "*", element: <NotFound /> },
     ],
   },
 
   // ── LEGACY & REDIRECTS ──
-  { path: "/owner", element: <Navigate to="/partner" replace /> },
-  { path: "/venue-owner", element: <Navigate to="/business/venue" replace /> },
-  { path: "/coach-landing", element: <Navigate to="/business/coach" replace /> },
+  { path: "/owner",          element: <Navigate to="/partner" replace /> },
+  { path: "/venue-owner",    element: <Navigate to="/business/venue" replace /> },
+  { path: "/coach-landing",  element: <Navigate to="/business/coach" replace /> },
   { path: "/umpire-landing", element: <Navigate to="/business/official" replace /> },
-  { path: "/partners", element: <PartnersGateway /> },
+  { path: "/partners",       element: <S><PartnersGateway /></S> },
 
   // Catch-all (Global)
   { path: "*", element: <NotFound /> },

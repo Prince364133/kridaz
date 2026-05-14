@@ -39,8 +39,9 @@ const storySchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// TTL index removed to make stories permanent
-// storySchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// ── Performance indexes ───────────────────────────────────────────────────────
+// TTL: auto-delete stories when expiresAt is reached (no cleanup job needed)
+storySchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const Story = mongoose.model('Story', storySchema);
 

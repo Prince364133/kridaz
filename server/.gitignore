@@ -26,3 +26,63 @@ dist-ssr
 
 
 /*.md
+
+# ── Debug / Seed / Scratch scripts ────────────────────────────────────────────
+# These are developer-only tools. They live locally but must NOT be committed.
+scratch/
+nuke_and_seed.js
+master_seed.js
+invoice.pdf
+test_output.txt
+scoring_validator.js
+seed_admin.js
+seed_scorer.js
+audit_turfs.js
+backfill_slots.js
+backfill_slugs.js
+repro_dashboards.js
+search_users.js
+find_profs.js
+find_recent_profs.js
+find_users_cjs.cjs
+fixChat.js
+jest.config.js
+
+# Glob patterns for stray root-level debug/test/fix/check scripts
+check_*.js
+debug_*.js
+fix_*.js
+test_*.js
+find_*.js
+
+# Scripts directory — seed and admin tooling (dangerous if run in production)
+scripts/seed_all_data.js
+scripts/seed_admin_credentials.js
+scripts/seed_partner_data.js
+scripts/seed_slots_bookings.js
+scripts/seed_turfs.js
+scripts/seed_blogs.js
+scripts/seed_features.js
+scripts/seedUsernames.js
+scripts/setup_test_creds.js
+scripts/setup_test_scorer.js
+scripts/add_admin_balance.js
+scripts/approve_all.js
+scripts/backfill_revenue_status.js
+scripts/backfill_short_ids.js
+scripts/check_*.js
+scripts/debug_*.js
+scripts/fix_*.js
+scripts/test_*.js
+scripts/list_*.js
+scripts/find_*.js
+scripts/db_check.js
+scripts/verify_db.js
+scripts/patchScorerName.js
+scripts/fixProfessionalOwnerRecords.js
+
+# ── Retired / orphaned route files ────────────────────────────────────────
+# Superseded by routes/user/auth.routes.js (live). Its two unique endpoints
+# (check-username, umpire-invite-details) have been migrated there.
+# This file is imported nowhere and must not be re-introduced.
+modules/auth/auth.routes.js

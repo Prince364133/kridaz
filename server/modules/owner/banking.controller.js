@@ -136,10 +136,17 @@ export const requestPayout = async (req, res) => {
       }
     });
 
-    // Deduct from wallet
-    owner.walletBalance -= amount;
-    
-    await Promise.all([withdrawal.save(), owner.save()]);
+    // Deduct from wallet — atomic operation with overdraft guard
+    const debitedOwner = await Owner.findOneAndUpdate(
+      { _id: ownerId, walletBalance: { $gte: amount } },
+      { $inc: { walletBalance: -amount } },
+      { new: true }
+    );
+    if (!debitedOwner) {
+      return res.status(400).json({ success: false, message: "Insufficient wallet balance" });
+    }
+
+    await withdrawal.save();
 
     res.status(200).json({ 
       success: true, 

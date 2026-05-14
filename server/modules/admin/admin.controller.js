@@ -132,10 +132,41 @@ export const getAllUsers = async (req, res) => {
   if (admin !== "admin" && admin !== "BMSP_ADMIN") {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
-  
+
   try {
-    const users = await User.find({}, { password: 0 });
-    res.status(200).json({ success: true, message: "success", users });
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, parseInt(req.query.limit) || 20);
+    const skip = (page - 1) * limit;
+    const search = req.query.search || '';
+
+    const query = { password: { $exists: true } };
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const [users, total] = await Promise.all([
+      User.find(query, { password: 0 })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      User.countDocuments(query),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "success",
+      users,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error("Error in getAllUsers: ", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -264,7 +295,8 @@ export const getAllTransactions = async (req, res) => {
     const transactions = await Booking.find({}, { createdAt: 1, payment: 1, totalPrice: 1 })
       .populate("user", { name: 1, _id: 0 })
       .populate("turf", { name: 1, _id: 0 })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(100); // safety cap — paginate this endpoint if needed
 
     return res.status(200).json({
       message: "Fetched all transactions",
@@ -282,7 +314,8 @@ export const getAllOwners = async (req, res) => {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
-    const owners = await Owner.find({ role: { $in: ["venu_owners", "owner", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"] } }, { password: 0 });
+    const owners = await Owner.find({ role: { $in: ["venu_owners", "owner", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"] } }, { password: 0 })
+      .limit(200); // safety cap — paginate this endpoint if needed
     res.status(200).json({
       message: "Fetched all owners",
       owners,
@@ -358,7 +391,8 @@ export const getAllProfessionals = async (req, res) => {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
   }
   try {
-    const professionals = await Owner.find({ role: { $in: ["coach", "umpire", "streamer", "scorer"] } }, { password: 0 });
+    const professionals = await Owner.find({ role: { $in: ["coach", "umpire", "streamer", "scorer"] } }, { password: 0 })
+      .limit(200); // safety cap — paginate this endpoint if needed
     res.status(200).json({
       message: "Fetched all professionals",
       professionals,
@@ -676,13 +710,20 @@ export const approveWithdrawalRequest = async (req, res) => {
       return res.status(404).json({ success: false, message: "Owner not found" });
     }
 
-    // Process the withdrawal
-    owner.walletBalance -= request.amount;
-    if (owner.reservedBalance >= request.amount) {
-      owner.reservedBalance -= request.amount;
+    // Process the withdrawal — atomic debit on both balances with overdraft guard
+    const updatedOwner = await Owner.findOneAndUpdate(
+      { _id: request.owner, walletBalance: { $gte: request.amount } },
+      {
+        $inc: {
+          walletBalance: -request.amount,
+          reservedBalance: owner.reservedBalance >= request.amount ? -request.amount : 0
+        }
+      },
+      { new: true }
+    );
+    if (!updatedOwner) {
+      return res.status(400).json({ success: false, message: "Insufficient owner wallet balance" });
     }
-
-    await owner.save();
 
     request.status = "COMPLETED";
     request.transactionId = transactionId;
@@ -901,7 +942,8 @@ export const getAllHostedGames = async (req, res) => {
       .populate('host', 'name email profilePicture')
       .populate('ground', 'name location')
       .populate('umpire', 'name')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(100); // safety cap — paginate this endpoint if needed
 
     res.status(200).json({ success: true, games });
   } catch (error) {

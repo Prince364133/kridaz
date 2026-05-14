@@ -124,4 +124,7 @@ const cricketScoringSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// ── Performance indexes ───────────────────────────────────────────────────────
+cricketScoringSchema.index({ matchId: 1 });
+
 export default mongoose.model("CricketScoring", cricketScoringSchema);

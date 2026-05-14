@@ -186,4 +186,8 @@ const hostedGameSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// ── Performance indexes ───────────────────────────────────────────────────────
+hostedGameSchema.index({ status: 1, date: 1, city: 1 });
+hostedGameSchema.index({ host: 1, createdAt: -1 });
+
 export default mongoose.model("HostedGame", hostedGameSchema);
