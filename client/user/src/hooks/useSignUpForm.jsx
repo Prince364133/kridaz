@@ -19,7 +19,7 @@ const registerSchema = yup.object().shape({
     .string()
     .required("Enter your email")
     .matches(
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/gm,
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
       "Enter a valid email"
     ),
   phone: yup
@@ -51,7 +51,12 @@ const registerSchema = yup.object().shape({
     .oneOf([yup.ref("password"), null], "Passwords must match"),
   otp: yup.string().when("$showOtpInput", {
     is: true,
-    then: () => yup.string().required("OTP is required").min(6, "OTP must be 6 characters"),
+    then: () => yup.string().required("Email OTP is required").min(6, "OTP must be 6 characters"),
+    otherwise: () => yup.string().notRequired(),
+  }),
+  phoneOtp: yup.string().when("$showOtpInput", {
+    is: true,
+    then: () => yup.string().required("WhatsApp OTP is required").min(6, "OTP must be 6 characters"),
     otherwise: () => yup.string().notRequired(),
   }),
   role: yup.string().required("Role is required"),
@@ -149,9 +154,9 @@ const useSignUpForm = (predefinedRole = "user") => {
 
     setLoading(true);
     try {
-      const email = getValues("email");
-      const response = await axiosInstance.post(`${apiPath}/send-otp`, { email });
-      toast.success(response.data.message || "OTP sent to your email");
+      const { email, phone } = getValues();
+      const response = await axiosInstance.post(`${apiPath}/send-otp`, { email, phone });
+      toast.success(response.data.message || "OTPs sent to your email and WhatsApp");
       setShowOtpInput(true);
     } catch (error) {
       if (error.response) {

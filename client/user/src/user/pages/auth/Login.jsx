@@ -35,7 +35,8 @@ const Login = () => {
     handleGoogleError,
     showOnboarding,
     setShowOnboarding,
-    onboardingUser
+    onboardingUser,
+    accountNotFound
   } = useLoginForm();
   const [mounted, setMounted] = useState(false);
   const dispatch = useDispatch(); // for quick demo button
@@ -82,38 +83,39 @@ const Login = () => {
             <div className="space-y-10 w-full">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                 
-                {showOtpInput ? (
-                  <div className="space-y-6">
-                    <div className="text-center mb-8">
-                      <h3 className="text-xl font-semibold text-white">Enter Verification Code</h3>
-                      <p className="text-sm text-white/60 mt-2">We sent a 6-digit code to your email address.</p>
-                    </div>
-                    
-                    <div className="space-y-2 group/field">
-                      <div className="relative">
-                        <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
-                        <input 
-                          {...register("otp")}
-                          type="text" 
-                          placeholder="000000"
-                          maxLength={6}
-                          className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
-                        />
-                      </div>
-                      {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
-                    </div>
-                    
-                    <button 
-                      type="submit" 
-                      disabled={loading}
-                      className="w-full bg-[#84CC16] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
-                    >
-                      {loading ? "Verifying..." : "Verify & Login"}
-                      {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
-                    </button>
+                {/* OTP Step */}
+                <div className={showOtpInput ? "space-y-6 block animate-fade-in" : "hidden"}>
+                  <div className="text-center mb-8">
+                    <h3 className="text-xl font-semibold text-white">Verification Code</h3>
+                    <p className="text-sm text-white/60 mt-2">We sent a 6-digit code to your email address.</p>
                   </div>
-                ) : (
-                  <>
+                  
+                  <div className="space-y-2 group/field">
+                    <div className="relative">
+                      <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                      <input 
+                        {...register("otp")}
+                        type="text" 
+                        placeholder="000000"
+                        maxLength={6}
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
+                      />
+                    </div>
+                    {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
+                  </div>
+                  
+                  <button 
+                    type="submit" 
+                    disabled={loading}
+                    className="w-full bg-[#84CC16] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
+                  >
+                    {loading ? "Verifying..." : "Verify & Login"}
+                    {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
+                  </button>
+                </div>
+
+                {/* Email/Password Step */}
+                <div className={!showOtpInput ? "space-y-8 block animate-fade-in" : "hidden"}>
                     {/* Google Login Button */}
                     <div className="w-full mb-8">
                       <GoogleAuthButton 
@@ -173,6 +175,20 @@ const Login = () => {
 
                     {/* Submit Button */}
                     <div className="space-y-4 mt-8">
+                      {accountNotFound && (
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl mb-4 animate-fade-in">
+                          <p className="text-sm text-red-500 text-center mb-3 font-medium">
+                            Account not found. Create a new account to get started!
+                          </p>
+                          <Link 
+                            to="/signup" 
+                            className="w-full bg-white/10 hover:bg-white/20 text-white h-12 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all"
+                          >
+                            Sign Up Now <ArrowRight size={16} />
+                          </Link>
+                        </div>
+                      )}
+                      
                       <button 
                         type="submit" 
                         disabled={loading}
@@ -183,8 +199,7 @@ const Login = () => {
                       </button>
 
                     </div>
-                  </>
-                )}
+                  </div>
               </form>
             </div>
 

@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy } from 'lucide-react';
+import { ChevronLeft, Settings, History, Users, Zap, CheckCircle2, AlertCircle, User, Undo2, Trophy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import useCricketScoring from '@hooks/shared/useCricketScoring';
@@ -102,11 +102,10 @@ function HistoryTab({ matchData }) {
 const ScoringApp = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
-  const { role } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState('scoring');
   const [showSettings, setShowSettings] = useState(false);
   const [liveEnabled, setLiveEnabled] = useState(false);
-  const [liveUrls, setLiveUrls] = useState(null);
   const [liveLoading, setLiveLoading] = useState(false);
 
   const {

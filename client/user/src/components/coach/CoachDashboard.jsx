@@ -1,19 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Users,
   Calendar,
   TrendingUp,
   Zap,
-  Layout,
-  Star,
-  ChevronRight,
-  BarChart2,
-  Package,
-  Activity,
-  CheckCircle2,
-  Clock,
-  ExternalLink,
-  Search
+  BarChart2
 } from "lucide-react";
 import {
   AreaChart,
@@ -24,7 +15,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Link } from "react-router-dom";
 import CountUp from "react-countup";
 import { useSelector } from "react-redux";
 import useCoachDashboard from "@hooks/owner/useCoachDashboard";

@@ -200,52 +200,52 @@ const SignUp = () => {
             {/* Body */}
             <div className="space-y-10 w-full">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                
-                {showOtpInput ? (
-                  <div className="space-y-6">
-                    <div className="text-center mb-8">
-                      <h3 className="text-xl font-semibold text-white">Enter Verification Code</h3>
-                    </div>
-                    <div className="space-y-4 group/field">
-                      <div className="relative">
-                        <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
-                        <input 
-                          {...register("otp")}
-                          type="text" 
-                          placeholder="Email OTP"
-                          maxLength={6}
-                          className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
-                        />
-                      </div>
-                      {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
-                    </div>
-
-                    <div className="space-y-4 group/field">
-                      <div className="relative">
-                        <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
-                        <input 
-                          {...register("phoneOtp")}
-                          type="text" 
-                          placeholder="WhatsApp OTP"
-                          maxLength={6}
-                          className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
-                        />
-                      </div>
-                      {errors.phoneOtp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.phoneOtp.message}</p>}
-                      <p className="text-[10px] text-white/40 text-center uppercase tracking-widest">Default test OTP: 123456</p>
-                    </div>
-                    
-                    <button 
-                      type="submit" 
-                      disabled={loading}
-                      className="w-full bg-[#84CC16] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
-                    >
-                      {loading ? "Verifying..." : "Verify & Create Account"}
-                      {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
-                    </button>
+                  {/* OTP Step */}
+                <div className={showOtpInput ? "space-y-6 block animate-fade-in" : "hidden"}>
+                  <div className="text-center mb-8">
+                    <h3 className="text-xl font-semibold text-white">Enter Verification Code</h3>
                   </div>
-                ) : (
-                  <>
+                  <div className="space-y-4 group/field">
+                    <div className="relative">
+                      <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                      <input 
+                        {...register("otp")}
+                        type="text" 
+                        placeholder="Email OTP"
+                        maxLength={6}
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
+                      />
+                    </div>
+                    {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
+                  </div>
+
+                  <div className="space-y-4 group/field">
+                    <div className="relative">
+                      <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                      <input 
+                        {...register("phoneOtp")}
+                        type="text" 
+                        placeholder="WhatsApp OTP"
+                        maxLength={6}
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
+                      />
+                    </div>
+                    {errors.phoneOtp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.phoneOtp.message}</p>}
+                    <p className="text-[10px] text-white/40 text-center uppercase tracking-widest">Default test OTP: 123456</p>
+                  </div>
+                  
+                  <button 
+                    type="submit" 
+                    disabled={loading}
+                    className="w-full bg-[#84CC16] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
+                  >
+                    {loading ? "Verifying..." : "Verify & Create Account"}
+                    {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
+                  </button>
+                </div>
+
+                {/* Form Fields Step */}
+                <div className={!showOtpInput ? "space-y-8 block animate-fade-in" : "hidden"}>
                     {/* Google Login Button */}
                     <div className="w-full mb-8">
                       <GoogleAuthButton 
@@ -524,9 +524,9 @@ const SignUp = () => {
                       {loading ? "Sending OTP..." : "Continue"}
                       {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
                     </button>
-                  </>
-                )}
+                    </div>
               </form>
+            </div>
 
               {/* Back to Login */}
               <div className="pt-8 mt-10 border-t border-white/5 flex flex-col items-center justify-center text-center">
@@ -545,8 +545,7 @@ const SignUp = () => {
             </Link>
           </div>
         </div>
-      </div>
-
+      
       {/* AMBIENT LIGHTING */}
       <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-white/[0.01] pointer-events-none rounded-full" />
       <div className="absolute bottom-1/4 left-0 w-[600px] h-[600px] bg-white/[0.01] pointer-events-none rounded-full" />

@@ -15,7 +15,10 @@ import { getIO } from "../../config/socket.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+const generateOTP = () => {
+  if (process.env.TEST_OTP) return process.env.TEST_OTP;
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
 const generateUniqueUsername = async (baseName) => {
   let username = baseName ? baseName.toLowerCase().replace(/[^a-z0-9]/g, '') : "player";
@@ -326,7 +329,7 @@ export const registerUser = async (req, res) => {
 
 // Owner Registration
 export const registerOwner = async (req, res) => {
-  const { name, email, phone, password, role, gender, location, otp } = req.body;
+  const { name, email, phone, password, role, gender, location, otp, phoneOtp } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -335,9 +338,16 @@ export const registerOwner = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email already registered" });
     }
 
-    const otpRecord = await OTP.findOne({ email, otp });
+    const otpRecord = await OTP.findOne({ email, phone });
     if (!otpRecord) {
-      return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
+      return res.status(400).json({ success: false, message: "No OTP record found. Please resend OTP." });
+    }
+
+    const isEmailValid = (otp === otpRecord.emailOtp);
+    const isPhoneValid = (phoneOtp === otpRecord.phoneOtp);
+
+    if (!isEmailValid || !isPhoneValid) {
+      return res.status(400).json({ success: false, message: "Invalid or expired OTPs" });
     }
 
     const hashedPassword = await argon2.hash(password);
@@ -436,25 +446,36 @@ export const loginStep1 = async (req, res) => {
       token = generateUserToken(account._id);
     }
 
-    // Set cookie for shared auth between portals
-    res.cookie("auth_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    // Send OTP for 2FA
+    const emailOtp = generateOTP();
+    const phoneOtp = generateOTP();
+    await OTP.findOneAndDelete({ email: account.email });
+    const newOtp = new OTP({ 
+      email: account.email, 
+      phone: account.phone, 
+      emailOtp, 
+      phoneOtp 
     });
+    await newOtp.save();
 
-    if (account.status === "blocked") {
-      return res.status(403).json({ success: false, message: "Your account has been blocked by an administrator." });
+    generateEmail(
+      account.email,
+      "Your Kridaz Login Verification Code",
+      `<p>Your verification code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>`
+    );
+
+    // Send WhatsApp
+    const otpTemplate = process.env.MSG91_WHATSAPP_OTP_TEMPLATE;
+    if (otpTemplate) {
+      sendWhatsAppMessage(account.phone, "", otpTemplate, [phoneOtp]);
+    } else {
+      sendWhatsAppMessage(account.phone, `Your Kridaz verification code is: ${phoneOtp}`);
     }
 
     return res.status(200).json({ 
       success: true, 
-      message: "Login successful", 
-      token, 
-      role,
-      user: account,
-      requiresOtp: false 
+      message: "OTP sent to your email and WhatsApp", 
+      requiresOtp: true 
     });
   } catch (err) {
     console.error(chalk.red(err.message));
