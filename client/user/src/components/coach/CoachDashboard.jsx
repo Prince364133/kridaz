@@ -1,6 +1,20 @@
-import React from "react";
-import { Users, Calendar, TrendingUp, Zap, Layout } from "lucide-react";
-import StatCard from "../admin/Dashboard/StatCard";
+import React, { useState } from "react";
+import {
+  Users,
+  Calendar,
+  TrendingUp,
+  Zap,
+  Layout,
+  Star,
+  ChevronRight,
+  BarChart2,
+  Package,
+  Activity,
+  CheckCircle2,
+  Clock,
+  ExternalLink,
+  Search
+} from "lucide-react";
 import {
   AreaChart,
   Area,
@@ -10,23 +24,34 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { Link } from "react-router-dom";
+import CountUp from "react-countup";
+import { useSelector } from "react-redux";
 import useCoachDashboard from "@hooks/owner/useCoachDashboard";
 import DashboardSkeleton from "../owner/Dashboard/DashboardSkeleton";
 
-export default function CoachDashboard() {
+const CoachDashboard = () => {
   const { dashboardData, loading, error } = useCoachDashboard();
+  const user = useSelector((state) => state.auth.user);
+  
+  const [currentTime, setCurrentTime] = React.useState(new Date());
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (loading) return <DashboardSkeleton />;
   if (error) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-[60vh] text-white text-center">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="font-bold text-xl uppercase tracking-wider text-primary">
-          Intelligence Unavailable
-        </p>
+      <div className="flex flex-col justify-center items-center min-h-[60vh] text-white">
+        <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="font-bold text-xl uppercase tracking-wider text-red-500">Connection Interrupted</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-6 px-8 py-3 border border-primary/50 text-primary font-bold uppercase rounded-xl hover:bg-primary/10 transition-all"
+          className="mt-6 px-8 py-3 border border-red-500/50 text-red-500 font-bold uppercase rounded-xl hover:bg-red-500/10 transition-all"
         >
           Try Again
         </button>
@@ -41,198 +66,270 @@ export default function CoachDashboard() {
     studentProgress = [],
     upcomingSessions = [],
     totalRevenue = 0,
+    coach
   } = dashboardData;
 
+  const getTimeGreeting = () => {
+    const hour = currentTime.getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  };
+
   return (
-    <div className="h-full custom-scrollbar">
-      <div className="p-4 md:p-10 space-y-6 md:space-y-12 animate-fade-in pt-2 pb-24 md:pb-12 max-w-[1600px] mx-auto">
+    <div className="h-full custom-scrollbar bg-[#000000] font-open-sans">
+      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 lg:space-y-10 animate-fade-in pt-0 pb-24 h-full relative">
+        <div className="space-y-8 lg:space-y-10 relative z-10">
 
-        {/* Coach Profile Section */}
-        {dashboardData.coach && (
-          <div className="bg-[#0A0A0A] rounded-[2.5rem] border border-white/5 p-8 flex flex-col md:flex-row items-center gap-8 group hover:border-[#84CC16]/20 transition-all">
-            <div className="relative">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl overflow-hidden border-4 border-[#84CC16]/20 group-hover:border-[#84CC16]/50 transition-all shadow-2xl shadow-black">
-                <img 
-                  src={dashboardData.coach.profilePicture || "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=300&h=300&fit=crop"} 
-                  alt="Coach" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-2 -right-2 bg-[#84CC16] p-2 rounded-xl text-black shadow-lg">
-                <Zap size={16} fill="black" />
-              </div>
-            </div>
-            
-            <div className="flex-1 text-center md:text-left space-y-2">
-              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-white">
-                  {dashboardData.coach.name}
-                </h1>
-                <span className="px-3 py-1 bg-[#84CC16]/10 text-[#84CC16] text-[10px] font-black uppercase tracking-[0.2em] rounded-lg self-center md:self-start">
-                  Pro Coach
-                </span>
-              </div>
-              
-              <p className="text-gray-400 font-medium text-sm md:text-base max-w-2xl">
-                {dashboardData.coach.businessDetails?.specialization || "Expert Sports Consultant"} • {dashboardData.coach.businessDetails?.experience || "N/A"} Experience
+          {/* Dashboard Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-white/5">
+            <div className="space-y-1">
+              <h1 className="text-3xl lg:text-4xl font-bold text-white tracking-tight font-inter">
+                Coach <span className="text-[#CCFF00]">Dashboard</span>
+              </h1>
+              <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider font-inter">
+                {getTimeGreeting()}, {user?.name || "Coach"} • Your training hub
               </p>
-              
-              <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
-                {dashboardData.coach.interests?.map((interest, i) => (
-                  <span key={i} className="px-3 py-1 bg-white/5 text-gray-400 text-[10px] font-bold uppercase tracking-wider rounded-full border border-white/5">
-                    {interest}
-                  </span>
-                )) || (
-                  <span className="px-3 py-1 bg-white/5 text-gray-400 text-[10px] font-bold uppercase tracking-wider rounded-full border border-white/5">
-                    Cricket
-                  </span>
-                )}
-              </div>
             </div>
 
-            <div className="hidden lg:flex items-center gap-8 pr-4">
-              <div className="text-center">
-                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Rating</p>
-                <div className="flex items-center gap-1 text-white font-black text-xl">
-                  {dashboardData.coach.rating || "4.9"} <span className="text-[#84CC16]">★</span>
-                </div>
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-2xl backdrop-blur-xl">
+              <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-xl flex items-center justify-center text-[#CCFF00]">
+                <Calendar size={24} />
               </div>
-              <div className="w-px h-12 bg-white/5"></div>
-              <div className="text-center">
-                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Reviews</p>
-                <p className="text-white font-black text-xl">{dashboardData.coach.numReviews || "120"}+</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Stats Grid — all real data */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          <StatCard title="Active Trainees" value={activeTrainees} icon={Users} />
-          <StatCard title="Total Sessions" value={totalSessions} icon={Calendar} />
-          <StatCard title="Performance Index" value={performanceIndex} icon={TrendingUp} />
-          <StatCard title="Total Earnings" value={totalRevenue} icon={Zap} prefix="₹" />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          {/* Student Progress Chart */}
-          <div className="lg:col-span-2 p-6 md:p-10 bg-[#0A0A0A] rounded-[2.5rem] border border-white/5 relative group transition-all hover:border-[#84CC16]/20">
-            <div className="flex justify-between items-center mb-8 md:mb-12">
-              <div>
-                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white">
-                  Student Progress
-                </h2>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-1">
-                  Aggregate Achievement Metrics
+              <div className="space-y-0.5">
+                <p className="text-white text-lg font-bold leading-none font-inter">
+                  {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
+                </p>
+                <p className="text-[#CCFF00] text-[10px] font-semibold uppercase tracking-widest opacity-80">
+                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} •{" "}
+                  {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
                 </p>
               </div>
-              <div className="p-3 bg-white/5 rounded-2xl border border-white/5 group-hover:border-[#84CC16]/30 transition-colors">
-                <TrendingUp className="text-[#84CC16]" size={20} />
-              </div>
-            </div>
-
-            <div className="h-[300px] md:h-[400px] w-full flex items-center justify-center border border-white/5 border-dashed rounded-[2rem] overflow-hidden">
-              {studentProgress.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={studentProgress} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="coachColor" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#84CC16" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#84CC16" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff05" />
-                    <XAxis
-                      dataKey="name"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: "#4b5563", fontSize: 10, fontWeight: "bold" }}
-                    />
-                    <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: "#4b5563", fontSize: 10, fontWeight: "bold" }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#000",
-                        border: "1px solid rgba(132,204,22,0.2)",
-                        borderRadius: "16px",
-                        boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
-                      }}
-                      itemStyle={{
-                        color: "#84CC16",
-                        fontWeight: "bold",
-                        textTransform: "uppercase",
-                        fontSize: "10px",
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#84CC16"
-                      strokeWidth={4}
-                      fill="url(#coachColor)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="text-center space-y-3 opacity-30">
-                  <Layout size={32} className="mx-auto" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em]">
-                    No progress data yet
-                  </p>
-                  <p className="text-[10px] text-gray-600">
-                    Progress will appear as students complete sessions
-                  </p>
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Upcoming Sessions Roster */}
-          <div className="p-8 md:p-10 bg-[#0A0A0A] rounded-[2.5rem] border border-white/5 flex flex-col group hover:border-[#84CC16]/20 transition-all">
-            <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-8">
-              Upcoming Sessions
-            </h2>
-            <div className="flex-1 space-y-5 overflow-y-auto max-h-[450px] pr-2 custom-scrollbar">
-              {upcomingSessions.length > 0 ? (
-                upcomingSessions.map((op, i) => (
-                  <div
-                    key={i}
-                    className="p-5 bg-white/[0.02] border-l-4 border-[#84CC16] group/item hover:bg-white/[0.05] transition-all rounded-r-[1.5rem]"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider">
-                        {op.time}
-                      </span>
-                      <span className="px-2 py-1 bg-[#84CC16]/10 text-[#84CC16] text-[8px] font-black uppercase tracking-widest rounded-md">
-                        {op.type}
-                      </span>
-                    </div>
-                    <h4 className="text-base font-bold text-white mb-1 uppercase tracking-tight">
-                      {op.name}
-                    </h4>
-                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                      <Users size={10} /> {op.student}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-20 py-20">
-                  <Calendar size={48} className="text-gray-600" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] leading-relaxed">
-                    No upcoming <br /> sessions
+          {/* Coach Profile Section (styled similarly to Venue design cards) */}
+          {coach && (
+            <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 flex flex-col md:flex-row items-center gap-8 group hover:border-[#CCFF00]/30 transition-all duration-500 shadow-[var(--shadow-2)]">
+              <div className="relative">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-[8px] overflow-hidden border border-[#2D2D2D] group-hover:border-[#CCFF00]/50 transition-all shadow-sm">
+                  <img 
+                    src={coach.profilePicture || "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=300&h=300&fit=crop"} 
+                    alt="Coach" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="absolute -bottom-3 -right-3 w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] border border-[#CCFF00]/20 flex items-center justify-center text-[#CCFF00] shadow-sm">
+                  <Zap size={20} />
+                </div>
+              </div>
+              
+              <div className="flex-1 text-center md:text-left space-y-3">
+                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                  <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-inter">
+                    {coach.name}
+                  </h2>
+                  <span className="px-3 py-1 bg-[#CCFF00]/10 text-[#CCFF00] text-xs font-semibold uppercase tracking-wider rounded-[6px] self-center md:self-start border border-[#CCFF00]/20 font-inter">
+                    Pro Coach
                   </span>
                 </div>
-              )}
+                
+                <p className="text-[#999999] text-[13px] font-medium max-w-2xl">
+                  {coach.businessDetails?.specialization || "Expert Sports Consultant"} • {coach.businessDetails?.experience || "N/A"} Experience
+                </p>
+                
+                <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
+                  {coach.interests?.map((interest, i) => (
+                    <span key={i} className="px-3 py-1 bg-[#2D2D2D] text-[#999999] text-[10px] font-medium uppercase tracking-wider rounded-[4px] border border-[#404040]">
+                      {interest}
+                    </span>
+                  )) || (
+                    <span className="px-3 py-1 bg-[#2D2D2D] text-[#999999] text-[10px] font-medium uppercase tracking-wider rounded-[4px] border border-[#404040]">
+                      Cricket
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="hidden lg:flex items-center gap-8 pl-8 border-l border-[#2D2D2D]">
+                <div className="text-center">
+                  <p className="text-xs font-medium text-[#878C9F] uppercase tracking-wider mb-1 font-inter">Rating</p>
+                  <div className="flex items-center gap-1 text-white font-bold text-2xl tracking-tight font-inter">
+                    {coach.rating || "4.9"} <span className="text-[#CCFF00] text-xl">★</span>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-medium text-[#878C9F] uppercase tracking-wider mb-1 font-inter">Reviews</p>
+                  <p className="text-white font-bold text-2xl tracking-tight font-inter">{coach.numReviews || "120"}+</p>
+                </div>
+              </div>
             </div>
-            <button className="mt-10 w-full h-14 bg-[#84CC16] text-black rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:scale-[0.98] active:scale-95 transition-all shadow-xl shadow-[#84CC16]/10">
-              New Assignment
-            </button>
+          )}
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
+            <StatsCard title="Active Trainees" value={activeTrainees} icon={Users} />
+            <StatsCard title="Total Sessions" value={totalSessions} icon={Calendar} />
+            <StatsCard title="Performance Index" value={performanceIndex} icon={TrendingUp} />
+            <StatsCard title="Total Earnings" value={totalRevenue} prefix="Rs " icon={Zap} />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+            {/* Student Progress Chart */}
+            <div className="lg:col-span-8">
+              <ChartCard
+                title="Student Progress"
+                subtitle="Aggregate Achievement Metrics"
+                action={
+                  <div className="p-2 bg-[#2D2D2D] rounded-[6px] border border-[#404040]">
+                    <TrendingUp className="text-[#CCFF00]" size={16} />
+                  </div>
+                }
+              >
+                {studentProgress.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={studentProgress} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorPerfCoach" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="#CCFF00" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" vertical={false} />
+                      <XAxis
+                        dataKey="name"
+                        axisLine={false}
+                        tickLine={false}
+                        stroke="#999999"
+                        fontSize={10}
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        stroke="#999999"
+                        fontSize={10}
+                      />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: "#151617", border: "1px solid #2D2D2D", borderRadius: "8px", padding: "12px" }}
+                        itemStyle={{ color: "#CCFF00", fontSize: "12px", textTransform: "uppercase", fontFamily: "Inter" }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#CCFF00"
+                        strokeWidth={2}
+                        fill="url(#colorPerfCoach)"
+                        fillOpacity={1}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <EmptyState height={300} icon={BarChart2} message="No progress data yet" sub="Progress will appear as students complete sessions" />
+                )}
+              </ChartCard>
+            </div>
+
+            {/* Upcoming Sessions Roster */}
+            <div className="lg:col-span-4">
+              <div className="bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] h-full flex flex-col group transition-all hover:border-[#CCFF00]/20">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h2 className="text-xl font-bold text-white tracking-tight font-inter">
+                      Upcoming Sessions
+                    </h2>
+                    <p className="text-xs font-medium text-[#999999] uppercase tracking-wider mt-1 font-inter">
+                      Your schedule
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-4 overflow-y-auto max-h-[350px] pr-2 custom-scrollbar">
+                  {upcomingSessions.length > 0 ? (
+                    upcomingSessions.map((op, i) => (
+                      <div
+                        key={i}
+                        className="p-4 bg-[#2D2D2D]/30 border-l-2 border-[#CCFF00] hover:bg-[#2D2D2D]/60 transition-all rounded-r-[6px]"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-[11px] font-semibold text-[#878C9F] uppercase tracking-wider">
+                            {op.time}
+                          </span>
+                          <span className="px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] text-[9px] font-bold uppercase tracking-widest rounded-[4px]">
+                            {op.type}
+                          </span>
+                        </div>
+                        <h4 className="text-[14px] font-semibold text-white mb-1 uppercase tracking-tight">
+                          {op.name}
+                        </h4>
+                        <p className="text-[11px] font-medium text-[#999999] uppercase tracking-wider flex items-center gap-1.5">
+                          <Users size={12} /> {op.student}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <EmptyState height={200} icon={Calendar} message="No upcoming sessions" sub="Schedule a session to see it here" />
+                  )}
+                </div>
+                <button className="mt-6 w-full py-3 bg-transparent border border-[#2D2D2D] hover:bg-[#CCFF00]/10 hover:text-[#CCFF00] hover:border-[#CCFF00]/30 text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter">
+                  New Assignment
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+// ── Empty State Helper ──
+const EmptyState = ({ height, icon: Icon, message, sub }) => (
+  <div
+    className="flex flex-col items-center justify-center gap-3 text-center rounded-[8px] border border-dashed border-[#2D2D2D]"
+    style={{ height }}
+  >
+    <Icon size={32} className="text-[#2D2D2D]" />
+    <p className="text-[13px] font-semibold text-[#555] uppercase tracking-wider">{message}</p>
+    {sub && <p className="text-[11px] text-[#444]">{sub}</p>}
+  </div>
+);
+
+// ── Stats Card ──
+const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon }) => {
+  return (
+    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#CCFF00]/30 transition-all duration-500 min-h-[140px] shadow-[var(--shadow-2)]">
+      <Icon className="absolute -right-4 -bottom-4 w-20 h-20 text-white/[0.02] group-hover:text-white/[0.04] transition-colors" />
+      <div className="flex items-center justify-between mb-5">
+        <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] flex items-center justify-center transition-all shadow-sm">
+          <Icon size={20} />
+        </div>
+      </div>
+      <div className="space-y-2 relative z-10">
+        <h3 className="text-xs font-medium text-[#878C9F] uppercase tracking-wider font-inter">{title}</h3>
+        <div className="text-2xl font-bold text-white tracking-tight flex items-baseline gap-1 font-inter">
+          {prefix && <span className="text-lg text-white/40 font-normal">{prefix}</span>}
+          <CountUp end={Number(value) || 0} duration={2} separator="," decimals={(Number(value) || 0) % 1 === 0 ? 0 : 1} />
+          {suffix && <span className="text-lg text-white/40 font-normal">{suffix}</span>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ChartCard = ({ title, subtitle, children, action, className = "h-full" }) => (
+  <div className={`bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] relative overflow-hidden group flex flex-col ${className}`}>
+    <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px] group-hover:bg-[#CCFF00]/10 transition-colors"></div>
+    <div className="flex flex-col gap-2 mb-6 relative z-10 shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+        <div>
+          <h2 className="text-lg font-bold text-white tracking-tight leading-none mb-2 font-inter">{title}</h2>
+          <p className="text-xs text-[#999999] tracking-normal font-inter">{subtitle}</p>
+        </div>
+        {action && <div className="z-20 self-start sm:self-auto">{action}</div>}
+      </div>
+    </div>
+    <div className="flex-1 min-h-0">{children}</div>
+  </div>
+);
+
+export default CoachDashboard;

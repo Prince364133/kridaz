@@ -8,10 +8,27 @@ const ownerSchema = new mongoose.Schema(
     googleId: { type: String },
     phone: { type: String },
     gender: { type: String, enum: ["Male", "Female", "Other", "Prefer not to say"] },
+    dob: { type: Date },
     location: { type: String },
     profilePicture: { type: String },
     bio: { type: String },
-    role: { type: String, enum: ["admin", "venu_owners", "coach", "umpire", "streamer", "scorer", "limited_admin", "limited_venu_owners", "limited_coach", "limited_umpire", "limited_streamer", "limited_scorer"], default: "venu_owners" },
+    coachingLevel: { type: String, enum: ["Beginner", "Intermediate", "Elite"] },
+    availabilityTimings: { type: String },
+    availabilityMode: { type: String, enum: ["Offline", "Online", "Both"] },
+    preferredLocations: { type: String },
+    trainingTypes: [{ type: String }],
+    ageGroups: [{ type: String }],
+    languages: { type: String },
+    achievements: { type: String },
+    role: { 
+      type: String, 
+      enum: [
+        "admin", "venu_owners", "coach", "umpire", "streamer", "scorer", 
+        "limited_admin", "limited_venu_owners", "limited_coach", "limited_umpire", "limited_streamer", "limited_scorer",
+        "BMSP_ADMIN", "VERIFIED_VENUE_OWNER", "BMSP_OWNER"
+      ], 
+      default: "venu_owners" 
+    },
     businessDetails: {
       businessName: String,
       registrationNumber: String,
@@ -19,6 +36,7 @@ const ownerSchema = new mongoose.Schema(
       city: String,
       state: String,
       zipCode: String,
+      pinCode: String,
       experience: String,
       specialization: String,
     },
