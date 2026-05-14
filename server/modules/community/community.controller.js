@@ -1,7 +1,9 @@
 import CommunityPost from '../../models/communityPost.model.js';
 import Story from '../../models/story.model.js';
 import Owner from '../../models/owner.model.js';
+import User from '../../models/user.model.js';
 import { uploadToCloudinary } from '../../utils/cloudinary.js';
+import { getIO } from '../../config/socket.js';
 
 const resolveUserId = async (id) => {
   if (!id) return null;
@@ -11,6 +13,39 @@ const resolveUserId = async (id) => {
     return id.toString();
   } catch (error) {
     return id.toString();
+  }
+};
+
+export const getCommunityStats = async (req, res) => {
+  try {
+    const [totalPosts, totalUsers, totalStories] = await Promise.all([
+      CommunityPost.countDocuments(),
+      User.countDocuments({ role: 'user' }),
+      Story.countDocuments({ expiresAt: { $gt: new Date() } })
+    ]);
+
+    // Aggregate total likes and comments across all posts
+    const posts = await CommunityPost.find({}, 'likes comments');
+    let totalLikes = 0;
+    let totalComments = 0;
+    
+    posts.forEach(post => {
+      totalLikes += post.likes.length;
+      totalComments += post.comments.length;
+    });
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        members: totalUsers,
+        posts: totalPosts,
+        comments: totalComments,
+        likes: totalLikes,
+        activeStories: totalStories
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -40,7 +75,13 @@ export const createPost = async (req, res) => {
 
     await newPost.save();
 
-    res.status(201).json({ success: true, post: newPost });
+    const populatedPost = await CommunityPost.findById(newPost._id)
+      .populate('adminId', 'name profilePicture username');
+
+    const io = getIO();
+    if (io) io.emit('new_community_post', populatedPost);
+
+    res.status(201).json({ success: true, post: populatedPost });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -132,6 +173,10 @@ export const deletePost = async (req, res) => {
     }
 
     await CommunityPost.findByIdAndDelete(id);
+
+    const io = getIO();
+    if (io) io.emit('community_post_deleted', id);
+
     res.status(200).json({ success: true, message: 'Post deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -160,6 +205,13 @@ export const likePost = async (req, res) => {
     // Populate likes before sending back
     const populatedPost = await CommunityPost.findById(id).populate('likes', 'name profilePicture username');
     
+    const io = getIO();
+    if (io) io.emit('community_post_liked', { 
+      postId: id, 
+      likes: populatedPost.likes,
+      likesCount: populatedPost.likes.length 
+    });
+
     res.status(200).json({ 
       success: true, 
       likesCount: populatedPost.likes.length, 
@@ -194,6 +246,12 @@ export const addComment = async (req, res) => {
     // Populate comments before sending back
     const populatedPost = await CommunityPost.findById(id).populate('comments.userId', 'name profilePicture username');
     
+    const io = getIO();
+    if (io) io.emit('community_post_commented', { 
+      postId: id, 
+      comments: populatedPost.comments 
+    });
+
     res.status(200).json({ success: true, comments: populatedPost.comments });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -219,6 +277,12 @@ export const updateComment = async (req, res) => {
 
     comment.text = text;
     await post.save();
+
+    const io = getIO();
+    if (io) io.emit('community_post_commented', { 
+      postId: id, 
+      comments: post.comments 
+    });
 
     res.status(200).json({ success: true, comments: post.comments });
   } catch (error) {
@@ -246,6 +310,12 @@ export const deleteComment = async (req, res) => {
 
     post.comments.pull({ _id: commentId });
     await post.save();
+
+    const io = getIO();
+    if (io) io.emit('community_post_commented', { 
+      postId: id, 
+      comments: post.comments 
+    });
 
     res.status(200).json({ success: true, comments: post.comments });
   } catch (error) {

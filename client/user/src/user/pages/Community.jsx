@@ -39,6 +39,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import StoryViewer from "../components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import {
+  communityApi,
+  useGetCommunityFeedQuery,
+  useGetStoriesFeedQuery,
+  useGetCommunityStatsQuery,
+  useCreatePostMutation,
+  useUpdatePostMutation,
+  useDeletePostMutation,
+  useLikePostMutation,
+  useAddCommentMutation,
+  useDeleteCommentMutation,
+  useUploadStoryMutation,
+  useDeleteStoryMutation
+} from "../../redux/api/communityApi";
+import { useSocket } from "@context/SocketContext";
 
 const PRI = "#84CC16";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
@@ -51,9 +66,102 @@ const Community = () => {
   const navigate = useNavigate();
   const isAdmin = role === 'admin' || role === 'BMSP_ADMIN';
 
-  const [posts, setPosts] = useState([]);
-  const [stories, setStories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // RTK Query Hooks
+  const { data: communityData, isLoading: feedLoading } = useGetCommunityFeedQuery();
+  const { data: storiesData } = useGetStoriesFeedQuery();
+  const { data: statsData } = useGetCommunityStatsQuery();
+  
+  const [createPost] = useCreatePostMutation();
+  const [updatePost] = useUpdatePostMutation();
+  const [deletePost] = useDeletePostMutation();
+  const [likePost] = useLikePostMutation();
+  const [addComment] = useAddCommentMutation();
+  const [deleteComment] = useDeleteCommentMutation();
+  const [uploadStory] = useUploadStoryMutation();
+  const [deleteStory] = useDeleteStoryMutation();
+
+  const { socket } = useSocket();
+
+  const posts = communityData?.posts || [];
+  const stories = storiesData?.stories || [];
+  const loading = feedLoading;
+
+  // Socket Listeners for Real-time Updates
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewPost = (newPost) => {
+      dispatch(
+        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
+          if (!draft.posts.find(p => p._id === newPost._id)) {
+            draft.posts.unshift(newPost);
+          }
+        })
+      );
+      // Update global stats
+      dispatch(
+        communityApi.util.updateQueryData('getCommunityStats', undefined, (draft) => {
+          if (draft.stats) draft.stats.posts = (parseInt(draft.stats.posts) + 1).toString();
+        })
+      );
+    };
+
+    const handlePostLiked = ({ postId, likes, likesCount }) => {
+      dispatch(
+        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
+          const post = draft.posts.find(p => p._id === postId);
+          if (post) {
+            post.likes = likes;
+          }
+        })
+      );
+      // Optional: Update global likes stat if needed
+    };
+
+    const handlePostCommented = ({ postId, comments }) => {
+      dispatch(
+        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
+          const post = draft.posts.find(p => p._id === postId);
+          if (post) {
+            post.comments = comments;
+          }
+        })
+      );
+      // Update global stats
+      dispatch(
+        communityApi.util.updateQueryData('getCommunityStats', undefined, (draft) => {
+          if (draft.stats) draft.stats.comments = (parseInt(draft.stats.comments) + 1).toString();
+        })
+      );
+    };
+
+    const handlePostDeleted = (postId) => {
+      dispatch(
+        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
+          draft.posts = draft.posts.filter(p => p._id !== postId);
+        })
+      );
+      // Update global stats
+      dispatch(
+        communityApi.util.updateQueryData('getCommunityStats', undefined, (draft) => {
+          if (draft.stats) draft.stats.posts = Math.max(0, parseInt(draft.stats.posts) - 1).toString();
+        })
+      );
+    };
+
+    socket.on('new_community_post', handleNewPost);
+    socket.on('community_post_liked', handlePostLiked);
+    socket.on('community_post_commented', handlePostCommented);
+    socket.on('community_post_deleted', handlePostDeleted);
+
+    return () => {
+      socket.off('new_community_post', handleNewPost);
+      socket.off('community_post_liked', handlePostLiked);
+      socket.off('community_post_commented', handlePostCommented);
+      socket.off('community_post_deleted', handlePostDeleted);
+    };
+  }, [socket, dispatch]);
+
   const [isPublishing, setIsPublishing] = useState(false);
   const [showLikesModal, setShowLikesModal] = useState(false);
   const [viewingLikes, setViewingLikes] = useState([]);
@@ -79,27 +187,6 @@ const Community = () => {
   const [shareModalOpen, setShareModalOpen] = useState(null);
   const [highlightedPost, setHighlightedPost] = useState(null);
 
-  useEffect(() => {
-    fetchData();
-  }, [user]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [postsRes, storiesRes] = await Promise.all([
-        axiosInstance.get('/api/user/community'),
-        axiosInstance.get('/api/user/stories/feed')
-      ]);
-      setPosts(postsRes.data.posts || []);
-      setStories(storiesRes.data.stories || []);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      toast.error("Failed to load community updates");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handlePostImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -117,44 +204,28 @@ const Community = () => {
     formData.append('content', newPost.content);
     if (newPost.image) formData.append('image', newPost.image);
 
-    const tempId = Date.now().toString();
-    const optimisticPost = {
-      _id: tempId,
-      title: newPost.title,
-      content: newPost.content,
-      imageUrl: postImagePreview,
-      createdAt: new Date().toISOString(),
-      adminId: user,
-      isOptimistic: true,
-      likes: [],
-      comments: []
-    };
-
-    if (!editingPost) {
-      setOptimisticPosts(prev => [optimisticPost, ...prev]);
-      closePostModal();
-    } else {
-      setIsPublishing(true);
-    }
-
+    setIsPublishing(true);
     try {
       if (editingPost) {
-        await axiosInstance.put(`/api/user/community/${editingPost._id}`, formData);
+        await updatePost({ postId: editingPost._id, formData }).unwrap();
         toast.success("Post updated successfully!");
-        closePostModal();
-        fetchData();
       } else {
-        await axiosInstance.post('/api/user/community', formData);
+        await createPost(formData).unwrap();
         toast.success("Post created successfully!");
-        fetchData();
       }
+      closePostModal();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to save post");
-      if (!editingPost) setOptimisticPosts(prev => prev.filter(p => p._id !== tempId));
+      toast.error(error.data?.message || "Failed to save post");
     } finally {
       setIsPublishing(false);
-      setOptimisticPosts(prev => prev.filter(p => p._id !== tempId));
     }
+  };
+
+  const handleEditPost = (post) => {
+    setEditingPost(post);
+    setNewPost({ title: post.title || '', content: post.content, image: null });
+    setPostImagePreview(post.image || post.imageUrl || null);
+    setShowPostModal(true);
   };
 
   const closePostModal = () => {
@@ -166,13 +237,9 @@ const Community = () => {
 
   const handleStoryMediaChange = (e) => {
     const files = Array.from(e.target.files);
-    if (files.length > 10) {
-      toast.error("You can upload a maximum of 10 media files");
-      return;
-    }
+    if (files.length > 10) return toast.error("Max 10 media files");
     setNewStory({ ...newStory, mediaFiles: files });
-    const previews = files.map(file => URL.createObjectURL(file));
-    setStoryMediaPreviews(previews);
+    setStoryMediaPreviews(files.map(file => URL.createObjectURL(file)));
   };
 
   const handleUploadStory = async (e) => {
@@ -186,52 +253,68 @@ const Community = () => {
 
     setIsPublishing(true);
     try {
-      await axiosInstance.post('/api/user/stories', formData);
-      toast.success("Story uploaded successfully!");
+      await uploadStory(formData).unwrap();
+      toast.success("Story uploaded!");
+      setShowStoryModal(false);
       setNewStory({ content: '', mediaFiles: [], durationDays: 1 });
       setStoryMediaPreviews([]);
-      setShowStoryModal(false);
-      fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to upload story");
+      toast.error("Failed to upload story");
     } finally {
       setIsPublishing(false);
     }
   };
 
   const handleDeletePost = async (postId) => {
-    if (!window.confirm("Are you sure?")) return;
+    if (!window.confirm("Delete this post?")) return;
     try {
-      await axiosInstance.delete(`/api/user/community/${postId}`);
+      await deletePost(postId).unwrap();
       toast.success("Post deleted");
-      setPosts(posts.filter(p => p._id !== postId));
     } catch (error) {
       toast.error("Failed to delete post");
     }
   };
 
   const handleDeleteStory = async (storyId) => {
-    if (!window.confirm("Are you sure?")) return;
+    if (!window.confirm("Delete this story?")) return;
     try {
-      await axiosInstance.delete(`/api/user/stories/${storyId}`);
+      await deleteStory(storyId).unwrap();
       toast.success("Story deleted");
       setSelectedStoryGroup(null);
-      fetchData();
     } catch (error) {
       toast.error("Failed to delete story");
     }
   };
 
+  const handleAddComment = async (postId) => {
+    gateInteraction(async () => {
+      if (!commentText.trim()) return;
+      setIsSubmittingComment(true);
+      try {
+        await addComment({ postId, text: commentText }).unwrap();
+        setCommentText("");
+        toast.success("Comment added!");
+      } catch (error) {
+        toast.error("Failed to add comment");
+      } finally {
+        setIsSubmittingComment(false);
+      }
+    }, {
+      title: "Join the Discussion",
+      message: "Sign in to leave a comment on this post."
+    });
+  };
+
   const handleLike = async (postId) => {
     gateInteraction(async () => {
       try {
-        const res = await axiosInstance.post(`/api/user/community/${postId}/like`);
-        if (res.data.success) {
-          setPosts(posts.map(p => p._id === postId ? { ...p, likes: res.data.likes } : p));
-        }
+        await likePost(postId).unwrap();
       } catch (error) {
         toast.error("Failed to like post");
       }
+    }, {
+      title: "Show Some Love",
+      message: "Sign in to like this post and support the creator."
     });
   };
 
@@ -239,7 +322,10 @@ const Community = () => {
     gateInteraction(async () => {
       const isFollowing = followingIds.includes(targetUserId);
       try {
-        const endpoint = isFollowing ? `/api/user/players/${targetUserId}/unfollow` : `/api/user/players/${targetUserId}/follow`;
+        const endpoint = isFollowing 
+          ? `/api/user/players/${targetUserId}/unfollow` 
+          : `/api/user/players/${targetUserId}/follow`;
+          
         const response = await axiosInstance.post(endpoint);
         if (response.data.success) {
           if (isFollowing) {
@@ -251,29 +337,19 @@ const Community = () => {
           }
         }
       } catch (error) {
-        toast.error(error.response?.data?.message || "Failed to update follow status");
+        toast.error("Failed to update follow status");
       }
+    }, {
+      title: "Follow Players",
+      message: "Sign in to follow players and stay updated."
     });
   };
 
   const handleShareToPlatform = (platform, postId) => {
     const url = `${window.location.origin}${window.location.pathname}?post=${postId}`;
-    const encodedUrl = encodeURIComponent(url);
-    const text = encodeURIComponent("Check out this post on Kridaz!");
-    let shareUrl = '';
-    switch (platform) {
-      case 'whatsapp': shareUrl = `https://wa.me/?text=${text} ${encodedUrl}`; break;
-      case 'twitter': shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${encodedUrl}`; break;
-      case 'facebook': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`; break;
-      case 'copy':
-        navigator.clipboard.writeText(url);
-        toast.success("Link copied!");
-        setShareModalOpen(null);
-        return;
-    }
-    if (shareUrl) {
-      window.open(shareUrl, '_blank');
-      setShareModalOpen(null);
+    if (platform === 'copy') {
+      navigator.clipboard.writeText(url);
+      toast.success("Link copied!");
     }
   };
 
@@ -514,10 +590,10 @@ const Community = () => {
                  
                  <div className="grid grid-cols-2 gap-3">
                     {[
-                      { label: 'Members', value: '1.2K', icon: Users },
-                      { label: 'Posts', value: '320', icon: MessageCircle },
-                      { label: 'Comments', value: '15.7K', icon: Target },
-                      { label: 'Likes', value: '8.9K', icon: Heart }
+                      { label: 'Members', value: statsData?.stats?.members || '0', icon: Users },
+                      { label: 'Posts', value: statsData?.stats?.posts || '0', icon: MessageCircle },
+                      { label: 'Comments', value: statsData?.stats?.comments || '0', icon: Target },
+                      { label: 'Likes', value: statsData?.stats?.likes || '0', icon: Heart }
                     ].map((s, i) => (
                       <div key={i} className="bg-white/[0.02] border border-white/5 rounded-xl p-3 flex flex-col gap-1.5 group hover:border-[#84CC16]/20 transition-all">
                          <div className="flex items-center gap-1.5 text-[#84CC16]">

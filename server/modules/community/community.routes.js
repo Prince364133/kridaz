@@ -10,7 +10,8 @@ import {
   deleteComment,
   getMyActivity,
   getUserPosts,
-  getUserStories
+  getUserStories,
+  getCommunityStats
 } from './community.controller.js';
 import adminAuth from '../../middleware/jwt/admin.middleware.js';
 import userAuth from '../../middleware/jwt/user.middleware.js';
@@ -20,6 +21,7 @@ const router = express.Router();
 
 // Public/User route
 router.get('/', getPosts);
+router.get('/stats', getCommunityStats);
 router.get('/my-activity', userAuth, getMyActivity);
 router.get('/user-posts/:targetUserId?', getUserPosts);
 router.get('/user-stories/:targetUserId?', getUserStories);

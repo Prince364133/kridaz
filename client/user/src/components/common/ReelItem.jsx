@@ -107,41 +107,41 @@ const ReelItem = ({ reel, isVisible }) => {
       </AnimatePresence>
 
       {/* Right Side Actions */}
-      <div className="absolute right-3 bottom-20 flex flex-col items-center gap-5 z-20">
-        <div className="flex flex-col items-center gap-1" onClick={handleLike}>
-          <button className={`p-2 transition-transform active:scale-125 ${isLiked ? 'text-red-500' : 'text-white'}`}>
-            <Heart size={36} fill={isLiked ? "currentColor" : "none"} strokeWidth={2} />
+      <div className="absolute right-3 bottom-24 flex flex-col items-center gap-6 z-20">
+        <div className="flex flex-col items-center gap-1.5" onClick={handleLike}>
+          <button className={`p-2.5 transition-all duration-300 active:scale-150 ${isLiked ? 'text-red-500 scale-110' : 'text-white'}`}>
+            <Heart size={40} fill={isLiked ? "currentColor" : "none"} strokeWidth={2.5} className="drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" />
           </button>
-          <span className="text-white text-xs font-bold drop-shadow-md">{reel.stats.likes || 0}</span>
+          <span className="text-white text-sm font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{reel.stats.likes || 0}</span>
         </div>
         
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-1.5">
           <button 
-            className="p-2 text-white active:scale-110 transition-transform"
+            className="p-2.5 text-white active:scale-125 transition-all duration-300"
             onClick={() => setShowComments(!showComments)}
           >
-            <MessageCircle size={36} strokeWidth={2} />
+            <MessageCircle size={40} strokeWidth={2.5} className="drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" />
           </button>
-          <span className="text-white text-xs font-bold drop-shadow-md">{reel.stats.comments || 0}</span>
+          <span className="text-white text-sm font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{reel.stats.comments || 0}</span>
         </div>
 
-        <div className="flex flex-col items-center gap-1">
-          <button className="p-2 text-white active:scale-110 transition-transform" onClick={handleShare}>
-            <Share2 size={32} strokeWidth={2} />
+        <div className="flex flex-col items-center gap-1.5">
+          <button className="p-2.5 text-white active:scale-125 transition-all duration-300" onClick={handleShare}>
+            <Share2 size={38} strokeWidth={2.5} className="drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" />
           </button>
-          <span className="text-white text-xs font-bold drop-shadow-md">Share</span>
+          <span className="text-white text-[11px] font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] uppercase tracking-tight">Share</span>
         </div>
 
-        <button className="p-2 text-white active:scale-110 transition-transform">
-          <Bookmark size={32} strokeWidth={2} />
+        <button className="p-2.5 text-white active:scale-125 transition-all duration-300">
+          <Bookmark size={38} strokeWidth={2.5} className="drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" />
         </button>
 
         <div className="relative">
           <button 
-            className="p-2 text-white opacity-80 active:bg-white/20 rounded-full transition-colors"
+            className="p-2.5 text-white active:bg-white/20 rounded-full transition-all duration-300"
             onClick={() => setShowMenu(!showMenu)}
           >
-            <MoreVertical size={24} />
+            <MoreVertical size={32} strokeWidth={2.5} className="drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" />
           </button>
 
           <AnimatePresence>
@@ -152,26 +152,36 @@ const ReelItem = ({ reel, isVisible }) => {
                   onClick={() => setShowMenu(false)}
                 />
                 <motion.div 
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute right-0 bottom-full mb-2 w-40 bg-zinc-900 border border-white/10 rounded-xl overflow-hidden z-50 shadow-2xl backdrop-blur-xl"
+                  initial={{ opacity: 0, x: 20, scale: 0.9 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: 20, scale: 0.9 }}
+                  className="absolute right-0 bottom-0 mb-14 w-48 bg-zinc-950 border border-white/20 rounded-2xl overflow-hidden z-50 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
                 >
                   {isCreator ? (
                     <button 
                       onClick={() => { handleDelete(); setShowMenu(false); }}
-                      className="w-full px-4 py-3 text-left text-red-500 hover:bg-white/5 font-semibold text-sm flex items-center gap-2"
+                      className="w-full px-5 py-4 text-left text-red-500 hover:bg-red-500/10 font-bold text-sm flex items-center gap-3 transition-colors"
                     >
-                      Delete Short
+                      <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
+                        <Heart size={16} fill="currentColor" />
+                      </div>
+                      Delete Reel
                     </button>
                   ) : (
                     <button 
                       onClick={() => { toast.success('Reported'); setShowMenu(false); }}
-                      className="w-full px-4 py-3 text-left text-white hover:bg-white/5 font-semibold text-sm"
+                      className="w-full px-5 py-4 text-left text-white hover:bg-white/10 font-bold text-sm flex items-center gap-3 transition-colors"
                     >
+                      <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                        <Share2 size={16} />
+                      </div>
                       Report
                     </button>
                   )}
+                  <div className="h-[1px] bg-white/10 mx-4" />
+                  <button className="w-full px-5 py-4 text-left text-white/60 hover:bg-white/10 font-bold text-sm transition-colors">
+                    Cancel
+                  </button>
                 </motion.div>
               </>
             )}
