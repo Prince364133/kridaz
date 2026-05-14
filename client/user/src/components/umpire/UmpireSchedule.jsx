@@ -3,7 +3,14 @@ import { Calendar, MapPin, Users, Clock, ArrowRight } from "lucide-react";
 import useUmpireDashboard from "@hooks/owner/useUmpireDashboard";
 import DashboardSkeleton from "../owner/Dashboard/DashboardSkeleton";
 
+import { useSelector } from "react-redux";
+
 export default function UmpireSchedule() {
+  const { role } = useSelector((state) => state.auth);
+  const isScorer = role?.toLowerCase().includes("scorer");
+  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const portalName = isScorer ? "SCORER" : "OFFICIAL";
+
   const { dashboardData, loading, error } = useUmpireDashboard();
 
   if (loading) return <DashboardSkeleton />;
@@ -11,13 +18,13 @@ export default function UmpireSchedule() {
   const upcomingMatches = dashboardData?.matches?.filter(m => m.status === 'upcoming') || [];
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in font-inter">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-6 border-b border-white/5">
         <div className="space-y-1">
-          <h1 className="text-5xl font-black uppercase tracking-tight text-white">
-            Official <span className="text-primary">Schedule</span>
+          <h1 className="text-4xl lg:text-5xl font-black uppercase tracking-tight text-white font-inter">
+            {portalName} <span style={{ color: themeColor }}>Schedule</span>
           </h1>
-          <p className="text-gray-500 text-xs font-medium uppercase tracking-wider">Upcoming assignments and availability</p>
+          <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] font-inter">Upcoming assignments and availability</p>
         </div>
       </div>
 
@@ -32,7 +39,10 @@ export default function UmpireSchedule() {
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {upcomingMatches.map((match) => (
-            <div key={match._id} className="group relative bg-[#0D0D0D] border border-white/5 rounded-[24px] p-8 hover:border-primary/30 transition-all duration-500">
+            <div key={match._id} className="group relative bg-[#000000] border border-white/5 rounded-[24px] p-8 transition-all duration-500"
+                 style={{ borderColor: "rgba(255,255,255,0.05)" }}
+                 onMouseEnter={(e) => e.currentTarget.style.borderColor = `${themeColor}40`}
+                 onMouseLeave={(e) => e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)"}>
               <div className="flex flex-col md:flex-row justify-between items-start gap-8">
                 <div className="flex gap-6 flex-1">
                   <div className="flex flex-col items-center justify-center w-24 h-24 bg-white/5 rounded-2xl border border-white/10 text-center">
@@ -50,31 +60,32 @@ export default function UmpireSchedule() {
                         <span className="text-[10px] font-bold text-yellow-500 uppercase tracking-widest">Upcoming</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-500 text-xs font-medium">
-                        <Clock size={14} className="text-primary" />
+                        <Clock size={14} style={{ color: themeColor }} />
                         {match.time}
                       </div>
                     </div>
                     
-                    <h3 className="text-3xl font-bold text-white group-hover:text-primary transition-colors">{match.name}</h3>
+                    <h3 className="text-3xl font-bold text-white transition-colors font-inter group-hover:text-white" style={{ color: "white" }}>{match.name}</h3>
                     
                     <div className="flex flex-wrap gap-6 text-sm text-gray-400">
                       <div className="flex items-center gap-2">
-                        <MapPin size={16} className="text-primary" />
+                        <MapPin size={16} style={{ color: themeColor }} />
                         {match.venue}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Users size={16} className="text-primary" />
+                        <Users size={16} style={{ color: themeColor }} />
                         {match.teams?.join(" vs ") || "Teams TBD"}
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="w-full md:w-auto flex flex-col items-stretch gap-3">
-                  <button className="px-8 py-3 bg-primary hover:bg-primary-dark text-black text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-primary/20">
+                <div className="w-full md:w-auto flex flex-col items-stretch gap-3 font-inter">
+                  <button className="px-8 py-3 text-black text-[11px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg"
+                          style={{ backgroundColor: themeColor, boxShadow: `0 10px 20px ${themeColor}20` }}>
                     Confirm Availability
                   </button>
-                  <button className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white text-xs font-bold uppercase tracking-widest rounded-xl border border-white/10 transition-all">
+                  <button className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white text-[11px] font-bold uppercase tracking-widest rounded-xl border border-white/10 transition-all">
                     Match Details
                   </button>
                 </div>

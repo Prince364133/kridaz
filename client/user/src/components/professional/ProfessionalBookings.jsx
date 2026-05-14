@@ -1,10 +1,20 @@
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { Check, X, Clock, User, Phone, Mail, MessageSquare, Loader2, Calendar, Shield, IndianRupee } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 
+/**
+ * ProfessionalBookings — Rebranded for the Scorer Portal.
+ * Enforces Teal Green (#00C187) and Inter typography.
+ */
+
 export default function ProfessionalBookings() {
+  const { role } = useSelector((state) => state.auth);
+  const isScorer = role?.toLowerCase().includes("scorer");
+  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -41,101 +51,107 @@ export default function ProfessionalBookings() {
   };
 
   if (loading) return (
-    <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-primary" size={40} /></div>
+    <div className="py-20 flex justify-center"><Loader2 className="animate-spin" style={{ color: themeColor }} size={40} /></div>
   );
 
   return (
-    <div className="space-y-8 animate-fade-in font-open-sans">
-      <div className="pb-6 border-b border-[#2D2D2D]">
-        <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-white font-inter">
-          Booking <span className="text-[#CCFF00]">Requests</span>
+    <div className="space-y-8 animate-fade-in font-inter">
+      <div className="pb-6 border-b border-white/5">
+        <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-white font-inter uppercase">
+          Match <span style={{ color: themeColor }}>Requests</span>
         </h1>
-        <p className="text-[#999999] text-xs font-semibold uppercase tracking-wider font-inter mt-1">Manage your upcoming and pending assignments</p>
+        <p className="text-neutral-500 text-[10px] font-black uppercase tracking-[0.2em] font-inter mt-1.5">Manage your upcoming assignments and session invites</p>
       </div>
 
       {bookings.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#000000] rounded-[8px] border border-[#2D2D2D] border-dashed p-12 text-center shadow-[var(--shadow-2)]">
-          <Calendar size={48} className="text-[#2D2D2D] mb-4" />
-          <h3 className="text-[13px] font-semibold text-[#555] uppercase tracking-wider font-inter mb-2">No Requests Found</h3>
-          <p className="text-[11px] text-[#444] font-inter">You don't have any booking requests yet.</p>
+        <div className="flex flex-col items-center justify-center min-h-[400px] bg-black rounded-3xl border border-white/5 border-dashed p-12 text-center shadow-2xl">
+          <Calendar size={48} className="text-neutral-800 mb-6" />
+          <h3 className="text-[13px] font-black text-neutral-600 uppercase tracking-widest font-inter mb-2">No Requests Found</h3>
+          <p className="text-[11px] text-neutral-700 font-black uppercase tracking-widest font-inter">Your assignment queue is currently empty</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {bookings.map((booking) => (
-            <div key={booking._id} className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-[#CCFF00]/30 transition-all shadow-[var(--shadow-2)]">
-              <div className="p-6 lg:p-8">
+            <div key={booking._id} className="bg-black border border-white/5 rounded-3xl overflow-hidden group hover:bg-white/[0.01] transition-all shadow-2xl">
+              <div className="p-8 lg:p-10">
                 <div className="flex flex-col md:flex-row justify-between gap-8">
                   <div className="flex gap-6">
                     <div className="relative">
                       <img 
                         src={booking.user?.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80"} 
-                        className="w-16 h-16 rounded-[6px] object-cover border border-[#2D2D2D]"
+                        className="w-16 h-16 rounded-2xl object-cover border border-white/5"
+                        alt={booking.user?.name}
                       />
-                      <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-[#CCFF00] rounded-[4px] flex items-center justify-center">
-                        <User size={12} className="text-black" />
+                      <div className="absolute -bottom-2 -right-2 w-7 h-7 rounded-xl flex items-center justify-center shadow-lg" style={{ backgroundColor: themeColor }}>
+                        <User size={14} className="text-black" />
                       </div>
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white tracking-tight font-inter mb-1">{booking.user?.name}</h3>
-                      <div className="flex flex-wrap gap-4">
-                        <span className="flex items-center gap-1 text-[10px] font-medium text-[#878C9F] uppercase tracking-wider font-inter"><Phone size={12} className="text-[#CCFF00]" /> {booking.user?.phone}</span>
-                        <span className="flex items-center gap-1 text-[10px] font-medium text-[#878C9F] uppercase tracking-wider font-inter"><Mail size={12} className="text-[#CCFF00]" /> {booking.user?.email}</span>
+                      <h3 className="text-xl font-black text-white tracking-tight font-inter uppercase mb-1.5">{booking.user?.name}</h3>
+                      <div className="flex flex-wrap gap-5">
+                        <span className="flex items-center gap-2 text-[10px] font-black text-neutral-500 uppercase tracking-widest font-inter"><Phone size={12} style={{ color: themeColor }} /> {booking.user?.phone}</span>
+                        <span className="flex items-center gap-2 text-[10px] font-black text-neutral-500 uppercase tracking-widest font-inter"><Mail size={12} style={{ color: themeColor }} /> {booking.user?.email}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col md:items-end gap-2">
-                    <div className={`px-3 py-1 rounded-[4px] text-[9px] font-bold uppercase tracking-wider border font-inter ${
-                      booking.status === 'PENDING' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
-                      booking.status === 'ACCEPTED' ? 'bg-[#CCFF00]/10 border-[#CCFF00]/20 text-[#CCFF00]' :
+                  <div className="flex flex-col md:items-end gap-3">
+                    <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border font-inter ${
+                      booking.status === 'PENDING' ? 'bg-orange-500/10 border-orange-500/20 text-orange-500' :
+                      booking.status === 'ACCEPTED' ? 'bg-[#00C187]/10 border-[#00C187]/20' :
                       'bg-red-500/10 border-red-500/20 text-red-500'
-                    }`}>
-                      {booking.status}
+                    }`}
+                    style={{ 
+                      color: booking.status === 'ACCEPTED' ? themeColor : undefined,
+                      borderColor: booking.status === 'ACCEPTED' ? themeColor : undefined 
+                    }}>
+                      {booking.status === 'ACCEPTED' ? 'SCHEDULED' : booking.status}
                     </div>
-                    <p className="text-2xl font-bold text-white mt-2 font-inter tracking-tight">₹{booking.totalAmount}</p>
+                    <p className="text-3xl font-black text-white mt-2 font-inter tracking-tighter">₹{Number(booking.totalAmount).toLocaleString()}</p>
                   </div>
                 </div>
 
-                <div className="mt-8 pt-8 border-t border-[#2D2D2D] grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="space-y-4">
-                    <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider font-inter">Scheduled Session</p>
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-[6px] bg-[#2D2D2D]/30 flex flex-col items-center justify-center border border-[#2D2D2D] text-center">
-                        <span className="text-[8px] font-bold text-[#CCFF00] uppercase font-inter">{format(new Date(booking.date), 'MMM')}</span>
-                        <span className="text-lg font-bold text-white leading-none font-inter">{format(new Date(booking.date), 'dd')}</span>
+                <div className="mt-10 pt-10 border-t border-white/5 grid grid-cols-1 md:grid-cols-3 gap-10">
+                  <div className="space-y-5">
+                    <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest font-inter">Match Schedule</p>
+                    <div className="flex items-center gap-5">
+                      <div className="w-14 h-14 rounded-2xl bg-white/[0.03] flex flex-col items-center justify-center border border-white/5 text-center shadow-inner">
+                        <span className="text-[9px] font-black uppercase font-inter" style={{ color: themeColor }}>{format(new Date(booking.date), 'MMM')}</span>
+                        <span className="text-xl font-black text-white leading-none font-inter mt-0.5">{format(new Date(booking.date), 'dd')}</span>
                       </div>
                       <div>
-                        <p className="text-[13px] font-bold text-white font-inter">
+                        <p className="text-sm font-black text-white font-inter tracking-tight uppercase">
                           {booking.slots.map(s => s.startTime).join(", ")}
                         </p>
-                        <p className="text-[9px] font-medium text-[#878C9F] uppercase tracking-wider font-inter">{booking.bookingType} Session</p>
+                        <p className="text-[9px] font-black text-neutral-500 uppercase tracking-widest font-inter mt-1">{booking.bookingType} Portal</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-4 md:col-span-2">
-                    <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider font-inter">User Message</p>
-                    <div className="p-4 bg-[#2D2D2D]/20 border border-[#2D2D2D] rounded-[6px] text-[13px] text-[#999999] italic font-open-sans">
-                      "{booking.message || "No special instructions provided."}"
+                  <div className="space-y-5 md:col-span-2">
+                    <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest font-inter">Match Brief</p>
+                    <div className="p-5 bg-white/[0.02] border border-white/5 rounded-2xl text-[13px] text-neutral-400 italic font-inter leading-relaxed">
+                      "{booking.message || "Standard match scoring and management assignment."}"
                     </div>
                   </div>
                 </div>
 
                 {booking.status === 'PENDING' && (
-                  <div className="mt-8 flex gap-4">
+                  <div className="mt-10 flex gap-4">
                     <button 
                       onClick={() => handleAction(booking._id, 'ACCEPTED')}
                       disabled={actionLoading === booking._id}
-                      className="flex-1 h-12 bg-[#CCFF00] text-black rounded-[6px] font-bold uppercase text-[11px] tracking-widest hover:scale-[0.98] active:scale-95 transition-all flex items-center justify-center gap-2 font-inter shadow-[var(--shadow-2)]"
+                      className="flex-1 h-14 text-black rounded-2xl font-black uppercase text-[12px] tracking-[0.2em] transition-all transform active:scale-95 flex items-center justify-center gap-3 font-inter shadow-xl"
+                      style={{ backgroundColor: themeColor, boxShadow: `0 10px 30px ${themeColor}33` }}
                     >
-                      {actionLoading === booking._id ? <Loader2 className="animate-spin" size={20} /> : <Check size={20} />} Accept Request
+                      {actionLoading === booking._id ? <Loader2 className="animate-spin" size={20} /> : <Check size={20} />} Confirm Slot
                     </button>
                     <button 
                       onClick={() => handleAction(booking._id, 'REJECTED')}
                       disabled={actionLoading === booking._id}
-                      className="flex-1 h-12 bg-transparent text-[#999999] hover:text-white border border-[#2D2D2D] rounded-[6px] font-bold uppercase text-[11px] tracking-widest hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-500 transition-all flex items-center justify-center gap-2 font-inter"
+                      className="flex-1 h-14 bg-white/5 text-neutral-500 hover:text-white border border-white/5 rounded-2xl font-black uppercase text-[12px] tracking-[0.2em] hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-500 transition-all transform active:scale-95 flex items-center justify-center gap-3 font-inter"
                     >
-                      {actionLoading === booking._id ? <Loader2 className="animate-spin" size={20} /> : <X size={20} />} Reject
+                      {actionLoading === booking._id ? <Loader2 className="animate-spin" size={20} /> : <X size={20} />} Decline
                     </button>
                   </div>
                 )}

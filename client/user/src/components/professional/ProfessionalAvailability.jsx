@@ -6,8 +6,17 @@ import toast from "react-hot-toast";
 import { format, addDays, startOfToday, parse } from "date-fns";
 import ClockPicker from "../common/ClockPicker";
 
+/**
+ * ProfessionalAvailability — Role-aware schedule management.
+ * Fully rebranded for Scorer users with Teal Green (#00C187) and Inter typography.
+ */
+
 export default function ProfessionalAvailability() {
-  const { user } = useSelector((state) => state.auth);
+  const { user, role } = useSelector((state) => state.auth);
+  
+  const isScorer = role?.toLowerCase().includes("scorer");
+  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -33,7 +42,8 @@ export default function ProfessionalAvailability() {
   const fetchAvailability = async () => {
     try {
       setFetching(true);
-      const professionalId = user._id || user.id || user.user;
+      const professionalId = user?._id || user?.id || user?.user;
+      if (!professionalId) return;
       const res = await axiosInstance.get(`/api/professional/details/${professionalId}?date=${selectedDate}`);
       if (res.data.availability) {
         setSlots(res.data.availability.slots);
@@ -42,7 +52,7 @@ export default function ProfessionalAvailability() {
       }
     } catch (error) {
       console.error("Error fetching availability:", error);
-      setSlots([]); // Ensure slots are cleared on error to prevent stale data
+      setSlots([]);
     } finally {
       setFetching(false);
     }
@@ -50,7 +60,9 @@ export default function ProfessionalAvailability() {
 
   const handleAddSlot = async () => {
     if (slots.some(s => s.startTime === newSlot.startTime)) {
-      toast.error("Slot already exists");
+      toast.error("Slot already exists", {
+        style: { background: "#000", color: "#fff", border: `1px solid ${themeColor}`, fontSize: "10px", fontWeight: "black" }
+      });
       return;
     }
     const updatedSlots = [...slots, { ...newSlot, isAvailable: true }].sort((a, b) => a.startTime.localeCompare(b.startTime));
@@ -75,9 +87,11 @@ export default function ProfessionalAvailability() {
       }
       setHasAvailability(prev => ({...prev, ...newHasAvailability}));
       
-      toast.success("Slot added to all 28 days!");
+      toast.success("Batch update complete: 28 days synchronized", {
+        style: { background: "#000", color: "#fff", border: `1px solid ${themeColor}`, fontSize: "10px", fontWeight: "black" }
+      });
     } catch (error) {
-      toast.error("Failed to add slot to all days");
+      toast.error("Batch synchronization failed");
     } finally {
       setLoading(false);
     }
@@ -92,9 +106,7 @@ export default function ProfessionalAvailability() {
   const handleSave = async (customSlots = null, customDate = null) => {
     try {
       setLoading(true);
-      // Check if customDate is a string (not an Event)
       const targetDate = typeof customDate === 'string' ? customDate : selectedDate;
-      // Check if customSlots is an array (not an Event)
       const targetSlots = Array.isArray(customSlots) ? customSlots : slots;
       
       await axiosInstance.put("/api/professional/availability", {
@@ -103,50 +115,49 @@ export default function ProfessionalAvailability() {
       });
       
       if (!customDate) {
-        toast.success("Availability updated successfully");
+        toast.success("Schedule synchronized", {
+            style: { background: "#000", color: "#fff", border: `1px solid ${themeColor}`, fontSize: "10px", fontWeight: "black" }
+        });
       }
       
-      // Update local cache of which dates have slots
       setHasAvailability(prev => ({
         ...prev,
         [targetDate]: targetSlots.length > 0
       }));
     } catch (error) {
-      console.error("Error saving availability:", error);
-      toast.error("Failed to save availability");
+      toast.error("Synchronization failed");
     } finally {
       setLoading(false);
     }
   };
 
-
-
-
   return (
-    <div className="space-y-8 animate-fade-in font-open-sans">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-6 border-b border-white/5">
-        <div className="space-y-1">
-          <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-white font-inter">
-            Manage <span className="text-[#CCFF00]">Availability</span>
+    <div className="space-y-8 animate-fade-in font-inter h-full custom-scrollbar pb-24">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b border-white/5">
+        <div className="space-y-1.5">
+          <h1 className="text-3xl lg:text-5xl font-black tracking-tighter text-white uppercase font-inter">
+            Node <span style={{ color: themeColor }}>Availability</span>
           </h1>
-          <p className="text-[#999999] text-xs font-semibold uppercase tracking-wider font-inter mt-1">Configure your daily working hours</p>
+          <p className="text-neutral-500 text-[10px] font-black uppercase tracking-[0.2em] font-inter mt-1.5">Configure your professional timeline and active slots</p>
         </div>
         <button 
           onClick={handleSave}
           disabled={loading}
-          className="px-6 py-2.5 bg-[#CCFF00] text-black rounded-[6px] font-bold uppercase text-[11px] tracking-widest flex items-center gap-2 hover:scale-[0.98] transition-all disabled:opacity-50 font-inter shadow-[var(--shadow-2)]"
+          className="px-10 py-4 rounded-2xl text-black font-black uppercase text-[11px] tracking-[0.2em] flex items-center gap-3 transition-all disabled:opacity-50 font-inter shadow-2xl active:scale-95"
+          style={{ backgroundColor: themeColor, boxShadow: `0 10px 30px ${themeColor}33` }}
         >
           {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Schedule
         </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 shadow-[var(--shadow-2)]">
-            <h3 className="text-[11px] font-bold uppercase tracking-wider text-white mb-6 flex items-center gap-2 font-inter">
-              <CalendarDays size={16} className="text-[#CCFF00]" /> Select Date
+        <div className="lg:col-span-4 space-y-8">
+          <div className="bg-black border border-white/5 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
+            <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-white mb-8 flex items-center gap-3 font-inter">
+              <CalendarDays size={18} style={{ color: themeColor }} /> Select Date
             </h3>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-3">
               {dates.map((date) => {
                 const dateStr = format(date, 'yyyy-MM-dd');
                 const isSelected = selectedDate === dateStr;
@@ -155,17 +166,22 @@ export default function ProfessionalAvailability() {
                   <button 
                     key={dateStr}
                     onClick={() => setSelectedDate(dateStr)}
-                    className={`relative flex flex-col items-center justify-center p-3 rounded-[6px] border transition-all ${
+                    className={`relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-300 ${
                       isSelected 
-                      ? "bg-[#CCFF00] border-[#CCFF00] text-black" 
-                      : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#CCFF00]/30"
+                      ? "text-black shadow-lg" 
+                      : "bg-white/[0.02] border-white/5 text-neutral-500 hover:border-white/20"
                     }`}
+                    style={{ 
+                      backgroundColor: isSelected ? themeColor : undefined,
+                      borderColor: isSelected ? themeColor : undefined,
+                      boxShadow: isSelected ? `0 10px 20px ${themeColor}33` : undefined
+                    }}
                   >
-                    <span className="text-[8px] font-bold uppercase tracking-wider mb-1 font-inter">{format(date, 'EEE')}</span>
-                    <span className="text-lg font-bold leading-none font-inter">{format(date, 'dd')}</span>
-                    <span className="text-[7px] font-bold uppercase tracking-widest mt-1 opacity-60 font-inter">{format(date, 'MMM')}</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest mb-1.5 font-inter">{format(date, 'EEE')}</span>
+                    <span className="text-xl font-black leading-none font-inter">{format(date, 'dd')}</span>
+                    <span className="text-[8px] font-black uppercase tracking-[0.2em] mt-1.5 opacity-60 font-inter">{format(date, 'MMM')}</span>
                     {hasSlots && !isSelected && (
-                      <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#CCFF00] rounded-full animate-pulse"></div>
+                      <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: themeColor }}></div>
                     )}
                   </button>
                 );
@@ -174,21 +190,22 @@ export default function ProfessionalAvailability() {
           </div>
         </div>
 
-        <div className="lg:col-span-8 space-y-6">
-          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 shadow-[var(--shadow-2)]">
-            <div className="flex flex-col md:flex-row items-end gap-4 mb-10 pb-8 border-b border-[#2D2D2D]">
-              <div className="flex-1 space-y-2">
-                <label className="text-[10px] font-medium text-[#878C9F] uppercase tracking-wider font-inter">Start Time</label>
-                <div className="bg-[#2D2D2D]/30 border border-[#2D2D2D] rounded-[6px] overflow-hidden">
+        <div className="lg:col-span-8 space-y-8">
+          <div className="bg-black border border-white/5 rounded-[2.5rem] p-8 lg:p-10 shadow-2xl relative overflow-hidden">
+            <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#00C187]/5 blur-[80px] pointer-events-none" />
+            <div className="flex flex-col md:flex-row items-end gap-6 mb-12 pb-10 border-b border-white/5 relative z-10">
+              <div className="flex-1 space-y-3">
+                <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest ml-1">Start Time</label>
+                <div className="bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden focus-within:border-[#00C187]/50 transition-all">
                   <ClockPicker 
                     value={timeToDate(newSlot.startTime)}
                     onChange={(date) => setNewSlot({...newSlot, startTime: dateToTime(date)})}
                   />
                 </div>
               </div>
-              <div className="flex-1 space-y-2">
-                <label className="text-[10px] font-medium text-[#878C9F] uppercase tracking-wider font-inter">End Time</label>
-                <div className="bg-[#2D2D2D]/30 border border-[#2D2D2D] rounded-[6px] overflow-hidden">
+              <div className="flex-1 space-y-3">
+                <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest ml-1">End Time</label>
+                <div className="bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden focus-within:border-[#00C187]/50 transition-all">
                   <ClockPicker 
                     value={timeToDate(newSlot.endTime)}
                     onChange={(date) => setNewSlot({...newSlot, endTime: dateToTime(date)})}
@@ -197,44 +214,45 @@ export default function ProfessionalAvailability() {
               </div>
               <button 
                 onClick={handleAddSlot}
-                className="h-12 px-6 bg-transparent text-[#999999] hover:text-[#CCFF00] border border-[#2D2D2D] rounded-[6px] font-bold uppercase text-[11px] tracking-wider hover:border-[#CCFF00]/30 transition-all flex items-center gap-2 font-inter"
+                className="h-16 px-8 bg-white/[0.03] border border-white/5 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] hover:bg-[#00C187]/10 hover:border-[#00C187]/30 transition-all flex items-center justify-center gap-3 font-inter"
+                style={{ color: themeColor }}
               >
-                <Plus size={16} /> Add Slot
+                <Plus size={18} /> Add Slot
               </button>
             </div>
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-              <h3 className="text-[11px] font-bold uppercase tracking-wider text-white font-inter">Active Slots for {format(new Date(selectedDate), 'MMMM dd, yyyy')}</h3>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 relative z-10">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-neutral-400 font-inter">Active Intervals for {format(new Date(selectedDate), 'MMMM dd, yyyy')}</h3>
             </div>
             
             {fetching ? (
-              <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-[#CCFF00]" size={32} /></div>
+              <div className="py-24 flex justify-center"><Loader2 className="animate-spin" style={{ color: themeColor }} size={40} /></div>
             ) : slots.length === 0 ? (
-              <div className="text-center py-20 border-2 border-dashed border-[#2D2D2D] rounded-[8px]">
-                <Clock size={40} className="mx-auto text-[#2D2D2D] mb-4" />
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#555] font-inter">No slots defined for this date</p>
+              <div className="text-center py-24 border-2 border-dashed border-white/5 rounded-[2rem] bg-white/[0.01]">
+                <Clock size={48} className="mx-auto text-neutral-800 mb-6" />
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-700 font-inter">No timeline defined for this node</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
                 {slots.map((slot, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-[#2D2D2D]/20 border border-[#2D2D2D] rounded-[6px] group hover:border-[#CCFF00]/30 transition-all">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-[6px] bg-[#CCFF00]/10 flex items-center justify-center">
-                        <Clock size={16} className="text-[#CCFF00]" />
+                  <div key={index} className="flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-3xl group hover:border-[#00C187]/30 transition-all shadow-lg">
+                    <div className="flex items-center gap-5">
+                      <div className="w-12 h-12 rounded-2xl bg-[#00C187]/10 flex items-center justify-center border border-[#00C187]/20">
+                        <Clock size={20} style={{ color: themeColor }} />
                       </div>
                       <div>
-                        <p className="text-[13px] font-bold text-white font-inter">{slot.startTime} - {slot.endTime}</p>
-                        <p className={`text-[9px] font-bold uppercase tracking-widest font-inter ${slot.isAvailable ? "text-[#CCFF00]" : "text-red-500"}`}>
-                          {slot.isAvailable ? "Available" : "Booked"}
+                        <p className="text-[15px] font-black text-white font-inter tracking-tight">{slot.startTime} - {slot.endTime}</p>
+                        <p className={`text-[9px] font-black uppercase tracking-[0.2em] font-inter mt-1`} style={{ color: slot.isAvailable ? themeColor : "#ef4444" }}>
+                          {slot.isAvailable ? "Available" : "Assigned"}
                         </p>
                       </div>
                     </div>
                     {slot.isAvailable && (
                       <button 
                         onClick={() => handleRemoveSlot(slot.startTime)}
-                        className="p-2 text-[#878C9F] hover:text-red-500 hover:bg-red-500/10 rounded-[4px] transition-all"
+                        className="p-3 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={18} />
                       </button>
                     )}
                   </div>

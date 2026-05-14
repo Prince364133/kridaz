@@ -60,7 +60,7 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       <Link
         key={item.to || item.label}
         to={item.to || "#"}
-        className={`flex items-center px-4 py-3 group relative transition-all duration-300 ${
+        className={`flex items-center px-4 py-3 group relative transition-all duration-300 font-inter ${
           isLogout 
             ? "text-white/40 hover:text-red-500" 
             : isActive 
@@ -79,7 +79,7 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         }}
       >
         {isActive && !isLogout && (
-          <div className="absolute inset-x-2 inset-y-1 bg-[#84CC16] rounded-xl -z-10 shadow-[0_0_15px_rgba(132,204,22,0.3)] transition-all duration-300" />
+          <div className="absolute inset-x-2 inset-y-1 bg-[#00C187] rounded-xl -z-10 shadow-[0_0_15px_rgba(0,193,135,0.3)] transition-all duration-300" />
         )}
         
         {!isActive && !isLogout && (
@@ -94,12 +94,12 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
                 ? "text-white/20 group-hover:text-red-500" 
                 : isActive 
                   ? "text-black" 
-                  : "text-white/20 group-hover:text-[#84CC16]"
+                  : "text-white/20 group-hover:text-[#00C187]"
             }`} 
           />
         </div>
 
-        <span className={`font-medium text-sm tracking-wide ml-4 whitespace-nowrap overflow-hidden transition-all duration-300 ${isMinimized ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
+        <span className={`font-semibold text-[13px] uppercase tracking-wider ml-4 whitespace-nowrap overflow-hidden transition-all duration-300 ${isMinimized ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
           {item.label}
         </span>
       </Link>
@@ -116,14 +116,14 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       )}
 
       <aside
-        className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#0a0a0a] border-r border-white/5 overflow-x-hidden transition-all duration-300 ease-in-out z-50 flex flex-col
+        className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#000000] border-r border-white/5 overflow-x-hidden transition-all duration-300 ease-in-out z-50 flex flex-col font-inter
           ${isMinimized ? "lg:w-20" : "w-64"}
           ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           ${className || ""}`}
       >
         <div className="flex flex-col p-4 border-b border-white/5 bg-black/20 gap-4 lg:hidden">
           <div className="flex items-center justify-end">
-            <button onClick={toggleSidebar} className="text-white hover:text-[#84CC16] transition-colors">
+            <button onClick={toggleSidebar} className="text-white hover:text-[#00C187] transition-colors">
               <X size={20} />
             </button>
           </div>
@@ -131,12 +131,12 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
 
         <div className={`px-4 py-6 border-b border-white/5 transition-all duration-300 ${isMinimized ? "items-center" : ""}`}>
           <div className="flex items-center gap-3">
-             <div className={`flex-shrink-0 w-2 h-2 rounded-full ${isLimitedScorer ? "bg-amber-500 animate-pulse" : "bg-[#84CC16] shadow-[0_0_10px_rgba(132,204,22,0.5)]"}`} />
+             <div className={`flex-shrink-0 w-2 h-2 rounded-full ${isLimitedScorer ? "bg-amber-500 animate-pulse" : "bg-[#00C187] shadow-[0_0_10px_rgba(0,193,135,0.5)]"}`} />
              {!isMinimized && (
                <div className="animate-in fade-in slide-in-from-left-2 duration-300">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 leading-none mb-1">Status</p>
-                  <p className={`text-[10px] font-black uppercase tracking-tight ${isLimitedScorer ? "text-amber-500" : "text-[#84CC16]"}`}>
-                    {isLimitedScorer ? "Unverified" : "Verified Scorer"}
+                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#878C9F] leading-none mb-1">Professional Status</p>
+                  <p className={`text-[10px] font-black uppercase tracking-tight ${isLimitedScorer ? "text-amber-500" : "text-[#00C187]"}`}>
+                    {isLimitedScorer ? "Limited Access" : "Verified Scorer"}
                   </p>
                </div>
              )}

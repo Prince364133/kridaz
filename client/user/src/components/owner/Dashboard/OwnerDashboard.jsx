@@ -38,7 +38,10 @@ import PeakHoursChart from "./PeakHoursChart";
 
 const OwnerDashboard = () => {
   const { dashboardData, loading, error } = useOwnerDashboard();
-  const user = useSelector((state) => state.auth.user);
+  const { role, user } = useSelector((state) => state.auth);
+  const isScorer = role?.toLowerCase().includes("scorer");
+  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const dashboardTitle = isScorer ? "SCORER Dashboard" : "Dashboard Overview";
 
   const [timeFilter, setTimeFilter] = useState("Month");
   const [revenueFilter, setRevenueFilter] = useState("Month");
@@ -107,7 +110,7 @@ const OwnerDashboard = () => {
     })),
   };
 
-  const COLORS = ["#84CC16", "#10B981", "#3B82F6", "#6366F1", "#F59E0B", "#EF4444"];
+  const COLORS = [themeColor, "#10B981", "#3B82F6", "#6366F1", "#F59E0B", "#EF4444"];
 
   const getTimeGreeting = () => {
     const hour = currentTime.getHours();
@@ -127,8 +130,8 @@ const OwnerDashboard = () => {
           {/* Dashboard Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-white/5">
             <div className="space-y-1">
-              <h1 className="text-3xl lg:text-4xl font-black text-white uppercase tracking-tight">
-                Dashboard <span className="text-[#CCFF00]">Overview</span>
+              <h1 className="text-3xl lg:text-4xl font-black text-white uppercase tracking-tight font-inter">
+                {dashboardTitle.split(' ')[0]} <span style={{ color: themeColor }}>{dashboardTitle.split(' ').slice(1).join(' ')}</span>
               </h1>
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em]">
                 {getTimeGreeting()}, {user?.name || "Partner"} • Your venue's heartbeat
@@ -136,14 +139,14 @@ const OwnerDashboard = () => {
             </div>
 
             <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-2xl backdrop-blur-xl">
-              <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-xl flex items-center justify-center text-[#CCFF00]">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${themeColor}1A`, color: themeColor }}>
                 <Calendar size={24} />
               </div>
               <div className="space-y-0.5">
-                <p className="text-white text-lg font-black leading-none">
+                <p className="text-white text-lg font-black leading-none font-inter">
                   {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
                 </p>
-                <p className="text-[#CCFF00] text-[10px] font-black uppercase tracking-widest opacity-80">
+                <p className="text-[10px] font-black uppercase tracking-widest opacity-80 font-inter" style={{ color: themeColor }}>
                   {currentTime.toLocaleDateString("en-US", { weekday: "long" })} •{" "}
                   {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
                 </p>
@@ -153,12 +156,12 @@ const OwnerDashboard = () => {
 
           {/* Stats Grid – 6 Cards (all real data, no hardcoded fallbacks) */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-5">
-            <StatsCard title="Total Bookings" value={totalBookings} icon={Calendar} />
-            <StatsCard title="Total Revenue" value={totalRevenue} prefix="Rs " icon={TrendingUp} />
-            <StatsCard title="Utilization Rate" value={utilization} suffix="%" icon={Activity} />
-            <StatsCard title="Active Grounds" value={totalTurfs} icon={MapPin} />
-            <StatsCard title="Average Rating" value={Number(averageRating)} icon={Star} />
-            <StatsCard title="Total Reviews" value={totalReviews} icon={Users2} />
+            <StatsCard title="Total Bookings" value={totalBookings} icon={Calendar} themeColor={themeColor} />
+            <StatsCard title="Total Revenue" value={totalRevenue} prefix="Rs " icon={TrendingUp} themeColor={themeColor} />
+            <StatsCard title="Utilization Rate" value={utilization} suffix="%" icon={Activity} themeColor={themeColor} />
+            <StatsCard title="Active Grounds" value={totalTurfs} icon={MapPin} themeColor={themeColor} />
+            <StatsCard title="Average Rating" value={Number(averageRating)} icon={Star} themeColor={themeColor} />
+            <StatsCard title="Total Reviews" value={totalReviews} icon={Users2} themeColor={themeColor} />
           </div>
 
           {/* Main Analytics Row */}
@@ -193,18 +196,18 @@ const OwnerDashboard = () => {
                     <AreaChart data={currentRevenueData}>
                       <defs>
                         <linearGradient id="colorPerf" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.2} />
-                          <stop offset="95%" stopColor="#CCFF00" stopOpacity={0} />
+                          <stop offset="5%" stopColor={themeColor} stopOpacity={0.2} />
+                          <stop offset="95%" stopColor={themeColor} stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" vertical={false} />
-                      <XAxis dataKey="date" stroke="#999999" fontSize={10} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#999999" fontSize={10} tickLine={false} axisLine={false} />
+                      <XAxis dataKey="date" stroke="#999999" fontSize={10} tickLine={false} axisLine={false} font-family="Inter" />
+                      <YAxis stroke="#999999" fontSize={10} tickLine={false} axisLine={false} font-family="Inter" />
                       <Tooltip
                         contentStyle={{ backgroundColor: "#151617", border: "1px solid #2D2D2D", borderRadius: "8px", padding: "12px" }}
-                        itemStyle={{ color: "#CCFF00", fontSize: "12px", textTransform: "uppercase", fontFamily: "Inter" }}
+                        itemStyle={{ color: themeColor, fontSize: "12px", textTransform: "uppercase", fontFamily: "Inter" }}
                       />
-                      <Area type="monotone" dataKey="revenue" stroke="#CCFF00" strokeWidth={2} fillOpacity={1} fill="url(#colorPerf)" />
+                      <Area type="monotone" dataKey="revenue" stroke={themeColor} strokeWidth={2} fillOpacity={1} fill="url(#colorPerf)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
@@ -236,7 +239,7 @@ const OwnerDashboard = () => {
                         </Pie>
                         <Tooltip
                           contentStyle={{ backgroundColor: "#151617", border: "1px solid #2D2D2D", borderRadius: "8px" }}
-                          itemStyle={{ textTransform: "uppercase", fontSize: "10px", color: "#CCFF00", fontFamily: "Inter" }}
+                          itemStyle={{ textTransform: "uppercase", fontSize: "10px", color: themeColor, fontFamily: "Inter" }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
@@ -276,7 +279,8 @@ const OwnerDashboard = () => {
                       <input
                         type="text"
                         placeholder="Filter player..."
-                        className="bg-[#2D2D2D] border border-[#404040] rounded-[6px] py-2 pl-9 pr-4 text-[14px] text-white focus:outline-none focus:border-[#CCFF00] transition-all font-inter"
+                        className="bg-[#2D2D2D] border border-[#404040] rounded-[6px] py-2 pl-9 pr-4 text-[14px] text-white focus:outline-none transition-all font-inter"
+                        style={{ '--tw-ring-color': themeColor } as any}
                       />
                     </div>
                   </div>
@@ -329,7 +333,7 @@ const OwnerDashboard = () => {
                                 <p className="text-[14px] font-semibold text-white tracking-tight">Rs {booking?.totalPrice || "0"}</p>
                               </td>
                               <td className="py-4 text-right">
-                                <button className="p-2 text-[#878C9F] hover:text-[#CCFF00] transition-colors">
+                                <button className="p-2 text-[#878C9F] transition-colors" style={{ color: themeColor }}>
                                   <ExternalLink size={16} />
                                 </button>
                               </td>
@@ -342,7 +346,7 @@ const OwnerDashboard = () => {
                       <p className="text-[12px] font-normal text-[#999999] uppercase tracking-widest">
                         Showing {Math.min(5, recentBookings.length)} of {totalBookings} bookings
                       </p>
-                      <Link to="/partner/bookings" className="text-[13px] font-normal text-[#CCFF00] uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-all font-inter">
+                      <Link to="/partner/bookings" className="text-[13px] font-normal uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-all font-inter" style={{ color: themeColor }}>
                         View All <ChevronRight size={14} />
                       </Link>
                     </div>
@@ -361,8 +365,9 @@ const OwnerDashboard = () => {
                 <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] flex-1">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider">Live Feed</h2>
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] rounded-full text-[10px] font-medium uppercase tracking-widest animate-pulse border border-[#CCFF00]/20">
-                      <span className="w-1 h-1 bg-[#CCFF00] rounded-full" /> Live
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-widest animate-pulse border"
+                         style={{ backgroundColor: `${themeColor}1A`, color: themeColor, borderColor: `${themeColor}33` }}>
+                      <span className="w-1 h-1 rounded-full" style={{ backgroundColor: themeColor }} /> Live
                     </div>
                   </div>
 
@@ -370,11 +375,11 @@ const OwnerDashboard = () => {
                     <div className="space-y-6">
                       {recentBookings.slice(0, 3).map((booking, i) => (
                         <div key={i} className="flex gap-4 group cursor-pointer">
-                          <div className="mt-1 p-2 rounded-[6px] bg-[#2D2D2D] text-[#CCFF00] group-hover:scale-110 transition-transform">
+                          <div className="mt-1 p-2 rounded-[6px] bg-[#2D2D2D] group-hover:scale-110 transition-transform" style={{ color: themeColor }}>
                             <CheckCircle2 size={14} />
                           </div>
                           <div>
-                            <p className="text-[14px] font-semibold text-white uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">
+                            <p className="text-[14px] font-semibold text-white uppercase tracking-tight transition-colors" style={{ color: themeColor }}>
                               Booking {booking?.status === "CANCELLED" ? "Cancelled" : "Confirmed"}
                             </p>
                             <p className="text-[12px] text-[#999999] mt-0.5">
@@ -395,7 +400,8 @@ const OwnerDashboard = () => {
                     </div>
                   )}
 
-                  <Link to="/partner/bookings" className="w-full mt-8 py-3 bg-transparent border border-[#2D2D2D] hover:bg-[#CCFF00]/10 hover:text-[#CCFF00] text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter flex items-center justify-center">
+                  <Link to="/partner/bookings" className="w-full mt-8 py-3 bg-transparent border border-[#2D2D2D] hover:text-white text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter flex items-center justify-center"
+                        style={{ '--hover-bg': `${themeColor}1A`, '--hover-color': themeColor } as any}>
                     View Full Activity History
                   </Link>
                 </div>
@@ -421,18 +427,20 @@ const EmptyState = ({ height, icon: Icon, message, sub }) => (
 );
 
 // ── Stats Card (no hardcoded trend badges) ──
-const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon }) => {
+const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, themeColor }) => {
   return (
-    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#CCFF00]/30 transition-all duration-500 min-h-[140px] shadow-[var(--shadow-2)]">
+    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group transition-all duration-500 min-h-[140px] shadow-[var(--shadow-2)]"
+         style={{ borderColor: '#2D2D2D' }}>
       <Icon className="absolute -right-4 -bottom-4 w-20 h-20 text-white/[0.02] group-hover:text-white/[0.04] transition-colors" />
       <div className="flex items-center justify-between mb-5">
-        <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] flex items-center justify-center transition-all shadow-sm">
+        <div className="w-10 h-10 rounded-[6px] flex items-center justify-center transition-all shadow-sm"
+             style={{ backgroundColor: `${themeColor}1A`, color: themeColor }}>
           <Icon size={20} />
         </div>
       </div>
       <div className="space-y-2 relative z-10">
-        <h3 className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px]">{title}</h3>
-        <div className="text-2xl font-semibold text-white tracking-tight flex items-baseline gap-1">
+        <h3 className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] font-inter">{title}</h3>
+        <div className="text-2xl font-semibold text-white tracking-tight flex items-baseline gap-1 font-inter">
           {prefix && <span className="text-lg text-white/40 font-normal">{prefix}</span>}
           <CountUp end={Number(value) || 0} duration={2} separator="," decimals={(Number(value) || 0) % 1 === 0 ? 0 : 1} />
           {suffix && <span className="text-lg text-white/40 font-normal">{suffix}</span>}
