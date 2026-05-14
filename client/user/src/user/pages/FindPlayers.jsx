@@ -3,46 +3,248 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { 
- Search, 
- MapPin, 
- Loader2, 
- Users,
- MessageCircle,
- Trophy,
+  Search, 
+  MapPin, 
+  Loader2, 
+  Users,
+  MessageCircle,
+  Trophy,
+  ShieldCheck,
+  UserPlus,
+  Swords,
+  ChevronRight,
+  Target,
+  Crown,
+  Activity,
+  Star
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import StoryViewer from "../components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
+const PRI = "#84CC16";
+const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif", fontSize: "20px" };
+
+const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvatarClick, currentUser, navigate, gateInteraction }) => {
+  const shapes = [
+    "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+    "circle(50% at 50% 50%)",
+    "polygon(50% 0%, 100% 100%, 0% 100%)",
+    "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)"
+  ];
+  const shape = shapes[rank % shapes.length];
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="relative bg-black rounded-[16px] border border-[#84CC16]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-[#84CC16]/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+    >
+      <div className="flex justify-end items-start p-4 absolute top-0 left-0 right-0 z-20">
+        <div className="p-1.5 bg-[#84CC16]/10 rounded-lg border border-[#84CC16]/20">
+          <ShieldCheck size={14} className="text-[#84CC16]" />
+        </div>
+      </div>
+
+      <div className="h-40 relative mt-2 flex items-center justify-center overflow-hidden">
+        <div 
+          className="absolute w-52 h-52 bg-[#84CC16]/10 border border-[#84CC16]/30 blur-sm opacity-50 group-hover:opacity-80 transition-opacity duration-700"
+          style={{ clipPath: shape }}
+        />
+        <div 
+          className="absolute w-48 h-48 border-2 border-[#84CC16]/40"
+          style={{ clipPath: shape }}
+        />
+        <div className="relative w-full h-full flex items-center justify-center z-10 pointer-events-none">
+          <img 
+            src={player.profilePicture || "https://pngimg.com/d/cricket_PNG102.png"} 
+            alt="" 
+            className="h-[95%] w-[90%] object-contain filter drop-shadow-[0_10px_30px_rgba(132,204,22,0.4)] group-hover:scale-110 transition-transform duration-700 select-none"
+          />
+        </div>
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+          <div className="bg-black border-2 border-[#84CC16] w-12 h-14 flex items-center justify-center" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
+            <span className="text-[#84CC16] font-black text-sm uppercase">
+              {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 px-3 pt-4 pb-2 flex flex-col items-center text-center">
+        <h3 className="text-sm font-black text-white uppercase tracking-tight mb-1 truncate w-full" style={HEADING_STYLE}>
+          {player.name}
+        </h3>
+        <div className="flex items-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-4">
+          <MapPin size={10} className="text-[#84CC16]" />
+          {player.city || 'Athletic'}
+        </div>
+        <div className="grid grid-cols-3 w-full border-t border-white/5 pt-2 mb-2">
+          <div className="flex flex-col items-center">
+            <span className="text-[#84CC16] text-[6px] font-black uppercase tracking-widest mb-1">Matches</span>
+            <span className="text-white font-black text-[10px]">—</span>
+          </div>
+          <div className="flex flex-col items-center border-x border-white/5">
+            <span className="text-[#84CC16] text-[6px] font-black uppercase tracking-widest mb-1">Runs</span>
+            <span className="text-white font-black text-[10px]">—</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-[#84CC16] text-[6px] font-black uppercase tracking-widest mb-1">Strike Rate</span>
+            <span className="text-white font-black text-[10px]">—</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 w-full mt-auto">
+          <button onClick={() => handleFollowToggle(player._id)} className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player._id) ? "bg-white/5 text-white/20 border border-white/10" : "bg-[#84CC16] text-black hover:bg-[#a3e635]"}`}>
+            {followingIds.includes(player._id) ? "Following" : "Follow"}
+          </button>
+          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#84CC16] transition-all">
+            <MessageCircle size={18} />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const TeamCard = ({ team, navigate }) => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="relative bg-[#0A0A0A] rounded-[20px] border border-white/5 overflow-hidden flex flex-col h-[380px] group hover:border-[#84CC16]/30 transition-all duration-500 shadow-2xl"
+    >
+      {/* Top Section: Banner */}
+      <div className="h-32 relative">
+        <img 
+          src={team.sportType === 'Cricket' ? 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2067&auto=format&fit=crop' : 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2076&auto=format&fit=crop'} 
+          alt="" 
+          className="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
+        
+        {/* Verified Badge */}
+        <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10">
+          <div className="w-3.5 h-3.5 bg-[#84CC16] rounded-full flex items-center justify-center">
+            <ShieldCheck size={10} className="text-black" />
+          </div>
+          <span className="text-[8px] font-black text-white uppercase tracking-widest">Verified</span>
+        </div>
+
+        {/* Team Avatar Overlay */}
+        <div className="absolute bottom-[-16px] left-4 z-10">
+          <div className="w-14 h-14 rounded-full border-[2px] border-[#0A0A0A] bg-[#0A0A0A] relative overflow-hidden group/avatar">
+            <div className="absolute inset-0 border-2 border-[#84CC16] rounded-full z-20" />
+            <div className="w-full h-full flex items-center justify-center bg-[#111] relative z-10">
+              {team.logo ? (
+                <img src={team.logo} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="flex flex-col items-center text-[#84CC16]">
+                  <Crown size={24} className="mb-1" />
+                  <div className="w-10 h-10 border-2 border-[#84CC16] rounded-full flex items-center justify-center p-1">
+                     {team.sportType === 'Cricket' ? <Trophy size={16} /> : <Activity size={16} />}
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Status Indicator */}
+            <div className="absolute bottom-2 right-2 w-4 h-4 bg-[#84CC16] rounded-full border-[3px] border-[#0A0A0A] z-30" />
+          </div>
+        </div>
+      </div>
+
+      {/* Middle Section: Details */}
+      <div className="flex-1 pt-6 px-4 pb-2 flex flex-col">
+        <div className="flex justify-between items-start mb-1">
+          <div>
+            <h3 className="text-base font-black text-white uppercase tracking-tighter mb-0.5" style={HEADING_STYLE}>{team.name}</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-[#84CC16] font-black text-[8px] uppercase tracking-widest flex items-center gap-1.5">
+                {team.sportType === 'Cricket' ? <Trophy size={10} /> : <Activity size={10} />}
+                {team.sportType}
+              </span>
+            </div>
+            <p className="text-gray-600 text-[8px] font-bold uppercase tracking-widest mt-0.5">@ {team.city || 'Global'}</p>
+          </div>
+          <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-white/40 hover:text-[#84CC16] transition-colors">
+            <Star size={16} />
+          </div>
+        </div>
+
+        {/* Stats Section */}
+        <div className="grid grid-cols-2 gap-2 py-3 border-y border-white/5 mb-3">
+          <div className="flex items-center gap-2">
+             <div className="p-2 bg-white/5 rounded-lg border border-white/10">
+                <Users size={14} className="text-[#84CC16]" />
+             </div>
+             <div>
+                <p className="text-sm font-black text-white leading-none mb-0.5">{team.memberCount || 1}</p>
+                <p className="text-[6px] text-gray-500 font-black uppercase tracking-widest">Members</p>
+             </div>
+          </div>
+          <div className="flex items-center gap-2">
+             <div className="p-2 bg-white/5 rounded-lg border border-white/10">
+                <Target size={14} className="text-[#84CC16]" />
+             </div>
+             <div>
+                <p className="text-sm font-black text-white leading-none mb-0.5">{team.matchesPlayed || 0}</p>
+                <p className="text-[6px] text-gray-500 font-black uppercase tracking-widest">Matches</p>
+             </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+           <Link 
+              to={`/team/${team._id}`}
+              className="h-12 bg-[#84CC16] text-black rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_15px_rgba(132,204,22,0.2)]"
+           >
+              <UserPlus size={14} strokeWidth={3} />
+              Join Team
+           </Link>
+           <Link 
+              to={`/team/${team._id}`}
+              className="h-12 bg-transparent border-2 border-white/10 text-white rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
+           >
+              <Swords size={14} />
+              Challenge
+           </Link>
+        </div>
+
+        <Link 
+          to={`/team-pass/${team._id}`}
+          className="mt-3 flex items-center justify-center gap-2 text-gray-600 hover:text-[#84CC16] text-[9px] font-black uppercase tracking-[0.2em] transition-all"
+        >
+          View Team Pass <ChevronRight size={12} />
+        </Link>
+      </div>
+    </motion.div>
+  );
+};
+
 const FindPlayers = () => {
- const { user: currentUser, isLoggedIn } = useSelector((state) => state.auth);
- const { gateInteraction } = useLoginOnDemand();
- const navigate = useNavigate();
+  const { user: currentUser } = useSelector((state) => state.auth);
+  const { gateInteraction } = useLoginOnDemand();
+  const navigate = useNavigate();
 
- const [players, setPlayers] = useState([]);
- const [loading, setLoading] = useState(true);
- const [searchQuery, setSearchQuery] = useState("");
- const [followingIds, setFollowingIds] = useState([]);
- const [filters, setFilters] = useState({
- city: "",
- sport: ""
- });
-
- const sports = ["Cricket", "Football", "Badminton", "Tennis", "Basketball", "Volleyball", "Table Tennis"];
- const [viewingStoryGroup, setViewingStoryGroup] = useState(null);
-
-  const [activeTab, setActiveTab] = useState("players"); // "players" or "teams"
+  const [players, setPlayers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [followingIds, setFollowingIds] = useState([]);
+  const [filters, setFilters] = useState({ city: "", sport: "" });
+  const [activeTab, setActiveTab] = useState("players");
   const [teams, setTeams] = useState([]);
+  const [viewingStoryGroup, setViewingStoryGroup] = useState(null);
+
+  const sports = ["Cricket", "Football", "Badminton", "Tennis", "Basketball", "Volleyball", "Table Tennis"];
 
   useEffect(() => {
-    if (activeTab === "players") {
-      fetchPlayers();
-    } else {
-      fetchTeams();
-    }
-    if (currentUser) {
-      fetchFollowingStatus();
-    }
+    if (activeTab === "players") fetchPlayers();
+    else fetchTeams();
+    if (currentUser) fetchFollowingStatus();
   }, [filters, currentUser, activeTab]);
 
   const fetchTeams = async () => {
@@ -52,7 +254,6 @@ const FindPlayers = () => {
       if (filters.city) params.append("city", filters.city);
       if (filters.sport) params.append("sportType", filters.sport);
       if (searchQuery) params.append("search", searchQuery);
-      
       const response = await axiosInstance.get(`/api/team/all?${params.toString()}`);
       setTeams(response.data.teams || []);
     } catch (error) {
@@ -62,346 +263,185 @@ const FindPlayers = () => {
     }
   };
 
- const fetchPlayers = async () => {
- setLoading(true);
- try {
- const params = new URLSearchParams();
- if (filters.city) params.append("city", filters.city);
- if (filters.sport) params.append("sport", filters.sport);
- 
- const response = await axiosInstance.get(`/api/user/players?${params.toString()}`);
- setPlayers(response.data.players || []);
- } catch (error) {
- toast.error("Failed to load players");
- } finally {
- setLoading(false);
- }
- };
-
- const fetchFollowingStatus = async () => {
- try {
- const response = await axiosInstance.get("/api/user/players/network");
- const ids = (response.data.following || []).filter(p => p).map(p => p._id);
- setFollowingIds(ids);
- } catch (error) {
- console.error("Error fetching network:", error);
- }
- };
-
-  const handleSearch = async (e) => {
-    const q = e.target.value;
-    setSearchQuery(q);
-    
-    if (q.length < 2) {
-      if (q.length === 0) {
-        activeTab === "players" ? fetchPlayers() : fetchTeams();
-      }
-      return;
-    }
-
+  const fetchPlayers = async () => {
+    setLoading(true);
     try {
-      if (activeTab === "players") {
-        const response = await axiosInstance.get(`/api/user/players/search?query=${q}`);
-        setPlayers(response.data.players || []);
-      } else {
-        fetchTeams(); // fetchTeams already uses searchQuery
-      }
+      const params = new URLSearchParams();
+      if (filters.city) params.append("city", filters.city);
+      if (filters.sport) params.append("sport", filters.sport);
+      const response = await axiosInstance.get(`/api/user/players?${params.toString()}`);
+      setPlayers(response.data.players || []);
     } catch (error) {
-      console.error("Search error:", error);
+      toast.error("Failed to load players");
+    } finally {
+      setLoading(false);
     }
   };
 
- const handleFilterChange = (name, value) => {
- setFilters(prev => ({ ...prev, [name]: value }));
- };
+  const fetchFollowingStatus = async () => {
+    try {
+      const response = await axiosInstance.get("/api/user/players/network");
+      const ids = (response.data.following || []).filter(p => p).map(p => p._id);
+      setFollowingIds(ids);
+    } catch (error) {
+      console.error("Error fetching network:", error);
+    }
+  };
 
- const handleFollowToggle = async (targetUserId) => {
- gateInteraction(async () => {
- const isFollowing = followingIds.includes(targetUserId);
- try {
- const endpoint = `/api/user/players/${targetUserId}/${isFollowing ? 'unfollow' : 'follow'}`;
- await axiosInstance.post(endpoint);
- 
- if (isFollowing) {
- setFollowingIds(prev => prev.filter(id => id !== targetUserId));
- toast.success("Unfollowed player");
- } else {
- setFollowingIds(prev => [...prev, targetUserId]);
- toast.success("Following player");
- }
- } catch (error) {
- toast.error("Failed to update follow status");
- }
- }, {
- title: "Build Your Network",
- message: "Connect with players in your city, track their progress, and challenge them to a match. Sign in to start following athletes."
- });
- };
+  const handleSearch = (e) => {
+    const q = e.target.value;
+    setSearchQuery(q);
+    if (q.length === 0) activeTab === "players" ? fetchPlayers() : fetchTeams();
+  };
 
- const handleAvatarClick = (player) => {
- gateInteraction(() => {
- if (!player.hasActiveStory) {
- navigate(`/profile/${player._id}`);
- return;
- }
- 
- const fetchStories = async () => {
- try {
- const res = await axiosInstance.get(`/api/user/community/user-stories/${player._id}`);
- if (res.data.success && res.data.stories?.length > 0) {
- setViewingStoryGroup({
- user: player,
- stories: res.data.stories
- });
- } else {
- navigate(`/profile/${player._id}`);
- }
- } catch (error) {
- toast.error("Failed to load stories");
- navigate(`/profile/${player._id}`);
- }
- };
- fetchStories();
- }, {
- title: "View Profile",
- message: "Sign in to view player profiles and stories."
- });
- };
+  const handleFilterChange = (name, value) => {
+    setFilters(prev => ({ ...prev, [name]: value }));
+  };
 
- return (
- <div className="min-h-screen bg-black text-white pt-24 pb-20 md:pb-12 px-4 md:px-8">
-  <div className="max-w-6xl mx-auto space-y-6">
-    
-    {/* Tab Switcher */}
-    <div className="flex items-center gap-4 border-b border-white/5 pb-1">
-      <button 
-        onClick={() => setActiveTab("players")}
-        className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "players" ? "text-[#CCFF00]" : "text-white/20 hover:text-white/40"}`}
-      >
-        Players
-        {activeTab === "players" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#CCFF00]" />}
-      </button>
-      <button 
-        onClick={() => setActiveTab("teams")}
-        className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "teams" ? "text-[#CCFF00]" : "text-white/20 hover:text-white/40"}`}
-      >
-        Teams
-        {activeTab === "teams" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#CCFF00]" />}
-      </button>
-    </div>
+  const handleFollowToggle = async (targetUserId) => {
+    gateInteraction(async () => {
+      const isFollowing = followingIds.includes(targetUserId);
+      try {
+        const endpoint = `/api/user/players/${targetUserId}/${isFollowing ? 'unfollow' : 'follow'}`;
+        await axiosInstance.post(endpoint);
+        if (isFollowing) {
+          setFollowingIds(prev => prev.filter(id => id !== targetUserId));
+          toast.success("Unfollowed player");
+        } else {
+          setFollowingIds(prev => [...prev, targetUserId]);
+          toast.success("Following player");
+        }
+      } catch (error) {
+        toast.error("Failed to update follow status");
+      }
+    });
+  };
 
-    {/* Compact Header Row */}
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02] border border-white/5 rounded-2xl p-3 md:p-4">
-      <div className="flex items-center gap-4 flex-1">
-        <h2 className="text-[10px] md:text-xs font-bold text-white/20 uppercase tracking-[0.2em] whitespace-nowrap hidden sm:block">{activeTab === "players" ? "Active Players" : "Verified Teams"}</h2>
- 
- <div className="relative flex-1 max-w-md group">
- <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00] transition-colors" size={16} />
- <input 
- type="text" 
- value={searchQuery}
- onChange={handleSearch}
- placeholder="SEARCH..."
- className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#CCFF00]/50 rounded-xl h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
- />
- </div>
- </div>
+  const handleAvatarClick = (player) => {
+    gateInteraction(() => {
+      if (!player.hasActiveStory) {
+        navigate(`/profile/${player._id}`);
+        return;
+      }
+      const fetchStories = async () => {
+        try {
+          const res = await axiosInstance.get(`/api/user/community/user-stories/${player._id}`);
+          if (res.data.success && res.data.stories?.length > 0) {
+            setViewingStoryGroup({ user: player, stories: res.data.stories });
+          } else {
+            navigate(`/profile/${player._id}`);
+          }
+        } catch (error) {
+          toast.error("Failed to load stories");
+          navigate(`/profile/${player._id}`);
+        }
+      };
+      fetchStories();
+    });
+  };
 
- <div className="flex items-center gap-2">
- <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
- <select 
- value={filters.sport}
- onChange={(e) => handleFilterChange("sport", e.target.value)}
- className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#CCFF00] focus:border-[#CCFF00]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
- >
- <option value="" className="bg-black text-white/40">All Sports</option>
- {sports.map(sport => (
- <option key={sport} value={sport} className="bg-black text-white">{sport}</option>
- ))}
- </select>
-
- <div className="relative group">
- <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00]" size={10} />
- <input 
- type="text"
- placeholder="LOCATION..."
- value={filters.city}
- onChange={(e) => handleFilterChange("city", e.target.value)}
- className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#CCFF00] focus:border-[#CCFF00]/50 outline-none w-28 md:w-32 placeholder:text-white/20"
- />
- </div>
- </div>
-
- <button 
- onClick={() => {
- setFilters({ city: "", sport: "" });
- setSearchQuery("");
- activeTab === "players" ? fetchPlayers() : fetchTeams();
- }}
- className="flex items-center gap-1.5 text-white/40 hover:text-white transition-colors text-[9px] md:text-[10px] font-bold uppercase tracking-widest px-2"
- >
- Reset
- </button>
- </div>
- </div>
-
- {/* Players Grid */}
- <div className="space-y-4 md:space-y-6">
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-            <div key={i} className="h-48 bg-white/[0.02] border border-white/5 rounded-2xl animate-pulse" />
-          ))}
+  return (
+    <div className="min-h-screen bg-black text-white pt-24 pb-20 px-4 md:px-8">
+      <div className="max-w-6xl mx-auto space-y-6">
+        
+        {/* Tab Switcher */}
+        <div className="flex items-center gap-4 border-b border-white/5 pb-1">
+          <button 
+            onClick={() => setActiveTab("players")}
+            className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "players" ? "text-[#84CC16]" : "text-white/20 hover:text-white/40"}`}
+          >
+            Players
+            {activeTab === "players" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#84CC16]" />}
+          </button>
+          <button 
+            onClick={() => setActiveTab("teams")}
+            className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "teams" ? "text-[#84CC16]" : "text-white/20 hover:text-white/40"}`}
+          >
+            Teams
+            {activeTab === "teams" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#84CC16]" />}
+          </button>
         </div>
-      ) : activeTab === "players" ? (
-        players.length === 0 ? (
-          <div className="py-20 text-center space-y-4">
-            <Users size={48} className="mx-auto text-white/10" />
-            <p className="text-white/20 text-sm uppercase tracking-widest">No players found matching your criteria.</p>
+
+        {/* Compact Header Row */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02] border border-white/5 rounded-2xl p-3 md:p-4">
+          <div className="flex items-center gap-4 flex-1">
+            <h2 className="text-[10px] md:text-xs font-bold text-white/20 uppercase tracking-[0.2em] whitespace-nowrap hidden sm:block" style={SUBHEADING_STYLE}>{activeTab === "players" ? "Active Players" : "Verified Teams"}</h2>
+            <div className="relative flex-1 max-w-md group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#84CC16] transition-colors" size={16} />
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={handleSearch}
+                placeholder="SEARCH..."
+                className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#84CC16]/50 rounded-xl h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
+              />
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {players.map((player) => (
-              <div key={player._id} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 hover:bg-white/[0.04] transition-all flex flex-col items-center text-center gap-4 group relative overflow-hidden">
-                <div 
-                  className={`relative w-24 h-24 rounded-full p-[2px] transition-all duration-500 group-hover:scale-110 ${player.hasActiveStory ? 'cursor-pointer ring-2 ring-[#CCFF00] ring-offset-2 ring-offset-black' : ''}`}
-                  onClick={() => handleAvatarClick(player)}
-                >
-                  <div className="absolute inset-0 rounded-full bg-[#CCFF00]/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="w-full h-full rounded-full flex items-center justify-center relative overflow-hidden z-10 bg-[#1a1a1a] border border-white/10">
-                    {player.profilePicture ? (
-                      <img src={player.profilePicture} alt={player.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-[#CCFF00] font-black text-2xl">
-                        {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
-                      </span>
-                    )}
-                  </div>
-                </div>
 
-                <div className="space-y-1 w-full">
-                  <Link to={`/profile/${player._id}`} className="block font-bold text-sm text-white hover:text-[#CCFF00] transition-colors truncate">
-                    {player.name}
-                  </Link>
-                  <div className="flex items-center justify-center gap-1 text-[10px] text-white/40 uppercase tracking-widest">
-                    <MapPin size={10} className="text-[#CCFF00]/60" />
-                    <span>{player.city || 'Athletic'}</span>
-                  </div>
-                </div>
+          <div className="flex items-center gap-2">
+            <select 
+              value={filters.sport}
+              onChange={(e) => handleFilterChange("sport", e.target.value)}
+              className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#84CC16] focus:border-[#84CC16]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
+            >
+              <option value="">All Sports</option>
+              {sports.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <div className="relative group">
+              <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#84CC16]" size={10} />
+              <input 
+                type="text"
+                placeholder="LOCATION..."
+                value={filters.city}
+                onChange={(e) => handleFilterChange("city", e.target.value)}
+                className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#84CC16] focus:border-[#84CC16]/50 outline-none w-28 md:w-32 placeholder:text-white/20"
+              />
+            </div>
+          </div>
+        </div>
 
-                <div className="flex items-center gap-2 w-full mt-auto">
-                  {(!currentUser || currentUser._id !== player._id) && (
-                    <>
-                      <button 
-                        onClick={() => handleFollowToggle(player._id)}
-                        className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                          followingIds.includes(player._id)
-                          ? "bg-white/5 text-white/20 border border-white/10"
-                          : "bg-[#CCFF00] text-black hover:bg-[#a3e635] shadow-[0_0_20px_rgba(132,204,22,0.1)]"
-                        }`}
-                      >
-                        {followingIds.includes(player._id) ? "Following" : "Follow"}
-                      </button>
-                      <button 
-                        onClick={() => {
-                          gateInteraction(() => navigate(`/messages?userId=${player._id}`), {
-                            title: "Start a Conversation",
-                            message: "Direct messaging allows you to coordinate matches and discuss tactics. Sign in to chat with players."
-                          });
-                        }}
-                        className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#CCFF00] hover:bg-white/10 transition-all group/msg"
-                      >
-                        <MessageCircle size={16} className="group-hover/msg:scale-110 transition-transform" />
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
+        {/* Content Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-[520px] bg-white/[0.02] border border-white/5 rounded-[32px] animate-pulse" />
             ))}
           </div>
-        )
-      ) : (
-        teams.length === 0 ? (
-          <div className="py-20 text-center space-y-4">
-            <Trophy size={48} className="mx-auto text-white/10" />
-            <p className="text-white/20 text-sm uppercase tracking-widest">No teams found in your city.</p>
+        ) : activeTab === "players" ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {players.map((player, idx) => (
+              <PlayerCard 
+                key={player._id} 
+                player={player} 
+                rank={idx}
+                followingIds={followingIds}
+                handleFollowToggle={handleFollowToggle}
+                handleAvatarClick={handleAvatarClick}
+                currentUser={currentUser}
+                navigate={navigate}
+                gateInteraction={gateInteraction}
+              />
+            ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {teams.map((team) => (
-              <div key={team._id} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 hover:bg-white/[0.04] transition-all flex flex-col items-center text-center gap-4 group relative overflow-hidden">
-                <Link 
-                  to={`/team/${team._id}`}
-                  className="relative w-20 h-20 rounded-2xl p-[1px] transition-all duration-500 group-hover:scale-110 bg-white/10"
-                >
-                  <div className="w-full h-full rounded-2xl flex items-center justify-center relative overflow-hidden z-10 bg-[#1a1a1a]">
-                    {team.logo ? (
-                      <img src={team.logo} alt={team.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <Users size={32} className="text-[#CCFF00]/60" />
-                    )}
-                  </div>
-                </Link>
-                <div className="space-y-1 w-full">
-                  <Link to={`/team/${team._id}`} className="font-bold text-sm text-white group-hover:text-[#CCFF00] transition-colors truncate uppercase tracking-wider block">{team.name}</Link>
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">{team.sportType}</p>
-                  <div className="flex items-center justify-center gap-1 text-[9px] text-white/20 uppercase tracking-widest mt-1">
-                    <MapPin size={8} />
-                    <span>{team.city || "Athletic"}</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between w-full px-4 py-2 bg-white/5 rounded-xl">
-                  <div className="text-center">
-                    <p className="text-[10px] font-black text-[#CCFF00]">{team.memberCount || team.members?.length || 0}</p>
-                    <p className="text-[7px] text-white/20 uppercase font-bold tracking-widest">Members</p>
-                  </div>
-                  <div className="w-[1px] h-4 bg-white/10" />
-                  <div className="text-center">
-                    <p className="text-[10px] font-black text-[#CCFF00]">{team.matchesPlayed || 0}</p>
-                    <p className="text-[7px] text-white/20 uppercase font-bold tracking-widest">Matches</p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2 w-full">
-                  <Link 
-                    to={`/team/${team._id}`}
-                    className="py-2.5 rounded-xl bg-[#CCFF00] text-black text-[8px] font-black uppercase tracking-widest text-center hover:bg-[#a3e635] transition-all"
-                  >
-                    Join Team
-                  </Link>
-                  <Link 
-                    to={`/team/${team._id}`}
-                    className="py-2.5 rounded-xl bg-white/5 border border-white/10 text-[8px] font-black uppercase tracking-widest text-white text-center hover:bg-white/10 transition-all"
-                  >
-                    Challenge
-                  </Link>
-                </div>
-
-                <Link 
-                  to={`/team-pass/${team._id}`}
-                  className="w-full py-2 text-center text-white/20 hover:text-[#CCFF00] text-[8px] font-black uppercase tracking-[0.2em] transition-colors"
-                >
-                  View Team Pass
-                </Link>
-              </div>
+              <TeamCard key={team._id} team={team} navigate={navigate} />
             ))}
           </div>
-        )
-      )}
- </div>
- </div>
+        )}
+      </div>
 
- {/* Story Viewer */}
- {viewingStoryGroup && (
- <StoryViewer 
- storyGroup={viewingStoryGroup}
- onClose={() => setViewingStoryGroup(null)}
- onDelete={null}
- currentUser={currentUser}
- />
- )}
- </div>
- );
+      {viewingStoryGroup && (
+        <StoryViewer 
+          storyGroup={viewingStoryGroup}
+          onClose={() => setViewingStoryGroup(null)}
+          onDelete={null}
+          currentUser={currentUser}
+        />
+      )}
+    </div>
+  );
 };
 
 export default FindPlayers;

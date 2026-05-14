@@ -4,19 +4,16 @@ import axiosInstance from "../../hooks/useAxiosInstance";
 import {
   Users, Trophy, MapPin, User, Calendar, ChevronLeft, Download,
   ShieldCheck, Share2, Zap, Copy, UserPlus, AlertOctagon,
-  QrCode as QrIcon
+  QrCode as QrIcon, Mail, Info, Star, Swords, Target, Crown, X, Link as LinkIcon
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
 
-// ── Design tokens ──────────────────────────────────────────────────────────
-const BG      = "#000000";
-const CARD_BG = "#000000";
-const BORDER  = "#2D2D2D";
-const ACCENT  = "#CCFF00";
-const MUTED   = "#878C9F";
-const MUTED2  = "#999999";
+const PRI = "#84CC16";
+const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
 
 const TeamPass = () => {
   const { id } = useParams();
@@ -44,7 +41,7 @@ const TeamPass = () => {
   const handleJoinTeam = async () => {
     if (!isLoggedIn) {
       localStorage.setItem("pendingTeamInvite", id);
-      toast.info("Please login to join the team");
+      toast.info("Please login to join the squad");
       navigate("/login");
       return;
     }
@@ -64,145 +61,209 @@ const TeamPass = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: BG }}>
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2" style={{ borderColor: ACCENT }} />
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-[#84CC16]/20 border-t-[#84CC16] rounded-full animate-spin" />
+          <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">Scanning Pass...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !team) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-6" style={{ backgroundColor: BG }}>
-        <p className="text-white font-semibold text-xl uppercase tracking-widest">{error || "Team not found"}</p>
-        <Link to="/" className="px-8 py-3 rounded-[8px] text-[13px] font-normal uppercase tracking-widest transition-all" style={{ border: `1px solid ${BORDER}`, color: MUTED2 }}>Go Back Home</Link>
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-6 p-6">
+        <AlertOctagon className="w-16 h-16 text-red-500 mb-2" />
+        <h2 className="text-2xl font-black text-white uppercase tracking-tighter" style={HEADING_STYLE}>Invalid Invitation</h2>
+        <p className="text-white/40 text-[11px] font-medium text-center max-w-xs">{error || "This team invitation has expired or been revoked."}</p>
+        <Link to="/" className="px-8 py-3 bg-white/5 border border-white/10 rounded-2xl text-white font-black uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all">Go Back Home</Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pb-24 pt-6 px-4" style={{ backgroundColor: BG }}>
-      <div className="mx-auto max-w-lg">
-        <Link to="/" className="inline-flex items-center gap-2 mb-8 text-[12px] font-normal uppercase tracking-[0.2em] transition-all" style={{ color: MUTED2 }}>
-          <ChevronLeft size={16} /> Back to Kridaz
-        </Link>
+    <div className="min-h-screen bg-black text-white py-12 px-4 flex flex-col items-center overflow-x-hidden">
+      <div className="w-full max-w-[480px] relative">
+        
+        {/* Background Glows */}
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#84CC16]/5 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-[#84CC16]/5 blur-[100px] rounded-full pointer-events-none" />
 
-        <div className="rounded-[8px] overflow-hidden relative" style={{ backgroundColor: CARD_BG, border: `1px solid ${BORDER}` }}>
-          <div className="absolute top-0 right-0 w-40 h-40 blur-[80px] pointer-events-none" style={{ backgroundColor: `${ACCENT}08` }} />
-
-          {/* Header */}
-          <div className="px-6 py-5 flex items-center justify-between" style={{ borderBottom: `1px solid ${BORDER}` }}>
-            <div>
-              <h3 className="text-xl font-black italic tracking-tighter" style={{ color: ACCENT }}>KRIDAZ</h3>
-              <p className="text-[10px] font-normal uppercase tracking-[0.3em] mt-0.5" style={{ color: MUTED }}>Team Invitation · {id.slice(-8).toUpperCase()}</p>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-[6px]" style={{ backgroundColor: `${ACCENT}15`, border: `1px solid ${ACCENT}30` }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ backgroundColor: ACCENT }} />
-              <span className="text-[10px] font-normal uppercase tracking-widest" style={{ color: ACCENT }}>Open Invite</span>
-            </div>
-          </div>
-
-          {/* Team Name */}
-          <div className="px-6 py-8 flex items-center gap-6" style={{ borderBottom: `1px solid ${BORDER}` }}>
-            <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
-              {team.logo ? (
-                <img src={team.logo} alt={team.name} className="w-full h-full object-cover" />
-              ) : (
-                <Users size={32} style={{ color: ACCENT }} />
-              )}
-            </div>
-            <div>
-              <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-none mb-2">{team.name}</h1>
-              <div className="flex items-center gap-2" style={{ color: MUTED2 }}>
-                <Trophy size={13} style={{ color: ACCENT }} />
-                <span className="text-[12px]">{team.sportType} · {team.members?.length || 0} Members</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Details Grid */}
-          <div className="grid grid-cols-2 gap-px" style={{ backgroundColor: BORDER }}>
-            {[
-              { label: "Captain", icon: User, value: team.captainName || "N/A" },
-              { label: "Location", icon: MapPin, value: team.city || "Various" },
-              { label: "Created", icon: Calendar, value: format(parseISO(team.createdAt), "MMM yyyy") },
-              { label: "Status", icon: ShieldCheck, value: team.visibility || "PUBLIC" },
-            ].map(({ label, icon: Icon, value }) => (
-              <div key={label} className="px-6 py-5" style={{ backgroundColor: CARD_BG }}>
-                <p className="text-[10px] font-normal uppercase tracking-[0.3em] mb-2" style={{ color: MUTED }}>{label}</p>
-                <div className="flex items-center gap-2">
-                  <Icon size={14} style={{ color: ACCENT }} />
-                  <span className="text-[13px] font-semibold text-white">{value}</span>
+        {/* The Ticket Card */}
+        <div className="bg-[#050505] border border-white/5 rounded-[40px] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] relative p-1">
+          
+          <div className="bg-[#0A0A0A] rounded-[38px] overflow-hidden border border-white/5">
+            
+            {/* Header Section */}
+            <div className="relative h-28 overflow-hidden border-b border-white/5">
+              <img 
+                src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2105&auto=format&fit=crop" 
+                className="w-full h-full object-cover opacity-20 grayscale" 
+                alt=""
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-[#0A0A0A]/60 to-[#0A0A0A]" />
+              <div className="absolute inset-x-8 top-8 flex items-center justify-between z-10">
+                <div>
+                  <h3 className="text-xl font-black tracking-tighter text-[#84CC16]" style={HEADING_STYLE}>KRIDAZ</h3>
+                  <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white/40 mt-1">Team Invitation • {team.teamCode || id.slice(-8).toUpperCase()}</p>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] border border-white/10 rounded-xl backdrop-blur-sm">
+                  <Mail size={12} className="text-[#84CC16]" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-white">Open Invite</span>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Description */}
-          {team.description && (
-            <div className="px-6 py-6" style={{ borderTop: `1px solid ${BORDER}` }}>
-              <p className="text-[10px] font-normal uppercase tracking-[0.3em] mb-2" style={{ color: MUTED }}>About Team</p>
-              <p className="text-[13px] text-white/80 leading-relaxed italic">"{team.description}"</p>
             </div>
-          )}
 
-          {/* QR Code */}
-          <div className="flex flex-col items-center gap-4 py-8" style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
-            <div className="p-4 rounded-[8px]" style={{ backgroundColor: "#fff", boxShadow: `0 0 40px ${ACCENT}15` }}>
-              {team.qrCode ? (
-                <img src={team.qrCode} alt="Team QR" className="w-44 h-44" />
-              ) : (
-                <div className="w-44 h-44 flex items-center justify-center bg-black/5">
-                  <QrIcon size={48} className="text-black/20" />
+            {/* Team Identity Area */}
+            <div className="px-8 py-8 flex items-center gap-6">
+              <div className="w-28 h-28 rounded-3xl bg-black border border-white/10 p-1.5 overflow-hidden shrink-0 shadow-2xl">
+                <div className="w-full h-full rounded-2xl bg-[#111] flex items-center justify-center overflow-hidden">
+                  {team.logo ? (
+                    <img src={team.logo} className="w-full h-full object-cover" alt={team.name} />
+                  ) : (
+                    <Users size={40} className="text-white/5" />
+                  )}
                 </div>
-              )}
+              </div>
+              <div className="flex-1">
+                <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-1" style={HEADING_STYLE}>{team.name}</h1>
+                <div className="flex items-center gap-2 text-[#84CC16]">
+                  <Trophy size={16} />
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em]">{team.sportType || 'Cricket'} • {team.members?.length || 0} Members</span>
+                </div>
+              </div>
             </div>
-            <div className="text-center px-6">
-              <p className="text-[12px] font-semibold text-white uppercase tracking-[0.2em]">Scan to Join Team</p>
-              <p className="text-[10px] mt-1" style={{ color: MUTED2 }}>Scan this pass to view team details and join the squad</p>
+
+            {/* Metadata Grid (Styled as individual boxes) */}
+            <div className="px-8 pb-4">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { label: "Captain", icon: User, value: team.owner?.name || "N/A" },
+                  { label: "Location", icon: MapPin, value: team.city || "Various" },
+                  { label: "Created", icon: Calendar, value: format(parseISO(team.createdAt), "MMM yyyy") },
+                  { label: "Status", icon: ShieldCheck, value: team.visibility || "PUBLIC" },
+                ].map(({ label, icon: Icon, value }) => (
+                  <div key={label} className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <Icon size={16} className="text-[#84CC16]" />
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">{label}</span>
+                    </div>
+                    <p className="text-xs font-black text-white uppercase truncate">{value}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Action */}
-          <div className="p-6 space-y-3">
-            <button
-              onClick={handleJoinTeam}
-              disabled={isJoining}
-              className="w-full flex items-center justify-center gap-2 py-4 rounded-[8px] text-[14px] font-black uppercase tracking-[0.2em] transition-all"
-              style={{ backgroundColor: ACCENT, color: "#000" }}
-            >
-              {isJoining ? "Processing..." : (
-                <>
-                  <UserPlus size={18} />
-                  Join This Team
-                </>
-              )}
-            </button>
+            {/* About Team Section */}
+            <div className="px-8 py-4">
+               <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-6 relative overflow-hidden">
+                  <div className="relative z-10 space-y-3">
+                    <div className="flex items-center gap-2 text-white/30">
+                        <Info size={14} />
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em]">About Team</span>
+                    </div>
+                    <p className="text-[13px] text-white/60 font-medium leading-relaxed">"{team.description || "Representing the best of their city. This squad is built on passion and strategy."}"</p>
+                  </div>
+                  {/* Decorative Ball Overlay */}
+                  <div className="absolute top-1/2 -right-8 -translate-y-1/2 opacity-[0.05] pointer-events-none">
+                    <Target size={140} strokeWidth={1} className="text-[#84CC16]" />
+                  </div>
+               </div>
+            </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            {/* QR Scan Section (Enhanced Glow) */}
+            <div className="px-8 py-6">
+              <div className="bg-white/[0.02] border border-white/5 rounded-[40px] p-8 flex flex-col md:flex-row items-center gap-10">
+                 {/* QR Frame with Pulse Glow */}
+                 <div className="relative p-2">
+                    <div className="absolute inset-0 bg-[#84CC16]/20 blur-2xl rounded-full animate-pulse" />
+                    {/* Corners */}
+                    <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-[#84CC16] rounded-tl-2xl" />
+                    <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-[#84CC16] rounded-tr-2xl" />
+                    <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-[#84CC16] rounded-bl-2xl" />
+                    <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-[#84CC16] rounded-br-2xl" />
+                    
+                    <div className="bg-white p-4 rounded-3xl relative z-10 shadow-[0_0_50px_rgba(132,204,22,0.2)]">
+                      {team.qrCode ? (
+                        <img src={team.qrCode} alt="Team QR" className="w-32 h-32" />
+                      ) : (
+                        <div className="w-32 h-32 flex items-center justify-center bg-black/5">
+                          <QrIcon size={48} className="text-black/10" />
+                        </div>
+                      )}
+                    </div>
+                 </div>
+
+                 <div className="flex-1 space-y-6">
+                    <div className="space-y-2 text-center md:text-left">
+                      <div className="flex items-center justify-center md:justify-start gap-2 text-[#84CC16]">
+                        <QrIcon size={18} strokeWidth={2.5} />
+                        <h4 className="text-[12px] font-black uppercase tracking-widest">Scan to Join Team</h4>
+                      </div>
+                      <p className="text-[10px] text-white/40 font-medium leading-relaxed">Scan this pass to view team details and join the squad</p>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { icon: Users, l: "View Details" },
+                        { icon: ShieldCheck, l: "Join Squad" },
+                        { icon: Zap, l: "Play & Win" }
+                      ].map((feat, i) => (
+                        <div key={i} className="flex flex-col items-center md:items-start gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#84CC16] shadow-lg">
+                            <feat.icon size={14} />
+                          </div>
+                          <p className="text-[7px] font-black text-white/30 uppercase tracking-[0.15em] leading-tight text-center md:text-left">{feat.l}</p>
+                        </div>
+                      ))}
+                    </div>
+                 </div>
+              </div>
+            </div>
+
+            {/* Main Action Area */}
+            <div className="px-8 pb-10 space-y-4">
               <button
-                onClick={() => window.print()}
-                className="flex items-center justify-center gap-2 py-3 rounded-[8px] text-[12px] font-normal uppercase tracking-widest transition-all"
-                style={{ border: `1px solid ${BORDER}`, color: MUTED2 }}
+                onClick={handleJoinTeam}
+                disabled={isJoining}
+                className="w-full flex items-center justify-center gap-4 py-6 rounded-[24px] bg-[#84CC16] text-black font-black uppercase text-[14px] tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.99] shadow-[0_15px_40px_rgba(132,204,22,0.4)] relative group overflow-hidden"
               >
-                <Download size={14} /> Save Pass
+                <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 skew-x-12" />
+                {isJoining ? <Loader2 size={24} className="animate-spin" /> : (
+                  <>
+                    <UserPlus size={22} strokeWidth={3} />
+                    Join This Team
+                  </>
+                )}
               </button>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  toast.success("Invite link copied!");
-                }}
-                className="flex items-center justify-center gap-2 py-3 rounded-[8px] text-[12px] font-normal uppercase tracking-widest transition-all"
-                style={{ border: `1px solid ${BORDER}`, color: MUTED2 }}
-              >
-                <Share2 size={14} /> Copy Link
-              </button>
+
+              <div className="grid grid-cols-2 gap-4">
+                 <button
+                  onClick={() => window.print()}
+                  className="flex items-center justify-center gap-3 py-4 rounded-2xl bg-white/[0.03] border border-white/5 text-white/40 font-black uppercase text-[10px] tracking-widest hover:bg-white/5 hover:text-white transition-all"
+                 >
+                   <Download size={16} /> Save Pass
+                 </button>
+                 <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success("Invite link copied!");
+                  }}
+                  className="flex items-center justify-center gap-3 py-4 rounded-2xl bg-white/[0.03] border border-white/5 text-white/40 font-black uppercase text-[10px] tracking-widest hover:bg-white/5 hover:text-white transition-all"
+                 >
+                   <Share2 size={16} /> Copy Link
+                 </button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-center gap-2" style={{ color: MUTED }}>
-          <ShieldCheck size={14} />
-          <span className="text-[10px] font-normal uppercase tracking-[0.3em]">Official Kridaz Team Invitation</span>
+        {/* Footer Label */}
+        <div className="flex flex-col items-center gap-4 py-10 opacity-30">
+           <div className="flex items-center gap-3">
+              <ShieldCheck size={16} />
+              <span className="text-[11px] font-black uppercase tracking-[0.5em]">Official Kridaz Team Invitation</span>
+           </div>
         </div>
       </div>
     </div>

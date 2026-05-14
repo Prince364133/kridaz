@@ -1,22 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Trophy, Medal, Star, Target, Activity, Search, ChevronRight, ChevronLeft } from 'lucide-react';
+import { 
+  Trophy, Medal, Star, Target, Activity, Search, 
+  ChevronRight, ChevronLeft, BarChart3, Users, 
+  Shield, Settings, Crown, LayoutGrid, Clock, MapPin,
+  Circle, Zap, Award
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
+const PRI = "#84CC16";
+
+const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif", fontSize: "20px" };
+
+const SidebarIcon = ({ icon: Icon, active, onClick, label }) => (
+  <div 
+    onClick={onClick}
+    className={`p-3 rounded-xl transition-all cursor-pointer flex flex-col items-center gap-1 group ${active ? 'bg-[#84CC16]/10 text-[#84CC16] border border-[#84CC16]/20 shadow-[0_0_15px_rgba(132,204,22,0.1)]' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
+  >
+    <Icon size={22} strokeWidth={active ? 2.5 : 2} />
+    <span className={`text-[7px] font-black uppercase tracking-widest ${active ? 'text-[#84CC16]' : 'text-gray-600 group-hover:text-gray-400'}`}>{label}</span>
+  </div>
+);
+
 const Leaderboard = () => {
   const navigate = useNavigate();
-  const [category, setCategory] = useState('batting'); // 'batting', 'bowling'
+  const [selectedSport, setSelectedSport] = useState('Cricket');
+  const [category, setCategory] = useState('batting'); // 'batting', 'bowling', or sport-specific stats
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const sports = [
+    { name: 'Cricket', icon: Trophy },
+    { name: 'Football', icon: Circle },
+    { name: 'Pickleball', icon: Target },
+    { name: 'Badminton', icon: Zap },
+    { name: 'Tennis', icon: Star }
+  ];
+
+  // Map sport to categories
+  const sportCategories = {
+    'Cricket': ['batting', 'bowling'],
+    'Football': ['goals', 'assists'],
+    'Pickleball': ['singles', 'doubles'],
+    'Badminton': ['singles', 'doubles'],
+    'Tennis': ['singles', 'doubles']
+  };
+
+  useEffect(() => {
+    // Reset category when sport changes
+    setCategory(sportCategories[selectedSport][0]);
+  }, [selectedSport]);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/user/leaderboard?category=${category}`);
+        // In a real app, we would pass sport and category to the API
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/leaderboard?sport=${selectedSport.toLowerCase()}&category=${category}`);
         if (response.data.success) {
-          setPlayers(response.data.players);
+          setPlayers(response.data.players || []);
         }
       } catch (err) {
         console.error("Leaderboard fetch error:", err);
@@ -25,178 +69,242 @@ const Leaderboard = () => {
       }
     };
     fetchLeaderboard();
-  }, [category]);
+  }, [category, selectedSport]);
 
-  const topThree = players.slice(0, 3);
-  const remaining = players.slice(3);
+  const getRankIcon = (rank) => {
+    if (rank === 1) return <div className="w-8 h-10 bg-gradient-to-b from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.4)] border border-yellow-300/30 text-black font-black">1</div>;
+    if (rank === 2) return <div className="w-8 h-10 bg-gradient-to-b from-gray-300 to-gray-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(148,163,184,0.4)] border border-gray-200/30 text-black font-black">2</div>;
+    if (rank === 3) return <div className="w-8 h-10 bg-gradient-to-b from-amber-600 to-amber-800 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(180,83,9,0.4)] border border-amber-500/30 text-black font-black">3</div>;
+    return <span className="text-gray-500 font-bold ml-3">{rank}</span>;
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white pb-24 font-sans">
-       {/* Sticky Header */}
-       <header className="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-xl border-b border-white/5 p-4 flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="p-2 text-gray-400 hover:text-white transition-colors">
-            <ChevronLeft size={24} />
-          </button>
-          <h1 className="text-xs font-black uppercase tracking-[0.2em]">Rankings</h1>
-          <div className="w-10" />
-       </header>
+    <div className="h-screen bg-[#050505] text-white font-sans overflow-hidden flex">
+      {/* Sidebar Navigation */}
+      <div className="w-24 border-r border-white/5 flex flex-col items-center py-10 gap-6 z-30 bg-[#050505] shrink-0">
+        
+        {sports.map((sport) => (
+          <SidebarIcon 
+            key={sport.name}
+            icon={sport.icon} 
+            label={sport.name}
+            active={selectedSport === sport.name} 
+            onClick={() => setSelectedSport(sport.name)}
+          />
+        ))}
 
-       {/* Hero Section */}
-       <section className="relative h-[350px] flex flex-col items-center justify-center overflow-hidden px-6 text-center pt-16">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-black to-black z-0" />
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative z-10 space-y-4"
-          >
-            <Trophy size={48} className="text-primary mx-auto mb-4" />
-            <h1 className="text-4xl font-black uppercase tracking-tighter">Global Leaderboard</h1>
-            <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">Dominating the turf worldwide</p>
-          </motion.div>
-       </section>
 
-       <div className="max-w-4xl mx-auto px-4 -mt-16 relative z-20">
-          {/* Category Toggle */}
-          <div className="flex bg-[#111] p-1 rounded-2xl border border-white/5 mb-12 shadow-2xl">
-            {['batting', 'bowling'].map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setCategory(cat)}
-                className={`flex-1 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                  category === cat ? 'bg-primary text-black shadow-lg' : 'text-gray-500 hover:text-white'
-                }`}
-              >
-                {cat} Category
-              </button>
-            ))}
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col relative overflow-y-auto">
+        {/* Background Image with Gradient Overlay */}
+        <div className="absolute top-0 left-0 right-0 h-[400px] z-0 overflow-hidden">
+          <img 
+            src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2073&auto=format&fit=crop" 
+            alt="" 
+            className="w-full h-full object-cover opacity-20 filter grayscale contrast-125"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/80 to-[#050505]"></div>
+        </div>
+
+        {/* Content Container */}
+        <div className="relative z-10 px-8 py-10 max-w-[1400px] mx-auto w-full">
+          
+          {/* Header Section */}
+          <div className="flex flex-col items-center mb-12">
+            <Trophy size={40} className="text-[#84CC16] mb-4 drop-shadow-[0_0_10px_rgba(132,204,22,0.5)]" />
+            <h1 className="text-5xl font-black tracking-tighter uppercase mb-2" style={HEADING_STYLE}>
+              {selectedSport} <span className="text-[#84CC16]">Leaderboard</span>
+            </h1>
+            <p className="text-gray-500 font-black uppercase tracking-[0.3em] text-[10px]" style={SUBHEADING_STYLE}>Dominating the turf worldwide</p>
+            <div className="w-12 h-1 bg-[#84CC16] mt-4 rounded-full"></div>
           </div>
 
-          {loading ? (
-             <div className="flex flex-col items-center py-20">
-                <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Syncing Global Data...</p>
-             </div>
-          ) : (
-            <>
-              {/* Podium */}
-              {players.length > 0 ? (
-                <div className="grid grid-cols-3 gap-2 md:gap-4 items-end mb-16 px-2">
-                  {/* 2nd Place */}
-                  <div className="flex flex-col items-center">
-                    {topThree[1] && (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="flex flex-col items-center w-full"
-                      >
-                        <div className="relative mb-3">
-                          <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-slate-400/30 overflow-hidden bg-[#111]">
-                            <img 
-                              src={topThree[1].profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${topThree[1].name}`} 
-                              alt="" 
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="absolute -bottom-2 -right-1 bg-slate-400 text-black w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black">2</div>
-                        </div>
-                        <p className="text-[10px] font-black uppercase truncate w-full text-center px-2">{topThree[1].name}</p>
-                        <p className="text-primary font-black text-sm">{category === 'batting' ? topThree[1].cricketStats?.totalRuns : topThree[1].cricketStats?.totalWickets}</p>
-                      </motion.div>
-                    )}
-                  </div>
+          {/* Category & Filters Row */}
+          <div className="flex flex-col lg:flex-row gap-6 items-center justify-between mb-8">
+            <div className="relative w-full lg:w-[400px]">
+              <select 
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full bg-[#0A0A0A] border border-white/5 rounded-2xl px-6 py-4 text-[11px] font-black uppercase tracking-[0.2em] outline-none focus:border-[#84CC16]/50 transition-all appearance-none cursor-pointer shadow-2xl text-[#84CC16]"
+              >
+                {sportCategories[selectedSport].map((cat) => (
+                  <option key={cat} value={cat}>{cat.replace('_', ' ')} CATEGORY</option>
+                ))}
+              </select>
+              <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none">
+                <ChevronLeft className="rotate-[-90deg] text-[#84CC16]" size={16} />
+              </div>
+            </div>
 
-                  {/* 1st Place */}
-                  <div className="flex flex-col items-center">
-                    {topThree[0] && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex flex-col items-center w-full"
-                      >
-                        <div className="relative mb-4">
-                          <div className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-primary overflow-hidden bg-[#111] shadow-[0_0_40px_rgba(132,204,22,0.4)]">
-                            <img 
-                              src={topThree[0].profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${topThree[0].name}`} 
-                              alt="" 
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-primary text-black px-3 py-1 rounded-full font-black text-[10px] uppercase shadow-xl">GOAT</div>
-                        </div>
-                        <p className="text-xs font-black uppercase truncate w-full text-center px-2">{topThree[0].name}</p>
-                        <p className="text-primary font-black text-xl">{category === 'batting' ? topThree[0].cricketStats?.totalRuns : topThree[0].cricketStats?.totalWickets}</p>
-                      </motion.div>
-                    )}
-                  </div>
-
-                  {/* 3rd Place */}
-                  <div className="flex flex-col items-center">
-                    {topThree[2] && (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="flex flex-col items-center w-full"
-                      >
-                        <div className="relative mb-3">
-                          <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-amber-700/30 overflow-hidden bg-[#111]">
-                            <img 
-                              src={topThree[2].profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${topThree[2].name}`} 
-                              alt="" 
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="absolute -bottom-2 -right-1 bg-amber-700 text-black w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black">3</div>
-                        </div>
-                        <p className="text-[10px] font-black uppercase truncate w-full text-center px-2">{topThree[2].name}</p>
-                        <p className="text-primary font-black text-sm">{category === 'batting' ? topThree[2].cricketStats?.totalRuns : topThree[2].cricketStats?.totalWickets}</p>
-                      </motion.div>
-                    )}
-                  </div>
+            <div className="flex gap-4 w-full lg:w-auto">
+              <div className="relative flex-1 lg:flex-none">
+                <select className="w-full bg-[#0A0A0A] border border-white/5 rounded-xl px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#84CC16]/50 transition-all appearance-none cursor-pointer pr-10">
+                  <option>All Time</option>
+                  <option>Monthly</option>
+                  <option>Weekly</option>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+                  <ChevronLeft className="rotate-[-90deg]" size={12} />
                 </div>
-              ) : (
-                <div className="text-center py-20 bg-[#0A0A0A] rounded-3xl border border-white/5">
-                   <p className="text-gray-500 uppercase font-black text-[10px] tracking-widest">No rankings available yet</p>
+              </div>
+              <div className="relative flex-1 lg:flex-none">
+                <select className="w-full bg-[#0A0A0A] border border-white/5 rounded-xl px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#84CC16]/50 transition-all appearance-none cursor-pointer pr-10">
+                  <option>Worldwide</option>
+                  <option>National</option>
+                  <option>Regional</option>
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+                  <ChevronLeft className="rotate-[-90deg]" size={12} />
                 </div>
-              )}
+              </div>
+            </div>
+          </div>
 
-              {/* List */}
-              <div className="space-y-3">
-                {remaining.map((player) => (
-                  <motion.div 
-                    key={player._id}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    onClick={() => navigate(`/profile/${player._id}`)}
-                    className="flex items-center gap-4 p-4 bg-[#0A0A0A] border border-white/5 rounded-2xl hover:border-primary/20 transition-all group cursor-pointer active:scale-95"
-                  >
-                    <span className="text-xs font-black text-gray-700 w-6">#{player.rank}</span>
-                    <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 bg-[#111]">
-                      <img 
-                        src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} 
-                        alt="" 
-                        className="w-full h-full object-cover" 
-                      />
+          {/* Table & Sidebar Flexbox */}
+          <div className="flex flex-col xl:flex-row gap-8">
+            
+            {/* Table Area */}
+            <div className="flex-1 bg-[#0A0A0A]/80 backdrop-blur-md rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+              <div className="grid grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_1fr] p-6 border-b border-white/5 bg-white/[0.02]">
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Rank</div>
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Player</div>
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Clock size={12} className="text-[#84CC16]" /> Matches</div>
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Target size={12} className="text-[#84CC16]" /> {category}</div>
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Star size={12} className="text-[#84CC16]" /> Highest</div>
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><BarChart3 size={12} className="text-[#84CC16]" /> Average</div>
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Activity size={12} className="text-[#84CC16]" /> Strike</div>
+              </div>
+
+              <div className="divide-y divide-white/5 min-h-[500px]">
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center py-40">
+                    <div className="w-10 h-10 border-2 border-[#84CC16] border-t-transparent rounded-full animate-spin mb-4" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600">Retrieving Arena Data...</p>
+                  </div>
+                ) : players.length > 0 ? (
+                  players.map((player, idx) => (
+                    <motion.div 
+                      key={player._id}
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      onClick={() => navigate(`/profile/${player._id}`)}
+                      className="grid grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_1fr] p-5 items-center hover:bg-[#84CC16]/5 transition-all group cursor-pointer border-l-2 border-transparent hover:border-[#84CC16]"
+                    >
+                      <div className="flex items-center">{getRankIcon(idx + 1)}</div>
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-[#84CC16]/50 transition-all">
+                          <img src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-black uppercase tracking-tight group-hover:text-[#84CC16] transition-colors">{player.name}</p>
+                          <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
+                            <MapPin size={10} className="text-[#84CC16]/50" /> {player.city || 'Global Elite'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-xs font-black text-gray-300 font-mono tracking-tighter ml-3">{player.cricketStats?.matchesPlayed || 0}</div>
+                      <div className="text-sm font-black text-white font-mono tracking-tighter ml-3">
+                        {category === 'batting' ? player.cricketStats?.totalRuns || 0 : 
+                         category === 'bowling' ? player.cricketStats?.totalWickets || 0 : 0}
+                      </div>
+                      <div className="text-xs font-black text-gray-300 font-mono tracking-tighter ml-3">
+                        {category === 'batting' ? player.cricketStats?.highestScore || 0 : player.cricketStats?.bestBowling || '0/0'}
+                      </div>
+                      <div className="text-xs font-black text-gray-300 font-mono tracking-tighter ml-3">{player.cricketStats?.average || '0.0'}</div>
+                      <div className="text-xs font-black text-gray-300 font-mono tracking-tighter ml-3">{player.cricketStats?.strikeRate || '0.0'}</div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-40">
+                    <LayoutGrid size={48} className="text-white/5 mb-4" />
+                    <p className="text-gray-600 font-black uppercase text-xs tracking-widest">No rankings available yet</p>
+                  </div>
+                )}
+                
+                {!loading && players.length > 0 && players.length < 8 && Array(8 - players.length).fill(0).map((_, i) => (
+                  <div key={`filler-${i}`} className="grid grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_1fr] p-5 items-center opacity-10 grayscale">
+                    <div className="ml-3 font-bold text-xs">{players.length + i + 1}</div>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-white/5"></div>
+                      <div className="space-y-1">
+                        <div className="w-24 h-2 bg-white/10 rounded"></div>
+                        <div className="w-16 h-1 bg-white/5 rounded"></div>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold uppercase truncate">{player.name}</p>
-                      <p className="text-[9px] text-gray-500 uppercase tracking-widest truncate">{player.city || 'Global Player'}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-base font-black text-primary">
-                        {category === 'batting' ? player.cricketStats?.totalRuns : player.cricketStats?.totalWickets}
-                      </p>
-                      <p className="text-[8px] font-bold text-gray-600 uppercase tracking-widest">
-                        {category === 'batting' ? 'Runs' : 'Wickets'}
-                      </p>
-                    </div>
-                    <ChevronRight size={14} className="text-gray-800 group-hover:text-primary transition-colors" />
-                  </motion.div>
+                    <div className="text-gray-600 font-black">---</div>
+                    <div className="text-gray-600 font-black">---</div>
+                    <div className="text-gray-600 font-black">---</div>
+                    <div className="text-gray-600 font-black">---</div>
+                    <div className="text-gray-600 font-black">---</div>
+                  </div>
                 ))}
               </div>
-            </>
-          )}
-       </div>
+
+              {/* Table Footer */}
+              <div className="p-4 bg-white/[0.01] border-t border-white/5 flex items-center justify-center gap-2">
+                 <Shield size={12} className="text-[#84CC16]" />
+                 <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Rankings are updated periodically based on verified {selectedSport} matches.</p>
+                 <Shield size={12} className="text-[#84CC16]" />
+              </div>
+            </div>
+
+            {/* Sidebar Stats Area */}
+            <div className="w-full xl:w-[320px] space-y-6">
+              
+              <div className="bg-[#0A0A0A] rounded-3xl border border-white/5 p-6 shadow-2xl">
+                <h3 className="text-xs font-black text-[#84CC16] uppercase tracking-[0.2em] mb-8 text-center" style={HEADING_STYLE}>{selectedSport} Overview</h3>
+                
+                <div className="flex flex-col items-center mb-8 relative">
+                  <div className="w-32 h-32 rounded-full border-[8px] border-white/5 border-t-[#84CC16] animate-[spin_10s_linear_infinite] flex items-center justify-center"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-24 h-24 rounded-full bg-black flex items-center justify-center shadow-[0_0_20px_rgba(132,204,22,0.3)]">
+                      <Trophy size={32} className="text-[#84CC16]" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-5">
+                  {[
+                    { label: "Total Players", value: "---", icon: Users },
+                    { label: "Total Matches", value: "---", icon: Clock },
+                    { label: "Total Stats", value: "---", icon: Target },
+                    { label: "Season Record", value: "---", icon: Star },
+                    { label: "Average Perf", value: "---", icon: BarChart3 },
+                    { label: "Activity Rate", value: "---", icon: Activity },
+                  ].map((stat, idx) => (
+                    <div key={idx} className="flex items-center justify-between group">
+                      <div className="flex items-center gap-3">
+                        <stat.icon size={16} className="text-[#84CC16]/60 group-hover:text-[#84CC16] transition-colors" />
+                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{stat.label}</span>
+                      </div>
+                      <span className="text-xs font-black text-white font-mono">---</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-[#111] to-[#050505] rounded-3xl border border-[#84CC16]/20 p-6 shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-[#84CC16]/5 rounded-full blur-3xl group-hover:bg-[#84CC16]/10 transition-all"></div>
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-2xl bg-[#84CC16]/10 text-[#84CC16] shadow-inner shadow-[#84CC16]/20">
+                    <Crown size={24} strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] font-black text-[#84CC16] uppercase tracking-widest mb-1" style={HEADING_STYLE}>Be the next champion</h4>
+                    <p className="text-[9px] text-gray-500 leading-relaxed font-bold uppercase tracking-tight">Play more matches and climb the leaderboard!</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 };
