@@ -44,8 +44,8 @@ const Root = () => {
         <Outlet />
       </main>
       {!location.pathname.startsWith('/messages') && !location.pathname.startsWith('/my-teams') && <MobileBottomNav />}
-      {/* Footer only visible on desktop OR if it's the home page on mobile (and hidden entirely on messages/teams) */}
-      <div className={(location.pathname.startsWith('/messages') || location.pathname.startsWith('/my-teams')) ? 'hidden' : (location.pathname === '/' ? 'block' : 'hidden lg:block')}>
+      {/* Footer only visible on desktop OR if it's the home page on mobile (and hidden entirely on messages/teams/community) */}
+      <div className={(location.pathname.startsWith('/messages') || location.pathname.startsWith('/my-teams') || location.pathname === '/community') ? 'hidden' : (location.pathname === '/' ? 'block' : 'hidden lg:block')}>
         <UserFooter />
       </div>
     </div>
