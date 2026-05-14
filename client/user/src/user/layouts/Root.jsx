@@ -47,8 +47,8 @@ const Root = () => {
         <Outlet />
       </main>
       {!hideNav && <MobileBottomNav />}
-      {/* Footer only visible on desktop OR if it's the home page on mobile (and hidden entirely on messages/teams/reels) */}
-      <div className={hideNav ? 'hidden' : (location.pathname === '/' ? 'block' : 'hidden lg:block')}>
+      {/* Footer logic: hidden on Reels/Messages/Teams/Community, otherwise desktop only (except home page) */}
+      <div className={(hideNav || location.pathname === '/community') ? 'hidden' : (location.pathname === '/' ? 'block' : 'hidden lg:block')}>
         <UserFooter />
       </div>
     </div>
