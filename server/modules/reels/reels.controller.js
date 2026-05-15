@@ -1,7 +1,7 @@
 import Reel from '../../models/reel.model.js';
 import ReelInteraction from '../../models/reelInteraction.model.js';
 import ReelComment from '../../models/reelComment.model.js';
-import { uploadToCloudinary } from '../../utils/cloudinary.js';
+
 import { reelQueue } from '../../queues/reel.queue.js';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
@@ -303,15 +303,14 @@ export const deleteReel = async (req, res) => {
     }
 
     // 1. Delete from R2
-    if (reel.hlsUrl) {
-      // HLS folder is typically reels/{reelId}
-      const hlsPrefix = `reels/${reelId}`;
-      const { deleteDirectoryFromR2 } = await import('../../utils/r2.js');
-      await deleteDirectoryFromR2(hlsPrefix).catch(e => console.warn('[REELS] R2 Cleanup failed:', e));
-    }
+    const { deleteFromR2, deleteDirectoryFromR2 } = await import('../../utils/r2.js');
+    
+    // Cleanup HLS and Raw Video (both under reels/{reelId})
+    const reelPrefix = `reels/${reelId}`;
+    await deleteDirectoryFromR2(reelPrefix).catch(e => console.warn('[REELS] R2 Prefix Cleanup failed:', e));
 
-    if (reel.thumbnailUrl && reel.thumbnailUrl.includes(process.env.R2_ENDPOINT)) {
-      const { deleteFromR2 } = await import('../../utils/r2.js');
+    // Cleanup Thumbnail
+    if (reel.thumbnailUrl && (reel.thumbnailUrl.includes(process.env.REELS_CDN_URL) || reel.thumbnailUrl.includes('r2.dev'))) {
       const thumbKey = `thumbnails/${reelId}.jpg`;
       await deleteFromR2(thumbKey).catch(e => console.warn('[REELS] Thumbnail Cleanup failed:', e));
     }

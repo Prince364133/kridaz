@@ -6,8 +6,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import os from 'os';
 import axios from 'axios';
-import { v2 as cloudinary } from 'cloudinary';
-import { uploadDirectoryToR2 } from './r2.js';
+import { uploadDirectoryToR2, uploadToR2 } from './r2.js';
 
 // Tell fluent-ffmpeg where to find the binaries
 ffmpeg.setFfmpegPath(ffmpegStatic);
@@ -53,16 +52,15 @@ export const processReelVideo = async (reel, localPath) => {
       });
     }
 
-    // 1.1. Upload raw video to Cloudinary from disk (if it's not already uploaded)
+    // 1.1. Upload raw video to R2 from disk (if it's not already uploaded)
     let rawVideoUrl = reel.rawVideoUrl;
     if (localPath && !rawVideoUrl) {
-      console.log('[WORKER] Uploading raw video to Cloudinary...');
-      const cloudResult = await cloudinary.uploader.upload(localPath, {
-        resource_type: 'video',
-        folder: 'kridaz/reels/raw'
-      });
-      rawVideoUrl = cloudResult.secure_url;
+      console.log('[WORKER] Uploading raw video to R2...');
+      const rawKey = `reels/${reel._id}/raw.mp4`;
+      const uploadResult = await uploadToR2(localPath, rawKey, 'video/mp4');
+      rawVideoUrl = uploadResult.url;
       await Reel.findByIdAndUpdate(reel._id, { rawVideoUrl });
+      console.log(`[WORKER] Raw video uploaded to R2: ${rawVideoUrl}`);
     }
 
     // 2. Get Metadata
@@ -143,17 +141,18 @@ export const processReelVideo = async (reel, localPath) => {
     const r2Prefix = `reels/${reel._id}`;
     await uploadDirectoryToR2(outputDir, r2Prefix);
 
-    // 7. Upload Thumbnail to Cloudinary
-    console.log('[WORKER] Uploading thumbnail to Cloudinary...');
-    const thumbnailResult = await cloudinary.uploader.upload(thumbnailPath, {
-      folder: 'kridaz/reels/thumbnails'
-    });
+    // 7. Upload Thumbnail to R2
+    console.log('[WORKER] Uploading thumbnail to R2...');
+    const thumbKey = `thumbnails/${reel._id}.jpg`;
+    const thumbUploadResult = await uploadToR2(thumbnailPath, thumbKey, 'image/jpeg');
+    const thumbnailUrl = thumbUploadResult.url;
+    console.log(`[WORKER] Thumbnail uploaded to R2: ${thumbnailUrl}`);
 
     const hlsUrl = `${process.env.REELS_CDN_URL}/${r2Prefix}/playlist.m3u8`;
 
     return {
       hlsUrl,
-      thumbnailUrl: thumbnailResult.secure_url,
+      thumbnailUrl,
       duration,
       aspectRatio,
       width,

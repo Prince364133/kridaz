@@ -18,23 +18,31 @@ const r2Client = new S3Client({
 
 export const uploadToR2 = async (filePath, key, contentType) => {
   try {
-    const fileBuffer = await fs.readFile(filePath);
-    const isManifest = key.endsWith('.m3u8');
-    const cacheControl = isManifest 
-      ? 'max-age=0, no-cache, no-store, must-revalidate'
-      : 'public, max-age=31536000, immutable';
-
-    const command = new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME,
-      Key: key,
-      Body: fileBuffer,
-      ContentType: contentType,
-      CacheControl: cacheControl,
+    const fileStream = fs.createReadStream(filePath);
+    
+    const parallelUploads3 = new Upload({
+      client: r2Client,
+      params: {
+        Bucket: process.env.R2_BUCKET_NAME,
+        Key: key,
+        Body: fileStream,
+        ContentType: contentType,
+        CacheControl: key.endsWith('.m3u8') 
+          ? 'max-age=0, no-cache, no-store, must-revalidate'
+          : 'public, max-age=31536000, immutable',
+      },
+      queueSize: 4,
+      partSize: 1024 * 1024 * 5,
+      leavePartsOnError: false,
     });
 
-
-    await r2Client.send(command);
-    return { success: true, key };
+    await parallelUploads3.done();
+    
+    return { 
+      success: true, 
+      key,
+      url: `${process.env.REELS_CDN_URL}/${key}`
+    };
   } catch (error) {
     console.error(`[R2_UPLOAD_ERROR] Failed to upload ${key}:`, error);
     throw error;
