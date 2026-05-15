@@ -252,9 +252,8 @@ const useSignUpForm = (predefinedRole = "user") => {
       toast.success("Successfully logged in with Google!");
 
       const user = result.user;
-      const isMissingDetails = !user.phone || !user.gender || !user.location;
-
-      if (isMissingDetails && result.role === "user") {
+      
+      if (result.isNewUser) {
         setOnboardingUser(user);
         setShowOnboarding(true);
         return;

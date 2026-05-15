@@ -81,14 +81,16 @@ export const getReelsFeed = async (req, res) => {
 
     const reels = await Reel.find(query)
       .populate('creatorId', 'name username profilePicture')
-      .sort({ _id: -1 }) // Use ID for stable cursor pagination
-      .limit(parseInt(limit));
+      .select('caption hashtags stats hlsUrl rawVideoUrl thumbnailUrl creatorId createdAt')
+      .sort({ _id: -1 }) 
+      .limit(parseInt(limit))
+      .lean(); // Use lean for faster JSON serialization
 
     const finalReels = initialReel ? [initialReel, ...reels] : reels;
     const nextCursor = reels.length > 0 ? reels[reels.length - 1]._id : null;
 
     // Generate a signed cookie for Cloudflare Edge Auth
-    const expiry = Math.floor(Date.now() / 1000) + 7200; // 2 hours
+    const expiry = Math.floor(Date.now() / 1000) + 7200; 
     const message = `exp=${expiry}`;
     const signature = crypto
       .createHmac('sha256', process.env.REELS_COOKIE_SECRET)
@@ -97,11 +99,17 @@ export const getReelsFeed = async (req, res) => {
     
     res.cookie('cf_reel_token', `${message}&sig=${signature}`, COOKIE_SETTINGS);
 
+    // Performance Headers
+    res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     res.status(200).json({ 
       success: true, 
       reels: finalReels,
       nextCursor 
     });
+
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

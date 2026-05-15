@@ -1,7 +1,8 @@
+version: "1"
 services:
   - type: web
     name: kridaz-backend
-    env: node
+    runtime: node
     rootDir: server
     buildCommand: corepack enable && corepack prepare pnpm@10.28.0 --activate && pnpm install --no-frozen-lockfile
     startCommand: node server.js

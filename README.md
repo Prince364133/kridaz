@@ -72,3 +72,14 @@ Please read our **[Developer Guide](DEVELOPER_GUIDE.md)** before submitting a Pu
 
 ---
 **Kridaz - Book Your Game, Own Your Passion.**
+
+
+## passwords for different roles
+- user: [] -> 36413333
+- venue owner: [] -> 36413333
+- admin: [] -> 36413333
+- coach: [] -> 36413333
+- umpire: [] -> 36413333
+- scorer: [] -> 36413333
+- commentator: [] -> 36413333
+- streamer: [] -> 36413333

@@ -1,7 +1,8 @@
+version: "1"
 services:
   - type: web
     name: kridaz-backend
-    env: node
+    runtime: node
     buildCommand: npm install
     startCommand: npm start
     envVars:

@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700;800;900&family=Space+Mono&family=Bayon&family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 /* ── Design Tokens ──────────────────────────────────────────────── */
 :root {
@@ -118,10 +118,16 @@ body {
 
 /* Hide scrollbar but keep scrollable */
 .no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar { -ms-overflow-style: none; }
+@supports (scrollbar-width: none) {
+  .no-scrollbar { scrollbar-width: none; }
+}
 
 .scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide { -ms-overflow-style: none; }
+@supports (scrollbar-width: none) {
+  .scrollbar-hide { scrollbar-width: none; }
+}
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
@@ -147,11 +153,13 @@ body {
   margin: 0 auto;
   overflow-y: scroll;
   scroll-snap-type: y mandatory;
-  -webkit-overflow-scrolling: touch;
+  /* -webkit-overflow-scrolling: touch; */ /* Deprecated, but keeping as comment if needed for very old iOS */
   background-color: #000;
   position: relative;
   overscroll-behavior-y: contain;
-  scrollbar-width: none; /* Firefox */
+  @supports (scrollbar-width: none) {
+    scrollbar-width: none; /* Firefox */
+  }
   -ms-overflow-style: none;  /* IE/Edge */
 }
 .reels-feed-container::-webkit-scrollbar {
@@ -261,6 +269,7 @@ body {
 
 .badge-distance {
   background-color: rgba(0,0,0,0.75);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   color: #fff;
   font-family: "Space Mono", monospace;

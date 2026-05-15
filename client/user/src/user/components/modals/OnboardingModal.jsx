@@ -16,7 +16,9 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
     phone: "",
     gender: "",
     location: "",
-    sportTypes: []
+    sportTypes: [],
+    password: "",
+    confirmPassword: ""
   });
 
   const [locationSuggestions, setLocationSuggestions] = useState([]);
@@ -46,6 +48,19 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
 
   const handleNext = () => {
     if (step === 1) {
+      if (!formData.password || !formData.confirmPassword) {
+        toast.error("Please create a password for your account");
+        return;
+      }
+      if (formData.password.length < 6) {
+        toast.error("Password must be at least 6 characters");
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        toast.error("Passwords do not match");
+        return;
+      }
+    } else if (step === 2) {
       if (!formData.phone || !formData.gender) {
         toast.error("Please fill in all details");
         return;
@@ -54,7 +69,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
         toast.error("Please enter a valid 10-digit phone number");
         return;
       }
-    } else if (step === 2) {
+    } else if (step === 3) {
       if (!formData.location) {
         toast.error("Please enter your location");
         return;
@@ -139,7 +154,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
         <div className="flex h-1.5 bg-[#000000]">
           <div 
             className="bg-[#CCFF00] transition-all duration-500 shadow-[0_0_10px_#CCFF00]" 
-            style={{ width: `${(step / 3) * 100}%` }}
+            style={{ width: `${(step / 4) * 100}%` }}
           />
         </div>
 
@@ -147,20 +162,66 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
           {/* Header */}
           <div className="space-y-2 text-center">
             <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight uppercase italic">
-              {step === 1 && "Final Touches"}
-              {step === 2 && "Where's the Arena?"}
-              {step === 3 && "Pick Your Game"}
+              {step === 1 && "Secure Account"}
+              {step === 2 && "Final Touches"}
+              {step === 3 && "Where's the Arena?"}
+              {step === 4 && "Pick Your Game"}
             </h2>
             <p className="text-white/40 text-sm font-medium uppercase tracking-[0.2em]">
-              {step === 1 && "Step 1 of 3: Basic Profile"}
-              {step === 2 && "Step 2 of 3: Your Location"}
-              {step === 3 && "Step 3 of 3: Your Interests"}
+              {step === 1 && "Step 1 of 4: Create Password"}
+              {step === 2 && "Step 2 of 4: Basic Profile"}
+              {step === 3 && "Step 3 of 4: Your Location"}
+              {step === 4 && "Step 4 of 4: Your Interests"}
             </p>
           </div>
 
           {/* Content */}
           <div className="min-h-[280px] flex flex-col justify-center">
             {step === 1 && (
+              <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                <div className="p-6 rounded-[8px] bg-[#CCFF00]/5 border border-[#CCFF00]/20 flex items-start gap-4 mb-4">
+                  <div className="p-3 rounded-[8px] bg-[#CCFF00]/10 text-[#CCFF00]">
+                    <Zap size={24} />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-white font-bold text-sm">One Last Thing!</h4>
+                    <p className="text-white/40 text-[10px]">Create a password so you can login directly next time.</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <label className="block">
+                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">New Password</span>
+                    <div className="mt-2 relative">
+                      <Zap className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                      <input
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({...formData, password: e.target.value})}
+                        placeholder="Min 6 characters"
+                        className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00] outline-none transition-all"
+                      />
+                    </div>
+                  </label>
+
+                  <label className="block">
+                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Confirm Password</span>
+                    <div className="mt-2 relative">
+                      <Zap className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                      <input
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                        placeholder="Re-enter password"
+                        className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00] outline-none transition-all"
+                      />
+                    </div>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
               <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                 <div className="space-y-4">
                   <label className="block">
@@ -200,7 +261,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
               </div>
             )}
 
-            {step === 2 && (
+            {step === 3 && (
               <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                 <div className="p-6 rounded-[8px] bg-[#CCFF00]/5 border border-[#CCFF00]/20 flex items-start gap-4">
                   <div className="p-3 rounded-[8px] bg-[#CCFF00]/10 text-[#CCFF00]">
@@ -253,7 +314,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
               </div>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
               <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-right-4 duration-300">
                 {sports.map((sport) => (
                   <button
@@ -290,7 +351,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
               </button>
             )}
             
-            {step < 3 ? (
+            {step < 4 ? (
               <button
                 onClick={handleNext}
                 className="flex-[2] bg-white text-black h-16 rounded-[8px] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl"

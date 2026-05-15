@@ -99,22 +99,25 @@ export const processReelVideo = async (reel, localPath) => {
     });
 
     // 4. Transcode to HLS
-    console.log('[WORKER] Transcoding to HLS with Aggressive Compression...');
+    console.log('[WORKER] Transcoding to HLS with Ultra-Low Latency Settings...');
     await new Promise((resolve, reject) => {
       ffmpeg(inputPath)
         .outputOptions([
           '-vcodec libx264',
-          '-crf 28',               // Higher CRF = more compression
-          '-preset fast',
-          '-maxrate 1000k',        // Cap bitrate to 1Mbps
-          '-bufsize 2000k',
+          '-crf 26',               // Slightly better quality than before
+          '-preset veryfast',      // Faster encoding for less worker lag
+          '-maxrate 1200k',        // Balanced bitrate
+          '-bufsize 2400k',
           '-pix_fmt yuv420p',
-          '-vf scale=720:-2',     // Ensure vertical 720p height
-          '-profile:v baseline',
-          '-level 3.0',
+          '-vf scale=720:-2',     
+          '-movflags +faststart',  // MOOV atom at the beginning
+          '-profile:v main',
+          '-level 3.1',
           '-start_number 0',
-          '-hls_time 4',           // Smaller segments for faster startup
+          '-hls_time 2',           // 2s segments = faster startup & seek
           '-hls_list_size 0',
+          '-hls_segment_type mpegts',
+          '-hls_flags independent_segments',
           '-f hls'
         ])
         .output(path.join(outputDir, 'playlist.m3u8'))
@@ -122,6 +125,7 @@ export const processReelVideo = async (reel, localPath) => {
         .on('error', reject)
         .run();
     });
+
 
     // 5. Content Moderation
     console.log('[WORKER] Running content moderation check...');

@@ -3,7 +3,7 @@ import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { useTrackHeartbeatMutation } from '../../redux/api/reelsApi';
 import Hls from 'hls.js';
 
-const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
+const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -29,7 +29,6 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
       interval = setInterval(() => {
         if (!videoRef.current.paused) {
           watchTimeRef.current += 1;
-          // Send heartbeat every 5 seconds
           if (watchTimeRef.current % 5 === 0) {
             trackHeartbeat({ 
               reelId, 
@@ -42,47 +41,64 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
     }
     return () => {
       if (interval) clearInterval(interval);
-      // Send final heartbeat on unmount/deactivate
-      if (watchTimeRef.current % 5 !== 0 && watchTimeRef.current > 0) {
+      if (watchTimeRef.current > 0) {
         trackHeartbeat({ 
           reelId, 
-          watchTime: watchTimeRef.current % 5, 
+          watchTime: watchTimeRef.current % 5 || 5, 
           completed: videoRef.current?.ended 
         });
       }
       watchTimeRef.current = 0;
     };
-  }, [isVisible, reelId, trackHeartbeat]);
+  }, [isVisible, reelId, trackHeartbeat, isLoaded]);
 
-  // HLS Initialization
+  // HLS Initialization & Tuning
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !hlsUrl) return;
 
-    // Check for HLS support
     if (finalHlsUrl.endsWith('.m3u8')) {
       if (Hls.isSupported()) {
         const hls = new Hls({
           capLevelToPlayerSize: true,
-          autoStartLoad: false, // Don't load segments until needed
-          xhrSetup: (xhr, url) => {
+          autoStartLoad: false, // Control manually based on visibility/proximity
+          startLevel: 0,        // Start with lowest quality for instant play
+          maxBufferLength: 10,   // Small buffer for low memory
+          maxMaxBufferLength: 20,
+          xhrSetup: (xhr) => {
             xhr.withCredentials = true;
           }
         });
         hlsRef.current = hls;
         hls.loadSource(finalHlsUrl);
         hls.attachMedia(video);
+        
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           if (isVisible) {
             video.play().catch(() => setIsPlaying(false));
           }
         });
+
+        // Error handling for better stability
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          if (data.fatal) {
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                hls.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                hls.recoverMediaError();
+                break;
+              default:
+                hls.destroy();
+                break;
+            }
+          }
+        });
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        // Native HLS support (Safari)
         video.src = finalHlsUrl;
       }
     } else {
-      // Fallback for regular MP4/WebM
       video.src = finalHlsUrl;
     }
 
@@ -94,42 +110,47 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
     };
   }, [finalHlsUrl]);
 
-  // Visibility Play/Pause Logic
+  // Proximity Loading Logic (Preload Next Reel)
   useEffect(() => {
+    const hls = hlsRef.current;
     const video = videoRef.current;
     if (!video) return;
 
     if (isVisible) {
-      if (hlsRef.current) {
-        hlsRef.current.startLoad(); // Start loading segments for HLS
-      }
+      if (hls) hls.startLoad();
       
-      if (video.readyState >= 2) {
-        const playPromise = video.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => setIsPlaying(true))
-            .catch(() => setIsPlaying(false));
-        }
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setIsPlaying(true))
+          .catch(() => setIsPlaying(false));
       }
-    } else {
+    } else if (isNext) {
+      // PRELOAD NEXT: Load manifest and first few segments
+      if (hls) {
+        hls.startLoad();
+        // We don't play, just buffer
+      }
       video.pause();
       setIsPlaying(false);
-      if (hlsRef.current) {
-        hlsRef.current.stopLoad(); // Pause loading segments when hidden
-      }
+    } else {
+      // FAR AWAY: Stop loading and pause
+      video.pause();
+      setIsPlaying(false);
+      if (hls) hls.stopLoad();
+      // Reset to start for clean play next time
+      video.currentTime = 0;
     }
-  }, [isVisible]);
+  }, [isVisible, isNext]);
 
   const togglePlay = () => {
     if (videoRef.current.paused) {
       videoRef.current.play();
-      setIsPlaying(true);
     } else {
       videoRef.current.pause();
-      setIsPlaying(false);
     }
   };
+
 
   const toggleMute = (e) => {
     e.stopPropagation();

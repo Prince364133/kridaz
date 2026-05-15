@@ -567,7 +567,7 @@ export const login = async (req, res) => {
 
 // Google Auth
 export const googleAuth = async (req, res) => {
-  const { credential, accessToken, role: requestedRole, umpireInvite, inviteToken } = req.body;
+  const { credential, accessToken, role: requestedRole, umpireInvite, inviteToken, password } = req.body;
   try {
     let payload;
 
@@ -600,6 +600,11 @@ export const googleAuth = async (req, res) => {
       token = generateUserToken(user._id);
     } else {
       // New account creation via Google
+      let hashedPassword = undefined;
+      if (password) {
+        hashedPassword = await argon2.hash(password);
+      }
+
       if (requestedRole && requestedRole !== "user") {
         let waitlistPosition = null;
         if (requestedRole === "coach" || requestedRole === "umpire") {
@@ -612,6 +617,7 @@ export const googleAuth = async (req, res) => {
           googleId,
           role: requestedRole,
           waitlistPosition,
+          ...(hashedPassword && { password: hashedPassword }),
         });
         await owner.save();
         roleToReturn = owner.role;
@@ -623,7 +629,8 @@ export const googleAuth = async (req, res) => {
           username: generatedUsername, 
           email, 
           googleId,
-          walletBalance: 50 // Welcome Bonus
+          walletBalance: 50, // Welcome Bonus
+          ...(hashedPassword && { password: hashedPassword }),
         });
         await user.save();
 
@@ -717,12 +724,16 @@ export const googleAuth = async (req, res) => {
       return res.status(403).json({ success: false, message: "Your account has been blocked by an administrator." });
     }
 
+    // Check if user is missing essential details or has no password set
+    const isNewUser = !authAccount.phone || !authAccount.gender || !authAccount.location || !authAccount.password;
+
     return res.status(200).json({ 
       success: true, 
       message: "Google authentication successful", 
       token, 
       role: roleToReturn,
-      user: authAccount
+      user: authAccount,
+      isNewUser
     });
   } catch (error) {
     console.error(chalk.red("Google Auth Error:"), error);
@@ -1068,7 +1079,7 @@ export const updateInterests = async (req, res) => {
   }
 };
 export const updateProfile = async (req, res) => {
-  const { name, username, phone, bio, gender, city, state, location, sportTypes, interests } = req.body;
+  const { name, username, phone, bio, gender, city, state, location, sportTypes, interests, password } = req.body;
   try {
     const decoded = req.user || req.owner;
     if (!decoded) {
@@ -1094,6 +1105,11 @@ export const updateProfile = async (req, res) => {
 
     let account;
     const finalInterests = interests || sportTypes || [];
+    let hashedPassword;
+    if (password) {
+      hashedPassword = await argon2.hash(password);
+    }
+
     const updateData = {
       name,
       username: username?.toLowerCase(),
@@ -1104,7 +1120,8 @@ export const updateProfile = async (req, res) => {
       state,
       location,
       sportTypes: finalInterests,
-      interests: finalInterests
+      interests: finalInterests,
+      ...(hashedPassword && { password: hashedPassword })
     };
 
     account = await User.findByIdAndUpdate(id, updateData, { new: true }).select("-password");

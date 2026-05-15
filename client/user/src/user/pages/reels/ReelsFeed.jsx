@@ -58,34 +58,48 @@ const ReelsFeed = () => {
     };
   }, [socket, dispatch, cursor, initialId]);
 
-  const handleScroll = () => {
-    if (!feedRef.current) return;
-    const scrollPos = feedRef.current.scrollTop;
-    const itemHeight = feedRef.current.clientHeight;
-    const index = Math.round(scrollPos / itemHeight);
-    
-    if (index !== activeIndex) {
-      setActiveIndex(index);
-      
-      // Mask URL like YouTube Shorts
-      const currentReel = data?.reels[index];
-      if (currentReel) {
-        window.history.replaceState(null, '', `/shorts/${currentReel._id}`);
-      }
-    }
+  // IntersectionObserver for active reel tracking
+  useEffect(() => {
+    if (!data?.reels || data.reels.length === 0) return;
 
-    // Load more when reaching near the end
-    if (data?.reels && index >= data.reels.length - 2 && !isFetching && data.nextCursor) {
-      setCursor(data.nextCursor);
-    }
-  };
+    const observerOptions = {
+      root: feedRef.current,
+      threshold: 0.6, // Reel is active when 60% visible
+    };
+
+    const observerCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const index = parseInt(entry.target.getAttribute('data-index'));
+          if (index !== activeIndex) {
+            setActiveIndex(index);
+            
+            // Mask URL
+            const currentReel = data.reels[index];
+            if (currentReel) {
+              window.history.replaceState(null, '', `/shorts/${currentReel._id}`);
+            }
+
+            // Load more trigger
+            if (index >= data.reels.length - 3 && !isFetching && data.nextCursor) {
+              setCursor(data.nextCursor);
+            }
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    const elements = feedRef.current.querySelectorAll('.reels-item-wrapper');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [data, activeIndex, isFetching]);
 
   // Ensure we are at the top if initialId is provided
   useEffect(() => {
     if (data?.reels && !isInitialScrollDone.current) {
       isInitialScrollDone.current = true;
-      // If we are on /shorts/:id, the backend already put it at index 0
-      // so we just need to ensure URL is correct and active index is 0
       if (initialId) {
         setActiveIndex(0);
         window.history.replaceState(null, '', `/shorts/${initialId}`);
@@ -123,21 +137,32 @@ const ReelsFeed = () => {
       {/* Vertical Feed Container */}
       <div 
         ref={feedRef}
-        onScroll={handleScroll}
-        className="reels-feed-container scrollbar-hide"
+        className="reels-feed-container scrollbar-hide snap-y snap-mandatory overflow-y-auto h-full w-full max-w-[500px]"
       >
         {data?.reels.map((reel, index) => {
+          // Preload: render actual component if within 2 items of active
           const isNear = Math.abs(index - activeIndex) <= 2;
+          const isActive = index === activeIndex;
           
           return (
-            <div key={reel._id} className="reels-item">
+            <div 
+              key={reel._id} 
+              data-index={index}
+              className="reels-item-wrapper w-full h-full snap-start snap-always"
+            >
               {isNear ? (
                 <ReelItem 
                   reel={reel} 
-                  isVisible={index === activeIndex} 
+                  isVisible={isActive}
+                  isNext={index === activeIndex + 1}
                 />
               ) : (
-                <div className="w-full h-full bg-black" />
+                <div className="w-full h-full bg-black flex items-center justify-center">
+                   {/* Show thumbnail placeholder for far-away items if available */}
+                   {reel.thumbnailUrl && (
+                     <img src={reel.thumbnailUrl} alt="" className="w-full h-full object-cover opacity-20 blur-sm" />
+                   )}
+                </div>
               )}
             </div>
           );
