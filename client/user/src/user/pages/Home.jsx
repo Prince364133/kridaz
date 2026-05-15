@@ -365,14 +365,14 @@ export default function Home() {
    letterSpacing: "0" 
  }}>
    <span className="text-white">More Than Booking.</span><br />
-   <span style={{ 
-     background: "linear-gradient(to right, #55DEE8 0%, #BFF367 100%)", 
-     WebkitBackgroundClip: "text", 
-     WebkitTextFillColor: "transparent",
-     backgroundClip: "text"
-   }}>
-     This Is Where Players<br />Belong.
-   </span>
+            <span style={{ 
+              background: "linear-gradient(110deg, #55DEE8 0%, #BFF367 100%)", 
+              WebkitBackgroundClip: "text", 
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text"
+            }}>
+              This Is Where Players<br />Belong.
+            </span>
  </h1>
  <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ color: PRI }}>where champions play</p>
  </div>
