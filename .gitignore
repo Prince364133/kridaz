@@ -14,3 +14,4 @@ scratch/
 *.pdf
 *.txt.bak
 test_output*
+server/uploads/

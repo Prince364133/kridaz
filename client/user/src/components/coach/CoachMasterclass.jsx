@@ -1,56 +1,99 @@
-import React from "react";
-import { Video, PlayCircle, Plus, Layout } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Video, PlayCircle, Plus, Layout, Calendar, Clock, Zap } from "lucide-react";
 import useCoachDashboard from "@hooks/owner/useCoachDashboard";
 import DashboardSkeleton from "../owner/Dashboard/DashboardSkeleton";
 
+/**
+ * CoachMasterclass — Virtual training content feed.
+ * Standardized for the Console design language (Inter font, 8px radii, Lime theme).
+ */
+
 export default function CoachMasterclass() {
   const { loading } = useCoachDashboard();
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const getTimeGreeting = () => {
+    const hour = currentTime.getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  };
 
   if (loading) return <DashboardSkeleton />;
 
-  return (
-    <div className="space-y-8 animate-fade-in font-open-sans">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-6 border-b border-white/5">
-        <div className="space-y-1">
-          <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-white font-inter">
-            Digital <span className="text-[#CCFF00]">Masterclass</span>
-          </h1>
-          <p className="text-[#999999] text-xs font-semibold uppercase tracking-wider font-inter mt-1">Virtual training and recorded content</p>
-        </div>
-        
-        <button className="px-6 py-2.5 bg-[#CCFF00] text-black rounded-[6px] font-bold uppercase text-[11px] tracking-widest flex items-center gap-2 hover:scale-[0.98] transition-all font-inter shadow-[var(--shadow-2)]">
-          <Plus size={16} />
-          <span>New Upload</span>
-        </button>
-      </div>
+  const themeColor = "#CCFF00";
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Placeholder for content - Keeping it aesthetic since we don't have video model yet */}
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="group relative bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden hover:border-[#CCFF00]/30 transition-all duration-500 shadow-[var(--shadow-2)]">
-             <div className="aspect-video bg-[#2D2D2D]/30 flex items-center justify-center relative">
-                <div className="w-16 h-16 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center border border-[#2D2D2D] group-hover:scale-110 transition-transform">
-                   <PlayCircle size={32} className="text-[#878C9F] group-hover:text-[#CCFF00] transition-colors" />
-                </div>
-                <div className="absolute top-4 left-4 px-3 py-1 bg-black/60 backdrop-blur-md rounded-[4px] border border-[#2D2D2D]">
-                   <span className="text-[10px] font-bold text-[#878C9F] uppercase tracking-wider font-inter">Tutorial #{i}</span>
-                </div>
-             </div>
-             <div className="p-6 space-y-4">
-                <div className="space-y-2">
-                   <h3 className="text-lg font-bold text-white group-hover:text-[#CCFF00] transition-colors font-inter tracking-tight">Advanced Batting Techniques</h3>
-                   <p className="text-[#999999] text-[13px] line-clamp-2 font-open-sans">Master the art of professional batting with this comprehensive drill sequence.</p>
-                </div>
-                <div className="flex justify-between items-center pt-4 border-t border-[#2D2D2D]">
-                   <div className="flex items-center gap-2 text-[10px] font-medium text-[#878C9F] uppercase tracking-wider font-inter">
-                      <Layout size={12} />
-                      <span>425 Views</span>
-                   </div>
-                   <span className="text-[10px] font-bold text-[#CCFF00] font-inter uppercase tracking-wider">DRAFT</span>
-                </div>
-             </div>
+  return (
+    <div className="h-full custom-scrollbar bg-[#000000] text-white font-inter pb-24">
+      <div className="p-4 lg:px-10 lg:pt-10 lg:pb-12 space-y-12 animate-fade-in relative">
+        
+        {/* Header Section */}
+        <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8 relative z-10 pb-6 border-b border-white/5">
+          <div className="flex items-center gap-4">
+            <div className="w-1.5 h-10 rounded-full" style={{ backgroundColor: themeColor }} />
+            <div>
+              <h1 className="text-3xl lg:text-4xl font-black tracking-tight font-['Open_Sans'] uppercase leading-none">
+                Digital <span style={{ color: themeColor }}>Masterclass</span>
+              </h1>
+              <p className="text-[#878C9F] text-[10px] font-black uppercase tracking-[0.2em] font-inter mt-1.5">{getTimeGreeting()} | Virtual Training Content Feed</p>
+            </div>
           </div>
-        ))}
+          
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full xl:w-auto">
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-8 py-4 rounded-lg backdrop-blur-xl">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center text-black" style={{ backgroundColor: themeColor }}>
+                <Calendar size={20} />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-white text-base font-black leading-none uppercase tracking-tight">
+                  {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long" })}
+                </p>
+                <p className="text-[9px] font-black uppercase tracking-widest opacity-60">
+                   {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                </p>
+              </div>
+            </div>
+
+            <button className="px-8 py-4 text-black rounded-lg text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-2xl" style={{ backgroundColor: themeColor, boxShadow: `0 10px 30px ${themeColor}33` }}>
+              <Plus size={18} /> New Upload
+            </button>
+          </div>
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="group relative bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg overflow-hidden hover:border-white/20 transition-all duration-500 shadow-2xl">
+               <div className="aspect-video bg-white/[0.02] flex items-center justify-center relative">
+                  <div className="w-16 h-16 bg-black/60 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
+                     <PlayCircle size={32} style={{ color: themeColor }} className="opacity-60 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <div className="absolute top-4 left-4 px-3 py-1 bg-black/60 backdrop-blur-md rounded-md border border-white/5">
+                     <span className="text-[9px] font-black text-neutral-500 uppercase tracking-widest">Training Node #{i}</span>
+                  </div>
+               </div>
+               <div className="p-8 space-y-5">
+                  <div className="space-y-2">
+                     <h3 className="text-[20px] font-black text-white group-hover:text-[#CCFF00] transition-colors uppercase tracking-widest leading-tight font-inter">Advanced Batting Mechanics</h3>
+                     <p className="text-neutral-500 text-[11px] font-bold uppercase leading-relaxed tracking-widest line-clamp-2">Mastering the professional stride and follow-through sequence.</p>
+                  </div>
+                  <div className="flex justify-between items-center pt-5 border-t border-white/5">
+                     <div className="flex items-center gap-3 text-[9px] font-black text-neutral-600 uppercase tracking-widest">
+                        <Layout size={14} />
+                        <span>742 Sessions</span>
+                     </div>
+                     <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-md border" style={{ color: themeColor, borderColor: `${themeColor}33`, backgroundColor: `${themeColor}1A` }}>DRAFT NODE</span>
+                  </div>
+               </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
