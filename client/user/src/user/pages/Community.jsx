@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { followUser, unfollowUser } from "@redux/slices/authSlice";
+import { followUser, unfollowUser } from "../../redux/slices/authSlice";
+import { startUpload } from "../../redux/slices/mediaUploadSlice";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { 
@@ -253,50 +254,72 @@ const Community = () => {
     e.preventDefault();
     if (!newPost.content && !newPost.image) return toast.error("Content or image is required");
 
-    setIsPublishing(true);
     try {
       if (editingPost) {
-        // We'll keep update post as is or refactor later if needed, 
-        // usually it's just updating text.
+        setIsPublishing(true);
         const formData = new FormData();
         if (newPost.title) formData.append('title', newPost.title);
         if (newPost.content) formData.append('content', newPost.content);
         await updatePost({ id: editingPost._id, data: formData }).unwrap();
         toast.success("Post updated!");
         closePostModal();
+        setIsPublishing(false);
       } else {
-        let key = null;
-        let postId = null;
+        // --- OPTIMISTIC UI ---
+        const tempId = Date.now().toString();
+        const optimisticPost = {
+          _id: tempId,
+          adminId: {
+            _id: user._id || user.id,
+            name: user.name,
+            profilePicture: user.profilePicture,
+            username: user.username || 'You'
+          },
+          title: newPost.title,
+          content: newPost.content,
+          mediaType: newPost.image ? (newPost.image.type.startsWith('video') ? 'video' : 'image') : 'text',
+          image: newPost.image ? URL.createObjectURL(newPost.image) : null,
+          mediaUrl: newPost.image ? URL.createObjectURL(newPost.image) : null,
+          status: 'pending',
+          likes: [],
+          comments: [],
+          createdAt: new Date().toISOString(),
+          isOptimistic: true
+        };
 
+        // Push to RTK Query Cache immediately
+        dispatch(
+          communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
+            draft.posts.unshift(optimisticPost);
+          })
+        );
+
+        // --- BACKGROUND UPLOAD ---
         if (newPost.image) {
-          // 1. Get Pre-signed URL
-          const { data: uploadData } = await getCommunityUploadUrl({
-            contentType: newPost.image.type,
-            fileName: newPost.image.name
-          });
-          
-          key = uploadData.key;
-          postId = uploadData.postId;
-
-          // 2. Upload to R2
-          await uploadFileToR2(uploadData.uploadUrl, newPost.image);
+          dispatch(startUpload({
+            id: tempId,
+            type: 'POST',
+            file: newPost.image,
+            previewUrl: optimisticPost.image,
+            metadata: {
+              title: newPost.title,
+              content: newPost.content
+            }
+          }));
+        } else {
+          // If text only, just call confirm directly (it handles no-key cases)
+          await confirmCommunityPost({
+            title: newPost.title,
+            content: newPost.content,
+            mediaType: 'text'
+          }).unwrap();
+          toast.success("Post shared!");
         }
 
-        // 3. Confirm Post
-        await confirmCommunityPost({
-          postId,
-          key,
-          mediaType: newPost.image?.type.startsWith('video') ? 'video' : 'image',
-          title: newPost.title,
-          content: newPost.content
-        }).unwrap();
-
-        toast.success("Post created!");
         closePostModal();
       }
     } catch (error) {
       toast.error(error?.data?.message || error.message || "Failed to save post");
-    } finally {
       setIsPublishing(false);
     }
   };
@@ -323,40 +346,79 @@ const Community = () => {
     e.preventDefault();
     if (!newStory.content && newStory.mediaFiles.length === 0) return toast.error("Story must have content or media");
 
-    setIsPublishing(true);
     try {
-      const mediaItems = [];
+      // Instagram-like: Upload first media in background
+      // Note: Current story model supports 1 media per story record in the grouped view.
+      // If user selected multiple, we'll create multiple story records.
       
-      // 1. Upload each media file
-      for (const file of newStory.mediaFiles) {
-        const { data: uploadData } = await getStoryUploadUrl({
-          contentType: file.type,
-          fileName: file.name
-        });
+      const files = newStory.mediaFiles.length > 0 ? newStory.mediaFiles : [null];
 
-        await uploadFileToR2(uploadData.uploadUrl, file);
-        
-        mediaItems.push({
-          key: uploadData.key,
-          mediaType: file.type.startsWith('video') ? 'video' : 'image'
-        });
+      for (const file of files) {
+        const tempId = Math.random().toString(36).substring(7);
+        const previewUrl = file ? URL.createObjectURL(file) : null;
+
+        // --- OPTIMISTIC UI ---
+        const optimisticStory = {
+          _id: tempId,
+          userId: user._id || user.id,
+          content: newStory.content,
+          mediaType: file ? (file.type.startsWith('video') ? 'video' : 'image') : 'text',
+          mediaUrl: previewUrl,
+          placeholder: previewUrl, // Use preview as temporary placeholder
+          status: 'pending',
+          expiresAt: new Date(Date.now() + 86400000).toISOString(),
+          createdAt: new Date().toISOString(),
+          isOptimistic: true
+        };
+
+        // Push to RTK Query Cache
+        dispatch(
+          communityApi.util.updateQueryData('getStoriesFeed', undefined, (draft) => {
+            const userGroup = draft.stories.find(g => (g.user._id || g.user) === (user._id || user.id));
+            if (userGroup) {
+              userGroup.stories.unshift(optimisticStory);
+            } else {
+              draft.stories.unshift({
+                user: {
+                  _id: user._id || user.id,
+                  name: user.name,
+                  profilePicture: user.profilePicture,
+                  username: user.username || 'You'
+                },
+                stories: [optimisticStory]
+              });
+            }
+          })
+        );
+
+        // --- BACKGROUND UPLOAD ---
+        if (file) {
+          dispatch(startUpload({
+            id: tempId,
+            type: 'STORY',
+            file: file,
+            previewUrl: previewUrl,
+            metadata: {
+              content: newStory.content,
+              durationDays: newStory.durationDays
+            }
+          }));
+        } else {
+          // Text only
+          await confirmStoryUpload({
+            content: newStory.content,
+            durationDays: newStory.durationDays,
+            mediaType: 'text'
+          }).unwrap();
+        }
       }
 
-      // 2. Confirm Story
-      await confirmStoryUpload({
-        content: newStory.content,
-        durationDays: newStory.durationDays,
-        mediaItems
-      }).unwrap();
-
-      toast.success("Story uploaded!");
+      toast.success("Sharing story...");
       setNewStory({ content: '', mediaFiles: [], durationDays: 1 });
       setStoryMediaPreviews([]);
       setShowStoryModal(false);
     } catch (error) {
       toast.error(error?.data?.message || error.message || "Failed to upload story");
-    } finally {
-      setIsPublishing(false);
     }
   };
 

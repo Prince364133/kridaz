@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  activeUpload: null, // { id, progress, status, previewUrl, metadata }
+  activeUpload: null, // { id, progress, status, previewUrl, metadata, type: 'REEL' | 'POST' | 'STORY' }
   recentUploads: [],
 };
 
@@ -16,7 +16,8 @@ const mediaUploadSlice = createSlice({
         status: 'uploading',
         previewUrl: action.payload.previewUrl,
         metadata: action.payload.metadata,
-        file: action.payload.file, // Note: storing non-serializable file in state is usually bad, but we need it for the background handler
+        file: action.payload.file,
+        type: action.payload.type || 'REEL', // Default to REEL for backward compatibility
       };
     },
     updateProgress: (state, action) => {
