@@ -1272,8 +1272,8 @@ export default function Home() {
  <div className="w-full px-4 lg:px-12">
  <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 lg:mb-10 gap-4">
  <div>
- <h2 className="font-display text-3xl sm:text-4xl md:text-6xl uppercase flex items-center gap-2 md:gap-3">
- Your <span style={{ color: PRI }}>Social Arena</span> <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
+ <h2 className="text-3xl sm:text-4xl md:text-6xl uppercase flex items-center gap-2 md:gap-3" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "800" }}>
+ <span className="text-white">Your</span> <span style={GRADIENT_TEXT}>Social Arena</span> <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
  </h2>
  <p className="text-gray-400 mt-2 text-sm md:text-base">Swipe to see what's happening in the field</p>
  </div>
