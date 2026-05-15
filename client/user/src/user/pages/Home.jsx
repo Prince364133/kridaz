@@ -19,12 +19,7 @@ const PRI = "#84CC16";
 const S2 = "#1A1A1A";
 const BDR = "#2A2A2A";
 
-const stats = [
- { value: "500+", label: "Venues" },
- { value: "50K+", label: "Players" },
- { value: "1M+", label: "Bookings" },
- { value: "25+", label: "Cities" },
-];
+
 
 const socialPosts = [
  { image: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800&q=80", likes: "1.2k", comments: "84" },
@@ -413,18 +408,30 @@ export default function Home() {
  </div>
  </section>
 
+ {/* ── QUICK LINKS ── */}
+  <section className="border-y border-white/5 bg-black py-10">
+    <div className="max-w-7xl mx-auto px-6 flex flex-wrap md:flex-nowrap items-center justify-around gap-8 overflow-x-auto no-scrollbar">
+      <Link to="/leaderboard" className="flex items-center gap-4 group shrink-0">
+        <Activity size={28} className="text-[#60A5FA] group-hover:scale-110 transition-transform" />
+        <span className="font-black text-sm tracking-[0.2em] uppercase text-[#60A5FA]">LIVE SCORE</span>
+      </Link>
+      
+      <Link to="/join-games" className="flex items-center gap-4 group shrink-0">
+        <Trophy size={28} className="text-[#F59E0B] group-hover:scale-110 transition-transform" />
+        <span className="font-black text-sm tracking-[0.2em] uppercase text-[#F59E0B]">JOIN TOURNAMENTS</span>
+      </Link>
 
- {/* ── STATS ── */}
- <section className="border-y" style={{ borderColor: "#1A1A1A", backgroundColor: "#0A0A0A" }}>
- <div className="w-full px-2 md:px-10 py-6 sm:py-8 grid grid-cols-4 divide-x divide-[#1A1A1A]">
- {stats.map((s) => (
- <div key={s.label} className="px-1 md:px-8 text-center flex flex-col justify-center overflow-hidden group">
- <p className="font-display text-[15px] min-[375px]:text-xl sm:text-3xl lg:text-5xl leading-none tracking-tighter group-hover:text-white transition-colors" style={{ color: PRI }}>{s.value}</p>
- <p className="font-mono text-[5px] min-[375px]:text-[6px] sm:text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.3em] mt-1 sm:mt-2 text-gray-500 group-hover:text-primary transition-colors truncate">{s.label}</p>
- </div>
- ))}
- </div>
- </section>
+      <Link to="/players" className="flex items-center gap-4 group shrink-0">
+        <Search size={28} className="text-[#84CC16] group-hover:scale-110 transition-transform" />
+        <span className="font-black text-sm tracking-[0.2em] uppercase text-[#84CC16]">FIND PLAYERS</span>
+      </Link>
+
+      <Link to="#" className="flex items-center gap-4 group shrink-0">
+        <ShoppingBag size={28} className="text-[#A855F7] group-hover:scale-110 transition-transform" />
+        <span className="font-black text-sm tracking-[0.2em] uppercase text-[#A855F7]">MARKETPLACE</span>
+      </Link>
+    </div>
+  </section>
 
  {/* Mobile Sub-Nav (Hot Bars) */}
  <div className="lg:hidden flex items-center justify-between w-full border-b border-[#1A1A1A] bg-[#0A0A0A] py-3 px-4 gap-3">
