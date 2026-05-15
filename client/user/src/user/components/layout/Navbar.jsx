@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { logout } from "@redux/slices/authSlice";
+import { reelsApi } from "../../../redux/api/reelsApi";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 
@@ -47,6 +48,7 @@ const Navbar = () => {
   ] : [
     { name: "Home", path: "/" },
     { name: "Venues", path: "/turfs" },
+    { name: "Reels", path: "/reels" },
     { name: "Pros", path: "/professionals" },
     { name: "Join Games", path: "/join-games" },
     { name: "Community", path: "/community" },
@@ -130,6 +132,11 @@ const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.path}
+                  onMouseEnter={() => {
+                    if (link.name === "Reels") {
+                      dispatch(reelsApi.util.prefetch("getReelsFeed", undefined, { force: true }));
+                    }
+                  }}
                   className={`text-sm font-semibold transition-all hover:text-primary relative group/link ${
                     location.pathname === link.path ? "text-primary" : "text-white/60"
                   }`}

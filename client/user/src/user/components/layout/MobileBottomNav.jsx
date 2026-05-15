@@ -1,9 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { Home, Search, PlayCircle, Users, User, Zap, Coins } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { reelsApi } from "../../../redux/api/reelsApi";
+import { useCallback } from "react";
 
 const MobileBottomNav = () => {
   const location = useLocation();
+  const dispatch = useDispatch();
   const { isLoggedIn, role } = useSelector((state) => state.auth);
 
   const getDashboardPath = () => {
@@ -15,10 +18,25 @@ const MobileBottomNav = () => {
     return "/profile";
   };
 
+  // Predictive Prefetching for Reels
+  const handlePrefetchReels = useCallback(() => {
+    // This will pre-load the Reels feed data in the background
+    // so the page is "instant" when they click it.
+    dispatch(
+      reelsApi.util.prefetch("getReelsFeed", undefined, { force: true })
+    );
+  }, [dispatch]);
+
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Venues", path: "/turfs", icon: Search },
-    { name: "Reels", path: "/reels", icon: PlayCircle },
+    { 
+      name: "Reels", 
+      path: "/reels", 
+      icon: PlayCircle,
+      onMouseEnter: handlePrefetchReels,
+      onTouchStart: handlePrefetchReels
+    },
     { name: "Games", path: "/join-games", icon: Zap },
     { name: "Profile", path: "/profile", icon: User },
   ];
@@ -29,8 +47,6 @@ const MobileBottomNav = () => {
     return true;
   });
 
-
-
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-black/80 backdrop-blur-2xl border-t border-white/10 px-4 pb-safe-area-inset-bottom">
       <div className="flex justify-between items-center h-16 max-w-md mx-auto">
@@ -40,6 +56,8 @@ const MobileBottomNav = () => {
             <Link
               key={item.name}
               to={item.path}
+              onMouseEnter={item.onMouseEnter}
+              onTouchStart={item.onTouchStart}
               className={`flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-300 ${
                 isActive ? "text-[#84CC16]" : "text-white/40 hover:text-white/60"
               }`}

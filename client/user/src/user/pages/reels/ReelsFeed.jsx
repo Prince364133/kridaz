@@ -131,7 +131,7 @@ const ReelsFeed = () => {
 
     const observerOptions = {
       root: feedRef.current,
-      threshold: 0.6, // Reel is active when 60% visible
+      threshold: 0.5, // Reel is active when 50% visible
     };
 
     const observerCallback = (entries) => {

@@ -35,6 +35,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "react-hot-toast";
 
 import BackgroundUploadManager from "./user/components/BackgroundUploadManager";
+import { reelsApi } from "./redux/api/reelsApi";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -42,6 +43,18 @@ export default function App() {
   const authState = useSelector((state) => state.auth);
   // If we have a persisted session, don't show the blocking loading screen
   const [loading, setLoading] = useState(false);
+
+  // Background Prefetching for Reels
+  useEffect(() => {
+    if (authState.isLoggedIn && !loading) {
+      // Idle prefetch: Load the reels feed data in the background after auth is ready
+      // 3s delay ensures we don't compete with the Home page's critical data
+      const idleTimer = setTimeout(() => {
+        dispatch(reelsApi.util.prefetch("getReelsFeed", undefined, { force: false }));
+      }, 3000); 
+      return () => clearTimeout(idleTimer);
+    }
+  }, [authState.isLoggedIn, loading, dispatch]);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
