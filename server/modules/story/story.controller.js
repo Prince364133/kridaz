@@ -9,7 +9,6 @@ import path from 'path';
 
 /**
  * Get Signed URL for Stories
- * This is the modern R2-only way to start a story upload.
  */
 export const getUploadUrl = async (req, res) => {
   try {
@@ -28,7 +27,6 @@ export const getUploadUrl = async (req, res) => {
 
 /**
  * Confirm Story Upload
- * This is called after the file is successfully uploaded to R2.
  */
 export const confirmStory = async (req, res) => {
   try {
@@ -86,15 +84,65 @@ const resolveUserId = async (id) => {
   }
 };
 
-/**
- * @deprecated Legacy multipart upload using Cloudinary.
- * All uploads should now use getUploadUrl + confirmStory via R2.
- */
 export const createStory = async (req, res) => {
-  return res.status(410).json({ 
-    success: false, 
-    message: "This endpoint is deprecated. Use the R2 pre-signed URL workflow." 
-  });
+  try {
+    const { mediaType, durationDays, content } = req.body;
+    const rawId = req.user.id;
+    const userId = await resolveUserId(rawId);
+
+    const userModel = 'User';
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + parseInt(durationDays || 1));
+
+    let createdStories = [];
+
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const mediaUrl = await uploadToCloudinary(file.buffer, 'kridaz/stories');
+        const newStory = new Story({
+          userId,
+          userModel,
+          mediaUrl,
+          mediaType: mediaType || 'image',
+          content,
+          durationDays: parseInt(durationDays || 1),
+          expiresAt
+        });
+        await newStory.save();
+        createdStories.push(newStory);
+      }
+    } else if (req.file) {
+      const mediaUrl = await uploadToCloudinary(req.file.buffer, 'kridaz/stories');
+      const newStory = new Story({
+        userId,
+        userModel,
+        mediaUrl,
+        mediaType: mediaType || 'image',
+        content,
+        durationDays: parseInt(durationDays || 1),
+        expiresAt
+      });
+      await newStory.save();
+      createdStories.push(newStory);
+    } else {
+      const newStory = new Story({
+        userId,
+        userModel,
+        mediaUrl: '',
+        mediaType: 'text',
+        content,
+        durationDays: parseInt(durationDays || 1),
+        expiresAt
+      });
+      await newStory.save();
+      createdStories.push(newStory);
+    }
+
+    res.status(201).json({ success: true, stories: createdStories, story: createdStories[0] });
+  } catch (error) {
+    console.error('Error creating story:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 export const getStories = async (req, res) => {
@@ -115,6 +163,7 @@ export const getStories = async (req, res) => {
       }
 
       // If any of these IDs are Owners, we should ALSO search for their linked User IDs
+      // because stories are now saved with User IDs.
       const resolvedNetworkIds = await Promise.all(networkIds.map(id => resolveUserId(id)));
       
       userIds = [...new Set([...userIds, ...resolvedNetworkIds])];
@@ -125,14 +174,16 @@ export const getStories = async (req, res) => {
       query.userId = { $in: userIds };
     }
 
+    // Select userModel to ensure refPath population works correctly
     let stories = await Story.find(query)
       .populate('userId', 'name username profilePicture')
       .populate('viewers', 'name username profilePicture')
       .sort({ createdAt: -1 })
-      .limit(50);
+      .limit(50); // safety cap per feed load
 
     // Group stories by user
     const groupedStories = stories.reduce((acc, story) => {
+      // Robust grouping: even if userId didn't populate, we use the ID string
       const storyUser = story.userId;
       if (!storyUser) return acc;
 
@@ -148,6 +199,7 @@ export const getStories = async (req, res) => {
       return acc;
     }, {});
 
+    // Ensure current user's group is first in the list if it exists
     const finalStories = Object.values(groupedStories).sort((a, b) => {
       const aId = a.user._id.toString();
       const bId = b.user._id.toString();
@@ -174,6 +226,7 @@ export const deleteStory = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Story not found' });
     }
 
+    // Only owner or admin can delete
     if (story.userId.toString() !== userId && userRole !== 'admin' && userRole !== 'BMSP_ADMIN') {
       return res.status(403).json({ success: false, message: 'Unauthorized' });
     }
@@ -185,9 +238,6 @@ export const deleteStory = async (req, res) => {
   }
 };
 
-/**
- * @deprecated Legacy update logic. 
- */
 export const updateStory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -200,6 +250,7 @@ export const updateStory = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Story not found' });
     }
 
+    // Only owner or admin can edit
     if (story.userId.toString() !== userId && userRole !== 'admin' && userRole !== 'BMSP_ADMIN') {
       return res.status(403).json({ success: false, message: 'Unauthorized' });
     }
@@ -212,8 +263,9 @@ export const updateStory = async (req, res) => {
       updateData.expiresAt = expiresAt;
     }
 
-    // Note: We don't support file update for stories in the new pipeline 
-    // because it's better to just create a new story.
+    if (req.file) {
+      updateData.mediaUrl = await uploadToCloudinary(req.file.buffer, 'kridaz/stories');
+    }
 
     const updatedStory = await Story.findByIdAndUpdate(id, updateData, { new: true });
     res.status(200).json({ success: true, story: updatedStory });
@@ -242,7 +294,7 @@ export const getAllStoriesAdmin = async (req, res) => {
     let stories = await Story.find()
       .populate('userId', 'name username email profilePicture')
       .sort({ createdAt: -1 })
-      .limit(100);
+      .limit(100); // admin safety cap
 
     const formattedStories = stories.map(story => {
       const storyObj = story.toObject();

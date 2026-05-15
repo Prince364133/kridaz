@@ -52,28 +52,12 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  {/* Content */}
  <div className="relative flex-1 flex items-center justify-center bg-black overflow-hidden">
  {currentStory.mediaUrl ? (
-    currentStory.mediaType === 'video' ? (
-      <video
-        src={currentStory.mediaUrl}
-        autoPlay
-        playsInline
-        className="w-full h-full object-contain"
-        onEnded={() => {
-          if (currentStoryIndex < storyGroup.stories.length - 1) {
-            setCurrentStoryIndex(currentStoryIndex + 1);
-          } else {
-            onClose();
-          }
-        }}
-      />
-    ) : (
-      <img 
-        src={currentStory.mediaUrl} 
-        alt="" 
-        className="w-full h-full object-contain"
-      />
-    )
-  ) : (
+ <img 
+ src={currentStory.mediaUrl} 
+ alt="" 
+ className="w-full h-full object-contain"
+ />
+ ) : (
  <div className="p-12 text-center w-full">
  <p className="text-2xl md:text-3xl font-bold leading-relaxed text-white">{currentStory.content}</p>
  </div>

@@ -3,6 +3,7 @@ import { mediaQueue } from '../../queues/media.queue.js';
 import Story from '../../models/story.model.js';
 import Owner from '../../models/owner.model.js';
 import User from '../../models/user.model.js';
+import { uploadToCloudinary } from '../../utils/cloudinary.js';
 import { getIO } from '../../config/socket.js';
 import { getPresignedUploadUrl } from '../../utils/r2.js';
 import { generatePlaceholder } from '../../utils/imageWorker.js';
@@ -37,29 +38,26 @@ export const confirmPost = async (req, res) => {
     const authorModel = req.user.role === 'owner' ? 'Owner' : 'User';
 
     let placeholder = null;
-    const mediaUrl = key ? `${process.env.REELS_CDN_URL}/${key}` : null;
+    const mediaUrl = `${process.env.REELS_CDN_URL}/${key}`;
 
-    if (mediaType === 'image' && mediaUrl) {
+    if (mediaType === 'image') {
       placeholder = await generatePlaceholder(mediaUrl);
     }
 
     const post = new CommunityPost({
-      _id: postId || new mongoose.Types.ObjectId(),
+      _id: postId,
       adminId,
       authorModel,
       title,
       content,
-      mediaType: mediaType || 'text',
+      mediaType: mediaType || 'image',
       image: mediaType === 'image' ? mediaUrl : null,
-      mediaUrl: mediaUrl,
+      mediaUrl: mediaType === 'image' ? mediaUrl : mediaUrl,
       placeholder,
       status: mediaType === 'video' ? 'pending' : 'ready'
     });
 
     await post.save();
-
-    const populatedPost = await CommunityPost.findById(post._id)
-      .populate('adminId', 'name profilePicture username');
 
     if (mediaType === 'video') {
       await mediaQueue.add('TRANSCODE_VIDEO', { 
@@ -68,10 +66,7 @@ export const confirmPost = async (req, res) => {
       });
     }
 
-    const io = getIO();
-    if (io) io.emit('new_community_post', populatedPost);
-
-    res.status(201).json({ success: true, post: populatedPost });
+    res.status(201).json({ success: true, post });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -96,6 +91,7 @@ export const getCommunityStats = async (req, res) => {
       Story.countDocuments({ expiresAt: { $gt: new Date() } })
     ]);
 
+    // Aggregate total likes and comments across all posts
     const posts = await CommunityPost.find({}, 'likes comments');
     let totalLikes = 0;
     let totalComments = 0;
@@ -120,14 +116,42 @@ export const getCommunityStats = async (req, res) => {
   }
 };
 
-/**
- * @deprecated Use getUploadUrl + confirmPost instead.
- */
 export const createPost = async (req, res) => {
-  return res.status(410).json({ 
-    success: false, 
-    message: "This endpoint is deprecated. Use the R2 pre-signed URL workflow." 
-  });
+  try {
+    const { title, content } = req.body;
+    // Normalized in middleware, handles both userAuth and adminAuth
+    const rawId = req.user?.id || req.admin?.id; 
+    const creatorId = await resolveUserId(rawId);
+
+    if (!creatorId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    let image = '';
+    if (req.file) {
+      image = await uploadToCloudinary(req.file.buffer, 'kridaz/community');
+    }
+
+    const newPost = new CommunityPost({
+      adminId: creatorId,
+      authorModel: 'User',
+      title,
+      content,
+      image
+    });
+
+    await newPost.save();
+
+    const populatedPost = await CommunityPost.findById(newPost._id)
+      .populate('adminId', 'name profilePicture username');
+
+    const io = getIO();
+    if (io) io.emit('new_community_post', populatedPost);
+
+    res.status(201).json({ success: true, post: populatedPost });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 export const getPosts = async (req, res) => {
@@ -139,6 +163,7 @@ export const getPosts = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(20);
 
+    // Get active stories for authors
     const authorIds = posts.map(p => p.adminId?._id).filter(id => id);
     const activeStories = await Story.find({
       userId: { $in: authorIds },
@@ -161,9 +186,6 @@ export const getPosts = async (req, res) => {
   }
 };
 
-/**
- * @deprecated File updates should create new posts or update text only.
- */
 export const updatePost = async (req, res) => {
   try {
     const { id } = req.params;
@@ -177,6 +199,7 @@ export const updatePost = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Post not found' });
     }
 
+    // Check ownership or admin role
     const isAuthor = post.adminId.toString() === userId;
     const isAdmin = role === 'admin' || role === 'BMSP_ADMIN';
 
@@ -185,6 +208,10 @@ export const updatePost = async (req, res) => {
     }
 
     let updateData = { title, content };
+    if (req.file) {
+      updateData.image = await uploadToCloudinary(req.file.buffer, 'kridaz/community');
+    }
+
     const updatedPost = await CommunityPost.findByIdAndUpdate(id, updateData, { new: true });
     res.status(200).json({ success: true, post: updatedPost });
   } catch (error) {
@@ -204,6 +231,7 @@ export const deletePost = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Post not found' });
     }
 
+    // Check ownership or admin role
     const isAuthor = post.adminId.toString() === userId;
     const isAdmin = role === 'admin' || role === 'BMSP_ADMIN';
 
@@ -241,6 +269,7 @@ export const likePost = async (req, res) => {
     
     await post.save();
     
+    // Populate likes before sending back
     const populatedPost = await CommunityPost.findById(id).populate('likes', 'name profilePicture username');
     
     const io = getIO();
@@ -281,6 +310,7 @@ export const addComment = async (req, res) => {
     
     await post.save();
     
+    // Populate comments before sending back
     const populatedPost = await CommunityPost.findById(id).populate('comments.userId', 'name profilePicture username');
     
     const io = getIO();
@@ -332,6 +362,7 @@ export const deleteComment = async (req, res) => {
     const { id, commentId } = req.params;
     const rawId = req.user?.id || req.admin?.id;
     const userId = await resolveUserId(rawId);
+    const role = req.user?.role || req.admin?.role;
 
     const post = await CommunityPost.findById(id);
     if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
@@ -339,6 +370,7 @@ export const deleteComment = async (req, res) => {
     const comment = post.comments.id(commentId);
     if (!comment) return res.status(404).json({ success: false, message: 'Comment not found' });
 
+    // Allow user to delete their own comment, OR post admin can delete any comment (optional, but good)
     if (comment.userId.toString() !== userId && post.adminId.toString() !== userId) {
       return res.status(403).json({ success: false, message: 'Unauthorized to delete this comment' });
     }
@@ -363,6 +395,7 @@ export const getMyActivity = async (req, res) => {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
+    // Fetch posts the user commented on or liked
     const posts = await CommunityPost.find({
       $or: [
         { 'comments.userId': userId },
@@ -371,8 +404,9 @@ export const getMyActivity = async (req, res) => {
     })
       .populate('adminId', 'name profilePicture')
       .sort({ createdAt: -1 })
-      .limit(50);
+      .limit(50); // safety cap
 
+    // Filter and format for profile view
     const activity = posts.map(post => ({
       postId: post._id,
       postTitle: post.title || 'Untitled Update',
@@ -395,6 +429,7 @@ export const getUserPosts = async (req, res) => {
     let targetUserId = paramId || req.user?.id;
     if (!targetUserId) return res.status(400).json({ success: false, message: 'User ID required' });
 
+    // Handle Owner-User identity mapping
     const owner = await Owner.findById(targetUserId);
     const searchIds = [targetUserId];
     if (owner && owner.userId) {
@@ -409,7 +444,7 @@ export const getUserPosts = async (req, res) => {
       .populate('likes', 'name profilePicture username')
       .populate('comments.userId', 'name profilePicture username')
       .sort({ createdAt: -1 })
-      .limit(50);
+      .limit(50); // safety cap
 
     res.status(200).json({ success: true, posts });
   } catch (error) {
@@ -423,6 +458,7 @@ export const getUserStories = async (req, res) => {
     let targetUserId = paramId || req.user?.id;
     if (!targetUserId) return res.status(400).json({ success: false, message: 'User ID required' });
 
+    // Handle Owner-User identity mapping
     const owner = await Owner.findById(targetUserId);
     const searchIds = [targetUserId];
     if (owner && owner.userId) {
@@ -435,11 +471,13 @@ export const getUserStories = async (req, res) => {
     const stories = await Story.find({ userId: { $in: searchIds } })
       .populate('viewers', 'name username profilePicture')
       .sort({ createdAt: -1 })
-      .limit(50);
+      .limit(50); // safety cap
 
+    // Enforce privacy: only allow viewing if own stories OR in social network
     const isOwnContent = req.user?.id && searchIds.some(id => id === req.user.id.toString());
     
     if (req.user?.id && !isOwnContent) {
+      // Check social network by finding the primary User document
       const user = await User.findOne({ _id: { $in: searchIds } });
       if (user) {
         const viewerId = req.user.id;
@@ -447,6 +485,7 @@ export const getUserStories = async (req, res) => {
         const isFollowedBy = user.following?.some(id => id.toString() === viewerId);
         
         if (!isFollowing && !isFollowedBy) {
+          // If not in network, only show active stories (privacy rule)
           const activeStories = stories.filter(s => s.expiresAt > new Date());
           return res.status(200).json({ success: true, stories: activeStories });
         }
