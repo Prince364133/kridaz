@@ -33,6 +33,20 @@ export const reelsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Reels'],
     }),
+    getReelUploadUrl: builder.query({
+      query: (params) => ({
+        url: '/api/reels/upload-url',
+        params,
+      }),
+    }),
+    confirmReelUpload: builder.mutation({
+      query: (data) => ({
+        url: '/api/reels/confirm-upload',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Reels'],
+    }),
     interactWithReel: builder.mutation({
       query: ({ reelId, ...data }) => ({
         url: `/api/reels/${reelId}/interact`,
@@ -44,6 +58,7 @@ export const reelsApi = baseApi.injectEndpoints({
         if (type === 'like') {
           const patchResult = dispatch(
             reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
+              if (!draft || !draft.reels) return;
               const reel = draft.reels.find((r) => r._id === reelId);
               if (reel) {
                 reel.stats.likes += 1;
@@ -67,6 +82,7 @@ export const reelsApi = baseApi.injectEndpoints({
       async onQueryStarted({ reelId }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
+            if (!draft || !draft.reels) return;
             const reel = draft.reels.find((r) => r._id === reelId);
             if (reel) {
               reel.stats.comments += 1;
@@ -88,6 +104,7 @@ export const reelsApi = baseApi.injectEndpoints({
       async onQueryStarted(reelId, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
+            if (!draft || !draft.reels) return;
             draft.reels = draft.reels.filter((r) => r._id !== reelId);
           })
         );
@@ -130,6 +147,9 @@ export const {
   useGetReelsFeedQuery,
   useGetRecommendedReelsQuery,
   useUploadReelMutation,
+  useGetReelUploadUrlQuery,
+  useLazyGetReelUploadUrlQuery,
+  useConfirmReelUploadMutation,
   useInteractWithReelMutation,
   useAddCommentMutation,
   useDeleteReelMutation,

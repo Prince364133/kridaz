@@ -15,12 +15,21 @@ const storySchema = new mongoose.Schema({
   mediaUrl: {
     type: String,
   },
+  hlsUrl: {
+    type: String,
+  },
+  placeholder: {
+    type: String, // Base64 tiny thumbnail for instant feed
+  },
+  rawMediaUrl: {
+    type: String, // Temporary raw file link
+  },
   content: {
     type: String
   },
   mediaType: {
     type: String,
-    enum: ['image', 'text'],
+    enum: ['image', 'text', 'video'],
     default: 'image'
   },
   durationDays: {
@@ -36,6 +45,11 @@ const storySchema = new mongoose.Schema({
   expiresAt: {
     type: Date,
     required: true
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'ready', 'failed'],
+    default: 'ready'
   }
 }, { timestamps: true });
 

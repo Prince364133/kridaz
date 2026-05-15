@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
-import { ChevronLeft, Upload, X, AlertCircle, Loader2, CheckCircle } from 'lucide-react';
+import { ChevronLeft, Upload, X, AlertCircle } from 'lucide-react';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import axiosInstance from '@hooks/useAxiosInstance';
-import { motion, AnimatePresence } from 'framer-motion';
-
+import { motion } from 'framer-motion';
+import { startUpload } from '@redux/slices/mediaUploadSlice';
 const UploadReel = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [caption, setCaption] = useState('');
   const [hashtags, setHashtags] = useState('');
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState('idle'); // idle, uploading, finalizing, success
+  const [isPreparing, setIsPreparing] = useState(false);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -30,40 +29,19 @@ const UploadReel = () => {
   const handleUpload = async () => {
     if (!file) return;
 
-    setIsUploading(true);
-    setUploadStatus('uploading');
-    setUploadProgress(0);
+    // Dispatch global background upload
+    dispatch(startUpload({
+      id: `reel-${Date.now()}`,
+      file,
+      previewUrl: preview,
+      metadata: {
+        caption,
+        hashtags: hashtags.split(' ').filter(t => t.startsWith('#')).map(t => t.slice(1)) || []
+      }
+    }));
 
-    const formData = new FormData();
-    formData.append('video', file);
-    formData.append('caption', caption);
-    formData.append('hashtags', hashtags);
-
-    try {
-      await axiosInstance.post('/api/reels/upload', formData, {
-        timeout: 0, // Disable timeout for large uploads
-        onUploadProgress: (progressEvent) => {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setUploadProgress(progress);
-          if (progress === 100) {
-            setUploadStatus('finalizing');
-          }
-        }
-      });
-
-      setUploadStatus('success');
-      toast.success('Reel uploaded! Optimization starting in background.');
-      
-      // Short delay to show success state before redirect
-      setTimeout(() => {
-        navigate('/reels');
-      }, 1500);
-    } catch (error) {
-      console.error('Upload failed:', error);
-      setIsUploading(false);
-      setUploadStatus('idle');
-      toast.error(error.response?.data?.message || 'Upload failed. Please try again.');
-    }
+    toast.success('Upload started in background');
+    navigate('/reels');
   };
 
   return (
@@ -135,91 +113,13 @@ const UploadReel = () => {
 
           <button 
             onClick={handleUpload}
-            disabled={!file || isUploading}
+            disabled={!file || isPreparing}
             className="w-full py-4 bg-[#84CC16] text-black font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#74b314] transition-colors mt-4"
           >
-            Share Reel
+            {isPreparing ? 'Preparing...' : 'Share Reel'}
           </button>
         </div>
       </div>
-
-      {/* Upload Progress Overlay */}
-      <AnimatePresence>
-        {isUploading && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center"
-          >
-            <div className="w-full max-w-xs">
-              {uploadStatus === 'success' ? (
-                <motion.div 
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="flex flex-col items-center gap-4"
-                >
-                  <div className="w-20 h-20 bg-[#84CC16] rounded-full flex items-center justify-center text-black">
-                    <CheckCircle size={48} />
-                  </div>
-                  <h2 className="text-2xl font-bold text-[#84CC16]">Upload Complete!</h2>
-                  <p className="text-gray-400">Taking you to the feed...</p>
-                </motion.div>
-              ) : (
-                <>
-                  <div className="relative w-32 h-32 mx-auto mb-8">
-                    {/* Radial Progress */}
-                    <svg className="w-full h-full -rotate-90">
-                      <circle
-                        cx="64"
-                        cy="64"
-                        r="58"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        fill="transparent"
-                        className="text-white/10"
-                      />
-                      <motion.circle
-                        cx="64"
-                        cy="64"
-                        r="58"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        fill="transparent"
-                        strokeDasharray="364.4"
-                        initial={{ strokeDashoffset: 364.4 }}
-                        animate={{ strokeDashoffset: 364.4 - (364.4 * uploadProgress) / 100 }}
-                        className="text-[#84CC16]"
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center flex-col">
-                      <span className="text-2xl font-bold">{uploadProgress}%</span>
-                    </div>
-                  </div>
-
-                  <h2 className="text-xl font-bold mb-2">
-                    {uploadStatus === 'uploading' ? 'Uploading Reel...' : 'Finalizing...'}
-                  </h2>
-                  <p className="text-sm text-gray-400 mb-6">
-                    {uploadStatus === 'uploading' 
-                      ? 'Please don\'t close the app or refresh the page.' 
-                      : 'We\'re preparing your video for background processing.'}
-                  </p>
-
-                  {/* Linear Progress Bar as backup visual */}
-                  <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${uploadProgress}%` }}
-                      className="h-full bg-[#84CC16]"
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

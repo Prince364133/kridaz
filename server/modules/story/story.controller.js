@@ -1,7 +1,77 @@
 import Story from '../../models/story.model.js';
 import User from '../../models/user.model.js';
 import Owner from '../../models/owner.model.js';
-import { uploadToCloudinary } from '../../utils/cloudinary.js';
+import { getPresignedUploadUrl } from '../../utils/r2.js';
+import { generatePlaceholder } from '../../utils/imageWorker.js';
+import { mediaQueue } from '../../queues/media.queue.js';
+import mongoose from 'mongoose';
+import path from 'path';
+
+/**
+ * Get Signed URL for Stories
+ */
+export const getUploadUrl = async (req, res) => {
+  try {
+    const { contentType, fileName } = req.query;
+    const storyId = new mongoose.Types.ObjectId();
+    const extension = fileName ? path.extname(fileName) : (contentType.includes('video') ? '.mp4' : '.webp');
+    const key = `temp/stories/${storyId}${extension}`;
+    
+    const uploadUrl = await getPresignedUploadUrl(key, contentType);
+
+    res.json({ success: true, storyId, uploadUrl, key });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Confirm Story Upload
+ */
+export const confirmStory = async (req, res) => {
+  try {
+    const { storyId, key, mediaType, content, durationDays } = req.body;
+    const userId = await resolveUserId(req.user.id);
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + parseInt(durationDays || 1));
+
+    let placeholder = null;
+    const mediaUrl = `${process.env.REELS_CDN_URL}/${key}`;
+
+    // 1. If image, generate instant placeholder
+    if (mediaType === 'image') {
+      placeholder = await generatePlaceholder(mediaUrl);
+    }
+
+    // 2. Save Story
+    const story = new Story({
+      _id: storyId,
+      userId,
+      userModel: 'User',
+      mediaType,
+      mediaUrl: mediaType === 'image' ? mediaUrl : null, // Images serve direct, Videos serve HLS
+      rawMediaUrl: mediaUrl,
+      placeholder,
+      content,
+      expiresAt,
+      status: mediaType === 'video' ? 'pending' : 'ready'
+    });
+
+    await story.save();
+
+    // 3. If video, trigger ABR transcoding pipeline
+    if (mediaType === 'video') {
+      await mediaQueue.add('TRANSCODE_VIDEO', { 
+        mediaId: story._id,
+        mediaType: 'story'
+      });
+    }
+
+    res.status(201).json({ success: true, story });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 const resolveUserId = async (id) => {
   if (!id) return null;

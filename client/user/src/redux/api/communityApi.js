@@ -78,6 +78,34 @@ export const communityApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Community'],
     }),
+    getCommunityUploadUrl: builder.query({
+      query: (params) => ({
+        url: '/api/user/community/upload-url',
+        params,
+      }),
+    }),
+    confirmCommunityPost: builder.mutation({
+      query: (data) => ({
+        url: '/api/user/community/confirm-post',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Community'],
+    }),
+    getStoryUploadUrl: builder.query({
+      query: (params) => ({
+        url: '/api/user/stories/upload-url',
+        params,
+      }),
+    }),
+    confirmStoryUpload: builder.mutation({
+      query: (data) => ({
+        url: '/api/user/stories/confirm-upload',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Stories'],
+    }),
     getUserStories: builder.query({
       query: (userId) => `/api/user/community/user-stories/${userId}`,
     }),
@@ -104,6 +132,12 @@ export const {
   useGetStoriesFeedQuery,
   useGetCommunityStatsQuery,
   useCreatePostMutation,
+  useGetCommunityUploadUrlQuery,
+  useLazyGetCommunityUploadUrlQuery,
+  useConfirmCommunityPostMutation,
+  useGetStoryUploadUrlQuery,
+  useLazyGetStoryUploadUrlQuery,
+  useConfirmStoryUploadMutation,
   useUpdatePostMutation,
   useDeletePostMutation,
   useLikePostMutation,

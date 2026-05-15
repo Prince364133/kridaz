@@ -35,7 +35,9 @@ router.get('/feed', reelsController.getReelsFeed);
 router.get('/recommended', reelsController.getRecommendedReels);
 
 // Protected Routes
-router.post('/upload', protect, upload.single('video'), reelsController.uploadReel);
+router.get('/upload-url', protect, reelsController.getUploadUrl);
+router.post('/confirm-upload', protect, reelsController.confirmUpload);
+router.post('/upload', protect, upload.single('video'), reelsController.uploadReel); // Legacy support
 router.post('/:reelId/interact', protect, reelsController.interactWithReel);
 router.post('/:reelId/comment', protect, reelsController.addComment);
 router.post('/:reelId/heartbeat', reelsController.trackWatchTime);

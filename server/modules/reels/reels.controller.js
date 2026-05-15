@@ -2,11 +2,12 @@ import Reel from '../../models/reel.model.js';
 import ReelInteraction from '../../models/reelInteraction.model.js';
 import ReelComment from '../../models/reelComment.model.js';
 
-import { reelQueue } from '../../queues/reel.queue.js';
+import { mediaQueue } from '../../queues/media.queue.js';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import path from 'path';
 import { getIO } from '../../config/socket.js';
+import { getPresignedUploadUrl } from '../../utils/r2.js';
 
 const COOKIE_SETTINGS = {
   httpOnly: true,
@@ -17,7 +18,75 @@ const COOKIE_SETTINGS = {
 };
 
 /**
- * Upload a new Reel
+ * Get Presigned URL for direct R2 upload
+ */
+export const getUploadUrl = async (req, res) => {
+  try {
+    const { contentType, fileName } = req.query;
+    if (!contentType) return res.status(400).json({ success: false, message: 'contentType is required' });
+
+    const reelId = new mongoose.Types.ObjectId();
+    const extension = fileName ? path.extname(fileName) : '.mp4';
+    const key = `temp/reels/${reelId}${extension}`;
+    
+    const uploadUrl = await getPresignedUploadUrl(key, contentType);
+
+    res.json({
+      success: true,
+      reelId,
+      uploadUrl,
+      key,
+      cdnUrl: process.env.REELS_CDN_URL
+    });
+  } catch (error) {
+    console.error('[REELS] Get Upload URL Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Confirm upload and start transcoding
+ */
+export const confirmUpload = async (req, res) => {
+  try {
+    const { reelId, key, caption, hashtags } = req.body;
+    const userId = req.user.id;
+
+    if (!reelId || !key) {
+      return res.status(400).json({ success: false, message: 'reelId and key are required' });
+    }
+
+    // 1. Create Reel record
+    const reel = new Reel({
+      _id: reelId,
+      creatorId: userId,
+      caption,
+      hashtags: hashtags ? (Array.isArray(hashtags) ? hashtags : hashtags.split(',').map(h => h.trim())) : [],
+      status: 'pending',
+      rawVideoUrl: `${process.env.REELS_CDN_URL}/${key}`
+    });
+
+    await reel.save();
+
+    // 2. Push to transcoding queue
+    await mediaQueue.add('TRANSCODE_VIDEO', { 
+      mediaId: reel._id,
+      mediaType: 'reel'
+    });
+
+    res.status(201).json({ 
+      success: true, 
+      message: 'Upload confirmed. Processing started.',
+      reel 
+    });
+  } catch (error) {
+    console.error('[REELS] Confirm Upload Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Upload a new Reel (Legacy)
  */
 export const uploadReel = async (req, res) => {
   try {

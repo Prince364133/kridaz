@@ -22,6 +22,20 @@ const communityPostSchema = new mongoose.Schema({
   image: {
     type: String
   },
+  mediaType: {
+    type: String,
+    enum: ['image', 'video', 'text'],
+    default: 'image'
+  },
+  mediaUrl: {
+    type: String
+  },
+  hlsUrl: {
+    type: String
+  },
+  placeholder: {
+    type: String // Base64 tiny thumbnail
+  },
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
@@ -32,7 +46,12 @@ const communityPostSchema = new mongoose.Schema({
     userImage: String,
     text: { type: String, required: true },
     createdAt: { type: Date, default: Date.now }
-  }]
+  }],
+  status: {
+    type: String,
+    enum: ['pending', 'ready', 'failed'],
+    default: 'ready'
+  }
 }, { timestamps: true });
 
 // ── Performance indexes ───────────────────────────────────────────────────────

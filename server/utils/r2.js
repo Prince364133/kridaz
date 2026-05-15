@@ -50,12 +50,20 @@ export const uploadToR2 = async (filePath, key, contentType) => {
 };
 
 export const uploadDirectoryToR2 = async (dirPath, prefix) => {
-  const files = await fs.readdir(dirPath);
-  const uploadPromises = files.map(async (file) => {
-    const filePath = path.join(dirPath, file);
-    const key = `${prefix}/${file}`;
-    const contentType = file.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/MP2T';
-    return uploadToR2(filePath, key, contentType);
+  const entries = await fs.readdir(dirPath, { withFileTypes: true });
+  
+  const uploadPromises = entries.map(async (entry) => {
+    const fullPath = path.join(dirPath, entry.name);
+    const key = `${prefix}/${entry.name}`;
+    
+    if (entry.isDirectory()) {
+      return uploadDirectoryToR2(fullPath, key);
+    } else {
+      const contentType = entry.name.endsWith('.m3u8') 
+        ? 'application/x-mpegURL' 
+        : (entry.name.endsWith('.ts') ? 'video/MP2T' : 'application/octet-stream');
+      return uploadToR2(fullPath, key, contentType);
+    }
   });
 
   return Promise.all(uploadPromises);

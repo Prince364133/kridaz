@@ -4,7 +4,7 @@ import ReelItem from '@components/common/ReelItem';
 import { ChevronLeft, Camera } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSocket } from '@context/SocketContext';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const ReelsFeed = () => {
   const navigate = useNavigate();
@@ -13,9 +13,41 @@ const ReelsFeed = () => {
   const { id: initialId } = useParams();
   const [cursor, setCursor] = useState(null);
   const { data, isLoading, isFetching } = useGetReelsFeedQuery({ cursor, initialId });
+  
+  // Optimistic UI state
+  const { isUploading, activeUpload } = useSelector(state => state.mediaUpload);
+  const { user } = useSelector(state => state.auth);
+
   const [activeIndex, setActiveIndex] = useState(0);
   const feedRef = useRef(null);
   const isInitialScrollDone = useRef(false);
+
+  // Combine real reels with optimistic one
+  const reels = React.useMemo(() => {
+    if (!data?.reels) return [];
+    if (!isUploading || !activeUpload || !user) return data.reels;
+
+    const optimisticReel = {
+      _id: activeUpload.id,
+      temp: true, // Marker for local preview
+      creatorId: {
+        _id: user._id,
+        username: user.username,
+        profilePicture: user.profilePicture,
+        name: user.name
+      },
+      caption: activeUpload.metadata.caption,
+      hashtags: activeUpload.metadata.hashtags,
+      hlsUrl: activeUpload.previewUrl, // Use blob URL as HLS source for preview
+      status: 'pending',
+      processingProgress: activeUpload.progress,
+      stats: { likes: 0, comments: 0, shares: 0 },
+      isLiked: false,
+      createdAt: new Date().toISOString()
+    };
+
+    return [optimisticReel, ...data.reels];
+  }, [data?.reels, isUploading, activeUpload, user]);
 
   // Socket listeners for real-time updates
   useEffect(() => {
@@ -46,21 +78,56 @@ const ReelsFeed = () => {
     socket.on('reel_deleted', ({ reelId }) => {
       dispatch(
         reelsApi.util.updateQueryData('getReelsFeed', { cursor, initialId }, (draft) => {
+          if (!draft || !draft.reels) return;
           draft.reels = draft.reels.filter((r) => r._id !== reelId);
         })
       );
+    });
+    
+    socket.on('MEDIA_PROCESSING_PROGRESS', ({ mediaId, mediaType, progress, status }) => {
+      if (mediaType === 'reel') {
+        dispatch(
+          reelsApi.util.updateQueryData('getReelsFeed', { cursor, initialId }, (draft) => {
+            if (!draft || !draft.reels) return;
+            const reel = draft.reels.find((r) => r._id === mediaId);
+            if (reel) {
+              reel.status = 'pending';
+              reel.processingProgress = progress;
+              reel.processingStatus = status;
+            }
+          })
+        );
+      }
+    });
+
+    socket.on('MEDIA_PROCESSING_COMPLETE', ({ mediaId, mediaType, hlsUrl, thumbnailUrl }) => {
+      if (mediaType === 'reel') {
+        dispatch(
+          reelsApi.util.updateQueryData('getReelsFeed', { cursor, initialId }, (draft) => {
+            if (!draft || !draft.reels) return;
+            const reel = draft.reels.find((r) => r._id === mediaId);
+            if (reel) {
+              reel.status = 'ready';
+              reel.hlsUrl = hlsUrl;
+              reel.thumbnailUrl = thumbnailUrl;
+            }
+          })
+        );
+      }
     });
 
     return () => {
       socket.off('reel_liked');
       socket.off('reel_commented');
       socket.off('reel_deleted');
+      socket.off('MEDIA_PROCESSING_PROGRESS');
+      socket.off('MEDIA_PROCESSING_COMPLETE');
     };
   }, [socket, dispatch, cursor, initialId]);
 
   // IntersectionObserver for active reel tracking
   useEffect(() => {
-    if (!data?.reels || data.reels.length === 0) return;
+    if (!reels || reels.length === 0) return;
 
     const observerOptions = {
       root: feedRef.current,
@@ -74,14 +141,14 @@ const ReelsFeed = () => {
           if (index !== activeIndex) {
             setActiveIndex(index);
             
-            // Mask URL
-            const currentReel = data.reels[index];
-            if (currentReel) {
+            // Mask URL (only for non-temp reels)
+            const currentReel = reels[index];
+            if (currentReel && !currentReel.temp) {
               window.history.replaceState(null, '', `/shorts/${currentReel._id}`);
             }
 
             // Load more trigger
-            if (index >= data.reels.length - 3 && !isFetching && data.nextCursor) {
+            if (index >= reels.length - 3 && !isFetching && data?.nextCursor) {
               setCursor(data.nextCursor);
             }
           }
@@ -94,18 +161,18 @@ const ReelsFeed = () => {
     elements.forEach((el) => observer.observe(el));
 
     return () => observer.disconnect();
-  }, [data, activeIndex, isFetching]);
+  }, [reels, activeIndex, isFetching, data?.nextCursor]);
 
   // Ensure we are at the top if initialId is provided
   useEffect(() => {
-    if (data?.reels && !isInitialScrollDone.current) {
+    if (reels.length > 0 && !isInitialScrollDone.current) {
       isInitialScrollDone.current = true;
       if (initialId) {
         setActiveIndex(0);
         window.history.replaceState(null, '', `/shorts/${initialId}`);
       }
     }
-  }, [data, initialId]);
+  }, [reels, initialId]);
 
   if (isLoading && !data) {
     return (
@@ -139,7 +206,7 @@ const ReelsFeed = () => {
         ref={feedRef}
         className="reels-feed-container scrollbar-hide snap-y snap-mandatory overflow-y-auto h-full w-full max-w-[500px]"
       >
-        {data?.reels.map((reel, index) => {
+        {reels.map((reel, index) => {
           // Preload: render actual component if within 2 items of active
           const isNear = Math.abs(index - activeIndex) <= 2;
           const isActive = index === activeIndex;
@@ -174,7 +241,7 @@ const ReelsFeed = () => {
           </div>
         )}
 
-        {data?.reels.length === 0 && !isLoading && (
+        {reels.length === 0 && !isLoading && (
           <div className="h-full w-full flex flex-col items-center justify-center text-white p-8">
             <p className="text-lg font-semibold mb-2">No reels yet</p>
             <p className="text-gray-400 text-center">Be the first one to post a reel!</p>

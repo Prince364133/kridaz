@@ -81,15 +81,48 @@ const ReelItem = ({ reel, isVisible }) => {
     }
   };
 
+  const isProcessing = reel.status === 'pending' && !reel.temp;
+
   return (
     <div className="relative w-full h-full bg-black overflow-hidden flex items-center justify-center">
-      <div className="h-full w-full" onDoubleClick={handleDoubleTap}>
-        <ReelPlayer 
-          reelId={reel._id}
-          hlsUrl={reel.hlsUrl || reel.rawVideoUrl} 
-          isVisible={isVisible} 
-          poster={reel.thumbnailUrl}
-        />
+      <div className="h-full w-full" onDoubleClick={!isProcessing ? handleDoubleTap : undefined}>
+        {isProcessing ? (
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* Blurred Placeholder */}
+            {reel.thumbnailUrl ? (
+              <img 
+                src={reel.thumbnailUrl} 
+                className="w-full h-full object-cover blur-2xl scale-110 opacity-50"
+                alt="Processing..."
+              />
+            ) : (
+              <div className="w-full h-full bg-zinc-900" />
+            )}
+            
+            {/* Processing Overlay */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm">
+              <div className="w-16 h-16 border-4 border-[#84CC16] border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-[#84CC16] font-bold text-lg">Optimizing Reel...</p>
+              <p className="text-white/60 text-sm mt-2">{reel.processingProgress || 0}% Complete</p>
+              
+              {/* Progress Bar */}
+              <div className="w-48 h-1 bg-white/10 rounded-full mt-6 overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${reel.processingProgress || 0}%` }}
+                  className="h-full bg-[#84CC16]"
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <ReelPlayer 
+            reelId={reel._id}
+            hlsUrl={reel.hlsUrl || reel.rawVideoUrl} 
+            isVisible={isVisible} 
+            poster={reel.thumbnailUrl}
+          />
+        )}
       </div>
 
       {/* Double Tap Heart Animation */}

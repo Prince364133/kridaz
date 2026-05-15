@@ -41,8 +41,20 @@ export const reelWorker = new Worker('reels', async (job) => {
       hlsUrl: result.hlsUrl,
       thumbnailUrl: result.thumbnailUrl,
       duration: result.duration,
-      aspectRatio: result.aspectRatio
+      aspectRatio: result.aspectRatio,
+      rawVideoUrl: null 
     });
+
+    const io = (await import('../config/socket.js')).getIO();
+    if (io) {
+      const userId = reel.userId || reel.creatorId || 'anonymous';
+      io.to(`user_${userId}`).emit('MEDIA_PROCESSING_COMPLETE', {
+        mediaId: reelId,
+        mediaType: 'reel',
+        hlsUrl: result.hlsUrl,
+        thumbnailUrl: result.thumbnailUrl
+      });
+    }
 
     console.log(`[REELS] Successfully processed reel: ${reelId}`);
   } catch (error) {

@@ -26,11 +26,16 @@ import {
   useAddCommentMutation,
   useDeleteCommentMutation,
   useUploadStoryMutation,
-  useDeleteStoryMutation
+  useDeleteStoryMutation,
+  useLazyGetCommunityUploadUrlQuery,
+  useConfirmCommunityPostMutation,
+  useLazyGetStoryUploadUrlQuery,
+  useConfirmStoryUploadMutation
 } from "../../redux/api/communityApi";
 import { useGetReelsFeedQuery } from "../../redux/api/reelsApi";
 import ReelItem from "../../components/common/ReelItem";
 import { useSocket } from "@context/SocketContext";
+import { uploadFileToR2 } from "@utils/mediaUpload";
 
 const PRI = "#84CC16";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
@@ -56,6 +61,11 @@ const Community = () => {
   const [deleteComment] = useDeleteCommentMutation();
   const [uploadStory] = useUploadStoryMutation();
   const [deleteStory] = useDeleteStoryMutation();
+
+  const [getCommunityUploadUrl] = useLazyGetCommunityUploadUrlQuery();
+  const [confirmCommunityPost] = useConfirmCommunityPostMutation();
+  const [getStoryUploadUrl] = useLazyGetStoryUploadUrlQuery();
+  const [confirmStoryUpload] = useConfirmStoryUploadMutation();
 
   const { socket } = useSocket();
 
@@ -146,16 +156,46 @@ const Community = () => {
       );
     };
 
+    const handleMediaProgress = ({ mediaId, progress, status }) => {
+      dispatch(
+        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
+          const post = draft.posts.find(p => p._id === mediaId);
+          if (post) {
+            post.status = 'pending';
+            post.processingProgress = progress;
+          }
+        })
+      );
+    };
+
+    const handleMediaComplete = ({ mediaId, hlsUrl, thumbnailUrl }) => {
+      dispatch(
+        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
+          const post = draft.posts.find(p => p._id === mediaId);
+          if (post) {
+            post.status = 'ready';
+            post.mediaUrl = hlsUrl;
+            post.thumbnailUrl = thumbnailUrl;
+          }
+        })
+      );
+      dispatch(communityApi.util.invalidateTags(['Stories']));
+    };
+
     socket.on('new_community_post', handleNewPost);
     socket.on('community_post_liked', handlePostLiked);
     socket.on('community_post_commented', handlePostCommented);
     socket.on('community_post_deleted', handlePostDeleted);
+    socket.on('MEDIA_PROCESSING_PROGRESS', handleMediaProgress);
+    socket.on('MEDIA_PROCESSING_COMPLETE', handleMediaComplete);
 
     return () => {
       socket.off('new_community_post', handleNewPost);
       socket.off('community_post_liked', handlePostLiked);
       socket.off('community_post_commented', handlePostCommented);
       socket.off('community_post_deleted', handlePostDeleted);
+      socket.off('MEDIA_PROCESSING_PROGRESS', handleMediaProgress);
+      socket.off('MEDIA_PROCESSING_COMPLETE', handleMediaComplete);
     };
   }, [socket, dispatch]);
 
@@ -213,24 +253,49 @@ const Community = () => {
     e.preventDefault();
     if (!newPost.content && !newPost.image) return toast.error("Content or image is required");
 
-    const formData = new FormData();
-    if (newPost.title) formData.append('title', newPost.title);
-    if (newPost.content) formData.append('content', newPost.content);
-    if (newPost.image) formData.append('image', newPost.image);
-
     setIsPublishing(true);
     try {
       if (editingPost) {
+        // We'll keep update post as is or refactor later if needed, 
+        // usually it's just updating text.
+        const formData = new FormData();
+        if (newPost.title) formData.append('title', newPost.title);
+        if (newPost.content) formData.append('content', newPost.content);
         await updatePost({ id: editingPost._id, data: formData }).unwrap();
-        toast.success("Post updated successfully!");
+        toast.success("Post updated!");
         closePostModal();
       } else {
-        await createPost(formData).unwrap();
-        toast.success("Post created successfully!");
+        let key = null;
+        let postId = null;
+
+        if (newPost.image) {
+          // 1. Get Pre-signed URL
+          const { data: uploadData } = await getCommunityUploadUrl({
+            contentType: newPost.image.type,
+            fileName: newPost.image.name
+          });
+          
+          key = uploadData.key;
+          postId = uploadData.postId;
+
+          // 2. Upload to R2
+          await uploadFileToR2(uploadData.uploadUrl, newPost.image);
+        }
+
+        // 3. Confirm Post
+        await confirmCommunityPost({
+          postId,
+          key,
+          mediaType: newPost.image?.type.startsWith('video') ? 'video' : 'image',
+          title: newPost.title,
+          content: newPost.content
+        }).unwrap();
+
+        toast.success("Post created!");
         closePostModal();
       }
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to save post");
+      toast.error(error?.data?.message || error.message || "Failed to save post");
     } finally {
       setIsPublishing(false);
     }
@@ -258,20 +323,38 @@ const Community = () => {
     e.preventDefault();
     if (!newStory.content && newStory.mediaFiles.length === 0) return toast.error("Story must have content or media");
 
-    const formData = new FormData();
-    formData.append('content', newStory.content);
-    formData.append('durationDays', newStory.durationDays);
-    newStory.mediaFiles.forEach((file) => formData.append('media', file));
-
     setIsPublishing(true);
     try {
-      await uploadStory(formData).unwrap();
+      const mediaItems = [];
+      
+      // 1. Upload each media file
+      for (const file of newStory.mediaFiles) {
+        const { data: uploadData } = await getStoryUploadUrl({
+          contentType: file.type,
+          fileName: file.name
+        });
+
+        await uploadFileToR2(uploadData.uploadUrl, file);
+        
+        mediaItems.push({
+          key: uploadData.key,
+          mediaType: file.type.startsWith('video') ? 'video' : 'image'
+        });
+      }
+
+      // 2. Confirm Story
+      await confirmStoryUpload({
+        content: newStory.content,
+        durationDays: newStory.durationDays,
+        mediaItems
+      }).unwrap();
+
       toast.success("Story uploaded!");
       setNewStory({ content: '', mediaFiles: [], durationDays: 1 });
       setStoryMediaPreviews([]);
       setShowStoryModal(false);
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to upload story");
+      toast.error(error?.data?.message || error.message || "Failed to upload story");
     } finally {
       setIsPublishing(false);
     }

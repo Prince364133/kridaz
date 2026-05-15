@@ -1,9 +1,76 @@
 import CommunityPost from '../../models/communityPost.model.js';
+import { mediaQueue } from '../../queues/media.queue.js';
 import Story from '../../models/story.model.js';
 import Owner from '../../models/owner.model.js';
 import User from '../../models/user.model.js';
 import { uploadToCloudinary } from '../../utils/cloudinary.js';
 import { getIO } from '../../config/socket.js';
+import { getPresignedUploadUrl } from '../../utils/r2.js';
+import { generatePlaceholder } from '../../utils/imageWorker.js';
+import mongoose from 'mongoose';
+import path from 'path';
+
+/**
+ * Get Signed URL for Community Posts
+ */
+export const getUploadUrl = async (req, res) => {
+  try {
+    const { contentType, fileName } = req.query;
+    const postId = new mongoose.Types.ObjectId();
+    const extension = fileName ? path.extname(fileName) : (contentType.includes('video') ? '.mp4' : '.webp');
+    const key = `temp/community/${postId}${extension}`;
+    
+    const uploadUrl = await getPresignedUploadUrl(key, contentType);
+
+    res.json({ success: true, postId, uploadUrl, key });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Confirm Community Post
+ */
+export const confirmPost = async (req, res) => {
+  try {
+    const { postId, key, mediaType, title, content } = req.body;
+    const adminId = req.user.id;
+    const authorModel = req.user.role === 'owner' ? 'Owner' : 'User';
+
+    let placeholder = null;
+    const mediaUrl = `${process.env.REELS_CDN_URL}/${key}`;
+
+    if (mediaType === 'image') {
+      placeholder = await generatePlaceholder(mediaUrl);
+    }
+
+    const post = new CommunityPost({
+      _id: postId,
+      adminId,
+      authorModel,
+      title,
+      content,
+      mediaType: mediaType || 'image',
+      image: mediaType === 'image' ? mediaUrl : null,
+      mediaUrl: mediaType === 'image' ? mediaUrl : mediaUrl,
+      placeholder,
+      status: mediaType === 'video' ? 'pending' : 'ready'
+    });
+
+    await post.save();
+
+    if (mediaType === 'video') {
+      await mediaQueue.add('TRANSCODE_VIDEO', { 
+        mediaId: post._id,
+        mediaType: 'community'
+      });
+    }
+
+    res.status(201).json({ success: true, post });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 const resolveUserId = async (id) => {
   if (!id) return null;

@@ -34,6 +34,8 @@ import { SocketProvider } from "./context/SocketContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "react-hot-toast";
 
+import BackgroundUploadManager from "./user/components/BackgroundUploadManager";
+
 export default function App() {
   const dispatch = useDispatch();
   const theme = useSelector((state) => state.theme.current);
@@ -57,15 +59,12 @@ export default function App() {
     const initAuth = async () => {
       console.log("App.jsx: Starting auth check...");
       try {
-        // Run getMe and network checks in parallel to save time
         const [meResponse, networkResponse] = await Promise.all([
           axiosInstance.get("/api/user/auth/getMe"),
           axiosInstance.get("/api/user/players/network").catch(() => ({ data: { success: false } }))
         ]);
         
         if (isMounted && meResponse.data.success) {
-          console.log("App.jsx: Session verified successfully.");
-          
           dispatch(restoreAuth({
             user: meResponse.data.user,
             role: meResponse.data.role,
@@ -77,14 +76,10 @@ export default function App() {
         }
       } catch (error) {
         if (isMounted) {
-          // 401/403 means session is definitively invalid or guest access
           if (error.response && (error.response.status === 401 || error.response.status === 403)) {
             if (authState.isLoggedIn) {
-              console.warn("App.jsx: Session expired, logging out.");
               dispatch(logout());
             }
-          } else {
-            console.warn("App.jsx: Auth check failed due to network/server issue. Preserving existing session.", error.message);
           }
         }
       } finally {
@@ -95,8 +90,6 @@ export default function App() {
       }
     };
 
-    // If we're already logged in, do the check in background
-    // If not logged in, we stay in loading state until check completes (auto-login check)
     initAuth();
     return () => {
       isMounted = false;
@@ -104,7 +97,6 @@ export default function App() {
     };
   }, [dispatch]);
 
-  // Refetch user data on window focus to catch role upgrades (e.g. approved by admin in another tab)
   useEffect(() => {
     const handleFocus = () => {
       if (authState.isLoggedIn) {
@@ -127,12 +119,11 @@ export default function App() {
     return () => window.removeEventListener("focus", handleFocus);
   }, [authState.isLoggedIn, authState.followingIds, dispatch]);
 
-
-
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <SocketProvider>
         <RouterProvider router={router} />
+        <BackgroundUploadManager />
         <Toaster 
           position="top-center"
           toastOptions={{

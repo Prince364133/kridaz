@@ -11,7 +11,9 @@ import {
   getMyActivity,
   getUserPosts,
   getUserStories,
-  getCommunityStats
+  getCommunityStats,
+  getUploadUrl,
+  confirmPost
 } from './community.controller.js';
 import adminAuth from '../../middleware/jwt/admin.middleware.js';
 import userAuth from '../../middleware/jwt/user.middleware.js';
@@ -31,6 +33,8 @@ router.put('/:id/comment/:commentId', userAuth, updateComment);
 router.delete('/:id/comment/:commentId', userAuth, deleteComment);
 
 // User/Admin routes (Admin can do everything, user can manage their own)
+router.get('/upload-url', userAuth, getUploadUrl);
+router.post('/confirm-post', userAuth, confirmPost);
 router.post('/', userAuth, upload.single('image'), createPost);
 router.put('/:id', userAuth, upload.single('image'), updatePost);
 router.delete('/:id', userAuth, deletePost);
