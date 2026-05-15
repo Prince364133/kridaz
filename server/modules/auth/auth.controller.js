@@ -446,7 +446,28 @@ export const loginStep1 = async (req, res) => {
       token = generateUserToken(account._id);
     }
 
-    // Send OTP for 2FA
+    // Bypass OTP for Admin role
+    const adminRole = "admin";
+    if (role === adminRole) {
+      // Set cookie for shared auth between portals
+      res.cookie("auth_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      });
+
+      return res.status(200).json({ 
+        success: true, 
+        message: "Admin login successful", 
+        token, 
+        role,
+        user: account,
+        requiresOtp: false 
+      });
+    }
+
+    // Send OTP for 2FA for regular users
     const emailOtp = generateOTP();
     const phoneOtp = generateOTP();
     await OTP.findOneAndDelete({ email: account.email });

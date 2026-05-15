@@ -41,7 +41,7 @@ const useLoginForm = () => {
 
   const handleRoleRedirect = (role) => {
     const normalizedRole = role?.toLowerCase();
-    if (normalizedRole === "bmsp_admin" || normalizedRole === "admin") {
+    if (normalizedRole === "admin") {
       navigate("/admin");
     } else if (normalizedRole === "owner") {
       navigate("/partner");
@@ -70,9 +70,10 @@ const useLoginForm = () => {
       const result = response.data;
 
       if (result.token) {
-        localStorage.setItem("token", result.token);
+        dispatch(login({ token: result.token, role: result.role, user: result.user }));
+        axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
         toast.success("Logged in successfully!");
-        navigate(result.user.role === "admin" ? "/admin/dashboard" : "/");
+        handleRoleRedirect(result.role);
         return;
       }
 
