@@ -19,21 +19,6 @@ const PRI = "#84CC16";
 const S2 = "#1A1A1A";
 const BDR = "#2A2A2A";
 
-const GRADIENT_TEXT = {
-  background: "linear-gradient(to right, #55DEE8 0%, #BFF367 100%)",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  backgroundClip: "text"
-};
-
-const SUBHEADING_STYLE = {
-  fontFamily: "'Inter', sans-serif",
-  fontWeight: "300",
-  fontSize: "20.04px",
-  lineHeight: "119%",
-  letterSpacing: "1.5%"
-};
-
 
 
 const socialPosts = [
@@ -372,24 +357,11 @@ export default function Home() {
  <div className="relative w-full px-4 lg:px-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center pt-4 md:pt-0">
  <div className="space-y-4 lg:space-y-6 relative z-10">
  <div>
- <h1 style={{ 
-   fontFamily: "'Open Sans', sans-serif", 
-   fontWeight: "700", 
-   fontSize: "clamp(40px, 6vw, 51.74px)", 
-   lineHeight: "1.14", 
-   letterSpacing: "0" 
- }}>
-   <span className="text-white">More Than Booking.</span><br />
-   <span style={{ 
-     background: "linear-gradient(to right, #55DEE8 0%, #BFF367 100%)", 
-     WebkitBackgroundClip: "text", 
-     WebkitTextFillColor: "transparent",
-     backgroundClip: "text"
-   }}>
-     This Is Where Players<br />Belong.
-   </span>
+ <h1 className="uppercase" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700", fontSize: "clamp(40px, 6vw, 51.74px)", lineHeight: "1.14", letterSpacing: "0" }}>
+ More Than <span style={{ color: PRI }}>Booking.</span><br />
+ Where Players<br />Belong.
  </h1>
- <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={GRADIENT_TEXT}>where champions play</p>
+ <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ color: PRI }}>where champions play</p>
  </div>
  <p className="opacity-70 max-w-xl mb-4 lg:mb-10" style={{ fontFamily: "'Inter', sans-serif", fontWeight: "300", fontSize: "20.04px", lineHeight: "119%", letterSpacing: "1.5%" }}>
  Discover premium sports venues, book your slot instantly, and connect with players across India.
@@ -421,7 +393,7 @@ export default function Home() {
  >
  <img src={c.img} alt={c.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
  <div className="absolute inset-0" style={{ background: "linear-gradient(to top,rgba(0,0,0,0.8),transparent)" }} />
- <p className="absolute bottom-3 left-3 text-lg uppercase tracking-tighter" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700" }}>{c.label}</p>
+ <p className="absolute bottom-3 left-3 font-display text-lg uppercase tracking-tighter">{c.label}</p>
  </Link>
  ))}
  </div>
@@ -429,7 +401,7 @@ export default function Home() {
  {/* 1M+ Bookings Card - Moved to Top Right Corner */}
  <div className="absolute top-12 right-12 rounded-2xl p-4 border z-20"
  style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", borderColor: "rgba(132,204,22,0.25)" }}>
- <p className="text-2xl text-primary leading-none" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700" }}>1M+</p>
+ <p className="font-display text-2xl text-primary leading-none">1M+</p>
  <p className="text-[10px] uppercase tracking-wider mt-1 opacity-60" style={{ color: "#fff" }}>Bookings Made</p>
  </div>
  </div>
@@ -480,9 +452,9 @@ export default function Home() {
  <div className="relative">
  <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#84CC16] rounded-full shadow-[0_0_25px_rgba(132,204,22,0.5)] hidden md:block"></div>
  <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- Find Your <span style={GRADIENT_TEXT}>Arena</span>
+ Find Your <span className="text-[#84CC16]">Arena</span>
  </h2>
- <p className="uppercase tracking-[0.4em] mt-4" style={SUBHEADING_STYLE}>
+ <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.4em] mt-4 font-inter">
  Premium Venue Discovery • Elite Sports Infrastructure
  </p>
  </div>
@@ -520,11 +492,11 @@ export default function Home() {
  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#84CC16]/10 blur-[120px] rounded-full pointer-events-none" />
 
  <ShoppingBag size={48} className="text-gray-600 mb-6 group-hover:text-[#84CC16] transition-colors duration-500" />
- <h3 className="text-4xl md:text-5xl lg:text-6xl text-white uppercase leading-tight" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700" }}>
+ <h3 className="font-display text-4xl md:text-5xl lg:text-6xl text-white uppercase leading-tight">
  Marketplace <br />
- <span style={GRADIENT_TEXT}>Coming Soon</span>
+ <span style={{ color: PRI }}>Coming Soon</span>
  </h3>
- <p className="uppercase tracking-[0.3em] mt-6 max-w-md mx-auto" style={SUBHEADING_STYLE}>
+ <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gray-500 mt-6 max-w-md mx-auto">
  We're building the ultimate destination for sports gear, equipment, and exclusive Kridaz merchandise.
  </p>
  </div>
@@ -581,9 +553,9 @@ export default function Home() {
  <div className="relative">
  <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#84CC16] rounded-full shadow-[0_0_20px_rgba(132,204,22,0.4)] hidden md:block"></div>
  <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- Find Players <span style={GRADIENT_TEXT}>Near You</span>
+ Find Players <span className="text-[#84CC16]">Near You</span>
  </h2>
- <p className="uppercase tracking-[0.3em] mt-3" style={SUBHEADING_STYLE}>
+ <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-3 font-inter">
  Global Talent Network • Skill-Matched Athletes
  </p>
  </div>
@@ -711,9 +683,9 @@ export default function Home() {
  <div className="relative">
  <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#84CC16] rounded-full shadow-[0_0_25px_rgba(132,204,22,0.5)] hidden md:block"></div>
  <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- JOIN <span style={GRADIENT_TEXT}>GAMES</span>
+ JOIN <span className="text-[#84CC16]">GAMES</span>
  </h2>
- <p className="uppercase tracking-[0.3em] mt-4" style={SUBHEADING_STYLE}>
+ <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-4 font-inter">
  Community Matchmaking • No Team? No Problem.
  </p>
  </div>
@@ -973,7 +945,7 @@ export default function Home() {
  <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
  PRO <span className="text-[#84CC16]">EXPERTS</span>
  </h2>
- <p className="uppercase tracking-[0.3em] mt-4" style={SUBHEADING_STYLE}>
+ <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-4 font-inter">
  Certified Coaching • Professional Officiating
  </p>
  </div>
@@ -1108,7 +1080,7 @@ export default function Home() {
  {/* ── BENTO GRID ── */}
  <section className="pt-10 lg:pt-20 pb-4 lg:pb-6 px-4 lg:px-12 w-full">
  <div className="text-center mb-8 lg:mb-14">
- <h2 className="text-5xl md:text-6xl lg:text-7xl uppercase leading-[0.9]" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "800" }}>
+ <h2 className="font-display text-5xl md:text-6xl lg:text-7xl uppercase leading-[0.9]">
  ALL IN ONE <span className="text-gray-500">SPORTS</span><br />
  EXPERIENCE <span className="inline-block px-4 py-2 ml-2 align-middle rounded-full font-script text-3xl md:text-4xl text-black" style={{ backgroundColor: PRI }}>Powered by AI ✨</span>
  </h2>
@@ -1122,8 +1094,8 @@ export default function Home() {
  </div>
  <div className="absolute right-0 top-0 w-3/4 h-3/4 bg-no-repeat bg-contain bg-right-top z-10" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&q=80')", opacity: 0.3 }} />
  <div className="relative z-20">
- <h3 className="text-5xl mb-2 leading-none" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700" }}>BOOK VENUES</h3>
- <p className="mb-6 max-w-sm" style={SUBHEADING_STYLE}>Find the perfect spot for Cricket, Football, Swimming, and more.</p>
+ <h3 className="font-display text-5xl mb-2 leading-none">BOOK VENUES</h3>
+ <p className="text-gray-400 mb-6 max-w-sm">Find the perfect spot for Cricket, Football, Swimming, and more.</p>
  <div className="flex flex-wrap gap-2 mb-6">
  {["Cricket", "Football", "Swimming", "Badminton"].map(t => (
  <span key={t} className="px-4 py-1.5 rounded-full text-xs font-bold border" style={{ borderColor: BDR, backgroundColor: "rgba(255,255,255,0.05)" }}>{t}</span>
@@ -1145,8 +1117,8 @@ export default function Home() {
  <span className="text-[#84CC16] font-bold text-xs uppercase tracking-widest flex items-center gap-1"><Trophy size={14} /> COMPETITIVE</span>
  </div>
  <div>
- <h3 className="text-4xl mb-1 leading-none" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700" }}>CHALLENGE<br />PLAYERS</h3>
- <p className="mb-4" style={SUBHEADING_STYLE}>Skill-matched opponents.</p>
+ <h3 className="font-display text-4xl mb-1 leading-none">CHALLENGE<br />PLAYERS</h3>
+ <p className="text-gray-400 text-sm mb-4">Skill-matched opponents.</p>
  <Link to="/players" className="font-bold text-white flex items-center gap-2 hover:text-[#84CC16] transition-colors">Start Match <ArrowRight size={16} /></Link>
  </div>
  </div>
@@ -1159,7 +1131,7 @@ export default function Home() {
  <div className="w-8 h-8 rounded-lg flex items-center justify-center border" style={{ borderColor: "rgba(255,255,255,0.1)", backgroundColor: "rgba(255,255,255,0.05)" }}>
  <Users size={14} className="text-[#84CC16]" />
  </div>
- <h3 className="text-xl uppercase" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700" }}>COMMUNITY FEED</h3>
+ <h3 className="font-display text-xl uppercase">COMMUNITY FEED</h3>
  </div>
  <Link to="/community" className="text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest">See All</Link>
  </div>
@@ -1227,8 +1199,8 @@ export default function Home() {
  </div>
  <div>
  <span className="text-[8px] font-bold text-[#84CC16] uppercase tracking-widest mb-1 block">Trending Now</span>
- <h3 className="text-xl mb-1 leading-tight uppercase truncate" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700" }}>{realSocialPosts[0]?.title || "SOCIAL ARENA"}</h3>
- <p className="mb-4 line-clamp-1" style={SUBHEADING_STYLE}>{realSocialPosts[0]?.content || "Check out what's happening in the field."}</p>
+ <h3 className="font-display text-xl mb-1 leading-tight uppercase truncate">{realSocialPosts[0]?.title || "SOCIAL ARENA"}</h3>
+ <p className="text-gray-400 text-[10px] mb-4 line-clamp-1">{realSocialPosts[0]?.content || "Check out what's happening in the field."}</p>
  <Link
  to="/community"
  className="font-bold text-white text-[10px] flex items-center gap-2 hover:text-[#84CC16] transition-colors uppercase tracking-widest"
@@ -1248,8 +1220,8 @@ export default function Home() {
  <Award size={20} style={{ color: "#F59E0B" }} />
  </div>
  <div>
- <h3 className="text-2xl mb-1 leading-none uppercase" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700" }}>PRO COACHES</h3>
- <p className="mb-4" style={SUBHEADING_STYLE}>Expert training.</p>
+ <h3 className="font-display text-2xl mb-1 leading-none uppercase">PRO COACHES</h3>
+ <p className="text-gray-400 text-xs mb-4">Expert training.</p>
  <Link to="/professionals" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Find Coach <ArrowRight size={14} /></Link>
  </div>
  </div>
@@ -1264,8 +1236,8 @@ export default function Home() {
  <Shield size={20} style={{ color: "#60A5FA" }} />
  </div>
  <div>
- <h3 className="text-2xl mb-1 leading-none uppercase" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700" }}>OFFICIALS</h3>
- <p className="mb-4 uppercase tracking-tighter" style={SUBHEADING_STYLE}>Umpires • Scorers • Streamers</p>
+ <h3 className="font-display text-2xl mb-1 leading-none uppercase">OFFICIALS</h3>
+ <p className="text-gray-400 text-[10px] mb-4 uppercase tracking-tighter">Umpires • Scorers • Streamers</p>
  <Link to="/professionals" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Hire Now <ArrowRight size={14} /></Link>
  </div>
  </div>
@@ -1280,10 +1252,10 @@ export default function Home() {
  <div className="w-full px-4 lg:px-12">
  <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 lg:mb-10 gap-4">
  <div>
- <h2 className="text-3xl sm:text-4xl md:text-6xl uppercase flex items-center gap-2 md:gap-3" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "800" }}>
- <span className="text-white">Your</span> <span style={GRADIENT_TEXT}>Social Arena</span> <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
+ <h2 className="font-display text-3xl sm:text-4xl md:text-6xl uppercase flex items-center gap-2 md:gap-3">
+ Your <span style={{ color: PRI }}>Social Arena</span> <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
  </h2>
- <p className="mt-2" style={SUBHEADING_STYLE}>Swipe to see what's happening in the field</p>
+ <p className="text-gray-400 mt-2 text-sm md:text-base">Swipe to see what's happening in the field</p>
  </div>
  <Link to="/community" className="text-white font-bold flex items-center gap-2 hover:text-[#84CC16] transition-colors uppercase tracking-widest text-sm">
  Explore Community <ChevronRight size={16} />
