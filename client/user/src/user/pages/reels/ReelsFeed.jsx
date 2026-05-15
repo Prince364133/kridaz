@@ -24,30 +24,8 @@ const ReelsFeed = () => {
 
   // Combine real reels with optimistic one
   const reels = React.useMemo(() => {
-    if (!data?.reels) return [];
-    if (!isUploading || !activeUpload || !user) return data.reels;
-
-    const optimisticReel = {
-      _id: activeUpload.id,
-      temp: true, // Marker for local preview
-      creatorId: {
-        _id: user._id,
-        username: user.username,
-        profilePicture: user.profilePicture,
-        name: user.name
-      },
-      caption: activeUpload.metadata.caption,
-      hashtags: activeUpload.metadata.hashtags,
-      hlsUrl: activeUpload.previewUrl, // Use blob URL as HLS source for preview
-      status: 'pending',
-      processingProgress: activeUpload.progress,
-      stats: { likes: 0, comments: 0, shares: 0 },
-      isLiked: false,
-      createdAt: new Date().toISOString()
-    };
-
-    return [optimisticReel, ...data.reels];
-  }, [data?.reels, isUploading, activeUpload, user]);
+    return data?.reels || [];
+  }, [data?.reels]);
 
   // Socket listeners for real-time updates
   useEffect(() => {
@@ -55,7 +33,7 @@ const ReelsFeed = () => {
 
     socket.on('reel_liked', ({ reelId, likes }) => {
       dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', { cursor, initialId }, (draft) => {
+        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
           const reel = draft.reels.find((r) => r._id === reelId);
           if (reel) {
             reel.stats.likes = likes;
@@ -66,7 +44,7 @@ const ReelsFeed = () => {
 
     socket.on('reel_commented', ({ reelId }) => {
       dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', { cursor, initialId }, (draft) => {
+        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
           const reel = draft.reels.find((r) => r._id === reelId);
           if (reel) {
             reel.stats.comments += 1;
@@ -77,7 +55,7 @@ const ReelsFeed = () => {
 
     socket.on('reel_deleted', ({ reelId }) => {
       dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', { cursor, initialId }, (draft) => {
+        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
           if (!draft || !draft.reels) return;
           draft.reels = draft.reels.filter((r) => r._id !== reelId);
         })
@@ -87,7 +65,7 @@ const ReelsFeed = () => {
     socket.on('MEDIA_PROCESSING_PROGRESS', ({ mediaId, mediaType, progress, status }) => {
       if (mediaType === 'reel') {
         dispatch(
-          reelsApi.util.updateQueryData('getReelsFeed', { cursor, initialId }, (draft) => {
+          reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
             if (!draft || !draft.reels) return;
             const reel = draft.reels.find((r) => r._id === mediaId);
             if (reel) {
@@ -103,7 +81,7 @@ const ReelsFeed = () => {
     socket.on('MEDIA_PROCESSING_COMPLETE', ({ mediaId, mediaType, hlsUrl, thumbnailUrl }) => {
       if (mediaType === 'reel') {
         dispatch(
-          reelsApi.util.updateQueryData('getReelsFeed', { cursor, initialId }, (draft) => {
+          reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
             if (!draft || !draft.reels) return;
             const reel = draft.reels.find((r) => r._id === mediaId);
             if (reel) {

@@ -6,6 +6,7 @@ import Navbar from "../components/layout/Navbar";
 import MobileBottomNav from "../components/layout/MobileBottomNav";
 import UserFooter from "../components/layout/UserFooter";
 import ScrollToTop from "../components/common/ScrollToTop";
+import BackgroundUploadManager from "../components/BackgroundUploadManager";
 import OnboardingModal from "../components/modals/OnboardingModal";
 import LoginModal from "../components/modals/LoginModal";
 import { closeLoginModal } from "@redux/slices/uiSlice";
@@ -24,8 +25,10 @@ const Root = () => {
     }
   }, [isAuthenticated, user]);
 
+  const searchParams = new URLSearchParams(location.search);
+  const isPlayersPage = location.pathname === '/players' && searchParams.get('tab') !== 'teams';
   const isReelsPage = location.pathname.startsWith('/reels') || location.pathname.startsWith('/shorts');
-  const hideNav = isReelsPage || location.pathname.startsWith('/messages') || location.pathname.startsWith('/my-teams');
+  const hideNav = isReelsPage || isPlayersPage || location.pathname.startsWith('/messages') || location.pathname.startsWith('/my-teams');
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -47,7 +50,8 @@ const Root = () => {
         <Outlet />
       </main>
       {!hideNav && <MobileBottomNav />}
-      {/* Footer logic: hidden on Reels/Messages/Teams/Community, otherwise desktop only (except home page) */}
+      <BackgroundUploadManager />
+      {/* Footer logic: hidden on Reels/Messages/Teams/Community/Players, otherwise desktop only (except home page) */}
       <div className={(hideNav || location.pathname === '/community') ? 'hidden' : (location.pathname === '/' ? 'block' : 'hidden lg:block')}>
         <UserFooter />
       </div>

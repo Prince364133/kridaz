@@ -4,6 +4,14 @@ import User from "../models/user.model.js";
 
 let io;
 
+const haversineDistance = (lat1, lng1, lat2, lng2) => {
+  const R = 6371000; // Earth radius in meters
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+};
+
 const socketConfig = (server) => {
   io = new Server(server, {
     pingTimeout: 60000,
@@ -136,6 +144,92 @@ const socketConfig = (server) => {
       socket.in(chatId).emit("message deleted", { chatId, messageIds });
     });
 
+    socket.on("update_location", async (data) => {
+      const { lat, lng } = data;
+      if (!socket.userId || isNaN(lat) || isNaN(lng)) return;
+      try {
+        await User.findByIdAndUpdate(socket.userId, {
+          locationData: {
+            type: "Point",
+            coordinates: [parseFloat(lng), parseFloat(lat)]
+          }
+        });
+      } catch (err) {
+        console.error("Error updating location via socket:", err.message);
+      }
+    });
+ 
+    socket.on("location:update", async (data) => {
+      // data = { lat, lng }
+      const { lat, lng } = data;
+      if (!socket.userId || !lat || !lng) return;
+ 
+      // Rate limiting (per socket)
+      const now = Date.now();
+      if (socket.lastLocationUpdate && now - socket.lastLocationUpdate < 2000) {
+        return;
+      }
+      socket.lastLocationUpdate = now;
+ 
+      try {
+        // Store location in Redis with 5-minute TTL
+        await redis.set(
+          `kridaz:location:${socket.userId}`,
+          JSON.stringify({ lat: data.lat, lng: data.lng, updatedAt: now }),
+          "EX",
+          300
+        );
+ 
+        // Update MongoDB (debounced — only every 30 seconds per user)
+        if (!socket.lastDbLocationWrite || now - socket.lastDbLocationWrite > 30000) {
+          User.findByIdAndUpdate(socket.userId, {
+            locationData: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] }
+          }).catch(() => {});
+          socket.lastDbLocationWrite = now;
+        }
+ 
+        // Find nearby online users to notify
+        // Performance: O(n) over online users. Production scale > 10k users use GEORADIUS.
+        for (const [uid, presence] of onlineUsers.entries()) {
+          if (uid.toString() === socket.userId.toString()) continue;
+ 
+          const targetLocRaw = await redis.get(`kridaz:location:${uid}`);
+          if (targetLocRaw) {
+            const targetLoc = JSON.parse(targetLocRaw);
+            const dist = haversineDistance(lat, lng, targetLoc.lat, targetLoc.lng);
+ 
+            if (dist <= 10000) { // 10km radius
+              io.to(uid.toString()).emit("nearby:location:update", {
+                userId: socket.userId,
+                lat,
+                lng
+              });
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Location update socket error:", err);
+      }
+    });
+ 
+    socket.on("location:start", async (data) => {
+      // data = { lat, lng, radiusKm }
+      const { lat, lng } = data;
+      if (!socket.userId || !lat || !lng) return;
+ 
+      try {
+        await redis.set(
+          `kridaz:location:${socket.userId}`,
+          JSON.stringify({ lat, lng, updatedAt: Date.now() }),
+          "EX",
+          300
+        );
+        socket.emit("location:start:ack", { success: true });
+      } catch (err) {
+        console.error("Location start socket error:", err);
+      }
+    });
+
     socket.on("disconnect", () => {
       if (socket.userId) {
         const lastSeen = new Date();
@@ -146,6 +240,9 @@ const socketConfig = (server) => {
         redis.srem('kridaz:online:users', socket.userId.toString())
           .then(() => schedulePresenceBroadcast())
           .catch(() => { /* non-critical */ });
+ 
+        // Clear real-time location from Redis
+        redis.del(`kridaz:location:${socket.userId}`).catch(() => {});
 
         io.emit("user last seen", { userId: socket.userId, lastSeen }); // kept as-is
       }

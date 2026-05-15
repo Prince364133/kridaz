@@ -33,6 +33,7 @@ import {
   useConfirmStoryUploadMutation
 } from "../../redux/api/communityApi";
 import { useGetReelsFeedQuery } from "../../redux/api/reelsApi";
+import { startUpload } from "../../redux/slices/mediaUploadSlice";
 import ReelItem from "../../components/common/ReelItem";
 import { useSocket } from "@context/SocketContext";
 import { uploadFileToR2 } from "@utils/mediaUpload";
@@ -175,11 +176,12 @@ const Community = () => {
           if (post) {
             post.status = 'ready';
             post.mediaUrl = hlsUrl;
-            post.thumbnailUrl = thumbnailUrl;
+            post.image = thumbnailUrl;
+            post.processingProgress = 100;
           }
         })
       );
-      dispatch(communityApi.util.invalidateTags(['Stories']));
+      dispatch(communityApi.util.invalidateTags(['Community', 'Stories']));
     };
 
     socket.on('new_community_post', handleNewPost);
@@ -265,33 +267,23 @@ const Community = () => {
         toast.success("Post updated!");
         closePostModal();
       } else {
-        let key = null;
-        let postId = null;
-
         if (newPost.image) {
-          // 1. Get Pre-signed URL
-          const { data: uploadData } = await getCommunityUploadUrl({
-            contentType: newPost.image.type,
-            fileName: newPost.image.name
-          });
-          
-          key = uploadData.key;
-          postId = uploadData.postId;
-
-          // 2. Upload to R2
-          await uploadFileToR2(uploadData.uploadUrl, newPost.image);
+          // Use Flash Upload (Backgrounding)
+          dispatch(startUpload({
+            id: Date.now().toString(),
+            file: newPost.image,
+            previewUrl: URL.createObjectURL(newPost.image),
+            metadata: {
+              type: 'community',
+              title: newPost.title,
+              content: newPost.content || ''
+            }
+          }));
+        } else {
+          // Plain text post (unlikely with current UI but handled)
+          await createPost({ title: newPost.title, content: newPost.content }).unwrap();
+          toast.success("Post created!");
         }
-
-        // 3. Confirm Post
-        await confirmCommunityPost({
-          postId,
-          key,
-          mediaType: newPost.image?.type.startsWith('video') ? 'video' : 'image',
-          title: newPost.title,
-          content: newPost.content
-        }).unwrap();
-
-        toast.success("Post created!");
         closePostModal();
       }
     } catch (error) {
@@ -323,16 +315,34 @@ const Community = () => {
     e.preventDefault();
     if (!newStory.content && newStory.mediaFiles.length === 0) return toast.error("Story must have content or media");
 
+    // If exactly one media file, use Flash Upload (Backgrounding)
+    if (newStory.mediaFiles.length === 1 && !newStory.content) {
+      const file = newStory.mediaFiles[0];
+      dispatch(startUpload({
+        id: Date.now().toString(),
+        file,
+        previewUrl: URL.createObjectURL(file),
+        metadata: {
+          type: 'story',
+          content: ''
+        }
+      }));
+      setNewStory({ content: '', mediaFiles: [], durationDays: 1 });
+      setStoryMediaPreviews([]);
+      setShowStoryModal(false);
+      return;
+    }
+
     setIsPublishing(true);
     try {
       const mediaItems = [];
       
-      // 1. Upload each media file
+      // 1. Upload each media file (Fallback for multi-file/text stories)
       for (const file of newStory.mediaFiles) {
         const { data: uploadData } = await getStoryUploadUrl({
           contentType: file.type,
           fileName: file.name
-        });
+        }).unwrap();
 
         await uploadFileToR2(uploadData.uploadUrl, file);
         
@@ -742,7 +752,11 @@ const Community = () => {
                       <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
                         <div className="w-full h-full rounded-full overflow-hidden bg-[#111]">
                           {group.stories[0].mediaUrl ? (
-                            <img src={group.stories[0].mediaUrl} alt="" className="w-full h-full object-cover" />
+                            <img 
+                              src={group.stories[0].thumbnailUrl || group.stories[0].mediaUrl} 
+                              alt="" 
+                              className={`w-full h-full object-cover ${(group.stories.some(s => s.status === 'pending' || s.status === 'processing')) ? 'blur-sm opacity-50' : ''}`} 
+                            />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#84CC16] font-bold bg-[#111]">
                                {group.stories[0].content?.slice(0, 15)}
@@ -883,21 +897,63 @@ const Community = () => {
                       </div>
                     </div>
 
-                    {/* Post Media */}
-                    {(post.image || post.imageUrl) && (
+                    {(post.image || post.imageUrl || post.mediaUrl) && (
                       <div className="relative rounded-[16px] overflow-hidden group border border-white/5 bg-[#111]">
                         <img 
-                          src={post.image || post.imageUrl} 
-                          className="w-full object-cover max-h-[500px]" 
+                          src={post.image || post.imageUrl || post.thumbnailUrl} 
+                          className={`w-full object-cover max-h-[500px] transition-all duration-500 ${(post.status === 'pending' || post.status === 'processing') ? 'blur-xl scale-110 opacity-50' : ''}`} 
                         />
-                        {/* Decorative Overlays (for parity with image) */}
-                        <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-2.5 py-1.5 rounded flex items-center gap-1.5">
-                           <Play size={10} className="fill-white text-white" />
-                           <span className="text-[10px] font-bold">Reels</span>
-                        </div>
-                        <div className="absolute top-4 right-4 p-1.5 bg-black/60 backdrop-blur-md rounded">
-                           <Video size={14} className="text-white" />
-                        </div>
+                        
+                        {/* Progress Overlay for Pending/Processing Posts */}
+                        {(post.status === 'pending' || post.status === 'processing') && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm z-10">
+                            <div className="w-24 h-24 relative flex items-center justify-center">
+                              {/* Circular Progress (SVG) */}
+                              <svg className="w-full h-full transform -rotate-90">
+                                <circle
+                                  cx="48"
+                                  cy="48"
+                                  r="40"
+                                  stroke="currentColor"
+                                  strokeWidth="6"
+                                  fill="transparent"
+                                  className="text-white/10"
+                                />
+                                <circle
+                                  cx="48"
+                                  cy="48"
+                                  r="40"
+                                  stroke="#84CC16"
+                                  strokeWidth="6"
+                                  fill="transparent"
+                                  strokeDasharray={2 * Math.PI * 40}
+                                  strokeDashoffset={2 * Math.PI * 40 * (1 - (post.processingProgress || 0) / 100)}
+                                  className="transition-all duration-300"
+                                />
+                              </svg>
+                              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <span className="text-[14px] font-black text-white">{post.processingProgress || 0}%</span>
+                              </div>
+                            </div>
+                            <div className="mt-4 flex flex-col items-center gap-1">
+                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#84CC16] animate-pulse">
+                                {post.status === 'processing' ? 'Optimizing Media' : 'Preparing Upload'}
+                              </span>
+                              <div className="flex gap-1">
+                                <span className="w-1 h-1 bg-[#84CC16] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                <span className="w-1 h-1 bg-[#84CC16] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                <span className="w-1 h-1 bg-[#84CC16] rounded-full animate-bounce"></span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Video Icon for processed videos */}
+                        {post.mediaType === 'video' && post.status === 'ready' && (
+                          <div className="absolute top-4 right-4 p-1.5 bg-black/60 backdrop-blur-md rounded">
+                             <Video size={14} className="text-white" />
+                          </div>
+                        )}
                       </div>
                     )}
 

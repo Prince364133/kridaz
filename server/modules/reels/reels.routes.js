@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as reelsController from './reels.controller.js';
-import { protect } from '../../middleware/auth.middleware.js';
+import { protect, optionalProtect } from '../../middleware/auth.middleware.js';
 import multer from 'multer';
 
 import fs from 'fs';
@@ -31,7 +31,7 @@ const upload = multer({
 });
 
 // Public Routes
-router.get('/feed', reelsController.getReelsFeed);
+router.get('/feed', optionalProtect, reelsController.getReelsFeed);
 router.get('/recommended', reelsController.getRecommendedReels);
 
 // Protected Routes

@@ -59,6 +59,9 @@ export const confirmPost = async (req, res) => {
 
     await post.save();
 
+    const populatedPost = await CommunityPost.findById(post._id)
+      .populate('adminId', 'name profilePicture username');
+
     if (mediaType === 'video') {
       await mediaQueue.add('TRANSCODE_VIDEO', { 
         mediaId: post._id,
@@ -66,7 +69,7 @@ export const confirmPost = async (req, res) => {
       });
     }
 
-    res.status(201).json({ success: true, post });
+    res.status(201).json({ success: true, post: populatedPost });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -156,7 +159,21 @@ export const createPost = async (req, res) => {
 
 export const getPosts = async (req, res) => {
   try {
-    const posts = await CommunityPost.find()
+    const rawId = req.user?.id || req.admin?.id;
+    const userId = await resolveUserId(rawId);
+
+    const query = {
+      $or: [
+        { status: 'ready' }
+      ]
+    };
+
+    if (userId) {
+      query.$or.push({ adminId: userId, status: 'pending' });
+      query.$or.push({ adminId: userId, status: 'processing' });
+    }
+
+    const posts = await CommunityPost.find(query)
       .populate('adminId', 'name profilePicture username')
       .populate('likes', 'name profilePicture username')
       .populate('comments.userId', 'name profilePicture username')

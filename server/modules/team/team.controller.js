@@ -140,7 +140,7 @@ export const getMyTeams = async (req, res) => {
 // @desc    Get all platform teams for discovery (Players → Teams tab)
 export const getAllTeams = async (req, res) => {
   try {
-    const { city, sportType, search } = req.query;
+    const { city, sportType, search, lat, lng, radius } = req.query;
     let query = { visibility: "PUBLIC" };
 
     if (city) query.city = new RegExp(city, "i");
@@ -152,10 +152,33 @@ export const getAllTeams = async (req, res) => {
       ];
     }
 
-    const teams = await Team.find(query)
-      .populate("owner", "name profilePicture username")
-      .populate("members.user", "name profilePicture username")
-      .sort({ createdAt: -1 });
+    let teams;
+    if (lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng))) {
+      const maxDistance = parseFloat(radius) || 10000; // 10km default
+      teams = await Team.aggregate([
+        {
+          $geoNear: {
+            near: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
+            distanceField: "distance",
+            maxDistance: maxDistance,
+            query: query,
+            spherical: true,
+            key: "locationData"
+          },
+        },
+        { $sort: { distance: 1 } },
+      ]);
+      // Manually populate since aggregate doesn't auto-populate
+      await Team.populate(teams, [
+        { path: "owner", select: "name profilePicture username" },
+        { path: "members.user", select: "name profilePicture username" }
+      ]);
+    } else {
+      teams = await Team.find(query)
+        .populate("owner", "name profilePicture username")
+        .populate("members.user", "name profilePicture username")
+        .sort({ createdAt: -1 });
+    }
 
     // Aggregating statistics (Simulated until Match model is fully linked)
     const teamsWithStats = teams.map((team) => ({

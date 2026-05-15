@@ -9,6 +9,15 @@ import Redis from 'ioredis';
 const redis = new Redis(process.env.REDIS_URL, {
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
+  connectTimeout: 5000, // 5 seconds timeout
+});
+
+redis.on('error', (err) => {
+  console.error('[REDIS] Connection error:', err.message);
+});
+
+redis.on('connect', () => {
+  console.log('[REDIS] Connected successfully.');
 });
 
 /**

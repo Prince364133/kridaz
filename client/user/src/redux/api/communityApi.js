@@ -90,6 +90,26 @@ export const communityApi = baseApi.injectEndpoints({
         method: 'POST',
         body: data,
       }),
+      async onQueryStarted(data, { dispatch, queryFulfilled }) {
+        try {
+          const { data: result } = await queryFulfilled;
+          // After successful confirmation, add the post to the top of the feed immediately
+          if (result.success && result.post) {
+            dispatch(
+              communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
+                if (!draft.posts) draft.posts = [];
+                // Check if post already exists (to avoid duplicates from refetch)
+                const exists = draft.posts.some(p => p._id === result.post._id);
+                if (!exists) {
+                  draft.posts.unshift(result.post);
+                }
+              })
+            );
+          }
+        } catch (err) {
+          // If it fails, the refetch will handle it or tags will handle it
+        }
+      },
       invalidatesTags: ['Community'],
     }),
     getStoryUploadUrl: builder.query({
@@ -105,6 +125,30 @@ export const communityApi = baseApi.injectEndpoints({
         body: data,
       }),
       invalidatesTags: ['Stories'],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data: result } = await queryFulfilled;
+          if (result.success && result.story) {
+            dispatch(
+              communityApi.util.updateQueryData('getStoriesFeed', undefined, (draft) => {
+                if (draft.stories) {
+                  // Find or create group for the author (using userId field from backend)
+                  const author = result.story.userId;
+                  const groupIndex = draft.stories.findIndex(g => g.author._id === author._id);
+                  if (groupIndex !== -1) {
+                    draft.stories[groupIndex].stories.unshift(result.story);
+                  } else {
+                    draft.stories.unshift({
+                      author: author,
+                      stories: [result.story]
+                    });
+                  }
+                }
+              })
+            );
+          }
+        } catch (err) {}
+      }
     }),
     getUserStories: builder.query({
       query: (userId) => `/api/user/community/user-stories/${userId}`,

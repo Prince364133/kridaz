@@ -29,6 +29,11 @@ const mediaUploadSlice = createSlice({
         state.activeUpload.status = action.payload;
       }
     },
+    updateId: (state, action) => {
+      if (state.activeUpload) {
+        state.activeUpload.id = action.payload;
+      }
+    },
     clearUpload: (state) => {
       if (state.activeUpload && state.activeUpload.status === 'success') {
         state.recentUploads.unshift(state.activeUpload);
@@ -44,5 +49,5 @@ const mediaUploadSlice = createSlice({
   },
 });
 
-export const { startUpload, updateProgress, updateStatus, clearUpload, setUploadError } = mediaUploadSlice.actions;
+export const { startUpload, updateProgress, updateStatus, updateId, clearUpload, setUploadError } = mediaUploadSlice.actions;
 export default mediaUploadSlice.reducer;

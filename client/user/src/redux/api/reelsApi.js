@@ -14,11 +14,23 @@ export const reelsApi = baseApi.injectEndpoints({
       serializeQueryArgs: ({ endpointName }) => {
         return endpointName;
       },
-      merge: (currentCache, newItems) => {
+      merge: (currentCache, newItems, { arg }) => {
+        // If it's a fresh fetch (no cursor), replace the cache
+        if (!arg?.cursor) {
+          return newItems;
+        }
+        
         if (!currentCache) return newItems;
+        
+        // Pagination: combine and deduplicate
+        const combinedReels = [...currentCache.reels, ...newItems.reels];
+        const uniqueReels = combinedReels.filter((v, i, a) => 
+          a.findIndex(t => t._id === v._id) === i
+        );
+        
         return {
           ...newItems,
-          reels: [...currentCache.reels, ...newItems.reels],
+          reels: uniqueReels,
         };
       },
       forceRefetch({ currentArg, previousArg }) {
@@ -124,9 +136,13 @@ export const reelsApi = baseApi.injectEndpoints({
       serializeQueryArgs: ({ endpointName }) => endpointName,
       merge: (currentCache, newItems) => {
         if (!currentCache) return newItems;
+        const combinedReels = [...currentCache.reels, ...newItems.reels];
+        const uniqueReels = combinedReels.filter((v, i, a) => 
+          a.findIndex(t => t._id === v._id) === i
+        );
         return {
           ...newItems,
-          reels: [...currentCache.reels, ...newItems.reels],
+          reels: uniqueReels,
         };
       },
       forceRefetch({ currentArg, previousArg }) {

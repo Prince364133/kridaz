@@ -148,14 +148,31 @@ export const getReelsFeed = async (req, res) => {
       query._id = { $ne: initialId };
     }
 
+    // Fetch user's pending reels if it's the first page
+    let userPendingReels = [];
+    if (!cursor && req.user) {
+      userPendingReels = await Reel.find({ 
+        creatorId: req.user.id, 
+        status: 'pending' 
+      }).populate('creatorId', 'name username profilePicture');
+    }
+
     const reels = await Reel.find(query)
       .populate('creatorId', 'name username profilePicture')
-      .select('caption hashtags stats hlsUrl rawVideoUrl thumbnailUrl creatorId createdAt')
+      .select('caption hashtags stats hlsUrl rawVideoUrl thumbnailUrl creatorId createdAt status processingProgress')
       .sort({ _id: -1 }) 
       .limit(parseInt(limit))
-      .lean(); // Use lean for faster JSON serialization
+      .lean();
 
-    const finalReels = initialReel ? [initialReel, ...reels] : reels;
+    const finalReels = [
+      ...(initialReel ? [initialReel] : []),
+      ...userPendingReels,
+      ...reels
+    ];
+    
+    // Deduplicate in case pending just became ready or initial is in reels
+    const uniqueReels = finalReels.filter((v, i, a) => a.findIndex(t => t._id.toString() === v._id.toString()) === i);
+
     const nextCursor = reels.length > 0 ? reels[reels.length - 1]._id : null;
 
     // Generate a signed cookie for Cloudflare Edge Auth
@@ -175,7 +192,7 @@ export const getReelsFeed = async (req, res) => {
 
     res.status(200).json({ 
       success: true, 
-      reels: finalReels,
+      reels: uniqueReels,
       nextCursor 
     });
 

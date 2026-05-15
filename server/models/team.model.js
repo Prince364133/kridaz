@@ -37,9 +37,15 @@ const teamSchema = new mongoose.Schema(
         status: { type: String, enum: ["PENDING", "JOINED", "EXPIRED"], default: "PENDING" },
       }
     ],
-    qrCode: { type: String }
+    qrCode: { type: String },
+    locationData: {
+      type: { type: String, default: 'Point' },
+      coordinates: { type: [Number] } // [longitude, latitude]
+    }
   },
   { timestamps: true }
 );
+
+teamSchema.index({ locationData: '2dsphere' });
 
 export default mongoose.model("Team", teamSchema);

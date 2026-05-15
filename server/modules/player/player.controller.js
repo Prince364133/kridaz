@@ -21,11 +21,13 @@ export const getPublicPlayers = async (req, res) => {
 
     // 1. Proximity Search
     if (lat && lng) {
+      const radius = req.query.radius ? parseFloat(req.query.radius) : 5000; // Default 5km
       const geoNearStage = {
         $geoNear: {
           near: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
           distanceField: "distance",
           spherical: true,
+          maxDistance: radius,
           query: {}
         }
       };
@@ -74,6 +76,7 @@ export const getPublicPlayers = async (req, res) => {
       city: u.city,
       state: u.state,
       sportTypes: u.sportTypes || [],
+      locationData: u.locationData,
       distance: u.distance ? (u.distance / 1000).toFixed(1) : null, // in km
       hasActiveStory: activeStories.some(id => id.toString() === u._id.toString()) && (
         req.user ? (
@@ -427,5 +430,93 @@ export const getLeaderboard = async (req, res) => {
   } catch (error) {
     console.error("Leaderboard error:", error);
     return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Get nearby players for the Live Map
+ * Optimized for map data payload
+ */
+export const getNearbyPlayers = async (req, res) => {
+  const { lat, lng, radius = 5000, limit = 50 } = req.query;
+  
+  if (!lat || !lng) {
+    return res.status(400).json({ success: false, message: "Location coordinates required" });
+  }
+
+  try {
+    const players = await User.aggregate([
+      {
+        $geoNear: {
+          near: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
+          distanceField: "distance",
+          spherical: true,
+          maxDistance: parseFloat(radius),
+          query: { 
+            locationData: { $exists: true },
+            _id: { $ne: new mongoose.Types.ObjectId(req.user?.id) }
+          }
+        }
+      },
+      { $limit: parseInt(limit) },
+      {
+        $project: {
+          name: 1,
+          username: 1,
+          profilePicture: { $ifNull: ["$profilePicture", "$profileImage"] },
+          lat: { $arrayElemAt: ["$locationData.coordinates", 1] },
+          lng: { $arrayElemAt: ["$locationData.coordinates", 0] },
+          distanceKm: { $divide: ["$distance", 1000] },
+          sportTypes: 1,
+          lastSeen: 1
+        }
+      }
+    ]);
+
+    return res.status(200).json({ success: true, players });
+  } catch (err) {
+    console.error("Nearby players error:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
+ * Update user location and privacy sharing flag
+ */
+export const updateUserLocation = async (req, res) => {
+  const { lat, lng, sharing = true } = req.body;
+  const userId = req.user?.id;
+
+  if (!userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  try {
+    let update = {};
+    
+    if (sharing === false || (lat === 0 && lng === 0)) {
+      // Clear location for privacy
+      update = { $unset: { locationData: "" } };
+    } else if (lat && lng) {
+      update = {
+        locationData: {
+          type: "Point",
+          coordinates: [parseFloat(lng), parseFloat(lat)]
+        },
+        lastSeen: new Date()
+      };
+    } else {
+      return res.status(400).json({ success: false, message: "Invalid location data" });
+    }
+
+    await User.findByIdAndUpdate(userId, update);
+    
+    return res.status(200).json({ 
+      success: true, 
+      message: sharing ? "Location updated" : "Location cleared (Privacy mode)" 
+    });
+  } catch (err) {
+    console.error("Update location error:", err);
+    return res.status(500).json({ success: false, message: err.message });
   }
 };

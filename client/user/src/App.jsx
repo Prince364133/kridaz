@@ -34,7 +34,6 @@ import { SocketProvider } from "./context/SocketContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "react-hot-toast";
 
-import BackgroundUploadManager from "./user/components/BackgroundUploadManager";
 import { reelsApi } from "./redux/api/reelsApi";
 
 export default function App() {
@@ -136,7 +135,6 @@ export default function App() {
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <SocketProvider>
         <RouterProvider router={router} />
-        <BackgroundUploadManager />
         <Toaster 
           position="top-center"
           toastOptions={{

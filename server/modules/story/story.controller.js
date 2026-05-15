@@ -59,6 +59,9 @@ export const confirmStory = async (req, res) => {
 
     await story.save();
 
+    // Populate userId for frontend grouping
+    const populatedStory = await Story.findById(story._id).populate('userId', 'name username profilePicture');
+
     // 3. If video, trigger ABR transcoding pipeline
     if (mediaType === 'video') {
       await mediaQueue.add('TRANSCODE_VIDEO', { 
@@ -67,7 +70,7 @@ export const confirmStory = async (req, res) => {
       });
     }
 
-    res.status(201).json({ success: true, story });
+    res.status(201).json({ success: true, story: populatedStory });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -191,7 +194,7 @@ export const getStories = async (req, res) => {
       
       if (!acc[storyUserId]) {
         acc[storyUserId] = {
-          user: typeof storyUser === 'object' ? storyUser : { _id: storyUser, username: 'Unknown Player' },
+          author: typeof storyUser === 'object' ? storyUser : { _id: storyUser, username: 'Unknown Player' },
           stories: []
         };
       }
@@ -201,8 +204,8 @@ export const getStories = async (req, res) => {
 
     // Ensure current user's group is first in the list if it exists
     const finalStories = Object.values(groupedStories).sort((a, b) => {
-      const aId = a.user._id.toString();
-      const bId = b.user._id.toString();
+      const aId = a.author._id.toString();
+      const bId = b.author._id.toString();
       if (aId === userId.toString()) return -1;
       if (bId === userId.toString()) return 1;
       return 0;

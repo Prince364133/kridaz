@@ -5,6 +5,7 @@ import { Loader2, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { 
   updateProgress, 
   updateStatus, 
+  updateId,
   setUploadError, 
   clearUpload 
 } from '../../redux/slices/mediaUploadSlice';
@@ -12,14 +13,26 @@ import {
   useLazyGetReelUploadUrlQuery, 
   useConfirmReelUploadMutation 
 } from '../../redux/api/reelsApi';
+import { 
+  useLazyGetCommunityUploadUrlQuery, 
+  useConfirmCommunityPostMutation,
+  useLazyGetStoryUploadUrlQuery,
+  useConfirmStoryUploadMutation
+} from '../../redux/api/communityApi';
 import { uploadFileToR2 } from '../../utils/mediaUpload';
 import toast from 'react-hot-toast';
 
 const BackgroundUploadManager = () => {
   const dispatch = useDispatch();
   const { activeUpload } = useSelector(state => state.mediaUpload);
-  const [getUploadUrl] = useLazyGetReelUploadUrlQuery();
-  const [confirmUpload] = useConfirmReelUploadMutation();
+  const [getReelUploadUrl] = useLazyGetReelUploadUrlQuery();
+  const [confirmReel] = useConfirmReelUploadMutation();
+  
+  const [getCommunityUploadUrl] = useLazyGetCommunityUploadUrlQuery();
+  const [confirmCommunity] = useConfirmCommunityPostMutation();
+
+  const [getStoryUploadUrl] = useLazyGetStoryUploadUrlQuery();
+  const [confirmStory] = useConfirmStoryUploadMutation();
   
   // Track if we are currently processing the active upload to avoid double triggers
   const processingId = useRef(null);
@@ -32,54 +45,84 @@ const BackgroundUploadManager = () => {
 
   const processUpload = async (upload) => {
     processingId.current = upload.id;
-    console.log('[BACKGROUND_UPLOAD] Starting process for:', upload.id);
+    const type = upload.metadata?.type || 'reel';
     
     try {
-      // 0. Validate File object (sanity check for serialization issues)
       if (!upload.file || !(upload.file instanceof File)) {
-        console.error('[BACKGROUND_UPLOAD] Invalid file object in state:', upload.file);
-        throw new Error('Video file lost or corrupted. Please try again.');
+        throw new Error('File lost or corrupted. Please try again.');
       }
 
-      console.log('[BACKGROUND_UPLOAD] Requesting pre-signed URL for:', upload.file.name);
+      let uploadUrl, key, dbId;
 
-      // 1. Get Pre-signed URL
-      const { data: uploadData, error: urlError } = await getUploadUrl({
-        contentType: upload.file.type,
-        fileName: upload.file.name
-      });
-
-      if (urlError || !uploadData?.success) {
-        console.error('[BACKGROUND_UPLOAD] URL Error:', urlError);
-        throw new Error(urlError?.data?.message || 'Failed to get upload authorization. Check server status.');
+      // 1. Get Pre-signed URL based on type
+      if (type === 'community') {
+        const { data } = await getCommunityUploadUrl({
+          contentType: upload.file.type,
+          fileName: upload.file.name
+        });
+        uploadUrl = data?.uploadUrl;
+        key = data?.key;
+        dbId = data?.postId;
+      } else if (type === 'story') {
+        const { data } = await getStoryUploadUrl({
+          contentType: upload.file.type,
+          fileName: upload.file.name
+        });
+        uploadUrl = data?.uploadUrl;
+        key = data?.key;
+        dbId = data?.storyId;
+      } else {
+        const { data } = await getReelUploadUrl({
+          contentType: upload.file.type,
+          fileName: upload.file.name
+        });
+        uploadUrl = data?.uploadUrl;
+        key = data?.key;
+        dbId = data?.reelId;
       }
 
-      const { uploadUrl, key, reelId } = uploadData;
-      console.log('[BACKGROUND_UPLOAD] Pre-signed URL obtained. Key:', key);
+      if (!uploadUrl) throw new Error('Failed to get upload authorization.');
+
+      // Sync ID for socket events
+      if (dbId) {
+        dispatch(updateId(dbId));
+        processingId.current = dbId;
+      }
 
       // 2. Upload Direct to R2
       await uploadFileToR2(uploadUrl, upload.file, (progress) => {
         dispatch(updateProgress(progress));
-        if (progress === 100) {
-          dispatch(updateStatus('finalizing'));
-        }
+        if (progress === 100) dispatch(updateStatus('finalizing'));
       });
 
-      console.log('[BACKGROUND_UPLOAD] R2 Upload complete. Confirming with backend...');
+      // 3. Confirm with Backend
+      if (type === 'community') {
+        await confirmCommunity({
+          postId: dbId,
+          key,
+          mediaType: upload.file.type.startsWith('video') ? 'video' : 'image',
+          title: upload.metadata.title,
+          content: upload.metadata.content
+        }).unwrap();
+      } else if (type === 'story') {
+        await confirmStory({
+          storyId: dbId,
+          key,
+          mediaType: upload.file.type.startsWith('video') ? 'video' : 'image',
+          content: upload.metadata.content
+        }).unwrap();
+      } else {
+        await confirmReel({
+          reelId: dbId,
+          key,
+          caption: upload.metadata.caption,
+          hashtags: upload.metadata.hashtags
+        }).unwrap();
+      }
 
-      // 3. Confirm Upload with Metadata
-      await confirmUpload({
-        reelId,
-        key,
-        caption: upload.metadata.caption,
-        hashtags: upload.metadata.hashtags
-      }).unwrap();
-
-      console.log('[BACKGROUND_UPLOAD] Success!');
       dispatch(updateStatus('success'));
-      toast.success('Reel uploaded successfully!');
+      toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} shared successfully!`);
       
-      // Auto-clear after 3 seconds
       setTimeout(() => {
         dispatch(clearUpload());
       }, 3000);
@@ -87,7 +130,7 @@ const BackgroundUploadManager = () => {
     } catch (error) {
       console.error('[BACKGROUND_UPLOAD_FAILED]', error);
       dispatch(setUploadError(error.message || 'Upload failed'));
-      toast.error(error.message || 'Reel upload failed. Check your connection.');
+      toast.error(error.message || 'Upload failed. Check your connection.');
     } finally {
       processingId.current = null;
     }
@@ -96,6 +139,7 @@ const BackgroundUploadManager = () => {
   if (!activeUpload) return null;
 
   const { progress, status, error } = activeUpload;
+  const type = activeUpload.metadata?.type || 'reel';
 
   return (
     <div className="fixed bottom-20 left-4 right-4 z-[9999] pointer-events-none">
@@ -120,7 +164,7 @@ const BackgroundUploadManager = () => {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
               <p className="text-sm font-bold text-white truncate">
-                {status === 'uploading' && 'Uploading Reel...'}
+                {status === 'uploading' && `Uploading ${type === 'community' ? 'Post' : type === 'story' ? 'Story' : 'Reel'}...`}
                 {status === 'finalizing' && 'Finalizing...'}
                 {status === 'success' && 'Shared Successfully!'}
                 {status === 'error' && 'Upload Failed'}

@@ -69,12 +69,19 @@ export const SocketProvider = ({ children }) => {
     return lastSeenMap[userId] || null;
   }, [lastSeenMap]);
 
+  const updateLocation = useCallback((lat, lng) => {
+    if (socket) {
+      socket.emit("update_location", { lat, lng });
+    }
+  }, [socket]);
+
   const value = {
     socket,
     onlineUsers,
     isUserOnline,
     getLastSeen,
     lastSeenMap,
+    updateLocation,
   };
 
   return (
