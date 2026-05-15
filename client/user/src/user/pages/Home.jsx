@@ -357,13 +357,13 @@ export default function Home() {
  <div className="relative w-full px-4 lg:px-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center pt-4 md:pt-0">
  <div className="space-y-4 lg:space-y-6 relative z-10">
  <div>
- <h1 className="font-display leading-[0.9] lg:leading-[0.85] tracking-tighter uppercase" style={{ fontSize: "clamp(2.5rem,10vw,6.5rem)" }}>
+ <h1 className="uppercase" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700", fontSize: "clamp(40px, 6vw, 51.74px)", lineHeight: "1.14", letterSpacing: "0" }}>
  More Than <span style={{ color: PRI }}>Booking.</span><br />
  Where Players<br />Belong.
  </h1>
  <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ color: PRI }}>where champions play</p>
  </div>
- <p className="text-sm lg:text-xl opacity-70 max-w-xl leading-relaxed mb-4 lg:mb-10">
+ <p className="opacity-70 max-w-xl leading-relaxed mb-4 lg:mb-10" style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(18px, 3vw, 37px)" }}>
  Discover premium sports venues, book your slot instantly, and connect with players across India.
  </p>
 
