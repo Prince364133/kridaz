@@ -39,7 +39,7 @@ export default function App() {
   const theme = useSelector((state) => state.theme.current);
   const authState = useSelector((state) => state.auth);
   // If we have a persisted session, don't show the blocking loading screen
-  const [loading, setLoading] = useState(!authState.isLoggedIn);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -127,16 +127,7 @@ export default function App() {
     return () => window.removeEventListener("focus", handleFocus);
   }, [authState.isLoggedIn, authState.followingIds, dispatch]);
 
-  if (loading) {
-    return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-[#84CC16] border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-white font-mono text-xs uppercase tracking-[0.3em] animate-pulse">Initializing Arena...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
