@@ -521,7 +521,9 @@ const JoinGames = () => {
  ) : (
  <div className="flex items-baseline gap-2 flex-wrap">
  <span>{game.teams?.teamA?.name}</span>
- <span className="text-[#CCFF00] text-sm">VS</span>
+                      <span className="text-[#CCFF00] text-[10px] md:text-sm flex items-center">
+                        V<span className="w-[1px] h-3 bg-[#CCFF00] ml-[1px] mr-[3px] opacity-60" />S
+                      </span>
  <span>{game.teams?.teamB?.name}</span>
  </div>
  )}

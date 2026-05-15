@@ -861,7 +861,7 @@ export default function Home() {
  <>Casual {g.gameType} Match</>
  ) : (
  <>{g.teams?.teamA?.name || 'Team A'}{' '}
- <span className="text-[#CCFF00] ">VS</span>{' '}
+ <span className="text-[#CCFF00] text-xs flex items-center">V<span className="w-[1px] h-3 bg-[#CCFF00] ml-[1px] mr-[3px] opacity-60" />S</span>{' '}
  {g.teams?.teamB?.name || 'Team B'}</>
  )}
  </h3>
