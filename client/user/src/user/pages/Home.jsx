@@ -363,7 +363,7 @@ export default function Home() {
  </h1>
  <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ color: PRI }}>where champions play</p>
  </div>
- <p className="opacity-70 max-w-xl leading-relaxed mb-4 lg:mb-10" style={{ fontFamily: "'Inter', sans-serif", fontSize: "clamp(18px, 3vw, 37px)" }}>
+ <p className="opacity-70 max-w-xl mb-4 lg:mb-10" style={{ fontFamily: "'Inter', sans-serif", fontWeight: "300", fontSize: "20.04px", lineHeight: "119%", letterSpacing: "1.5%" }}>
  Discover premium sports venues, book your slot instantly, and connect with players across India.
  </p>
 
