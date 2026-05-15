@@ -357,9 +357,22 @@ export default function Home() {
  <div className="relative w-full px-4 lg:px-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center pt-4 md:pt-0">
  <div className="space-y-4 lg:space-y-6 relative z-10">
  <div>
- <h1 className="uppercase" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700", fontSize: "clamp(40px, 6vw, 51.74px)", lineHeight: "1.14", letterSpacing: "0" }}>
- More Than <span style={{ color: PRI }}>Booking.</span><br />
- Where Players<br />Belong.
+ <h1 style={{ 
+   fontFamily: "'Open Sans', sans-serif", 
+   fontWeight: "700", 
+   fontSize: "clamp(40px, 6vw, 51.74px)", 
+   lineHeight: "1.14", 
+   letterSpacing: "0" 
+ }}>
+   <span className="text-white">More Than Booking.</span><br />
+   <span style={{ 
+     background: "linear-gradient(to right, #55DEE8 0%, #BFF367 100%)", 
+     WebkitBackgroundClip: "text", 
+     WebkitTextFillColor: "transparent",
+     backgroundClip: "text"
+   }}>
+     This Is Where Players<br />Belong.
+   </span>
  </h1>
  <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ color: PRI }}>where champions play</p>
  </div>
