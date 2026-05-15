@@ -19,6 +19,13 @@ const PRI = "#84CC16";
 const S2 = "#1A1A1A";
 const BDR = "#2A2A2A";
 
+const GRADIENT_TEXT = {
+  background: "linear-gradient(to right, #55DEE8 0%, #BFF367 100%)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  backgroundClip: "text"
+};
+
 
 
 const socialPosts = [
@@ -365,16 +372,16 @@ export default function Home() {
    letterSpacing: "0" 
  }}>
    <span className="text-white">More Than Booking.</span><br />
-            <span style={{ 
-              background: "linear-gradient(110deg, #55DEE8 0%, #BFF367 100%)", 
-              WebkitBackgroundClip: "text", 
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text"
-            }}>
-              This Is Where Players<br />Belong.
-            </span>
+   <span style={{ 
+     background: "linear-gradient(to right, #55DEE8 0%, #BFF367 100%)", 
+     WebkitBackgroundClip: "text", 
+     WebkitTextFillColor: "transparent",
+     backgroundClip: "text"
+   }}>
+     This Is Where Players<br />Belong.
+   </span>
  </h1>
- <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ color: PRI }}>where champions play</p>
+ <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={GRADIENT_TEXT}>where champions play</p>
  </div>
  <p className="opacity-70 max-w-xl mb-4 lg:mb-10" style={{ fontFamily: "'Inter', sans-serif", fontWeight: "300", fontSize: "20.04px", lineHeight: "119%", letterSpacing: "1.5%" }}>
  Discover premium sports venues, book your slot instantly, and connect with players across India.
@@ -465,7 +472,7 @@ export default function Home() {
  <div className="relative">
  <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#84CC16] rounded-full shadow-[0_0_25px_rgba(132,204,22,0.5)] hidden md:block"></div>
  <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- Find Your <span className="text-[#84CC16]">Arena</span>
+ Find Your <span style={GRADIENT_TEXT}>Arena</span>
  </h2>
  <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.4em] mt-4 font-inter">
  Premium Venue Discovery • Elite Sports Infrastructure
@@ -507,7 +514,7 @@ export default function Home() {
  <ShoppingBag size={48} className="text-gray-600 mb-6 group-hover:text-[#84CC16] transition-colors duration-500" />
  <h3 className="font-display text-4xl md:text-5xl lg:text-6xl text-white uppercase leading-tight">
  Marketplace <br />
- <span style={{ color: PRI }}>Coming Soon</span>
+ <span style={GRADIENT_TEXT}>Coming Soon</span>
  </h3>
  <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gray-500 mt-6 max-w-md mx-auto">
  We're building the ultimate destination for sports gear, equipment, and exclusive Kridaz merchandise.
@@ -566,7 +573,7 @@ export default function Home() {
  <div className="relative">
  <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#84CC16] rounded-full shadow-[0_0_20px_rgba(132,204,22,0.4)] hidden md:block"></div>
  <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- Find Players <span className="text-[#84CC16]">Near You</span>
+ Find Players <span style={GRADIENT_TEXT}>Near You</span>
  </h2>
  <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-3 font-inter">
  Global Talent Network • Skill-Matched Athletes
@@ -696,7 +703,7 @@ export default function Home() {
  <div className="relative">
  <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#84CC16] rounded-full shadow-[0_0_25px_rgba(132,204,22,0.5)] hidden md:block"></div>
  <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- JOIN <span className="text-[#84CC16]">GAMES</span>
+ JOIN <span style={GRADIENT_TEXT}>GAMES</span>
  </h2>
  <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-4 font-inter">
  Community Matchmaking • No Team? No Problem.
