@@ -4,36 +4,11 @@ import { followUser, unfollowUser } from "@redux/slices/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { 
-  Heart, 
-  MessageCircle, 
-  Share2, 
-  Plus, 
-  Image as ImageIcon, 
-  X, 
-  MoreVertical, 
-  Send,
-  Loader2,
-  Trash2,
-  Clock,
-  User as UserIcon,
-  Trophy,
-  Edit,
-  Edit3,
-  Twitter,
-  Facebook,
-  Link as LinkIcon,
-  Eye,
-  ChevronDown,
-  TrendingUp,
-  Target,
-  BarChart3,
-  Users,
-  Zap,
-  ChevronRight,
-  ShieldCheck,
-  Calendar,
-  Mail,
-  ArrowRight
+  Heart, MessageCircle, Share2, Plus, Image as ImageIcon, X, MoreVertical, Send,
+  Loader2, Trash2, Clock, User as UserIcon, Trophy, Edit, Edit3, Twitter, Facebook,
+  Link as LinkIcon, Eye, ChevronDown, TrendingUp, Target, BarChart3, Users, Zap,
+  ChevronRight, ShieldCheck, Calendar, Mail, ArrowRight, MonitorPlay, FileText,
+  Circle, Bookmark, Smile, Search, Play, Video, Home, Bell, PlaySquare
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
@@ -53,6 +28,8 @@ import {
   useUploadStoryMutation,
   useDeleteStoryMutation
 } from "../../redux/api/communityApi";
+import { useGetReelsFeedQuery } from "../../redux/api/reelsApi";
+import ReelItem from "../../components/common/ReelItem";
 import { useSocket } from "@context/SocketContext";
 
 const PRI = "#84CC16";
@@ -82,7 +59,31 @@ const Community = () => {
 
   const { socket } = useSocket();
 
-  const posts = communityData?.posts || [];
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [activePanel, setActivePanel] = useState(null); // 'messages' | 'notifications' | null
+  const togglePanel = (panel) => setActivePanel(prev => prev === panel ? null : panel);
+
+  // Reels feed data
+  const [reelCursor, setReelCursor] = useState(null);
+  const [activeReelIndex, setActiveReelIndex] = useState(0);
+  const reelFeedRef = useState(null);
+  const { data: reelsData, isLoading: reelsLoading, isFetching: reelsFetching } = useGetReelsFeedQuery(
+    { cursor: reelCursor },
+    { skip: activeFilter !== "Reels" }
+  );
+  const reels = reelsData?.reels || [];
+
+  const rawPosts = communityData?.posts || [];
+  const posts = rawPosts.filter(post => {
+    if (activeFilter === "Reels") {
+      return post.image || post.imageUrl || post.videoUrl;
+    }
+    if (activeFilter === "Following") {
+      const authorId = post.adminId?._id || post.adminId || post.user?._id || post.user;
+      return followingIds?.includes(authorId);
+    }
+    return true;
+  });
   const stories = storiesData?.stories || [];
   const loading = feedLoading;
 
@@ -98,7 +99,6 @@ const Community = () => {
           }
         })
       );
-      // Update global stats
       dispatch(
         communityApi.util.updateQueryData('getCommunityStats', undefined, (draft) => {
           if (draft.stats) draft.stats.posts = (parseInt(draft.stats.posts) + 1).toString();
@@ -115,7 +115,6 @@ const Community = () => {
           }
         })
       );
-      // Optional: Update global likes stat if needed
     };
 
     const handlePostCommented = ({ postId, comments }) => {
@@ -127,7 +126,6 @@ const Community = () => {
           }
         })
       );
-      // Update global stats
       dispatch(
         communityApi.util.updateQueryData('getCommunityStats', undefined, (draft) => {
           if (draft.stats) draft.stats.comments = (parseInt(draft.stats.comments) + 1).toString();
@@ -141,7 +139,6 @@ const Community = () => {
           draft.posts = draft.posts.filter(p => p._id !== postId);
         })
       );
-      // Update global stats
       dispatch(
         communityApi.util.updateQueryData('getCommunityStats', undefined, (draft) => {
           if (draft.stats) draft.stats.posts = Math.max(0, parseInt(draft.stats.posts) - 1).toString();
@@ -163,9 +160,6 @@ const Community = () => {
   }, [socket, dispatch]);
 
   const [isPublishing, setIsPublishing] = useState(false);
-  const [showLikesModal, setShowLikesModal] = useState(false);
-  const [viewingLikes, setViewingLikes] = useState([]);
-  
   const [showPostModal, setShowPostModal] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '', image: null });
   const [postImagePreview, setPostImagePreview] = useState(null);
@@ -178,14 +172,34 @@ const Community = () => {
   const [selectedStoryGroup, setSelectedStoryGroup] = useState(null);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
 
-  const [activeDiscussion, setActiveDiscussion] = useState(null); 
-  const [commentText, setCommentText] = useState("");
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [editingComment, setEditingComment] = useState(null); 
-  const [optimisticPosts, setOptimisticPosts] = useState([]);
-  const [optimisticStories, setOptimisticStories] = useState([]);
-  const [shareModalOpen, setShareModalOpen] = useState(null);
-  const [highlightedPost, setHighlightedPost] = useState(null);
+  const [commentInputs, setCommentInputs] = useState({});
+
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    if (!showGlobalSearch) return;
+    const delayDebounceFn = setTimeout(async () => {
+      if (!searchQuery.trim()) {
+        setSearchResults([]);
+        return;
+      }
+      setIsSearching(true);
+      try {
+        const res = await axiosInstance.get('/api/user/players', { params: { search: searchQuery } });
+        if (res.data?.success) {
+          setSearchResults(res.data.players || []);
+        }
+      } catch (err) {
+        console.error("Search failed:", err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery, showGlobalSearch]);
 
   const handlePostImageChange = (e) => {
     const file = e.target.files[0];
@@ -197,35 +211,29 @@ const Community = () => {
 
   const handleCreatePost = async (e) => {
     e.preventDefault();
-    if (!newPost.content) return toast.error("Content is required");
+    if (!newPost.content && !newPost.image) return toast.error("Content or image is required");
 
     const formData = new FormData();
-    formData.append('title', newPost.title);
-    formData.append('content', newPost.content);
+    if (newPost.title) formData.append('title', newPost.title);
+    if (newPost.content) formData.append('content', newPost.content);
     if (newPost.image) formData.append('image', newPost.image);
 
     setIsPublishing(true);
     try {
       if (editingPost) {
-        await updatePost({ postId: editingPost._id, formData }).unwrap();
+        await updatePost({ id: editingPost._id, data: formData }).unwrap();
         toast.success("Post updated successfully!");
+        closePostModal();
       } else {
         await createPost(formData).unwrap();
         toast.success("Post created successfully!");
+        closePostModal();
       }
-      closePostModal();
     } catch (error) {
-      toast.error(error.data?.message || "Failed to save post");
+      toast.error(error?.data?.message || "Failed to save post");
     } finally {
       setIsPublishing(false);
     }
-  };
-
-  const handleEditPost = (post) => {
-    setEditingPost(post);
-    setNewPost({ title: post.title || '', content: post.content, image: null });
-    setPostImagePreview(post.image || post.imageUrl || null);
-    setShowPostModal(true);
   };
 
   const closePostModal = () => {
@@ -237,9 +245,13 @@ const Community = () => {
 
   const handleStoryMediaChange = (e) => {
     const files = Array.from(e.target.files);
-    if (files.length > 10) return toast.error("Max 10 media files");
+    if (files.length > 10) {
+      toast.error("Maximum 10 media files allowed");
+      return;
+    }
     setNewStory({ ...newStory, mediaFiles: files });
-    setStoryMediaPreviews(files.map(file => URL.createObjectURL(file)));
+    const previews = files.map(file => URL.createObjectURL(file));
+    setStoryMediaPreviews(previews);
   };
 
   const handleUploadStory = async (e) => {
@@ -255,18 +267,18 @@ const Community = () => {
     try {
       await uploadStory(formData).unwrap();
       toast.success("Story uploaded!");
-      setShowStoryModal(false);
       setNewStory({ content: '', mediaFiles: [], durationDays: 1 });
       setStoryMediaPreviews([]);
+      setShowStoryModal(false);
     } catch (error) {
-      toast.error("Failed to upload story");
+      toast.error(error?.data?.message || "Failed to upload story");
     } finally {
       setIsPublishing(false);
     }
   };
 
   const handleDeletePost = async (postId) => {
-    if (!window.confirm("Delete this post?")) return;
+    if (!window.confirm("Are you sure?")) return;
     try {
       await deletePost(postId).unwrap();
       toast.success("Post deleted");
@@ -276,7 +288,7 @@ const Community = () => {
   };
 
   const handleDeleteStory = async (storyId) => {
-    if (!window.confirm("Delete this story?")) return;
+    if (!window.confirm("Are you sure?")) return;
     try {
       await deleteStory(storyId).unwrap();
       toast.success("Story deleted");
@@ -288,20 +300,18 @@ const Community = () => {
 
   const handleAddComment = async (postId) => {
     gateInteraction(async () => {
-      if (!commentText.trim()) return;
-      setIsSubmittingComment(true);
+      const text = commentInputs[postId];
+      if (!text || !text.trim()) return;
       try {
-        await addComment({ postId, text: commentText }).unwrap();
-        setCommentText("");
+        await addComment({ postId, text }).unwrap();
+        setCommentInputs(prev => ({ ...prev, [postId]: "" }));
         toast.success("Comment added!");
       } catch (error) {
         toast.error("Failed to add comment");
-      } finally {
-        setIsSubmittingComment(false);
       }
     }, {
       title: "Join the Discussion",
-      message: "Sign in to leave a comment on this post."
+      message: "Sign in to leave a comment."
     });
   };
 
@@ -312,9 +322,6 @@ const Community = () => {
       } catch (error) {
         toast.error("Failed to like post");
       }
-    }, {
-      title: "Show Some Love",
-      message: "Sign in to like this post and support the creator."
     });
   };
 
@@ -339,9 +346,6 @@ const Community = () => {
       } catch (error) {
         toast.error("Failed to update follow status");
       }
-    }, {
-      title: "Follow Players",
-      message: "Sign in to follow players and stay updated."
     });
   };
 
@@ -354,287 +358,636 @@ const Community = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pt-4 pb-12 px-4 md:px-8">
-      <div className="max-w-[1280px] mx-auto">
-        
-        {/* Header Hero Area - Compact Open Design */}
-        <div className="relative mb-6 py-8 overflow-hidden rounded-[32px]">
-          <div className="absolute inset-0 z-0">
-            <img 
-              src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2105&auto=format&fit=crop" 
-              alt="" 
-              className="w-full h-full object-cover opacity-20 grayscale"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/30 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30" />
-          </div>
-
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 px-4">
-            <div className="space-y-1">
-              <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter" style={HEADING_STYLE}>
-                Community <span className="text-[#84CC16]">Hub</span>
-              </h1>
-              <p className="text-[#84CC16] text-[16px] md:text-[20px] font-black uppercase tracking-[0.2em]" style={SUBHEADING_STYLE}>
-                Connect, Share, and Play
-              </p>
-            </div>
-            <button 
-              onClick={() => gateInteraction(() => setShowPostModal(true))}
-              className="flex items-center gap-2.5 px-6 py-3.5 bg-[#84CC16] text-black rounded-xl font-black uppercase text-[10px] tracking-widest hover:brightness-110 transition-all shadow-[0_5px_25px_rgba(132,204,22,0.2)] active:scale-95"
-            >
-              <Plus size={16} strokeWidth={3} /> New Post
-            </button>
-          </div>
-        </div>
-
-        {/* Stories Horizontal Strip - Compact */}
-        <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 mb-6">
-           <div className="flex items-center gap-2 mb-5">
-              <div className="w-1 h-1 bg-[#84CC16] rounded-full" />
-              <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">Live Stories</h2>
-           </div>
-           
-           <div className="flex gap-5 overflow-x-auto pb-1 no-scrollbar scroll-smooth">
+    <div className="min-h-screen bg-[#050505] text-white pt-4 pb-12 px-4 md:px-6 xl:pl-[100px] font-sans relative">
+      
+      {/* ================= FAR LEFT COLUMN (NAVBAR) ================= */}
+      <div className="hidden xl:flex flex-col gap-2 fixed left-0 top-[80px] w-[80px] z-50">
+              {/* Home */}
               <div 
-                onClick={() => gateInteraction(() => setShowStoryModal(true))}
-                className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
+                onClick={() => setActiveFilter("All")}
+                title="Home"
+                className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activeFilter !== 'Reels' ? 'bg-[#84CC16]/5 border-l-[3px] border-[#84CC16]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
               >
-                <div className="w-16 h-16 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center group-hover:border-[#84CC16]/50 transition-all relative">
-                   <div className="w-[56px] h-[56px] rounded-full bg-white/5 flex items-center justify-center">
-                      <Plus size={20} className="text-white/20 group-hover:text-[#84CC16] transition-colors" />
-                   </div>
-                   <div className="absolute bottom-0 right-0 w-5 h-5 bg-[#84CC16] rounded-full flex items-center justify-center border-2 border-black">
-                      <Plus size={10} strokeWidth={3} className="text-black" />
-                   </div>
+                <Home size={24} className={activeFilter !== 'Reels' ? "text-[#84CC16]" : "text-white/70 group-hover:text-white"} fill={activeFilter !== 'Reels' ? "currentColor" : "none"} />
+              </div>
+              {/* Search */}
+              <div 
+                onClick={() => setShowGlobalSearch(true)}
+                title="Search"
+                className="flex justify-center py-4 cursor-pointer group hover:bg-white/5 rounded-r-xl transition-colors border-l-[3px] border-transparent"
+              >
+                <Search size={24} className="text-white/70 group-hover:text-white" />
+              </div>
+              {/* Reels */}
+              <div 
+                onClick={() => setActiveFilter(activeFilter === "Reels" ? "All" : "Reels")}
+                title="Reels"
+                className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activeFilter === 'Reels' ? 'bg-[#84CC16]/5 border-l-[3px] border-[#84CC16]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
+              >
+                <PlaySquare size={24} className={activeFilter === 'Reels' ? 'text-[#84CC16]' : 'text-white/70 group-hover:text-white'} />
+              </div>
+              {/* Notifications */}
+              <div 
+                onClick={() => togglePanel('notifications')}
+                title="Notifications"
+                className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activePanel === 'notifications' ? 'bg-[#84CC16]/5 border-l-[3px] border-[#84CC16]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
+              >
+                <div className="relative">
+                  <Bell size={24} className="text-white/70 group-hover:text-white" />
+                  <div className="absolute -top-1.5 -right-1.5 w-[14px] h-[14px] bg-[#84CC16] rounded-full flex items-center justify-center text-[9px] font-black text-black border-2 border-[#050505]">3</div>
                 </div>
-                <span className="text-[9px] font-black uppercase tracking-widest text-white/30 group-hover:text-white transition-colors">Add Story</span>
+              </div>
+              {/* Messages */}
+              <div 
+                onClick={() => togglePanel('messages')}
+                title="Messages"
+                className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activePanel === 'messages' ? 'bg-[#84CC16]/5 border-l-[3px] border-[#84CC16]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
+              >
+                <div className="relative">
+                  <Send size={24} className="text-white/70 group-hover:text-white" />
+                  <div className="absolute -top-1.5 -right-1.5 w-[14px] h-[14px] bg-[#84CC16] rounded-full flex items-center justify-center text-[9px] font-black text-black border-2 border-[#050505]">5</div>
+                </div>
+              </div>
+      </div>
+
+      {/* Global Search Modal */}
+      <AnimatePresence>
+        {showGlobalSearch && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-start justify-center pt-32 bg-black/80 backdrop-blur-md"
+            onClick={() => setShowGlobalSearch(false)}
+          >
+            <motion.div 
+              initial={{ y: -20, opacity: 0, scale: 0.95 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: -20, opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-[24px] overflow-hidden shadow-2xl mx-4"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 p-5 border-b border-white/5 bg-[#111]">
+                <Search size={20} className="text-[#84CC16]" />
+                <input 
+                  type="text" 
+                  autoFocus
+                  placeholder="Search players..." 
+                  className="flex-1 bg-transparent text-white text-[16px] outline-none placeholder:text-white/30 font-bold"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button onClick={() => setShowGlobalSearch(false)} className="text-white/50 hover:text-white transition-colors bg-white/5 p-1.5 rounded-lg">
+                  <X size={16} />
+                </button>
               </div>
 
-              {stories.map((group) => (
+              <div className="max-h-[50vh] overflow-y-auto no-scrollbar">
+                {isSearching ? (
+                  <div className="flex justify-center p-12">
+                    <Loader2 size={32} className="text-[#84CC16] animate-spin" />
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <div className="p-2 space-y-1">
+                    {searchResults.map(player => (
+                      <div 
+                        key={player._id} 
+                        onClick={() => {
+                          setShowGlobalSearch(false);
+                          navigate(`/profile/${player._id}`);
+                        }}
+                        className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-all group"
+                      >
+                        <div className="w-[46px] h-[46px] rounded-full bg-[#111] border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                           <img 
+                             src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} 
+                             className="w-full h-full object-cover"
+                           />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[14px] font-bold text-white group-hover:text-[#84CC16] transition-colors truncate">{player.name}</div>
+                          <div className="text-[12px] font-medium text-white/40 truncate">@{player.username || player.name.toLowerCase().replace(/\s+/g, '')}</div>
+                        </div>
+                        <div className="px-3 py-1.5 rounded-full border border-white/10 text-[10px] font-bold text-white/50 group-hover:border-[#84CC16] group-hover:text-[#84CC16] transition-all">
+                          View Profile
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : searchQuery ? (
+                  <div className="p-12 text-center text-white/30 font-bold text-[13px] uppercase tracking-widest">
+                    No players found
+                  </div>
+                ) : (
+                  <div className="p-12 text-center text-white/30 font-bold text-[13px] uppercase tracking-widest">
+                    Type to start searching
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="max-w-[1500px] mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+          {/* ================= NOTIFICATIONS COLUMN ================= */}
+          {activePanel === 'notifications' && (
+            <div className="hidden xl:block xl:col-span-3 transition-all duration-300">
+              <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 flex flex-col h-[calc(100vh-100px)] sticky top-[80px]">
+
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-[14px] font-black uppercase tracking-widest" style={HEADING_STYLE}>NOTIFICATIONS</h3>
+                  <button onClick={() => setActivePanel(null)} className="text-white/40 hover:text-white p-1 bg-white/5 rounded-lg"><X size={16} /></button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto no-scrollbar space-y-1 pr-1">
+                  {[
+                    { icon: Heart, color: "text-red-500", text: "simran.s liked your post", time: "2m", img: "simran.s" },
+                    { icon: MessageCircle, color: "text-blue-400", text: "rohit45 commented: 'Great game!'" , time: "10m", img: "rohit45" },
+                    { icon: Users, color: "text-[#84CC16]", text: "deepak_29 started following you", time: "30m", img: "deepak_29" },
+                    { icon: Heart, color: "text-red-500", text: "vikash07 liked your story", time: "1h", img: "vikash07" },
+                    { icon: MessageCircle, color: "text-blue-400", text: "team_kridaz replied to your comment", time: "2h", img: "team_kridaz" },
+                    { icon: Users, color: "text-[#84CC16]", text: "aman.singh started following you", time: "3h", img: "aman.singh" },
+                    { icon: Trophy, color: "text-yellow-400", text: "You earned the 'Match Winner' badge!", time: "5h", img: "kridaz_bot" }
+                  ].map((notif, i) => (
+                    <div key={i} className="flex items-start gap-3 p-2.5 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group">
+                      <div className="relative shrink-0">
+                        <div className="w-[38px] h-[38px] rounded-full bg-[#111] border border-white/5 overflow-hidden">
+                          <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${notif.img}`} className="w-full h-full object-cover" />
+                        </div>
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-[16px] h-[16px] rounded-full bg-[#111] flex items-center justify-center border border-[#0A0A0A]`}>
+                          <notif.icon size={9} className={notif.color} fill="currentColor" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[11px] font-medium text-white/80 group-hover:text-white transition-colors leading-snug">{notif.text}</div>
+                        <div className="text-[9px] font-bold text-white/30 mt-1">{notif.time} ago</div>
+                      </div>
+                      {i < 2 && <div className="w-2 h-2 rounded-full bg-[#84CC16] shrink-0 mt-1.5" />}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-4 mt-2 border-t border-white/5 flex justify-center">
+                  <button className="text-[#84CC16] text-[10px] font-bold hover:underline tracking-widest uppercase">View all notifications</button>
+                </div>
+
+              </div>
+            </div>
+          )}
+
+          {/* ================= LEFT COLUMN (MESSAGES) ================= */}
+          {activePanel === 'messages' && (
+            <div className="hidden xl:block xl:col-span-3 transition-all duration-300">
+            <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 flex flex-col h-[calc(100vh-100px)] sticky top-[80px]">
+              
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-[14px] font-black uppercase tracking-widest" style={HEADING_STYLE}>MESSAGES</h3>
+                <button className="text-[#84CC16] hover:brightness-110 p-1 bg-white/5 rounded-lg">
+                  <Edit3 size={16} />
+                </button>
+              </div>
+
+              <div className="relative mb-5">
+                <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
+                <input 
+                  type="text" 
+                  placeholder="Search messages" 
+                  className="w-full bg-[#111] border border-white/5 rounded-full py-2.5 pl-9 pr-4 text-[11px] font-bold outline-none focus:border-white/20 transition-all placeholder:text-white/30"
+                />
+              </div>
+
+              <div className="flex items-center gap-6 border-b border-white/10 mb-3 px-1">
+                <button className="pb-2.5 text-[10px] font-black text-white border-b-2 border-[#84CC16] tracking-widest uppercase">PRIMARY</button>
+                <button className="pb-2.5 text-[10px] font-black text-white/40 hover:text-white transition-colors tracking-widest uppercase">REQUESTS</button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto no-scrollbar space-y-1 mt-1 pr-1">
+                {[
+                  { name: "simran.s", msg: "Great game! 🔥🔥", time: "2m", unread: 2 },
+                  { name: "rohit45", msg: "See you at the next match!", time: "10m", unread: 1 },
+                  { name: "deepak_29", msg: "That was insane! 💪", time: "30m", unread: 0 },
+                  { name: "vikash07", msg: "Let's train tomorrow", time: "45m", unread: 0 },
+                  { name: "katta_18", msg: "Keep pushing! 💚", time: "1h", unread: 0 },
+                  { name: "aman.singh", msg: "Photo", time: "1h", unread: 0 },
+                  { name: "team_kridaz", msg: "New announcement!", time: "2h", unread: 3 },
+                  { name: "arjun_11", msg: "Thanks bro! 🙌", time: "3h", unread: 0 }
+                ].map((msg, i) => (
+                  <div key={i} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group">
+                    <div className="relative shrink-0">
+                      <div className="w-[36px] h-[36px] rounded-full bg-[#111] border border-white/5 flex items-center justify-center overflow-hidden">
+                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.name}`} className="w-full h-full object-cover" />
+                      </div>
+                      {msg.unread > 0 && <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#84CC16] rounded-full border-2 border-[#0A0A0A]" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[11px] font-bold truncate group-hover:text-[#84CC16] transition-colors">{msg.name}</div>
+                      <div className={`text-[10px] truncate mt-0.5 ${msg.unread > 0 ? 'font-bold text-white' : 'font-medium text-white/40'}`}>
+                        {msg.msg}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="text-[9px] font-bold text-white/30">{msg.time}</span>
+                      {msg.unread > 0 && (
+                        <div className="w-[16px] h-[16px] bg-[#84CC16] text-black rounded-full flex items-center justify-center text-[9px] font-black">
+                          {msg.unread}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-4 mt-2 border-t border-white/5 flex justify-center">
+                <button className="text-[#84CC16] text-[10px] font-bold hover:underline tracking-widest uppercase">
+                  View all messages
+                </button>
+              </div>
+
+            </div>
+            </div>
+          )}
+
+          {/* ================= MIDDLE COLUMN (FEED) ================= */}
+          <div className={`lg:col-span-8 ${activePanel ? 'xl:col-span-6' : 'xl:col-span-8'} transition-all duration-300 ${activeFilter === 'Reels' ? 'h-[calc(100vh-100px)] sticky top-[80px]' : 'space-y-6'}`}>
+            
+            {activeFilter !== "Reels" && (
+              <div className="space-y-6 mb-6">
+                {/* Header Hero Area */}
+                <div className="relative overflow-hidden flex justify-between items-start pb-4">
+              <div className="relative z-10 space-y-1">
+                <h1 className="text-3xl md:text-[42px] font-black uppercase tracking-tighter flex items-center gap-2" style={HEADING_STYLE}>
+                  COMMUNITY <span className="text-[#84CC16]">HUB</span>
+                </h1>
+                <p className="text-[#84CC16] text-[20px] md:text-[20px] font-bold uppercase tracking-[0.2em]" style={SUBHEADING_STYLE}>
+                  CONNECT, SHARE, AND PLAY
+                </p>
+              </div>
+            </div>
+
+            {/* Stories Section */}
+            <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5">
+              <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth items-center pb-2">
+                
+                {/* Add Story */}
                 <div 
-                  key={group._id} 
-                  onClick={() => { setSelectedStoryGroup(group); setCurrentStoryIndex(0); }}
+                  onClick={() => gateInteraction(() => setShowStoryModal(true))}
                   className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
                 >
-                   <div className="w-16 h-16 rounded-full border-2 border-[#84CC16] p-0.5 relative hover:scale-105 transition-transform">
-                      <div className="w-full h-full rounded-full bg-[#111] overflow-hidden border border-white/5">
-                         {group.stories[0].mediaUrl ? (
-                           <img src={group.stories[0].mediaUrl} alt="" className="w-full h-full object-cover" />
-                         ) : (
-                           <div className="p-1.5 text-[5px] text-center line-clamp-3 text-[#84CC16] font-black uppercase leading-tight">{group.stories[0].content}</div>
-                         )}
-                      </div>
-                      <div className="absolute -top-0.5 -left-0.5 px-1 py-0.5 bg-red-600 rounded-full text-[5px] font-black uppercase tracking-widest shadow-lg">Live</div>
-                   </div>
-                   <div className="text-center">
-                      <p className="text-[9px] font-black uppercase tracking-tight text-white group-hover:text-[#84CC16] transition-colors">{group.user?.name?.split(' ')[0] || "Player"}</p>
-                      <p className="text-[7px] font-black text-white/10 uppercase tracking-widest mt-0.5">2h ago</p>
-                   </div>
-                </div>
-              ))}
-              
-              {stories.length < 5 && [
-                { name: 'Rohit', time: '4h ago' },
-                { name: 'Simran', time: '6h ago' },
-                { name: 'Vikash', time: '10h ago' },
-                { name: 'Katta', time: '12h ago' }
-              ].map((m, i) => (
-                <div key={i} className="flex flex-col items-center gap-2.5 shrink-0 cursor-default opacity-30">
-                   <div className="w-16 h-16 rounded-full border border-white/5 p-0.5">
-                      <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center">
-                         <UserIcon size={24} className="text-white/5" />
-                      </div>
-                   </div>
-                   <div className="text-center">
-                      <p className="text-[9px] font-black uppercase tracking-tight text-white/40">{m.name}</p>
-                      <p className="text-[7px] font-black text-white/10 uppercase tracking-widest mt-0.5">{m.time}</p>
-                   </div>
-                </div>
-              ))}
-           </div>
-        </div>
-
-        {/* Main Feed Grid - Compact */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
-          {/* Feed Column */}
-          <div className="lg:col-span-8 space-y-4">
-            <div className="flex items-center justify-between mb-1">
-               <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-white/5 rounded-lg">
-                    <TrendingUp size={14} className="text-[#84CC16]" />
+                  <div className="w-[68px] h-[68px] rounded-full border border-dashed border-white/30 flex items-center justify-center group-hover:border-[#84CC16]/50 transition-all relative p-0.5">
+                    <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center overflow-hidden border border-white/10">
+                      <img src={user?.profilePicture || "/default-avatar.png"} className="w-full h-full object-cover opacity-60" />
+                    </div>
+                    <div className="absolute bottom-0 right-0 w-[22px] h-[22px] bg-[#84CC16] rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
+                      <Plus size={12} strokeWidth={4} className="text-black" />
+                    </div>
                   </div>
-                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30">Community Feed</h2>
-               </div>
-               <button className="flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">
-                 <Clock size={10} /> Most Recent <ChevronDown size={10} />
-               </button>
+                  <span className="text-[10px] font-bold text-white/60 group-hover:text-white transition-colors">Your story</span>
+                </div>
+
+                {/* Render Stories */}
+                {stories.map((group, idx) => (
+                  <div 
+                    key={group._id} 
+                    onClick={() => { setSelectedStoryGroup(group); setCurrentStoryIndex(0); }}
+                    className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
+                  >
+                    <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${idx === 0 ? 'bg-[#84CC16]' : 'bg-white/20'}`}>
+                      <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
+                        <div className="w-full h-full rounded-full overflow-hidden bg-[#111]">
+                          {group.stories[0].mediaUrl ? (
+                            <img src={group.stories[0].mediaUrl} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#84CC16] font-bold bg-[#111]">
+                               {group.stories[0].content?.slice(0, 15)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {idx === 0 && (
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 px-1.5 py-[2px] bg-red-500 rounded flex items-center text-[7px] font-black uppercase text-white shadow-lg tracking-wider border border-[#0A0A0A]">
+                          LIVE
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-[10px] font-bold text-white/80 group-hover:text-[#84CC16] transition-colors truncate max-w-[68px]">
+                      {group.user?.name?.split(' ')[0] || "Player"}
+                    </span>
+                  </div>
+                ))}
+
+                {/* Dummy stories for design parity if feed is empty */}
+                {stories.length < 5 && [
+                  { name: 'simran.s', live: false },
+                  { name: 'rohit45', live: false },
+                  { name: 'vikash07', live: false },
+                  { name: 'katta_18', live: false },
+                  { name: 'aman.singh', live: false }
+                ].map((dummy, idx) => (
+                  <div key={idx} className="flex flex-col items-center gap-2.5 shrink-0 cursor-default opacity-40">
+                    <div className="w-[68px] h-[68px] rounded-full p-[2px] bg-[#84CC16]">
+                      <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
+                        <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center">
+                          <UserIcon size={24} className="text-white/20" />
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold text-white/60 truncate max-w-[68px]">{dummy.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {loading ? (
-              <div className="py-20 flex flex-col items-center gap-4">
-                <Loader2 size={32} className="text-[#84CC16] animate-spin" />
-                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20">Scanning Hub...</p>
-              </div>
-            ) : (posts.length === 0 && optimisticPosts.length === 0) ? (
-              <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-16 text-center space-y-4">
-                <MessageCircle size={40} className="mx-auto text-white/5" />
-                <p className="text-[9px] font-black uppercase tracking-widest text-white/20">Be the first to start the conversation.</p>
-              </div>
-            ) : (
-              [...optimisticPosts, ...posts].map((post) => (
-                <div key={post._id} className="bg-[#0A0A0A] border border-white/5 rounded-[24px] overflow-hidden group hover:border-white/10 transition-all relative">
-                  {post.isOptimistic && (
-                    <div className="absolute inset-0 z-20 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
-                       <Loader2 size={20} className="text-[#84CC16] animate-spin" />
+            {/* Filters Row */}
+            <div className="flex gap-2 overflow-x-auto no-scrollbar items-center">
+               {["All", "Following", "Reels", "Highlights", "Match Moments", "Announcements"].map((filter) => (
+                 <button 
+                   key={filter}
+                   onClick={() => setActiveFilter(filter)}
+                   className={`px-4 py-2 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border ${
+                     activeFilter === filter 
+                     ? 'bg-[#84CC16] text-black border-[#84CC16] hover:brightness-110' 
+                     : 'bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white'
+                   }`}
+                 >
+                   {filter}
+                 </button>
+               ))}
+               <div className="ml-auto flex shrink-0">
+                  <button className="px-3 py-2 rounded-full bg-transparent border border-white/10 text-white/70 hover:bg-white/5 text-[11px] font-bold flex items-center gap-1.5">
+                    Latest <ChevronDown size={12} />
+                  </button>
+               </div>
+            </div>
+            </div>
+            )}
+
+            {/* Main Feed Posts / Reels */}
+            {activeFilter === "Reels" ? (
+              <div className="flex justify-center h-[calc(100vh-180px)] bg-black/40 rounded-[24px]">
+                <div
+                  className="w-[380px] h-full overflow-y-scroll snap-y snap-mandatory no-scrollbar rounded-[24px]"
+                  onScroll={(e) => {
+                    const el = e.currentTarget;
+                    const idx = Math.round(el.scrollTop / el.clientHeight);
+                    setActiveReelIndex(idx);
+                    if (reels.length > 0 && idx >= reels.length - 2 && !reelsFetching && reelsData?.nextCursor) {
+                      setReelCursor(reelsData.nextCursor);
+                    }
+                  }}
+                >
+                  {reelsLoading ? (
+                    <div className="h-full flex items-center justify-center bg-black">
+                      <Loader2 size={36} className="text-[#84CC16] animate-spin" />
+                    </div>
+                  ) : reels.length > 0 ? reels.map((reel, index) => (
+                    <div key={reel._id} className="w-full h-full snap-start snap-always relative bg-black overflow-hidden flex-shrink-0">
+                      {Math.abs(index - activeReelIndex) <= 2 ? (
+                        <ReelItem reel={reel} isVisible={index === activeReelIndex} />
+                      ) : (
+                        <div className="w-full h-full bg-black" />
+                      )}
+                    </div>
+                  )) : (
+                    <div className="h-full flex flex-col items-center justify-center gap-3 text-white/40 bg-black">
+                      <PlaySquare size={48} className="opacity-50" />
+                      <div className="font-bold uppercase tracking-widest text-[13px]">No reels yet</div>
                     </div>
                   )}
-                  {/* Post Header */}
-                  <div className="p-4 flex items-center justify-between border-b border-white/5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-black border border-white/5 p-0.5 overflow-hidden">
-                        <div className="w-full h-full rounded-lg bg-[#111] flex items-center justify-center overflow-hidden">
-                          <img 
-                            src={post.adminId?.profilePicture || "/default-avatar.png"} 
-                            alt="" 
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                           <h3 className="text-[10px] font-black uppercase tracking-tight text-white">{post.adminId?.name || "Player"}</h3>
-                           <div className="w-3 h-3 bg-[#84CC16] rounded-full flex items-center justify-center">
-                              <ShieldCheck size={8} className="text-black" />
-                           </div>
-                        </div>
-                        <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mt-0.5 flex items-center gap-1">
-                           <Calendar size={8} className="text-[#84CC16]" /> {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </p>
-                      </div>
+                  {reelsFetching && (
+                    <div className="h-20 flex items-center justify-center snap-start">
+                      <Loader2 size={24} className="text-[#84CC16] animate-spin" />
                     </div>
-                    <div className="flex items-center gap-2">
-                       {isLoggedIn && user?._id !== (post.adminId?._id || post.adminId) && (
-                         <button 
-                           onClick={() => handleFollowToggle(post.adminId?._id || post.adminId)}
-                           className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
-                             followingIds.includes(post.adminId?._id || post.adminId)
-                             ? 'bg-white/5 text-white/20'
-                             : 'bg-[#84CC16] text-black hover:brightness-110 shadow-[0_5px_15px_rgba(132,204,22,0.1)]'
-                           }`}
-                         >
-                           {followingIds.includes(post.adminId?._id || post.adminId) ? 'Followed' : 'Follow'}
-                         </button>
-                       )}
-                       {(isAdmin || user?._id === (post.adminId?._id || post.adminId)) && (
-                         <button onClick={() => handleDeletePost(post._id)} className="text-white/20 hover:text-red-500 transition-colors p-2">
-                            <Trash2 size={14} />
-                         </button>
-                       )}
-                    </div>
-                  </div>
-
-                  {/* Content Section */}
-                  <div className="p-6 space-y-4">
-                    <div className="space-y-1.5">
-                      {post.title && <h4 className="text-xl font-black uppercase tracking-tighter" style={HEADING_STYLE}>{post.title}</h4>}
-                      <p className="text-white/60 text-[11px] leading-relaxed font-medium whitespace-pre-wrap">{post.content}</p>
-                    </div>
-
-                    {(post.image || post.imageUrl) && (
-                      <div className="relative rounded-[16px] overflow-hidden border border-white/5">
-                         <img 
-                          src={post.image || post.imageUrl} 
-                          alt="" 
-                          className="w-full object-cover max-h-[400px] group-hover:scale-105 transition-transform duration-1000" 
+                  )}
+                </div>
+              </div>
+            ) : loading ? (
+              <div className="py-20 flex flex-col items-center justify-center gap-4">
+                <Loader2 size={32} className="text-[#84CC16] animate-spin" />
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-16 text-center text-white/30 font-bold uppercase tracking-widest text-sm">
+                No posts found
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {posts.map(post => (
+                  <div key={post._id} className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 space-y-4">
+                    {/* Post Header */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={post.adminId?.profilePicture || "/default-avatar.png"} 
+                          className="w-10 h-10 rounded-full object-cover border border-white/10"
                         />
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[13px] font-bold">{post.adminId?.name || "Player"}</span>
+                            <ShieldCheck size={14} className="text-[#84CC16]" />
+                          </div>
+                          <div className="text-[11px] font-bold text-white/40 mt-0.5">
+                             2h ago
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                         <button className="text-white/40 hover:text-white transition-colors">
+                           <MoreVertical size={18} />
+                         </button>
+                      </div>
+                    </div>
+
+                    {/* Post Media */}
+                    {(post.image || post.imageUrl) && (
+                      <div className="relative rounded-[16px] overflow-hidden group border border-white/5 bg-[#111]">
+                        <img 
+                          src={post.image || post.imageUrl} 
+                          className="w-full object-cover max-h-[500px]" 
+                        />
+                        {/* Decorative Overlays (for parity with image) */}
+                        <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-2.5 py-1.5 rounded flex items-center gap-1.5">
+                           <Play size={10} className="fill-white text-white" />
+                           <span className="text-[10px] font-bold">Reels</span>
+                        </div>
+                        <div className="absolute top-4 right-4 p-1.5 bg-black/60 backdrop-blur-md rounded">
+                           <Video size={14} className="text-white" />
+                        </div>
                       </div>
                     )}
-                  </div>
 
-                  {/* Action Bar */}
-                  <div className="px-6 py-4 bg-white/[0.01] border-t border-white/5 flex items-center justify-between">
-                     <div className="flex items-center gap-6">
-                        <button 
-                          onClick={() => handleLike(post._id)}
-                          className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 rounded-lg text-[9px] font-black uppercase tracking-widest text-[#84CC16] hover:bg-white/10 transition-all"
-                        >
-                           <Heart size={12} fill={post.likes?.some(l => (l._id || l) === user?._id) ? "#84CC16" : "none"} /> {post.likes?.length || 0}
-                        </button>
-                        <button className="flex items-center gap-1.5 text-white/40 hover:text-white transition-colors text-[9px] font-black uppercase tracking-widest">
-                           <MessageCircle size={16} /> {post.comments?.length || 0}
-                        </button>
-                     </div>
-                     <button 
-                        onClick={() => handleShareToPlatform('copy', post._id)}
-                        className="flex items-center gap-1.5 text-[#84CC16] text-[9px] font-black uppercase tracking-widest hover:brightness-110 transition-all"
-                     >
-                        <Share2 size={14} /> Share
-                     </button>
+                    {/* Action Bar */}
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="flex items-center gap-5">
+                         <button onClick={() => handleLike(post._id)} className="flex items-center gap-2 group">
+                            <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l._id || l) === user?._id) ? 'fill-[#84CC16] text-[#84CC16]' : 'text-white/70 group-hover:text-red-500'}`} />
+                            <span className="text-[12px] font-bold text-white">{post.likes?.length || 0}</span>
+                         </button>
+                         <button className="flex items-center gap-2 group">
+                            <MessageCircle size={20} className="text-white/70 group-hover:text-white transition-colors" />
+                            <span className="text-[12px] font-bold text-white">{post.comments?.length || 0}</span>
+                         </button>
+                         <button onClick={() => handleShareToPlatform('copy', post._id)} className="flex items-center gap-2 group">
+                            <Send size={18} className="text-white/70 group-hover:text-white transition-colors" />
+                            <span className="text-[12px] font-bold text-white">Share</span>
+                         </button>
+                      </div>
+                      <button>
+                        <Bookmark size={20} className="text-white/70 hover:text-white transition-colors" />
+                      </button>
+                    </div>
+
+                    {/* Caption & Likes List */}
+                    <div className="space-y-2">
+                       <div className="text-[12px] font-medium leading-relaxed">
+                         {post.title && <span className="font-bold mr-2">{post.title}</span>}
+                         <span className="text-white/90 whitespace-pre-wrap">{post.content}</span>
+                       </div>
+                       
+                       {post.likes?.length > 0 && (
+                         <div className="flex items-center gap-2 text-[11px] font-medium text-white/50 pt-1">
+                            <div className="flex -space-x-1.5">
+                               {[1,2,3].slice(0, Math.min(3, post.likes.length)).map((_,i) => (
+                                 <div key={i} className="w-5 h-5 rounded-full bg-white/20 border border-[#0A0A0A] overflow-hidden">
+                                   <UserIcon size={18} className="text-white/50" />
+                                 </div>
+                               ))}
+                            </div>
+                            <p>Liked by <span className="font-bold text-white">simran.s</span>, <span className="font-bold text-white">deepak_29</span> and <span className="font-bold text-white">{Math.max(0, post.likes?.length - 2)} others</span></p>
+                         </div>
+                       )}
+                    </div>
+
+                    {/* Comment Input */}
+                    <div className="flex items-center gap-3 pt-3">
+                      <img src={user?.profilePicture || "/default-avatar.png"} className="w-7 h-7 rounded-full object-cover border border-white/10" />
+                      <input 
+                        type="text" 
+                        placeholder="Add a comment..." 
+                        className="flex-1 bg-transparent text-[12px] font-medium outline-none text-white placeholder:text-white/40"
+                        value={commentInputs[post._id] || ""}
+                        onChange={(e) => setCommentInputs({...commentInputs, [post._id]: e.target.value})}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleAddComment(post._id);
+                        }}
+                      />
+                      <button className="text-white/40 hover:text-white">
+                        <Smile size={16} />
+                      </button>
+                    </div>
+
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
 
-          {/* Sidebar Column - Compact & Sticky */}
-          <div className="lg:col-span-4">
-            <div className="sticky top-[80px] space-y-4">
-              <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-6 space-y-5">
-                 <div className="flex items-center gap-2 mb-1">
-                    <div className="p-1.5 bg-white/5 rounded-lg">
-                      <BarChart3 size={14} className="text-[#84CC16]" />
-                    </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#84CC16]">Your Stats</h3>
-                 </div>
-                 
-                 <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { label: 'Members', value: statsData?.stats?.members || '0', icon: Users },
-                      { label: 'Posts', value: statsData?.stats?.posts || '0', icon: MessageCircle },
-                      { label: 'Comments', value: statsData?.stats?.comments || '0', icon: Target },
-                      { label: 'Likes', value: statsData?.stats?.likes || '0', icon: Heart }
-                    ].map((s, i) => (
-                      <div key={i} className="bg-white/[0.02] border border-white/5 rounded-xl p-3 flex flex-col gap-1.5 group hover:border-[#84CC16]/20 transition-all">
-                         <div className="flex items-center gap-1.5 text-[#84CC16]">
-                            <s.icon size={10} />
-                            <span className="text-[7px] font-black uppercase tracking-widest text-white/20">{s.label}</span>
-                         </div>
-                         <p className="text-lg font-black text-white">{s.value}</p>
+          {/* ================= RIGHT COLUMN (WIDGETS) ================= */}
+          <div className={`lg:col-span-4 ${activePanel ? 'xl:col-span-3' : 'xl:col-span-4'} transition-all duration-300 space-y-6`}>
+            
+            {/* New Post Button */}
+            <div className="flex justify-end pt-1">
+              <button 
+                onClick={() => gateInteraction(() => setShowPostModal(true))}
+                className="w-full md:w-auto px-6 py-3 bg-[#84CC16] text-black rounded-xl font-bold uppercase tracking-widest text-[11px] flex items-center justify-center gap-2 shadow-[0_5px_15px_rgba(132,204,22,0.15)] hover:brightness-110 transition-all"
+              >
+                <Plus size={14} strokeWidth={3} /> NEW POST
+              </button>
+            </div>
+
+            <div className="sticky top-[80px] space-y-6">
+              {/* YOUR STATS */}
+              <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 space-y-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-white">
+                    <BarChart3 size={16} className="text-[#84CC16]" />
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.1em]" style={HEADING_STYLE}>YOUR STATS</h3>
+                  </div>
+                  <button className="text-[10px] font-bold text-[#84CC16] hover:underline">View all</button>
+                </div>
+
+                <div className="grid grid-cols-3 gap-y-5 gap-x-2">
+                  {[
+                    { label: "Members", value: statsData?.stats?.members || "12.4K", icon: Users },
+                    { label: "Posts", value: statsData?.stats?.posts || "1.2K", icon: FileText },
+                    { label: "Online Now", value: "326", icon: Circle, fill: true },
+                    { label: "Comments", value: statsData?.stats?.comments || "2.1K", icon: MessageCircle },
+                    { label: "Likes", value: statsData?.stats?.likes || "8.7K", icon: Heart },
+                    { label: "Tournaments", value: "48", icon: Trophy }
+                  ].map((s, i) => (
+                    <div key={i} className="flex flex-col gap-1">
+                      <div className="flex items-center gap-1.5 text-white/50">
+                        <s.icon size={10} className={s.fill ? "text-[#84CC16]" : ""} fill={s.fill ? "currentColor" : "none"} />
+                        <span className="text-[9px] font-bold leading-none">{s.label}</span>
                       </div>
-                    ))}
-                 </div>
+                      <div className="text-[14px] font-black">{s.value}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-6 space-y-5">
-                 <div className="flex items-center gap-2 mb-1">
-                    <div className="p-1.5 bg-white/5 rounded-lg">
-                      <Zap size={14} className="text-[#84CC16]" />
-                    </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">Popular Topics</h3>
-                 </div>
+              {/* TRENDING TOPICS */}
+              <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 space-y-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-white">
+                    <MonitorPlay size={16} className="text-[#84CC16]" />
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.1em]" style={HEADING_STYLE}>TRENDING TOPICS</h3>
+                  </div>
+                  <button className="text-[10px] font-bold text-[#84CC16] hover:underline">View all</button>
+                </div>
 
-                 <div className="space-y-1.5">
-                    {[
-                      { tag: '# Cricket', count: 542 },
-                      { tag: '# Matchday', count: 328 },
-                      { tag: '# TeamSDCBN', count: 276 },
-                      { tag: '# Tournaments', count: 184 },
-                      { tag: '# Players', count: 142 }
-                    ].map((t, i) => (
-                      <div key={i} className="flex items-center justify-between p-2.5 bg-white/[0.01] hover:bg-white/[0.03] rounded-lg border border-white/5 transition-all group cursor-pointer">
-                         <span className="text-[9px] font-black uppercase tracking-tight text-white group-hover:text-[#84CC16] transition-colors">{t.tag}</span>
-                         <span className="text-[8px] font-black text-white/10">{t.count}</span>
+                <div className="flex flex-wrap gap-2">
+                  {["#Cricket", "#MatchDay", "#Football", "#TeamSpirit", "#RoadToVictory", "#Tournaments"].map((tag, i) => (
+                    <button key={i} className="px-3 py-1.5 bg-transparent border border-white/10 hover:bg-white/5 rounded-lg text-[10px] font-bold transition-colors">
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* SUGGESTED FOR YOU */}
+              <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 space-y-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-white">
+                    <Zap size={16} className="text-[#84CC16]" fill="currentColor" />
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.1em]" style={HEADING_STYLE}>SUGGESTED FOR YOU</h3>
+                  </div>
+                  <button className="text-[10px] font-bold text-[#84CC16] hover:underline">View all</button>
+                </div>
+
+                <div className="space-y-5">
+                  {[
+                    { name: "virat.kohli18", mutual: "2 mutual friends", verified: true },
+                    { name: "msdhoni07", mutual: "3 mutual friends", verified: true },
+                    { name: "jasprit.bumrah93", mutual: "1 mutual friend", verified: true },
+                    { name: "rohit45", mutual: "2 mutual friends", verified: false }
+                  ].map((u, i) => (
+                    <div key={i} className="flex items-center justify-between group cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#111] border border-white/10 flex items-center justify-center overflow-hidden">
+                           <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${u.name}`} className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-bold group-hover:text-[#84CC16] transition-colors">{u.name}</span>
+                            {u.verified && <ShieldCheck size={10} className="text-[#84CC16]" />}
+                          </div>
+                          <div className="text-[9px] font-bold text-white/40">{u.mutual}</div>
+                        </div>
                       </div>
-                    ))}
-                 </div>
-                 
-                 <button className="w-full flex items-center justify-center gap-2 text-[#84CC16] text-[8px] font-black uppercase tracking-[0.2em] pt-2 group">
-                    View All Topics <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform" />
-                 </button>
+                      <button className="px-3 py-1 bg-transparent border border-[#84CC16] text-[#84CC16] rounded-full text-[9px] font-bold hover:bg-[#84CC16] hover:text-black transition-all uppercase tracking-widest">
+                        Follow
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
+
+
         </div>
       </div>
 

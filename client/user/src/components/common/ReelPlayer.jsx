@@ -57,7 +57,9 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
     const video = videoRef.current;
     if (!video || !hlsUrl) return;
 
-    if (finalHlsUrl.endsWith('.m3u8')) {
+    // Check for HLS support
+    const src = finalHlsUrl || hlsUrl;
+    if (src && (src.endsWith('.m3u8') || src.includes('.m3u8'))) {
       if (Hls.isSupported()) {
         const hls = new Hls({
           capLevelToPlayerSize: true,
@@ -70,10 +72,11 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
           }
         });
         hlsRef.current = hls;
-        hls.loadSource(finalHlsUrl);
+        hls.loadSource(src);
         hls.attachMedia(video);
         
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          setIsLoaded(true);
           if (isVisible) {
             video.play().catch(() => setIsPlaying(false));
           }
@@ -96,10 +99,10 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
           }
         });
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = finalHlsUrl;
+        video.src = src;
       }
-    } else {
-      video.src = finalHlsUrl;
+    } else if (src) {
+      video.src = src;
     }
 
     return () => {
@@ -159,14 +162,15 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
   };
 
   return (
-    <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden" onClick={togglePlay}>
+    <div className="relative w-full h-full bg-black flex items-center justify-center" onClick={togglePlay}>
       <video
         ref={videoRef}
         poster={poster}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-contain"
         loop
         muted={isMuted}
         playsInline
+        onCanPlay={() => setIsLoaded(true)}
         onLoadedData={() => setIsLoaded(true)}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
