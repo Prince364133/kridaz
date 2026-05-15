@@ -3,7 +3,7 @@ services:
     name: kridaz-backend
     env: node
     rootDir: server
-    buildCommand: pnpm install
+    buildCommand: corepack enable && corepack prepare pnpm@10.28.0 --activate && pnpm install --no-frozen-lockfile
     startCommand: node server.js
     envVars:
       - key: NODE_ENV
