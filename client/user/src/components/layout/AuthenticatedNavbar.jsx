@@ -137,7 +137,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
             <input 
               type="text" 
               placeholder="Search bookings, players, or reports..."
-              className="w-full bg-[#0d0d0d] border border-white/5 rounded-xl py-2.5 pl-12 pr-16 text-sm text-white placeholder:text-white/20 focus:outline-none transition-all font-inter shadow-inner"
+              className="w-full bg-[#0d0d0d] border border-white/5 rounded-lg py-2.5 pl-12 pr-16 text-sm text-white placeholder:text-white/20 focus:outline-none transition-all font-inter shadow-inner"
               style={{ borderColor: 'rgba(255,255,255,0.05)' }}
               onFocus={(e) => e.target.style.borderColor = themeColor + '80'}
               onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.05)'}
@@ -166,7 +166,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
             <>
               <button 
                 onClick={() => setIsManualBookingOpen(true)}
-                className="hidden md:flex items-center gap-2 px-6 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95"
+                className="hidden md:flex items-center gap-2 px-6 py-2.5 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95"
                 style={{ backgroundColor: themeColor, color: '#000', boxShadow: `0 5px 15px ${themeColor}33` }}
               >
                 <Plus size={14} strokeWidth={3} />
@@ -184,7 +184,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
           <div className="relative" ref={notificationRef}>
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
-              className={`p-2.5 rounded-xl transition-all duration-300 relative border ${
+              className={`p-2.5 rounded-lg transition-all duration-300 relative border ${
                 showNotifications ? "" : "bg-[#0d0d0d] text-[#999999] border-white/5 hover:border-white/10"
               }`}
               style={{ 
@@ -198,7 +198,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 mt-4 w-80 sm:w-96 bg-[#000000] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+              <div className="absolute right-0 mt-4 w-80 sm:w-96 bg-[#000000] border border-white/10 rounded-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 <div className="p-5 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                    <div className="flex items-center gap-2">
                       <h3 className="font-black text-white tracking-widest text-[10px] uppercase">Notification Vault</h3>
@@ -257,9 +257,9 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
           <div className="relative" ref={profileRef}>
             <button 
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="flex items-center gap-4 p-1.5 pr-5 bg-[#0d0d0d] border border-white/5 rounded-2xl hover:bg-white/[0.03] hover:border-white/10 transition-all duration-300 group"
+              className="flex items-center gap-4 p-1.5 pr-5 bg-[#0d0d0d] border border-white/5 rounded-lg hover:bg-white/[0.03] hover:border-white/10 transition-all duration-300 group"
             >
-              <div className="w-11 h-11 rounded-xl overflow-hidden flex items-center justify-center text-black shadow-2xl group-hover:scale-105 transition-transform" style={{ backgroundColor: themeColor }}>
+              <div className="w-11 h-11 rounded-lg overflow-hidden flex items-center justify-center text-black shadow-2xl group-hover:scale-105 transition-transform" style={{ backgroundColor: themeColor }}>
                 {user?.profilePicture ? (
                   <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
@@ -276,7 +276,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
             </button>
 
             {showProfileMenu && (
-              <div className="absolute right-0 mt-4 w-52 bg-[#000000] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+              <div className="absolute right-0 mt-4 w-52 bg-[#000000] border border-white/10 rounded-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 <div className="py-2">
                   <button 
                     onClick={() => {

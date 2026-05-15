@@ -3,10 +3,28 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import { Check, X, Clock, User, Phone, Mail, MessageSquare, Loader2, Calendar, Shield, IndianRupee } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
+import useCoachDashboard from "@hooks/useCoachDashboard";
+import DashboardSkeleton from "@components/DashboardSkeleton";
 
 export default function CoachBookings() {
+  const { dashboardData, loading } = useCoachDashboard();
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const getTimeGreeting = () => {
+    const hour = currentTime.getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  };
+
   const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
 
   useEffect(() => {
@@ -15,14 +33,11 @@ export default function CoachBookings() {
 
   const fetchBookings = async () => {
     try {
-      setLoading(true);
       const res = await axiosInstance.get("/api/professional/my-bookings");
       setBookings(res.data.bookings || []);
     } catch (error) {
       console.error("Error fetching bookings:", error);
       toast.error("Failed to load bookings");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -40,18 +55,45 @@ export default function CoachBookings() {
     }
   };
 
-  if (loading) return (
-    <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-primary" size={40} /></div>
-  );
+  if (loading) return <DashboardSkeleton />;
 
   return (
-    <div className="space-y-8 animate-fade-in font-open-sans">
-      <div className="pb-6 border-b border-white/5">
-        <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-white font-inter">
-          Booking <span className="text-[#CCFF00]">Requests</span>
-        </h1>
-        <p className="text-[#999999] text-xs font-semibold uppercase tracking-wider font-inter mt-1">Manage your upcoming and pending assignments</p>
-      </div>
+    <div className="h-full custom-scrollbar bg-[#000000]">
+      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative font-['Open_Sans']">
+        
+        {/* Header Section — Exact Copy of Dashboard Design */}
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 pb-2 border-b border-white/5">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-8 bg-[#CCFF00] rounded-full" />
+              <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
+                Booking <span className="text-[#CCFF00]">Roster</span>
+              </h1>
+            </div>
+            <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
+              {getTimeGreeting()} | Professional Reservation Console
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-2xl backdrop-blur-xl">
+              <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-xl flex items-center justify-center text-[#CCFF00]">
+                <Calendar size={24} />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-white text-lg font-bold leading-none font-inter">
+                  {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
+                </p>
+                <p className="text-[#CCFF00] text-[10px] font-semibold uppercase tracking-widest opacity-80">
+                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} •{" "}
+                  {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                </p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="relative z-10">
 
       {bookings.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#000000] rounded-[8px] border border-dashed border-[#2D2D2D] p-12 text-center shadow-[var(--shadow-2)]">
@@ -148,6 +190,8 @@ export default function CoachBookings() {
           ))}
         </div>
       )}
+      </div>
+    </div>
     </div>
   );
 }

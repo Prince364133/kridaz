@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { User, Mail, Phone, MapPin, Award, BookOpen, Camera, Save, Loader2, Plus, Trash2, CheckCircle2, ChevronLeft, ChevronRight, FileText, Image as ImageIcon, Video, Play, Layout, X, ChevronDown, Zap } from "lucide-react";
+import { User, Mail, Phone, MapPin, Award, BookOpen, Camera, Save, Loader2, Plus, Trash2, CheckCircle2, ChevronLeft, ChevronRight, FileText, Image as ImageIcon, Video, Play, Layout, X, ChevronDown, Zap, ShieldCheck, Target, Globe } from "lucide-react";
 import toast from "react-hot-toast";
 
 /**
  * ProfessionalProfile — The definitive dossier for professionals.
- * Fully rebranded for the Scorer Portal with Teal Green (#00C187) and Inter font.
+ * Compact for the Console design language (Inter font, 8px radii).
+ * Fully custom-styled dropdowns for premium dark theme parity.
  */
 
 const ALL_SPORTS = [
@@ -64,8 +65,11 @@ export default function ProfessionalProfile() {
   const [newAchievement, setNewAchievement] = useState("");
   const [newCert, setNewCert] = useState({ title: "", description: "", image: "" });
   const [newPortfolioItem, setNewPortfolioItem] = useState({ title: "", description: "", mediaType: "image", mediaUrl: "" });
+  
   const [showSportsDropdown, setShowSportsDropdown] = useState(false);
   const [showLanguagesDropdown, setShowLanguagesDropdown] = useState(false);
+  const [showEngagementDropdown, setShowEngagementDropdown] = useState(false);
+  const [showProficiencyDropdown, setShowProficiencyDropdown] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -116,7 +120,7 @@ export default function ProfessionalProfile() {
         achievements: formData.achievements.join("\n")
       };
       await axiosInstance.put("/api/professional/update-profile", payload);
-      toast.success("Dossier synchronized with server", {
+      toast.success("Dossier synchronized", {
         style: { background: "#000", color: "#fff", border: `1px solid ${themeColor}`, fontSize: "10px", fontWeight: "black" }
       });
     } catch (error) {
@@ -176,9 +180,9 @@ export default function ProfessionalProfile() {
         certifications: [...formData.certifications, { ...newCert }]
       });
       setNewCert({ title: "", description: "", image: "" });
-      toast.success("Credential added to stack");
+      toast.success("Credential added");
     } else {
-      toast.error("Credential title is mandatory");
+      toast.error("Title is mandatory");
     }
   };
 
@@ -222,7 +226,7 @@ export default function ProfessionalProfile() {
         portfolio: [...formData.portfolio, { ...newPortfolioItem }]
       });
       setNewPortfolioItem({ title: "", description: "", mediaType: "image", mediaUrl: "" });
-      toast.success("Work showcased in portfolio");
+      toast.success("Work showcased");
     } else {
       toast.error("Title and media are mandatory");
     }
@@ -259,47 +263,6 @@ export default function ProfessionalProfile() {
     }
   };
 
-  if (fetching) return (
-    <div className="py-20 flex justify-center"><Loader2 className="animate-spin" style={{ color: themeColor }} size={48} /></div>
-  );
-
-  const StepIndicator = () => (
-    <div className="flex items-center gap-8 mb-12 overflow-x-auto no-scrollbar pb-4">
-      {[1, 2, 3].map((step) => (
-        <button 
-          key={step} 
-          onClick={() => jumpToStep(step)}
-          className="flex items-center gap-4 group text-left outline-none shrink-0"
-        >
-          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xs font-black transition-all duration-500 ${
-            currentStep === step 
-              ? `text-black shadow-2xl` 
-              : currentStep > step 
-                ? "bg-white/5 border border-white/5" 
-                : "bg-black border border-white/5 text-neutral-600 group-hover:border-white/10"
-          }`}
-          style={{ 
-            backgroundColor: currentStep === step ? themeColor : currentStep > step ? "rgba(255,255,255,0.05)" : "transparent",
-            color: currentStep === step ? "#000" : currentStep > step ? themeColor : "#444",
-            boxShadow: currentStep === step ? `0 10px 25px ${themeColor}33` : 'none'
-          }}>
-            {currentStep > step ? <CheckCircle2 size={22} /> : `0${step}`}
-          </div>
-          <div className="hidden sm:block">
-            <p className={`text-[9px] font-black uppercase tracking-[0.2em] transition-colors font-inter`}
-               style={{ color: currentStep === step ? themeColor : "#444" }}>
-              PHASE {step}
-            </p>
-            <p className={`text-[12px] font-black uppercase tracking-widest transition-colors font-inter ${currentStep === step ? "text-white" : "text-neutral-700 group-hover:text-white/60"}`}>
-              {step === 1 ? "Professional" : step === 2 ? "Credentials" : "Work Portfolio"}
-            </p>
-          </div>
-          {step < 3 && <div className={`w-10 h-[1px] ${currentStep > step ? "opacity-30" : "bg-white/5"}`} style={{ backgroundColor: currentStep > step ? themeColor : "rgba(255,255,255,0.05)" }} />}
-        </button>
-      ))}
-    </div>
-  );
-
   const filteredSports = ALL_SPORTS.filter(s => 
     (!newGameType || s.toLowerCase().includes(newGameType.toLowerCase())) && 
     !formData.gameTypes.includes(s)
@@ -310,58 +273,109 @@ export default function ProfessionalProfile() {
     !formData.languages.includes(l)
   );
 
-  return (
-    <div className="space-y-10 animate-fade-in font-inter pb-32 h-full custom-scrollbar">
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-8 pb-12 border-b border-white/5">
-        <div className="space-y-2">
-          <h1 className="text-4xl lg:text-6xl font-black tracking-tighter text-white font-inter uppercase">
-            {portalName} <span style={{ color: themeColor }}>DOSSIER</span>
-          </h1>
-          <p className="text-neutral-500 text-[10px] font-black uppercase tracking-[0.3em] font-inter mt-2">Architect your professional presence and verified credentials</p>
-        </div>
+  if (fetching) return (
+    <div className="py-20 flex justify-center"><Loader2 className="animate-spin" style={{ color: themeColor }} size={48} /></div>
+  );
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 w-full xl:w-auto">
-          <div className="px-6 py-3 bg-white/[0.02] border border-white/5 rounded-2xl flex flex-col justify-center">
-            <p className="text-[9px] font-black text-neutral-600 uppercase tracking-widest font-inter mb-2">Completion Index</p>
-            <div className="flex items-center gap-4">
-              <div className="w-32 h-2 bg-white/5 rounded-full overflow-hidden shadow-inner">
-                <div className="h-full transition-all duration-1000" style={{ width: `${(currentStep / 3) * 100}%`, backgroundColor: themeColor, boxShadow: `0 0 10px ${themeColor}66` }} />
-              </div>
-              <span className="text-[11px] font-black text-white font-inter">{Math.round((currentStep / 3) * 100)}%</span>
+  const StepIndicator = () => (
+    <div className="flex items-center gap-4 mb-6 overflow-x-auto no-scrollbar pb-1">
+      {[1, 2, 3].map((step) => (
+        <button 
+          key={step} 
+          onClick={() => jumpToStep(step)}
+          className="flex items-center gap-3 group text-left outline-none shrink-0"
+        >
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-[9px] font-black transition-all duration-300 ${
+            currentStep === step 
+              ? `text-black` 
+              : currentStep > step 
+                ? "bg-white/5 border border-white/5" 
+                : "bg-black border border-white/5 text-neutral-600 group-hover:border-white/10"
+          }`}
+          style={{ 
+            backgroundColor: currentStep === step ? themeColor : currentStep > step ? "rgba(255,255,255,0.05)" : "transparent",
+            color: currentStep === step ? "#000" : currentStep > step ? themeColor : "#444",
+            boxShadow: currentStep === step ? `0 0 15px ${themeColor}33` : 'none'
+          }}>
+            {currentStep > step ? <CheckCircle2 size={16} /> : `0${step}`}
+          </div>
+          <div className="hidden sm:block">
+            <p className={`text-[7px] font-black uppercase tracking-[0.2em] transition-colors font-inter leading-none`}
+               style={{ color: currentStep === step ? themeColor : "#444" }}>
+              PHASE {step}
+            </p>
+            <p className={`text-[10px] font-black uppercase tracking-widest transition-colors font-inter mt-0.5 ${currentStep === step ? "text-white" : "text-neutral-700 group-hover:text-white/60"}`}>
+              {step === 1 ? "Professional" : step === 2 ? "Credentials" : "Work Portfolio"}
+            </p>
+          </div>
+          {step < 3 && <div className="w-6 h-[1px] bg-white/5" />}
+        </button>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="space-y-6 animate-fade-in font-inter pb-20 h-full custom-scrollbar">
+      {/* Header */}
+      <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 relative z-10 pb-4 border-b border-white/5">
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-8 rounded-full" style={{ backgroundColor: themeColor }} />
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-black tracking-tight font-['Open_Sans'] uppercase leading-none text-white">
+                {portalName} <span style={{ color: themeColor }}>DOSSIER</span>
+              </h1>
+              <p className="text-[#878C9F] text-[9px] font-black uppercase tracking-[0.2em] font-inter mt-1 ml-0.5 opacity-60">Professional presence & verified credentials</p>
             </div>
           </div>
+          
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-2.5 rounded-lg backdrop-blur-xl">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-black" style={{ backgroundColor: themeColor }}>
+                <Zap size={16} />
+              </div>
+              <div className="space-y-1">
+                <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest leading-none">Status</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full transition-all duration-1000" style={{ width: `${(currentStep / 3) * 100}%`, backgroundColor: themeColor }} />
+                  </div>
+                  <span className="text-[11px] font-black text-white">{Math.round((currentStep / 3) * 100)}%</span>
+                </div>
+              </div>
+            </div>
 
-          <button 
-            onClick={handleUpdate}
-            disabled={loading}
-            className="px-10 py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all transform active:scale-95 flex items-center justify-center gap-4 shadow-2xl group font-inter text-[11px]"
-            style={{ backgroundColor: themeColor, color: '#000', boxShadow: `0 10px 30px ${themeColor}33` }}
-          >
-            {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} className="group-hover:rotate-12 transition-transform" />}
-            Save Dossier
-          </button>
-        </div>
-      </div>
+            <button 
+              onClick={handleUpdate}
+              disabled={loading}
+              className="px-6 py-3 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all transform active:scale-95 shadow-xl" 
+              style={{ backgroundColor: themeColor, boxShadow: `0 5px 15px ${themeColor}22` }}
+            >
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              Save
+            </button>
+          </div>
+      </header>
 
       <StepIndicator />
 
       <div className="w-full">
         {currentStep === 1 && (
-          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-              {/* Left: Professional Quick Settings */}
-              <div className="lg:col-span-4 space-y-8">
-                <div className="bg-black border border-white/5 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
-                  <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-white mb-8 font-inter flex items-center gap-3">
-                    <Award size={18} style={{ color: themeColor }} /> Domain Expertise
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+              {/* Left Column */}
+              <div className="lg:col-span-4 space-y-4">
+                {/* Domain Expertise */}
+                <div className={`bg-white/[0.03] border border-white/5 rounded-lg p-5 backdrop-blur-xl relative ${showSportsDropdown ? 'z-[100]' : 'z-10'}`}>
+                  <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-6 flex items-center gap-2">
+                    <Award size={14} style={{ color: themeColor }} /> Domain Expertise
                   </h3>
-                  <div className="relative mb-6">
-                    <div className="flex gap-3">
+                  
+                  <div className="relative mb-4">
+                    <div className="flex gap-2">
                       <input 
                         type="text" 
                         placeholder="Assign Domain..."
-                        className="flex-1 bg-white/[0.03] border border-white/5 rounded-xl px-5 py-3.5 text-[12px] text-white outline-none focus:border-[#00C187]/50 font-inter transition-all"
+                        className="flex-1 bg-white/[0.03] border border-white/5 rounded-lg px-4 py-3 text-[11px] text-white outline-none focus:border-white/10 transition-all font-inter"
                         value={newGameType}
                         onChange={(e) => {
                           setNewGameType(e.target.value);
@@ -369,18 +383,18 @@ export default function ProfessionalProfile() {
                         }}
                         onFocus={() => setShowSportsDropdown(true)}
                       />
-                      <button onClick={() => addGameType()} className="w-12 h-12 rounded-xl flex items-center justify-center transition-all shadow-lg shrink-0" style={{ backgroundColor: themeColor }}>
-                        <Plus size={22} color="#000" />
+                      <button onClick={() => addGameType()} className="w-11 h-11 rounded-lg flex items-center justify-center transition-all shrink-0" style={{ backgroundColor: themeColor }}>
+                        <Plus size={18} color="#000" />
                       </button>
                     </div>
 
                     {showSportsDropdown && filteredSports.length > 0 && (
-                      <div className="absolute top-full left-0 right-0 mt-3 bg-[#080808] border border-white/10 rounded-2xl shadow-2xl z-50 max-h-56 overflow-y-auto no-scrollbar">
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-lg shadow-2xl z-[100] max-h-64 overflow-y-auto custom-scrollbar">
                         {filteredSports.map(sport => (
                           <button 
                             key={sport}
                             onClick={() => addGameType(sport)}
-                            className="w-full px-6 py-4 text-left text-[12px] text-white hover:bg-[#00C187]/10 transition-colors border-b border-white/5 last:border-0 font-inter font-black uppercase tracking-tight"
+                            className="w-full px-4 py-2.5 text-left text-[10px] text-white hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 font-black uppercase"
                           >
                             {sport}
                           </button>
@@ -389,65 +403,65 @@ export default function ProfessionalProfile() {
                     )}
                   </div>
                   
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-1.5">
                     {formData.gameTypes.map(type => (
-                      <span key={type} className="px-5 py-2.5 bg-white/[0.03] border border-white/5 rounded-xl text-[10px] font-black text-white flex items-center gap-3 font-inter uppercase tracking-widest hover:border-[#00C187]/30 transition-all">
+                      <span key={type} className="px-3 py-1.5 bg-white/[0.05] border border-white/5 rounded-md text-[8px] font-black text-white flex items-center gap-2 uppercase tracking-widest">
                         {type}
-                        <button onClick={() => removeGameType(type)} className="text-neutral-600 hover:text-red-500 transition-colors"><X size={14} /></button>
+                        <button onClick={() => removeGameType(type)} className="text-neutral-600 hover:text-red-500 transition-colors"><X size={10} /></button>
                       </span>
                     ))}
-                    {formData.gameTypes.length === 0 && (
-                        <p className="text-[10px] text-neutral-800 font-black uppercase tracking-widest py-2 italic">Select Primary Domains</p>
+                  </div>
+                </div>
+
+                {/* Custom Engagement Mode Dropdown */}
+                <div className={`bg-white/[0.03] border border-white/5 rounded-lg p-5 backdrop-blur-xl relative ${showEngagementDropdown ? 'z-[100]' : 'z-10'}`}>
+                  <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-6 flex items-center gap-2">
+                    <MapPin size={14} style={{ color: themeColor }} /> Engagement
+                  </h3>
+                  <div className="relative">
+                    <button 
+                      onClick={() => setShowEngagementDropdown(!showEngagementDropdown)}
+                      className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[11px] text-white outline-none font-black uppercase tracking-widest transition-all flex items-center justify-between"
+                    >
+                      <span>{formData.availabilityMode === 'Both' ? 'Hybrid Mode' : formData.availabilityMode === 'Offline' ? 'Physical Only' : 'Remote Only'}</span>
+                      <ChevronDown size={16} className={`transition-transform duration-300 ${showEngagementDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showEngagementDropdown && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-lg shadow-2xl z-[100] overflow-hidden">
+                        {[
+                          { label: 'Physical Only', value: 'Offline' },
+                          { label: 'Remote Only', value: 'Online' },
+                          { label: 'Hybrid Mode', value: 'Both' }
+                        ].map((opt) => (
+                          <button 
+                            key={opt.value}
+                            onClick={() => {
+                              setFormData({ ...formData, availabilityMode: opt.value });
+                              setShowEngagementDropdown(false);
+                            }}
+                            className="w-full px-4 py-3 text-left text-[10px] text-white hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 font-black uppercase tracking-widest"
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
 
-                <div className="bg-black border border-white/5 rounded-[2.5rem] p-10 shadow-2xl space-y-8 relative overflow-hidden">
-                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
-                  <div className="flex items-center gap-4 relative z-10">
-                    <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center shadow-inner">
-                      <MapPin size={22} style={{ color: themeColor }} />
-                    </div>
-                    <div>
-                      <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-white font-inter">Engagement</h3>
-                      <p className="text-[9px] text-neutral-600 font-black uppercase tracking-widest mt-1">Operational Mode</p>
-                    </div>
-                  </div>
-                  <div className="relative z-10">
-                    <select 
-                      className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-5 text-[13px] text-white focus:border-[#00C187]/50 outline-none font-inter font-black uppercase tracking-widest transition-all appearance-none cursor-pointer"
-                      value={formData.availabilityMode}
-                      onChange={(e) => setFormData({...formData, availabilityMode: e.target.value})}
-                    >
-                      <option value="Offline">Physical Presence Only</option>
-                      <option value="Online">Remote Operations Only</option>
-                      <option value="Both">Hybrid Mode (Both)</option>
-                    </select>
-                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-600">
-                      <ChevronDown size={18} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-black border border-white/5 rounded-[2.5rem] p-10 shadow-2xl space-y-8 relative overflow-hidden">
-                   <div className="absolute top-0 right-0 w-48 h-48 bg-[#00C187]/5 blur-[80px] pointer-events-none" />
-                   <div className="flex items-center gap-4 relative z-10">
-                    <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center shadow-inner">
-                      <BookOpen size={22} style={{ color: themeColor }} />
-                    </div>
-                    <div>
-                      <h3 className="text-[13px] font-black uppercase tracking-[0.2em] text-white font-inter">Linguistics</h3>
-                      <p className="text-[9px] text-neutral-600 font-black uppercase tracking-widest mt-1">Communication Stack</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-6 relative z-10">
+                {/* Linguistics */}
+                <div className={`bg-white/[0.03] border border-white/5 rounded-lg p-5 backdrop-blur-xl relative ${showLanguagesDropdown ? 'z-[100]' : 'z-10'}`}>
+                  <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-6 flex items-center gap-2">
+                    <Globe size={14} style={{ color: themeColor }} /> Languages
+                  </h3>
+                  <div className="space-y-4">
                     <div className="relative">
-                      <div className="flex gap-3">
+                      <div className="flex gap-2">
                         <input 
                           type="text" 
                           placeholder="Link Language..."
-                          className="flex-1 bg-white/[0.03] border border-white/5 rounded-xl px-5 py-4 text-[12px] text-white outline-none focus:border-[#00C187]/50 font-inter transition-all"
+                          className="flex-1 bg-white/[0.03] border border-white/5 rounded-lg px-4 py-3 text-[11px] text-white outline-none focus:border-white/10 transition-all font-inter"
                           value={newLanguage}
                           onChange={(e) => {
                             setNewLanguage(e.target.value);
@@ -455,32 +469,31 @@ export default function ProfessionalProfile() {
                           }}
                           onFocus={() => setShowLanguagesDropdown(true)}
                         />
-                        <button onClick={() => addLanguage()} className="w-14 h-14 rounded-xl shadow-lg flex items-center justify-center shrink-0 transition-all active:scale-95" style={{ backgroundColor: themeColor }}>
-                           <Plus size={24} color="#000" />
+                        <button onClick={() => addLanguage()} className="w-11 h-11 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: themeColor }}>
+                           <Plus size={18} color="#000" />
                         </button>
                       </div>
 
                       {showLanguagesDropdown && filteredLanguages.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 mt-3 bg-[#080808] border border-white/10 rounded-2xl shadow-2xl z-50 max-h-56 overflow-y-auto no-scrollbar">
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-lg shadow-2xl z-[100] max-h-64 overflow-y-auto custom-scrollbar">
                           {filteredLanguages.map(lang => (
                             <button 
                               key={lang}
                               onClick={() => addLanguage(lang)}
-                              className="w-full px-6 py-4 text-left text-[12px] text-white hover:bg-[#00C187]/10 transition-colors border-b border-white/5 last:border-0 flex items-center justify-between group font-inter font-black uppercase"
+                              className="w-full px-4 py-2.5 text-left text-[10px] text-white hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 font-black uppercase"
                             >
-                              <span>{lang}</span>
-                              <Plus size={14} style={{ color: themeColor }} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                              {lang}
                             </button>
                           ))}
                         </div>
                       )}
                     </div>
                     
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-wrap gap-1.5">
                       {formData.languages.map(lang => (
-                        <span key={lang} className="px-5 py-2.5 bg-white/[0.03] border border-white/5 rounded-xl text-[11px] font-black text-white flex items-center gap-4 font-inter uppercase tracking-widest hover:border-[#00C187]/30 transition-all">
+                        <span key={lang} className="px-3 py-1.5 bg-white/[0.05] border border-white/5 rounded-md text-[8px] font-black text-white flex items-center gap-2 uppercase tracking-widest">
                           {lang}
-                          <button onClick={() => removeLanguage(lang)} className="text-neutral-600 hover:text-red-500 transition-colors"><X size={14} /></button>
+                          <button onClick={() => removeLanguage(lang)} className="text-neutral-600 hover:text-red-500 transition-colors"><X size={10} /></button>
                         </span>
                       ))}
                     </div>
@@ -488,54 +501,70 @@ export default function ProfessionalProfile() {
                 </div>
               </div>
 
-              {/* Right: Detailed Professional Matrix */}
-              <div className="lg:col-span-8 space-y-8">
-                <div className="bg-black border border-white/5 rounded-[2.5rem] p-10 lg:p-12 space-y-12 shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-[#00C187]/5 blur-[100px] pointer-events-none" />
-                  
-                  <div className="space-y-10 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center shadow-inner">
-                        <FileText size={22} style={{ color: themeColor }} />
-                      </div>
-                      <h3 className="text-[14px] font-black uppercase tracking-[0.3em] text-white font-inter">Professional Matrix</h3>
-                    </div>
+              {/* Right Column */}
+              <div className="lg:col-span-8 space-y-4">
+                <div className="bg-white/[0.03] border border-white/5 rounded-lg p-6 backdrop-blur-xl space-y-8 shadow-2xl relative overflow-hidden">
+                  {/* Professional Matrix */}
+                  <div className="space-y-6 relative z-10">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-3">
+                      <FileText size={16} style={{ color: themeColor }} /> Professional Matrix
+                    </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] ml-1">Operational Headline</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Operational Headline</label>
                         <input 
                           type="text" 
-                          placeholder="e.g. Senior Scorer & Node Administrator"
-                          className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-5 text-[14px] text-white focus:border-[#00C187]/50 outline-none font-inter font-black transition-all"
+                          placeholder="e.g. Senior Scorer"
+                          className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[12px] text-white focus:border-white/10 outline-none font-inter font-black transition-all"
                           value={formData.specialization}
                           onChange={(e) => setFormData({...formData, specialization: e.target.value})}
                         />
                       </div>
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] ml-1">Proficiency Level</label>
+                      <div className={`space-y-1.5 relative ${showProficiencyDropdown ? 'z-[110]' : 'z-auto'}`}>
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Proficiency Level</label>
                         <div className="relative">
-                            <select 
-                            className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-5 text-[14px] text-white focus:border-[#00C187]/50 outline-none font-inter font-black uppercase tracking-widest transition-all appearance-none"
-                            value={formData.coachingLevel}
-                            onChange={(e) => setFormData({...formData, coachingLevel: e.target.value})}
+                            <button 
+                              onClick={() => setShowProficiencyDropdown(!showProficiencyDropdown)}
+                              className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[12px] text-white focus:border-white/10 outline-none font-black uppercase tracking-widest flex items-center justify-between"
                             >
-                            <option value="Beginner">Junior Associate</option>
-                            <option value="Intermediate">Mid-Tier Professional</option>
-                            <option value="Elite">Elite / Senior Professional</option>
-                            <option value="National">Governing Body Certified</option>
-                            </select>
-                            <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-600">
-                                <ChevronDown size={18} />
-                            </div>
+                              <span>{
+                                formData.coachingLevel === 'Beginner' ? 'Junior Associate' : 
+                                formData.coachingLevel === 'Intermediate' ? 'Mid-Tier Professional' :
+                                formData.coachingLevel === 'Elite' ? 'Elite / Senior' : 'Governing Body Certified'
+                              }</span>
+                              <ChevronDown size={16} className={`transition-transform duration-300 ${showProficiencyDropdown ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            {showProficiencyDropdown && (
+                              <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-lg shadow-2xl z-[100] overflow-hidden">
+                                {[
+                                  { label: 'Junior Associate', value: 'Beginner' },
+                                  { label: 'Mid-Tier Professional', value: 'Intermediate' },
+                                  { label: 'Elite / Senior', value: 'Elite' },
+                                  { label: 'Governing Body Certified', value: 'National' }
+                                ].map((opt) => (
+                                  <button 
+                                    key={opt.value}
+                                    onClick={() => {
+                                      setFormData({ ...formData, coachingLevel: opt.value });
+                                      setShowProficiencyDropdown(false);
+                                    }}
+                                    className="w-full px-4 py-3 text-left text-[11px] text-white hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 font-black uppercase tracking-widest"
+                                  >
+                                    {opt.label}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
                         </div>
                       </div>
-                      <div className="space-y-3 md:col-span-2">
-                        <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] ml-1">Industry Tenure</label>
+                      <div className="space-y-1.5 md:col-span-2">
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Industry Tenure</label>
                         <input 
                           type="text" 
                           placeholder="e.g. 12+ Professional Seasons"
-                          className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-5 text-[14px] text-white focus:border-[#00C187]/50 outline-none font-inter font-black transition-all"
+                          className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[12px] text-white focus:border-white/10 outline-none font-black transition-all"
                           value={formData.experience}
                           onChange={(e) => setFormData({...formData, experience: e.target.value})}
                         />
@@ -543,53 +572,45 @@ export default function ProfessionalProfile() {
                     </div>
                   </div>
 
-                  <div className="space-y-10 relative z-10">
-                    <div className="flex items-center gap-4">
-                       <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center shadow-inner">
-                        <CheckCircle2 size={22} style={{ color: themeColor }} />
-                      </div>
-                      <h3 className="text-[14px] font-black uppercase tracking-[0.3em] text-white font-inter">Specialization Scopes</h3>
-                    </div>
+                  {/* Specialization Scopes */}
+                  <div className="space-y-6 relative z-10">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-3">
+                      <Target size={16} style={{ color: themeColor }} /> Specialization Scopes
+                    </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                      <div className="space-y-6">
-                        <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] ml-1">Operational Types</label>
-                        <div className="flex flex-wrap gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Operational Types</label>
+                        <div className="flex flex-wrap gap-1.5">
                           {["Individual", "Group", "Team", "Online", "Clinic"].map(type => (
                             <button 
                               key={type}
                               onClick={() => toggleArrayItem("trainingTypes", type)}
-                              className={`px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                              className={`px-4 py-2.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
                                 formData.trainingTypes.includes(type) 
-                                  ? "text-black shadow-2xl" 
-                                  : "bg-white/[0.03] border border-white/5 text-neutral-600 hover:border-[#00C187]/30 hover:text-white"
+                                  ? "text-black" 
+                                  : "bg-white/[0.03] border border-white/5 text-neutral-600 hover:text-white"
                               }`}
-                              style={{ 
-                                  backgroundColor: formData.trainingTypes.includes(type) ? themeColor : 'transparent',
-                                  boxShadow: formData.trainingTypes.includes(type) ? `0 10px 20px ${themeColor}33` : 'none'
-                              }}
+                              style={{ backgroundColor: formData.trainingTypes.includes(type) ? themeColor : 'transparent' }}
                             >
                               {type}
                             </button>
                           ))}
                         </div>
                       </div>
-                      <div className="space-y-6">
-                        <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] ml-1">Target Demographics</label>
-                        <div className="flex flex-wrap gap-3">
+                      <div className="space-y-4">
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Target Demographics</label>
+                        <div className="flex flex-wrap gap-1.5">
                           {["Kids (<12)", "Teens (13-19)", "Adults (20+)", "Seniors"].map(age => (
                             <button 
                               key={age}
                               onClick={() => toggleArrayItem("ageGroups", age)}
-                              className={`px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                              className={`px-4 py-2.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
                                 formData.ageGroups.includes(age) 
-                                  ? "text-black shadow-2xl" 
-                                  : "bg-white/[0.03] border border-white/5 text-neutral-600 hover:border-[#00C187]/30 hover:text-white"
+                                  ? "text-black" 
+                                  : "bg-white/[0.03] border border-white/5 text-neutral-600 hover:text-white"
                               }`}
-                              style={{ 
-                                  backgroundColor: formData.ageGroups.includes(age) ? themeColor : 'transparent',
-                                  boxShadow: formData.ageGroups.includes(age) ? `0 10px 20px ${themeColor}33` : 'none'
-                              }}
+                              style={{ backgroundColor: formData.ageGroups.includes(age) ? themeColor : 'transparent' }}
                             >
                               {age}
                             </button>
@@ -602,347 +623,363 @@ export default function ProfessionalProfile() {
               </div>
             </div>
 
+            {/* Career Milestones — Full Width */}
+            <div className="bg-white/[0.03] border border-white/5 rounded-lg p-6 backdrop-blur-xl relative overflow-hidden">
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
+                <div className="space-y-1">
+                    <h3 className="text-[20px] font-black text-white uppercase tracking-widest flex items-center gap-3 font-inter">
+                    <Award size={28} style={{ color: themeColor }} /> CAREER MILESTONES
+                    </h3>
+                    <p className="text-[8px] text-neutral-500 font-black uppercase tracking-[0.5em] opacity-50">Establish your professional legacy</p>
+                </div>
+                <div className="flex gap-2 w-full lg:w-auto lg:min-w-[350px]">
+                    <input 
+                    type="text" 
+                    placeholder="Log Industry Milestone..."
+                    className="flex-1 bg-white/[0.03] border border-white/5 rounded-lg px-4 py-3 text-[12px] text-white outline-none font-black transition-all"
+                    value={newAchievement}
+                    onChange={(e) => setNewAchievement(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addAchievement()}
+                    />
+                    <button onClick={addAchievement} className="w-11 h-11 rounded-lg shadow-xl flex items-center justify-center shrink-0 transition-all" style={{ backgroundColor: themeColor }}>
+                    <Plus size={24} color="#000" />
+                    </button>
+                </div>
+                </div>
 
-            <div className="bg-black border border-white/5 rounded-[3rem] p-10 lg:p-14 shadow-2xl relative group overflow-hidden">
-               <div className="absolute inset-0 bg-gradient-to-r from-[#00C187]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-               <div className="relative">
-                  <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-10 mb-14">
-                    <div className="space-y-3">
-                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter font-inter flex items-center gap-5">
-                        <Award size={40} style={{ color: themeColor }} /> Career Milestones
-                      </h3>
-                      <p className="text-neutral-500 text-[11px] font-black uppercase tracking-[0.4em] font-inter">Establish your professional legacy and industry impact</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                {formData.achievements.map((ach, idx) => (
+                    <div key={idx} className="flex items-start justify-between p-4 bg-white/[0.03] border border-white/5 rounded-lg group/item transition-all hover:border-white/10">
+                    <div className="flex items-start gap-3">
+                        <CheckCircle2 size={14} style={{ color: themeColor }} className="mt-0.5 shrink-0" />
+                        <span className="text-[11px] text-neutral-300 font-black uppercase tracking-tight leading-snug">{ach}</span>
                     </div>
-                    <div className="flex gap-4 w-full xl:w-auto xl:min-w-[600px]">
-                      <input 
-                        type="text" 
-                        placeholder="Log Industry Milestone..."
-                        className="flex-1 bg-white/[0.03] border border-white/5 rounded-2xl px-8 py-5 text-[14px] text-white focus:border-[#00C187]/50 outline-none font-inter font-black transition-all"
-                        value={newAchievement}
-                        onChange={(e) => setNewAchievement(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && addAchievement()}
-                      />
-                      <button onClick={addAchievement} className="w-16 h-16 rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center shrink-0" style={{ backgroundColor: themeColor }}>
-                        <Plus size={32} color="#000" />
-                      </button>
+                    <button onClick={() => removeAchievement(ach)} className="text-neutral-700 hover:text-red-500 transition-colors shrink-0 ml-2"><Trash2 size={14} /></button>
                     </div>
-                  </div>
+                ))}
+                {formData.achievements.length === 0 && (
+                    <div className="col-span-full py-10 bg-white/[0.01] rounded-lg border border-dashed border-white/5 flex flex-col items-center justify-center space-y-2">
+                    <p className="text-[8px] text-neutral-800 font-black uppercase tracking-[0.5em]">Timeline Node Empty</p>
+                    </div>
+                )}
+                </div>
+            </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {formData.achievements.map((ach, idx) => (
-                      <div key={idx} className="flex items-start justify-between p-8 bg-white/[0.02] border border-white/5 rounded-3xl group/item hover:border-[#00C187]/30 transition-all duration-500 relative shadow-lg">
-                        <div className="flex items-start gap-5">
-                          <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center shrink-0 group-hover/item:border-[#00C187]/40 transition-all shadow-inner">
-                            <CheckCircle2 size={20} style={{ color: themeColor }} />
-                          </div>
-                          <span className="text-[14px] text-neutral-300 font-inter font-black uppercase tracking-tight leading-relaxed pt-2">{ach}</span>
-                        </div>
-                        <button onClick={() => removeAchievement(ach)} className="text-neutral-800 hover:text-red-500 transition-colors mt-3"><Trash2 size={18} /></button>
-                      </div>
-                    ))}
-                    {formData.achievements.length === 0 && (
-                      <div className="col-span-full py-24 border-2 border-dashed border-white/5 rounded-[2.5rem] bg-white/[0.01] flex flex-col items-center justify-center space-y-6">
-                        <div className="w-20 h-20 rounded-full bg-white/[0.02] border border-white/5 flex items-center justify-center shadow-inner">
-                          <Award size={40} className="text-neutral-800" />
-                        </div>
-                        <p className="text-[11px] text-neutral-700 font-black uppercase tracking-[0.5em]">Industry Timeline Empty</p>
-                      </div>
-                    )}
-                  </div>
-               </div>
+            {/* Adjusted Navigation */}
+            <div className="flex items-center justify-end gap-3 pt-6">
+              {currentStep > 1 && (
+                <button 
+                  onClick={prevStep}
+                  className="px-5 h-10 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
+                >
+                  <ChevronLeft size={14} /> Previous
+                </button>
+              )}
+              <button 
+                onClick={nextStep}
+                className="px-8 h-10 rounded-lg text-[9px] font-black uppercase tracking-[0.3em] transition-all transform active:scale-95 shadow-lg flex items-center justify-center gap-2 hover:brightness-110"
+                style={{ backgroundColor: themeColor, color: '#000' }}
+              >
+                {currentStep === 3 ? (
+                  <><CheckCircle2 size={14} /> Finalize</>
+                ) : (
+                  <><Zap size={14} /> Phase {currentStep + 1} <ChevronRight size={14} /></>
+                )}
+              </button>
             </div>
           </div>
         )}
 
         {currentStep === 2 && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-in fade-in slide-in-from-right-4 duration-700">
-            {/* Left: Add Certification Form */}
-            <div className="lg:col-span-5 space-y-8">
-              <div className="bg-black border border-white/5 rounded-[3rem] p-10 lg:p-12 space-y-10 shadow-2xl relative group overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-b from-[#00C187]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                <div className="relative space-y-8">
-                  <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-2xl bg-[#00C187]/10 border border-[#00C187]/20 flex items-center justify-center shadow-lg">
-                      <Award size={28} style={{ color: themeColor }} />
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-500">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                {/* Add Certification */}
+                <div className="lg:col-span-4 space-y-4">
+                <div className="bg-white/[0.03] border border-white/5 rounded-lg p-5 backdrop-blur-xl space-y-6 shadow-2xl relative overflow-hidden group">
+                    <div className="flex items-center gap-4 border-b border-white/5 pb-4">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center text-black" style={{ backgroundColor: themeColor }}>
+                        <Award size={20} />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-black text-white uppercase tracking-tighter font-inter">Add Credential</h3>
-                      <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest mt-1.5">Showcase verified professional standing</p>
+                        <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500">Verification</h3>
+                        <p className="text-white text-[12px] font-black uppercase tracking-tight">Add Credential</p>
                     </div>
-                  </div>
+                    </div>
 
-                  <div className="space-y-6">
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] ml-1">Credential Title</label>
-                      <input 
+                    <div className="space-y-4">
+                    <div className="space-y-1.5">
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Credential Title</label>
+                        <input 
                         type="text" 
-                        placeholder="e.g. Master Scorer - BCCI Certified"
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-5 text-[14px] text-white focus:border-[#00C187]/50 outline-none font-inter font-black transition-all"
+                        placeholder="e.g. Master Scorer"
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[11px] text-white focus:border-white/10 outline-none font-black transition-all"
                         value={newCert.title}
                         onChange={(e) => setNewCert({...newCert, title: e.target.value})}
-                      />
+                        />
                     </div>
 
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] ml-1">Brief Description</label>
-                      <textarea 
-                        rows="4"
-                        placeholder="Detail the scope and validation of this credential..."
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-5 text-[14px] text-white focus:border-[#00C187]/50 outline-none font-inter font-black transition-all resize-none"
+                    <div className="space-y-1.5">
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Description</label>
+                        <textarea 
+                        rows="3"
+                        placeholder="Detail scope..."
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[11px] text-white focus:border-white/10 outline-none font-black transition-all resize-none"
                         value={newCert.description}
                         onChange={(e) => setNewCert({...newCert, description: e.target.value})}
-                      />
+                        />
                     </div>
 
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] ml-1">Digital Proof</label>
-                      <div className="relative group/upload">
+                    <div className="space-y-1.5">
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Digital Proof</label>
+                        <div className="relative group/upload">
                         <input 
-                          type="file" 
-                          accept="image/*"
-                          onChange={handleCertImageUpload}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            type="file" 
+                            accept="image/*"
+                            onChange={handleCertImageUpload}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
-                        <div className={`w-full h-48 border border-dashed rounded-[2rem] flex flex-col items-center justify-center gap-4 transition-all ${newCert.image ? "border-[#00C187]/40 bg-[#00C187]/5 shadow-inner" : "border-white/5 bg-white/[0.02] group-hover/upload:border-[#00C187]/30"}`}>
-                          {newCert.image ? (
-                            <img src={newCert.image} className="w-full h-full object-contain p-4" alt="Preview" />
-                          ) : (
+                        <div className={`w-full h-36 border border-dashed rounded-lg flex flex-col items-center justify-center gap-3 transition-all ${newCert.image ? "border-white/20 bg-white/5" : "border-white/5 bg-white/[0.02] group-hover/upload:border-white/10"}`}>
+                            {newCert.image ? (
+                            <img src={newCert.image} className="w-full h-full object-contain p-2" alt="Preview" />
+                            ) : (
                             <>
-                              <ImageIcon size={40} className="text-neutral-800" />
-                              <span className="text-[10px] font-black text-neutral-700 uppercase tracking-widest">Link High-Res Identity Proof</span>
+                                <ImageIcon size={24} className="text-neutral-900" />
+                                <span className="text-[8px] font-black text-neutral-800 uppercase tracking-widest">Link Identity Proof</span>
                             </>
-                          )}
+                            )}
                         </div>
-                      </div>
+                        </div>
                     </div>
 
                     <button 
-                      onClick={addCertification}
-                      className="w-full h-16 text-black font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl transition-all flex items-center justify-center gap-4 shadow-2xl mt-6 active:scale-95"
-                      style={{ backgroundColor: themeColor, boxShadow: `0 10px 30px ${themeColor}33` }}
+                        onClick={addCertification}
+                        className="w-full h-12 text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-lg transition-all flex items-center justify-center gap-2 active:scale-95"
+                        style={{ backgroundColor: themeColor }}
                     >
-                      <Plus size={22} /> Integrate Credential
+                        <Plus size={16} /> Integrate
                     </button>
-                  </div>
+                    </div>
                 </div>
-              </div>
+                </div>
+
+                {/* Right: Credentials List */}
+                <div className="lg:col-span-8 space-y-4">
+                <div className="bg-white/[0.03] border border-white/5 rounded-lg p-6 backdrop-blur-xl space-y-6 min-h-[500px] relative overflow-hidden">
+                    <div className="flex items-center justify-between border-b border-white/5 pb-4 relative z-10">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-3 font-['Open_Sans']">
+                        <ShieldCheck size={16} style={{ color: themeColor }} /> Verified Stack
+                    </h3>
+                    <span className="text-[8px] font-black text-neutral-600 uppercase tracking-widest px-3 py-1 bg-white/5 rounded-full border border-white/5">{formData.certifications.length} Creds</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 relative z-10">
+                    {formData.certifications.map((cert, idx) => (
+                        <div key={idx} className="bg-white/[0.03] border border-white/5 rounded-lg overflow-hidden group/item transition-all hover:border-white/10">
+                        <div className="h-24 bg-white/[0.02] relative overflow-hidden flex items-center justify-center border-b border-white/5">
+                            {cert.image ? (
+                            <img src={cert.image} className="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-110" alt={cert.title} />
+                            ) : (
+                            <Award size={24} className="text-neutral-900" />
+                            )}
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                            <button onClick={() => removeCertification(idx)} className="w-10 h-10 bg-red-600 text-white rounded-lg flex items-center justify-center transition-all hover:scale-105"><Trash2 size={16} /></button>
+                            </div>
+                        </div>
+                        <div className="p-3 space-y-1">
+                            <h4 className="text-[11px] font-black text-white uppercase tracking-tight line-clamp-1">{cert.title}</h4>
+                            <p className="text-[9px] text-neutral-500 font-medium line-clamp-2 leading-relaxed">{cert.description || "Pending validation."}</p>
+                        </div>
+                        </div>
+                    ))}
+
+                    {formData.certifications.length === 0 && (
+                        <div className="col-span-full py-16 flex flex-col items-center justify-center space-y-4 bg-white/[0.01] rounded-lg border border-dashed border-white/5">
+                        <ShieldCheck size={32} className="text-neutral-900" />
+                        <p className="text-[8px] text-neutral-800 font-black uppercase tracking-[0.5em]">Stack Empty</p>
+                        </div>
+                    )}
+                    </div>
+                </div>
+                </div>
             </div>
 
-            {/* Right: List of Certifications */}
-            <div className="lg:col-span-7 space-y-8">
-              <div className="bg-black border border-white/5 rounded-[3rem] p-10 lg:p-12 space-y-10 min-h-[600px] shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-[#00C187]/5 blur-[100px] pointer-events-none" />
-                <div className="flex items-center justify-between border-b border-white/5 pb-8 relative z-10">
-                  <div className="flex items-center gap-4">
-                    <FileText size={22} style={{ color: themeColor }} />
-                    <h3 className="text-[14px] font-black uppercase tracking-[0.3em] text-white font-inter">Verified Stack</h3>
-                  </div>
-                  <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest px-4 py-1.5 bg-white/5 rounded-full border border-white/5">{formData.certifications.length} Credentials</span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-                  {formData.certifications.map((cert, idx) => (
-                    <div key={idx} className="bg-white/[0.02] border border-white/5 rounded-3xl overflow-hidden group/item hover:border-[#00C187]/40 transition-all duration-500 shadow-xl">
-                      <div className="h-48 bg-white/[0.03] relative overflow-hidden flex items-center justify-center border-b border-white/5">
-                        {cert.image ? (
-                          <img src={cert.image} className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-1000" alt={cert.title} />
-                        ) : (
-                          <Award size={56} className="text-neutral-900" />
-                        )}
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                          <button onClick={() => removeCertification(idx)} className="w-14 h-14 bg-red-600 text-white rounded-2xl flex items-center justify-center hover:scale-110 transition-all shadow-2xl"><Trash2 size={22} /></button>
-                        </div>
-                      </div>
-                      <div className="p-6 space-y-3">
-                        <h4 className="text-[13px] font-black text-white uppercase tracking-tight font-inter line-clamp-1">{cert.title}</h4>
-                        <p className="text-[11px] text-neutral-500 font-inter line-clamp-2 leading-relaxed">{cert.description || "Credential validation summary pending."}</p>
-                      </div>
-                    </div>
-                  ))}
-
-                  {formData.certifications.length === 0 && (
-                    <div className="col-span-full py-32 flex flex-col items-center justify-center space-y-8 bg-white/[0.01] rounded-[2.5rem] border-2 border-dashed border-white/5">
-                      <div className="w-24 h-24 rounded-full bg-white/[0.02] border border-white/5 flex items-center justify-center shadow-inner">
-                        <Award size={48} className="text-neutral-900" />
-                      </div>
-                      <p className="text-[11px] text-neutral-700 font-black uppercase tracking-[0.5em]">Credential Stack Empty</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+            {/* Adjusted Navigation */}
+            <div className="flex items-center justify-end gap-3 pt-6">
+              <button 
+                onClick={prevStep}
+                className="px-5 h-10 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
+              >
+                <ChevronLeft size={14} /> Previous
+              </button>
+              <button 
+                onClick={nextStep}
+                className="px-8 h-10 rounded-lg text-[9px] font-black uppercase tracking-[0.3em] transition-all transform active:scale-95 shadow-lg flex items-center justify-center gap-2 hover:brightness-110"
+                style={{ backgroundColor: themeColor, color: '#000' }}
+              >
+                <Zap size={14} /> Phase 3 <ChevronRight size={14} />
+              </button>
             </div>
           </div>
         )}
 
         {currentStep === 3 && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-in fade-in slide-in-from-right-4 duration-700">
-            <div className="lg:col-span-4 space-y-8">
-              <div className="bg-black border border-white/5 rounded-[3rem] p-10 lg:p-12 space-y-10 shadow-2xl relative group overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-b from-[#00C187]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                <div className="relative space-y-8">
-                  <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-2xl bg-[#00C187]/10 border border-[#00C187]/20 flex items-center justify-center shadow-lg">
-                      <Layout size={28} style={{ color: themeColor }} />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-black text-white uppercase tracking-tighter font-inter">Live Gallery</h3>
-                      <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest mt-1.5">Portfolio & Industry Visuals</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-8">
-                    <div className="flex bg-white/[0.02] p-1.5 rounded-2xl border border-white/5 shadow-inner">
-                      <button 
-                        onClick={() => setNewPortfolioItem({...newPortfolioItem, mediaType: 'image', mediaUrl: ''})}
-                        className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all transform active:scale-95 ${newPortfolioItem.mediaType === 'image' ? "text-black shadow-lg" : "text-neutral-600 hover:text-white"}`}
-                        style={{ backgroundColor: newPortfolioItem.mediaType === 'image' ? themeColor : 'transparent' }}
-                      >
-                        Photography
-                      </button>
-                      <button 
-                        onClick={() => setNewPortfolioItem({...newPortfolioItem, mediaType: 'video', mediaUrl: ''})}
-                        className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all transform active:scale-95 ${newPortfolioItem.mediaType === 'video' ? "text-black shadow-lg" : "text-neutral-600 hover:text-white"}`}
-                        style={{ backgroundColor: newPortfolioItem.mediaType === 'video' ? themeColor : 'transparent' }}
-                      >
-                        Broadcasting
-                      </button>
-                    </div>
-
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] ml-1">Project Title</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. IPL Regional Qualifiers 2024"
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-5 text-[14px] text-white focus:border-[#00C187]/50 outline-none font-inter font-black transition-all"
-                        value={newPortfolioItem.title}
-                        onChange={(e) => setNewPortfolioItem({...newPortfolioItem, title: e.target.value})}
-                      />
-                    </div>
-
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] ml-1">Case Brief</label>
-                      <textarea 
-                        rows="4"
-                        placeholder="Narrate the impact and context of this industry visual..."
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-5 text-[14px] text-white focus:border-[#00C187]/50 outline-none font-inter font-black transition-all resize-none"
-                        value={newPortfolioItem.description}
-                        onChange={(e) => setNewPortfolioItem({...newPortfolioItem, description: e.target.value})}
-                      />
-                    </div>
-
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] ml-1">Upload {newPortfolioItem.mediaType === 'image' ? 'Artifact' : 'Feed'}</label>
-                      <div className="relative group/upload">
-                        <input 
-                          type="file" 
-                          accept={newPortfolioItem.mediaType === 'image' ? "image/*" : "video/*"}
-                          onChange={handlePortfolioMediaUpload}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        />
-                        <div className={`w-full h-48 border border-dashed rounded-[2.5rem] flex flex-col items-center justify-center gap-5 transition-all ${newPortfolioItem.mediaUrl ? "border-[#00C187]/40 bg-[#00C187]/5 shadow-inner" : "border-white/5 bg-white/[0.02] group-hover/upload:border-[#00C187]/30"}`}>
-                          {newPortfolioItem.mediaUrl ? (
-                             newPortfolioItem.mediaType === 'image' ? (
-                                <img src={newPortfolioItem.mediaUrl} className="w-full h-full object-contain p-5" alt="Preview" />
-                             ) : (
-                                <div className="flex flex-col items-center gap-2">
-                                   <Play size={48} style={{ color: themeColor }} />
-                                   <span className="text-[10px] font-black text-white uppercase tracking-widest">Video Stream Ready</span>
-                                </div>
-                             )
-                          ) : (
-                            <>
-                              {newPortfolioItem.mediaType === 'image' ? <ImageIcon size={48} className="text-neutral-800" /> : <Video size={48} className="text-neutral-800" />}
-                              <span className="text-[10px] font-black text-neutral-700 uppercase tracking-widest">Integrate Visual Asset</span>
-                            </>
-                          )}
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-500">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                {/* Gallery Form */}
+                <div className="lg:col-span-4 space-y-4">
+                <div className="bg-white/[0.03] border border-white/5 rounded-lg p-5 backdrop-blur-xl space-y-6 shadow-2xl relative overflow-hidden group">
+                    <div className="flex items-center gap-4 border-b border-white/5 pb-4">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center text-black" style={{ backgroundColor: themeColor }}>
+                        <Layout size={20} />
                         </div>
-                      </div>
+                        <div>
+                        <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500">Portfolio</h3>
+                        <p className="text-white text-[12px] font-black uppercase tracking-tight">Live Gallery</p>
+                        </div>
                     </div>
 
-                    <button 
-                      onClick={addPortfolioItem}
-                      className="w-full h-16 text-black font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl transition-all flex items-center justify-center gap-4 shadow-2xl mt-6 active:scale-95"
-                      style={{ backgroundColor: themeColor, boxShadow: `0 10px 30px ${themeColor}33` }}
-                    >
-                      <Plus size={22} /> Publish to Gallery
-                    </button>
-                  </div>
+                    <div className="space-y-6">
+                        <div className="flex bg-white/[0.03] p-1 rounded-lg border border-white/5">
+                        <button 
+                            onClick={() => setNewPortfolioItem({...newPortfolioItem, mediaType: 'image', mediaUrl: ''})}
+                            className={`flex-1 py-2 text-[8px] font-black uppercase tracking-widest rounded-md transition-all ${newPortfolioItem.mediaType === 'image' ? "text-black" : "text-neutral-600"}`}
+                            style={{ backgroundColor: newPortfolioItem.mediaType === 'image' ? themeColor : 'transparent' }}
+                        >
+                            Photography
+                        </button>
+                        <button 
+                            onClick={() => setNewPortfolioItem({...newPortfolioItem, mediaType: 'video', mediaUrl: ''})}
+                            className={`flex-1 py-2 text-[8px] font-black uppercase tracking-widest rounded-md transition-all ${newPortfolioItem.mediaType === 'video' ? "text-black" : "text-neutral-600"}`}
+                            style={{ backgroundColor: newPortfolioItem.mediaType === 'video' ? themeColor : 'transparent' }}
+                        >
+                            Broadcasting
+                        </button>
+                        </div>
+
+                        <div className="space-y-1.5">
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Project Title</label>
+                        <input 
+                            type="text" 
+                            placeholder="e.g. IPL Regional"
+                            className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[11px] text-white outline-none font-black transition-all"
+                            value={newPortfolioItem.title}
+                            onChange={(e) => setNewPortfolioItem({...newPortfolioItem, title: e.target.value})}
+                        />
+                        </div>
+
+                        <div className="space-y-1.5">
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Brief</label>
+                        <textarea 
+                            rows="3"
+                            placeholder="Impact..."
+                            className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[11px] text-white outline-none font-black transition-all resize-none"
+                            value={newPortfolioItem.description}
+                            onChange={(e) => setNewPortfolioItem({...newPortfolioItem, description: e.target.value})}
+                        />
+                        </div>
+
+                        <div className="space-y-1.5">
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Upload</label>
+                        <div className="relative group/upload">
+                            <input 
+                            type="file" 
+                            accept={newPortfolioItem.mediaType === 'image' ? "image/*" : "video/*"}
+                            onChange={handlePortfolioMediaUpload}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            />
+                            <div className={`w-full h-36 border border-dashed rounded-lg flex flex-col items-center justify-center gap-3 transition-all ${newPortfolioItem.mediaUrl ? "border-white/20 bg-white/5" : "border-white/5 bg-white/[0.02] group-hover/upload:border-white/10"}`}>
+                            {newPortfolioItem.mediaUrl ? (
+                                newPortfolioItem.mediaType === 'image' ? (
+                                    <img src={newPortfolioItem.mediaUrl} className="w-full h-full object-contain p-2" alt="Preview" />
+                                ) : (
+                                    <div className="flex flex-col items-center gap-1">
+                                    <Play size={24} style={{ color: themeColor }} />
+                                    <span className="text-[8px] font-black text-white uppercase tracking-widest">Node Ready</span>
+                                    </div>
+                                )
+                            ) : (
+                                <>
+                                {newPortfolioItem.mediaType === 'image' ? <ImageIcon size={24} className="text-neutral-900" /> : <Video size={24} className="text-neutral-900" />}
+                                <span className="text-[8px] font-black text-neutral-800 uppercase tracking-widest">Visual Asset</span>
+                                </>
+                            )}
+                            </div>
+                        </div>
+                        </div>
+
+                        <button 
+                        onClick={addPortfolioItem}
+                        className="w-full h-12 text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-lg transition-all flex items-center justify-center gap-2 active:scale-95"
+                        style={{ backgroundColor: themeColor }}
+                        >
+                        <Plus size={16} /> Publish
+                        </button>
+                    </div>
                 </div>
-              </div>
+                </div>
+
+                {/* Right: Exhibition Gallery */}
+                <div className="lg:col-span-8 space-y-4">
+                <div className="bg-white/[0.03] border border-white/5 rounded-lg p-6 backdrop-blur-xl space-y-6 min-h-[500px] relative overflow-hidden">
+                    <div className="flex items-center justify-between border-b border-white/5 pb-4 relative z-10">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-3 font-['Open_Sans']">
+                        <Layout size={16} style={{ color: themeColor }} /> Exhibition
+                    </h3>
+                    <span className="text-[8px] font-black text-neutral-600 uppercase tracking-widest px-3 py-1 bg-white/5 rounded-full border border-white/5">{formData.portfolio?.length || 0} Assets</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 relative z-10">
+                    {formData.portfolio?.map((item, idx) => (
+                        <div key={idx} className="bg-white/[0.03] border border-white/5 rounded-lg overflow-hidden group/item transition-all hover:border-white/10">
+                        <div className="h-28 bg-white/[0.02] relative overflow-hidden flex items-center justify-center border-b border-white/5">
+                            {item.mediaType === 'image' ? (
+                            <img src={item.mediaUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-110" alt={item.title} />
+                            ) : (
+                            <div className="w-full h-full bg-[#111] flex flex-col items-center justify-center gap-2">
+                                <Play size={20} style={{ color: themeColor }} />
+                                <span className="text-[7px] font-black text-neutral-700 uppercase tracking-[0.3em]">Motion</span>
+                            </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                            <button onClick={() => removePortfolioItem(idx)} className="w-10 h-10 bg-red-600 text-white rounded-lg flex items-center justify-center transition-all hover:scale-105"><Trash2 size={16} /></button>
+                            </div>
+                        </div>
+                        <div className="p-3 space-y-1">
+                            <h4 className="text-[11px] font-black text-white uppercase tracking-tight line-clamp-1">{item.title}</h4>
+                            <p className="text-[9px] text-neutral-500 font-medium line-clamp-2 leading-relaxed">{item.description || "Pending."}</p>
+                        </div>
+                        </div>
+                    ))}
+
+                    {(!formData.portfolio || formData.portfolio.length === 0) && (
+                        <div className="col-span-full py-16 flex flex-col items-center justify-center space-y-4 bg-white/[0.01] rounded-lg border border-dashed border-white/5">
+                        <Layout size={32} className="text-neutral-900" />
+                        <p className="text-[8px] text-neutral-800 font-black uppercase tracking-[0.5em]">Empty</p>
+                        </div>
+                    )}
+                    </div>
+                </div>
+                </div>
             </div>
 
-            <div className="lg:col-span-8 space-y-8">
-              <div className="bg-black border border-white/5 rounded-[3rem] p-10 lg:p-12 space-y-10 min-h-[600px] shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-[#00C187]/5 blur-[100px] pointer-events-none" />
-                <div className="flex items-center justify-between border-b border-white/5 pb-8 relative z-10">
-                  <div className="flex items-center gap-4">
-                    <Layout size={22} style={{ color: themeColor }} />
-                    <h3 className="text-[14px] font-black uppercase tracking-[0.3em] text-white font-inter">Work Exhibition</h3>
-                  </div>
-                  <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest px-4 py-1.5 bg-white/5 rounded-full border border-white/5">{formData.portfolio?.length || 0} Assets</span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-                  {formData.portfolio?.map((item, idx) => (
-                    <div key={idx} className="bg-white/[0.02] border border-white/5 rounded-3xl overflow-hidden group/item hover:border-[#00C187]/40 transition-all duration-500 shadow-xl">
-                      <div className="h-56 bg-white/[0.03] relative overflow-hidden flex items-center justify-center border-b border-white/5">
-                        {item.mediaType === 'image' ? (
-                          <img src={item.mediaUrl} className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-1000" alt={item.title} />
-                        ) : (
-                          <div className="w-full h-full bg-[#111] flex flex-col items-center justify-center gap-4">
-                            <div className="w-16 h-16 rounded-full bg-[#00C187]/10 flex items-center justify-center border border-[#00C187]/20">
-                              <Play size={24} style={{ color: themeColor }} />
-                            </div>
-                            <span className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.3em]">Motion Asset</span>
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                          <button onClick={() => removePortfolioItem(idx)} className="w-14 h-14 bg-red-600 text-white rounded-2xl flex items-center justify-center hover:scale-110 transition-all shadow-2xl"><Trash2 size={22} /></button>
-                        </div>
-                      </div>
-                      <div className="p-8 space-y-4">
-                        <h4 className="text-[14px] font-black text-white uppercase tracking-tight font-inter line-clamp-1">{item.title}</h4>
-                        <p className="text-[11px] text-neutral-500 font-inter line-clamp-2 leading-relaxed">{item.description || "Project impact summary pending."}</p>
-                      </div>
-                    </div>
-                  ))}
-
-                  {(!formData.portfolio || formData.portfolio.length === 0) && (
-                    <div className="col-span-full py-32 flex flex-col items-center justify-center space-y-8 bg-white/[0.01] rounded-[2.5rem] border-2 border-dashed border-white/5">
-                      <div className="w-24 h-24 rounded-full bg-white/[0.02] border border-white/5 flex items-center justify-center shadow-inner">
-                        <Layout size={48} className="text-neutral-900" />
-                      </div>
-                      <p className="text-[11px] text-neutral-700 font-black uppercase tracking-[0.5em]">Gallery Under Construction</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+            {/* Adjusted Navigation */}
+            <div className="flex items-center justify-end gap-3 pt-6">
+              <button 
+                onClick={prevStep}
+                className="px-5 h-10 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
+              >
+                <ChevronLeft size={14} /> Previous
+              </button>
+              <button 
+                onClick={handleUpdate}
+                className="px-8 h-10 rounded-lg text-[9px] font-black uppercase tracking-[0.3em] transition-all transform active:scale-95 shadow-lg flex items-center justify-center gap-2 hover:brightness-110"
+                style={{ backgroundColor: themeColor, color: '#000' }}
+              >
+                <CheckCircle2 size={14} /> Finalize
+              </button>
             </div>
           </div>
         )}
-      </div>
-      <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/90 to-transparent z-[60]">
-        <div className="max-w-xl mx-auto flex items-center justify-between gap-6">
-          {currentStep > 1 && (
-            <button 
-              onClick={prevStep}
-              className="flex-1 h-16 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-neutral-400 transform active:scale-95 shadow-xl"
-            >
-              <ChevronLeft size={18} /> Previous Phase
-            </button>
-          )}
-          <button 
-            onClick={nextStep}
-            className={`flex-[2] h-16 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] transition-all transform active:scale-95 shadow-2xl flex items-center justify-center gap-4`}
-            style={{ backgroundColor: themeColor, color: '#000', boxShadow: `0 10px 40px ${themeColor}4D` }}
-          >
-            {currentStep === 3 ? (
-              <><CheckCircle2 size={20} /> Finalize Dossier</>
-            ) : (
-              <><Zap size={20} /> Advance to Phase {currentStep + 1} <ChevronRight size={18} /></>
-            )}
-          </button>
-        </div>
       </div>
     </div>
   );

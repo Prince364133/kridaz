@@ -1,28 +1,71 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Calendar, Plus, Clock, Users, ArrowRight, Video } from "lucide-react";
 import useCoachDashboard from "@hooks/owner/useCoachDashboard";
 import DashboardSkeleton from "../owner/Dashboard/DashboardSkeleton";
 
 export default function CoachSessions() {
   const { dashboardData, loading } = useCoachDashboard();
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const getTimeGreeting = () => {
+    const hour = currentTime.getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  };
 
   if (loading) return <DashboardSkeleton />;
 
   const sessions = dashboardData?.sessions || [];
 
   return (
-    <div className="space-y-8 animate-fade-in font-open-sans">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-6 border-b border-white/5">
-        <div className="space-y-1">
-          <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-white font-inter">
-            Training <span className="text-[#CCFF00]">Sessions</span>
-          </h1>
-          <p className="text-[#999999] text-xs font-semibold uppercase tracking-wider font-inter mt-1">Scheduled classes and private training</p>
-        </div>
-        <button className="px-6 py-3 bg-[#CCFF00] text-black rounded-[6px] font-bold uppercase text-xs tracking-widest flex items-center gap-2 hover:scale-[0.98] transition-all font-inter shadow-[var(--shadow-2)]">
-          <Plus size={16} /> New Session
-        </button>
-      </div>
+    <div className="h-full custom-scrollbar bg-[#000000]">
+      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative font-['Open_Sans']">
+        
+        {/* Header Section — Exact Copy of Dashboard Design */}
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 pb-2 border-b border-white/5">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-8 bg-[#CCFF00] rounded-full" />
+              <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
+                Training <span className="text-[#CCFF00]">Sessions</span>
+              </h1>
+            </div>
+            <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
+              {getTimeGreeting()} | Operational Training Feed
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-2xl backdrop-blur-xl">
+              <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-xl flex items-center justify-center text-[#CCFF00]">
+                <Calendar size={24} />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-white text-lg font-bold leading-none font-inter">
+                  {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
+                </p>
+                <p className="text-[#CCFF00] text-[10px] font-semibold uppercase tracking-widest opacity-80">
+                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} •{" "}
+                  {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                </p>
+              </div>
+            </div>
+
+            <button className="px-6 py-4 bg-[#CCFF00] hover:bg-[#CCFF00]/90 text-black rounded-2xl font-bold uppercase text-[11px] tracking-widest flex items-center gap-2 hover:scale-[0.98] transition-all font-inter shadow-2xl active:scale-95">
+              <Plus size={16} /> New Session
+            </button>
+          </div>
+        </header>
+
+        <div className="relative z-10">
 
       {sessions.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#000000] rounded-[8px] border border-dashed border-[#2D2D2D] p-12 text-center shadow-[var(--shadow-2)]">
@@ -83,6 +126,8 @@ export default function CoachSessions() {
           ))}
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 }
