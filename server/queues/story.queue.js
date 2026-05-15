@@ -24,10 +24,10 @@ export const storyWorker = new Worker('stories', async (job) => {
     if (!story) return;
 
     // Use the same robust video pipeline
-    const { processReelVideo } = await import('../utils/reelWorker.js');
+    const { processMediaVideo } = await import('../utils/reelWorker.js');
     
     // We pass the story object as a "reel-like" object
-    const result = await processReelVideo(story);
+    const result = await processMediaVideo(story, 'story');
     
     await Story.findByIdAndUpdate(storyId, {
       status: 'ready',

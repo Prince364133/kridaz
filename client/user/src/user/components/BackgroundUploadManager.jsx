@@ -32,8 +32,17 @@ const BackgroundUploadManager = () => {
 
   const processUpload = async (upload) => {
     processingId.current = upload.id;
+    console.log('[BACKGROUND_UPLOAD] Starting process for:', upload.id);
     
     try {
+      // 0. Validate File object (sanity check for serialization issues)
+      if (!upload.file || !(upload.file instanceof File)) {
+        console.error('[BACKGROUND_UPLOAD] Invalid file object in state:', upload.file);
+        throw new Error('Video file lost or corrupted. Please try again.');
+      }
+
+      console.log('[BACKGROUND_UPLOAD] Requesting pre-signed URL for:', upload.file.name);
+
       // 1. Get Pre-signed URL
       const { data: uploadData, error: urlError } = await getUploadUrl({
         contentType: upload.file.type,
@@ -41,10 +50,12 @@ const BackgroundUploadManager = () => {
       });
 
       if (urlError || !uploadData?.success) {
-        throw new Error(urlError?.data?.message || 'Failed to get upload authorization');
+        console.error('[BACKGROUND_UPLOAD] URL Error:', urlError);
+        throw new Error(urlError?.data?.message || 'Failed to get upload authorization. Check server status.');
       }
 
       const { uploadUrl, key, reelId } = uploadData;
+      console.log('[BACKGROUND_UPLOAD] Pre-signed URL obtained. Key:', key);
 
       // 2. Upload Direct to R2
       await uploadFileToR2(uploadUrl, upload.file, (progress) => {
@@ -54,6 +65,8 @@ const BackgroundUploadManager = () => {
         }
       });
 
+      console.log('[BACKGROUND_UPLOAD] R2 Upload complete. Confirming with backend...');
+
       // 3. Confirm Upload with Metadata
       await confirmUpload({
         reelId,
@@ -62,6 +75,7 @@ const BackgroundUploadManager = () => {
         hashtags: upload.metadata.hashtags
       }).unwrap();
 
+      console.log('[BACKGROUND_UPLOAD] Success!');
       dispatch(updateStatus('success'));
       toast.success('Reel uploaded successfully!');
       
@@ -73,7 +87,7 @@ const BackgroundUploadManager = () => {
     } catch (error) {
       console.error('[BACKGROUND_UPLOAD_FAILED]', error);
       dispatch(setUploadError(error.message || 'Upload failed'));
-      toast.error('Reel upload failed. Check your connection.');
+      toast.error(error.message || 'Reel upload failed. Check your connection.');
     } finally {
       processingId.current = null;
     }

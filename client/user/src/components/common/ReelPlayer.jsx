@@ -58,20 +58,22 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
     if (!video || !hlsUrl) return;
 
     const src = finalHlsUrl || hlsUrl;
+    if (!src) return;
+
     const isHls = src.endsWith('.m3u8') || src.includes('.m3u8');
 
     if (isHls && Hls.isSupported()) {
       const hls = new Hls({
         capLevelToPlayerSize: true,
         autoStartLoad: false, 
-        startLevel: 0,
+        startLevel: -1, // Auto
         // Instagram-like aggressive buffering
         maxBufferLength: isVisible ? 30 : 10, 
         maxMaxBufferLength: isVisible ? 60 : 20,
         enableWorker: true,
         lowLatencyMode: true,
-        xhrSetup: (xhr) => {
-          // Public assets don't need credentials
+        xhrSetup: (xhr, url) => {
+          xhr.withCredentials = false; // CDN assets are public
         }
       });
 
@@ -82,20 +84,24 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         setIsLoaded(true);
         if (isVisible) {
-          video.play().catch(e => console.log('Auto-play blocked'));
+          video.play().catch(e => console.warn('[REEL_PLAYER] Auto-play blocked:', e));
         }
       });
 
       hls.on(Hls.Events.ERROR, (event, data) => {
+        console.error(`[REEL_PLAYER] [HLS_ERROR] [${reelId}]:`, data.type, data.details, data.fatal);
         if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
+              console.log('[REEL_PLAYER] Network error, trying to recover...');
               hls.startLoad();
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
+              console.log('[REEL_PLAYER] Media error, trying to recover...');
               hls.recoverMediaError();
               break;
             default:
+              console.error('[REEL_PLAYER] Fatal error, destroying instance');
               hls.destroy();
               break;
           }

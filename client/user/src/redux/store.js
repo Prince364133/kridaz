@@ -17,7 +17,8 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ["persist/PERSIST"],
+        ignoredActions: ["persist/PERSIST", "mediaUpload/startUpload"],
+        ignoredPaths: ["mediaUpload.activeUpload.file"],
       },
     }).concat(baseApi.middleware),
 });

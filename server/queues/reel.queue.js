@@ -32,9 +32,9 @@ export const reelWorker = new Worker('reels', async (job) => {
     await Reel.findByIdAndUpdate(reelId, { status: 'processing' });
 
     // Dynamic import to avoid circular dependencies and load heavy modules only when needed
-    const { processReelVideo } = await import('../utils/reelWorker.js');
+    const { processMediaVideo } = await import('../utils/reelWorker.js');
     
-    const result = await processReelVideo(reel, job.data.localPath);
+    const result = await processMediaVideo(reel, 'reel', job.data.localPath);
     
     await Reel.findByIdAndUpdate(reelId, {
       status: 'ready',

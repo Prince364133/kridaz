@@ -35,6 +35,10 @@ const startServer = () => {
       const { reelWorker } = await import("./queues/reel.queue.js");
       console.log("[REELS] Worker initialized and listening for jobs.");
 
+      // Start Unified Media Worker (Reels, Stories, Community)
+      const { mediaWorker } = await import("./queues/media.queue.js");
+      console.log("[MEDIA] Unified worker initialized and listening for jobs.");
+
     }).catch(err => {
       console.error("[DATABASE] Background connection error:", err.message);
     });

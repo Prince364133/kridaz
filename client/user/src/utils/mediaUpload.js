@@ -5,32 +5,40 @@
  * @param {Function} onProgress - Callback for upload progress (simulated with fetch)
  * @returns {Promise<void>}
  */
-export const uploadFileToR2 = async (uploadUrl, file, onProgress) => {
-  try {
-    // We use native fetch for the direct R2 upload to avoid 
-    // global axios interceptors (which add Auth headers that R2 rejects)
-    // Note: Native fetch doesn't support progress, but we can simulate it for UX
-    // or use XMLHttpRequest if progress is critical.
+export const uploadFileToR2 = (uploadUrl, file, onProgress) => {
+  return new Promise((resolve, reject) => {
+    console.log('[R2_UPLOAD] Starting XHR to:', uploadUrl);
+    if (!uploadUrl) return reject(new Error('Upload URL is missing'));
+
+    const xhr = new XMLHttpRequest();
     
-    const response = await fetch(uploadUrl, {
-      method: 'PUT',
-      body: file,
-      headers: {
-        'Content-Type': file.type,
+    xhr.open('PUT', uploadUrl);
+    xhr.setRequestHeader('Content-Type', file.type);
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percentComplete = Math.round((event.loaded / event.total) * 100);
+        console.log(`[R2_UPLOAD] Progress: ${percentComplete}%`);
+        if (onProgress) onProgress(percentComplete);
       }
-    });
+    };
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[R2_UPLOAD_ERROR_RESPONSE]', errorText);
-      throw new Error(`Upload failed with status: ${response.status}`);
-    }
+    xhr.onload = () => {
+      console.log('[R2_UPLOAD] XHR onload status:', xhr.status);
+      if (xhr.status >= 200 && xhr.status < 300) {
+        if (onProgress) onProgress(100);
+        resolve();
+      } else {
+        console.error('[R2_UPLOAD_ERROR_RESPONSE]', xhr.responseText);
+        reject(new Error(`Upload failed with status: ${xhr.status}`));
+      }
+    };
 
-    // Since fetch doesn't have progress, we trigger 100% on completion
-    if (onProgress) onProgress(100);
+    xhr.onerror = (error) => {
+      console.error('[R2_UPLOAD_ERROR]', error);
+      reject(new Error('Direct cloud upload failed. Check your connection and CORS settings.'));
+    };
 
-  } catch (error) {
-    console.error('[R2_UPLOAD_ERROR]', error);
-    throw new Error('Direct cloud upload failed. Please check your connection and CORS settings.');
-  }
+    xhr.send(file);
+  });
 };
