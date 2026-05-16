@@ -46,22 +46,22 @@ app.use(
 // Global — all /api routes (health check excluded via skip in the middleware)
 app.use('/api', globalLimiter);
 
-import { verifyTurnstile } from "./middleware/turnstile.middleware.js";
+import { validateTurnstile } from "./middleware/turnstile.middleware.js";
 
 // Auth routes — user
-app.use('/api/user/auth/send-otp',           otpLimiter, verifyTurnstile);
-app.use('/api/user/auth/login-step1',         otpLimiter, verifyTurnstile);
-app.use('/api/user/auth/login',               authLimiter, verifyTurnstile);
-app.use('/api/user/auth/register',            authLimiter, verifyTurnstile);
+app.use('/api/user/auth/send-otp',           otpLimiter, validateTurnstile);
+app.use('/api/user/auth/login-step1',         otpLimiter, validateTurnstile);
+app.use('/api/user/auth/login',               authLimiter, validateTurnstile);
+app.use('/api/user/auth/register',            authLimiter, validateTurnstile);
 app.use('/api/user/auth/google-auth',         authLimiter); // Google Auth usually handles its own bot protection
-app.use('/api/user/auth/forgot-password-otp', authLimiter, verifyTurnstile);
-app.use('/api/user/auth/reset-password',      authLimiter, verifyTurnstile);
+app.use('/api/user/auth/forgot-password-otp', authLimiter, validateTurnstile);
+app.use('/api/user/auth/reset-password',      authLimiter, validateTurnstile);
 
 // Auth routes — owner
-app.use('/api/owner/auth/send-otp',    otpLimiter, verifyTurnstile);
-app.use('/api/owner/auth/login-step1', otpLimiter, verifyTurnstile);
-app.use('/api/owner/auth/login',       authLimiter, verifyTurnstile);
-app.use('/api/owner/auth/register',    authLimiter, verifyTurnstile);
+app.use('/api/owner/auth/send-otp',    otpLimiter, validateTurnstile);
+app.use('/api/owner/auth/login-step1', otpLimiter, validateTurnstile);
+app.use('/api/owner/auth/login',       authLimiter, validateTurnstile);
+app.use('/api/owner/auth/register',    authLimiter, validateTurnstile);
 app.use('/api/owner/auth/google-auth', authLimiter);
 
 // Payment routes — user bookings
