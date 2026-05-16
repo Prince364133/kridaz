@@ -98,30 +98,22 @@ export default function ProfessionalDetails() {
   };
 
   if (loading && !pro) return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <Loader2 className="animate-spin text-[#84CC16]" size={40} />
+    <div className="min-h-screen bg-black flex items-center justify-center font-sans">
+      <Loader2 className="animate-spin text-[#55DEE8]" size={40} />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-20 px-6 md:px-10">
+    <div className="min-h-screen bg-black text-white pt-12 pb-20 px-6 md:px-10 font-sans">
       <div className="max-w-7xl mx-auto">
-        <button 
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors mb-8 group"
-        >
-          <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="font-mono text-xs uppercase tracking-widest">Back to Listing</span>
-        </button>
-
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Left Column: Profile Info */}
           <div className="lg:col-span-8">
-            <div className="bg-neutral-900/40 rounded-[40px] border border-neutral-800 p-8 md:p-12 mb-8">
+            <div className="bg-neutral-900/40 rounded-xl border border-neutral-800 p-8 md:p-12 mb-8">
               <div className="flex flex-col md:flex-row gap-8 items-start">
                 <div className="relative">
-                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-[32px] overflow-hidden border-4 border-[#84CC16]/20">
-                    <div className="w-full h-full bg-[#84CC16]/10 flex items-center justify-center overflow-hidden">
+                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl overflow-hidden p-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">
+                    <div className="w-full h-full bg-black rounded-lg overflow-hidden flex items-center justify-center">
                       {pro.profilePicture ? (
                         <img 
                           src={pro.profilePicture} 
@@ -137,38 +129,35 @@ export default function ProfessionalDetails() {
                         className="w-full h-full flex items-center justify-center bg-[#1a1a1a]"
                         style={{ display: pro.profilePicture ? 'none' : 'flex' }}
                       >
-                        <span className="text-[#84CC16] font-black text-5xl tracking-tighter">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black text-5xl tracking-tighter">
                           {pro.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
                         </span>
                       </div>
                     </div>
                   </div>
-                  <div className="absolute -bottom-2 -right-2 bg-[#84CC16] p-2 rounded-xl shadow-xl">
-                    <Shield size={20} className="text-black" />
-                  </div>
                 </div>
 
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h1 className="font-display text-4xl md:text-5xl uppercase leading-none">{pro.name}</h1>
-                    <span className="px-3 py-1 rounded-full bg-[#84CC16]/10 text-[#84CC16] text-[10px] font-bold tracking-widest border border-[#84CC16]/20 uppercase">
+                    <h1 className="font-heading text-4xl md:text-5xl uppercase leading-none">{pro.name}</h1>
+                    <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[10px] font-bold tracking-widest border border-[#BFF367]/20 uppercase">
                       PRO {pro.role}
                     </span>
                   </div>
                   
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-6">
-                    <span className="flex items-center gap-1"><MapPin size={14} className="text-[#84CC16]" /> {pro.city}, {pro.state}</span>
-                    <span className="flex items-center gap-1"><Star size={14} className="fill-[#84CC16] text-[#84CC16]" /> {pro.rating?.toFixed(1) || "5.0"} ({pro.numReviews || 0} reviews)</span>
-                    <span className="flex items-center gap-1"><Award size={14} className="text-[#84CC16]" /> {pro.businessDetails?.experience || "5+ Years"} exp</span>
+                  <div className="flex flex-wrap items-center gap-6 text-lg text-white/60 mb-8 font-sans">
+                    <span className="flex items-center gap-2"><MapPin size={18} className="text-[#55DEE8]" /> {pro.city}, {pro.state}</span>
+                    <span className="flex items-center gap-2"><Star size={18} className="fill-[#BFF367] text-[#BFF367]" /> {pro.rating?.toFixed(1) || "5.0"} ({pro.numReviews || 0} reviews)</span>
+                    <span className="flex items-center gap-2"><Award size={18} className="text-[#55DEE8]" /> {pro.businessDetails?.experience || "5+ Years"} exp</span>
                   </div>
 
-                  <p className="text-gray-400 leading-relaxed mb-8 max-w-2xl">
+                  <p className="text-white/70 leading-relaxed mb-10 max-w-2xl text-[18px] font-sans">
                     {pro.bio || `Specialized in ${pro.gameTypes?.join(", ")}. Providing high-quality professional services to elevate your sports experience. Certified and experienced in handling complex match scenarios and coaching sessions.`}
                   </p>
 
                   <div className="flex flex-wrap gap-2">
                     {pro.gameTypes?.map(sport => (
-                      <span key={sport} className="px-4 py-2 rounded-xl bg-black border border-neutral-800 text-[10px] font-bold tracking-widest text-gray-300 uppercase">
+                      <span key={sport} className="px-5 py-2.5 rounded-lg bg-[#1a1a1a] border border-white/10 text-xs font-bold tracking-widest text-white/80 uppercase">
                         {sport}
                       </span>
                     ))}
@@ -177,191 +166,198 @@ export default function ProfessionalDetails() {
               </div>
             </div>
 
-            {/* Certifications & Reviews Tabs (Simplified for now) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <div className="bg-neutral-900/40 rounded-[40px] border border-neutral-800 p-8">
-                <h3 className="font-display text-xl uppercase mb-6 flex items-center gap-2">
-                  <Shield size={18} className="text-[#84CC16]" /> Certifications
-                </h3>
-                <div className="grid grid-cols-3 gap-3">
-                  {pro.certifications?.length > 0 ? pro.certifications.map((cert, i) => (
-                    <div key={i} className="aspect-square rounded-2xl bg-black border border-neutral-800 overflow-hidden group cursor-pointer">
-                      <img src={cert} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-                    </div>
-                  )) : [1, 2, 3].map(i => (
-                    <div key={i} className="aspect-square rounded-2xl bg-black/40 border border-dashed border-neutral-800 flex items-center justify-center">
-                      <Camera size={20} className="text-neutral-800" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-neutral-900/40 rounded-[40px] border border-neutral-800 p-8">
-                <h3 className="font-display text-xl uppercase mb-6 flex items-center gap-2">
-                  <Star size={18} className="text-[#84CC16]" /> User Reviews
-                </h3>
-                {reviews.length === 0 ? (
-                  <div className="text-center py-4">
-                    <p className="text-gray-500 font-mono text-[10px] uppercase tracking-widest">No reviews yet</p>
+            {/* Certifications */}
+            <div className="bg-neutral-900/40 rounded-xl border border-neutral-800 p-8 mb-8">
+              <h3 className="font-heading text-xl uppercase mb-6 flex items-center gap-2">
+                <Shield size={18} className="text-[#55DEE8]" /> Certifications
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {pro.certifications?.length > 0 ? pro.certifications.map((cert, i) => (
+                  <div key={i} className="aspect-video rounded-xl bg-black border border-neutral-800 overflow-hidden group cursor-pointer">
+                    <img src={cert} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {reviews.slice(0, 3).map((review, i) => (
-                      <div key={i} className="border-b border-neutral-800 pb-4 last:border-0 last:pb-0">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full border border-white/10 overflow-hidden bg-[#84CC16]/10 flex items-center justify-center shrink-0">
-                              {review.user?.profilePicture ? (
-                                <img 
-                                  src={review.user.profilePicture} 
-                                  className="w-full h-full object-cover" 
-                                  onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                                  }}
-                                />
-                              ) : null}
-                              <div 
-                                className="w-full h-full flex items-center justify-center"
-                                style={{ display: review.user?.profilePicture ? 'none' : 'flex' }}
-                              >
-                                <span className="text-[#84CC16] font-black text-[8px]">
-                                  {review.user?.name ? review.user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
-                                </span>
-                              </div>
-                            </div>
-                            <span className="text-xs font-bold">{review.user?.name}</span>
-                          </div>
-                          <div className="flex items-center gap-0.5">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} size={8} className={i < review.rating ? "fill-[#84CC16] text-[#84CC16]" : "text-neutral-800"} />
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-[10px] text-gray-400 italic line-clamp-2">"{review.comment}"</p>
-                      </div>
-                    ))}
+                )) : [1, 2, 3, 4].map(i => (
+                  <div key={i} className="aspect-video rounded-xl bg-black/40 border border-dashed border-neutral-800 flex items-center justify-center">
+                    <Camera size={20} className="text-neutral-800" />
                   </div>
-                )}
+                ))}
               </div>
             </div>
           </div>
 
           {/* Right Column: Booking Widget */}
           <div className="lg:col-span-4">
-            <div className="sticky top-24">
-              <div className="bg-[#84CC16] rounded-[40px] p-8 text-black mb-6 shadow-2xl shadow-[#84CC16]/20">
-                <div className="flex justify-between items-end mb-6">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-60">Price per {pro.role === "coach" ? "hour" : "match"}</p>
-                    <p className="text-4xl font-display uppercase leading-none">₹{pro.price || "500"}</p>
-                  </div>
-                  <div className="w-12 h-12 rounded-2xl bg-black/10 flex items-center justify-center">
-                    <Zap size={24} />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-xs font-bold">
-                    <CheckCircle size={16} /> Instant Request
-                  </div>
-                  <div className="flex items-center gap-3 text-xs font-bold">
-                    <Shield size={16} /> Secured Payment
-                  </div>
-                  <div className="flex items-center gap-3 text-xs font-bold">
-                    <Clock size={16} /> Flexible Cancellation
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-neutral-900 border border-neutral-800 rounded-[40px] p-8">
-                <h4 className="font-display text-lg uppercase mb-6 flex items-center justify-between">
-                  Select Schedule
-                  <CalendarDays size={18} className="text-[#84CC16]" />
-                </h4>
+            <div className="sticky top-24 space-y-6">
+              
+              {/* Select Schedule Card */}
+              <div className="bg-[#1a1a1a] rounded-xl p-6 border border-neutral-800/60 shadow-lg">
+                <h2 className="font-heading text-xl font-bold text-white mb-6">Select Schedule</h2>
 
                 {/* Date Selection */}
-                <div className="flex gap-2 overflow-x-auto no-scrollbar mb-8 pb-2">
-                  {dates.map((date) => {
-                    const dateStr = format(date, 'yyyy-MM-dd');
-                    const isSelected = selectedDate === dateStr;
-                    return (
-                      <button 
-                        key={dateStr}
-                        onClick={() => setSelectedDate(dateStr)}
-                        className={`flex flex-col items-center justify-center min-w-[60px] h-20 rounded-2xl border transition-all ${
-                          isSelected 
-                          ? "bg-[#84CC16] border-[#84CC16] text-black" 
-                          : "bg-black border-neutral-800 text-gray-500 hover:border-gray-600"
-                        }`}
-                      >
-                        <span className="text-[8px] font-bold uppercase tracking-widest mb-1">{format(date, 'EEE')}</span>
-                        <span className="text-xl font-display">{format(date, 'dd')}</span>
-                      </button>
-                    );
-                  })}
+                <div className="mb-6">
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+                    {dates.slice(0, 5).map((date) => {
+                      const dateStr = format(date, 'yyyy-MM-dd');
+                      const isSelected = selectedDate === dateStr;
+                      return (
+                        <button 
+                          key={dateStr}
+                          onClick={() => setSelectedDate(dateStr)}
+                          className={`flex flex-col items-center justify-center min-w-[56px] h-[64px] rounded-lg transition-all ${
+                            isSelected 
+                            ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black" 
+                            : "bg-black border border-neutral-800 text-gray-400 hover:border-neutral-600"
+                          }`}
+                        >
+                          <span className="text-[10px] font-semibold mb-1">{format(date, 'EEE')}</span>
+                          <span className="text-lg font-bold leading-none">{format(date, 'dd')}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                {/* Slots */}
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Available Slots</p>
-                {loading ? (
-                   <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-[#84CC16]" size={24} /></div>
-                ) : !availability || availability.slots.length === 0 ? (
-                  <div className="text-center py-10 bg-black/40 rounded-2xl border border-dashed border-neutral-800 mb-8">
-                    <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">No slots available</p>
+                <div className="mb-6">
+                  <span className="text-sm font-semibold text-gray-400 mb-3 block">Available Slots</span>
+                  {loading ? (
+                    <div className="py-4 flex justify-center"><Loader2 className="animate-spin text-[#55DEE8]" size={24} /></div>
+                  ) : !availability || availability.slots.length === 0 ? (
+                    <div className="text-center py-6 bg-black/40 rounded-lg border border-dashed border-neutral-800">
+                      <p className="text-xs font-semibold text-neutral-500">No slots available</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      {availability.slots.map((slot, i) => (
+                        <button 
+                          key={i}
+                          disabled={!slot.isAvailable}
+                          onClick={() => handleSlotToggle(slot)}
+                          className={`px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${
+                            !slot.isAvailable 
+                            ? "bg-neutral-900 border border-neutral-900 text-neutral-600 cursor-not-allowed line-through" 
+                            : selectedSlots.some(s => s.startTime === slot.startTime)
+                            ? "bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#BFF367] text-[#BFF367]"
+                            : "bg-black border border-neutral-800 text-gray-300 hover:border-neutral-600"
+                          }`}
+                        >
+                          {slot.startTime} - {slot.endTime}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <textarea 
+                  placeholder="Special request (Optional)"
+                  className="w-full bg-black border border-neutral-800 rounded-lg p-3 text-sm focus:border-[#55DEE8] outline-none transition-colors h-20 resize-none text-white font-sans placeholder:text-gray-600"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                />
+              </div>
+
+              {/* Checkout Card */}
+              <div className="bg-[#1a1a1a] rounded-xl p-6 lg:p-8 border border-neutral-800/60 shadow-lg">
+                <h2 className="font-heading text-2xl font-bold text-white mb-6">Checkout</h2>
+                
+                {/* Selected Slots Preview */}
+                <div className="space-y-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <User size={20} className="text-[#55DEE8]" />
+                    <span className="text-base font-bold text-white">{pro.name}</span>
                   </div>
+                  <div className="flex items-start gap-3">
+                    <Clock size={20} className="text-[#55DEE8] mt-0.5" />
+                    <div>
+                      {selectedSlots.length > 0 ? (
+                        <div className="flex flex-col gap-1">
+                          {selectedSlots.map((slot, idx) => (
+                            <span key={idx} className="text-base font-bold text-white/90">
+                              {slot.startTime} - {slot.endTime} <span className="text-neutral-600 font-normal mx-2">|</span> {format(new Date(selectedDate), 'dd/MM/yyyy')}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-base font-bold text-neutral-600">Select slots above</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <hr className="border-neutral-800/50 my-6" />
+
+                <div>
+                  <h3 className="font-heading text-xl font-bold text-white mb-4">Price Details</h3>
+                  <div className="space-y-4 font-sans">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-white/60">Slot Price</span>
+                      <span className="text-white font-bold">₹ {selectedSlots.length * (pro.price || 0)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-white/60">Service Charge</span>
+                      <span className="text-white font-bold">₹ 0</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="text-xl font-bold text-white">Total Amount</span>
+                      <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">₹ {selectedSlots.length * (pro.price || 0)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <hr className="border-neutral-800/50 my-6" />
+
+                <div className="mb-8 font-sans">
+                  <h3 className="font-heading text-xl font-bold text-white mb-4">Payment</h3>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xl font-bold text-white">Advance Pay</span>
+                    <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">₹ {selectedSlots.length * (pro.price || 0)}</span>
+                  </div>
+                  <p className="text-xs text-yellow-500/80 font-medium">( Pay remaining at venue )</p>
+                </div>
+
+                <button 
+                  onClick={handleBooking}
+                  disabled={bookingLoading || selectedSlots.length === 0}
+                  className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black py-4 rounded-lg font-bold hover:opacity-90 transition-all disabled:opacity-50 disabled:grayscale shadow-lg active:scale-95"
+                >
+                  {bookingLoading ? <Loader2 className="animate-spin mx-auto text-black" size={20} /> : "PAY NOW"}
+                </button>
+              </div>
+
+              {/* Reviews Card */}
+              <div className="bg-[#1a1a1a] rounded-xl p-6 border border-neutral-800/60 shadow-lg">
+                <div className="flex justify-between items-center mb-6">
+                  <span className="text-sm text-white/60 font-sans">How was your experience</span>
+                  <button className="px-3 py-1.5 rounded-md border border-[#BFF367]/40 text-[#BFF367] text-xs font-bold hover:bg-[#BFF367]/10 transition-colors">
+                    RATE PRO
+                  </button>
+                </div>
+                
+                <h3 className="font-heading text-base font-bold text-white mb-6">Recent Reviews</h3>
+                
+                {reviews.length === 0 ? (
+                  <p className="text-sm text-white/40 pb-2 font-sans italic">No reviews yet.</p>
                 ) : (
-                  <div className="grid grid-cols-2 gap-3 mb-8">
-                    {availability.slots.map((slot, i) => (
-                      <button 
-                        key={i}
-                        disabled={!slot.isAvailable}
-                        onClick={() => handleSlotToggle(slot)}
-                        className={`px-4 py-3 rounded-xl border text-[10px] font-bold transition-all ${
-                          !slot.isAvailable 
-                          ? "bg-neutral-900 border-neutral-950 text-neutral-800 cursor-not-allowed line-through" 
-                          : selectedSlots.some(s => s.startTime === slot.startTime)
-                          ? "bg-[#84CC16]/20 border-[#84CC16] text-[#84CC16]"
-                          : "bg-black border-neutral-800 text-gray-400 hover:border-gray-600"
-                        }`}
-                      >
-                        {slot.startTime} - {slot.endTime}
-                      </button>
+                  <div className="space-y-6 font-sans">
+                    {reviews.slice(0, 4).map((review, i) => (
+                      <div key={i} className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-full bg-neutral-800 overflow-hidden shrink-0 border border-white/5">
+                          {review.user?.profilePicture ? (
+                            <img src={review.user.profilePicture} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-neutral-800 text-white/40 text-xs font-bold uppercase">
+                              {review.user?.name?.slice(0,2) || "?"}
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-white/70 leading-relaxed line-clamp-3">
+                          {review.comment || "Loved the experience!"}
+                        </p>
+                      </div>
                     ))}
                   </div>
                 )}
-
-                {/* Message */}
-                <div className="mb-8">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Special Request (Optional)</label>
-                  <textarea 
-                    placeholder="E.g. Focus on batting drills..."
-                    className="w-full bg-black border border-neutral-800 rounded-2xl p-4 text-xs font-medium focus:border-[#84CC16] outline-none transition-colors h-24 resize-none"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                  />
-                </div>
-
-                {/* Booking Footer */}
-                <div className="pt-6 border-t border-neutral-800">
-                  <div className="flex justify-between items-end mb-6">
-                    <div>
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total Amount</p>
-                      <p className="text-2xl font-display text-white">₹{selectedSlots.length * (pro.price || 0)}</p>
-                    </div>
-                    <p className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest">{selectedSlots.length} Slots Selected</p>
-                  </div>
-
-                  <button 
-                    onClick={handleBooking}
-                    disabled={bookingLoading || selectedSlots.length === 0}
-                    className="w-full bg-[#84CC16] text-black py-4 rounded-[20px] font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
-                  >
-                    {bookingLoading ? <Loader2 className="animate-spin mx-auto" size={20} /> : "Send Booking Request"}
-                  </button>
-                  <p className="text-center text-[9px] text-gray-500 mt-4 uppercase tracking-[0.2em]">Coins will be reserved until accepted</p>
-                </div>
               </div>
+
             </div>
           </div>
         </div>
