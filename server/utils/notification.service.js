@@ -79,6 +79,7 @@ Join the action now on Kridaz! 🏏⚽🏐
     `;
 
     const emailSubject = `New ${gameType} Match in ${city}!`;
+    const baseUrl = process.env.CLIENT_URL || "https://kridaz.vercel.app";
     const emailHtml = `
       <div style="font-family: sans-serif; padding: 20px; background: #000; color: #fff; border-radius: 20px;">
         <h1 style="color: #fbbf24;">New ${gameType} Match!</h1>
@@ -89,12 +90,11 @@ Join the action now on Kridaz! 🏏⚽🏐
           <p><strong>Time:</strong> ${time}</p>
           <p><strong>Location:</strong> ${city}, ${state}</p>
         </div>
-        <a href="http://localhost:5174/join-games" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #fbbf24; color: #000; text-decoration: none; font-weight: bold; border-radius: 10px;">Join Match Now</a>
+        <a href="${baseUrl}/join-games" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #fbbf24; color: #000; text-decoration: none; font-weight: bold; border-radius: 10px;">Join Match Now</a>
       </div>
     `;
 
     const templateName = process.env.MSG91_WHATSAPP_NOTIF_TEMPLATE;
-    const baseUrl = process.env.CLIENT_URL || "http://localhost:5174";
 
     // Send notifications in parallel
     await Promise.all(targetUsers.map(async (user) => {
@@ -140,7 +140,7 @@ export const sendCustomPlayerInvite = async (customPlayer, game, host) => {
     const { name, email, mustPay, inviteToken } = customPlayer;
     const { gameType, date, time, city, state, perPlayerCharge } = game;
 
-    const baseUrl = process.env.CLIENT_URL || "http://localhost:5174";
+    const baseUrl = process.env.CLIENT_URL || "https://kridaz.vercel.app";
     const magicLink = `${baseUrl}/auth/signup?invite=${inviteToken}&email=${encodeURIComponent(email)}`;
 
     const formattedDate = new Date(date).toDateString();
@@ -235,7 +235,7 @@ export const sendCustomUmpireInvite = async (customUmpire, game, host) => {
     const { name, email, inviteToken } = customUmpire;
     const { gameType, date, time, city, state } = game;
 
-    const baseUrl = process.env.CLIENT_URL || "http://localhost:5174";
+    const baseUrl = process.env.CLIENT_URL || "https://kridaz.vercel.app";
     const magicLink = `${baseUrl}/auth/signup?umpireInvite=${inviteToken}&email=${encodeURIComponent(email)}`;
 
     const formattedDate = new Date(date).toDateString();
