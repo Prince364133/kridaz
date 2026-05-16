@@ -1,12 +1,4 @@
-import Redis from 'ioredis';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
-
-redis.on('connect', () => console.log('[REDIS] Connected successfully'));
-redis.on('error', (err) => console.error('[REDIS] Connection error:', err));
+import { redisClient as redis } from '../config/redis.js';
 
 /**
  * Live State Management Service

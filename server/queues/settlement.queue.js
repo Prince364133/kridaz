@@ -1,16 +1,6 @@
 import { Queue, Worker } from 'bullmq';
-import Redis from 'ioredis';
+import { bullmqConnection as connection } from '../config/redis.js';
 import { runPlayingTransition, runAutoSettle } from '../utils/settlementWorker.js';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Redis connection — shared by Queue and Worker.
-// maxRetriesPerRequest: null is required by BullMQ.
-// enableReadyCheck: false avoids blocking on cold Redis starts.
-// ─────────────────────────────────────────────────────────────────────────────
-const connection = new Redis(process.env.REDIS_URL, {
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Queue — holds the repeatable job definitions

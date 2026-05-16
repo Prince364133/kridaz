@@ -1,24 +1,6 @@
 import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
-import Redis from 'ioredis';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Shared Redis connection — same pattern used by BullMQ and settlement queue.
-// maxRetriesPerRequest: null is required by ioredis when used with BullMQ/rate-limit.
-// ─────────────────────────────────────────────────────────────────────────────
-const redis = new Redis(process.env.REDIS_URL, {
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-  connectTimeout: 5000, // 5 seconds timeout
-});
-
-redis.on('error', (err) => {
-  console.error('[REDIS] Connection error:', err.message);
-});
-
-redis.on('connect', () => {
-  console.log('[REDIS] Connected successfully.');
-});
+import { redisClient as redis } from '../config/redis.js';
 
 /**
  * Auth limiter — login, register, Google auth, password reset.

@@ -1,13 +1,6 @@
 import { Queue, Worker } from 'bullmq';
-import Redis from 'ioredis';
+import { bullmqConnection as connection } from '../config/redis.js';
 import Reel from '../models/reel.model.js';
-// We will create this worker utility next
-// import { processReelVideo } from '../utils/reelWorker.js';
-
-const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-});
 
 export const reelQueue = new Queue('reels', { 
   connection,

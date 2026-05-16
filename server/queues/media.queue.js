@@ -1,13 +1,8 @@
 import { Queue, Worker } from 'bullmq';
-import Redis from 'ioredis';
+import { bullmqConnection as connection } from '../config/redis.js';
 import Reel from '../models/reel.model.js';
 import Story from '../models/story.model.js';
 import CommunityPost from '../models/communityPost.model.js';
-
-const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-});
 
 const MODELS = {
   reel: Reel,

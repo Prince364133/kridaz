@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import Redis from "ioredis";
+import { redisClient as redis } from "./redis.js";
 import User from "../models/user.model.js";
 
 let io;
@@ -18,17 +18,13 @@ const socketConfig = (server) => {
     cors: {
       origin: process.env.CLIENT_URLS 
         ? process.env.CLIENT_URLS.split(",").map((url) => url.trim()) 
-        : ["http://localhost:5173", "http://localhost:5174", "https://kridaz.vercel.app"],
+        : ["http://localhost:5174", "https://kridaz.vercel.app"],
     },
   });
 
   const onlineUsers = new Map(); // Local fallback — kept for within-process lookups
 
   // ── Redis presence tracking ─────────────────────────────────────────────────
-  const redis = new Redis(process.env.REDIS_URL, {
-    maxRetriesPerRequest: null,
-    enableReadyCheck: false,
-  });
 
   // Debounce: batch all presence changes within a 2-second window into one broadcast
   let presenceTimer = null;
