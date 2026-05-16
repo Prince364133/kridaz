@@ -188,24 +188,29 @@ const socketConfig = (server) => {
           socket.lastDbLocationWrite = now;
         }
  
-        // Find nearby online users to notify
-        // Performance: O(n) over online users. Production scale > 10k users use GEORADIUS.
-        for (const [uid, presence] of onlineUsers.entries()) {
-          if (uid.toString() === socket.userId.toString()) continue;
- 
-          const targetLocRaw = await redis.get(`kridaz:location:${uid}`);
-          if (targetLocRaw) {
-            const targetLoc = JSON.parse(targetLocRaw);
-            const dist = haversineDistance(lat, lng, targetLoc.lat, targetLoc.lng);
- 
-            if (dist <= 10000) { // 10km radius
-              io.to(uid.toString()).emit("nearby:location:update", {
+        // 1. Add/Update this user's location in the global geo-index
+        await redis.geoadd("kridaz:geo:online", lng, lat, socket.userId.toString());
+
+        // 2. Find nearby users within 10km using Redis (O(log N))
+        const nearbyUserIds = await redis.georadius(
+          "kridaz:geo:online",
+          lng,
+          lat,
+          10,
+          "km"
+        );
+
+        // 3. Notify them
+        if (nearbyUserIds && nearbyUserIds.length > 0) {
+          nearbyUserIds.forEach((uid) => {
+            if (uid !== socket.userId.toString()) {
+              io.to(uid).emit("nearby:location:update", {
                 userId: socket.userId,
                 lat,
                 lng
               });
             }
-          }
+          });
         }
       } catch (err) {
         console.error("Location update socket error:", err);
@@ -224,6 +229,7 @@ const socketConfig = (server) => {
           "EX",
           300
         );
+        await redis.geoadd("kridaz:geo:online", lng, lat, socket.userId.toString());
         socket.emit("location:start:ack", { success: true });
       } catch (err) {
         console.error("Location start socket error:", err);
@@ -243,6 +249,7 @@ const socketConfig = (server) => {
  
         // Clear real-time location from Redis
         redis.del(`kridaz:location:${socket.userId}`).catch(() => {});
+        redis.zrem("kridaz:geo:online", socket.userId.toString()).catch(() => {});
 
         io.emit("user last seen", { userId: socket.userId, lastSeen }); // kept as-is
       }
