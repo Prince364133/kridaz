@@ -7,7 +7,8 @@ import {
   getPlayerProfile,
   getNetworkById,
   getNearbyPlayers,
-  updateUserLocation
+  updateUserLocation,
+  updateNotificationPreferences
 } from './player.controller.js';
 import userAuth from "../../middleware/jwt/user.middleware.js";
 
@@ -16,6 +17,7 @@ const router = express.Router();
 router.get('/search', searchPlayers);
 router.get('/nearby', userAuth, getNearbyPlayers);
 router.post('/location', userAuth, updateUserLocation);
+router.patch('/notification-preferences', userAuth, updateNotificationPreferences);
 router.get('/network', userAuth, getNetwork);
 router.get('/:id', getPlayerProfile);
 

@@ -26,7 +26,7 @@ app.use(cookieParser());
 
 const allowedOrigins = process.env.CLIENT_URLS
   ? process.env.CLIENT_URLS.split(",").map((url) => url.trim())
-  : ["http://localhost:5173", "http://localhost:5174"];
+  : ["http://localhost:5174", "https://kridaz.vercel.app"];
 
 app.use(
   cors({
@@ -46,20 +46,22 @@ app.use(
 // Global — all /api routes (health check excluded via skip in the middleware)
 app.use('/api', globalLimiter);
 
+import { verifyTurnstile } from "./middleware/turnstile.middleware.js";
+
 // Auth routes — user
-app.use('/api/user/auth/send-otp',           otpLimiter);
-app.use('/api/user/auth/login-step1',         otpLimiter);  // OTP verification entry
-app.use('/api/user/auth/login',               authLimiter);
-app.use('/api/user/auth/register',            authLimiter);
-app.use('/api/user/auth/google-auth',         authLimiter);
-app.use('/api/user/auth/forgot-password-otp', authLimiter);
-app.use('/api/user/auth/reset-password',      authLimiter);
+app.use('/api/user/auth/send-otp',           otpLimiter, verifyTurnstile);
+app.use('/api/user/auth/login-step1',         otpLimiter, verifyTurnstile);
+app.use('/api/user/auth/login',               authLimiter, verifyTurnstile);
+app.use('/api/user/auth/register',            authLimiter, verifyTurnstile);
+app.use('/api/user/auth/google-auth',         authLimiter); // Google Auth usually handles its own bot protection
+app.use('/api/user/auth/forgot-password-otp', authLimiter, verifyTurnstile);
+app.use('/api/user/auth/reset-password',      authLimiter, verifyTurnstile);
 
 // Auth routes — owner
-app.use('/api/owner/auth/send-otp',    otpLimiter);
-app.use('/api/owner/auth/login-step1', otpLimiter);  // OTP verification entry
-app.use('/api/owner/auth/login',       authLimiter);
-app.use('/api/owner/auth/register',    authLimiter);
+app.use('/api/owner/auth/send-otp',    otpLimiter, verifyTurnstile);
+app.use('/api/owner/auth/login-step1', otpLimiter, verifyTurnstile);
+app.use('/api/owner/auth/login',       authLimiter, verifyTurnstile);
+app.use('/api/owner/auth/register',    authLimiter, verifyTurnstile);
 app.use('/api/owner/auth/google-auth', authLimiter);
 
 // Payment routes — user bookings
@@ -92,8 +94,14 @@ app.get("/", (req, res) => {
   res.send("Kridaz API is running");
 });
 
+import * as Sentry from "@sentry/node";
+
 // Error handling
 app.use(notFound);
+
+// Sentry error handler (must be after controllers but before other error middleware)
+Sentry.setupExpressErrorHandler(app);
+
 app.use(errorHandler);
 
 export default app;

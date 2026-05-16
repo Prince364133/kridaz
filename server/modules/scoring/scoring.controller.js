@@ -48,7 +48,7 @@ export const goLive = async (req, res) => {
       console.warn("[Scoring] Redis state init failed (non-fatal):", redisErr.message);
     }
 
-    const appBase = process.env.APP_BASE_URL || 'http://localhost:5174';
+    const appBase = process.env.USER_URL || process.env.CLIENT_URLS?.split(",")[0] || 'http://localhost:5174';
     res.status(200).json({ 
       success: true, 
       overlayToken,

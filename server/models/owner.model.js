@@ -96,6 +96,13 @@ const ownerSchema = new mongoose.Schema(
       },
     ],
     upgradeRequested: { type: Boolean, default: false },
+    notificationPreferences: {
+      email: { type: Boolean, default: true },
+      whatsapp: { type: Boolean, default: true },
+      marketing: { type: Boolean, default: true },
+      bookingAlerts: { type: Boolean, default: true },
+      settlementAlerts: { type: Boolean, default: true }
+    }
  },
  { timestamps: true }
 );

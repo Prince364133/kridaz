@@ -15,6 +15,9 @@ export default async function connectDB() {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
       serverSelectionTimeoutMS: 15000, 
       connectTimeoutMS: 15000,
+      maxPoolSize: 20,        // Default is 5, too low for production
+      minPoolSize: 5,         // Keep 5 warm at all times
+      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
     });
     console.log(`[DATABASE] Success! Connected to database: ${conn.connection.name}`);
     

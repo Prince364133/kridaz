@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import useLoginForm from "@hooks/useLoginForm";
 import GoogleAuthButton from "@user/components/auth/GoogleAuthButton";
+import Turnstile from "react-turnstile";
 import OnboardingModal from "../../components/modals/OnboardingModal";
 import { 
   ArrowRight, 
@@ -36,7 +37,8 @@ const Login = () => {
     showOnboarding,
     setShowOnboarding,
     onboardingUser,
-    accountNotFound
+    accountNotFound,
+    setTurnstileToken
   } = useLoginForm();
   const [mounted, setMounted] = useState(false);
   const dispatch = useDispatch(); // for quick demo button
@@ -188,6 +190,15 @@ const Login = () => {
                           </Link>
                         </div>
                       )}
+                      
+                      {/* Turnstile Bot Protection */}
+                      <div className="flex justify-center my-4">
+                        <Turnstile
+                          sitekey="0x4AAAAAAA7f_T_9-vI7yP6U" // Dummy test key, should be replaced with real key in production
+                          onVerify={(token) => setTurnstileToken(token)}
+                          theme="dark"
+                        />
+                      </div>
                       
                       <button 
                         type="submit" 

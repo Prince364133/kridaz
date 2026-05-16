@@ -135,7 +135,7 @@ export const verifyPayment = async (req, res) => {
     }
 
     const bookingId = new mongoose.Types.ObjectId();
-    const frontendUrl = process.env.CLIENT_URLS?.split(",")[1] || "http://localhost:5174";
+    const frontendUrl = process.env.USER_URL || process.env.CLIENT_URLS?.split(",")[0] || "http://localhost:5174";
     const qrUrl = `${frontendUrl}/booking-pass/${bookingId}`;
 
     const QRcode = await generateQRCode(qrUrl);
@@ -364,7 +364,7 @@ export const bookWithWallet = async (req, res) => {
 
       // 3. Create objects
       const bookingId = new mongoose.Types.ObjectId();
-      const frontendUrl = process.env.CLIENT_URLS?.split(",")[1] || "http://localhost:5174";
+      const frontendUrl = process.env.USER_URL || process.env.CLIENT_URLS?.split(",")[0] || "http://localhost:5174";
       const qrUrl = `${frontendUrl}/booking-pass/${bookingId}`;
 
       const QRcode = await generateQRCode(qrUrl);
@@ -790,7 +790,7 @@ export const createManualBooking = async (req, res) => {
     }
 
     const bookingId = new mongoose.Types.ObjectId();
-    const frontendUrl = process.env.CLIENT_URLS?.split(",")[1] || "http://localhost:5174";
+    const frontendUrl = process.env.USER_URL || process.env.CLIENT_URLS?.split(",")[0] || "http://localhost:5174";
     const qrUrl = `${frontendUrl}/booking-pass/${bookingId}`;
     const QRcode = await generateQRCode(qrUrl);
 

@@ -17,12 +17,13 @@ import {
 } from "./auth.validator.js";
 import { validate } from "../../middleware/validate.middleware.js";
 import { protect } from "../../middleware/auth.middleware.js";
+import { validateTurnstile } from "../../middleware/turnstile.middleware.js";
 
 const router = express.Router();
 
-router.post("/user/register", validate(userRegisterSchema), registerUser);
-router.post("/owner/register", validate(ownerRegisterSchema), registerOwner);
-router.post("/login", validate(userLoginSchema), login);
+router.post("/user/register", validateTurnstile, validate(userRegisterSchema), registerUser);
+router.post("/owner/register", validateTurnstile, validate(ownerRegisterSchema), registerOwner);
+router.post("/login", validateTurnstile, validate(userLoginSchema), login);
 router.post("/logout", logout);
 router.post("/owner/request", validate(ownerRequestSchema), ownerRequest);
 router.post("/request-upgrade", protect, requestUpgrade);

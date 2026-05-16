@@ -520,3 +520,43 @@ export const updateUserLocation = async (req, res) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+/**
+ * Update notification preferences for the logged-in user or owner
+ */
+export const updateNotificationPreferences = async (req, res) => {
+  const { preferences } = req.body;
+  const decoded = req.user || req.owner;
+
+  if (!decoded) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  if (!preferences || typeof preferences !== 'object') {
+    return res.status(400).json({ success: false, message: "Invalid preferences data" });
+  }
+
+  try {
+    const currentUserId = decoded.id || decoded._id;
+    
+    // Check if user exists
+    const user = await User.findById(currentUserId);
+    if (user) {
+      user.notificationPreferences = { ...user.notificationPreferences, ...preferences };
+      await user.save();
+      return res.status(200).json({ success: true, message: "Notification preferences updated", preferences: user.notificationPreferences });
+    }
+
+    // Check if owner exists
+    const owner = await Owner.findById(currentUserId);
+    if (owner) {
+      owner.notificationPreferences = { ...owner.notificationPreferences, ...preferences };
+      await owner.save();
+      return res.status(200).json({ success: true, message: "Notification preferences updated", preferences: owner.notificationPreferences });
+    }
+
+    return res.status(404).json({ success: false, message: "User/Owner not found" });
+  } catch (err) {
+    console.error("Update notification preferences error:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};

@@ -75,7 +75,7 @@ export const createTeam = async (req, res) => {
     });
 
     // Generate QR Code for join link
-    const frontendUrl = process.env.CLIENT_URLS?.split(",")[1] || "http://localhost:5174";
+    const frontendUrl = process.env.CLIENT_URLS?.split(",")[0] || "http://localhost:5174";
     const qrUrl = `${frontendUrl}/team-pass/${newTeam._id}`;
     try {
       console.log("Generating QR code for team join link:", qrUrl);
@@ -254,7 +254,7 @@ export const getTeamById = async (req, res) => {
 
     // Generate QR code if missing
     if (!team.qrCode) {
-      const frontendUrl = process.env.CLIENT_URLS?.split(",")[1] || "http://localhost:5174";
+      const frontendUrl = process.env.USER_URL || process.env.CLIENT_URLS?.split(",")[0] || "http://localhost:5174";
       const qrUrl = `${frontendUrl}/team-pass/${team._id}`;
       try {
         console.log("Generating missing QR code for team:", team._id);

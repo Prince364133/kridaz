@@ -112,8 +112,9 @@ export const uploadReel = async (req, res) => {
     await reel.save();
 
     // 3. Push to transcoding queue with local file path
-    await reelQueue.add('TRANSCODE_REEL', { 
-      reelId: reel._id,
+    await mediaQueue.add('TRANSCODE_VIDEO', { 
+      mediaId: reel._id,
+      mediaType: 'reel',
       localPath 
     });
 

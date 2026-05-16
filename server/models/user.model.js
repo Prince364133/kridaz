@@ -81,7 +81,14 @@ const userSchema = new mongoose.Schema({
       expiry: Date,
       thumbnail: String,
       metadata: mongoose.Schema.Types.Mixed
-    }]
+    }],
+    notificationPreferences: {
+      email: { type: Boolean, default: true },
+      whatsapp: { type: Boolean, default: true },
+      marketing: { type: Boolean, default: false },
+      matchUpdates: { type: Boolean, default: true },
+      securityAlerts: { type: Boolean, default: true } // Always true by design usually, but toggleable for user
+    }
  }, {timestamps: true});
 
 userSchema.index({ locationData: "2dsphere" }, { sparse: true }); // already present — geospatial queries

@@ -89,6 +89,7 @@ const useSignUpForm = (predefinedRole = "user") => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingUser, setOnboardingUser] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [turnstileToken, setTurnstileToken] = useState(null);
 
   // Determine API base path based on role
   const apiPath = predefinedRole === "user" ? "/api/user/auth" : "/api/owner/auth";
@@ -152,10 +153,19 @@ const useSignUpForm = (predefinedRole = "user") => {
       return;
     }
 
+    if (!turnstileToken) {
+      toast.error("Please complete the bot verification");
+      return;
+    }
+
     setLoading(true);
     try {
       const { email, phone } = getValues();
-      const response = await axiosInstance.post(`${apiPath}/send-otp`, { email, phone });
+      const response = await axiosInstance.post(`${apiPath}/send-otp`, { 
+        email, 
+        phone,
+        "cf-turnstile-response": turnstileToken 
+      });
       toast.success(response.data.message || "OTPs sent to your email and WhatsApp");
       setShowOtpInput(true);
     } catch (error) {
@@ -182,7 +192,13 @@ const useSignUpForm = (predefinedRole = "user") => {
     setLoading(true);
     const inviteToken = localStorage.getItem("pendingInvite");
     const umpireInvite = localStorage.getItem("umpireInvite");
-    const payload = { ...data, role: predefinedRole, inviteToken, umpireInvite };
+    const payload = { 
+      ...data, 
+      role: predefinedRole, 
+      inviteToken, 
+      umpireInvite,
+      "cf-turnstile-response": turnstileToken
+    };
     try {
       const response = await axiosInstance.post(`${apiPath}/register`, payload);
       const result = response.data;
@@ -296,6 +312,7 @@ const useSignUpForm = (predefinedRole = "user") => {
     handleGoogleSuccess,
     handleGoogleError,
     usernameStatus,
+    setTurnstileToken,
     showOnboarding,
     setShowOnboarding,
     onboardingUser,

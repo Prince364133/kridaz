@@ -4,6 +4,7 @@ import Booking from "../models/booking.model.js";
 import Owner from "../models/owner.model.js";
 import WalletTransaction from "../models/walletTransaction.model.js";
 import TimeSlot from "../models/timeSlot.model.js";
+import * as Sentry from "@sentry/node";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -54,6 +55,7 @@ const backfillPlayTimes = async () => {
     }
   } catch (err) {
     console.error(chalk.red("[SETTLEMENT] Backfill error:"), err.message);
+    Sentry.captureException(err, { tags: { job: "backfillPlayTimes" } });
   }
 };
 
@@ -90,6 +92,7 @@ export const runPlayingTransition = async () => {
     }
   } catch (err) {
     console.error(chalk.red("[SETTLEMENT] Phase A-1 error:"), err.message);
+    Sentry.captureException(err, { tags: { job: "runPlayingTransition_Phase1" } });
   }
 
   // ── Step 2: PLAYING → IN_REVIEW_WINDOW ───────────────────────────────────
@@ -150,6 +153,7 @@ export const runPlayingTransition = async () => {
   } catch (err) {
     if (session) await session.abortTransaction();
     console.error(chalk.red("[SETTLEMENT] Phase A-2 error:"), err.message);
+    Sentry.captureException(err, { tags: { job: "runPlayingTransition_Phase2" } });
   } finally {
     if (session) session.endSession();
   }
@@ -254,6 +258,7 @@ export const runAutoSettle = async () => {
   } catch (err) {
     if (session) await session.abortTransaction();
     console.error(chalk.red("[SETTLEMENT] Phase B error:"), err.message);
+    Sentry.captureException(err, { tags: { job: "runAutoSettle" } });
   } finally {
     if (session) session.endSession();
   }
@@ -335,10 +340,13 @@ const runLegacySettlement = async () => {
   } catch (err) {
     await session.abortTransaction();
     console.error(chalk.red("[SETTLEMENT] Legacy settlement error:"), err.message);
+    Sentry.captureException(err, { tags: { job: "runLegacySettlement" } });
   } finally {
     session.endSession();
   }
 };
+
+import { redisClient as redis } from "../config/redis.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entry point — called from server.js after DB connects
@@ -349,17 +357,26 @@ export const initSettlementWorker = () => {
   // One-time backfill for pre-migration bookings
   backfillPlayTimes();
 
-  // Run all jobs immediately on startup
-  runPlayingTransition();
-  runAutoSettle();
-  runLegacySettlement();
-
-  // Phase A: CONFIRMED → PLAYING → IN_REVIEW_WINDOW  (every 5 min)
-  // Phase B: IN_REVIEW_WINDOW → COMPLETED  (every 15 min)
-  // Legacy: old 12-hr PENDING→SETTLED flow  (every 60 min)
-  // NOTE: Recurring scheduling is handled by BullMQ (server/queues/settlement.queue.js).
-  //       setInterval calls have been removed to prevent duplicate execution across
-  //       multiple server instances.
+  // Startup run — guarded by a 2-minute Redis lock to prevent duplicate execution
+  // on rapid restarts (e.g. Render deploy restarts the dyno while BullMQ fires).
+  const lockKey = 'kridaz:settlement:startup:lock';
+  redis.set(lockKey, '1', 'EX', 120, 'NX').then((result) => {
+    if (result === 'OK') {
+      // We acquired the lock — safe to run startup jobs
+      console.log(chalk.magenta('[SETTLEMENT] Startup lock acquired. Running immediate jobs...'));
+      runPlayingTransition();
+      runAutoSettle();
+      runLegacySettlement();
+    } else {
+      console.log(chalk.yellow('[SETTLEMENT] Startup lock already held. Skipping immediate run (BullMQ will handle it).'));
+    }
+  }).catch((err) => {
+    // Redis unavailable or error — run anyway, accept the small duplicate risk
+    console.warn(chalk.yellow(`[SETTLEMENT] Redis lock failed (${err.message}). Running immediate jobs anyway.`));
+    runPlayingTransition();
+    runAutoSettle();
+    runLegacySettlement();
+  });
 
   console.log(chalk.magenta('[SETTLEMENT] Worker functions ready. Scheduling handled by BullMQ.'));
 };

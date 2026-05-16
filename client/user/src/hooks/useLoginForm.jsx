@@ -26,6 +26,7 @@ const useLoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [accountNotFound, setAccountNotFound] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -62,11 +63,20 @@ const useLoginForm = () => {
     const isValid = await trigger(["email", "password"]);
     if (!isValid) return;
 
+    if (!turnstileToken) {
+      toast.error("Please complete the bot verification");
+      return;
+    }
+
     setLoading(true);
     setAccountNotFound(false); // Reset on new attempt
     try {
       const { email, password } = getValues();
-      const response = await axiosInstance.post("/api/user/auth/login-step1", { email, password });
+      const response = await axiosInstance.post("/api/user/auth/login-step1", { 
+        email, 
+        password,
+        "cf-turnstile-response": turnstileToken
+      });
       const result = response.data;
 
       if (result.token) {
@@ -101,7 +111,12 @@ const useLoginForm = () => {
     setLoading(true);
     try {
       const { email } = getValues();
-      const response = await axiosInstance.post("/api/user/auth/login", { email, otp: data.otp, password: data.password });
+      const response = await axiosInstance.post("/api/user/auth/login", { 
+        email, 
+        otp: data.otp, 
+        password: data.password,
+        "cf-turnstile-response": turnstileToken
+      });
       const result = response.data;
       
       dispatch(login({ token: result.token, role: result.role, user: result.user }));
@@ -165,7 +180,8 @@ const useLoginForm = () => {
     handleGoogleSuccess,
     handleGoogleError,
     accountNotFound,
-    setAccountNotFound
+    setAccountNotFound,
+    setTurnstileToken
   };
 };
 

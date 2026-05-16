@@ -1,6 +1,9 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import { initSentry } from "./config/sentry.js";
+initSentry();
+
 import app from "./app.js";
 import connectDB from "./config/database.js";
 import http from "http";
@@ -11,9 +14,9 @@ import { initSettlementJobs } from "./queues/settlement.queue.js";
 const port = process.env.PORT || 4000;
 const server = http.createServer(app);
 
-// Disable timeout for large video uploads
-server.timeout = 0;
-server.keepAliveTimeout = 0;
+// Keep-alive tuned for Render's load balancer (recommended: 75s)
+server.keepAliveTimeout = 75000;
+server.headersTimeout = 76000;
 
 // Initialize Socket.io
 socketConfig(server);
@@ -31,13 +34,18 @@ const startServer = () => {
       initSettlementWorker();           // startup runs + backfill (immediate)
       await initSettlementJobs();       // recurring jobs via BullMQ (singleton)
       
-      // Start Reels Worker
-      const { reelWorker } = await import("./queues/reel.queue.js");
-      console.log("[REELS] Worker initialized and listening for jobs.");
-
-      // Start Unified Media Worker (Reels, Stories, Community)
-      const { mediaWorker } = await import("./queues/media.queue.js");
-      console.log("[MEDIA] Unified worker initialized and listening for jobs.");
+      // Conditionally start CPU-heavy media workers
+      // In production, you can set ENABLE_WORKERS=false on the API service 
+      // and run a separate 'worker' service with ENABLE_WORKERS=true
+      if (process.env.ENABLE_WORKERS !== "false") {
+        console.log("[WORKER] Starting media processing workers...");
+        
+        // Start Unified Media Worker (Reels, Stories, Community)
+        const { mediaWorker } = await import("./queues/media.queue.js");
+        console.log("[MEDIA] Unified sandboxed worker initialized.");
+      } else {
+        console.log("[SERVER] Media workers disabled (API-only mode).");
+      }
 
     }).catch(err => {
       console.error("[DATABASE] Background connection error:", err.message);

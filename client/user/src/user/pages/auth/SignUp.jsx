@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import useSignUpForm from "../../hooks/useSignUpForm";
 import GoogleAuthButton from "@user/components/auth/GoogleAuthButton";
+import Turnstile from "react-turnstile";
 import OnboardingModal from "../../components/modals/OnboardingModal";
 import { 
   ArrowRight, 
@@ -53,6 +54,7 @@ const SignUp = () => {
     handleGoogleSuccess,
     handleGoogleError,
     usernameStatus,
+    setTurnstileToken,
     showOnboarding,
     setShowOnboarding,
     onboardingUser
@@ -514,6 +516,15 @@ const SignUp = () => {
                         </div>
                         {errors.confirmPassword && <p className="text-xs text-red-500 mt-1 ml-1">{errors.confirmPassword.message}</p>}
                       </div>
+                    </div>
+
+                    {/* Turnstile Bot Protection */}
+                    <div className="flex justify-center my-4">
+                      <Turnstile
+                        sitekey="0x4AAAAAAA7f_T_9-vI7yP6U" // Dummy test key, should be replaced with real key in production
+                        onVerify={(token) => setTurnstileToken(token)}
+                        theme="dark"
+                      />
                     </div>
 
                     <button 

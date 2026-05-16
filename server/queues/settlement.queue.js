@@ -64,4 +64,6 @@ export const settlementWorker = new Worker('settlement', async (job) => {
 
 settlementWorker.on('failed', (job, err) => {
   console.error(`[SETTLEMENT] Job ${job?.name} failed:`, err.message);
+  const Sentry = import("@sentry/node");
+  Sentry.then(s => s.captureException(err, { tags: { job: job?.name } }));
 });

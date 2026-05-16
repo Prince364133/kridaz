@@ -25,6 +25,8 @@
     "@aws-sdk/client-s3": "^3.1046.0",
     "@aws-sdk/lib-storage": "^3.1046.0",
     "@aws-sdk/s3-request-presigner": "^3.1046.0",
+    "@sentry/node": "^10.53.1",
+    "@sentry/profiling-node": "^10.53.1",
     "@socket.io/redis-adapter": "^8.3.0",
     "argon2": "^0.40.3",
     "axios": "^1.7.9",

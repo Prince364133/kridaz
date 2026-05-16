@@ -120,7 +120,7 @@ export const generateInvoice = async (booking, turf, user) => {
       const summaryTop = rowTop + 50;
 
       // QR Code Generation
-      const clientUrl = process.env.CLIENT_URLS ? process.env.CLIENT_URLS.split(',')[0] : 'http://localhost:5174';
+      const clientUrl = process.env.USER_URL || (process.env.CLIENT_URLS ? process.env.CLIENT_URLS.split(',')[0] : 'http://localhost:5174');
       const bookingPassUrl = `${clientUrl}/booking-pass/${booking._id}`;
       
       try {
