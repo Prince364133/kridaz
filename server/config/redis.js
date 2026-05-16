@@ -37,4 +37,8 @@ export const bullmqConnection = new Redis(REDIS_URL, {
 bullmqConnection.on('connect', () => console.log('[REDIS] BullMQ client connected.'));
 bullmqConnection.on('error', (err) => console.error('[REDIS] BullMQ client error:', err.message));
 
+// ── Socket.io Redis Adapter Clients ────────────────────────────────────────
+export const pubClient = new Redis(REDIS_URL);
+export const subClient = pubClient.duplicate();
+
 export default redisClient;

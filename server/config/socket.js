@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
-import { redisClient as redis } from "./redis.js";
+import { createAdapter } from "@socket.io/redis-adapter";
+import { redisClient as redis, pubClient, subClient } from "./redis.js";
 import User from "../models/user.model.js";
 
 let io;
@@ -21,6 +22,9 @@ const socketConfig = (server) => {
         : ["http://localhost:5174", "https://kridaz.vercel.app"],
     },
   });
+
+  // ── Redis Adapter (Enables horizontal scaling) ───────────────────────────────
+  io.adapter(createAdapter(pubClient, subClient));
 
   const onlineUsers = new Map(); // Local fallback — kept for within-process lookups
 
