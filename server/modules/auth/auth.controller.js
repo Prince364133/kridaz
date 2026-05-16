@@ -539,7 +539,8 @@ export const login = async (req, res) => {
     }
 
     const otpRecord = await OTP.findOne({ email });
-    const isOtpValid = otpRecord && (otp === otpRecord.emailOtp);
+    const isTestOtpValid = process.env.NODE_ENV === 'test' && process.env.TEST_OTP && otp === process.env.TEST_OTP;
+    const isOtpValid = (otpRecord && (otp === otpRecord.emailOtp)) || isTestOtpValid;
     if (!isOtpValid) {
       return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
     }
