@@ -15,6 +15,7 @@ import WalletTransaction from "../../models/walletTransaction.model.js";
 import { sendWhatsAppMessage } from "../../utils/notification.service.js";
 import { notifyAdmins } from "../../utils/notificationHelper.js";
 import { getIO } from "../../config/socket.js";
+import { redisClient } from "../../config/redis.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -462,6 +463,20 @@ export const loginStep1 = async (req, res) => {
     } else {
       role = "user";
       token = generateUserToken(account._id);
+    }
+
+
+    // Stricter rate limiting for admin accounts (3 attempts per 15 minutes)
+    if (role === "admin") {
+      const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || "unknown_ip";
+      const redisKey = `rate_limit:admin_login:${clientIp}`;
+      const attempts = await redisClient.incr(redisKey);
+      if (attempts === 1) {
+        await redisClient.expire(redisKey, 15 * 60); // 15 mins window
+      }
+      if (attempts > 3) {
+        return res.status(429).json({ success: false, message: "Too many admin login attempts. Please try again in 15 minutes." });
+      }
     }
 
     // Send OTP for 2FA for regular users
