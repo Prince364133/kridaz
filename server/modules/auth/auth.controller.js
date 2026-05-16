@@ -5,7 +5,10 @@ import User from "../../models/user.model.js";
 import Owner from "../../models/owner.model.js";
 import OwnerRequest from "../../models/ownerRequest.model.js";
 import OTP from "../../models/otp.model.js";
-import { generateUserToken, generateOwnerToken } from "../../utils/generateJwtToken.js";
+import { generateUserToken, generateOwnerToken, generateRefreshToken } from "../../utils/generateJwtToken.js";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import RefreshToken from "../../models/refreshToken.model.js";
 import generateEmail from "../../utils/generateEmail.js";
 import cloudinary, { uploadToCloudinary } from "../../utils/cloudinary.js";
 import WalletTransaction from "../../models/walletTransaction.model.js";
@@ -14,6 +17,33 @@ import { notifyAdmins } from "../../utils/notificationHelper.js";
 import { getIO } from "../../config/socket.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const issueTokens = async (res, userId, token) => {
+    const refreshToken = generateRefreshToken(userId);
+    const hashedToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    
+    await RefreshToken.create({
+        user: userId,
+        token: hashedToken,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    });
+
+    res.cookie("auth_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 15 * 60 * 1000, // 15 mins
+    });
+
+    res.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      path: "/" 
+    });
+};
+
 
 const generateOTP = () => {
   if (process.env.TEST_OTP) return process.env.TEST_OTP;
@@ -310,13 +340,7 @@ export const registerUser = async (req, res) => {
 
     const token = generateUserToken(newUser._id, newUser.role, newUser.ownerDetails);
 
-    // Set cookie for shared auth between portals
-    res.cookie("auth_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    });
+    await issueTokens(res, newUser ? newUser._id : (account ? account._id : (owner ? owner.userId || owner._id : req.user ? req.user.id : null)), token);
 
     return res
       .status(201)
@@ -392,13 +416,7 @@ export const registerOwner = async (req, res) => {
 
     const token = generateOwnerToken(newUser._id, newOwner.role, newOwner._id);
 
-    // Set cookie for shared auth between portals
-    res.cookie("auth_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    });
+    await issueTokens(res, newUser ? newUser._id : (account ? account._id : (owner ? owner.userId || owner._id : req.user ? req.user.id : null)), token);
 
     return res.status(201).json({
       success: true,
@@ -446,27 +464,6 @@ export const loginStep1 = async (req, res) => {
       token = generateUserToken(account._id);
     }
 
-    // Bypass OTP for Admin role
-    const adminRole = "admin";
-    if (role === adminRole) {
-      // Set cookie for shared auth between portals
-      res.cookie("auth_token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      });
-
-      return res.status(200).json({ 
-        success: true, 
-        message: "Admin login successful", 
-        token, 
-        role,
-        user: account,
-        requiresOtp: false 
-      });
-    }
-
     // Send OTP for 2FA for regular users
     const emailOtp = generateOTP();
     const phoneOtp = generateOTP();
@@ -486,11 +483,13 @@ export const loginStep1 = async (req, res) => {
     );
 
     // Send WhatsApp
-    const otpTemplate = process.env.MSG91_WHATSAPP_OTP_TEMPLATE;
-    if (otpTemplate) {
-      sendWhatsAppMessage(account.phone, "", otpTemplate, [phoneOtp]);
-    } else {
-      sendWhatsAppMessage(account.phone, `Your Kridaz verification code is: ${phoneOtp}`);
+    if (account.phone) {
+      const otpTemplate = process.env.MSG91_WHATSAPP_OTP_TEMPLATE;
+      if (otpTemplate) {
+        sendWhatsAppMessage(account.phone, "", otpTemplate, [phoneOtp]);
+      } else {
+        sendWhatsAppMessage(account.phone, `Your Kridaz verification code is: ${phoneOtp}`);
+      }
     }
 
     return res.status(200).json({ 
@@ -540,13 +539,7 @@ export const login = async (req, res) => {
 
     await OTP.deleteOne({ _id: otpRecord._id });
 
-    // Set cookie for shared auth between portals
-    res.cookie("auth_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    });
+    await issueTokens(res, newUser ? newUser._id : (account ? account._id : (owner ? owner.userId || owner._id : req.user ? req.user.id : null)), token);
 
     if (account.status === "blocked") {
       return res.status(403).json({ success: false, message: "Your account has been blocked by an administrator." });
@@ -712,12 +705,7 @@ export const googleAuth = async (req, res) => {
       }
     }
 
-    res.cookie("auth_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
+    await issueTokens(res, authAccount ? authAccount._id : (user ? user._id : owner.userId || owner._id), token);
 
     const authAccount = owner || user;
     if (authAccount && authAccount.status === "blocked") {
@@ -743,12 +731,88 @@ export const googleAuth = async (req, res) => {
 
 // Logout
 export const logout = async (req, res) => {
+  const refreshToken = req.cookies?.refresh_token;
+  if (refreshToken) {
+      const hashedToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+      await RefreshToken.findOneAndUpdate(
+          { token: hashedToken },
+          { revokedAt: new Date() }
+      );
+  }
+  
   res.clearCookie("auth_token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
   });
+  res.clearCookie("refresh_token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/"
+  });
   return res.status(200).json({ success: true, message: "Logged out successfully" });
+};
+
+export const refresh = async (req, res) => {
+  try {
+      const refreshToken = req.cookies?.refresh_token;
+      
+      if (!refreshToken) {
+          return res.status(401).json({ success: false, message: "No refresh token provided" });
+      }
+
+      let decoded;
+      try {
+          decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+      } catch (err) {
+          return res.status(401).json({ success: false, message: "Invalid refresh token" });
+      }
+
+      const hashedToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+      const tokenDoc = await RefreshToken.findOne({ token: hashedToken, user: decoded.id });
+
+      if (!tokenDoc || !tokenDoc.isActive) {
+          return res.status(401).json({ success: false, message: "Refresh token revoked or expired" });
+      }
+
+      const user = await User.findById(decoded.id);
+      const owner = await Owner.findOne({ userId: decoded.id });
+
+      if (!user && !owner) {
+          return res.status(401).json({ success: false, message: "User not found" });
+      }
+      
+      if ((user && user.status === "blocked") || (owner && owner.status === "blocked")) {
+          return res.status(403).json({ success: false, message: "Account blocked" });
+      }
+
+      let role = "user";
+      let newToken;
+      let account = owner || user;
+      
+      if (owner) {
+          role = owner.role;
+          newToken = generateOwnerToken(owner.userId || owner._id, role, owner._id);
+      } else {
+          newToken = generateUserToken(user._id, user.role, user.ownerDetails);
+      }
+
+      tokenDoc.revokedAt = new Date();
+      await tokenDoc.save();
+
+      await issueTokens(res, decoded.id, newToken);
+
+      return res.status(200).json({ 
+          success: true, 
+          token: newToken,
+          role,
+          user: account
+      });
+  } catch (error) {
+      console.error("Refresh token error:", error);
+      return res.status(500).json({ success: false, message: "Failed to refresh token" });
+  }
 };
 
 // Owner Request (Waitlist/Inquiry)
