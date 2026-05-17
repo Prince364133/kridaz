@@ -11,6 +11,7 @@ build/
 # Root-level scratch folder (dev-only debug scripts)
 scratch/
 server/scratch/
+server/scratch_*.js
 
 # Sensitive Seed Scripts
 server/scripts/seed_admin_credentials.js

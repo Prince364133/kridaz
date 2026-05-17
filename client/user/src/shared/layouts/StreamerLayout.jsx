@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { StreamerSidebar, AuthenticatedNavbar } from "@components/layout";
 import MobileBottomNav from "@user/components/layout/MobileBottomNav";
+import ErrorBoundary from "@components/common/ErrorBoundary";
 
 const StreamerLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,7 +44,9 @@ const StreamerLayout = () => {
         `}
         >
           <div className="w-full p-4 pb-24 lg:pb-10">
-            <Outlet />
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
           </div>
         </main>
       </div>

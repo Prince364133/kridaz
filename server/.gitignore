@@ -54,6 +54,7 @@ debug_*.js
 fix_*.js
 test_*.js
 find_*.js
+scratch_*.js
 
 # Scripts directory — seed and admin tooling (dangerous if run in production)
 scripts/seed_all_data.js
