@@ -8,18 +8,18 @@ import {
   updateId,
   setUploadError, 
   clearUpload 
-} from '../../redux/slices/mediaUploadSlice';
+} from '@redux/slices/mediaUploadSlice';
 import { 
   useLazyGetReelUploadUrlQuery, 
   useConfirmReelUploadMutation 
-} from '../../redux/api/reelsApi';
+} from '@redux/api/reelsApi';
 import { 
   useLazyGetCommunityUploadUrlQuery, 
   useConfirmCommunityPostMutation,
   useLazyGetStoryUploadUrlQuery,
   useConfirmStoryUploadMutation
-} from '../../redux/api/communityApi';
-import { uploadFileToR2 } from '../../utils/mediaUpload';
+} from '@redux/api/communityApi';
+import { uploadFileToR2 } from '@utils/mediaUpload';
 import toast from 'react-hot-toast';
 
 const BackgroundUploadManager = () => {

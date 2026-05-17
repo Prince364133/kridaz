@@ -1,0 +1,20 @@
+// Public API boundary for features/admin
+export { default as UserManagement } from "./UserManagement/UserPage";
+export { default as VerificationCenter } from "./OwnerRequests/VerificationCenter";
+export { default as AdminDashboard } from "./Dashboard/AdminDashboard";
+export { default as PartnerViewer } from "./OwnerManagement/OwnerViewer";
+export { default as TurfList } from "./Turf/TurfList";
+export { default as AllTurf } from "./Turf/AllTurf";
+export { default as VenueApprovalDetail } from "./Turf/VenueApprovalDetail";
+export { default as TransactionSection } from "./Transactions/TransactionSection";
+export { FeatureFlags } from "./FeatureFlags";
+export { MarketingManagement } from "./Marketing/MarketingManagement";
+export { BlogManagement } from "./Blogs/BlogManagement";
+export { default as CommunityManagement } from "./Community/CommunityManagement";
+export { default as ProfessionalManagement } from "./ProfessionalManagement/ProfessionalManagement";
+export { default as SupportCenter } from "./Resolution/SupportCenter";
+export { default as DisputeManager } from "./Resolution/DisputeManager";
+export { default as AuditLogs } from "./Audit/AuditLogs";
+export { default as ProfessionalDetailsPage } from "./ProfessionalManagement/ProfessionalDetailsPage";
+export { default as FinancialMissionControl } from "./Finance/FinancialMissionControl";
+export { default as HostedGamesPage } from "./HostedGames/HostedGamesPage";

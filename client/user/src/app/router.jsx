@@ -26,137 +26,141 @@ const PageLoader = () => (
 
 // ΓöÇΓöÇ Lazy: User Portal Pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const UserHome               = lazy(() => import("@user/pages/Home"));
-const UserLogin              = lazy(() => import("@user/pages/auth/Login"));
-const UserSignUp             = lazy(() => import("@user/pages/auth/SignUp"));
-const ForgotPassword         = lazy(() => import("@user/pages/auth/ForgotPassword"));
-const UserTurf               = lazy(() => import("@user/components/turf/Turf"));
-const UserTurfDetails        = lazy(() => import("@user/components/turf/TurfDetails"));
-const UserTurfBookingHistory = lazy(() => import("@user/components/turf/TurfBookingHistory"));
-const UserProfile            = lazy(() => import("@user/pages/Profile"));
-const UserBlogs              = lazy(() => import("@user/pages/Blogs"));
-const UserBlogDetail         = lazy(() => import("@user/pages/BlogDetail"));
-const Community              = lazy(() => import("@user/pages/Community"));
-const FindPlayers            = lazy(() => import("@user/pages/FindPlayers"));
-const UserWallet             = lazy(() => import("@user/pages/Wallet"));
-const BookingPass            = lazy(() => import("@user/pages/BookingPass"));
-const BookingInvoice         = lazy(() => import("@user/pages/BookingInvoice"));
-const HostGame               = lazy(() => import("@user/pages/HostGame"));
-const JoinGames              = lazy(() => import("@user/pages/JoinGames"));
-const MyHostedGames          = lazy(() => import("@user/pages/MyHostedGames"));
-const MyJoinedGames          = lazy(() => import("@user/pages/MyJoinedGames"));
-const FindProfessionals      = lazy(() => import("@user/pages/FindProfessionals"));
-const ProfessionalDetails    = lazy(() => import("@user/pages/ProfessionalDetails"));
-const Messages               = lazy(() => import("@user/pages/Messages"));
-const MyTeams                = lazy(() => import("@user/pages/MyTeams"));
-const CheckoutPage           = lazy(() => import("@user/pages/checkout/CheckoutPage"));
-const ScoringApp             = lazy(() => import("@user/pages/ScoringApp"));
-const MatchAnalytics         = lazy(() => import("@user/pages/MatchAnalytics"));
-const MatchDetails           = lazy(() => import("@user/pages/MatchDetails"));
-const Leaderboard            = lazy(() => import("@user/pages/Leaderboard"));
-const LiveOverlay            = lazy(() => import("@user/pages/LiveOverlay"));
-const LiveScoreboard         = lazy(() => import("@user/pages/LiveScoreboard"));
-const TeamPass               = lazy(() => import("@user/pages/TeamPass"));
-const TeamProfile            = lazy(() => import("@user/pages/TeamProfile"));
-const ReelsFeed              = lazy(() => import("@user/pages/reels/ReelsFeed"));
-const UploadReel             = lazy(() => import("@user/pages/reels/UploadReel"));
-const ReelAnalytics          = lazy(() => import("@user/pages/reels/ReelAnalytics"));
+const UserLogin              = lazy(() => import("@features/auth").then(m => ({ default: m.Login })));
+const UserSignUp             = lazy(() => import("@features/auth").then(m => ({ default: m.SignUp })));
+const ForgotPassword         = lazy(() => import("@features/auth").then(m => ({ default: m.ForgotPassword })));
+const UserTurf               = lazy(() => import("@features/turf").then(m => ({ default: m.Turf })));
+const UserTurfDetails        = lazy(() => import("@features/turf").then(m => ({ default: m.TurfDetails })));
+const UserTurfBookingHistory = lazy(() => import("@features/turf").then(m => ({ default: m.TurfBookingHistory })));
+const UserProfile            = lazy(() => import("@features/profile").then(m => ({ default: m.Profile })));
+const UserBlogs              = lazy(() => import("@features/blogs").then(m => ({ default: m.Blogs })));
+const UserBlogDetail         = lazy(() => import("@features/blogs").then(m => ({ default: m.BlogDetail })));
+const Community              = lazy(() => import("@features/networking").then(m => ({ default: m.Community })));
+const FindPlayers            = lazy(() => import("@features/networking").then(m => ({ default: m.FindPlayers })));
+const UserWallet             = lazy(() => import("@features/wallet").then(m => ({ default: m.Wallet })));
+const BookingPass            = lazy(() => import("@features/turf").then(m => ({ default: m.BookingPass })));
+const BookingInvoice         = lazy(() => import("@features/turf").then(m => ({ default: m.BookingInvoice })));
+const HostGame               = lazy(() => import("@features/games").then(m => ({ default: m.HostGame })));
+const JoinGames              = lazy(() => import("@features/games").then(m => ({ default: m.JoinGames })));
+const MyHostedGames          = lazy(() => import("@features/games").then(m => ({ default: m.MyHostedGames })));
+const MyJoinedGames          = lazy(() => import("@features/games").then(m => ({ default: m.MyJoinedGames })));
+const FindProfessionals      = lazy(() => import("@features/networking").then(m => ({ default: m.FindProfessionals })));
+const ProfessionalDetails    = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalDetails })));
+const Messages               = lazy(() => import("@features/chat").then(m => ({ default: m.Messages })));
+const MyTeams                = lazy(() => import("@features/teams").then(m => ({ default: m.Teams })));
+const CheckoutPage           = lazy(() => import("@features/turf").then(m => ({ default: m.CheckoutPage })));
+const ScoringApp             = lazy(() => import("@features/scoring").then(m => ({ default: m.ScoringApp })));
+const MatchAnalytics         = lazy(() => import("@features/scoring").then(m => ({ default: m.MatchAnalytics })));
+const MatchDetails           = lazy(() => import("@features/scoring").then(m => ({ default: m.MatchDetails })));
+const Leaderboard            = lazy(() => import("@features/leaderboard").then(m => ({ default: m.Leaderboard })));
+const LiveOverlay            = lazy(() => import("@features/scoring").then(m => ({ default: m.LiveOverlay })));
+const LiveScoreboard         = lazy(() => import("@features/scoring").then(m => ({ default: m.LiveScoreboard })));
+const TeamPass               = lazy(() => import("@features/teams").then(m => ({ default: m.TeamPass })));
+const TeamProfile            = lazy(() => import("@features/teams").then(m => ({ default: m.TeamProfile })));
+const ReelsFeed              = lazy(() => import("@features/reels").then(m => ({ default: m.ReelsFeed })));
+const UploadReel             = lazy(() => import("@features/reels").then(m => ({ default: m.UploadReel })));
+const ReelAnalytics          = lazy(() => import("@features/reels").then(m => ({ default: m.ReelAnalytics })));
 
-// ΓöÇΓöÇ Lazy: Business Landing Pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const UserVenueOwnerLanding  = lazy(() => import("@user/pages/business/VenueOwnerLanding"));
-const UserCoachLanding       = lazy(() => import("@user/pages/business/CoachLanding"));
-const UserUmpireLanding      = lazy(() => import("@user/pages/business/UmpireLanding"));
-const UserStreamerLanding     = lazy(() => import("@user/pages/business/StreamerLanding"));
-const UserScorerLanding      = lazy(() => import("@user/pages/business/ScorerLanding"));
-const BusinessRegistration   = lazy(() => import("@user/pages/business/BusinessRegistration"));
 
-// ΓöÇΓöÇ Lazy: Legal Pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const PrivacyPolicy              = lazy(() => import("@user/pages/legal/PrivacyPolicy"));
-const TermsOfService             = lazy(() => import("@user/pages/legal/TermsOfService"));
-const DataDeletionInstructions   = lazy(() => import("@user/pages/legal/DataDeletionInstructions"));
+// ── Lazy: Business Landing Pages ───────────────────────────────────────────────────
+const UserVenueOwnerLanding  = lazy(() => import("@features/business").then(m => ({ default: m.VenueOwnerLanding })));
+const UserCoachLanding       = lazy(() => import("@features/business").then(m => ({ default: m.CoachLanding })));
+const UserUmpireLanding      = lazy(() => import("@features/business").then(m => ({ default: m.UmpireLanding })));
+const UserStreamerLanding     = lazy(() => import("@features/business").then(m => ({ default: m.StreamerLanding })));
+const UserScorerLanding      = lazy(() => import("@features/business").then(m => ({ default: m.ScorerLanding })));
+const BusinessRegistration   = lazy(() => import("@features/business").then(m => ({ default: m.BusinessRegistration })));
+
+
+// ── Lazy: Legal Pages ─────────────────────────────────────────────────────────────
+const PrivacyPolicy              = lazy(() => import("@features/legal").then(m => ({ default: m.PrivacyPolicy })));
+const TermsOfService             = lazy(() => import("@features/legal").then(m => ({ default: m.TermsOfService })));
+const DataDeletionInstructions   = lazy(() => import("@features/legal").then(m => ({ default: m.DataDeletionInstructions })));
+
 
 // ΓöÇΓöÇ Lazy: Owner / Partner Portal Pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const PartnersGateway  = lazy(() => import("@pages/PartnersGateway"));
-const VenueOwnerSignUp = lazy(() => import("@pages/VenueOwnerSignUp"));
-const CoachSignUp      = lazy(() => import("@pages/CoachSignUp"));
-const UmpireSignUp     = lazy(() => import("@pages/UmpireSignUp"));
-const ScorerSignUp     = lazy(() => import("@pages/ScorerSignUp"));
-const StreamerSignUp   = lazy(() => import("@user/pages/auth/StreamerSignUp"));
+const PartnersGateway  = lazy(() => import("@features/business").then(m => ({ default: m.PartnersGateway })));
 
-// ΓöÇΓöÇ Lazy: Streamer Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const StreamSetup    = lazy(() => import("@components/streamer/StreamSetup"));
-const ManageStream   = lazy(() => import("@pages/ManageStream"));
-const TickerGallery  = lazy(() => import("@components/streamer/TickerGallery"));
+const VenueOwnerSignUp = lazy(() => import("@features/auth").then(m => ({ default: m.VenueOwnerSignUp })));
+const CoachSignUp      = lazy(() => import("@features/auth").then(m => ({ default: m.CoachSignUp })));
+const UmpireSignUp     = lazy(() => import("@features/auth").then(m => ({ default: m.UmpireSignUp })));
+const ScorerSignUp     = lazy(() => import("@features/auth").then(m => ({ default: m.ScorerSignUp })));
+const StreamerSignUp   = lazy(() => import("@features/auth").then(m => ({ default: m.StreamerSignUp })));
 
-// ΓöÇΓöÇ Lazy: YouTube / Facebook Auth Status ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-// Named exports ΓÇö use .then() to map to default for lazy()
-const YouTubeConnected  = lazy(() => import("@pages/YouTubeAuthStatus").then(m => ({ default: m.YouTubeConnected })));
-const YouTubeError      = lazy(() => import("@pages/YouTubeAuthStatus").then(m => ({ default: m.YouTubeError })));
-const FacebookConnected = lazy(() => import("@pages/FacebookAuthStatus").then(m => ({ default: m.FacebookConnected })));
-const FacebookError     = lazy(() => import("@pages/FacebookAuthStatus").then(m => ({ default: m.FacebookError })));
+// ── Lazy: Streamer Components ────────────────────────────────────────────────────────────────────────────────
+const StreamSetup    = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamSetup })));
+const ManageStream   = lazy(() => import("@features/streamer").then(m => ({ default: m.ManageStream })));
+const TickerGallery  = lazy(() => import("@features/streamer").then(m => ({ default: m.TickerGallery })));
+
+// ── Lazy: YouTube / Facebook Auth Status ─────────────────────────────────────────────────────────────────────
+// Named exports — use .then() to map to default for lazy()
+const YouTubeConnected  = lazy(() => import("@features/streamer").then(m => ({ default: m.YouTubeConnected })));
+const YouTubeError      = lazy(() => import("@features/streamer").then(m => ({ default: m.YouTubeError })));
+const FacebookConnected = lazy(() => import("@features/streamer").then(m => ({ default: m.FacebookConnected })));
+const FacebookError     = lazy(() => import("@features/streamer").then(m => ({ default: m.FacebookError })));
 
 // ΓöÇΓöÇ Lazy: Owner (Partner) Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const AddTurf            = lazy(() => import("@components/owner/TurfManagement/AddTurf"));
-const EditTurf           = lazy(() => import("@components/owner/TurfManagement/EditTurf"));
-const TurfManagement     = lazy(() => import("@components/owner/TurfManagement/TurfManagement"));
-const TurfDetails        = lazy(() => import("@components/owner/TurfManagement/TurfDetails"));
-const OwnerDashboard     = lazy(() => import("@components/owner/Dashboard/OwnerDashboard"));
-const PartnerReviews     = lazy(() => import("@components/owner/Review/OwnerReviews"));
-const PartnerBookings    = lazy(() => import("@components/owner/Bookings/OwnerBookings"));
-const CustomerDirectory  = lazy(() => import("@components/owner/Customers/CustomerDirectory"));
-const VenueIntelligence  = lazy(() => import("@components/owner/Intelligence/VenueIntelligence"));
-const OwnerRevenue       = lazy(() => import("@components/owner/Revenue/OwnerRevenue"));
-const OwnerPromotions    = lazy(() => import("@components/owner/Promotions/OwnerPromotions"));
-const PayoutBanking      = lazy(() => import("@components/owner/Banking/PayoutBanking"));
-const PartnerSupport     = lazy(() => import("@components/owner/Support/PartnerSupport"));
+const AddTurf            = lazy(() => import("@features/venue-owner").then(m => ({ default: m.AddTurf })));
+const EditTurf           = lazy(() => import("@features/venue-owner").then(m => ({ default: m.EditTurf })));
+const TurfManagement     = lazy(() => import("@features/venue-owner").then(m => ({ default: m.TurfManagement })));
+const TurfDetails        = lazy(() => import("@features/venue-owner").then(m => ({ default: m.TurfDetails })));
+const OwnerDashboard     = lazy(() => import("@features/venue-owner").then(m => ({ default: m.OwnerDashboard })));
+const PartnerReviews     = lazy(() => import("@features/venue-owner").then(m => ({ default: m.PartnerReviews })));
+const PartnerBookings    = lazy(() => import("@features/venue-owner").then(m => ({ default: m.PartnerBookings })));
+const CustomerDirectory  = lazy(() => import("@features/venue-owner").then(m => ({ default: m.CustomerDirectory })));
+const VenueIntelligence  = lazy(() => import("@features/venue-owner").then(m => ({ default: m.VenueIntelligence })));
+const OwnerRevenue       = lazy(() => import("@features/venue-owner").then(m => ({ default: m.OwnerRevenue })));
+const OwnerPromotions    = lazy(() => import("@features/venue-owner").then(m => ({ default: m.OwnerPromotions })));
+const PayoutBanking      = lazy(() => import("@features/venue-owner").then(m => ({ default: m.PayoutBanking })));
+const PartnerSupport     = lazy(() => import("@features/venue-owner").then(m => ({ default: m.PartnerSupport })));
 
 // ΓöÇΓöÇ Lazy: Coach Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const CoachDashboard   = lazy(() => import("@components/coach/CoachDashboard"));
-const CoachStudents    = lazy(() => import("@components/coach/CoachStudents"));
-const CoachSessions    = lazy(() => import("@components/coach/CoachSessions"));
-const CoachMasterclass = lazy(() => import("@components/coach/CoachMasterclass"));
+const CoachDashboard   = lazy(() => import("@features/coach").then(m => ({ default: m.CoachDashboard })));
+const CoachStudents    = lazy(() => import("@features/coach").then(m => ({ default: m.CoachStudents })));
+const CoachSessions    = lazy(() => import("@features/coach").then(m => ({ default: m.CoachSessions })));
+const CoachMasterclass = lazy(() => import("@features/coach").then(m => ({ default: m.CoachMasterclass })));
 
 // ΓöÇΓöÇ Lazy: Umpire Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const UmpireDashboard = lazy(() => import("@components/umpire/UmpireDashboard"));
-const UmpireMatches   = lazy(() => import("@components/umpire/UmpireMatches"));
-const UmpireSchedule  = lazy(() => import("@components/umpire/UmpireSchedule"));
-const UmpireFeedback  = lazy(() => import("@components/umpire/UmpireFeedback"));
+const UmpireDashboard = lazy(() => import("@features/umpire").then(m => ({ default: m.UmpireDashboard })));
+const UmpireMatches   = lazy(() => import("@features/umpire").then(m => ({ default: m.UmpireMatches })));
+const UmpireSchedule  = lazy(() => import("@features/umpire").then(m => ({ default: m.UmpireSchedule })));
+const UmpireFeedback  = lazy(() => import("@features/umpire").then(m => ({ default: m.UmpireFeedback })));
 
-// ΓöÇΓöÇ Lazy: Streamer Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const StreamerDashboard = lazy(() => import("@components/streamer/StreamerDashboard"));
-const StreamerMatches   = lazy(() => import("@components/streamer/StreamerMatches"));
-const StreamerSchedule  = lazy(() => import("@components/streamer/StreamerSchedule"));
+// ── Lazy: Streamer Portal Components ─────────────────────────────────────────────────────────────────────────
+const StreamerDashboard = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamerDashboard })));
+const StreamerMatches   = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamerMatches })));
+const StreamerSchedule  = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamerSchedule })));
 
 // ΓöÇΓöÇ Lazy: Scorer Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const ScorerDashboard = lazy(() => import("@components/scorer/ScorerDashboard"));
-const ScorerMatches   = lazy(() => import("@components/scorer/ScorerMatches"));
+const ScorerDashboard = lazy(() => import("@features/scorer").then(m => ({ default: m.ScorerDashboard })));
+const ScorerMatches   = lazy(() => import("@features/scorer").then(m => ({ default: m.ScorerMatches })));
 
 // ΓöÇΓöÇ Lazy: Shared Professional Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const ProfessionalAvailability = lazy(() => import("@components/professional/ProfessionalAvailability"));
-const ProfessionalBookings     = lazy(() => import("@components/professional/ProfessionalBookings"));
-const ProfessionalReviews      = lazy(() => import("@components/professional/ProfessionalReviews"));
-const ProfessionalProfile      = lazy(() => import("@components/professional/ProfessionalProfile"));
-const DashboardProfile         = lazy(() => import("@components/shared/DashboardProfile"));
+const ProfessionalAvailability = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalAvailability })));
+const ProfessionalBookings     = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalBookings })));
+const ProfessionalReviews      = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalReviews })));
+const ProfessionalProfile      = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalProfile })));
+const DashboardProfile         = lazy(() => import("@features/partner-profile").then(m => ({ default: m.DashboardProfile })));
 
 // ΓöÇΓöÇ Lazy: Admin Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const UserManagement         = lazy(() => import("@components/admin/UserManagement/UserPage"));
-const VerificationCenter     = lazy(() => import("@components/admin/OwnerRequests/VerificationCenter"));
-const AdminDashboard         = lazy(() => import("@components/admin/Dashboard/AdminDashboard"));
-const PartnerViewer          = lazy(() => import("@components/admin/OwnerManagement/OwnerViewer"));
-const TurfList               = lazy(() => import("@components/admin/Turf/TurfList"));
-const AllTurf                = lazy(() => import("@components/admin/Turf/AllTurf"));
-const VenueApprovalDetail    = lazy(() => import("@components/admin/Turf/VenueApprovalDetail"));
-const TransactionSection     = lazy(() => import("@components/admin/Transactions/TransactionSection"));
-const FeatureFlags           = lazy(() => import("@components/admin/FeatureFlags").then(m => ({ default: m.FeatureFlags })));
-const MarketingManagement    = lazy(() => import("@components/admin/Marketing/MarketingManagement").then(m => ({ default: m.MarketingManagement })));
-const BlogManagement         = lazy(() => import("@components/admin/Blogs/BlogManagement").then(m => ({ default: m.BlogManagement })));
-const CommunityManagement    = lazy(() => import("@components/admin/Community/CommunityManagement"));
-const ProfessionalManagement = lazy(() => import("@components/admin/ProfessionalManagement/ProfessionalManagement"));
-const SupportCenter          = lazy(() => import("@components/admin/Resolution/SupportCenter"));
-const DisputeManager         = lazy(() => import("@components/admin/Resolution/DisputeManager"));
-const AuditLogs              = lazy(() => import("@components/admin/Audit/AuditLogs"));
-const FinancialMissionControl = lazy(() => import("@components/admin/Finance/FinancialMissionControl"));
-const ProfessionalDetailsPage = lazy(() => import("@components/admin/ProfessionalManagement/ProfessionalDetailsPage"));
-const HostedGamesPage         = lazy(() => import("@components/admin/HostedGames/HostedGamesPage"));
+const UserManagement         = lazy(() => import("@features/admin").then(m => ({ default: m.UserManagement })));
+const VerificationCenter     = lazy(() => import("@features/admin").then(m => ({ default: m.VerificationCenter })));
+const AdminDashboard         = lazy(() => import("@features/admin").then(m => ({ default: m.AdminDashboard })));
+const PartnerViewer          = lazy(() => import("@features/admin").then(m => ({ default: m.PartnerViewer })));
+const TurfList               = lazy(() => import("@features/admin").then(m => ({ default: m.TurfList })));
+const AllTurf                = lazy(() => import("@features/admin").then(m => ({ default: m.AllTurf })));
+const VenueApprovalDetail    = lazy(() => import("@features/admin").then(m => ({ default: m.VenueApprovalDetail })));
+const TransactionSection     = lazy(() => import("@features/admin").then(m => ({ default: m.TransactionSection })));
+const FeatureFlags           = lazy(() => import("@features/admin").then(m => ({ default: m.FeatureFlags })));
+const MarketingManagement    = lazy(() => import("@features/admin").then(m => ({ default: m.MarketingManagement })));
+const BlogManagement         = lazy(() => import("@features/admin").then(m => ({ default: m.BlogManagement })));
+const CommunityManagement    = lazy(() => import("@features/admin").then(m => ({ default: m.CommunityManagement })));
+const ProfessionalManagement = lazy(() => import("@features/admin").then(m => ({ default: m.ProfessionalManagement })));
+const SupportCenter          = lazy(() => import("@features/admin").then(m => ({ default: m.SupportCenter })));
+const DisputeManager         = lazy(() => import("@features/admin").then(m => ({ default: m.DisputeManager })));
+const AuditLogs              = lazy(() => import("@features/admin").then(m => ({ default: m.AuditLogs })));
+const FinancialMissionControl = lazy(() => import("@features/admin").then(m => ({ default: m.FinancialMissionControl })));
+const ProfessionalDetailsPage = lazy(() => import("@features/admin").then(m => ({ default: m.ProfessionalDetailsPage })));
+const HostedGamesPage         = lazy(() => import("@features/admin").then(m => ({ default: m.HostedGamesPage })));
 
 // ΓöÇΓöÇ Shorthand wrapper ΓÇö keeps route definitions terse ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const S = ({ children }) => <Suspense fallback={<PageLoader />}>{children}</Suspense>;

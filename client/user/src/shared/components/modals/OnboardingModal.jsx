@@ -4,8 +4,8 @@ import { Check, Trophy, Activity, Zap, Target, MapPin, Phone, User as UserIcon, 
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { updateUser } from "../../redux/slices/authSlice";
-import { searchLocations } from "../../utils/locationService";
+import { updateUser } from "@redux/slices/authSlice";
+import { searchLocations } from "@utils/locationService";
 
 const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
   const dispatch = useDispatch();

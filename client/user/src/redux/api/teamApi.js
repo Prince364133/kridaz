@@ -73,6 +73,25 @@ export const teamApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, id) => [{ type: "Team", id }],
     }),
+    searchPlayers: builder.query({
+      query: (query) => `/api/user/players/search?query=${query}`,
+    }),
+    inviteMember: builder.mutation({
+      query: ({ teamId, userId }) => ({
+        url: `/api/team/${teamId}/invite`,
+        method: "POST",
+        body: { invitees: [{ userId }] },
+      }),
+      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }],
+    }),
+    addCustomMember: builder.mutation({
+      query: ({ teamId, name, phone }) => ({
+        url: `/api/team/${teamId}/invite`,
+        method: "POST",
+        body: { invitees: [{ name, phone }] },
+      }),
+      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }],
+    }),
   }),
 });
 
@@ -90,4 +109,7 @@ export const {
   useGetOpponentTeamsQuery,
   useGetNetworkQuery,
   useRequestToJoinMutation,
+  useSearchPlayersQuery,
+  useInviteMemberMutation,
+  useAddCustomMemberMutation,
 } = teamApi;
