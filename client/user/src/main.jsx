@@ -4,7 +4,7 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "./redux/store";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import App from "./App";
+import App from "./app/App";
 import "./index.css";
 import * as Sentry from "@sentry/react";
 

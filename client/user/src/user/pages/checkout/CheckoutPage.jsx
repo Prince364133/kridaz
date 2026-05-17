@@ -25,7 +25,7 @@ import { format } from "date-fns";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { handlePayment, createOrder } from "../../config/razorpay";
+import { handlePayment, createOrder } from "../../../infrastructure/razorpay";
 
 // Helper: parse "01:00 PM" slot time + date into ISO string
 const buildDateTime = (dateStr, timeStr, addHrs = 0) => {

@@ -21,7 +21,7 @@ import CountUp from "react-countup";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
-import { handlePayment, createOrder, loadRazorpay } from "../../config/razorpay";
+import { handlePayment, createOrder, loadRazorpay } from "../../../infrastructure/razorpay";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
