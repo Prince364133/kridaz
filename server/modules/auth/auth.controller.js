@@ -572,13 +572,9 @@ export const googleAuth = async (req, res) => {
     let payload;
 
     if (credential) {
-      const audiences = [
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_ANDROID_CLIENT_ID,
-      ].filter(Boolean);
       const ticket = await client.verifyIdToken({
         idToken: credential,
-        audience: audiences,
+        audience: process.env.GOOGLE_CLIENT_ID,
       });
       payload = ticket.getPayload();
     } else if (accessToken) {
