@@ -1,13 +1,13 @@
-import Owner from "../../models/owner.model.js";
-import WithdrawalRequest from "../../models/withdrawalRequest.model.js";
+import { prisma } from "../../config/prisma.js";
 import * as argon2 from "argon2";
 
 export const getBankingDetails = async (req, res) => {
-  const { id, ownerId } = req.owner;
+  const { id: ownerId } = req.owner;
   try {
-    const owner = ownerId 
-      ? await Owner.findById(ownerId).select("bankingDetails walletBalance")
-      : await Owner.findOne({ userId: id }).select("bankingDetails walletBalance");
+    const owner = await prisma.ownerProfile.findUnique({
+      where: { id: ownerId },
+      select: { bankingDetails: true, walletBalance: true }
+    });
       
     if (!owner) {
       return res.status(404).json({ success: false, message: "Partner record not found" });
@@ -23,18 +23,15 @@ export const getBankingDetails = async (req, res) => {
 };
 
 export const updateBankingDetails = async (req, res) => {
-  const { id, ownerId } = req.owner;
+  const { id: ownerId } = req.owner;
   const { accountName, accountNumber, ifscCode, bankName, upiId, payoutMode, cancelledCheckUrl } = req.body;
   try {
-    const owner = ownerId 
-      ? await Owner.findById(ownerId)
-      : await Owner.findOne({ userId: id });
-      
+    const owner = await prisma.ownerProfile.findUnique({ where: { id: ownerId } });
     if (!owner) return res.status(404).json({ message: "Owner not found" });
 
-    const currentDetails = owner.bankingDetails || {};
+    const currentDetails = (owner.bankingDetails || {});
 
-    owner.bankingDetails = {
+    const updatedBankingDetails = {
       accountName,
       accountNumber,
       ifscCode,
@@ -45,8 +42,16 @@ export const updateBankingDetails = async (req, res) => {
       kycStatus: currentDetails.kycStatus === "VERIFIED" ? "VERIFIED" : "PENDING"
     };
 
-    await owner.save();
-    res.status(200).json({ success: true, message: "Banking details updated and sent for verification", bankingDetails: owner.bankingDetails });
+    const updatedOwner = await prisma.ownerProfile.update({
+      where: { id: ownerId },
+      data: { bankingDetails: updatedBankingDetails }
+    });
+
+    res.status(200).json({ 
+      success: true, 
+      message: "Banking details updated and sent for verification", 
+      bankingDetails: updatedOwner.bankingDetails 
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -62,14 +67,11 @@ export const getPayoutConfig = async (req, res) => {
 };
 
 export const requestPayout = async (req, res) => {
-  const { id, ownerId } = req.owner;
+  const { id: ownerId } = req.owner;
   const { amount, password } = req.body;
 
   try {
-    const owner = ownerId 
-      ? await Owner.findById(ownerId)
-      : await Owner.findOne({ userId: id });
-      
+    const owner = await prisma.ownerProfile.findUnique({ where: { id: ownerId } });
     if (!owner) return res.status(404).json({ message: "Owner not found" });
 
     // Verify password
@@ -96,7 +98,7 @@ export const requestPayout = async (req, res) => {
     }
 
     // Verify balance
-    if (owner.walletBalance < amount) {
+    if (Number(owner.walletBalance) < amount) {
       return res.status(400).json({ success: false, message: "Insufficient wallet balance" });
     }
 
@@ -109,7 +111,7 @@ export const requestPayout = async (req, res) => {
     }
 
     // Check if banking info exists
-    const { bankingDetails } = owner;
+    const bankingDetails = (owner.bankingDetails || {});
     if (!bankingDetails || !bankingDetails.accountName) {
       return res.status(400).json({ success: false, message: "Please configure your banking details first" });
     }
@@ -122,37 +124,45 @@ export const requestPayout = async (req, res) => {
       return res.status(400).json({ success: false, message: "UPI ID is required for UPI payout" });
     }
 
-    // Create Withdrawal Record
-    const withdrawal = new WithdrawalRequest({
-      owner: ownerId,
-      amount,
-      bankDetails: {
-        accountName: bankingDetails.accountName,
-        accountNumber: bankingDetails.accountNumber,
-        ifscCode: bankingDetails.ifscCode,
-        bankName: bankingDetails.bankName || (bankingDetails.payoutMode === "UPI" ? "UPI Transfer" : "Unknown Bank"),
-        upiId: bankingDetails.upiId,
-        payoutMode: bankingDetails.payoutMode
+    // Atomic transaction: Deduct balance and create request
+    await prisma.$transaction(async (tx) => {
+      // Re-verify balance within transaction
+      const currentOwner = await tx.ownerProfile.findUnique({
+        where: { id: ownerId },
+        select: { walletBalance: true }
+      });
+
+      if (Number(currentOwner.walletBalance) < amount) {
+        throw new Error("Insufficient wallet balance");
       }
+
+      await tx.ownerProfile.update({
+        where: { id: ownerId },
+        data: { walletBalance: { decrement: amount } }
+      });
+
+      await tx.withdrawalRequest.create({
+        data: {
+          ownerId,
+          amount,
+          bankDetails: {
+            accountName: bankingDetails.accountName,
+            accountNumber: bankingDetails.accountNumber,
+            ifscCode: bankingDetails.ifscCode,
+            bankName: bankingDetails.bankName || (bankingDetails.payoutMode === "UPI" ? "UPI Transfer" : "Unknown Bank"),
+            upiId: bankingDetails.upiId,
+            payoutMode: bankingDetails.payoutMode
+          }
+        }
+      });
     });
-
-    // Deduct from wallet — atomic operation with overdraft guard
-    const debitedOwner = await Owner.findOneAndUpdate(
-      { _id: ownerId, walletBalance: { $gte: amount } },
-      { $inc: { walletBalance: -amount } },
-      { new: true }
-    );
-    if (!debitedOwner) {
-      return res.status(400).json({ success: false, message: "Insufficient wallet balance" });
-    }
-
-    await withdrawal.save();
 
     res.status(200).json({ 
       success: true, 
-      message: `Withdrawal of Rs ${amount} initiated to ${owner.bankingDetails.bankName}. Funds will reflect in 48-72 hours.` 
+      message: `Withdrawal of Rs ${amount} initiated. Funds will reflect in 48-72 hours.` 
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
+

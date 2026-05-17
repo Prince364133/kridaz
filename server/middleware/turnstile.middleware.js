@@ -1,4 +1,5 @@
 import axios from 'axios';
+import logger from '../utils/logger.js';
 
 /**
  * Middleware to validate Cloudflare Turnstile token.
@@ -32,7 +33,7 @@ export const validateTurnstile = async (req, res, next) => {
     if (response.data.success) {
       return next();
     } else {
-      console.warn('[TURNSTILE] Validation failed:', response.data['error-codes']);
+      logger.warn('[TURNSTILE] Validation failed', { errorCodes: response.data['error-codes'] });
       return res.status(403).json({
         success: false,
         message: 'Security verification failed. Please refresh the page and try again.',
@@ -40,7 +41,7 @@ export const validateTurnstile = async (req, res, next) => {
       });
     }
   } catch (error) {
-    console.error('[TURNSTILE] Error verifying token:', error.message);
+    logger.error('[TURNSTILE] Error verifying token', error);
     // On network error with Cloudflare, we fail open only if strictly necessary, 
     // but here we fail closed for security on auth routes.
     return res.status(500).json({

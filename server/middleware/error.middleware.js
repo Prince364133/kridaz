@@ -1,11 +1,11 @@
-import chalk from "chalk";
+import logger from "../utils/logger.js";
 
 /**
  * Global Error Handler Middleware
  * Catch all errors and send standardized JSON response
  */
 export const errorHandler = (err, req, res, next) => {
-  console.error(chalk.red("[ERROR]"), err.stack || err.message || err);
+  logger.error("[ERROR] Unhandled exception", err);
 
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";

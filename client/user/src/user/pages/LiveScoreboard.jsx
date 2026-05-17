@@ -18,14 +18,20 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useParams, useNavigate } from 'react-router-dom';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { io } from 'socket.io-client';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import {
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
   ChevronLeft, Share2, Zap, Activity, User,
   Target, TrendingUp, Radio, Wifi, WifiOff,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6001';
 
@@ -127,13 +133,13 @@ const LiveScoreboard = () => {
       reconnectionDelayMax: 5000,
     });
 
-    const joinRoom = () => socket.emit('joinMatch', matchId);
+    const joinRoom = () => socket.emit(SOCKET.JOIN_MATCH, matchId);
 
     socket.on('connect', () => { setConnected(true); joinRoom(); fetchScore(); });
     socket.on('disconnect', () => setConnected(false));
     socket.on('reconnect', () => { setConnected(true); joinRoom(); fetchScore(); });
 
-    socket.on('scoreUpdated', (data) => {
+    socket.on(SOCKET.SCORE_UPDATED, (data) => {
       setScore(data);
       // Derive toast from lastBallRaw
       const lb = data?.lastBallRaw;
@@ -146,8 +152,8 @@ const LiveScoreboard = () => {
       }
     });
 
-    socket.on('ballEvent', (ev) => showToast(ev));
-    socket.on('matchEnded', () => setEnded(true));
+    socket.on(SOCKET.BALL_EVENT, (ev) => showToast(ev));
+    socket.on(SOCKET.MATCH_ENDED, () => setEnded(true));
 
     return () => {
       clearTimeout(toastTimer.current);

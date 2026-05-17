@@ -1,23 +1,24 @@
-import Notification from "../../models/notification.model.js";
+import { prisma } from "../../config/prisma.js";
 
-const getRecipient = (req) => {
+const getRecipientQuery = (req) => {
   const { ownerId, id } = req.user;
   // If ownerId exists in the token, this is a partner/admin notification stream
   if (ownerId) {
-    return { recipientId: ownerId, recipientModel: 'Owner' };
+    return { ownerId: ownerId, recipientModel: 'Owner' };
   }
   // Otherwise, it's a general user notification stream
-  return { recipientId: id, recipientModel: 'User' };
+  return { userId: id, recipientModel: 'User' };
 };
 
 export const getMyNotifications = async (req, res) => {
   try {
-    const { recipientId, recipientModel } = getRecipient(req);
+    const query = getRecipientQuery(req);
 
-    const notifications = await Notification.find({ 
-      recipient: recipientId, 
-      recipientModel 
-    }).sort({ createdAt: -1 }).limit(50);
+    const notifications = await prisma.notification.findMany({ 
+      where: query,
+      orderBy: { createdAt: 'desc' },
+      take: 50
+    });
 
     res.status(200).json({ success: true, notifications });
   } catch (error) {
@@ -28,7 +29,10 @@ export const getMyNotifications = async (req, res) => {
 export const markAsRead = async (req, res) => {
   const { id } = req.params;
   try {
-    await Notification.findByIdAndUpdate(id, { isRead: true });
+    await prisma.notification.update({
+      where: { id },
+      data: { isRead: true }
+    });
     res.status(200).json({ success: true, message: "Marked as read" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -37,12 +41,12 @@ export const markAsRead = async (req, res) => {
 
 export const markAllAsRead = async (req, res) => {
   try {
-    const { recipientId, recipientModel } = getRecipient(req);
+    const query = getRecipientQuery(req);
 
-    await Notification.updateMany(
-      { recipient: recipientId, recipientModel, isRead: false },
-      { isRead: true }
-    );
+    await prisma.notification.updateMany({
+      where: { ...query, isRead: false },
+      data: { isRead: true }
+    });
     res.status(200).json({ success: true, message: "All marked as read" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -51,11 +55,15 @@ export const markAllAsRead = async (req, res) => {
 
 export const clearNotifications = async (req, res) => {
   try {
-    const { recipientId, recipientModel } = getRecipient(req);
+    const query = getRecipientQuery(req);
 
-    await Notification.deleteMany({ recipient: recipientId, recipientModel });
+    await prisma.notification.deleteMany({
+      where: query
+    });
     res.status(200).json({ success: true, message: "Notifications cleared" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+

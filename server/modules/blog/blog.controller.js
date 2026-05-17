@@ -1,13 +1,20 @@
-import Blog from "../../models/blog.model.js";
+import { prisma } from "../../config/prisma.js";
 import { uploadToCloudinary } from "../../utils/cloudinary.js";
+import logger from "../../utils/logger.js";
 
 // ── GET all published blogs ─────────────────────────────────────────────────
 export const getBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find({ status: "published" }).sort({ order: 1, createdAt: -1 });
+    const blogs = await prisma.blog.findMany({
+      where: { status: "published" },
+      orderBy: [
+        { order: 'asc' },
+        { createdAt: 'desc' }
+      ]
+    });
     res.status(200).json({ success: true, blogs });
   } catch (error) {
-    console.error("[getBlogs Error]:", error);
+    logger.error("[getBlogs Error]:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -15,15 +22,14 @@ export const getBlogs = async (req, res) => {
 // ── GET single blog by ID (increments views) ───────────────────────────────
 export const getBlogById = async (req, res) => {
   try {
-    const blog = await Blog.findByIdAndUpdate(
-      req.params.id,
-      { $inc: { views: 1 } },
-      { new: true }
-    );
+    const blog = await prisma.blog.update({
+      where: { id: req.params.id },
+      data: { views: { increment: 1 } }
+    });
     if (!blog) return res.status(404).json({ success: false, message: "Blog not found" });
     res.status(200).json({ success: true, blog });
   } catch (error) {
-    console.error("[getBlogById Error]:", error);
+    logger.error("[getBlogById Error]:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -31,15 +37,14 @@ export const getBlogById = async (req, res) => {
 // ── LIKE a blog ────────────────────────────────────────────────────────────
 export const likeBlog = async (req, res) => {
   try {
-    const blog = await Blog.findByIdAndUpdate(
-      req.params.id,
-      { $inc: { likes: 1 } },
-      { new: true }
-    );
+    const blog = await prisma.blog.update({
+      where: { id: req.params.id },
+      data: { likes: { increment: 1 } }
+    });
     if (!blog) return res.status(404).json({ success: false, message: "Blog not found" });
     res.status(200).json({ success: true, blog });
   } catch (error) {
-    console.error("[likeBlog Error]:", error);
+    logger.error("[likeBlog Error]:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -51,7 +56,7 @@ export const createBlog = async (req, res) => {
 
     // If a file was uploaded via multipart, push it to Cloudinary
     if (req.file) {
-      console.log("[createBlog]: Uploading file to Cloudinary...");
+      logger.info("[createBlog]: Uploading file to Cloudinary...");
       imageUrl = await uploadToCloudinary(req.file.buffer, "kridaz/blogs");
     }
 
@@ -59,18 +64,24 @@ export const createBlog = async (req, res) => {
       return res.status(400).json({ success: false, message: "Article image is required" });
     }
 
-    // Clean up numerical fields from FormData strings
-    const blogData = {
-      ...req.body,
-      imageUrl,
-      order: Number(req.body.order) || 0,
-    };
+    const { title, content, author, category, tags, status, order } = req.body;
 
-    const blog = new Blog(blogData);
-    await blog.save();
+    const blog = await prisma.blog.create({
+      data: {
+        title,
+        content,
+        author,
+        imageUrl,
+        category,
+        tags: Array.isArray(tags) ? tags : (tags ? tags.split(',').map(t => t.trim()) : []),
+        status: status || "draft",
+        order: Number(order) || 0,
+      }
+    });
+
     res.status(201).json({ success: true, blog });
   } catch (error) {
-    console.error("[createBlog Error]:", error);
+    logger.error("[createBlog Error]:", error);
     res.status(500).json({ success: false, message: "Internal Server Error during blog creation" });
   }
 };
@@ -78,29 +89,31 @@ export const createBlog = async (req, res) => {
 // ── UPDATE blog ────────────────────────────────────────────────────────────
 export const updateBlog = async (req, res) => {
   try {
+    const { id } = req.params;
     const updates = { ...req.body };
 
     // If a new file was uploaded, replace the image on Cloudinary
     if (req.file) {
-      console.log("[updateBlog]: Uploading new file to Cloudinary...");
+      logger.info("[updateBlog]: Uploading new file to Cloudinary...");
       updates.imageUrl = await uploadToCloudinary(req.file.buffer, "kridaz/blogs");
     }
 
     // Ensure order is a number if provided
     if (updates.order) updates.order = Number(updates.order);
+    if (updates.tags && typeof updates.tags === 'string') {
+        updates.tags = updates.tags.split(',').map(t => t.trim());
+    }
 
-    const blog = await Blog.findById(req.params.id);
-    if (!blog) return res.status(404).json({ success: false, message: "Blog not found" });
-
-    // Update fields
-    Object.keys(updates).forEach(key => {
-      blog[key] = updates[key];
+    const blog = await prisma.blog.update({
+      where: { id },
+      data: updates
     });
 
-    await blog.save();
+    if (!blog) return res.status(404).json({ success: false, message: "Blog not found" });
+
     res.status(200).json({ success: true, blog });
   } catch (error) {
-    console.error("[updateBlog Error]:", error);
+    logger.error("[updateBlog Error]:", error);
     res.status(500).json({ success: false, message: "Internal Server Error during blog update" });
   }
 };
@@ -108,11 +121,11 @@ export const updateBlog = async (req, res) => {
 // ── DELETE blog ────────────────────────────────────────────────────────────
 export const deleteBlog = async (req, res) => {
   try {
-    const blog = await Blog.findByIdAndDelete(req.params.id);
-    if (!blog) return res.status(404).json({ success: false, message: "Blog not found" });
+    await prisma.blog.delete({ where: { id: req.params.id } });
     res.status(200).json({ success: true, message: "Blog deleted successfully" });
   } catch (error) {
-    console.error("[deleteBlog Error]:", error);
+    logger.error("[deleteBlog Error]:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
+

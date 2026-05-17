@@ -1,6 +1,26 @@
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import axiosInstance from "@hooks/useAxiosInstance";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
+const becomeOwnerSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z
+    .string()
+    .email("Enter a valid email")
+    .min(1, "Enter your email"),
+  phone: z
+    .string()
+    .regex(PHONE_REGEX, "Enter a valid 10-digit phone number")
+    .length(10, "Phone number must be exactly 10 digits long"),
+});port { PHONE_REGEX } from '@kridaz/shared-constants/validation';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -18,7 +38,7 @@ const becomeOwnerSchema = yup.object().shape({
   phone: yup
     .string()
     .required("Enter your phone number")
-    .matches(/^[0-9]{10}$/, "Enter a valid 10-digit phone number")
+    .matches(PHONE_REGEX, "Enter a valid 10-digit phone number")
     .min(10, "Phone number must be at least 10 digits long")
     .max(10, "Phone number must be at most 10 digits long"),
 });
@@ -31,7 +51,7 @@ const useBecomeOwner = () => {
        handleSubmit,
        formState: { errors },
      } = useForm({
-       resolver: yupResolver(becomeOwnerSchema),
+       resolver: zodResolver(becomeOwnerSchema),
      });
        const onSubmit = async (data) => {
          setLoading(true);

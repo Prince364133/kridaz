@@ -1,11 +1,19 @@
 import { useState } from "react";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { Check, Trophy, Activity, Zap, Target, MapPin, Phone, User as UserIcon, ChevronRight, ChevronLeft, Loader2 } from "lucide-react";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import axiosInstance from "@hooks/useAxiosInstance";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import toast from "react-hot-toast";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { useDispatch } from "react-redux";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { updateUser } from "../../redux/slices/authSlice";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { searchLocations } from "../../utils/locationService";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { useRef, useEffect } from "react";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 
 const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
   const dispatch = useDispatch();
@@ -65,7 +73,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
         toast.error("Please fill in all details");
         return;
       }
-      if (!/^[0-9]{10}$/.test(formData.phone)) {
+      if (!PHONE_REGEX.test(formData.phone)) {
         toast.error("Please enter a valid 10-digit phone number");
         return;
       }

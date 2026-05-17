@@ -1,5 +1,4 @@
 import ffmpeg from 'fluent-ffmpeg';
-import Reel from '../models/reel.model.js';
 import ffmpegStatic from 'ffmpeg-static';
 import ffprobeStatic from 'ffprobe-static';
 import path from 'path';
@@ -7,7 +6,8 @@ import fs from 'fs-extra';
 import os from 'os';
 import axios from 'axios';
 import { uploadDirectoryToR2, uploadToR2, deleteFromR2 } from './r2.js';
-import { getIO } from '../config/socket.js';
+import { getEmitter } from '../config/socketEmitter.js';
+import logger from './logger.js';
 
 // Tell fluent-ffmpeg where to find the binaries
 ffmpeg.setFfmpegPath(ffmpegStatic);
@@ -47,14 +47,14 @@ const RENDITIONS = [
  * Processes a video with Adaptive Bitrate (ABR) HLS
  */
 export const processMediaVideo = async (media, mediaType, localPath = null) => {
-  const tempId = `media_${media._id}_${Date.now()}`;
+  const tempId = `media_${media.id}_${Date.now()}`;
   const tempDir = path.join(os.tmpdir(), tempId);
   const inputPath = localPath || path.join(tempDir, 'input.mp4');
   const outputDir = path.join(tempDir, 'output');
   const thumbnailPath = path.join(tempDir, 'thumbnail.jpg');
 
   try {
-    console.log(`[WORKER] [${media._id}] Starting Adaptive Bitrate pipeline for ${mediaType}...`);
+    logger.info(`[WORKER] [${media.id}] Starting Adaptive Bitrate pipeline for ${mediaType}...`);
     await fs.ensureDir(outputDir);
 
     const sourceUrl = media.rawVideoUrl || media.rawMediaUrl;
@@ -62,7 +62,7 @@ export const processMediaVideo = async (media, mediaType, localPath = null) => {
     // 1. Download if no local path (Direct-to-cloud flow)
     if (!localPath) {
       if (!sourceUrl) throw new Error('No source video available');
-      console.log(`[WORKER] [${media._id}] Downloading raw video from R2...`);
+      logger.info(`[WORKER] [${media.id}] Downloading raw video from R2...`);
       const response = await axios({
         url: sourceUrl,
         method: 'GET',
@@ -90,7 +90,7 @@ export const processMediaVideo = async (media, mediaType, localPath = null) => {
     const aspectRatio = width / height;
 
     // 3. Generate Thumbnail
-    console.log(`[WORKER] [${media._id}] Generating optimized thumbnail...`);
+    logger.info(`[WORKER] [${media.id}] Generating optimized thumbnail...`);
     await new Promise((resolve, reject) => {
       ffmpeg(inputPath)
         .screenshots({
@@ -104,8 +104,8 @@ export const processMediaVideo = async (media, mediaType, localPath = null) => {
     });
 
     // 4. Multi-Variant Transcoding
-    console.log(`[WORKER] [${media._id}] Transcoding ABR Ladder (360p, 480p, 720p)...`);
-    const io = getIO();
+    logger.info(`[WORKER] [${media.id}] Transcoding ABR Ladder (360p, 480p, 720p)...`);
+    const emitter = getEmitter();
     const userId = media.userId || media.creatorId || media.adminId || 'anonymous';
     const userRoom = `user_${userId}`;
     
@@ -120,7 +120,7 @@ export const processMediaVideo = async (media, mediaType, localPath = null) => {
       const renditionDir = path.join(outputDir, rendition.resolution);
       await fs.ensureDir(renditionDir);
 
-      console.log(`[WORKER] [${media._id}] Encoding ${rendition.resolution}...`);
+      logger.info(`[WORKER] [${media.id}] Encoding ${rendition.resolution}...`);
       
       await new Promise((resolve, reject) => {
         ffmpeg(inputPath)
@@ -147,9 +147,9 @@ export const processMediaVideo = async (media, mediaType, localPath = null) => {
             const renditionProgress = Math.min(Math.max(progress.percent || 0, 0), 100);
             const totalProgress = Math.round(((i / RENDITIONS.length) * 100) + (renditionProgress / RENDITIONS.length));
             
-            if (io) {
-              io.to(userRoom).emit('MEDIA_PROCESSING_PROGRESS', {
-                mediaId: media._id,
+            if (emitter) {
+              emitter.to(userRoom).emit('MEDIA_PROCESSING_PROGRESS', {
+                mediaId: media.id,
                 mediaType: mediaType,
                 progress: totalProgress,
                 status: `Optimizing ${rendition.resolution}...`
@@ -168,12 +168,12 @@ export const processMediaVideo = async (media, mediaType, localPath = null) => {
     await fs.writeFile(path.join(outputDir, 'master.m3u8'), masterPlaylist);
 
     // 5. Upload Everything to R2
-    console.log(`[WORKER] [${media._id}] Uploading HLS variants and Master Manifest...`);
-    const r2Prefix = `${modelPrefix}/${media._id}`;
+    logger.info(`[WORKER] [${media.id}] Uploading HLS variants and Master Manifest...`);
+    const r2Prefix = `${modelPrefix}/${media.id}`;
     await uploadDirectoryToR2(outputDir, r2Prefix);
 
     // 6. Upload Thumbnail
-    const thumbKey = `thumbnails/${media._id}.jpg`;
+    const thumbKey = `thumbnails/${media.id}.jpg`;
     const thumbUploadResult = await uploadToR2(thumbnailPath, thumbKey, 'image/jpeg');
 
     const hlsUrl = `${process.env.REELS_CDN_URL}/${r2Prefix}/master.m3u8`;
@@ -182,8 +182,8 @@ export const processMediaVideo = async (media, mediaType, localPath = null) => {
     if (sourceUrl && sourceUrl.includes('/temp/')) {
       const urlParts = sourceUrl.split('/');
       const tempKey = urlParts.slice(urlParts.indexOf('temp')).join('/');
-      console.log(`[WORKER] [${media._id}] Deleting temporary raw file: ${tempKey}`);
-      await deleteFromR2(tempKey).catch(err => console.warn(`[WORKER] Cleanup warning: ${err.message}`));
+      logger.info(`[WORKER] [${media.id}] Deleting temporary raw file: ${tempKey}`);
+      await deleteFromR2(tempKey).catch(err => logger.warn(`[WORKER] Cleanup warning: ${err.message}`));
     }
 
     return {
@@ -196,7 +196,7 @@ export const processMediaVideo = async (media, mediaType, localPath = null) => {
     };
 
   } catch (error) {
-    console.error(`[WORKER] [${media._id}] [ERROR]:`, error.message);
+    logger.error(`[WORKER] [${media.id}] [ERROR]:`, error);
     throw error;
   } finally {
     await fs.remove(tempDir).catch(() => {});

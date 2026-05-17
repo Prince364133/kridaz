@@ -46,7 +46,7 @@ jobs:
           cd server
           pnpm test -- --runInBand
         env:
-          MONGO_URI: ${{ secrets.MONGO_URI_TEST }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
           JWT_SECRET: ${{ secrets.JWT_SECRET_TEST }}
 
   client-ci:

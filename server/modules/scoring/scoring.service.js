@@ -1,159 +1,144 @@
-import User from "../../models/user.model.js";
+import { prisma } from "../../config/prisma.js";
+import StatsService from "../../services/stats.service.js";
+import logger from "../../utils/logger.js";
 
 /**
  * Aggregates and updates player statistics after a match is completed.
- * @param {Object} matchScoring - The completed CricketScoring document.
- * @param {Object} hostedGame - The corresponding HostedGame document.
+ * @param {Object} matchScoring - The completed CricketMatch (Prisma) object.
+ * @param {Object} hostedGame - The corresponding HostedGame (Prisma) object.
  */
 export const aggregatePlayerStats = async (matchScoring, hostedGame) => {
   try {
     const userUpdates = new Map();
 
-    const getUserData = async (userId) => {
+    // 0. Extract all relevant user IDs for batch processing
+    const playerIds = new Set();
+    
+    matchScoring.playerStats.forEach(s => playerIds.add(s.userId));
+    matchScoring.timeline.filter(t => t.fielderId).forEach(t => playerIds.add(t.fielderId));
+    
+    if (hostedGame.umpireId) playerIds.add(hostedGame.umpireId);
+    if (hostedGame.hostId) playerIds.add(hostedGame.hostId);
+
+    const idsArray = Array.from(playerIds);
+    const statsMap = await StatsService.getBatchStats(idsArray);
+    
+    const usersForNames = await prisma.user.findMany({
+      where: { id: { in: idsArray } },
+      select: { id: true, name: true }
+    });
+    const userNameMap = new Map(usersForNames.map(u => [u.id, u.name]));
+
+    const getStatsData = (userId) => {
       const idStr = userId?.toString();
       if (!idStr) return null;
-      if (userUpdates.has(idStr)) {
-        return userUpdates.get(idStr);
-      }
-      const user = await User.findById(userId);
-      if (user) {
-        if (!user.stats) user.stats = { cricket: {} };
-        if (!user.stats.cricket) user.stats.cricket = {};
-        userUpdates.set(idStr, user);
-      }
-      return user;
+      if (userUpdates.has(idStr)) return userUpdates.get(idStr);
+      
+      const stats = statsMap.get(idStr) || { cricket: {}, badges: [] };
+      if (!stats.cricket) stats.cricket = {};
+      
+      userUpdates.set(idStr, stats);
+      return stats;
     };
 
-    // 1. Process Batting Stats
-    for (const stat of matchScoring.battingStats) {
-      const user = await getUserData(stat.user);
-      if (!user) continue;
+    // 1. Process Batting & Bowling Stats from playerStats
+    for (const stat of matchScoring.playerStats) {
+      const stats = getStatsData(stat.userId);
+      if (!stats) continue;
 
-      const cricket = user.stats.cricket;
-      cricket.matches = (cricket.matches || 0) + 1;
-      cricket.runs = (cricket.runs || 0) + stat.runs;
-      cricket.ballsFaced = (cricket.ballsFaced || 0) + stat.balls;
+      const cricket = stats.cricket;
       
-      if (stat.runs > (cricket.highestScore || 0)) {
-        cricket.highestScore = stat.runs;
+      // Batting
+      if (stat.balls > 0 || stat.runs > 0) {
+        cricket.matches = (cricket.matches || 0) + 1;
+        cricket.runs = (cricket.runs || 0) + (stat.runs || 0);
+        cricket.ballsFaced = (cricket.ballsFaced || 0) + (stat.balls || 0);
+        
+        if ((stat.runs || 0) > (cricket.highestScore || 0)) {
+          cricket.highestScore = stat.runs;
+        }
+
+        if (stat.runs >= 100) cricket.hundreds = (cricket.hundreds || 0) + 1;
+        else if (stat.runs >= 50) cricket.fifties = (cricket.fifties || 0) + 1;
+
+        cricket.battingAverage = cricket.matches > 0 ? Number((cricket.runs / cricket.matches).toFixed(2)) : 0;
+        cricket.battingStrikeRate = cricket.ballsFaced > 0 ? Number(((cricket.runs / cricket.ballsFaced) * 100).toFixed(2)) : 0;
       }
 
-      if (stat.runs >= 100) {
-        cricket.hundreds = (cricket.hundreds || 0) + 1;
-      } else if (stat.runs >= 50) {
-        cricket.fifties = (cricket.fifties || 0) + 1;
-      }
+      // Bowling
+      if (stat.ballsBowled > 0) {
+        cricket.wickets = (cricket.wickets || 0) + (stat.wickets || 0);
+        cricket.runsConceded = (cricket.runsConceded || 0) + (stat.runsConceded || 0);
+        cricket.ballsBowled = (cricket.ballsBowled || 0) + (stat.ballsBowled || 0);
 
-      // Calculate Averages & Strike Rate
-      cricket.battingAverage = Number((cricket.runs / cricket.matches).toFixed(2));
-      cricket.battingStrikeRate = cricket.ballsFaced > 0 
-        ? Number(((cricket.runs / cricket.ballsFaced) * 100).toFixed(2)) 
-        : 0;
+        const currentBest = cricket.bestBowling || { wickets: 0, runs: 999 };
+        if (stat.wickets > currentBest.wickets || (stat.wickets === currentBest.wickets && stat.runsConceded < currentBest.runs)) {
+          cricket.bestBowling = { wickets: stat.wickets, runs: stat.runsConceded };
+        }
+
+        cricket.bowlingEconomy = cricket.ballsBowled > 0 ? Number(((cricket.runsConceded / cricket.ballsBowled) * 6).toFixed(2)) : 0;
+        cricket.bowlingAverage = cricket.wickets > 0 ? Number((cricket.runsConceded / cricket.wickets).toFixed(2)) : 0;
+      }
     }
 
-    // 2. Process Bowling Stats
-    for (const stat of matchScoring.bowlingStats) {
-      const user = await getUserData(stat.user);
-      if (!user) continue;
-
-      const cricket = user.stats.cricket;
-      cricket.wickets = (cricket.wickets || 0) + stat.wickets;
-      cricket.runsConceded = (cricket.runsConceded || 0) + stat.runs;
-      cricket.ballsBowled = (cricket.ballsBowled || 0) + stat.balls;
-
-      // Best Bowling
-      const currentBest = cricket.bestBowling || { wickets: 0, runs: 999 };
-      if (stat.wickets > currentBest.wickets || 
-         (stat.wickets === currentBest.wickets && stat.runs < currentBest.runs)) {
-        cricket.bestBowling = { wickets: stat.wickets, runs: stat.runs };
-      }
-
-      // Economy & Average
-      cricket.bowlingEconomy = cricket.ballsBowled > 0 
-        ? Number(((cricket.runsConceded / cricket.ballsBowled) * 6).toFixed(2)) 
-        : 0;
-      cricket.bowlingAverage = cricket.wickets > 0 
-        ? Number((cricket.runsConceded / cricket.wickets).toFixed(2)) 
-        : 0;
-    }
-
-    // 3. Process Fielding Stats from Timeline
+    // 2. Process Fielding Stats from Timeline
     for (const ball of matchScoring.timeline) {
-      if (ball.isWicket && ball.fielder) {
-        const user = await getUserData(ball.fielder);
-        if (!user) continue;
+      if (ball.isWicket && ball.fielderId) {
+        const stats = getStatsData(ball.fielderId);
+        if (!stats) continue;
 
-        const cricket = user.stats.cricket;
+        const cricket = stats.cricket;
         const wType = ball.wicketType?.toUpperCase();
-        if (wType === "CAUGHT") {
-          cricket.catches = (cricket.catches || 0) + 1;
-        } else if (wType === "STUMPED") {
-          cricket.stumpings = (cricket.stumpings || 0) + 1;
-        }
+        if (wType === "CAUGHT") cricket.catches = (cricket.catches || 0) + 1;
+        else if (wType === "STUMPED") cricket.stumpings = (cricket.stumpings || 0) + 1;
       }
     }
 
-    // 4. Update Official Stats (Umpire, Scorer, Streamer)
-    if (hostedGame) {
-      const umpireId = hostedGame.umpire || hostedGame.umpireRequest?.user;
-      if (umpireId) {
-        const user = await getUserData(umpireId);
-        if (user) {
-          user.stats.matchesOfficiated = (user.stats.matchesOfficiated || 0) + 1;
-        }
-      }
-
-      const scorerId = hostedGame.scorer || hostedGame.scorerRequest?.user;
-      if (scorerId) {
-        const user = await getUserData(scorerId);
-        if (user) {
-          user.stats.matchesScored = (user.stats.matchesScored || 0) + 1;
-        }
-      }
-
-      const streamerId = hostedGame.streamer || hostedGame.streamerRequest?.user;
-      if (streamerId) {
-        const user = await getUserData(streamerId);
-        if (user) {
-          user.stats.streamsHosted = (user.stats.streamsHosted || 0) + 1;
-        }
-      }
+    // 3. Update Official Stats
+    if (hostedGame.umpireId) {
+      const stats = getStatsData(hostedGame.umpireId);
+      if (stats) stats.matchesOfficiated = (stats.matchesOfficiated || 0) + 1;
     }
+
+    // 4. Batch update all stats
+    await StatsService.updateBatchStats(userUpdates);
 
     // 5. Check for Badges
     const earnedBadges = [];
-    for (const user of userUpdates.values()) {
-      const newBadges = checkAndAwardBadges(user);
+    const badgeBatchUpdates = [];
+    
+    for (const [userId, stats] of userUpdates.entries()) {
+      const newBadges = checkAndAwardBadges(stats);
       if (newBadges.length > 0) {
         earnedBadges.push({
-          userId: user._id,
-          userName: user.name,
+          userId: userId,
+          userName: userNameMap.get(userId) || "Unknown",
           badges: newBadges
         });
+        badgeBatchUpdates.push({ userId, badges: newBadges });
       }
     }
 
-    // Save all updated users
-    for (const user of userUpdates.values()) {
-      await user.save();
+    if (badgeBatchUpdates.length > 0) {
+      await StatsService.addBatchBadges(badgeBatchUpdates);
     }
 
-    console.log(`Successfully aggregated advanced stats for match ${matchScoring.matchId}`);
+    logger.info(`Successfully aggregated normalized stats for match ${matchScoring.id}`);
     return earnedBadges;
   } catch (error) {
-    console.error("Error in aggregatePlayerStats:", error);
+    logger.error("Error in aggregatePlayerStats:", error);
+    return [];
   }
 };
 
 const checkAndAwardBadges = (user) => {
-  if (!user.stats?.cricket) return [];
-  const cricket = user.stats.cricket;
+  if (!user.cricket) return [];
+  const cricket = user.cricket;
   const currentBadges = user.badges || [];
   const newBadges = [];
 
   const hasBadge = (name) => currentBadges.some(b => b.name === name);
 
-  // 1. Century Maker (Milestone: Total Runs)
   if (cricket.runs >= 100 && !hasBadge('Century Maker')) {
     newBadges.push({
       name: 'Century Maker',
@@ -163,7 +148,6 @@ const checkAndAwardBadges = (user) => {
     });
   }
 
-  // 2. Wicket Machine (Milestone: Total Wickets)
   if (cricket.wickets >= 10 && !hasBadge('Wicket Machine')) {
     newBadges.push({
       name: 'Wicket Machine',
@@ -173,7 +157,6 @@ const checkAndAwardBadges = (user) => {
     });
   }
 
-  // 3. Safe Hands (Milestone: Catches)
   if (cricket.catches >= 5 && !hasBadge('Safe Hands')) {
     newBadges.push({
       name: 'Safe Hands',
@@ -183,7 +166,6 @@ const checkAndAwardBadges = (user) => {
     });
   }
 
-  // 4. Debutant (Milestone: First Match)
   if (cricket.matches >= 1 && !hasBadge('Rising Star')) {
     newBadges.push({
       name: 'Rising Star',
@@ -193,8 +175,5 @@ const checkAndAwardBadges = (user) => {
     });
   }
   
-  if (newBadges.length > 0) {
-    user.badges = [...currentBadges, ...newBadges];
-  }
   return newBadges;
 };

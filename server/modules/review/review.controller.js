@@ -1,7 +1,5 @@
-import Review from "../../models/review.model.js";
-import Turf from "../../models/turf.model.js";
-import User from "../../models/user.model.js";
-import Owner from "../../models/owner.model.js";
+import { prisma } from "../../config/prisma.js";
+import logger from "../../utils/logger.js";
 
 export const addReview = async (req, res) => {
   const userId = req.user.id || req.user.user;
@@ -13,31 +11,23 @@ export const addReview = async (req, res) => {
   }
 
   try {
-    const [user, turf] = await Promise.all([
-      User.findById(userId).then(u => u || Owner.findById(userId)),
-      Turf.findById(id),
-    ]);
-
-    if (!user) {
-      return res.status(404).json({ message: "Account not found" });
-    }
+    const turf = await prisma.turf.findUnique({ where: { id } });
     if (!turf) {
       return res.status(404).json({ message: "Turf not found" });
     }
 
-    const review = new Review({
-      user: userId,
-      turf: id,
-      rating,
-      comment,
+    await prisma.review.create({
+      data: {
+        userId,
+        turfId: id,
+        rating: parseInt(rating),
+        comment
+      }
     });
 
-    turf.reviews.push(review._id);
-    
-    await Promise.all([turf.save(), review.save()]);
     return res.status(201).json({ message: "Review added successfully" });
   } catch (error) {
-    console.error("Error in addReview", error);
+    logger.error("Error in addReview", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -45,9 +35,19 @@ export const addReview = async (req, res) => {
 export const viewReviewsByTurf = async (req, res) => {
   const { id } = req.params; // turf id
   try {
-    const reviews = await Review.find({ turf: id })
-      .sort({ createdAt: -1 })
-      .populate("user", "name profilePicture _id");
+    const reviews = await prisma.review.findMany({
+      where: { turfId: id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            profilePicture: true
+          }
+        }
+      }
+    });
       
     const averageRating = reviews.length > 0
       ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
@@ -59,55 +59,67 @@ export const viewReviewsByTurf = async (req, res) => {
       averageRating,
     });
   } catch (error) {
-    console.error("Error in viewReviewsByTurf", error);
+    logger.error("Error in viewReviewsByTurf", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const getOwnerTurfReviews = async (req, res) => {
-  const ownerId = req.owner.id;
+  const ownerId = req.owner.ownerId || req.owner.id;
 
   try {
-    const turfs = await Turf.find({ 
-      $or: [
-        { owner: req.owner.ownerId },
-        { owner: req.owner.id }
-      ]
-    })
-      .select("name reviews")
-      .lean();
+    const owner = await prisma.ownerProfile.findUnique({
+      where: { id: ownerId },
+      include: {
+        turfs: {
+          include: {
+            reviews: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    profilePicture: true
+                  }
+                }
+              },
+              orderBy: { createdAt: 'desc' }
+            }
+          }
+        }
+      }
+    });
 
-    const turfIds = turfs.map((turf) => turf._id);
-    const reviews = await Review.find({ turf: { $in: turfIds } })
-      .populate("user", "name profilePicture _id")
-      .lean();
+    if (!owner) {
+      return res.status(404).json({ success: false, message: "Owner not found" });
+    }
 
-    const turfsWithReviews = turfs.map((turf) => {
-      const turfReviews = reviews.filter((review) =>
-        review.turf.equals(turf._id)
-      );
-      const avgRating =
-        turfReviews.reduce((sum, review) => sum + review.rating, 0) /
-        (turfReviews.length || 1);
+    const turfsWithReviews = owner.turfs.map(turf => {
+      const reviewCount = turf.reviews.length;
+      const totalRating = turf.reviews.reduce((acc, r) => acc + r.rating, 0);
+      const avgRating = reviewCount > 0 ? (totalRating / reviewCount).toFixed(1) : 0;
 
       return {
-        id: turf._id,
+        id: turf.id,
         name: turf.name,
-        avgRating: parseFloat(avgRating.toFixed(1)),
-        reviews: turfReviews.map((review) => ({
-          id: review._id,
-          user: review.user,
-          userName: review.user ? review.user.name : "Anonymous Player",
-          rating: review.rating,
-          comment: review.comment,
-          createdAt: review.createdAt,
-        })),
+        avgRating: parseFloat(avgRating),
+        reviewCount,
+        reviews: turf.reviews.map(r => ({
+          id: r.id,
+          userId: r.userId,
+          userName: r.user?.name || "Anonymous Player",
+          userProfile: r.user?.profilePicture,
+          rating: r.rating,
+          comment: r.comment,
+          createdAt: r.createdAt
+        }))
       };
     });
 
     return res.status(200).json(turfsWithReviews);
   } catch (error) {
-    console.error("Error in getOwnerTurfReviews", error);
+    logger.error("Error in getOwnerTurfReviews", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+

@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import logger from './logger.js';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12; // Standard for GCM
@@ -38,7 +39,7 @@ export const encrypt = (text) => {
     
     return `${iv.toString('hex')}:${authTag}:${encrypted}`;
   } catch (error) {
-    console.error('Encryption failed:', error);
+    logger.error('Encryption failed', error);
     return text; // Fallback to plaintext if encryption fails to prevent data loss, though should be avoided in prod
   }
 };
@@ -73,7 +74,7 @@ export const decrypt = (encryptedText) => {
   } catch (error) {
     // If decryption fails (e.g. wrong key), return original text
     // In production, you might want to log this as a security event
-    console.error('Decryption failed:', error.message);
+    logger.error('Decryption failed', error);
     return encryptedText;
   }
 };

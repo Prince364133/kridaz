@@ -1,84 +1,60 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { format, isValid } from "date-fns";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useNavigate } from "react-router-dom";
 
-const addTurfSchema = yup.object().shape({
-  name: yup
-    .string()
-    .required("Enter the name of the turf")
+const addTurfSchema = z.object({
+  name: z.string()
+    .min(1, "Enter the name of the turf")
     .min(3, "Name must be at least 3 characters long"),
-  description: yup
-    .string()
-    .required("Enter the description of the turf")
+  description: z.string()
+    .min(1, "Enter the description of the turf")
     .min(3, "Description must be at least 3 characters long"),
-  policies: yup
-    .string()
-    .required("Venue policies and rules are required")
+  policies: z.string()
+    .min(1, "Venue policies and rules are required")
     .min(200, "Policies must be at least 200 characters long")
     .max(10000, "Policies must be at most 10,000 characters long"),
-  location: yup
-    .string()
-    .required("Enter the location of the turf")
+  location: z.string()
+    .min(1, "Enter the location of the turf")
     .min(3, "Location must be at least 3 characters long"),
-  city: yup.string().required("City is required"),
-  state: yup.string().required("State is required"),
-  latitude: yup.string().optional(),
-  longitude: yup.string().optional(),
-  pricePerHour: yup
-    .number()
-    .required("Enter the price per hour of the turf")
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  pricePerHour: z.preprocess((val) => Number(val), z.number()
     .min(500, "Price per hour must be at least 500 rupees")
-    .max(3000, "Price per hour must be at most 3000 rupees"),
-  images: yup
-    .mixed()
-    .test(
-      "images",
-      "Please upload at least one valid image (PNG, JPEG, or WebP). Max 10 images.",
-      function (value) {
-        if (!value || value.length === 0) return false;
-        if (value.length > 10) return false;
-        const acceptedFormats = ["image/png", "image/jpeg", "image/webp"];
-        return Array.from(value).every(file => acceptedFormats.includes(file.type));
-      }
-    ),
-  youtubeUrl: yup.string().url("Invalid YouTube URL").nullable(),
-  openTime: yup.date().required("Open time is required"),
-  closeTime: yup
-    .date()
-    .required("Close time is required")
-    .min(yup.ref("openTime"), "Close time must be after open time"),
-  sportTypes: yup
-    .array()
-    .of(yup.string())
-    .min(1, "At least one sport type is required"),
-  groundTypes: yup
-    .array()
-    .of(yup.string())
-    .min(1, "At least one ground type is required"),
-  facilities: yup
-    .array()
-    .of(yup.string())
-    .min(1, "At least one facility is required"),
-  slotDuration: yup.number().required("Slot duration is required").min(30).max(240),
-  breakTime: yup.number().min(0).max(60),
-  slotsConfigDuration: yup.string().oneOf(["Until Changed", "Fixed Weeks"]).required("Configuration duration is required"),
-  slotsConfigWeeks: yup.number().when("slotsConfigDuration", {
-    is: "Fixed Weeks",
-    then: (schema) => schema.required("Number of weeks is required").min(1).max(52),
-    otherwise: (schema) => schema.optional(),
-  }),
-  mapUrl: yup.string().url("Invalid Google Maps URL").nullable(),
-  managerContacts: yup.array().of(
-    yup.object().shape({
-      name: yup.string().required("Manager name is required"),
-      phone: yup.string().required("Manager phone is required").matches(/^\d{10}$/, "Phone must be 10 digits"),
+    .max(3000, "Price per hour must be at most 3000 rupees")),
+  images: z.any()
+    .refine((value) => {
+      if (!value || value.length === 0) return false;
+      if (value.length > 10) return false;
+      const acceptedFormats = ["image/png", "image/jpeg", "image/webp"];
+      return Array.from(value).every((file) => acceptedFormats.includes(file.type));
+    }, "Please upload at least one valid image (PNG, JPEG, or WebP). Max 10 images."),
+  youtubeUrl: z.union([z.literal(""), z.string().url("Invalid YouTube URL")]).optional().nullable(),
+  openTime: z.date({ required_error: "Open time is required" }),
+  closeTime: z.date({ required_error: "Close time is required" }),
+  sportTypes: z.array(z.string()).min(1, "At least one sport type is required"),
+  groundTypes: z.array(z.string()).min(1, "At least one ground type is required"),
+  facilities: z.array(z.string()).min(1, "At least one facility is required"),
+  slotDuration: z.preprocess((val) => Number(val), z.number().min(30).max(240)),
+  breakTime: z.preprocess((val) => Number(val), z.number().min(0).max(60).optional().default(0)),
+  slotsConfigDuration: z.enum(["Until Changed", "Fixed Weeks"], { required_error: "Configuration duration is required" }),
+  slotsConfigWeeks: z.preprocess((val) => Number(val), z.number().min(1).max(52).optional().default(1)),
+  mapUrl: z.union([z.literal(""), z.string().url("Invalid Google Maps URL")]).optional().nullable(),
+  managerContacts: z.array(
+    z.object({
+      name: z.string().min(1, "Manager name is required"),
+      phone: z.string().regex(/^\d{10}$/, "Phone must be 10 digits"),
     })
   ).optional(),
+}).refine(data => data.closeTime > data.openTime, {
+  message: "Close time must be after open time",
+  path: ["closeTime"],
 });
 
 export default function useAddTurf() {
@@ -93,7 +69,7 @@ export default function useAddTurf() {
     setValue,
     watch,
   } = useForm({
-    resolver: yupResolver(addTurfSchema),
+    resolver: zodResolver(addTurfSchema),
     defaultValues: {
       sportTypes: [],
       groundTypes: [],

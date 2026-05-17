@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { io } from 'socket.io-client';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSelector } from 'react-redux';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
 const SocketContext = createContext();
 
@@ -71,7 +74,7 @@ export const SocketProvider = ({ children }) => {
 
   const updateLocation = useCallback((lat, lng) => {
     if (socket) {
-      socket.emit("update_location", { lat, lng });
+      socket.emit(SOCKET.UPDATE_LOCATION, { lat, lng });
     }
   }, [socket]);
 

@@ -1,0 +1,1 @@
+{"parameters":[{"in":"query","name":"city","schema":{"type":"string"}},{"in":"query","name":"sportType","schema":{"type":"string"}}]}

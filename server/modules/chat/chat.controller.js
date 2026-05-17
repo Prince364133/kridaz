@@ -1,89 +1,129 @@
-import Chat from "../../models/chat.model.js";
-import mongoose from "mongoose";
-import User from "../../models/user.model.js";
-import Owner from "../../models/owner.model.js";
-import Message from "../../models/message.model.js";
+import { prisma } from "../../config/prisma.js";
 import { uploadToCloudinary } from "../../utils/cloudinary.js";
 import { getIO } from "../../config/socket.js";
+
+import logger from "../../utils/logger.js";
+import { SOCKET } from "@kridaz/shared-constants/socketEvents";
+
 
 // Helper: resolve the correct user IDs and model for the current request
 function resolveCurrentUser(req) {
   const isOwner = req.user?.role?.includes("venu_owners") || req.user?.role === "owner" || req.owner?.role?.includes("venu_owners") || req.owner?.role === "owner";
 
-  // Collect all possible IDs for this user
-  const ids = new Set();
-  if (req.user?._id) ids.add(req.user._id.toString());
-  if (req.user?.id) ids.add(req.user.id.toString());
-  if (req.user?.userId) ids.add(req.user.userId.toString());
-  if (req.user?.ownerId) ids.add(req.user.ownerId.toString());
-  if (req.owner?._id) ids.add(req.owner._id.toString());
-  if (req.owner?.id) ids.add(req.owner.id.toString());
-  if (req.owner?.ownerId) ids.add(req.owner.ownerId.toString());
-
   const currentUserId = isOwner
     ? (req.user?.ownerId || req.owner?.ownerId || req.user?.id || req.owner?.id)
-    : (req.user?._id || req.user?.id || req.user?.userId);
+    : (req.user?.id || req.user?.userId);
 
   const currentUserModel = isOwner ? "Owner" : "User";
-  return { currentUserId, currentUserModel, allUserIds: Array.from(ids) };
+  
+  // For Prisma, we need to know if the ID refers to userId or ownerId
+  const participantData = isOwner 
+    ? { ownerId: currentUserId, userId: null, onModel: "Owner" }
+    : { userId: currentUserId, ownerId: null, onModel: "User" };
+
+  return { currentUserId, currentUserModel, participantData };
 }
 
 // Helper: check if a user is an admin in a chat
-function checkIsAdmin(chat, userIds) {
-  return chat.groupAdmins.some(admin => {
-    const adminId = (admin.user?._id || admin.user)?.toString();
-    return userIds.includes(adminId);
+async function checkIsAdmin(chatId, participantData) {
+  const participant = await prisma.chatParticipant.findFirst({
+    where: {
+      chatId,
+      userId: participantData.userId,
+      ownerId: participantData.ownerId,
+      isAdmin: true
+    }
   });
+  return !!participant;
 }
 
 /**
  * Access or create a one-on-one chat
  */
 export const accessChat = async (req, res) => {
-  const { userId, onModel } = req.body;
-  const { currentUserId, currentUserModel } = resolveCurrentUser(req);
+  const { userId, onModel = "User" } = req.body;
+  const { participantData: currentParticipant } = resolveCurrentUser(req);
 
   if (!userId) return res.sendStatus(400);
 
-  // Find existing 1-on-1 chat
-  let isChat = await Chat.find({
-    isGroupChat: false,
-    $and: [
-      { users: { $elemMatch: { user: currentUserId } } },
-      { users: { $elemMatch: { user: userId } } },
-    ],
-  })
-    .populate("users.user", "-password")
-    .populate("latestMessage");
+  const targetParticipant = onModel === "Owner"
+    ? { ownerId: userId, userId: null, onModel: "Owner" }
+    : { userId: userId, ownerId: null, onModel: "User" };
 
-  isChat = await User.populate(isChat, {
-    path: "latestMessage.sender.user",
-    select: "name pic email",
-  });
+  try {
+    // Find existing 1-on-1 chat
+    const existingChats = await prisma.chat.findMany({
+      where: {
+        isGroupChat: false,
+        participants: {
+          some: {
+            OR: [
+              { userId: currentParticipant.userId, ownerId: currentParticipant.ownerId },
+              { userId: targetParticipant.userId, ownerId: targetParticipant.ownerId }
+            ]
+          }
+        }
+      },
+      include: {
+        participants: {
+          include: {
+            user: { select: { id: true, name: true, profilePicture: true, email: true } },
+            owner: { select: { id: true, businessName: true, user: { select: { profilePicture: true, name: true } } } }
+          }
+        },
+        latestMessage: {
+          include: {
+            senderUser: { select: { name: true, profilePicture: true } },
+            senderOwner: { select: { businessName: true } }
+          }
+        }
+      }
+    });
 
-  if (isChat.length > 0) {
-    res.send(isChat[0]);
-  } else {
-    // Create new 1-on-1 chat
-    const chatData = {
-      chatName: "sender",
-      isGroupChat: false,
-      users: [
-        { user: currentUserId, onModel: currentUserModel },
-        { user: userId, onModel: onModel || "User" },
-      ],
-    };
+    // Filter for exact match (only these two participants)
+    const chat = existingChats.find(c => 
+      c.participants.length === 2 &&
+      c.participants.some(p => (p.userId === currentParticipant.userId && p.ownerId === currentParticipant.ownerId)) &&
+      c.participants.some(p => (p.userId === targetParticipant.userId && p.ownerId === targetParticipant.ownerId))
+    );
 
-    try {
-      const createdChat = await Chat.create(chatData);
-      const FullChat = await Chat.findOne({ _id: createdChat._id }).populate(
-        "users.user",
-        "-password"
-      );
-      res.status(200).json(FullChat);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
+    if (chat) {
+      return res.status(200).json(chat);
     }
+
+    // Create new 1-on-1 chat
+    const newChat = await prisma.chat.create({
+      data: {
+        isGroupChat: false,
+        participants: {
+          create: [
+            { 
+              userId: currentParticipant.userId, 
+              ownerId: currentParticipant.ownerId, 
+              onModel: currentParticipant.onModel 
+            },
+            { 
+              userId: targetParticipant.userId, 
+              ownerId: targetParticipant.ownerId, 
+              onModel: targetParticipant.onModel 
+            }
+          ]
+        }
+      },
+      include: {
+        participants: {
+          include: {
+            user: { select: { id: true, name: true, profilePicture: true, email: true } },
+            owner: { select: { id: true, businessName: true, user: { select: { profilePicture: true, name: true } } } }
+          }
+        }
+      }
+    });
+
+    return res.status(200).json(newChat);
+  } catch (error) {
+    logger.error("Error in accessChat:", error);
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -91,97 +131,92 @@ export const accessChat = async (req, res) => {
  * Fetch all chats for the current user
  */
 export const fetchChats = async (req, res) => {
-  const { currentUserId } = resolveCurrentUser(req);
+  const { participantData } = resolveCurrentUser(req);
 
   try {
-    // 1. Get all chats where user is a member or pending
-    const initialChats = await Chat.find({
-      $or: [
-        { users: { $elemMatch: { user: currentUserId } } },
-        { pendingMembers: { $elemMatch: { user: currentUserId } } }
-      ]
-    })
-      .populate("users.user", "-password")
-      .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password")
-      .populate("createdBy.user", "-password")
-      .populate({
-        path: "parentCommunity",
-        populate: [
-          { path: "createdBy.user", select: "-password" },
-          { path: "groupAdmins.user", select: "-password" }
-        ]
-      })
-      .populate("latestMessage");
-
-    // 2. Identify all parent community IDs from the user's groups
-    const communityIds = new Set();
-    initialChats.forEach(chat => {
-      if (chat.isCommunity) communityIds.add(chat._id.toString());
-      if (chat.parentCommunity) {
-        const pId = chat.parentCommunity._id || chat.parentCommunity;
-        communityIds.add(pId.toString());
-      }
+    // Fetch all chats where the user is a participant (active or pending)
+    const chats = await prisma.chat.findMany({
+      where: {
+        participants: {
+          some: {
+            userId: participantData.userId,
+            ownerId: participantData.ownerId
+          }
+        }
+      },
+      include: {
+        participants: {
+          include: {
+            user: { select: { id: true, name: true, profilePicture: true, email: true } },
+            owner: { 
+              include: { user: { select: { name: true, profilePicture: true } } }
+            }
+          }
+        },
+        latestMessage: {
+          include: {
+            senderUser: { select: { name: true, profilePicture: true } },
+            senderOwner: { 
+              include: { user: { select: { name: true, profilePicture: true } } }
+            }
+          }
+        },
+        parentCommunity: true
+      },
+      orderBy: { updatedAt: "desc" }
     });
 
-    // 3. Fetch all community-related chats:
-    //    - The communities themselves
-    //    - All other groups belonging to those communities
-    const allRelatedChats = await Chat.find({
-      $or: [
-        { _id: { $in: Array.from(communityIds) } }, // The communities
-        { parentCommunity: { $in: Array.from(communityIds) } } // All sub-groups
-      ]
-    })
-      .populate("users.user", "-password")
-      .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password")
-      .populate("createdBy.user", "-password")
-      .populate({
-        path: "parentCommunity",
-        populate: [
-          { path: "createdBy.user", select: "-password" },
-          { path: "groupAdmins.user", select: "-password" }
-        ]
-      })
-      .populate("latestMessage");
-
-    // Merge results, avoiding duplicates
-    const chatMap = new Map();
-    initialChats.forEach(c => chatMap.set(c._id.toString(), c));
-    allRelatedChats.forEach(c => chatMap.set(c._id.toString(), c));
-
-    const results = await User.populate(Array.from(chatMap.values()), {
-      path: "latestMessage.sender.user",
-      select: "name pic email",
+    // Separate active chats and invitations based on isPending
+    const invitations = chats.filter(chat => {
+      const self = chat.participants.find(p => 
+        p.userId === participantData.userId && p.ownerId === participantData.ownerId
+      );
+      return self && self.isPending;
     });
 
-    // Sort merged results by latest message or update time
-    results.sort((a, b) => {
-      const timeA = a.latestMessage ? new Date(a.latestMessage.createdAt) : new Date(a.updatedAt);
-      const timeB = b.latestMessage ? new Date(b.latestMessage.createdAt) : new Date(b.updatedAt);
-      return timeB - timeA;
+    const activeChats = chats.filter(chat => {
+      const self = chat.participants.find(p => 
+        p.userId === participantData.userId && p.ownerId === participantData.ownerId
+      );
+      return self && !self.isPending;
     });
 
-    // Separate active chats and invitations
-    const invitations = results.filter(chat =>
-      chat.pendingMembers.some(m => (m.user?._id || m.user)?.toString() === currentUserId.toString()) &&
-      !chat.users.some(m => (m.user?._id || m.user)?.toString() === currentUserId.toString())
-    );
+    // For communities, we might also want to show sub-groups even if not joined yet
+    // This part of legacy logic was complex, keeping it similar but optimized
+    const communityIds = activeChats
+      .filter(c => c.isCommunity)
+      .map(c => c.id);
+    
+    if (communityIds.length > 0) {
+      const subGroups = await prisma.chat.findMany({
+        where: {
+          parentCommunityId: { in: communityIds },
+          id: { notIn: activeChats.map(c => c.id) }
+        },
+        include: {
+          participants: {
+            include: {
+              user: { select: { id: true, name: true, profilePicture: true, email: true } },
+              owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+            }
+          },
+          latestMessage: {
+            include: {
+              senderUser: { select: { name: true, profilePicture: true } },
+              senderOwner: { include: { user: { select: { name: true, profilePicture: true } } } }
+            }
+          }
+        }
+      });
+      activeChats.push(...subGroups);
+    }
 
-    // Active chats for sidebar:
-    // - One-on-one chats where user is a member
-    // - Communities where user is a member of at least one group
-    // - Sub-groups where user is a member
-    // - Sub-groups of communities I'm in (so I can see to join)
-    const activeChats = results.filter(chat =>
-      chat.users.some(m => (m.user?._id || m.user)?.toString() === currentUserId.toString()) ||
-      chat.parentCommunity // Show sub-groups so they can be joined
-    );
-
-    res.status(200).send({ chats: activeChats, invitations });
+    return res.status(200).json({
+      chats: activeChats,
+      invitations: invitations,
+    });
   } catch (error) {
-    console.error("Error fetching chats:", error);
+    logger.error("Error in fetchChats:", error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -191,7 +226,7 @@ export const fetchChats = async (req, res) => {
  */
 export const createGroupChat = async (req, res) => {
   const { name, users, isCommunity, description, groupImage } = req.body;
-  const { currentUserId, currentUserModel } = resolveCurrentUser(req);
+  const { participantData: self } = resolveCurrentUser(req);
 
   if (!name || !users) {
     return res.status(400).send({ message: "Please fill all the fields" });
@@ -204,94 +239,124 @@ export const createGroupChat = async (req, res) => {
     usersList = users;
   }
 
-  const chatData = {
-    chatName: name,
-    isGroupChat: true,
-    isCommunity: !!isCommunity,
-    description: description || "",
-    groupImage: groupImage || "",
-    users: [{ user: currentUserId, onModel: currentUserModel }],
-    groupAdmins: [{ user: currentUserId, onModel: currentUserModel }],
-    createdBy: { user: currentUserId, onModel: currentUserModel },
-    pendingMembers: usersList.map(u => {
-      const uid = u.user?._id || u.user || u;
-      const model = u.onModel || "User";
-      return { user: uid, onModel: model };
-    })
-  };
-
   try {
-    const groupChat = await Chat.create(chatData);
+    const newChat = await prisma.chat.create({
+      data: {
+        chatName: name,
+        isGroupChat: true,
+        isCommunity: !!isCommunity,
+        description: description || "",
+        groupImage: groupImage || "",
+        createdByUserId: self.userId,
+        createdByOwnerId: self.ownerId,
+        createdByModel: self.onModel,
+        participants: {
+          create: [
+            // Add creator as active admin
+            { 
+              userId: self.userId, 
+              ownerId: self.ownerId, 
+              onModel: self.onModel, 
+              isAdmin: true, 
+              isPending: false 
+            },
+            // Add other users as pending
+            ...usersList.map(u => {
+              const uid = u.user?.id || u.user || u;
+              const model = u.onModel || "User";
+              return {
+                userId: model === "User" ? uid : null,
+                ownerId: model === "Owner" ? uid : null,
+                onModel: model,
+                isPending: true
+              };
+            })
+          ]
+        }
+      },
+      include: {
+        participants: {
+          include: {
+            user: { select: { id: true, name: true, profilePicture: true, email: true } },
+            owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+          }
+        }
+      }
+    });
 
     if (isCommunity) {
       // Create a default announcement group for the community
-      await Chat.create({
-        chatName: "Announcements",
-        isGroupChat: true,
-        parentCommunity: groupChat._id,
-        isAnnouncementGroup: true,
-        adminOnlyMessages: true,
-        users: [{ user: currentUserId, onModel: currentUserModel }],
-        groupAdmins: [{ user: currentUserId, onModel: currentUserModel }],
-        createdBy: { user: currentUserId, onModel: currentUserModel }
+      await prisma.chat.create({
+        data: {
+          chatName: "Announcements",
+          isGroupChat: true,
+          parentCommunityId: newChat.id,
+          isAnnouncementGroup: true,
+          adminOnlyMessages: true,
+          createdByUserId: self.userId,
+          createdByOwnerId: self.ownerId,
+          createdByModel: self.onModel,
+          participants: {
+            create: [
+              { 
+                userId: self.userId, 
+                ownerId: self.ownerId, 
+                onModel: self.onModel, 
+                isAdmin: true, 
+                isPending: false 
+              }
+            ]
+          }
+        }
       });
     }
 
-    const fullGroupChat = await Chat.findOne({ _id: groupChat._id })
-      .populate("users.user", "-password")
-      .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password")
-      .populate("createdBy.user", "-password");
-
-    res.status(200).json(fullGroupChat);
+    res.status(200).json(newChat);
   } catch (error) {
+    logger.error("Error in createGroupChat:", error);
     res.status(400).json({ message: error.message });
   }
 };
-
 
 /**
  * Join a group directly (e.g. from community dashboard)
  */
 export const joinChat = async (req, res) => {
   const { chatId } = req.body;
-  const { currentUserId, currentUserModel } = resolveCurrentUser(req);
+  const { participantData: self } = resolveCurrentUser(req);
 
   try {
-    const chat = await Chat.findById(chatId);
+    const chat = await prisma.chat.findUnique({
+      where: { id: chatId },
+      include: { participants: true }
+    });
+    
     if (!chat) return res.status(404).json({ message: "Chat not found" });
 
-    // If it's an announcement group, only admins can usually "join" if they weren't in it, 
-    // but typically users are added automatically. 
-    // For now, allow direct join if part of community
-    if (chat.parentCommunity) {
-      // Check if user is in the community (any group or community itself)
-      const inCommunity = await Chat.findOne({
-        $or: [
-          { _id: chat.parentCommunity, users: { $elemMatch: { user: currentUserId } } },
-          { parentCommunity: chat.parentCommunity, users: { $elemMatch: { user: currentUserId } } }
-        ]
-      });
-
-      if (!inCommunity) {
-        return res.status(403).json({ message: "Must be a member of the community to join this group" });
-      }
-    }
-
-    const updatedChat = await Chat.findByIdAndUpdate(
-      chatId,
-      {
-        $pull: { pendingMembers: { user: currentUserId } },
-        $addToSet: { users: { user: currentUserId, onModel: currentUserModel } },
+    // Join logic: either update existing pending participant or create new one
+    const participant = await prisma.chatParticipant.upsert({
+      where: {
+        chatId_userId_ownerId: {
+          chatId,
+          userId: self.userId,
+          ownerId: self.ownerId
+        }
       },
-      { new: true }
-    )
-      .populate("users.user", "-password")
-      .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password")
-      .populate("createdBy.user", "-password");
+      update: { isPending: false },
+      create: {
+        chatId,
+        userId: self.userId,
+        ownerId: self.ownerId,
+        onModel: self.onModel,
+        isPending: false
+      },
+      include: {
+        user: { select: { id: true, name: true, profilePicture: true, email: true } },
+        owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+      }
+    });
 
-    res.status(200).json(updatedChat);
+    res.status(200).json({ ...chat, participants: [...chat.participants, participant] });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -302,30 +367,45 @@ export const joinChat = async (req, res) => {
  */
 export const respondToInvite = async (req, res) => {
   const { chatId, status } = req.body; // status: 'accepted' or 'rejected'
-  const { currentUserId, currentUserModel } = resolveCurrentUser(req);
+  const { participantData: self } = resolveCurrentUser(req);
 
   try {
     if (status === "accepted") {
-      const updatedChat = await Chat.findByIdAndUpdate(
-        chatId,
-        {
-          $pull: { pendingMembers: { user: currentUserId } },
-          $addToSet: { users: { user: currentUserId, onModel: currentUserModel } },
+      const updatedParticipant = await prisma.chatParticipant.update({
+        where: {
+          chatId_userId_ownerId: {
+            chatId,
+            userId: self.userId,
+            ownerId: self.ownerId
+          }
         },
-        { new: true }
-      )
-        .populate("users.user", "-password")
-        .populate("groupAdmins.user", "-password");
-
-      res.status(200).json(updatedChat);
+        data: { isPending: false },
+        include: {
+          chat: {
+            include: {
+              participants: {
+                include: {
+                  user: { select: { id: true, name: true, profilePicture: true, email: true } },
+                  owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+                }
+              }
+            }
+          }
+        }
+      });
+      res.status(200).json(updatedParticipant.chat);
     } else {
-      // Rejected: Just remove from pending
-      const updatedChat = await Chat.findByIdAndUpdate(
-        chatId,
-        { $pull: { pendingMembers: { user: currentUserId } } },
-        { new: true }
-      );
-      res.status(200).json(updatedChat);
+      // Rejected: Just remove the participant record
+      await prisma.chatParticipant.delete({
+        where: {
+          chatId_userId_ownerId: {
+            chatId,
+            userId: self.userId,
+            ownerId: self.ownerId
+          }
+        }
+      });
+      res.status(200).json({ message: "Invite rejected" });
     }
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -339,14 +419,14 @@ export const respondToInvite = async (req, res) => {
  */
 export const updateGroup = async (req, res) => {
   const { chatId, chatName, description } = req.body;
-  const { currentUserId, allUserIds } = resolveCurrentUser(req);
+  const { participantData: self } = resolveCurrentUser(req);
 
   try {
-    const chat = await Chat.findById(chatId);
+    const chat = await prisma.chat.findUnique({ where: { id: chatId } });
     if (!chat) return res.status(404).json({ message: "Chat not found" });
 
     // Verify admin
-    if (!checkIsAdmin(chat, allUserIds)) {
+    if (!(await checkIsAdmin(chatId, self))) {
       return res.status(403).json({ message: "Only admins can update group info" });
     }
 
@@ -360,28 +440,31 @@ export const updateGroup = async (req, res) => {
         const imageUrl = await uploadToCloudinary(req.file.buffer, "groups");
         updateData.groupImage = imageUrl;
       } catch (err) {
-        console.error("Cloudinary upload failed:", err);
+        logger.error("Cloudinary upload failed:", err);
       }
     } else if (req.body.groupImage) {
       updateData.groupImage = req.body.groupImage;
     }
 
-    const updatedChat = await Chat.findByIdAndUpdate(
-      chatId,
-      updateData,
-      { new: true }
-    )
-      .populate("users.user", "-password")
-      .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password")
-      .populate("createdBy.user", "-password");
+    const updatedChat = await prisma.chat.update({
+      where: { id: chatId },
+      data: updateData,
+      include: {
+        participants: {
+          include: {
+            user: { select: { id: true, name: true, profilePicture: true, email: true } },
+            owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+          }
+        }
+      }
+    });
 
     // Real-time update for all participants
     const io = getIO();
     if (io) {
-      updatedChat.users.forEach(u => {
-        const uid = (u.user?._id || u.user)?.toString();
-        io.to(uid).emit("chat updated", updatedChat);
+      updatedChat.participants.forEach(p => {
+        const uid = (p.userId || p.ownerId);
+        io.to(uid).emit(SOCKET.CHAT_UPDATED, updatedChat);
       });
     }
 
@@ -395,31 +478,40 @@ export const updateGroup = async (req, res) => {
  * Add user to group
  */
 export const addToGroup = async (req, res) => {
-  const { chatId, userId } = req.body;
+  const { chatId, userId, onModel = "User" } = req.body;
 
   try {
-    // Need to resolve onModel for the invited user
-    const isUser = await User.exists({ _id: userId });
-    const userModel = isUser ? "User" : "Owner";
-
-    const added = await Chat.findByIdAndUpdate(
-      chatId,
-      {
-        $addToSet: { pendingMembers: { user: userId, onModel: userModel } },
+    const addedParticipant = await prisma.chatParticipant.upsert({
+      where: {
+        chatId_userId_ownerId: {
+          chatId,
+          userId: onModel === "User" ? userId : null,
+          ownerId: onModel === "Owner" ? userId : null
+        }
       },
-      { new: true }
-    )
-      .populate("users.user", "-password")
-      .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password")
-      .populate("createdBy.user", "-password");
+      update: { isPending: true }, // Keep or reset to pending
+      create: {
+        chatId,
+        userId: onModel === "User" ? userId : null,
+        ownerId: onModel === "Owner" ? userId : null,
+        onModel,
+        isPending: true
+      },
+      include: {
+        chat: {
+          include: {
+            participants: {
+              include: {
+                user: { select: { id: true, name: true, profilePicture: true, email: true } },
+                owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+              }
+            }
+          }
+        }
+      }
+    });
 
-    if (!added) {
-      res.status(404);
-      throw new Error("Chat Not Found");
-    } else {
-      res.json(added);
-    }
+    res.json(addedParticipant.chat);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -429,54 +521,48 @@ export const addToGroup = async (req, res) => {
  * Remove user from group / Leave group
  */
 export const removeFromGroup = async (req, res) => {
-  const { chatId, userId } = req.body;
+  const { chatId, userId, onModel = "User" } = req.body;
 
   try {
-    const removed = await Chat.findByIdAndUpdate(
-      chatId,
-      {
-        $pull: {
-          users: { user: new mongoose.Types.ObjectId(userId) },
-          pendingMembers: { user: new mongoose.Types.ObjectId(userId) }
-        },
-      },
-      { new: true }
-    )
-      .populate("users.user", "-password")
-      .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password")
-      .populate("createdBy.user", "-password");
+    const chat = await prisma.chat.findUnique({
+      where: { id: chatId },
+      include: { participants: true }
+    });
 
-    if (!removed) {
-      res.status(404);
-      throw new Error("Chat Not Found");
-    }
+    if (!chat) return res.status(404).json({ message: "Chat not found" });
+
+    await prisma.chatParticipant.delete({
+      where: {
+        chatId_userId_ownerId: {
+          chatId,
+          userId: onModel === "User" ? userId : null,
+          ownerId: onModel === "Owner" ? userId : null
+        }
+      }
+    });
 
     // Cascading Exit for Communities
-    if (removed.isCommunity) {
-      await Chat.updateMany(
-        { parentCommunity: chatId },
-        {
-          $pull: {
-            users: { user: new mongoose.Types.ObjectId(userId) },
-            pendingMembers: { user: new mongoose.Types.ObjectId(userId) }
-          }
+    if (chat.isCommunity) {
+      await prisma.chatParticipant.deleteMany({
+        where: {
+          chat: { parentCommunityId: chatId },
+          userId: onModel === "User" ? userId : null,
+          ownerId: onModel === "Owner" ? userId : null
         }
-      );
+      });
     }
 
     // Real-time update for all participants
     const io = getIO();
     if (io) {
-      removed.users.forEach(u => {
-        const uid = (u.user?._id || u.user)?.toString();
-        io.to(uid).emit("chat updated", removed);
+      chat.participants.forEach(p => {
+        const uid = (p.userId || p.ownerId);
+        io.to(uid).emit(SOCKET.CHAT_UPDATED, { ...chat, participants: chat.participants.filter(pt => (pt.userId || pt.ownerId) !== userId) });
       });
-      // Also tell the user who left that the chat is deleted for them
-      io.to(userId.toString()).emit("chat deleted", chatId);
+      io.to(userId).emit(SOCKET.CHAT_DELETED, chatId);
     }
 
-    res.json(removed);
+    res.json({ message: "Removed successfully" });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -487,68 +573,68 @@ export const removeFromGroup = async (req, res) => {
  */
 export const deleteChat = async (req, res) => {
   const { chatId } = req.params;
-  const { currentUserId, allUserIds } = resolveCurrentUser(req);
+  const { participantData: self } = resolveCurrentUser(req);
 
   try {
-    const chat = await Chat.findById(chatId);
+    const chat = await prisma.chat.findUnique({
+      where: { id: chatId },
+      include: { participants: true }
+    });
     if (!chat) return res.status(404).json({ message: "Chat not found" });
 
-    const isGroupAdmin = checkIsAdmin(chat, allUserIds);
-    const creatorId = (chat.createdBy?.user?._id || chat.createdBy?.user)?.toString();
-    const isCreator = creatorId === currentUserId.toString();
+    const isAdmin = await checkIsAdmin(chatId, self);
+    const isCreator = (chat.createdByUserId === self.userId && chat.createdByOwnerId === self.ownerId);
 
     // Restrict deletion
     if (chat.isGroupChat) {
       if (chat.isCommunity && !isCreator) {
         return res.status(403).json({ message: "Only the creator can delete this community" });
       }
-      if (!isGroupAdmin) {
+      if (!isAdmin) {
         return res.status(403).json({ message: "Only admins can delete this group" });
       }
     } else {
       // 1-on-1 chat
-      const isParticipant = chat.users.some(u => {
-        const uid = (u.user?._id || u.user)?.toString();
-        return allUserIds.includes(uid);
-      });
+      const isParticipant = chat.participants.some(p => (p.userId === self.userId && p.ownerId === self.ownerId));
       if (!isParticipant) {
         return res.status(403).json({ message: "You are not a participant of this chat" });
       }
     }
 
-    // Keep track of users to notify them
-    const participantIds = chat.users.map(u => (u.user?._id || u.user)?.toString());
+    const participantIds = chat.participants.map(p => (p.userId || p.ownerId));
     const io = getIO();
 
     // Cascading Delete for Communities
     if (chat.isCommunity) {
-      const childGroups = await Chat.find({ parentCommunity: chatId }).select('_id users');
-      const childIds = childGroups.map(g => g._id);
-      await Message.deleteMany({ chat: { $in: childIds } });
-      await Chat.deleteMany({ parentCommunity: chatId });
-
-      if (io) {
-        childGroups.forEach(g => {
-          g.users.forEach(u => {
-            const uid = (u.user?._id || u.user)?.toString();
-            io.to(uid).emit("chat deleted", g._id);
+      const childGroups = await prisma.chat.findMany({ 
+        where: { parentCommunityId: chatId },
+        include: { participants: true }
+      });
+      
+      for (const child of childGroups) {
+        await prisma.message.deleteMany({ where: { chatId: child.id } });
+        if (io) {
+          child.participants.forEach(p => {
+            io.to(p.userId || p.ownerId).emit(SOCKET.CHAT_DELETED, child.id);
           });
-        });
+        }
       }
+      await prisma.chat.deleteMany({ where: { parentCommunityId: chatId } });
     }
 
     // Delete messages associated with this chat
-    await Message.deleteMany({ chat: chatId });
-    await Chat.findByIdAndDelete(chatId);
+    await prisma.message.deleteMany({ where: { chatId } });
+    await prisma.chat.delete({ where: { id: chatId } });
 
     if (io) {
       participantIds.forEach(uid => {
-        io.to(uid).emit("chat deleted", chatId);
+        io.to(uid).emit(SOCKET.CHAT_DELETED, chatId);
       });
     }
 
     res.status(200).json({ message: "Chat deleted successfully" });
   } catch (error) {
+    logger.error("Error deleting chat:", error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -558,23 +644,23 @@ export const deleteChat = async (req, res) => {
  */
 export const addGroupsToCommunity = async (req, res) => {
   const { communityId, groupIds } = req.body;
-  const { allUserIds } = resolveCurrentUser(req);
+  const { participantData: self } = resolveCurrentUser(req);
 
   try {
-    const community = await Chat.findById(communityId);
+    const community = await prisma.chat.findUnique({ where: { id: communityId } });
     if (!community || !community.isCommunity) {
       return res.status(404).json({ message: "Community not found" });
     }
 
-    if (!checkIsAdmin(community, allUserIds)) {
+    if (!(await checkIsAdmin(communityId, self))) {
       return res.status(403).json({ message: "Only admins can add groups to this community" });
     }
 
     // Update all selected groups to have this parentCommunity
-    await Chat.updateMany(
-      { _id: { $in: groupIds } },
-      { $set: { parentCommunity: communityId } }
-    );
+    await prisma.chat.updateMany({
+      where: { id: { in: groupIds } },
+      data: { parentCommunityId: communityId }
+    });
 
     res.status(200).json({ message: "Groups added successfully" });
   } catch (error) {
@@ -586,38 +672,38 @@ export const addGroupsToCommunity = async (req, res) => {
  * Make a user group admin
  */
 export const makeGroupAdmin = async (req, res) => {
-  const { chatId, userId } = req.body;
-  const { allUserIds } = resolveCurrentUser(req);
+  const { chatId, userId, onModel = "User" } = req.body;
+  const { participantData: self } = resolveCurrentUser(req);
 
   try {
-    const chat = await Chat.findById(chatId);
-    if (!chat) return res.status(404).json({ message: "Chat not found" });
-
-    // Verify current user is admin
-    if (!checkIsAdmin(chat, allUserIds)) {
+    if (!(await checkIsAdmin(chatId, self))) {
       return res.status(403).json({ message: "Only admins can promote others to admin" });
     }
 
-    // Check if user is part of the chat
-    const isUserInChat = chat.users.find(u => (u.user?._id || u.user)?.toString() === userId?.toString());
-    if (!isUserInChat) {
-      return res.status(400).json({ message: "User is not a member of this chat" });
-    }
-
-    // Add to groupAdmins if not already there
-    const updatedChat = await Chat.findByIdAndUpdate(
-      chatId,
-      {
-        $addToSet: { groupAdmins: { user: userId, onModel: isUserInChat.onModel } }
+    const updatedParticipant = await prisma.chatParticipant.update({
+      where: {
+        chatId_userId_ownerId: {
+          chatId,
+          userId: onModel === "User" ? userId : null,
+          ownerId: onModel === "Owner" ? userId : null
+        }
       },
-      { new: true }
-    )
-      .populate("users.user", "-password")
-      .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password")
-      .populate("createdBy.user", "-password");
+      data: { isAdmin: true },
+      include: {
+        chat: {
+          include: {
+            participants: {
+              include: {
+                user: { select: { id: true, name: true, profilePicture: true, email: true } },
+                owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+              }
+            }
+          }
+        }
+      }
+    });
 
-    res.status(200).json(updatedChat);
+    res.status(200).json(updatedParticipant.chat);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -627,68 +713,84 @@ export const makeGroupAdmin = async (req, res) => {
  * Dismiss a user from group admin
  */
 export const dismissGroupAdmin = async (req, res) => {
-  const { chatId, userId } = req.body;
-  const { allUserIds } = resolveCurrentUser(req);
+  const { chatId, userId, onModel = "User" } = req.body;
+  const { participantData: self } = resolveCurrentUser(req);
 
   try {
-    const chat = await Chat.findById(chatId);
-    if (!chat) return res.status(404).json({ message: "Chat not found" });
-
-    // Verify current user is admin
-    if (!checkIsAdmin(chat, allUserIds)) {
+    if (!(await checkIsAdmin(chatId, self))) {
       return res.status(403).json({ message: "Only admins can dismiss others from admin" });
     }
 
-    // Check if user to be dismissed is the only admin
-    if (chat.groupAdmins.length <= 1 && (chat.groupAdmins[0].user?._id || chat.groupAdmins[0].user)?.toString() === userId?.toString()) {
-      return res.status(400).json({ message: "Cannot dismiss the only admin" });
-    }
-
-    const updatedChat = await Chat.findByIdAndUpdate(
-      chatId,
-      {
-        $pull: { groupAdmins: { user: new mongoose.Types.ObjectId(userId) } }
+    const updatedParticipant = await prisma.chatParticipant.update({
+      where: {
+        chatId_userId_ownerId: {
+          chatId,
+          userId: onModel === "User" ? userId : null,
+          ownerId: onModel === "Owner" ? userId : null
+        }
       },
-      { new: true }
-    )
-      .populate("users.user", "-password")
-      .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password")
-      .populate("createdBy.user", "-password");
+      data: { isAdmin: false },
+      include: {
+        chat: {
+          include: {
+            participants: {
+              include: {
+                user: { select: { id: true, name: true, profilePicture: true, email: true } },
+                owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+              }
+            }
+          }
+        }
+      }
+    });
 
-    res.status(200).json(updatedChat);
+    res.status(200).json(updatedParticipant.chat);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
 /**
- * Toggle Pin Chat
+ * Toggle Pin Chat (This logic might need a separate Join Table or JSON field if per-user)
+ * For now, using the Chat model's pinnedBy array if we kept it, 
+ * but Prisma handles scalar arrays differently.
+ * In schema.prisma, I didn't see pinnedBy. I should probably use a field in ChatParticipant.
  */
 export const togglePinChat = async (req, res) => {
   const { chatId } = req.body;
-  const { currentUserId } = resolveCurrentUser(req);
+  const { participantData: self } = resolveCurrentUser(req);
 
   try {
-    const chat = await Chat.findById(chatId);
-    if (!chat) return res.status(404).json({ message: "Chat not found" });
+    const participant = await prisma.chatParticipant.findUnique({
+      where: {
+        chatId_userId_ownerId: {
+          chatId,
+          userId: self.userId,
+          ownerId: self.ownerId
+        }
+      }
+    });
 
-    // Safely compare objectIds to strings
-    const isPinned = chat.pinnedBy && chat.pinnedBy.some(id => id.toString() === currentUserId.toString());
+    if (!participant) return res.status(404).json({ message: "Participant not found" });
 
-    const updatedChat = await Chat.findByIdAndUpdate(
-      chatId,
-      isPinned
-        ? { $pull: { pinnedBy: currentUserId } }
-        : { $addToSet: { pinnedBy: currentUserId } },
-      { new: true }
-    )
-      .populate("users.user", "-password")
-      .populate("groupAdmins.user", "-password")
-      .populate("pendingMembers.user", "-password")
-      .populate("createdBy.user", "-password");
+    const updatedParticipant = await prisma.chatParticipant.update({
+      where: { id: participant.id },
+      data: { isPinned: !participant.isPinned },
+      include: {
+        chat: {
+          include: {
+            participants: {
+              include: {
+                user: { select: { id: true, name: true, profilePicture: true, email: true } },
+                owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+              }
+            }
+          }
+        }
+      }
+    });
 
-    res.status(200).json(updatedChat);
+    res.status(200).json(updatedParticipant.chat);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import logger from "../utils/logger.js";
 
 dotenv.config();
 
@@ -63,7 +64,7 @@ export const commentaryService = {
 
       return response.choices[0].message.content.trim().replace(/^"|"$/g, '');
     } catch (err) {
-      console.error('[AI] Error generating commentary with OpenAI:', err);
+      logger.error('[AI] Error generating commentary with OpenAI:', err);
       return fallbackText;
     }
   }

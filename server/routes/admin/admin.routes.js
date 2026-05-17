@@ -1,23 +1,23 @@
 import { Router } from "express"
 
-import turfRouter from "./turf.routes.js"
-import dashboardRouter from "./dashboard.routes.js";
+import turfRouter from "../../modules/turf/turf.routes.js"
+import dashboardRouter from "../../modules/admin/routes/dashboard.routes.js";
 import communityRouter from "../../modules/community/community.routes.js"
-import transactionRouter from "./transaction.routes.js"
-import userManagementRouter from "./userManagement.routes.js"
-import ownerRequestRouter from "./requestManagement.routes.js"
-import ownerManagementRouter from "./ownerManagement.routes.js"
-import featureFlagRouter from "./featureFlag.routes.js"
-import marketingRouter from "./marketing.routes.js"
-import blogRouter from "./blog.routes.js"
-import professionalRouter from "./professionalManagement.routes.js"
-import withdrawalRouter from "./withdrawal.routes.js"
-import supportRouter from "./support.routes.js"
-import auditRouter from "./audit.routes.js"
-import settingsRouter from "./settings.routes.js"
-import notificationRouter from "../notification.routes.js"
-import adminDisputeRouter from "./dispute.routes.js"
-import gameRouter from "./gameManagement.routes.js"
+import transactionRouter from "../../modules/wallet/routes/transaction.routes.js"
+import userManagementRouter from "../../modules/player/routes/admin.routes.js"
+import ownerRequestRouter from "../../modules/owner/routes/partnerRequest.routes.js"
+import ownerManagementRouter from "../../modules/owner/routes/admin.routes.js"
+import featureFlagRouter from "../../modules/feature/feature.routes.js"
+import marketingRouter from "../../modules/marketing/marketing.routes.js"
+import blogRouter from "../../modules/blog/blog.routes.js"
+import professionalRouter from "../../modules/professional/professional.routes.js"
+import withdrawalRouter from "../../modules/wallet/routes/admin.routes.js"
+import supportRouter from "../../modules/support/routes/admin.routes.js"
+import auditRouter from "../../modules/audit/routes/admin.routes.js"
+import settingsRouter from "../../modules/settings/routes/admin.routes.js"
+import adminNotificationRouter from "../../modules/notification/notification.routes.js"
+import adminDisputeRouter from "../../modules/dispute/dispute.routes.js"
+import gameRouter from "../../modules/hostedGame/hostedGame.routes.js"
 import verifyAdminToken from "../../middleware/jwt/admin.middleware.js"
 
 const adminRouter = Router()
@@ -38,7 +38,7 @@ adminRouter.use("/dashboard", verifyAdminToken, dashboardRouter);
 adminRouter.use("/transactions", verifyAdminToken, transactionRouter);
 adminRouter.use("/community", verifyAdminToken, communityRouter);
 adminRouter.use("/dispute", verifyAdminToken, adminDisputeRouter);
-adminRouter.use("/notifications", verifyAdminToken, notificationRouter);
+adminRouter.use("/notifications", verifyAdminToken, adminNotificationRouter);
 adminRouter.use("/games", verifyAdminToken, gameRouter);
 
 export default adminRouter;

@@ -1,6 +1,7 @@
 import { Queue, Worker } from 'bullmq';
 import { bullmqConnection as connection } from '../config/redis.js';
 import { runPlayingTransition, runAutoSettle } from '../utils/settlementWorker.js';
+import logger from "../utils/logger.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Queue — holds the repeatable job definitions
@@ -36,7 +37,8 @@ export async function initSettlementJobs() {
     jobId: 'legacy-settle-singleton',
   });
 
-  console.log('[SETTLEMENT] BullMQ jobs scheduled (singleton — runs once across all instances)');
+  logger.info('[SETTLEMENT] BullMQ jobs scheduled (singleton — runs once across all instances)');
+  return { settlementQueue };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -63,7 +65,7 @@ export const settlementWorker = new Worker('settlement', async (job) => {
 });
 
 settlementWorker.on('failed', (job, err) => {
-  console.error(`[SETTLEMENT] Job ${job?.name} failed:`, err.message);
+  logger.error(`[SETTLEMENT] Job ${job?.name} failed:`, err.message);
   const Sentry = import("@sentry/node");
   Sentry.then(s => s.captureException(err, { tags: { job: job?.name } }));
 });

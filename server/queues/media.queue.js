@@ -1,14 +1,6 @@
 import { Queue, Worker } from 'bullmq';
 import { bullmqConnection as connection } from '../config/redis.js';
-import Reel from '../models/reel.model.js';
-import Story from '../models/story.model.js';
-import CommunityPost from '../models/communityPost.model.js';
 
-const MODELS = {
-  reel: Reel,
-  story: Story,
-  community: CommunityPost
-};
 
 import path from 'path';
 import { fileURLToPath } from 'url';

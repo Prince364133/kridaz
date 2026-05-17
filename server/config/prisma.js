@@ -38,6 +38,19 @@ const processSocialAccounts = (accounts, action) => {
 
 const prisma = basePrisma.$extends({
   query: {
+    $allModels: {
+      async $allOperations({ args, query }) {
+        // Increment query count if we are in a request context
+        const { queryContext } = await import('../middleware/queryCounter.middleware.js').catch(() => ({}));
+        if (queryContext) {
+          const store = queryContext.getStore();
+          if (store) {
+            store.queryCount++;
+          }
+        }
+        return query(args);
+      },
+    },
     user: {
       async $allOperations({ model, operation, args, query }) {
         // Encrypt sensitive fields on write operations

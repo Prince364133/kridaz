@@ -1,25 +1,31 @@
-import WalletTransaction from "../../models/walletTransaction.model.js";
-import User from "../../models/user.model.js";
-import Owner from "../../models/owner.model.js";
-import WithdrawalRequest from "../../models/withdrawalRequest.model.js";
+import { prisma } from "../../config/prisma.js";
 import razorpay from "../../config/razorpay.js";
 import crypto from "crypto";
-import { notifyAdmins } from "../../utils/notificationHelper.js";
+import NotificationService from "../../services/notification.service.js";
+import WalletService from "../../services/wallet.service.js";
+import logger from "../../utils/logger.js";
 
 const getAccount = async (req) => {
   const { id, role, ownerId } = req.user;
 
-  // Regular users → User model
+  // Regular users
   if (role === "user") {
-    return await User.findById(id);
+    return await prisma.user.findUnique({ 
+      where: { id },
+      select: { id: true, role: true }
+    });
   }
 
-  // Owner / umpire / coach / admin → Owner model
-  // Try ownerId shortcut first, fall back to userId lookup
-  if (ownerId) {
-    return await Owner.findById(ownerId);
-  }
-  return await Owner.findOne({ userId: id });
+  // Owner / umpire / coach / admin → OwnerProfile
+  const owner = await prisma.ownerProfile.findFirst({
+    where: {
+      OR: [
+        { id: ownerId || "" },
+        { userId: id }
+      ]
+    }
+  });
+  return owner;
 };
 
 export const createTopupOrder = async (req, res) => {
@@ -48,18 +54,20 @@ export const createTopupOrder = async (req, res) => {
     const order = await razorpay.orders.create(options);
 
     // Create a pending transaction
-    await WalletTransaction.create({
-      user: userId,
-      amount: amount,
-      type: "TOPUP",
-      status: "PENDING",
-      description: "Wallet Top-up",
-      razorpayOrderId: order.id,
+    await prisma.walletTransaction.create({
+      data: {
+        userId: userId,
+        amount: Number(amount),
+        type: "TOPUP",
+        status: "PENDING",
+        description: "Wallet Top-up",
+        razorpayOrderId: order.id,
+      }
     });
 
     return res.status(200).json({ order });
   } catch (error) {
-    console.error("Error in createTopupOrder:", error);
+    logger.error("Error in createTopupOrder:", error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -75,54 +83,54 @@ export const verifyTopup = async (req, res) => {
 
     if (generatedSignature !== razorpay_signature) {
       // Update transaction status to FAILED
-      await WalletTransaction.findOneAndUpdate(
-        { razorpayOrderId: razorpay_order_id },
-        { status: "FAILED", description: "Payment Verification Failed" }
-      );
+      await prisma.walletTransaction.updateMany({
+        where: { razorpayOrderId: razorpay_order_id },
+        data: { status: "FAILED", description: "Payment Verification Failed" }
+      });
       return res.status(400).json({ success: false, message: "Payment verification failed" });
     }
 
     // Find the pending transaction
-    const transaction = await WalletTransaction.findOne({
-      razorpayOrderId: razorpay_order_id,
-      status: "PENDING",
+    const transaction = await prisma.walletTransaction.findFirst({
+      where: {
+        razorpayOrderId: razorpay_order_id,
+        status: "PENDING",
+      }
     });
 
     if (!transaction) {
       return res.status(404).json({ success: false, message: "Transaction record not found" });
     }
 
-    // Atomic update using session
     const account = await getAccount(req);
     if (!account) {
       return res.status(404).json({ success: false, message: "Account not found" });
     }
 
-    const Model = (req.user.role === "user") ? User : Owner;
-
-    // Atomic wallet credit — $inc is atomic at document level, no replica set needed
-    const updatedAccount = await Model.findByIdAndUpdate(
-      account._id,
-      { $inc: { walletBalance: transaction.amount } },
-      { new: true }
+    // Atomic wallet credit using Service
+    const newBalance = await WalletService.credit(
+      account.id,
+      req.user.role,
+      transaction.amount,
+      "Wallet Top-up"
     );
 
-    if (!updatedAccount) {
-      return res.status(500).json({ success: false, message: "Failed to update wallet balance" });
-    }
-
     // Mark transaction as SUCCESS
-    transaction.status = "SUCCESS";
-    transaction.razorpayPaymentId = razorpay_payment_id;
-    await transaction.save();
+    await prisma.walletTransaction.update({
+      where: { id: transaction.id },
+      data: {
+        status: "SUCCESS",
+        razorpayPaymentId: razorpay_payment_id
+      }
+    });
 
     return res.status(200).json({
       success: true,
       message: "Wallet topped up successfully",
-      balance: updatedAccount.walletBalance,
+      balance: newBalance,
     });
   } catch (error) {
-    console.error("Error in verifyTopup:", error);
+    logger.error("Error in verifyTopup:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -130,22 +138,22 @@ export const verifyTopup = async (req, res) => {
 export const getWalletData = async (req, res) => {
   const userId = req.user.id;
   try {
-    const account = await getAccount(req);
-    const transactions = await WalletTransaction.find({ user: userId })
-      .sort({ createdAt: -1 })
-      .limit(20);
+    const wallet = await WalletService.getWallet(userId, req.user.role);
+    const transactions = await prisma.walletTransaction.findMany({
+      where: { userId: userId },
+      orderBy: { createdAt: 'desc' },
+      take: 20
+    });
 
     return res.status(200).json({
-      balance: account?.walletBalance || 0,
-      reservedBalance: account?.reservedBalance || 0,
-      pendingBalance: account?.pendingBalance || 0,
-      usableBalance: (account?.walletBalance || 0) - (account?.reservedBalance || 0),
-      transactions,
+      ...wallet,
+      transactions: transactions,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
+
 export const checkPaymentStatus = async (req, res) => {
   const { orderId } = req.params;
   try {
@@ -154,45 +162,30 @@ export const checkPaymentStatus = async (req, res) => {
 
     if (successfulPayment) {
       // Find the pending transaction
-      const transaction = await WalletTransaction.findOne({
-        razorpayOrderId: orderId,
-        status: "PENDING",
+      const transaction = await prisma.walletTransaction.findFirst({
+        where: {
+          razorpayOrderId: orderId,
+          status: "PENDING",
+        }
       });
 
       if (transaction) {
-        // Find the user to check their role
-        const userDoc = await User.findById(transaction.user);
-        const isPartner = userDoc && ["venu_owners", "owner", "coach", "umpire", "admin", "streamer", "scorer"].some(r => userDoc.role?.toLowerCase().includes(r));
+        const user = await prisma.user.findUnique({
+          where: { id: transaction.userId },
+          select: { role: true }
+        });
+        const role = user?.role || 'user';
+        
+        const newBalance = await WalletService.credit(transaction.userId, role, transaction.amount, "Top-up check");
 
-        let account;
-        if (isPartner) {
-          // Update Owner collection for partners
-          account = await Owner.findOneAndUpdate(
-            { userId: transaction.user },
-            { $inc: { walletBalance: transaction.amount } },
-            { new: true }
-          );
-          // Fallback to User if no Owner record exists yet (should not happen for active partners)
-          if (!account) {
-            account = await User.findByIdAndUpdate(
-              transaction.user,
-              { $inc: { walletBalance: transaction.amount } },
-              { new: true }
-            );
-          }
-        } else {
-          // Update User collection for regular players
-          account = await User.findByIdAndUpdate(
-            transaction.user,
-            { $inc: { walletBalance: transaction.amount } },
-            { new: true }
-          );
-        }
-
-        if (account) {
-          transaction.status = "SUCCESS";
-          transaction.razorpayPaymentId = successfulPayment.id;
-          await transaction.save();
+        if (newBalance !== undefined) {
+          await prisma.walletTransaction.update({
+            where: { id: transaction.id },
+            data: {
+              status: "SUCCESS",
+              razorpayPaymentId: successfulPayment.id
+            }
+          });
           return res.status(200).json({ success: true, message: "Payment was successful. Wallet updated." });
         }
       }
@@ -200,13 +193,12 @@ export const checkPaymentStatus = async (req, res) => {
 
     return res.status(200).json({ success: false, message: "No successful payment found for this order." });
   } catch (error) {
-    console.error("Error in checkPaymentStatus:", error);
+    logger.error("Error in checkPaymentStatus:", error);
     return res.status(500).json({ message: error.message });
   }
 };
 
 export const requestWithdrawal = async (req, res) => {
-  const ownerId = req.user.id || req.user.user;
   const { amount, bankDetails } = req.body;
 
   try {
@@ -214,41 +206,42 @@ export const requestWithdrawal = async (req, res) => {
       return res.status(403).json({ message: "Only partners can request withdrawals" });
     }
 
-    if (!amount || amount < 500) {
-      return res.status(400).json({ message: "Minimum withdrawal amount is Rs 500" });
-    }
-
-    if (amount > 100000) {
-      return res.status(400).json({ message: "Maximum withdrawal amount is Rs 1,00,000" });
-    }
-
-    const owner = req.user.ownerId 
-      ? await Owner.findById(req.user.ownerId) 
-      : await Owner.findOne({ userId: req.user.id });
+    const owner = await prisma.ownerProfile.findFirst({
+      where: {
+        OR: [
+          { id: req.user.ownerId || "" },
+          { userId: req.user.id }
+        ]
+      }
+    });
 
     if (!owner) {
       return res.status(404).json({ message: "Account not found" });
     }
 
-    const usableBalance = owner.walletBalance - owner.reservedBalance;
+    const usableBalance = Number(owner.walletBalance) - Number(owner.reservedBalance);
     if (usableBalance < amount) {
       return res.status(400).json({ message: "Insufficient usable balance" });
     }
 
     // 1. Create withdrawal request
-    const request = await WithdrawalRequest.create({
-      owner: owner._id,
-      amount,
-      bankDetails,
-      status: "PENDING"
+    const request = await prisma.withdrawalRequest.create({
+      data: {
+        ownerId: owner.id,
+        amount: Number(amount),
+        bankDetails,
+        status: "PENDING"
+      }
     });
 
     // 2. Reserve the amount
-    owner.reservedBalance += amount;
-    await owner.save();
+    await prisma.ownerProfile.update({
+      where: { id: owner.id },
+      data: { reservedBalance: { increment: Number(amount) } }
+    });
 
     // 3. Notify Admin
-    await notifyAdmins({
+    NotificationService.notifyAdmins({
       title: "Withdrawal Requested",
       message: `Partner ${owner.name} requested a withdrawal of Rs ${amount}.`,
       type: "WITHDRAWAL",
@@ -258,25 +251,38 @@ export const requestWithdrawal = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Withdrawal request submitted successfully",
-      request
+      request: request
     });
   } catch (error) {
-    console.error("Error in requestWithdrawal:", error);
+    logger.error("Error in requestWithdrawal:", error);
     return res.status(500).json({ message: error.message });
   }
 };
 
 export const getOwnerWithdrawals = async (req, res) => {
   try {
-    const owner = req.user.ownerId 
-      ? await Owner.findById(req.user.ownerId) 
-      : await Owner.findOne({ userId: req.user.id });
+    const owner = await prisma.ownerProfile.findFirst({
+      where: {
+        OR: [
+          { id: req.user.ownerId || "" },
+          { userId: req.user.id }
+        ]
+      }
+    });
 
     if (!owner) {
       return res.status(404).json({ success: false, message: "Partner account not found" });
     }
-    const requests = await WithdrawalRequest.find({ owner: owner._id }).sort({ createdAt: -1 });
-    return res.status(200).json({ success: true, requests });
+
+    const requests = await prisma.withdrawalRequest.findMany({
+      where: { ownerId: owner.id },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return res.status(200).json({ 
+      success: true, 
+      requests: requests 
+    });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

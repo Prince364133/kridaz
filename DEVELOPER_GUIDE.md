@@ -5,21 +5,23 @@ Welcome to the Kridaz development team! This guide will help you understand the 
 ## 🏗 Scalable Folder Structure
 
 ### Backend (`/server`)
-We use a **Domain-Driven Modular Architecture**. Each feature area is encapsulated in its own module.
+We use a **Vertical Slice Domain-Driven Architecture**. Each feature area is completely encapsulated within its own module in the `server/modules/` directory.
 
-- **`models/`**: Centralized Mongoose schemas.
-- **`modules/`**: The heart of the application logic.
-  - `[feature]/[feature].controller.js`: Business logic and request handling.
-  - `[feature]/[feature].validator.js`: Zod schemas for input validation.
-  - `[feature]/[feature].service.js`: (Optional) Reusable logic/DB queries.
-- **`routes/`**: Route definitions that link URL paths to module controllers.
-- **`middleware/`**: Shared functions like `verifyToken`, `validate`, and `errorHandler`.
+- **`modules/`**:
+  - `[feature]/[feature].controller.js`: Request controllers and business boundaries.
+  - `[feature]/[feature].validator.js`: Zod schemas for sanitization and input validation.
+  - `[feature]/[feature].service.js`: Database queries, helper functions, and transactions.
+  - `[feature]/routes/[actor].routes.js`: Sub-routers mapped per-actor (e.g., `admin.routes.js`, `user.routes.js`, `public.routes.js`).
+- **`routes/`**: Main gateway routing hub. 
+  - `index.js`: Dynamically autoloads all module-level routing definitions.
+  - `[actor]/[actor].routes.js`: Maps actor-level global middlewares (e.g. `userAuth`) and attaches the module sub-routers.
 
 **How to add a new backend feature:**
 1. Create a new folder in `server/modules/[new-feature]`.
-2. Define your logic in `controller.js`.
-3. Define validation in `validator.js`.
-4. Register the routes in `server/routes/`.
+2. Define your logic in `controller.js` and input validation in `validator.js`.
+3. Create a `routes/` directory inside your new module containing `user.routes.js`, `admin.routes.js`, or `public.routes.js` as needed.
+4. Mount the sub-router inside the centralized actor hub under `server/routes/[actor]/[actor].routes.js` or let `index.js` auto-load it if it is a public vertical slice.
+
 
 ---
 
@@ -71,7 +73,7 @@ router.post("/", validate(exampleSchema), controller.handler);
 ---
 
 ## 🛠 Tech Stack
-- **Database**: MongoDB (Mongoose)
+- **Database**: PostgreSQL (Prisma ORM)
 - **Backend**: Node.js, Express
 - **Frontend**: React, Redux Toolkit, Tailwind CSS
 - **Tools**: Axios (API), Zod (Validation), Lucide (Icons)
@@ -88,8 +90,8 @@ We use GitHub Actions for automated testing and builds. The configuration is loc
 
 ## 🚦 Getting Started
 1. Clone the repo.
-2. Run `npm install` in the root (for dev tools) and in `server/` and `client/user/`.
+2. Run `pnpm install` in the root workspace.
 3. Set up your `.env` in `server/`.
-4. Run `npm run dev` in both `server/` and `client/user/`.
+4. Run `pnpm dev` in the root workspace to boot all services concurrently.
 
 Happy coding! 🚀

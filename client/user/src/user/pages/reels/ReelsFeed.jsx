@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useGetReelsFeedQuery, reelsApi } from '@redux/api/reelsApi';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import ReelItem from '@components/common/ReelItem';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { ChevronLeft, Camera } from 'lucide-react';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useNavigate, useParams } from 'react-router-dom';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSocket } from '@context/SocketContext';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useDispatch, useSelector } from 'react-redux';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
 const ReelsFeed = () => {
   const navigate = useNavigate();
@@ -31,7 +38,7 @@ const ReelsFeed = () => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('reel_liked', ({ reelId, likes }) => {
+    socket.on(SOCKET.REEL_LIKED, ({ reelId, likes }) => {
       dispatch(
         reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
           const reel = draft.reels.find((r) => r._id === reelId);
@@ -42,7 +49,7 @@ const ReelsFeed = () => {
       );
     });
 
-    socket.on('reel_commented', ({ reelId }) => {
+    socket.on(SOCKET.REEL_COMMENTED, ({ reelId }) => {
       dispatch(
         reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
           const reel = draft.reels.find((r) => r._id === reelId);
@@ -53,7 +60,7 @@ const ReelsFeed = () => {
       );
     });
 
-    socket.on('reel_deleted', ({ reelId }) => {
+    socket.on(SOCKET.REEL_DELETED, ({ reelId }) => {
       dispatch(
         reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
           if (!draft || !draft.reels) return;
@@ -62,7 +69,7 @@ const ReelsFeed = () => {
       );
     });
     
-    socket.on('MEDIA_PROCESSING_PROGRESS', ({ mediaId, mediaType, progress, status }) => {
+    socket.on(SOCKET.MEDIA_PROCESSING_PROGRESS, ({ mediaId, mediaType, progress, status }) => {
       if (mediaType === 'reel') {
         dispatch(
           reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
@@ -78,7 +85,7 @@ const ReelsFeed = () => {
       }
     });
 
-    socket.on('MEDIA_PROCESSING_COMPLETE', ({ mediaId, mediaType, hlsUrl, thumbnailUrl }) => {
+    socket.on(SOCKET.MEDIA_PROCESSING_COMPLETE, ({ mediaId, mediaType, hlsUrl, thumbnailUrl }) => {
       if (mediaType === 'reel') {
         dispatch(
           reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
@@ -95,11 +102,11 @@ const ReelsFeed = () => {
     });
 
     return () => {
-      socket.off('reel_liked');
-      socket.off('reel_commented');
-      socket.off('reel_deleted');
-      socket.off('MEDIA_PROCESSING_PROGRESS');
-      socket.off('MEDIA_PROCESSING_COMPLETE');
+      socket.off(SOCKET.REEL_LIKED);
+      socket.off(SOCKET.REEL_COMMENTED);
+      socket.off(SOCKET.REEL_DELETED);
+      socket.off(SOCKET.MEDIA_PROCESSING_PROGRESS);
+      socket.off(SOCKET.MEDIA_PROCESSING_COMPLETE);
     };
   }, [socket, dispatch, cursor, initialId]);
 

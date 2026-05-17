@@ -1,8 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSelector } from "react-redux";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import axiosInstance from "@hooks/useAxiosInstance";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { 
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
   Search, 
   MapPin, 
   Users,
@@ -27,12 +32,19 @@ import {
   AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import toast from "react-hot-toast";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import StoryViewer from "../components/StoryViewer";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import NearbyPlayersMap from "../components/map/NearbyPlayersMap";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSocket } from "../../context/SocketContext";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { haversineMeters } from "../utils/geoUtils";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
 const PRI = "#84CC16";
 const HEADING_STYLE = { fontFamily: '"Outfit", sans-serif' };
@@ -385,7 +397,7 @@ const FindPlayers = () => {
             (now - lastEmitTime.current) > HEARTBEAT_INTERVAL_MS;
 
           if (shouldEmit) {
-            socket.emit("location:update", newLocation);
+            socket.emit(SOCKET.LOCATION_UPDATE, newLocation);
             lastEmittedLocation.current = newLocation;
             lastEmitTime.current = now;
           }
@@ -572,7 +584,7 @@ const FindPlayers = () => {
   useEffect(() => {
     if (!socket || !userLocation || snapState === 'COLLAPSED' || !isLocationSharing) return;
     
-    socket.emit("location:start", {
+    socket.emit(SOCKET.LOCATION_START, {
       lat: userLocation.lat,
       lng: userLocation.lng,
       radiusKm: selectedRadius
@@ -592,10 +604,10 @@ const FindPlayers = () => {
       });
     };
 
-    socket.on("nearby:location:update", handleLocationUpdate);
+    socket.on(SOCKET.NEARBY_LOCATION_UPDATE, handleLocationUpdate);
     
     return () => {
-      socket.off("nearby:location:update", handleLocationUpdate);
+      socket.off(SOCKET.NEARBY_LOCATION_UPDATE, handleLocationUpdate);
     };
   }, [socket]);
 

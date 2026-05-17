@@ -1,0 +1,17 @@
+{
+  "name": "@kridaz/shared-constants",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./socketEvents": "./src/socketEvents.js",
+    "./roles": "./src/roles.js",
+    "./bookingStatus": "./src/bookingStatus.js",
+    "./mediaStatus": "./src/mediaStatus.js",
+    "./validation": "./src/validation.js"
+  },
+  "description": "Shared constants used across Kridaz server and client packages.",
+  "keywords": [],
+  "license": "ISC"
+}

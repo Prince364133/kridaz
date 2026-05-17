@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useState } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
@@ -8,18 +8,15 @@ import { useDispatch } from "react-redux";
 import {login} from "../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 
-const loginSchema = yup.object().shape({
-  email: yup
+const loginSchema = z.object({
+  email: z
     .string()
-    .required("Enter your email")
-    .matches(
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-      "Enter a valid email"
-    ),
-  password: yup
+    .email("Enter a valid email")
+    .min(1, "Enter your email"),
+  password: z
     .string()
-    .required("Enter your password")
     .min(6, "Password must be at least 6 characters long"),
+  otp: z.string().optional()
 });
 
 const useLoginForm = () => {
@@ -37,7 +34,7 @@ const useLoginForm = () => {
     trigger,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(loginSchema),
+    resolver: zodResolver(loginSchema),
   });
 
   const handleRoleRedirect = (role) => {

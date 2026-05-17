@@ -1,42 +1,26 @@
 import express from "express";
-import { 
-  getAllTurfs, 
-  getTurfById, 
-  getTimeSlotByTurfId,
-  getTurfLocations,
-  turfRegister,
-  getTurfByOwner,
-  editTurfById,
-  getTurfDetailsWithSlots,
-  adminGetAllTurfs
-} from "./turf.controller.js";
-import { turfRegisterSchema, turfUpdateSchema } from "./turf.validator.js";
-import { validate } from "../../middleware/validate.middleware.js";
-import upload from "../../middleware/uploads/upload.middleware.js";
-import verifyOwnerToken from "../../middleware/jwt/owner.middleware.js";
-import verifyAdminToken from "../../middleware/jwt/admin.middleware.js";
+import userTurfRouter from "./routes/user.routes.js";
+import ownerTurfRouter from "./routes/owner.routes.js";
+import adminTurfRouter from "./routes/admin.routes.js";
 
-const router = express.Router();
+/**
+ * Turf Domain Router
+ * Mounts actor-specific sub-routers for the Turf module.
+ * 
+ * Routes:
+ * /api/turf/user/...
+ * /api/turf/owner/...
+ * /api/turf/admin/...
+ */
 
-// User routes
-router.get("/user/all", getAllTurfs);
-router.get("/user/locations", getTurfLocations);
-router.get("/user/details/:id", getTurfById);
-router.get("/user/timeSlot", getTimeSlotByTurfId);
+const turfRouter = express.Router();
 
-// Owner routes
-router.post(
-  "/owner/register", 
-  verifyOwnerToken, 
-  upload.array("images", 10), 
-  validate(turfRegisterSchema), 
-  turfRegister
-);
-router.get("/owner/all", verifyOwnerToken, getTurfByOwner);
-router.get("/owner/:id/details", verifyOwnerToken, getTurfDetailsWithSlots);
-router.put("/owner/:id", verifyOwnerToken, validate(turfUpdateSchema), editTurfById);
+// Mount Actor Sub-Routers
+turfRouter.use("/user", userTurfRouter);
+turfRouter.use("/owner", ownerTurfRouter);
+turfRouter.use("/admin", adminTurfRouter);
 
-// Admin routes
-router.get("/admin/all", verifyAdminToken, adminGetAllTurfs);
+// Fallback / Root - Map to user routes
+turfRouter.use("/", userTurfRouter);
 
-export default router;
+export default turfRouter;

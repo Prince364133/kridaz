@@ -1,15 +1,21 @@
 import axios from 'axios';
-import User from '../models/user.model.js';
+import { prisma } from '../config/prisma.js';
+import logger from "../utils/logger.js";
 
 export async function getFacebookPageStats(userId, accountId = null) {
-  const user = await User.findById(userId).select('socialAccounts');
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { socialAccounts: true, facebookPageName: true, facebookPageThumb: true }
+  });
+  
   if (!user || !user.socialAccounts) return null;
   
+  const socialAccounts = user.socialAccounts;
   let account;
   if (accountId) {
-    account = user.socialAccounts.find(acc => acc.platform === 'facebook' && acc.accountId === accountId);
+    account = socialAccounts.find(acc => acc.platform === 'facebook' && acc.accountId === accountId);
   } else {
-    account = user.socialAccounts.find(acc => acc.platform === 'facebook');
+    account = socialAccounts.find(acc => acc.platform === 'facebook');
   }
 
   if (!account?.accessToken || !account?.accountId) {
@@ -32,25 +38,18 @@ export async function getFacebookPageStats(userId, accountId = null) {
       thumbnail: data.picture?.data?.url || null
     };
   } catch (err) {
-    console.warn('[Facebook] Could not fetch live page stats:', err.response?.data || err.message);
+    logger.warn('[Facebook] Could not fetch live page stats:', err.response?.data || err.message);
     
     // Fallback: Use data from socialAccounts array if available
-    try {
-      const user = await User.findById(userId).select('socialAccounts facebookPageName facebookPageThumb');
-      const account = user?.socialAccounts?.find(acc => acc.platform === 'facebook');
-      
-      if (account || user?.facebookPageName) {
-        console.log('[Facebook] Returning cached statistics for user:', userId);
-        return {
-          followers: account?.metadata?.followers_count || 0,
-          likes: account?.metadata?.fan_count || 0,
-          name: account?.accountName || user?.facebookPageName || 'Facebook Page',
-          thumbnail: account?.thumbnail || user?.facebookPageThumb || null,
-          isCached: true
-        };
-      }
-    } catch (fallbackErr) {
-      console.error('[Facebook] Fallback stats retrieval failed:', fallbackErr.message);
+    if (account || user?.facebookPageName) {
+      logger.info('[Facebook] Returning cached statistics for user:', userId);
+      return {
+        followers: account?.metadata?.followers_count || 0,
+        likes: account?.metadata?.fan_count || 0,
+        name: account?.accountName || user?.facebookPageName || 'Facebook Page',
+        thumbnail: account?.thumbnail || user?.facebookPageThumb || null,
+        isCached: true
+      };
     }
     
     return null;
@@ -58,14 +57,19 @@ export async function getFacebookPageStats(userId, accountId = null) {
 }
 
 export async function createFacebookLiveStream(userId, { title, description, accountId = null }) {
-  const user = await User.findById(userId).select('socialAccounts');
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { socialAccounts: true }
+  });
+  
   if (!user || !user.socialAccounts) throw new Error("User not found or social accounts missing");
   
+  const socialAccounts = user.socialAccounts;
   let account;
   if (accountId) {
-    account = user.socialAccounts.find(acc => acc.platform === 'facebook' && acc.accountId === accountId);
+    account = socialAccounts.find(acc => acc.platform === 'facebook' && acc.accountId === accountId);
   } else {
-    account = user.socialAccounts.find(acc => acc.platform === 'facebook');
+    account = socialAccounts.find(acc => acc.platform === 'facebook');
   }
 
   if (!account?.accessToken || !account?.accountId) {
@@ -99,20 +103,25 @@ export async function createFacebookLiveStream(userId, { title, description, acc
       watchUrl: `https://facebook.com/${data.id}`
     };
   } catch (err) {
-    console.error('[Facebook] Stream Create Error:', err.response?.data || err.message);
+    logger.error('[Facebook] Stream Create Error:', err.response?.data || err.message);
     throw new Error(err.response?.data?.error?.message || "Failed to create Facebook Live Stream");
   }
 }
 
 export async function endFacebookLiveStream(userId, liveVideoId, accountId = null) {
-  const user = await User.findById(userId).select('socialAccounts');
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { socialAccounts: true }
+  });
+  
   if (!user || !user.socialAccounts) throw new Error("User not found or social accounts missing");
   
+  const socialAccounts = user.socialAccounts;
   let account;
   if (accountId) {
-    account = user.socialAccounts.find(acc => acc.platform === 'facebook' && acc.accountId === accountId);
+    account = socialAccounts.find(acc => acc.platform === 'facebook' && acc.accountId === accountId);
   } else {
-    account = user.socialAccounts.find(acc => acc.platform === 'facebook');
+    account = socialAccounts.find(acc => acc.platform === 'facebook');
   }
 
   if (!account?.accessToken) throw new Error("Facebook not connected");
@@ -126,7 +135,8 @@ export async function endFacebookLiveStream(userId, liveVideoId, accountId = nul
     });
     return { success: true };
   } catch (err) {
-    console.error('[Facebook] Stream End Error:', err.response?.data || err.message);
+    logger.error('[Facebook] Stream End Error:', err.response?.data || err.message);
     return { success: false, error: err.message };
   }
 }
+

@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { PHONE_REGEX } from "@kridaz/shared-constants/validation";
+import { OWNER_ROLE } from "@kridaz/shared-constants/roles";
 
 export const sendOtpSchema = z.object({
   body: z.object({
@@ -50,7 +52,7 @@ export const ownerRegisterSchema = z.object({
     confirmPassword: z.string().min(1, "Confirm Password is required"),
     otp: z.string().min(6, "OTP must be 6 characters"),
     phoneOtp: z.string().min(6, "WhatsApp OTP must be 6 characters"),
-    role: z.enum(["venu_owners", "owner", "coach", "umpire", "streamer", "scorer"]).optional(),
+    role: z.enum(Object.values(OWNER_ROLE)).optional(),
   }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
@@ -61,7 +63,7 @@ export const ownerRequestSchema = z.object({
   body: z.object({
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Email is invalid"),
-    phone: z.string().regex(/^[0-9]{10}$/, "Phone number must be 10 digits"),
+    phone: z.string().regex(PHONE_REGEX, "Phone number must be 10 digits"),
     role: z.string().optional(),
     businessDetails: z.object({
       address: z.string().optional(),

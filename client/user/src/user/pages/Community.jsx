@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSelector, useDispatch } from "react-redux";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { followUser, unfollowUser } from "@redux/slices/authSlice";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { Link, useNavigate } from "react-router-dom";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import axiosInstance from "@hooks/useAxiosInstance";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { 
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
   Heart, MessageCircle, Share2, Plus, Image as ImageIcon, X, MoreVertical, Send,
   Loader2, Trash2, Clock, User as UserIcon, Trophy, Edit, Edit3, Twitter, Facebook,
   Link as LinkIcon, Eye, ChevronDown, TrendingUp, Target, BarChart3, Users, Zap,
@@ -11,10 +17,15 @@ import {
   Circle, Bookmark, Smile, Search, Play, Video, Home, Bell, PlaySquare
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import toast from "react-hot-toast";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import StoryViewer from "../components/StoryViewer";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import {
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
   communityApi,
   useGetCommunityFeedQuery,
   useGetStoriesFeedQuery,
@@ -33,10 +44,15 @@ import {
   useConfirmStoryUploadMutation
 } from "../../redux/api/communityApi";
 import { useGetReelsFeedQuery } from "../../redux/api/reelsApi";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { startUpload } from "../../redux/slices/mediaUploadSlice";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import ReelItem from "../../components/common/ReelItem";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSocket } from "@context/SocketContext";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { uploadFileToR2 } from "@utils/mediaUpload";
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
 const PRI = "#84CC16";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
@@ -184,20 +200,20 @@ const Community = () => {
       dispatch(communityApi.util.invalidateTags(['Community', 'Stories']));
     };
 
-    socket.on('new_community_post', handleNewPost);
-    socket.on('community_post_liked', handlePostLiked);
-    socket.on('community_post_commented', handlePostCommented);
-    socket.on('community_post_deleted', handlePostDeleted);
-    socket.on('MEDIA_PROCESSING_PROGRESS', handleMediaProgress);
-    socket.on('MEDIA_PROCESSING_COMPLETE', handleMediaComplete);
+    socket.on(SOCKET.NEW_COMMUNITY_POST, handleNewPost);
+    socket.on(SOCKET.COMMUNITY_POST_LIKED, handlePostLiked);
+    socket.on(SOCKET.COMMUNITY_POST_COMMENTED, handlePostCommented);
+    socket.on(SOCKET.COMMUNITY_POST_DELETED, handlePostDeleted);
+    socket.on(SOCKET.MEDIA_PROCESSING_PROGRESS, handleMediaProgress);
+    socket.on(SOCKET.MEDIA_PROCESSING_COMPLETE, handleMediaComplete);
 
     return () => {
-      socket.off('new_community_post', handleNewPost);
-      socket.off('community_post_liked', handlePostLiked);
-      socket.off('community_post_commented', handlePostCommented);
-      socket.off('community_post_deleted', handlePostDeleted);
-      socket.off('MEDIA_PROCESSING_PROGRESS', handleMediaProgress);
-      socket.off('MEDIA_PROCESSING_COMPLETE', handleMediaComplete);
+      socket.off(SOCKET.NEW_COMMUNITY_POST, handleNewPost);
+      socket.off(SOCKET.COMMUNITY_POST_LIKED, handlePostLiked);
+      socket.off(SOCKET.COMMUNITY_POST_COMMENTED, handlePostCommented);
+      socket.off(SOCKET.COMMUNITY_POST_DELETED, handlePostDeleted);
+      socket.off(SOCKET.MEDIA_PROCESSING_PROGRESS, handleMediaProgress);
+      socket.off(SOCKET.MEDIA_PROCESSING_COMPLETE, handleMediaComplete);
     };
   }, [socket, dispatch]);
 

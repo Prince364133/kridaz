@@ -16,8 +16,11 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { io } from 'socket.io-client';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6001';
 
@@ -57,6 +60,7 @@ const BADGE_CFG = {
 // ─── CSS injected once into the document head ────────────────────────────────
 const GLOBAL_CSS = `
  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
  * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -342,8 +346,8 @@ const LiveOverlay = () => {
  socketRef.current = socket;
 
  const joinRoom = () => {
- socket.emit('joinMatch', matchId);
- if (token) socket.emit('overlayJoin', { matchId, token });
+ socket.emit(SOCKET.JOIN_MATCH, matchId);
+ if (token) socket.emit(SOCKET.OVERLAY_JOIN, { matchId, token });
  };
 
  socket.on('connect', () => {
@@ -355,7 +359,7 @@ const LiveOverlay = () => {
  socket.on('reconnect', () => { setConnected(true); joinRoom(); fetchScore(); });
 
  // Primary score update ────────────────────────────────────────────────────
- socket.on('scoreUpdated', (data) => {
+ socket.on(SOCKET.SCORE_UPDATED, (data) => {
  setScore(data);
  // Derive badge from lastBallRaw if no explicit ballEvent follows
  const lb = data?.lastBallRaw;
@@ -369,11 +373,11 @@ const LiveOverlay = () => {
  });
 
  // Explicit ball event (emitted separately by controller)
- socket.on('ballEvent', (ev) => {
+ socket.on(SOCKET.BALL_EVENT, (ev) => {
  if (ev.type) showBadge(ev.type, ev);
  });
 
- socket.on('matchEnded', () => {
+ socket.on(SOCKET.MATCH_ENDED, () => {
  setScore(prev => prev ? { ...prev, _ended: true } : prev);
  });
 

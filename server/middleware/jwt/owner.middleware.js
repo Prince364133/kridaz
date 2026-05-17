@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
-import User from "../../models/user.model.js";
+import { prisma } from "../../config/prisma.js";
+import logger from "../../utils/logger.js";
 
 const verifyOwnerToken = async (req, res, next) => {
   try {
@@ -28,19 +29,22 @@ const verifyOwnerToken = async (req, res, next) => {
     }
 
     // Support both {id, role} and {user: {role}} or similar structures
-    let role = decoded.role?.toLowerCase() || "";
-    let isAllowed = ["venu_owners", "coach", "umpire", "admin", "streamer", "scorer"].some(r => role.includes(r));
+    let role = decoded.role?.toUpperCase() || "";
+    const allowedRoles = ["VENUE_OWNER", "OWNER", "COACH", "UMPIRE", "ADMIN", "STREAMER", "SCORER"];
+    let isAllowed = allowedRoles.includes(role);
 
     // Fallback: If role in token is not allowed, check the database for the current role
     // This handles cases where the user's role was upgraded but their token is stale.
     if (!isAllowed && decoded.id) {
-        console.log(`DEBUG: Token role '${role}' for user ${decoded.id} not allowed. Checking database...`);
-        const dbUser = await User.findById(decoded.id).select("role");
+        logger.info(`DEBUG: Token role '${role}' for user ${decoded.id} not allowed. Checking database...`);
+        const dbUser = await prisma.user.findUnique({
+          where: { id: decoded.id },
+          select: { role: true }
+        });
         if (dbUser && dbUser.role) {
-            const dbRole = dbUser.role.toLowerCase();
-            const isDbAllowed = ["venu_owners", "coach", "umpire", "admin", "streamer", "scorer"].some(r => dbRole.includes(r));
-            if (isDbAllowed) {
-                console.log(`DEBUG: Found valid partner role '${dbRole}' in database. Allowing access.`);
+            const dbRole = dbUser.role.toUpperCase();
+            if (allowedRoles.includes(dbRole)) {
+                logger.info(`DEBUG: Found valid partner role '${dbRole}' in database. Allowing access.`);
                 role = dbRole;
                 isAllowed = true;
             }
@@ -48,7 +52,7 @@ const verifyOwnerToken = async (req, res, next) => {
     }
 
     if (!isAllowed) {
-        console.warn(`DEBUG: Unauthorized role access attempt. Role in token: '${role}', User ID: ${decoded.id}`);
+        logger.warn(`DEBUG: Unauthorized role access attempt. Role in token: '${role}', User ID: ${decoded.id}`);
         return res.status(403).json({ success: false, message: "Unauthorized role" });
     }
 
@@ -57,7 +61,7 @@ const verifyOwnerToken = async (req, res, next) => {
       id: decoded.id,
       userId: decoded.id, // Alias for clarity
       ownerId: decoded.ownerId,
-      role: role
+      role: role.toLowerCase() // Keep it lowercase for downstream compatibility if expected
     };
 
     req.owner = normalizedUser;
@@ -65,8 +69,11 @@ const verifyOwnerToken = async (req, res, next) => {
     
     next();
   } catch (err) {
-    console.error("Partner Middleware Error:", err.message);
-    return res.status(401).json({ success: false, message: "Unauthorized: " + err.message });
+    logger.error("Partner Middleware Error", err);
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ success: false, message: "TOKEN_EXPIRED" });
+    }
+    return res.status(403).json({ success: false, message: "Unauthorized: Session invalid" });
   }
 };
 

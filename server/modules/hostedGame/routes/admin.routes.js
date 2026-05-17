@@ -1,0 +1,74 @@
+import express from "express";
+import { 
+  getAllHostedGames,
+  deleteHostedGame,
+  batchDeleteGames,
+  batchUpdateGameStatus
+} from "../../admin/admin.controller.js";
+
+const router = express.Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: Admin GameManagement
+ *   description: Admin management for hosted matches and games
+ */
+
+/**
+ * @swagger
+ * /hosted-game/admin/list:
+ *   get:
+ *     summary: List all hosted games
+ *     tags: [Admin GameManagement]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of games
+ */
+router.get("/list", getAllHostedGames);
+
+/**
+ * @swagger
+ * /hosted-game/admin/{id}:
+ *   delete:
+ *     summary: Delete a hosted game
+ *     tags: [Admin GameManagement]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Game deleted
+ */
+router.delete("/:id", deleteHostedGame);
+
+/**
+ * @swagger
+ * /hosted-game/admin/batch-delete:
+ *   post:
+ *     summary: Batch delete games
+ *     tags: [Admin GameManagement]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Games deleted
+ */
+router.post("/batch-delete", batchDeleteGames);
+
+/**
+ * @swagger
+ * /hosted-game/admin/batch-status:
+ *   put:
+ *     summary: Batch update game status
+ *     tags: [Admin GameManagement]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
+router.put("/batch-status", batchUpdateGameStatus);
+
+export default router;

@@ -1,40 +1,63 @@
+/**
+ * @module RootRouter
+ * @description The central API routing hub for the Kridaz server.
+ *
+ * ARCHITECTURE — Two-tier routing:
+ *
+ * TIER 1 — Actor Hub Routers (this file):
+ *   These are complex, auth-layered routers that serve a specific user persona
+ *   (User, Owner, Admin). They contain nested sub-routes and persona-specific
+ *   middleware. They are explicitly imported and maintained here.
+ *
+ * TIER 2 — Domain Module Routers (autoloaded from modules/loader.js):
+ *   Self-contained domain modules (Booking, Team, Reels, etc.) that own their
+ *   own routing, middleware, and documentation. Adding a new domain module
+ *   ONLY requires an entry in modules/loader.js — nothing else changes here.
+ *
+ * UTILITY ROUTES (this file):
+ *   Small, shared, public routes (features, location, uploads) that don't
+ *   warrant their own module but are referenced by multiple actors.
+ */
+
 import { Router } from "express";
+import { createDomainRouter } from "../modules/loader.js";
+
+// ── Tier 1: Actor Hub Routers ─────────────────────────────────────────────────
+// These handle persona-specific flows (auth, profile, actor-specific resources).
+// They deliberately have nested sub-routes to enforce actor isolation.
 import userRouter from "./user/user.routes.js";
 import ownerRouter from "./owner/owner.routes.js";
 import adminRouter from "./admin/admin.routes.js";
-import featureRouter from "./feature.routes.js";
-import uploadRouter from "./upload.routes.js";
-import hostedGameRouter from "../modules/hostedGame/hostedGame.routes.js";
-import professionalRouter from "../modules/professional/professional.routes.js";
-import chatRouter from "../modules/chat/chat.routes.js";
-import scoringRouter from "../modules/scoring/scoring.routes.js";
-import scorerRouter from "../modules/scoring/scorer.routes.js";
-import youtubeRouter from "../modules/youtube/youtube.routes.js";
-import facebookRouter from "../modules/facebook/facebook.routes.js";
-import teamRouter from "../modules/team/team.routes.js";
-import locationRouter from "./location.routes.js";
-import storyRouter from "../modules/story/story.routes.js";
-import reelsRouter from "../modules/reels/reels.routes.js";
-import paymentRouter from "../modules/payment/payment.routes.js";
+
+// ── Utility Routes ────────────────────────────────────────────────────────────
+// Public or cross-actor utilities. Not large enough for their own module.
+import featurePublicRouter from "../modules/feature/routes/public.routes.js";
+import marketingPublicRouter from "../modules/marketing/routes/public.routes.js";
+import blogPublicRouter from "../modules/blog/routes/public.routes.js";
+
+const featureRouter = Router();
+featureRouter.use("/", featurePublicRouter);
+featureRouter.use("/marketing", marketingPublicRouter);
+featureRouter.use("/blogs", blogPublicRouter);
+import uploadRouter from "../modules/upload/routes/public.routes.js";
+import locationRouter from "../modules/turf/routes/public.routes.js";
 
 const rootRouter = Router();
 
-rootRouter.use("/payment", paymentRouter);
-rootRouter.use("/team", teamRouter);
-rootRouter.use("/features", featureRouter);
-rootRouter.use("/location", locationRouter);
+// ── Tier 2: Domain Modules (auto-discovered) ──────────────────────────────────
+// Scans modules/loader.js MODULE_MANIFEST and mounts each domain router.
+// To add a new domain: add an entry to MODULE_MANIFEST. Done.
+const domainRouter = await createDomainRouter();
+rootRouter.use("/", domainRouter);
+
+// ── Tier 1: Actor Hubs ────────────────────────────────────────────────────────
 rootRouter.use("/user", userRouter);
 rootRouter.use("/owner", ownerRouter);
 rootRouter.use("/admin", adminRouter);
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+rootRouter.use("/features", featureRouter);
 rootRouter.use("/upload", uploadRouter);
-rootRouter.use("/hosted-game", hostedGameRouter);
-rootRouter.use("/professional", professionalRouter);
-rootRouter.use("/chat", chatRouter);
-rootRouter.use("/scoring", scoringRouter);
-rootRouter.use("/scorer", scorerRouter);
-rootRouter.use("/youtube", youtubeRouter);
-rootRouter.use("/facebook", facebookRouter);
-rootRouter.use("/story", storyRouter);
-rootRouter.use("/reels", reelsRouter);
+rootRouter.use("/location", locationRouter);
 
 export default rootRouter;

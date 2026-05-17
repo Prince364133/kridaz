@@ -1,0 +1,85 @@
+import client from "prom-client";
+import logger from "./logger.js";
+
+// Create a Registry which registers the metrics
+const register = new client.Registry();
+
+// Add a default label which is added to all metrics
+register.setDefaultLabels({
+  app: "kridaz-api",
+});
+
+// Enable the collection of default metrics
+client.collectDefaultMetrics({ register });
+
+// ── HTTP Metrics ─────────────────────────────────────────────────────────────
+export const httpRequestDurationMicroseconds = new client.Histogram({
+  name: "http_request_duration_seconds",
+  help: "Duration of HTTP requests in seconds",
+  labelNames: ["method", "route", "status_code"],
+  buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10], // seconds
+});
+register.registerMetric(httpRequestDurationMicroseconds);
+
+// ── Socket Metrics ───────────────────────────────────────────────────────────
+export const activeSocketConnections = new client.Gauge({
+  name: "active_socket_connections_total",
+  help: "Total number of active socket.io connections",
+});
+register.registerMetric(activeSocketConnections);
+
+// ── Database Metrics ─────────────────────────────────────────────────────────
+export const dbOperationDurationSeconds = new client.Histogram({
+  name: "db_operation_duration_seconds",
+  help: "Duration of database operations in seconds",
+  labelNames: ["operation", "model"],
+  buckets: [0.01, 0.05, 0.1, 0.5, 1],
+});
+register.registerMetric(dbOperationDurationSeconds);
+
+// ── Queue Metrics ────────────────────────────────────────────────────────────
+export const queueDepth = new client.Gauge({
+  name: "queue_depth_total",
+  help: "Number of jobs in BullMQ queues",
+  labelNames: ["queue_name", "status"],
+});
+register.registerMetric(queueDepth);
+
+// ── Business Metrics (KPIs) ──────────────────────────────────────────────────
+export const bookingCreatedTotal = new client.Counter({
+  name: "booking_created_total",
+  help: "Total number of bookings created",
+});
+register.registerMetric(bookingCreatedTotal);
+
+export const paymentTotal = new client.Counter({
+  name: "payment_total",
+  help: "Total number of payments processed",
+  labelNames: ["status"], // success, failed
+});
+register.registerMetric(paymentTotal);
+
+// ── Polling for Queue Depths ────────────────────────────────────────────────
+const queues = {};
+
+export const trackQueue = (name, queueInstance) => {
+  queues[name] = queueInstance;
+};
+
+// Poller to update queue metrics every 30 seconds
+setInterval(async () => {
+  for (const [name, queue] of Object.entries(queues)) {
+    try {
+      const counts = await queue.getJobCounts();
+      queueDepth.set({ queue_name: name, status: "active" }, counts.active);
+      queueDepth.set({ queue_name: name, status: "waiting" }, counts.waiting);
+      queueDepth.set({ queue_name: name, status: "delayed" }, counts.delayed);
+      queueDepth.set({ queue_name: name, status: "failed" }, counts.failed);
+    } catch (error) {
+      logger.error(`[METRICS] Error fetching counts for queue ${name}:`, error);
+    }
+  }
+}, 30000);
+
+export { register };
+export default client;

@@ -86,3 +86,4 @@ scripts/fixProfessionalOwnerRecords.js
 # (check-username, umpire-invite-details) have been migrated there.
 # This file is imported nowhere and must not be re-introduced.
 modules/auth/auth.routes.js
+/generated/prisma

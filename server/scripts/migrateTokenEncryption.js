@@ -1,5 +1,6 @@
 import { prisma } from '../config/prisma.js';
 import { isEncrypted } from '../utils/encryption.js';
+import logger from "../utils/logger.js";
 
 /**
  * Migration script to encrypt existing plaintext OAuth tokens in the database.
@@ -9,7 +10,7 @@ import { isEncrypted } from '../utils/encryption.js';
  * the encryption hook.
  */
 async function migrate() {
-  console.log('🚀 Starting OAuth token migration...');
+  logger.info('🚀 Starting OAuth token migration...');
   
   try {
     const users = await prisma.user.findMany({
@@ -23,7 +24,7 @@ async function migrate() {
       }
     });
 
-    console.log(`📊 Found ${users.length} users to check.`);
+    logger.info(`📊 Found ${users.length} users to check.`);
 
     let updatedCount = 0;
     let skipCount = 0;
@@ -59,20 +60,20 @@ async function migrate() {
         });
         updatedCount++;
         if (updatedCount % 10 === 0) {
-          console.log(`✅ Processed ${updatedCount} users...`);
+          logger.info(`✅ Processed ${updatedCount} users...`);
         }
       } catch (err) {
-        console.error(`❌ Failed to update user ${user.id} (${user.email}):`, err.message);
+        logger.error(`❌ Failed to update user ${user.id} (${user.email}):`, err.message);
       }
     }
 
-    console.log('\n✨ Migration Complete!');
-    console.log(`✅ Users Updated: ${updatedCount}`);
-    console.log(`⏭️  Users Skipped: ${skipCount}`);
-    console.log(`Total Checked: ${users.length}`);
+    logger.info('\n✨ Migration Complete!');
+    logger.info(`✅ Users Updated: ${updatedCount}`);
+    logger.info(`⏭️  Users Skipped: ${skipCount}`);
+    logger.info(`Total Checked: ${users.length}`);
 
   } catch (error) {
-    console.error('💥 Migration failed:', error);
+    logger.error('💥 Migration failed:', error);
   } finally {
     process.exit(0);
   }

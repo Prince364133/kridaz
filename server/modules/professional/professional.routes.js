@@ -1,32 +1,22 @@
-import express from "express";
-import { 
-  getAllProfessionals, 
-  getProfessionalFilters,
-  getProfessionalById, 
-  bookProfessional, 
-  updateAvailability, 
-  getMyBookings, 
-  handleBookingRequest, 
-  addProfessionalReview, 
-  replyToReview,
-  updateProfessionalProfile
-} from "./professional.controller.js";
-import protect from "../../middleware/jwt/auth.middleware.js";
+import { Router } from "express";
+import userProfessionalRouter from "./routes/user.routes.js";
+import adminProfessionalRouter from "./routes/admin.routes.js";
 
-const router = express.Router();
+/**
+ * Professional Domain Router
+ * Mounts actor-specific sub-routers for the Professional module (umpires, scorers, streamers, coaches).
+ * 
+ * Routes:
+ * /api/professional/...
+ */
 
-// User Routes
-router.get("/list", getAllProfessionals);
-router.get("/filters", getProfessionalFilters);
-router.get("/details/:id", getProfessionalById);
-router.post("/book", protect, bookProfessional);
-router.post("/review", protect, addProfessionalReview);
+const professionalRouter = Router();
 
-// Professional (Owner) Routes
-router.put("/availability", protect, updateAvailability);
-router.get("/my-bookings", protect, getMyBookings);
-router.post("/handle-request", protect, handleBookingRequest);
-router.post("/review/reply", protect, replyToReview);
-router.put("/update-profile", protect, updateProfessionalProfile);
+// Mount Actor Sub-Routers
+professionalRouter.use("/user", userProfessionalRouter);
+professionalRouter.use("/admin", adminProfessionalRouter);
 
-export default router;
+// Fallback / Root - Map to user routes
+professionalRouter.use("/", userProfessionalRouter);
+
+export default professionalRouter;

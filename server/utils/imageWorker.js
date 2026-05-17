@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import { uploadToR2 } from './r2.js';
+import logger from './logger.js';
 
 /**
  * Generates a tiny base64 placeholder for an image
@@ -25,7 +26,7 @@ export const generatePlaceholder = async (sourceUrlOrBuffer) => {
 
     return `data:image/webp;base64,${placeholder.toString('base64')}`;
   } catch (error) {
-    console.error('[IMAGE_WORKER] Placeholder failed:', error.message);
+    logger.error('[IMAGE_WORKER] Placeholder failed', error);
     return null;
   }
 };

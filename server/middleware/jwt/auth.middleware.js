@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import * as Sentry from "@sentry/node";
 
 const verifyAuth = async (req, res, next) => {
   try {
@@ -23,7 +24,7 @@ const verifyAuth = async (req, res, next) => {
     const role = decoded.role?.toLowerCase() || "";
     
     // Check if it's a partner/business role
-    const isBusinessRole = ["admin", "venu_owners", "coach", "umpire", "streamer", "scorer"].some(r => role.includes(r));
+    const isBusinessRole = ["admin", "venue_owner", "coach", "umpire", "streamer", "scorer"].some(r => role.includes(r));
     
 
 
@@ -43,9 +44,18 @@ const verifyAuth = async (req, res, next) => {
       req.owner = normalizedUser;
     }
 
+    // Set Sentry user context
+    Sentry.setUser({
+      id: normalizedUser.id,
+      role: normalizedUser.role,
+    });
+
     next();
   } catch (err) {
-    return res.status(401).json({ message: "Unauthorized: Session expired or invalid" });
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ success: false, message: "TOKEN_EXPIRED" });
+    }
+    return res.status(401).json({ success: false, message: "Unauthorized: Session expired or invalid" });
   }
 };
 

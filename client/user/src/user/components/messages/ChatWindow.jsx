@@ -1,11 +1,19 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useGetMessagesQuery, useSendMessageMutation, useMarkMessagesReadMutation, useRemoveFromGroupMutation, useDeleteMessagesMutation, useCreateGroupChatMutation, useDeleteChatMutation, useGetChatsQuery } from '../../../redux/api/chatApi';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSocket } from '../../../context/SocketContext';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSelector } from 'react-redux';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useNavigate } from 'react-router-dom';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import GroupInfoModal from './GroupInfoModal';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { Plus, Users, MessageSquare, ChevronLeft, Search, MoreVertical, Send, CheckCheck, Trash2, Globe } from 'lucide-react';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import AddGroupToCommunityModal from './AddGroupToCommunityModal';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
 const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  const { user } = useSelector((state) => state.auth);
@@ -67,7 +75,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  if (hasUnread) {
  const myIdToSend = user?._id || user?.id;
- socket.emit('messages read', { chatId: chat._id, userId: myIdToSend });
+ socket.emit(SOCKET.MESSAGES_READ, { chatId: chat._id, userId: myIdToSend });
  markMessagesReadMutation(chat._id).catch(console.error);
  }
  }
@@ -75,13 +83,13 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  useEffect(() => {
  if (socket && chat) {
- socket.emit('join chat', chat._id);
+ socket.emit(SOCKET.JOIN_CHAT, chat._id);
 
  const handleNewMessage = (newMessage) => {
  if (chat._id === (newMessage.chat?._id || newMessage.chat)) {
  setMessages((prev) => [...prev, newMessage]);
  // Mark as read immediately since chat is open
- socket.emit('messages read', { chatId: chat._id, userId: user?._id || user?.id });
+ socket.emit(SOCKET.MESSAGES_READ, { chatId: chat._id, userId: user?._id || user?.id });
  }
  };
 
@@ -107,16 +115,16 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  }
  };
 
- socket.on('message recieved', handleNewMessage);
- socket.on('typing', handleTyping);
- socket.on('stop typing', handleStopTyping);
- socket.on('messages read', handleMessagesRead);
+ socket.on(SOCKET.MESSAGE_RECEIVED, handleNewMessage);
+ socket.on(SOCKET.TYPING, handleTyping);
+ socket.on(SOCKET.STOP_TYPING, handleStopTyping);
+ socket.on(SOCKET.MESSAGES_READ, handleMessagesRead);
 
  return () => {
- socket.off('message recieved', handleNewMessage);
- socket.off('typing', handleTyping);
- socket.off('stop typing', handleStopTyping);
- socket.off('messages read', handleMessagesRead);
+ socket.off(SOCKET.MESSAGE_RECEIVED, handleNewMessage);
+ socket.off(SOCKET.TYPING, handleTyping);
+ socket.off(SOCKET.STOP_TYPING, handleStopTyping);
+ socket.off(SOCKET.MESSAGES_READ, handleMessagesRead);
  };
  }
  }, [socket, chat]);
@@ -129,7 +137,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  e.preventDefault();
  if (!message.trim()) return;
 
- socket.emit('stop typing', chat._id);
+ socket.emit(SOCKET.STOP_TYPING, chat._id);
  setIsTyping(false);
  if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
@@ -139,7 +147,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  content: message
  }).unwrap();
 
- socket.emit('new message', data);
+ socket.emit(SOCKET.NEW_MESSAGE, data);
  setMessages((prev) => [...prev, data]);
  setMessage('');
  } catch (err) {
@@ -154,13 +162,13 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  if (!isTyping) {
  setIsTyping(true);
- socket.emit('typing', chat._id);
+ socket.emit(SOCKET.TYPING, chat._id);
  }
 
  if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
  typingTimeoutRef.current = setTimeout(() => {
- socket.emit('stop typing', chat._id);
+ socket.emit(SOCKET.STOP_TYPING, chat._id);
  setIsTyping(false);
  }, 3000);
  };

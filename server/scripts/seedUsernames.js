@@ -1,36 +1,45 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import User from '../models/user.model.js';
+import { prisma } from "../config/prisma.js";
+import dotenv from "dotenv";
+import logger from "../utils/logger.js";
 
-dotenv.config({ path: 'server/.env' });
+dotenv.config();
 
 const seedUsernames = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('Connected to MongoDB');
+    logger.info("Seeding usernames with Prisma...");
 
-    const users = await User.find({ username: { $exists: false } });
-    console.log(`Found ${users.length} users without usernames`);
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          { username: null },
+          { username: "" }
+        ]
+      }
+    });
+    logger.info(`Found ${users.length} users without usernames`);
 
     for (const user of users) {
-      let baseUsername = (user.name || 'player').toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+      let baseUsername = (user.name || "player").toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
       let username = baseUsername;
       let counter = 1;
 
       // Ensure uniqueness
-      while (await User.findOne({ username })) {
+      while (await prisma.user.findUnique({ where: { username } })) {
         username = `${baseUsername}${counter}`;
         counter++;
       }
 
-      await User.findOneAndUpdate({ _id: user._id }, { $set: { username } });
-      console.log(`Assigned username @${username} to user ${user.name}`);
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { username }
+      });
+      logger.info(`Assigned username @${username} to user ${user.name}`);
     }
 
-    console.log('Seeding completed successfully');
+    logger.info("Seeding completed successfully");
     process.exit(0);
   } catch (error) {
-    console.error('Seeding failed:', error);
+    logger.error("Seeding failed:", error);
     process.exit(1);
   }
 };

@@ -1,12 +1,21 @@
 import { useForm } from "react-hook-form";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { yupResolver } from "@hookform/resolvers/yup";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import * as yup from "yup";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { useState } from "react";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import axiosInstance from "@hooks/useAxiosInstance";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import toast from "react-hot-toast";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { useDispatch } from "react-redux";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { useNavigate } from "react-router-dom";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { login } from "@redux/slices/authSlice";
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 
 const registerSchema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -20,7 +29,7 @@ const registerSchema = yup.object().shape({
   phone: yup
     .string()
     .required("Enter your phone number")
-    .matches(/^[0-9]{10}$/, "Enter a valid 10-digit phone number")
+    .matches(PHONE_REGEX, "Enter a valid 10-digit phone number")
     .min(10, "Phone number must be at least 10 digits long")
     .max(10, "Phone number must be at most 10 digits long"),
   password: yup

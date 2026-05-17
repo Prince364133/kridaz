@@ -1,6 +1,6 @@
 import axios from "axios";
 import { store } from "../redux/store";
-import { logout } from "../redux/slices/authSlice";
+import { logout, restoreAuth } from "../redux/slices/authSlice";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "",
@@ -23,10 +23,31 @@ axiosInstance.interceptors.request.use((config) => {
 // Response interceptor: dispatch logout on expired/invalid token, but ignore /getMe failures for guests
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      const isAuthCheck = error.config?.url?.includes('/api/user/auth/getMe');
-      
+  async (error) => {
+    const originalRequest = error.config;
+    const isAuthCheck = originalRequest?.url?.includes('/api/user/auth/getMe');
+
+    if (
+      error.response?.status === 401 && 
+      error.response?.data?.message === "TOKEN_EXPIRED" &&
+      !originalRequest._retry && 
+      !isAuthCheck
+    ) {
+      originalRequest._retry = true;
+      try {
+        const refreshUrl = `${import.meta.env.VITE_API_URL || ""}/api/user/auth/refresh`;
+        const { data } = await axios.post(refreshUrl, {}, { withCredentials: true });
+        
+        if (data.token) {
+          store.dispatch(restoreAuth({ token: data.token }));
+          originalRequest.headers.Authorization = `Bearer ${data.token}`;
+          return axiosInstance(originalRequest);
+        }
+      } catch (refreshError) {
+        store.dispatch(logout());
+        return Promise.reject(refreshError);
+      }
+    } else if (error.response?.status === 401 || error.response?.status === 403) {
       if (!isAuthCheck) {
         store.dispatch(logout());
       }

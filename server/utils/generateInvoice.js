@@ -45,9 +45,9 @@ export const generateInvoice = async (booking, user, turf) => {
 
       doc
         .fontSize(10)
-        .text(`Invoice Number: TS-${booking._id.toString().slice(-6).toUpperCase()}`, 50, 160)
+        .text(`Invoice Number: TS-${booking.id.toString().slice(-6).toUpperCase()}`, 50, 160)
         .text(`Invoice Date: ${format(new Date(), "dd MMMM yyyy")}`, 50, 175)
-        .text(`Booking ID: ${booking._id}`, 50, 190)
+        .text(`Booking ID: ${booking.id}`, 50, 190)
         .moveDown();
 
       // --- Customer & Merchant Details ---

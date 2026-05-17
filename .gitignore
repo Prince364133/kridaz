@@ -10,8 +10,18 @@ build/
 # ── Debug / scratch / generated files ───────────────────────────────
 # Root-level scratch folder (dev-only debug scripts)
 scratch/
+server/scratch/
+
+# Sensitive Seed Scripts
+server/scripts/seed_admin_credentials.js
+server/scripts/seed_all_data.js
+
 # Common generated/temp file types
 *.pdf
 *.txt.bak
 test_output*
 server/uploads/
+logs/
+.docusaurus/
+docs/.docusaurus/
+

@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useGetChatsQuery, useRespondToInvitationMutation, useTogglePinChatMutation, useDeleteChatMutation, useRemoveFromGroupMutation } from '../../../redux/api/chatApi';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSelector } from 'react-redux';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSocket } from '../../../context/SocketContext';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { 
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
   MessageSquare, 
   Plus, 
   Users, 
@@ -19,6 +24,7 @@ import {
   Trash2
 } from 'lucide-react';
 import ConfirmModal from '../modals/ConfirmModal';
+import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
 const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateCommunity, onEditProfile, onChatDeleted }) => {
   const { user } = useSelector((state) => state.auth);
@@ -106,20 +112,20 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
       refetch();
     };
 
-    socket.on('message recieved', handleNewMessage);
-    socket.on('typing', handleTyping);
-    socket.on('stop typing', handleStopTyping);
-    socket.on('chat updated', handleChatUpdated);
-    socket.on('chat deleted', handleChatDeleted);
-    socket.on('user profile updated', handleProfileUpdated);
+    socket.on(SOCKET.MESSAGE_RECEIVED, handleNewMessage);
+    socket.on(SOCKET.TYPING, handleTyping);
+    socket.on(SOCKET.STOP_TYPING, handleStopTyping);
+    socket.on(SOCKET.CHAT_UPDATED, handleChatUpdated);
+    socket.on(SOCKET.CHAT_DELETED, handleChatDeleted);
+    socket.on(SOCKET.USER_PROFILE_UPDATED, handleProfileUpdated);
 
     return () => {
-      socket.off('message recieved', handleNewMessage);
-      socket.off('typing', handleTyping);
-      socket.off('stop typing', handleStopTyping);
-      socket.off('chat updated', handleChatUpdated);
-      socket.off('chat deleted', handleChatDeleted);
-      socket.off('user profile updated', handleProfileUpdated);
+      socket.off(SOCKET.MESSAGE_RECEIVED, handleNewMessage);
+      socket.off(SOCKET.TYPING, handleTyping);
+      socket.off(SOCKET.STOP_TYPING, handleStopTyping);
+      socket.off(SOCKET.CHAT_UPDATED, handleChatUpdated);
+      socket.off(SOCKET.CHAT_DELETED, handleChatDeleted);
+      socket.off(SOCKET.USER_PROFILE_UPDATED, handleProfileUpdated);
     };
   }, [socket, selectedChatId, refetch]);
 

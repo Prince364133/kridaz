@@ -1,4 +1,5 @@
 import { redisClient as redis } from '../config/redis.js';
+import logger from "../utils/logger.js";
 
 /**
  * Live State Management Service
@@ -13,7 +14,7 @@ export const liveStateService = {
       const key = `match:${matchId}:score`;
       await redis.set(key, JSON.stringify(scoreData), 'EX', 3600 * 6); // Expire in 6 hours
     } catch (err) {
-      console.error('[REDIS] Error setting live score:', err);
+      logger.error('[REDIS] Error setting live score:', err);
     }
   },
 
@@ -26,7 +27,7 @@ export const liveStateService = {
       const data = await redis.get(key);
       return data ? JSON.parse(data) : null;
     } catch (err) {
-      console.error('[REDIS] Error getting live score:', err);
+      logger.error('[REDIS] Error getting live score:', err);
       return null;
     }
   },
@@ -39,7 +40,7 @@ export const liveStateService = {
       const key = `match:${matchId}:overlay`;
       await redis.set(key, JSON.stringify(config), 'EX', 3600 * 6);
     } catch (err) {
-      console.error('[REDIS] Error setting overlay config:', err);
+      logger.error('[REDIS] Error setting overlay config:', err);
     }
   },
 
@@ -52,7 +53,7 @@ export const liveStateService = {
       const data = await redis.get(key);
       return data ? JSON.parse(data) : { showScoreboard: true, showCommentary: true };
     } catch (err) {
-      console.error('[REDIS] Error getting overlay config:', err);
+      logger.error('[REDIS] Error getting overlay config:', err);
       return { showScoreboard: true, showCommentary: true };
     }
   },
@@ -65,7 +66,7 @@ export const liveStateService = {
       const key = `match:${matchId}:streamStatus`;
       await redis.set(key, status, 'EX', 3600 * 6);
     } catch (err) {
-      console.error('[REDIS] Error setting stream status:', err);
+      logger.error('[REDIS] Error setting stream status:', err);
     }
   },
 
@@ -74,7 +75,7 @@ export const liveStateService = {
       const key = `match:${matchId}:streamStatus`;
       return await redis.get(key) || 'none';
     } catch (err) {
-      console.error('[REDIS] Error getting stream status:', err);
+      logger.error('[REDIS] Error getting stream status:', err);
       return 'none';
     }
   },
@@ -89,7 +90,7 @@ export const liveStateService = {
       await redis.ltrim(key, 0, 49); // Keep latest 50
       await redis.expire(key, 3600 * 6);
     } catch (err) {
-      console.error('[REDIS] Error adding commentary:', err);
+      logger.error('[REDIS] Error adding commentary:', err);
     }
   },
 
@@ -99,7 +100,7 @@ export const liveStateService = {
       const data = await redis.lrange(key, 0, -1);
       return data.map(item => JSON.parse(item));
     } catch (err) {
-      console.error('[REDIS] Error getting commentary:', err);
+      logger.error('[REDIS] Error getting commentary:', err);
       return [];
     }
   }

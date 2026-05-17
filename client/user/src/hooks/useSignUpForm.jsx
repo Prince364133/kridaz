@@ -1,6 +1,59 @@
+import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useState, useEffect } from "react";
+import axiosInstance from "@hooks/useAxiosInstance";
+import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { login } from "../redux/slices/authSlice";
+
+const registerSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .regex(/^[a-z0-9_]+$/, "Username can only contain lowercase letters, numbers, and underscores"),
+  email: z.string().email("Enter a valid email"),
+  phone: z.string().regex(PHONE_REGEX, "Enter a valid 10-digit phone number"),
+  gender: z.string().min(1, "Select your gender").optional(),
+  dob: z.string().min(1, "Date of Birth is required").optional(),
+  address: z.string().min(1, "Address is required").optional(),
+  city: z.string().min(1, "City is required").optional(),
+  state: z.string().min(1, "State is required").optional(),
+  pinCode: z.string().regex(/^[0-9]{6}$/, "Enter a valid 6-digit PIN code").optional(),
+  sportTypes: z.array(z.string()).min(1, "Select at least one sport expertise").optional(),
+  experience: z.string().min(1, "Years of experience is required").optional(),
+  coachingLevel: z.string().min(1, "Coaching level is required").optional(),
+  sessionFee: z.any().optional(),
+  availabilityTimings: z.string().min(1, "Availability timings are required").optional(),
+  availabilityMode: z.string().min(1, "Select availability mode").optional(),
+  preferredLocations: z.string().min(1, "Preferred training locations are required").optional(),
+  bio: z.string().min(20, "Bio should be at least 20 characters").optional(),
+  location: z.string().optional(),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+  confirmPassword: z.string().min(1, "Confirm your password"),
+  otp: z.string().optional(),
+  phoneOtp: z.string().optional(),
+  role: z.string().min(1, "Role is required"),
+  businessDetails: z.object({
+    businessName: z.string().optional(),
+    registrationNumber: z.string().optional(),
+  }).optional(),
+  documents: z.array(
+    z.object({
+      name: z.string().min(1),
+      url: z.string().min(1),
+    })
+  ).optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords must match",
+  path: ["confirmPassword"],
+});port { PHONE_REGEX } from '@kridaz/shared-constants/validation';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
@@ -25,7 +78,7 @@ const registerSchema = yup.object().shape({
   phone: yup
     .string()
     .required("Enter your phone number")
-    .matches(/^[0-9]{10}$/, "Enter a valid 10-digit phone number"),
+    .matches(PHONE_REGEX, "Enter a valid 10-digit phone number"),
   gender: yup.string().required("Select your gender"),
   dob: yup.string().required("Date of Birth is required"),
   address: yup.string().required("Address is required"),
@@ -103,7 +156,7 @@ const useSignUpForm = (predefinedRole = "user") => {
     watch,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(registerSchema),
+    resolver: zodResolver(registerSchema),
     context: { showOtpInput },
     defaultValues: {
       role: predefinedRole,
