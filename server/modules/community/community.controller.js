@@ -3,6 +3,7 @@ import { mediaQueue } from '../../queues/media.queue.js';
 import { getPresignedUploadUrl } from '../../utils/r2.js';
 import { generatePlaceholder } from '../../utils/imageWorker.js';
 import { getIO } from '../../config/socket.js';
+import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -45,7 +46,7 @@ export const getUploadUrl = async (req, res) => {
 export const confirmPost = async (req, res) => {
   try {
     const { postId, key, mediaType, title, content } = req.body;
-    const authorId = req.user.id;
+    const authorId = await resolveUserId(req.user.id);
 
     let placeholder = null;
     const mediaUrl = `${process.env.REELS_CDN_URL}/${key}`;
@@ -77,7 +78,15 @@ export const confirmPost = async (req, res) => {
       });
     }
 
-    res.status(201).json({ success: true, post: { ...post, adminId: post.author } });
+    const formattedPost = {
+      ...post,
+      adminId: post.author,
+      mediaUrl: post.mediaUrls?.[0],
+      image: post.mediaType === 'image' ? post.mediaUrls?.[0] : null,
+      videoUrl: post.mediaType === 'video' ? post.mediaUrls?.[0] : null
+    };
+
+    res.status(201).json({ success: true, post: formattedPost });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -87,24 +96,20 @@ export const confirmPost = async (req, res) => {
 
 export const getCommunityStats = async (req, res) => {
   try {
-    const [totalPosts, totalUsers, totalStories, aggStats] = await Promise.all([
+    const [totalPosts, totalUsers, totalStories] = await Promise.all([
       prisma.post.count(),
-      prisma.user.count({ where: { role: 'user' } }),
-      prisma.story.count({ where: { expiresAt: { gt: new Date() } } }),
-      prisma.post.aggregate({
-        _sum: {
-          // This assumes we might want to store counts eventually, 
-          // but for now we have relations for likes/comments.
-          // Prisma doesn't directly sum array lengths in aggregate.
-        }
-      })
+      prisma.user.count({ where: { role: 'USER' } }),
+      prisma.story.count({ where: { expiresAt: { gt: new Date() } } })
     ]);
 
-    // For likes and comments, we need to count them. 
-    // This is less efficient but correct for now.
-    const likesCount = await prisma.user.count({
-      where: { likedPosts: { some: {} } }
+    const postsWithLikes = await prisma.post.findMany({
+      select: {
+        _count: {
+          select: { likes: true }
+        }
+      }
     });
+    const likesCount = postsWithLikes.reduce((sum, p) => sum + p._count.likes, 0);
     const commentsCount = await prisma.comment.count();
 
     res.status(200).json({
@@ -154,7 +159,13 @@ export const createPost = async (req, res) => {
     });
 
     const io = getIO();
-    const formattedPost = { ...post, adminId: post.author };
+    const formattedPost = { 
+      ...post, 
+      adminId: post.author,
+      mediaUrl: post.mediaUrls?.[0],
+      image: post.mediaType === 'image' ? post.mediaUrls?.[0] : null,
+      videoUrl: post.mediaType === 'video' ? post.mediaUrls?.[0] : null
+    };
     if (io) io.emit(SOCKET.NEW_COMMUNITY_POST, formattedPost);
 
     res.status(201).json({ success: true, post: formattedPost });
@@ -169,12 +180,14 @@ export const getPosts = async (req, res) => {
     const userId = await resolveUserId(rawId);
 
     const posts = await prisma.post.findMany({
-      where: {
-        OR: [
-          { status: 'ready' },
-          userId ? { authorId: userId, status: { in: ['pending', 'processing'] } } : {}
-        ]
-      },
+      where: userId 
+        ? {
+            OR: [
+              { status: 'ready' },
+              { authorId: userId, status: { in: ['pending', 'processing'] } }
+            ]
+          }
+        : { status: 'ready' },
       include: {
         author: { select: { id: true, name: true, profilePicture: true, username: true } },
         _count: {
@@ -197,6 +210,9 @@ export const getPosts = async (req, res) => {
       const postObj = {
         ...post,
         adminId: post.author,
+        mediaUrl: post.mediaUrls?.[0],
+        image: post.mediaType === 'image' ? post.mediaUrls?.[0] : null,
+        videoUrl: post.mediaType === 'video' ? post.mediaUrls?.[0] : null,
         likesCount: post._count.likes,
         totalComments: post._count.comments,
         comments: post.comments.map(c => ({
@@ -213,13 +229,13 @@ export const getPosts = async (req, res) => {
     const authorIds = formattedPosts.map(p => p.adminId?.id).filter(id => id);
     const activeStories = await prisma.story.findMany({
       where: {
-        authorId: { in: authorIds },
+        userId: { in: authorIds },
         expiresAt: { gt: new Date() }
       },
-      select: { authorId: true }
+      select: { userId: true }
     });
 
-    const activeStoryUserIds = new Set(activeStories.map(s => s.authorId));
+    const activeStoryUserIds = new Set(activeStories.map(s => s.userId));
 
     const postsWithStoryStatus = formattedPosts.map(post => {
       if (post.adminId) {
@@ -572,13 +588,22 @@ export const getUserStories = async (req, res) => {
     }
 
     const stories = await prisma.story.findMany({
-      where: { authorId: { in: searchIds } },
+      where: { userId: { in: searchIds } },
       include: {
         viewers: { select: { id: true, name: true, username: true, profilePicture: true } },
-        author: { select: { id: true, name: true, username: true, profilePicture: true } }
+        user: { select: { id: true, name: true, username: true, profilePicture: true } }
       },
       orderBy: { createdAt: 'desc' },
       take: 50
+    });
+
+    const formattedStories = stories.map(s => {
+      const storyObj = {
+        ...s,
+        author: s.user
+      };
+      delete storyObj.user;
+      return storyObj;
     });
 
     // Enforce privacy
@@ -597,12 +622,12 @@ export const getUserStories = async (req, res) => {
       
       if (!relationship) {
         // If not in network, only show active stories
-        const activeStories = stories.filter(s => s.expiresAt > new Date());
+        const activeStories = formattedStories.filter(s => s.expiresAt > new Date());
         return res.status(200).json({ success: true, stories: activeStories });
       }
     }
 
-    res.status(200).json({ success: true, stories });
+    res.status(200).json({ success: true, stories: formattedStories });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

@@ -48,6 +48,29 @@ router.post('/save-page', verifyAuth, controller.savePage);
 
 /**
  * @swagger
+ * /facebook/active-page:
+ *   post:
+ *     summary: Set currently active Facebook page for live streaming
+ *     tags: [SocialStreaming]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [pageId]
+ *             properties:
+ *               pageId: { type: string }
+ *     responses:
+ *       200:
+ *         description: Active Facebook page updated successfully
+ */
+router.post('/active-page', verifyAuth, controller.setActivePage);
+
+/**
+ * @swagger
  * /facebook/account/{accountId}:
  *   delete:
  *     summary: Disconnect Facebook account

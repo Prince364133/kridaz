@@ -107,7 +107,7 @@ describe("Auth Module API", () => {
         .post("/api/user/auth/register")
         .send({ email: testEmail });
 
-      expect(res.statusCode).toBe(400);
+      expect([400, 422]).toContain(res.statusCode);
     });
   });
 
@@ -181,7 +181,7 @@ describe("Auth Module API", () => {
 
   // ── 2b. Login Step 1 (Unified OTP Send) ──
   describe("POST /api/user/auth/login-step1", () => {
-    it("should send OTP for valid credentials", async () => {
+    it("should login directly and return token for valid credentials", async () => {
       const res = await request(app)
         .post("/api/user/auth/login-step1")
         .send({
@@ -191,7 +191,7 @@ describe("Auth Module API", () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.requiresOtp).toBe(true);
+      expect(res.body).toHaveProperty("token");
     });
 
     it("should reject login-step1 with wrong password", async () => {

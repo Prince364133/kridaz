@@ -112,7 +112,7 @@ describe("Booking Module API", () => {
   describe("POST /api/user/booking/create-order", () => {
     it("should reject without auth token", async () => {
       const res = await request(app)
-        .post("/api/user/booking/create-order")
+        .post("/api/booking/user/create-order")
         .send({ totalPrice: 500 });
 
       expect(res.statusCode).toBe(401);
@@ -122,18 +122,18 @@ describe("Booking Module API", () => {
       if (!userToken) return logger.warn("Skipped: no user token");
 
       const res = await request(app)
-        .post("/api/user/booking/create-order")
+        .post("/api/booking/user/create-order")
         .set("Authorization", `Bearer ${userToken}`)
         .send({});
 
-      expect(res.statusCode).toBe(400);
+      expect(res.statusCode).toBe(422);
     });
 
     it("should create a Razorpay order with valid payload", async () => {
       if (!userToken) return logger.warn("Skipped: no user token");
 
       const res = await request(app)
-        .post("/api/user/booking/create-order")
+        .post("/api/booking/user/create-order")
         .set("Authorization", `Bearer ${userToken}`)
         .send({ totalPrice: 500 });
 
@@ -150,10 +150,10 @@ describe("Booking Module API", () => {
   });
 
   // ── 2. Wallet Booking ────────────────────────────────────────────────
-  describe("POST /api/user/booking/book-with-wallet", () => {
+  describe("POST /api/booking/user/book-with-wallet", () => {
     it("should reject without auth token", async () => {
       const res = await request(app)
-        .post("/api/user/booking/book-with-wallet")
+        .post("/api/booking/user/book-with-wallet")
         .send({
           turfId:           "dummy-id",
           startTime:        slotStart(),
@@ -169,18 +169,18 @@ describe("Booking Module API", () => {
       if (!userToken) return logger.warn("Skipped: no user token");
 
       const res = await request(app)
-        .post("/api/user/booking/book-with-wallet")
+        .post("/api/booking/user/book-with-wallet")
         .set("Authorization", `Bearer ${userToken}`)
         .send({ totalPrice: 500 }); // missing startTime, endTime, turfId
 
-      expect(res.statusCode).toBe(400);
+      expect(res.statusCode).toBe(422);
     });
 
     it("should reject booking on non-existent turf", async () => {
       if (!userToken) return logger.warn("Skipped: no user token");
 
       const res = await request(app)
-        .post("/api/user/booking/book-with-wallet")
+        .post("/api/booking/user/book-with-wallet")
         .set("Authorization", `Bearer ${userToken}`)
         .send({
           turfId:           "non-existent-turf-id-00000",
@@ -197,7 +197,7 @@ describe("Booking Module API", () => {
       if (!userToken || !testTurfId) return logger.warn("Skipped: no token or turf");
 
       const res = await request(app)
-        .post("/api/user/booking/book-with-wallet")
+        .post("/api/booking/user/book-with-wallet")
         .set("Authorization", `Bearer ${userToken}`)
         .send({
           turfId:           testTurfId,
@@ -215,9 +215,9 @@ describe("Booking Module API", () => {
   });
 
   // ── 3. Get User Bookings ──────────────────────────────────────────────
-  describe("GET /api/user/booking/get-bookings", () => {
+  describe("GET /api/booking/user/all", () => {
     it("should reject without auth token", async () => {
-      const res = await request(app).get("/api/user/booking/get-bookings");
+      const res = await request(app).get("/api/booking/user/all");
       expect(res.statusCode).toBe(401);
     });
 
@@ -225,7 +225,7 @@ describe("Booking Module API", () => {
       if (!userToken) return logger.warn("Skipped: no user token");
 
       const res = await request(app)
-        .get("/api/user/booking/get-bookings")
+        .get("/api/booking/user/all")
         .set("Authorization", `Bearer ${userToken}`);
 
       if (res.statusCode !== 200) logger.info("[get-bookings]", res.body);
@@ -236,18 +236,18 @@ describe("Booking Module API", () => {
   });
 
   // ── 4. Get Booking By ID ──────────────────────────────────────────────
-  describe("GET /api/user/booking/:id", () => {
+  describe("GET /api/booking/user/:id", () => {
     it("should return 404 for a non-existent booking ID", async () => {
-      const res = await request(app).get("/api/user/booking/nonexistent-booking-id");
+      const res = await request(app).get("/api/booking/user/nonexistent-booking-id");
       expect([404, 400]).toContain(res.statusCode);
     });
   });
 
   // ── 5. Validate Coupon ────────────────────────────────────────────────
-  describe("POST /api/user/booking/validate-coupon", () => {
+  describe("POST /api/booking/user/validate-coupon", () => {
     it("should reject without auth token", async () => {
       const res = await request(app)
-        .post("/api/user/booking/validate-coupon")
+        .post("/api/booking/user/validate-coupon")
         .send({ code: "TESTCODE" });
 
       expect(res.statusCode).toBe(401);
@@ -257,9 +257,9 @@ describe("Booking Module API", () => {
       if (!userToken) return logger.warn("Skipped: no user token");
 
       const res = await request(app)
-        .post("/api/user/booking/validate-coupon")
+        .post("/api/booking/user/validate-coupon")
         .set("Authorization", `Bearer ${userToken}`)
-        .send({ code: "INVALIDCOUPON99" });
+        .send({ code: "INVALIDCOUPON99", turfId: "dummy", amount: 500 });
 
       // Could be 400 (not found) or 404
       expect([400, 404]).toContain(res.statusCode);

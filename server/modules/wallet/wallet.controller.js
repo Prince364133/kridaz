@@ -5,29 +5,6 @@ import NotificationService from "../../services/notification.service.js";
 import WalletService from "../../services/wallet.service.js";
 import logger from "../../utils/logger.js";
 
-const getAccount = async (req) => {
-  const { id, role, ownerId } = req.user;
-
-  // Regular users
-  if (role === "user") {
-    return await prisma.user.findUnique({ 
-      where: { id },
-      select: { id: true, role: true }
-    });
-  }
-
-  // Owner / umpire / coach / admin → OwnerProfile
-  const owner = await prisma.ownerProfile.findFirst({
-    where: {
-      OR: [
-        { id: ownerId || "" },
-        { userId: id }
-      ]
-    }
-  });
-  return owner;
-};
-
 export const createTopupOrder = async (req, res) => {
   const userId = req.user.id || req.user.user;
   try {
@@ -37,12 +14,15 @@ export const createTopupOrder = async (req, res) => {
       return res.status(400).json({ message: "Top-up amount is required" });
     }
 
-    if (amount < 500) {
-      return res.status(400).json({ message: "Minimum top-up amount is Rs 500" });
+    const minTopup = Number(process.env.WALLET_MIN_TOPUP) || 500;
+    const maxTopup = Number(process.env.WALLET_MAX_TOPUP) || 10000;
+
+    if (amount < minTopup) {
+      return res.status(400).json({ message: `Minimum top-up amount is Rs ${minTopup}` });
     }
 
-    if (amount > 10000) {
-      return res.status(400).json({ message: "Maximum top-up amount is Rs 10,000" });
+    if (amount > maxTopup) {
+      return res.status(400).json({ message: `Maximum top-up amount is Rs ${maxTopup.toLocaleString('en-IN')}` });
     }
 
     const options = {
@@ -102,26 +82,34 @@ export const verifyTopup = async (req, res) => {
       return res.status(404).json({ success: false, message: "Transaction record not found" });
     }
 
-    const account = await getAccount(req);
+    const account = await WalletService.getAccountProfile(
+      req.user.id,
+      req.user.role,
+      req.user.ownerId
+    );
     if (!account) {
       return res.status(404).json({ success: false, message: "Account not found" });
     }
 
-    // Atomic wallet credit using Service
-    const newBalance = await WalletService.credit(
-      account.id,
-      req.user.role,
-      transaction.amount,
-      "Wallet Top-up"
-    );
+    // Atomic wallet credit and status update inside Prisma transaction
+    const newBalance = await prisma.$transaction(async (tx) => {
+      const balance = await WalletService.credit(
+        account.id,
+        req.user.role,
+        transaction.amount,
+        tx
+      );
 
-    // Mark transaction as SUCCESS
-    await prisma.walletTransaction.update({
-      where: { id: transaction.id },
-      data: {
-        status: "SUCCESS",
-        razorpayPaymentId: razorpay_payment_id
-      }
+      // Mark transaction as SUCCESS
+      await tx.walletTransaction.update({
+        where: { id: transaction.id },
+        data: {
+          status: "SUCCESS",
+          razorpayPaymentId: razorpay_payment_id
+        }
+      });
+
+      return balance;
     });
 
     return res.status(200).json({
@@ -176,16 +164,26 @@ export const checkPaymentStatus = async (req, res) => {
         });
         const role = user?.role || 'user';
         
-        const newBalance = await WalletService.credit(transaction.userId, role, transaction.amount, "Top-up check");
+        const newBalance = await prisma.$transaction(async (tx) => {
+          const balance = await WalletService.credit(
+            transaction.userId,
+            role,
+            transaction.amount,
+            tx
+          );
 
-        if (newBalance !== undefined) {
-          await prisma.walletTransaction.update({
+          await tx.walletTransaction.update({
             where: { id: transaction.id },
             data: {
               status: "SUCCESS",
               razorpayPaymentId: successfulPayment.id
             }
           });
+
+          return balance;
+        });
+
+        if (newBalance !== undefined) {
           return res.status(200).json({ success: true, message: "Payment was successful. Wallet updated." });
         }
       }
@@ -206,14 +204,11 @@ export const requestWithdrawal = async (req, res) => {
       return res.status(403).json({ message: "Only partners can request withdrawals" });
     }
 
-    const owner = await prisma.ownerProfile.findFirst({
-      where: {
-        OR: [
-          { id: req.user.ownerId || "" },
-          { userId: req.user.id }
-        ]
-      }
-    });
+    const owner = await WalletService.getAccountProfile(
+      req.user.id,
+      req.user.role,
+      req.user.ownerId
+    );
 
     if (!owner) {
       return res.status(404).json({ message: "Account not found" });
@@ -261,14 +256,11 @@ export const requestWithdrawal = async (req, res) => {
 
 export const getOwnerWithdrawals = async (req, res) => {
   try {
-    const owner = await prisma.ownerProfile.findFirst({
-      where: {
-        OR: [
-          { id: req.user.ownerId || "" },
-          { userId: req.user.id }
-        ]
-      }
-    });
+    const owner = await WalletService.getAccountProfile(
+      req.user.id,
+      req.user.role,
+      req.user.ownerId
+    );
 
     if (!owner) {
       return res.status(404).json({ success: false, message: "Partner account not found" });

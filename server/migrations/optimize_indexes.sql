@@ -30,3 +30,6 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS "WithdrawalRequest_ownerId_createdAt_idx
 CREATE INDEX CONCURRENTLY IF NOT EXISTS "Turf_slug_idx" ON "Turf"("slug");
 CREATE INDEX CONCURRENTLY IF NOT EXISTS "Turf_status_isActive_state_city_idx" ON "Turf"("status", "isActive", "state", "city");
 
+-- 7. Team & Spatial Proximity Optimizations
+CREATE INDEX CONCURRENTLY IF NOT EXISTS "Team_geoPoint_idx" ON "Team" USING GIST ("geoPoint");
+

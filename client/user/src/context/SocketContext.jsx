@@ -1,7 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { io } from 'socket.io-client';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSelector } from 'react-redux';
 import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 

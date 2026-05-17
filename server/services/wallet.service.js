@@ -6,13 +6,38 @@ import { prisma } from '../config/prisma.js';
  */
 class WalletService {
   /**
+   * Get target account profile (User or OwnerProfile) based on role
+   */
+  async getAccountProfile(userId, role, ownerId, tx) {
+    const client = tx || prisma;
+    const userIdStr = userId ? userId.toString() : "";
+
+    if (role?.toLowerCase() === 'user') {
+      return await client.user.findUnique({
+        where: { id: userIdStr },
+        select: { id: true, role: true }
+      });
+    } else {
+      const ownerIdStr = ownerId ? ownerId.toString() : "";
+      return await client.ownerProfile.findFirst({
+        where: {
+          OR: [
+            { id: ownerIdStr },
+            { userId: userIdStr }
+          ]
+        }
+      });
+    }
+  }
+
+  /**
    * Get wallet balance for a user or owner
    */
   async getWallet(userId, role, tx) {
     const userIdStr = userId.toString();
     const client = tx || prisma;
 
-    if (role === 'user') {
+    if (role?.toLowerCase() === 'user') {
       const wallet = await client.wallet.findUnique({
         where: { userId: userIdStr }
       });
@@ -67,7 +92,7 @@ class WalletService {
     const amountVal = Number(amount);
     const client = tx || prisma;
     
-    if (role === 'user') {
+    if (role?.toLowerCase() === 'user') {
       const wallet = await client.wallet.upsert({
         where: { userId: userIdStr },
         update: { balance: { increment: amountVal } },
@@ -106,7 +131,7 @@ class WalletService {
     const amountVal = Number(amount);
     const client = tx || prisma;
 
-    if (role === 'user') {
+    if (role?.toLowerCase() === 'user') {
       const operation = async (t) => {
         const wallet = await t.wallet.findUnique({ where: { userId: userIdStr } });
         if (!wallet || Number(wallet.balance) < amountVal) {
@@ -153,14 +178,15 @@ class WalletService {
     const amountVal = Number(amount);
 
     const operation = async (t) => {
-      if (role === 'user') {
+      if (role?.toLowerCase() === 'user') {
         const wallet = await t.wallet.findUnique({ where: { userId: userIdStr } });
         const usable = Number(wallet?.balance || 0) - Number(wallet?.reservedBalance || 0);
         if (usable < amountVal) throw new Error("Insufficient usable balance");
 
-        return await t.wallet.update({
+        return await t.wallet.upsert({
           where: { userId: userIdStr },
-          data: { reservedBalance: { increment: amountVal } }
+          update: { reservedBalance: { increment: amountVal } },
+          create: { userId: userIdStr, balance: 0, reservedBalance: amountVal }
         });
       } else {
         const owner = await t.ownerProfile.findFirst({
@@ -193,12 +219,17 @@ class WalletService {
     const amountVal = Number(amount);
     const client = tx || prisma;
 
-    if (role === 'user') {
-      const result = await client.wallet.update({
+    if (role?.toLowerCase() === 'user') {
+      const result = await client.wallet.upsert({
         where: { userId: userIdStr },
-        data: {
+        update: {
           reservedBalance: { decrement: amountVal },
           balance: shouldDebit ? { decrement: amountVal } : undefined
+        },
+        create: {
+          userId: userIdStr,
+          balance: 0,
+          reservedBalance: 0
         }
       });
       return Number(result.reservedBalance);

@@ -196,7 +196,7 @@ const JoinGames = () => {
  gateInteraction(async () => {
  try {
  const res = await axiosInstance.post(`/api/hosted-game/join`, {
- gameId: selectedGame._id,
+ gameId: selectedGame.id,
  team: joiningSlot.team,
  slotIndex: joiningSlot.index,
  role: joiningSlot.role
@@ -558,7 +558,7 @@ const JoinGames = () => {
  <div>
  <p className="text-[11px] font-black text-white leading-none">
  {game.gameMode === 'QUICK' 
- ? game.quickSlots.filter(s => s.status === 'OPEN').length 
+ ? (game.quickSlots?.filter(s => s.status === 'OPEN')?.length || 0) 
  : (game.teams?.teamA?.slots?.filter(s => s.status === 'OPEN').length || 0) + (game.teams?.teamB?.slots?.filter(s => s.status === 'OPEN').length || 0)
  } OPEN
  </p>
@@ -581,10 +581,10 @@ const JoinGames = () => {
  <span className="truncate">{game.ground?.name || 'Self-Arranged Venue'}</span>
  </div>
  <button
- onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(game.shortId || game._id); toast.success('Game ID copied!'); }}
+ onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(game.shortId || game.id); toast.success('Game ID copied!'); }}
  className="text-[8px] font-black text-white/30 hover:text-[#CCFF00] uppercase tracking-widest transition-colors flex items-center gap-1"
  >
- <Info size={8} /> ID: {game.shortId || game._id.slice(-6).toUpperCase()}
+ <Info size={8} /> ID: {game.shortId || (game.id || '').slice(-6).toUpperCase()}
  </button>
  </div>
 
@@ -612,7 +612,7 @@ const JoinGames = () => {
  onClick={(e) => {
  if (game.isLive) {
  e.stopPropagation();
- navigate(`/live-score/${game._id}`);
+ navigate(`/live-score/${game.id}`);
  } else {
  setSelectedGame(game);
  }
@@ -692,10 +692,10 @@ const JoinGames = () => {
  <h3 className="text-2xl font-black text-white uppercase tracking-tighter font-open-sans">
  Casual Match Pool
  </h3>
- <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">{selectedGame.quickSlots.length} Total Slots</span>
+ <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">{selectedGame.quickSlots?.length || 0} Total Slots</span>
  </div>
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
- {selectedGame.quickSlots.map((slot, sIdx) => (
+ {(selectedGame.quickSlots || []).map((slot, sIdx) => (
  <button
  key={sIdx}
  disabled={slot.status !== 'OPEN'}
@@ -740,16 +740,29 @@ const JoinGames = () => {
  </div>
  ) : (
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
- {['teamA', 'teamB'].map((teamKey, tIdx) => (
+ {['teamA', 'teamB'].map((teamKey, tIdx) => {
+ const team = selectedGame.teams?.[teamKey];
+ if (!team) return (
+ <div key={teamKey} className="space-y-4">
+ <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-4">
+ <h3 className="text-2xl font-black text-white uppercase tracking-tighter font-open-sans">
+ {tIdx === 0 ? 'Team A' : 'Team B'}
+ </h3>
+ <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">Team {tIdx === 0 ? 'A' : 'B'}</span>
+ </div>
+ <p className="text-sm text-white/30 font-bold">No slots configured yet.</p>
+ </div>
+ );
+ return (
  <div key={teamKey} className="space-y-6">
  <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-4">
  <h3 className="text-2xl font-black text-white uppercase tracking-tighter font-open-sans">
- {selectedGame.teams[teamKey].name}
+ {team.name}
  </h3>
  <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">Team {tIdx === 0 ? 'A' : 'B'}</span>
  </div>
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
- {selectedGame.teams[teamKey].slots.map((slot, sIdx) => (
+ {(team.slots || []).map((slot, sIdx) => (
  <button
  key={sIdx}
  disabled={slot.status !== 'OPEN'}
@@ -759,7 +772,7 @@ const JoinGames = () => {
  navigate('/login');
  return;
  }
- setJoiningSlot({ team: teamKey === 'teamA' ? 'A' : 'B', index: sIdx, role: slot.role });
+ setJoiningSlot({ team: teamKey === 'teamA' ? 'A' : 'B', index: sIdx, role: slot.role, slotId: slot.id });
  setShowConfirm(true);
  }}
  className={`p-5 rounded-[20px] border transition-all duration-500 text-left group relative overflow-hidden ${
@@ -771,15 +784,32 @@ const JoinGames = () => {
  {slot.status === 'OPEN' && (
  <div className="absolute top-0 left-0 w-1 h-full bg-[#CCFF00] scale-y-0 group-hover:scale-y-100 transition-transform" />
  )}
- <p className="text-[9px] text-[#878C9F] font-black uppercase tracking-widest mb-1">{slot.role}</p>
+ <div className="flex items-center justify-between mb-1">
+ <p className="text-[9px] text-[#878C9F] font-black uppercase tracking-widest">{slot.role || 'Player'}</p>
+ {slot.user && (
+ <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10">
+ {slot.user.profilePicture ? (
+ <img src={slot.user.profilePicture} alt="" className="w-full h-full object-cover" />
+ ) : (
+ <div className="w-full h-full bg-white/5 flex items-center justify-center text-[8px] text-white/40">
+ {slot.user.name?.[0]}
+ </div>
+ )}
+ </div>
+ )}
+ </div>
  <p className="font-black text-white uppercase tracking-tight">
- {slot.status === 'OPEN' ? 'AVAILABLE' : slot.status === 'PENDING' ? 'RESERVED' : 'OCCUPIED'}
+ {slot.status === 'OPEN' ? 'AVAILABLE' : slot.status === 'JOINED' ? (slot.user?.name || 'OCCUPIED') : slot.status === 'PENDING' ? 'RESERVED' : 'OCCUPIED'}
  </p>
  </button>
  ))}
+ {(team.slots || []).length === 0 && (
+ <p className="text-sm text-white/30 font-bold col-span-2">No slots configured for this team.</p>
+ )}
  </div>
  </div>
- ))}
+ );
+ })}
  </div>
  )}
  </div>

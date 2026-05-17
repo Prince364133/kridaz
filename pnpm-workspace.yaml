@@ -1,5 +1,10 @@
 packages:
-  - 'client/*'
-  - 'server'
-  - 'packages/*'
-  - 'docs'
+  - client/*
+  - server
+  - packages/*
+  - docs
+
+onlyBuiltDependencies:
+  - onnxruntime-node
+  - protobufjs
+  - sharp

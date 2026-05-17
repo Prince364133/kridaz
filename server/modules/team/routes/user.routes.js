@@ -71,6 +71,7 @@ router.get("/find-by-code/:code", getTeamByCode);
  *       200:
  *         description: Team profile and squad
  */
+router.get("/opponents", authenticate, getOpponentTeams);
 router.get("/:id", getTeamById);
 
 // ── Authenticated Routes ────────────────────────────────────────────────────
@@ -116,7 +117,6 @@ router.get("/", getMyTeams);
  *       200:
  *         description: List of teams looking for matches
  */
-router.get("/opponents", getOpponentTeams);
 
 /**
  * @swagger

@@ -473,8 +473,8 @@ export const getNearbyPlayers = async (req, res) => {
     const formattedPlayers = players.map(p => ({
       ...p,
       id: p.id,
-      lat: p.lat ? parseFloat(p.lat) : null,
-      lng: p.lng ? parseFloat(p.lng) : null,
+      lat: p.latitude ? parseFloat(String(p.latitude)) : null,
+      lng: p.longitude ? parseFloat(String(p.longitude)) : null,
       distanceKm: null // PostGIS distance can be added if needed
     }));
 
@@ -501,11 +501,11 @@ export const updateUserLocation = async (req, res) => {
     
     if (sharing === false || (lat === 0 && lng === 0)) {
       // Clear location for privacy
-      update = { lat: null, lng: null };
+      update = { latitude: null, longitude: null };
     } else if (lat && lng) {
       update = {
-        lat: parseFloat(lat),
-        lng: parseFloat(lng),
+        latitude: parseFloat(lat),
+        longitude: parseFloat(lng),
         lastSeen: new Date()
       };
     } else {
@@ -521,12 +521,12 @@ export const updateUserLocation = async (req, res) => {
         where: { userId: userId },
         create: {
           userId: userId,
-          latitude: update.lat !== undefined ? update.lat : undefined,
-          longitude: update.lng !== undefined ? update.lng : undefined
+          latitude: update.latitude !== undefined ? update.latitude : undefined,
+          longitude: update.longitude !== undefined ? update.longitude : undefined
         },
         update: {
-          latitude: update.lat !== undefined ? update.lat : undefined,
-          longitude: update.lng !== undefined ? update.lng : undefined
+          latitude: update.latitude !== undefined ? update.latitude : undefined,
+          longitude: update.longitude !== undefined ? update.longitude : undefined
         }
       })
     ]);

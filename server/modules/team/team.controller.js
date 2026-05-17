@@ -5,6 +5,49 @@ import { createUniqueTeamCode, ensureTeamQRCode, getTeamWithDetails } from "./te
 import { updateGeoPoint } from "../../utils/geo.util.js";
 import logger from "../../utils/logger.js";
 import generateQRCode from "../../utils/generateQRCode.js";
+const mapTeamUserAvatar = (team) => {
+  if (!team) return null;
+  const formatted = { ...team };
+  if (formatted.owner) {
+    formatted.owner = {
+      ...formatted.owner,
+      avatar: formatted.owner.profilePicture || null
+    };
+  }
+  if (Array.isArray(formatted.members)) {
+    formatted.members = formatted.members.map(m => {
+      const formattedMember = { ...m };
+      if (formattedMember.user) {
+        formattedMember.user = {
+          ...formattedMember.user,
+          avatar: formattedMember.user.profilePicture || null
+        };
+      }
+      return formattedMember;
+    });
+  }
+
+  // Combine Team_A and Team_B into opponents list symmetrically
+  const opponentsList = [
+    ...(formatted.Team_A || []),
+    ...(formatted.Team_B || [])
+  ];
+  formatted.opponents = opponentsList.map(opp => {
+    const mappedOpp = { ...opp };
+    if (mappedOpp.owner) {
+      mappedOpp.owner = {
+        ...mappedOpp.owner,
+        avatar: mappedOpp.owner.profilePicture || null
+      };
+    }
+    return mappedOpp;
+  });
+  delete formatted.Team_A;
+  delete formatted.Team_B;
+
+  return formatted;
+};
+
 // @route   POST /api/team
 // @desc    Create a new team with a unique team code
 export const createTeam = async (req, res) => {
@@ -114,14 +157,41 @@ export const getMyTeams = async (req, res) => {
         members: {
           include: {
             user: {
-              select: { id: true, name: true, email: true, phone: true, avatar: true }
+              select: { id: true, name: true, email: true, phone: true, profilePicture: true }
             }
           }
         },
         owner: {
-          select: { id: true, name: true, avatar: true }
+          select: { id: true, name: true, profilePicture: true }
         },
-        opponents: true
+        Team_A: {
+          select: {
+            id: true,
+            name: true,
+            teamCode: true,
+            sportType: true,
+            city: true,
+            logo: true,
+            image: true,
+            owner: {
+              select: { id: true, name: true, profilePicture: true, username: true }
+            }
+          }
+        },
+        Team_B: {
+          select: {
+            id: true,
+            name: true,
+            teamCode: true,
+            sportType: true,
+            city: true,
+            logo: true,
+            image: true,
+            owner: {
+              select: { id: true, name: true, profilePicture: true, username: true }
+            }
+          }
+        }
       },
       orderBy: { updatedAt: "desc" }
     });
@@ -130,11 +200,10 @@ export const getMyTeams = async (req, res) => {
     const myTeamIds = teams.map(t => t.id);
     const opponentTeamsRaw = await prisma.team.findMany({
       where: {
-        opponents: {
-          some: {
-            id: { in: myTeamIds }
-          }
-        }
+        OR: [
+          { Team_A: { some: { id: { in: myTeamIds } } } },
+          { Team_B: { some: { id: { in: myTeamIds } } } }
+        ]
       },
       select: {
         id: true,
@@ -151,7 +220,7 @@ export const getMyTeams = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      teams,
+      teams: teams.map(t => mapTeamUserAvatar(t)),
       opponentTeams: opponentTeamsRaw,
     });
   } catch (error) {
@@ -176,22 +245,62 @@ export const getAllTeams = async (req, res) => {
       const longitude = parseFloat(lng);
       const distanceLimit = parseFloat(radius) || 10000; // 10km default
 
-      // PostGIS raw query for proximity discovery
-      teams = await prisma.$queryRaw`
-        SELECT t.*, 
-               u.name as "ownerName", u.avatar as "ownerAvatar", u.username as "ownerUsername",
-               ST_Distance(t."geoPoint", ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography) as distance,
-               (SELECT COUNT(*)::int FROM "TeamMember" tm WHERE tm."teamId" = t.id AND tm.status = 'JOINED') as "memberCount"
-        FROM "Team" t
-        LEFT JOIN "User" u ON t."ownerId" = u.id
-        WHERE t.visibility = 'PUBLIC'
-          AND ST_DWithin(t."geoPoint", ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography, ${distanceLimit})
-          AND (${search} IS NULL OR t.name ILIKE ${'%' + search + '%'} OR t."teamCode" ILIKE ${'%' + search + '%'})
-          AND (${sportType} IS NULL OR t."sportType" ILIKE ${sportType})
-          AND (${city} IS NULL OR t.city ILIKE ${'%' + city + '%'})
-        ORDER BY distance ASC
-        LIMIT 50
-      `;
+      // Pre-format search patterns to avoid literal '%undefined%' or '%null%' javascript string coercion
+      const searchPattern = search ? `%${search}%` : null;
+      const sportTypePattern = sportType || null;
+      const cityPattern = city ? `%${city}%` : null;
+
+      // PostGIS raw query for proximity discovery with Haversine fallback
+      try {
+        teams = await prisma.$queryRaw`
+          SELECT t.*, 
+                 u.name as "ownerName", u."profilePicture" as "ownerAvatar", u.username as "ownerUsername",
+                 ST_Distance(t."geoPoint", ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography) as distance,
+                 (SELECT COUNT(*)::int FROM "TeamMember" tm WHERE tm."teamId" = t.id AND tm.status = 'JOINED') as "memberCount"
+          FROM "Team" t
+          LEFT JOIN "User" u ON t."ownerId" = u.id
+          WHERE t.visibility = 'PUBLIC'
+            AND ST_DWithin(t."geoPoint", ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography, ${distanceLimit})
+            AND (${searchPattern} IS NULL OR t.name ILIKE ${searchPattern} OR t."teamCode" ILIKE ${searchPattern})
+            AND (${sportTypePattern} IS NULL OR t."sportType" ILIKE ${sportTypePattern})
+            AND (${cityPattern} IS NULL OR t.city ILIKE ${cityPattern})
+          ORDER BY distance ASC
+          LIMIT 50
+        `;
+      } catch (postgisError) {
+        logger.warn(`PostGIS proximity query failed, falling back to Haversine/Decimal approximation: ${postgisError.message}`);
+        
+        // Haversine formula fallback using standard Decimal coordinates (latitude and longitude)
+        // distance is in meters, 6371000 is Earth radius in meters
+        const radLat = (latitude * Math.PI) / 180;
+        const radLng = (longitude * Math.PI) / 180;
+
+        teams = await prisma.$queryRaw`
+          SELECT t.*, 
+                 u.name as "ownerName", u."profilePicture" as "ownerAvatar", u.username as "ownerUsername",
+                 (6371000 * acos(
+                    cos(${radLat}) * cos(radians(t.latitude::double precision)) * 
+                    cos(radians(t.longitude::double precision) - ${radLng}) + 
+                    sin(${radLat}) * sin(radians(t.latitude::double precision))
+                 )) as distance,
+                 (SELECT COUNT(*)::int FROM "TeamMember" tm WHERE tm."teamId" = t.id AND tm.status = 'JOINED') as "memberCount"
+          FROM "Team" t
+          LEFT JOIN "User" u ON t."ownerId" = u.id
+          WHERE t.visibility = 'PUBLIC'
+            AND t.latitude IS NOT NULL 
+            AND t.longitude IS NOT NULL
+            AND (6371000 * acos(
+                    cos(${radLat}) * cos(radians(t.latitude::double precision)) * 
+                    cos(radians(t.longitude::double precision) - ${radLng}) + 
+                    sin(${radLat}) * sin(radians(t.latitude::double precision))
+                 )) <= ${distanceLimit}
+            AND (${searchPattern} IS NULL OR t.name ILIKE ${searchPattern} OR t."teamCode" ILIKE ${searchPattern})
+            AND (${sportTypePattern} IS NULL OR t."sportType" ILIKE ${sportTypePattern})
+            AND (${cityPattern} IS NULL OR t.city ILIKE ${cityPattern})
+          ORDER BY distance ASC
+          LIMIT 50
+        `;
+      }
     } else {
       // 2. Standard discovery search
       const teamsRaw = await prisma.team.findMany({
@@ -210,18 +319,15 @@ export const getAllTeams = async (req, res) => {
         },
         include: {
           owner: {
-            select: { id: true, name: true, avatar: true, username: true }
+            select: { id: true, name: true, profilePicture: true, username: true }
           },
           members: {
             where: { status: "JOINED" },
             include: {
               user: {
-                select: { id: true, name: true, avatar: true }
+                select: { id: true, name: true, profilePicture: true }
               }
             }
-          },
-          _count: {
-            select: { members: { where: { status: "JOINED" } } }
           }
         },
         orderBy: { createdAt: "desc" },
@@ -229,12 +335,15 @@ export const getAllTeams = async (req, res) => {
       });
 
       // Format to match expected output structure
-      teams = teamsRaw.map(t => ({
-        ...t,
-        memberCount: t._count.members,
-        matchesPlayed: Math.floor(Math.random() * 20),
-        totalScore: Math.floor(Math.random() * 1000)
-      }));
+      teams = teamsRaw.map(t => {
+        const formatted = mapTeamUserAvatar(t);
+        return {
+          ...formatted,
+          memberCount: t.members.length,
+          matchesPlayed: Math.floor(Math.random() * 20),
+          totalScore: Math.floor(Math.random() * 1000)
+        };
+      });
     }
 
     return res.status(200).json({
@@ -259,16 +368,43 @@ export const getTeamByCode = async (req, res) => {
       where: { teamCode: code },
       include: {
         owner: {
-          select: { id: true, name: true, avatar: true, username: true }
+          select: { id: true, name: true, profilePicture: true, username: true }
         },
         members: {
           include: {
             user: {
-              select: { id: true, name: true, avatar: true, sportType: true }
+              select: { id: true, name: true, profilePicture: true, sportTypes: true }
             }
           }
         },
-        opponents: true,
+        Team_A: {
+          select: {
+            id: true,
+            name: true,
+            teamCode: true,
+            sportType: true,
+            city: true,
+            logo: true,
+            image: true,
+            owner: {
+              select: { id: true, name: true, profilePicture: true, username: true }
+            }
+          }
+        },
+        Team_B: {
+          select: {
+            id: true,
+            name: true,
+            teamCode: true,
+            sportType: true,
+            city: true,
+            logo: true,
+            image: true,
+            owner: {
+              select: { id: true, name: true, profilePicture: true, username: true }
+            }
+          }
+        },
         opponentRequestsReceived: {
           include: {
             from: {
@@ -286,7 +422,7 @@ export const getTeamByCode = async (req, res) => {
       });
     }
 
-    return res.status(200).json({ success: true, team });
+    return res.status(200).json({ success: true, team: mapTeamUserAvatar(team) });
   } catch (error) {
     logger.error("Find team by code error:", error);
     return res.status(500).json({ 
@@ -306,16 +442,43 @@ export const getTeamById = async (req, res) => {
       where: { id },
       include: {
         owner: {
-          select: { id: true, name: true, avatar: true, username: true }
+          select: { id: true, name: true, profilePicture: true, username: true }
         },
         members: {
           include: {
             user: {
-              select: { id: true, name: true, avatar: true, sportType: true }
+              select: { id: true, name: true, profilePicture: true, sportTypes: true }
             }
           }
         },
-        opponents: true,
+        Team_A: {
+          select: {
+            id: true,
+            name: true,
+            teamCode: true,
+            sportType: true,
+            city: true,
+            logo: true,
+            image: true,
+            owner: {
+              select: { id: true, name: true, profilePicture: true, username: true }
+            }
+          }
+        },
+        Team_B: {
+          select: {
+            id: true,
+            name: true,
+            teamCode: true,
+            sportType: true,
+            city: true,
+            logo: true,
+            image: true,
+            owner: {
+              select: { id: true, name: true, profilePicture: true, username: true }
+            }
+          }
+        },
         opponentRequestsReceived: {
           include: {
             from: {
@@ -341,19 +504,20 @@ export const getTeamById = async (req, res) => {
           where: { id: team.id },
           data: { qrCode: qrCodeUrl },
           include: {
-            owner: { select: { id: true, name: true, avatar: true, username: true } },
-            members: { include: { user: { select: { id: true, name: true, avatar: true, sportType: true } } } },
-            opponents: true,
+            owner: { select: { id: true, name: true, profilePicture: true, username: true } },
+            members: { include: { user: { select: { id: true, name: true, profilePicture: true, sportTypes: true } } } },
+            Team_A: { select: { id: true, name: true, teamCode: true, sportType: true, city: true, logo: true, image: true, owner: { select: { id: true, name: true, profilePicture: true, username: true } } } },
+            Team_B: { select: { id: true, name: true, teamCode: true, sportType: true, city: true, logo: true, image: true, owner: { select: { id: true, name: true, profilePicture: true, username: true } } } },
             opponentRequestsReceived: { include: { from: { select: { id: true, name: true, image: true, logo: true, teamCode: true } } } }
           }
         });
-        return res.status(200).json({ success: true, team: updatedTeam });
+        return res.status(200).json({ success: true, team: mapTeamUserAvatar(updatedTeam) });
       } catch (qrError) {
         logger.error("Failed to generate team QR code:", qrError);
       }
     }
 
-    return res.status(200).json({ success: true, team });
+    return res.status(200).json({ success: true, team: mapTeamUserAvatar(team) });
   } catch (error) {
     logger.error("Get team error:", error);
     return res.status(500).json({ success: false, message: "Failed to fetch team details" });
@@ -481,7 +645,10 @@ export const requestOpponent = async (req, res) => {
     const alreadyOpponents = await prisma.team.findFirst({
       where: {
         id: myTeam.id,
-        opponents: { some: { id: targetTeam.id } }
+        OR: [
+          { Team_A: { some: { id: targetTeam.id } } },
+          { Team_B: { some: { id: targetTeam.id } } }
+        ]
       }
     });
     if (alreadyOpponents) {
@@ -565,11 +732,7 @@ export const handleOpponentRequest = async (req, res) => {
         // Link teams as opponents (many-to-many)
         prisma.team.update({
           where: { id: myTeam.id },
-          data: { opponents: { connect: { id: request.fromId } } }
-        }),
-        prisma.team.update({
-          where: { id: request.fromId },
-          data: { opponents: { connect: { id: myTeam.id } } }
+          data: { Team_B: { connect: { id: request.fromId } } }
         }),
         // Notify the requester
         prisma.notification.create({
@@ -800,7 +963,7 @@ export const getOpponentTeams = async (req, res) => {
         ]
       },
       select: {
-        opponents: {
+        Team_A: {
           select: {
             id: true,
             name: true,
@@ -810,7 +973,21 @@ export const getOpponentTeams = async (req, res) => {
             logo: true,
             image: true,
             owner: {
-              select: { id: true, name: true, avatar: true, username: true }
+              select: { id: true, name: true, profilePicture: true, username: true }
+            }
+          }
+        },
+        Team_B: {
+          select: {
+            id: true,
+            name: true,
+            teamCode: true,
+            sportType: true,
+            city: true,
+            logo: true,
+            image: true,
+            owner: {
+              select: { id: true, name: true, profilePicture: true, username: true }
             }
           }
         }
@@ -820,8 +997,9 @@ export const getOpponentTeams = async (req, res) => {
     // Flatten and unique
     const opponentTeamsMap = new Map();
     myTeams.forEach(team => {
-      team.opponents.forEach(opp => {
-        opponentTeamsMap.set(opp.id, opp);
+      const combined = [...(team.Team_A || []), ...(team.Team_B || [])];
+      combined.forEach(opp => {
+        opponentTeamsMap.set(opp.id, mapTeamUserAvatar(opp));
       });
     });
 

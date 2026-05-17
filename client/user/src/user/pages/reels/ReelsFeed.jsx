@@ -1,15 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useGetReelsFeedQuery, reelsApi } from '@redux/api/reelsApi';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import ReelItem from '@components/common/ReelItem';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { ChevronLeft, Camera } from 'lucide-react';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useNavigate, useParams } from 'react-router-dom';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSocket } from '@context/SocketContext';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useDispatch, useSelector } from 'react-redux';
 import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
@@ -19,7 +13,7 @@ const ReelsFeed = () => {
   const { socket } = useSocket();
   const { id: initialId } = useParams();
   const [cursor, setCursor] = useState(null);
-  const { data, isLoading, isFetching } = useGetReelsFeedQuery({ cursor, initialId });
+  const { data, isLoading, isFetching, refetch } = useGetReelsFeedQuery({ cursor, initialId });
   
   // Optimistic UI state
   const { isUploading, activeUpload } = useSelector(state => state.mediaUpload);
@@ -34,17 +28,18 @@ const ReelsFeed = () => {
     return data?.reels || [];
   }, [data?.reels]);
 
-  // Socket listeners for real-time updates
+  // ── Socket listeners for real-time updates ───────────────────────────────
+  // NOTE: Backend uses Prisma UUID `id` field (not Mongo `_id`). All cache
+  // lookups MUST use r.id to correctly patch the RTK Query cache.
   useEffect(() => {
     if (!socket) return;
 
     socket.on(SOCKET.REEL_LIKED, ({ reelId, likes }) => {
       dispatch(
         reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-          const reel = draft.reels.find((r) => r._id === reelId);
-          if (reel) {
-            reel.stats.likes = likes;
-          }
+          if (!draft?.reels) return;
+          const reel = draft.reels.find((r) => r.id === reelId);
+          if (reel) reel.stats.likes = likes;
         })
       );
     });
@@ -52,10 +47,9 @@ const ReelsFeed = () => {
     socket.on(SOCKET.REEL_COMMENTED, ({ reelId }) => {
       dispatch(
         reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-          const reel = draft.reels.find((r) => r._id === reelId);
-          if (reel) {
-            reel.stats.comments += 1;
-          }
+          if (!draft?.reels) return;
+          const reel = draft.reels.find((r) => r.id === reelId);
+          if (reel) reel.stats.comments += 1;
         })
       );
     });
@@ -63,42 +57,42 @@ const ReelsFeed = () => {
     socket.on(SOCKET.REEL_DELETED, ({ reelId }) => {
       dispatch(
         reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-          if (!draft || !draft.reels) return;
-          draft.reels = draft.reels.filter((r) => r._id !== reelId);
+          if (!draft?.reels) return;
+          draft.reels = draft.reels.filter((r) => r.id !== reelId);
         })
       );
     });
-    
+
     socket.on(SOCKET.MEDIA_PROCESSING_PROGRESS, ({ mediaId, mediaType, progress, status }) => {
-      if (mediaType === 'reel') {
-        dispatch(
-          reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-            if (!draft || !draft.reels) return;
-            const reel = draft.reels.find((r) => r._id === mediaId);
-            if (reel) {
-              reel.status = 'pending';
-              reel.processingProgress = progress;
-              reel.processingStatus = status;
-            }
-          })
-        );
-      }
+      if (mediaType !== 'reel') return;
+      dispatch(
+        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
+          if (!draft?.reels) return;
+          // Match on r.id — Prisma returns UUID as `id`, not `_id`
+          const reel = draft.reels.find((r) => r.id === mediaId);
+          if (reel) {
+            reel.status = 'processing';
+            reel.processingProgress = progress;
+            reel.processingStatus = status;
+          }
+        })
+      );
     });
 
     socket.on(SOCKET.MEDIA_PROCESSING_COMPLETE, ({ mediaId, mediaType, hlsUrl, thumbnailUrl }) => {
-      if (mediaType === 'reel') {
-        dispatch(
-          reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-            if (!draft || !draft.reels) return;
-            const reel = draft.reels.find((r) => r._id === mediaId);
-            if (reel) {
-              reel.status = 'ready';
-              reel.hlsUrl = hlsUrl;
-              reel.thumbnailUrl = thumbnailUrl;
-            }
-          })
-        );
-      }
+      if (mediaType !== 'reel') return;
+      dispatch(
+        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
+          if (!draft?.reels) return;
+          const reel = draft.reels.find((r) => r.id === mediaId);
+          if (reel) {
+            reel.status = 'ready';
+            reel.hlsUrl = hlsUrl;
+            reel.thumbnailUrl = thumbnailUrl;
+            reel.processingProgress = 100;
+          }
+        })
+      );
     });
 
     return () => {
@@ -109,6 +103,27 @@ const ReelsFeed = () => {
       socket.off(SOCKET.MEDIA_PROCESSING_COMPLETE);
     };
   }, [socket, dispatch, cursor, initialId]);
+
+  // ── Polling fallback for pending/processing reels ─────────────────────────
+  // If the socket is disconnected OR drops events, pending reels would be stuck
+  // forever. Poll every 8 s while any reel is still being processed.
+  useEffect(() => {
+    const hasPendingReels = reels.some(
+      (r) => r.status === 'pending' || r.status === 'processing'
+    );
+
+    // Always poll when pending reels exist and socket is down.
+    // Also poll when socket is up but as a safety net (stops once all ready).
+    if (!hasPendingReels) return;
+
+    // Always poll as a safety net — socket events can be missed if the
+    // emitter room name mismatches, or if the user reconnects mid-processing.
+    const interval = setInterval(() => {
+      refetch();
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [reels, refetch]);
 
   // IntersectionObserver for active reel tracking
   useEffect(() => {
@@ -129,7 +144,7 @@ const ReelsFeed = () => {
             // Mask URL (only for non-temp reels)
             const currentReel = reels[index];
             if (currentReel && !currentReel.temp) {
-              window.history.replaceState(null, '', `/shorts/${currentReel._id}`);
+              window.history.replaceState(null, '', `/shorts/${currentReel.id}`);
             }
 
             // Load more trigger
@@ -198,7 +213,7 @@ const ReelsFeed = () => {
           
           return (
             <div 
-              key={reel._id} 
+              key={reel.id} 
               data-index={index}
               className="reels-item-wrapper w-full h-full snap-start snap-always"
             >

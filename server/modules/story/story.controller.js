@@ -162,20 +162,34 @@ export const createStory = async (req, res) => {
 export const getStories = async (req, res) => {
   try {
     const { all } = req.query;
-    const rawId = req.user.id;
-    const userId = await resolveUserId(rawId);
+    const rawId = req.user?.id || req.admin?.id;
+    const userId = rawId ? await resolveUserId(rawId) : null;
     
-    let userIds = [userId]; // Always include resolved current User ID
+    let userIds = userId ? [userId] : []; 
     
-    if (all !== 'true') {
+    if (all !== 'true' && userId) {
       const networkIds = await SocialService.getNetworkIds(userId);
       userIds = [...new Set([...userIds, ...networkIds])];
+    } else if (all !== 'true' && !userId) {
+      // If unauthenticated and asking for network feed, return empty or treat as all=true?
+      // Let's treat as global public feed for unauthenticated users viewing the community.
+      // We will just not filter by userIds later.
     }
 
-    const where = { expiresAt: { gt: new Date() } };
-    if (all !== 'true') {
-      where.userId = { in: userIds };
+    const baseWhere = { expiresAt: { gt: new Date() } };
+    if (all !== 'true' && userId) {
+      baseWhere.userId = { in: userIds };
     }
+
+    const where = {
+      ...baseWhere,
+      ...(userId ? {
+        OR: [
+          { status: 'ready' },
+          { userId: userId, status: { in: ['pending', 'processing'] } }
+        ]
+      } : { status: 'ready' })
+    };
 
     // Fetch stories with user and viewer relations using Prisma
     let stories = await prisma.story.findMany({
@@ -205,6 +219,7 @@ export const getStories = async (req, res) => {
       if (!acc[storyUserId]) {
         acc[storyUserId] = {
           author: storyUser,
+          user: storyUser,
           stories: []
         };
       }

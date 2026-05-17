@@ -28,12 +28,18 @@ const applyIndexes = async () => {
     const sqlPath = path.join(__dirname, '../migrations/optimize_indexes.sql');
     const sql = fs.readFileSync(sqlPath, 'utf8');
 
-    // Split by semicolons and filter out empty strings/comments
-    // Note: This is a simple split, assuming no semicolons inside strings
+    // Split by semicolons and strip SQL comments line-by-line
+    // Note: This is a robust split, stripping out -- comment lines cleanly
     const commands = sql
       .split(';')
-      .map(cmd => cmd.trim())
-      .filter(cmd => cmd.length > 0 && !cmd.startsWith('--'));
+      .map(cmd => {
+        return cmd
+          .split('\n')
+          .filter(line => !line.trim().startsWith('--'))
+          .join('\n')
+          .trim();
+      })
+      .filter(cmd => cmd.length > 0);
 
     for (const command of commands) {
       const description = command.split('\n')[0].substring(0, 50);

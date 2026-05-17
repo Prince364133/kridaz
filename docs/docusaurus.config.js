@@ -53,7 +53,7 @@ const config = {
             label: 'Guides',
           },
           {
-            to: '/docs/api/kridaz-api',
+            to: '/docs/api/kridaz-api-documentation',
             label: 'API Reference',
             position: 'left',
           },

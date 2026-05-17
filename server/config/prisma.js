@@ -5,14 +5,9 @@ const { Pool } = pkg_pg;
 import { PrismaPg } from '@prisma/adapter-pg';
 import dotenv from 'dotenv';
 import { encrypt, decrypt, isEncrypted } from '../utils/encryption.js';
+import { queryContext } from '../middleware/queryCounter.middleware.js';
 
 dotenv.config();
-
-const connectionString = process.env.DATABASE_URL;
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
-
-const basePrisma = new PrismaClient({ adapter });
 
 /**
  * Sensitive fields that should be encrypted/decrypted
@@ -36,12 +31,15 @@ const processSocialAccounts = (accounts, action) => {
   });
 };
 
+const connectionString = process.env.DATABASE_URL;
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+const basePrisma = new PrismaClient({ adapter });
+
 const prisma = basePrisma.$extends({
   query: {
     $allModels: {
       async $allOperations({ args, query }) {
-        // Increment query count if we are in a request context
-        const { queryContext } = await import('../middleware/queryCounter.middleware.js').catch(() => ({}));
         if (queryContext) {
           const store = queryContext.getStore();
           if (store) {
@@ -58,13 +56,11 @@ const prisma = basePrisma.$extends({
         if (isWrite) {
           const processData = (data) => {
             if (!data) return;
-            // Encrypt top-level fields
             SENSITIVE_FIELDS.forEach(field => {
               if (data[field] && typeof data[field] === 'string' && !isEncrypted(data[field])) {
                 data[field] = encrypt(data[field]);
               }
             });
-            // Encrypt socialAccounts JSON field
             if (data.socialAccounts) {
               data.socialAccounts = processSocialAccounts(data.socialAccounts, 'encrypt');
             }

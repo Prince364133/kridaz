@@ -19,6 +19,6 @@ export const confirmPostSchema = z.object({
 
 export const commentSchema = z.object({
   body: z.object({
-    content: z.string().min(1, "Comment content cannot be empty"),
+    text: z.string().min(1, "Comment text cannot be empty"),
   }),
 });

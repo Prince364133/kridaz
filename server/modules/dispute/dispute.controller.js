@@ -143,20 +143,20 @@ export const replyToDispute = async (req, res) => {
         disputeId,
         senderId: userId,
         senderType: senderRole || (req.user.role === 'ADMIN' ? 'ADMIN' : 'USER'),
-        message
+        message,
+        images: []
       }
     });
 
     let newStatus = dispute.status;
-    if (senderRole === 'ADMIN' && dispute.status === "PENDING") {
+    if (senderRole === 'ADMIN' && (dispute.status === "PENDING" || dispute.status === "OPEN")) {
       newStatus = "INVESTIGATING";
     }
 
     const updatedDispute = await prisma.dispute.update({
       where: { id: disputeId },
       data: {
-        status: newStatus,
-        lastRepliedAt: new Date()
+        status: newStatus
       },
       include: { replies: true }
     });
@@ -420,11 +420,11 @@ export const resolveDispute = async (req, res) => {
         where: { id: disputeId },
         data: {
           status: "RESOLVED",
-          resolvedAt: new Date(),
           resolution: {
             action: resolutionAction,
             notes: resolutionNotes,
-            partialAmount: partialAmount || 0
+            partialAmount: partialAmount || 0,
+            resolvedAt: new Date()
           }
         }
       });

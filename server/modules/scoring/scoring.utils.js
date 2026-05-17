@@ -77,11 +77,11 @@ export const computeScoreSnapshot = (scoring, match) => {
     return {
       id: id,
       name: getPlayerName(id),
-      runs: stat?.runs || 0,
-      balls: stat?.balls || 0,
-      fours: stat?.fours || 0,
-      sixes: stat?.sixes || 0,
-      strikeRate: stat?.balls > 0 ? Number(((stat.runs / stat.balls) * 100).toFixed(2)) : 0
+      runs: stat?.battingRuns || 0,
+      balls: stat?.battingBalls || 0,
+      fours: stat?.battingFours || 0,
+      sixes: stat?.battingSixes || 0,
+      strikeRate: stat?.battingBalls > 0 ? Number(((stat.battingRuns / stat.battingBalls) * 100).toFixed(2)) : 0
     };
   });
 
@@ -92,11 +92,11 @@ export const computeScoreSnapshot = (scoring, match) => {
     currentBowler = {
       id: scoring.bowlerId,
       name: getPlayerName(scoring.bowlerId),
-      overs: bStat ? Math.floor(bStat.ballsBowled / 6) : 0,
-      balls: bStat ? (bStat.ballsBowled % 6) : 0,
-      runs: bStat?.runsConceded || 0,
-      wickets: bStat?.wickets || 0,
-      economy: bStat?.ballsBowled > 0 ? Number(((bStat.runsConceded / bStat.ballsBowled) * 6).toFixed(2)) : 0
+      overs: bStat ? Math.floor(bStat.bowlingBalls / 6) : 0,
+      balls: bStat ? (bStat.bowlingBalls % 6) : 0,
+      runs: bStat?.bowlingRuns || 0,
+      wickets: bStat?.bowlingWickets || 0,
+      economy: bStat?.bowlingBalls > 0 ? Number(((bStat.bowlingRuns / bStat.bowlingBalls) * 6).toFixed(2)) : 0
     };
   }
 
@@ -105,6 +105,8 @@ export const computeScoreSnapshot = (scoring, match) => {
     battingTeamName,
     totalRuns,
     totalWickets,
+    runs: totalRuns,
+    wickets: totalWickets,
     overs,
     balls,
     overString,

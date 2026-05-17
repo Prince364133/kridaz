@@ -1,30 +1,58 @@
 import axios from 'axios';
 import { prisma } from '../../config/prisma.js';
+import { redisClient as redis } from '../../config/redis.js';
+import crypto from 'crypto';
 import logger from "../../utils/logger.js";
 
 const FB_APP_ID = process.env.FACEBOOK_APP_ID;
 const FB_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
 const REDIRECT_URI = process.env.FACEBOOK_REDIRECT_URI || `${process.env.APP_BASE_URL}/api/facebook/oauth/callback`;
+const FB_API_VERSION = process.env.FACEBOOK_API_VERSION || 'v25.0';
+const FB_API_VERSION_MAJOR = FB_API_VERSION.split('.')[0] || 'v25';
 
-export const startOAuth = (req, res) => {
-  const userId = req.user.id || req.user.user;
-  const scope = 'public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts,publish_video';
-  const state = userId.toString();
-  const url = `https://www.facebook.com/v25.dialog/oauth?client_id=${FB_APP_ID}&redirect_uri=${REDIRECT_URI}&scope=${scope}&response_type=code&state=${state}`;
+export const startOAuth = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user.user;
+    const scope = 'public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts,publish_video';
+    const nonce = crypto.randomBytes(16).toString('hex');
+    const stateKey = `oauth:state:facebook:${userId}`;
+    await redis.set(stateKey, nonce, 'EX', 900); // 15 minutes TTL
 
-  if (req.headers.accept?.includes('application/json')) {
-    return res.json({ url });
+    const state = `${userId}:${nonce}`;
+    const url = `https://www.facebook.com/${FB_API_VERSION_MAJOR}.dialog/oauth?client_id=${FB_APP_ID}&redirect_uri=${REDIRECT_URI}&scope=${scope}&response_type=code&state=${state}`;
+
+    if (req.headers.accept?.includes('application/json')) {
+      return res.json({ url });
+    }
+    res.redirect(url);
+  } catch (error) {
+    logger.error('Facebook startOAuth Error:', error.message);
+    res.status(500).json({ success: false, message: error.message });
   }
-  res.redirect(url);
 };
+
 
 export const handleCallback = async (req, res) => {
   try {
-    const { code, state: userId } = req.query;
+    const { code, state } = req.query;
     if (!code) throw new Error('No code provided');
+    if (!state) throw new Error('No state parameter provided');
 
-    // 1. Exchange code for user access token
-    const tokenRes = await axios.get(`https://graph.facebook.com/v25.0/oauth/access_token`, {
+    // 1. CSRF State Verification
+    const [userId, nonce] = state.split(':');
+    if (!userId || !nonce) {
+      throw new Error('CSRF validation failed: Invalid state format');
+    }
+
+    const stateKey = `oauth:state:facebook:${userId}`;
+    const storedNonce = await redis.get(stateKey);
+    if (!storedNonce || storedNonce !== nonce) {
+      throw new Error('CSRF validation failed: State nonce mismatch or expired');
+    }
+    await redis.del(stateKey);
+
+    // 2. Exchange code for user access token using dynamic versioning
+    const tokenRes = await axios.get(`https://graph.facebook.com/${FB_API_VERSION}/oauth/access_token`, {
       params: {
         client_id:     FB_APP_ID,
         client_secret: FB_APP_SECRET,
@@ -35,8 +63,8 @@ export const handleCallback = async (req, res) => {
 
     const shortToken = tokenRes.data.access_token;
 
-    // 2. Exchange short-lived token for long-lived token (~60 days)
-    const longTokenRes = await axios.get(`https://graph.facebook.com/v25.0/oauth/access_token`, {
+    // 3. Exchange short-lived token for long-lived token (~60 days)
+    const longTokenRes = await axios.get(`https://graph.facebook.com/${FB_API_VERSION}/oauth/access_token`, {
       params: {
         grant_type:        'fb_exchange_token',
         client_id:         FB_APP_ID,
@@ -47,8 +75,8 @@ export const handleCallback = async (req, res) => {
 
     const longToken = longTokenRes.data.access_token;
 
-    // 3. Fetch User's Pages
-    const pagesRes = await axios.get(`https://graph.facebook.com/v25.0/me/accounts`, {
+    // 4. Fetch User's Pages
+    const pagesRes = await axios.get(`https://graph.facebook.com/${FB_API_VERSION}/me/accounts`, {
       params: {
         access_token: longToken,
         fields: 'id,name,picture,access_token,followers_count,fan_count'
@@ -59,7 +87,7 @@ export const handleCallback = async (req, res) => {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, socialAccounts: true }
+      select: { id: true, socialAccounts: true, facebookPageId: true }
     });
     if (!user) throw new Error('User not found');
 
@@ -87,28 +115,32 @@ export const handleCallback = async (req, res) => {
       });
     }
 
-    // Update user with fresh socialAccounts and legacy primary fields
+    // Determine currently active page (keep existing active page if still present, else fall back to the first available page)
+    const activePageId = user.facebookPageId;
+    const activePage = pages.find(p => p.id === activePageId) || pages[0];
+
+    // Update user with fresh socialAccounts and active page fields
     await prisma.user.update({
       where: { id: userId },
       data: {
-        socialAccounts:    updatedAccounts,
-        facebookAccessToken: pages.length > 0 ? pages[0].access_token : undefined,
-        facebookPageId:      pages.length > 0 ? pages[0].id : undefined,
-        facebookPageName:    pages.length > 0 ? pages[0].name : undefined,
-        facebookPageThumb:   pages.length > 0 ? (pages[0].picture?.data?.url || null) : undefined,
+        socialAccounts:      updatedAccounts,
+        facebookAccessToken: activePage ? activePage.access_token : undefined,
+        facebookPageId:      activePage ? activePage.id : undefined,
+        facebookPageName:    activePage ? activePage.name : undefined,
+        facebookPageThumb:   activePage ? (activePage.picture?.data?.url || null) : undefined,
         oauth: {
           upsert: {
             create: {
-              facebookAccessToken: pages.length > 0 ? pages[0].access_token : undefined,
-              facebookPageId:      pages.length > 0 ? pages[0].id : undefined,
-              facebookPageName:    pages.length > 0 ? pages[0].name : undefined,
-              facebookPageThumb:   pages.length > 0 ? (pages[0].picture?.data?.url || null) : undefined,
+              facebookAccessToken: activePage ? activePage.access_token : undefined,
+              facebookPageId:      activePage ? activePage.id : undefined,
+              facebookPageName:    activePage ? activePage.name : undefined,
+              facebookPageThumb:   activePage ? (activePage.picture?.data?.url || null) : undefined,
             },
             update: {
-              facebookAccessToken: pages.length > 0 ? pages[0].access_token : undefined,
-              facebookPageId:      pages.length > 0 ? pages[0].id : undefined,
-              facebookPageName:    pages.length > 0 ? pages[0].name : undefined,
-              facebookPageThumb:   pages.length > 0 ? (pages[0].picture?.data?.url || null) : undefined,
+              facebookAccessToken: activePage ? activePage.access_token : undefined,
+              facebookPageId:      activePage ? activePage.id : undefined,
+              facebookPageName:    activePage ? activePage.name : undefined,
+              facebookPageThumb:   activePage ? (activePage.picture?.data?.url || null) : undefined,
             }
           }
         }
@@ -302,3 +334,75 @@ export const removeAccount = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const setActivePage = async (req, res) => {
+  try {
+    const { pageId } = req.body;
+    const userId = req.user.id || req.user.user;
+
+    if (!pageId) {
+      return res.status(400).json({ success: false, message: 'pageId is required' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { socialAccounts: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const accounts = Array.isArray(user.socialAccounts) ? user.socialAccounts : [];
+    const targetPage = accounts.find(
+      acc => acc.platform === 'facebook' && acc.accountId === pageId
+    );
+
+    if (!targetPage) {
+      return res.status(404).json({
+        success: false,
+        message: 'Selected page not found in connected Facebook accounts'
+      });
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        facebookAccessToken: targetPage.accessToken,
+        facebookPageId:      targetPage.accountId,
+        facebookPageName:    targetPage.accountName,
+        facebookPageThumb:   targetPage.thumbnail,
+        oauth: {
+          upsert: {
+            create: {
+              facebookAccessToken: targetPage.accessToken,
+              facebookPageId:      targetPage.accountId,
+              facebookPageName:    targetPage.accountName,
+              facebookPageThumb:   targetPage.thumbnail,
+            },
+            update: {
+              facebookAccessToken: targetPage.accessToken,
+              facebookPageId:      targetPage.accountId,
+              facebookPageName:    targetPage.accountName,
+              facebookPageThumb:   targetPage.thumbnail,
+            }
+          }
+        }
+      }
+    });
+
+    res.json({
+      success: true,
+      message: `Active Facebook page set to ${targetPage.accountName}`,
+      activePage: {
+        id: targetPage.accountId,
+        name: targetPage.accountName,
+        thumbnail: targetPage.thumbnail
+      }
+    });
+  } catch (error) {
+    logger.error('Set Active Page Error:', error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

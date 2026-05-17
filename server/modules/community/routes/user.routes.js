@@ -16,6 +16,7 @@ import {
   confirmPost
 } from '../community.controller.js';
 import userAuth from '../../../middleware/jwt/user.middleware.js';
+import { optionalAuth } from '../../../middleware/jwt/auth.middleware.js';
 import upload from '../../../middleware/uploads/upload.middleware.js';
 import { validate } from '../../../middleware/validate.middleware.js';
 import { getUploadUrlSchema, confirmPostSchema, commentSchema } from '../community.validator.js';
@@ -38,7 +39,7 @@ const router = express.Router();
  *     summary: Get all community posts
  *     tags: [Community]
  */
-router.get('/', getPosts);
+router.get('/', optionalAuth, getPosts);
 
 /**
  * @swagger

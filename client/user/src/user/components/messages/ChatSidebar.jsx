@@ -1,13 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useGetChatsQuery, useRespondToInvitationMutation, useTogglePinChatMutation, useDeleteChatMutation, useRemoveFromGroupMutation } from '../../../redux/api/chatApi';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSelector } from 'react-redux';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSocket } from '../../../context/SocketContext';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { 
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
   MessageSquare, 
   Plus, 
   Users, 
@@ -24,7 +20,6 @@ import { SOCKET } from '@kridaz/shared-constants/socketEvents';
   Trash2
 } from 'lucide-react';
 import ConfirmModal from '../modals/ConfirmModal';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
 const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateCommunity, onEditProfile, onChatDeleted }) => {
   const { user } = useSelector((state) => state.auth);

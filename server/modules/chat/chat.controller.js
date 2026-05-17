@@ -55,14 +55,10 @@ export const accessChat = async (req, res) => {
     const existingChats = await prisma.chat.findMany({
       where: {
         isGroupChat: false,
-        participants: {
-          some: {
-            OR: [
-              { userId: currentParticipant.userId, ownerId: currentParticipant.ownerId },
-              { userId: targetParticipant.userId, ownerId: targetParticipant.ownerId }
-            ]
-          }
-        }
+        AND: [
+          { participants: { some: { userId: currentParticipant.userId, ownerId: currentParticipant.ownerId } } },
+          { participants: { some: { userId: targetParticipant.userId, ownerId: targetParticipant.ownerId } } }
+        ]
       },
       include: {
         participants: {
@@ -334,27 +330,38 @@ export const joinChat = async (req, res) => {
     if (!chat) return res.status(404).json({ message: "Chat not found" });
 
     // Join logic: either update existing pending participant or create new one
-    const participant = await prisma.chatParticipant.upsert({
+    let participant = await prisma.chatParticipant.findFirst({
       where: {
-        chatId_userId_ownerId: {
-          chatId,
-          userId: self.userId,
-          ownerId: self.ownerId
-        }
-      },
-      update: { isPending: false },
-      create: {
         chatId,
         userId: self.userId,
-        ownerId: self.ownerId,
-        onModel: self.onModel,
-        isPending: false
-      },
-      include: {
-        user: { select: { id: true, name: true, profilePicture: true, email: true } },
-        owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+        ownerId: self.ownerId
       }
     });
+
+    if (participant) {
+      participant = await prisma.chatParticipant.update({
+        where: { id: participant.id },
+        data: { isPending: false },
+        include: {
+          user: { select: { id: true, name: true, profilePicture: true, email: true } },
+          owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+        }
+      });
+    } else {
+      participant = await prisma.chatParticipant.create({
+        data: {
+          chatId,
+          userId: self.userId,
+          ownerId: self.ownerId,
+          onModel: self.onModel,
+          isPending: false
+        },
+        include: {
+          user: { select: { id: true, name: true, profilePicture: true, email: true } },
+          owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+        }
+      });
+    }
 
     res.status(200).json({ ...chat, participants: [...chat.participants, participant] });
   } catch (error) {
@@ -370,15 +377,18 @@ export const respondToInvite = async (req, res) => {
   const { participantData: self } = resolveCurrentUser(req);
 
   try {
+    const participant = await prisma.chatParticipant.findFirst({
+      where: {
+        chatId,
+        userId: self.userId,
+        ownerId: self.ownerId
+      }
+    });
+    if (!participant) return res.status(404).json({ message: "Invite not found" });
+
     if (status === "accepted") {
       const updatedParticipant = await prisma.chatParticipant.update({
-        where: {
-          chatId_userId_ownerId: {
-            chatId,
-            userId: self.userId,
-            ownerId: self.ownerId
-          }
-        },
+        where: { id: participant.id },
         data: { isPending: false },
         include: {
           chat: {
@@ -397,13 +407,7 @@ export const respondToInvite = async (req, res) => {
     } else {
       // Rejected: Just remove the participant record
       await prisma.chatParticipant.delete({
-        where: {
-          chatId_userId_ownerId: {
-            chatId,
-            userId: self.userId,
-            ownerId: self.ownerId
-          }
-        }
+        where: { id: participant.id }
       });
       res.status(200).json({ message: "Invite rejected" });
     }
@@ -481,35 +485,57 @@ export const addToGroup = async (req, res) => {
   const { chatId, userId, onModel = "User" } = req.body;
 
   try {
-    const addedParticipant = await prisma.chatParticipant.upsert({
+    const targetUserId = onModel === "User" ? userId : null;
+    const targetOwnerId = onModel === "Owner" ? userId : null;
+
+    let addedParticipant = await prisma.chatParticipant.findFirst({
       where: {
-        chatId_userId_ownerId: {
-          chatId,
-          userId: onModel === "User" ? userId : null,
-          ownerId: onModel === "Owner" ? userId : null
-        }
-      },
-      update: { isPending: true }, // Keep or reset to pending
-      create: {
         chatId,
-        userId: onModel === "User" ? userId : null,
-        ownerId: onModel === "Owner" ? userId : null,
-        onModel,
-        isPending: true
-      },
-      include: {
-        chat: {
-          include: {
-            participants: {
-              include: {
-                user: { select: { id: true, name: true, profilePicture: true, email: true } },
-                owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+        userId: targetUserId,
+        ownerId: targetOwnerId
+      }
+    });
+
+    if (addedParticipant) {
+      addedParticipant = await prisma.chatParticipant.update({
+        where: { id: addedParticipant.id },
+        data: { isPending: true },
+        include: {
+          chat: {
+            include: {
+              participants: {
+                include: {
+                  user: { select: { id: true, name: true, profilePicture: true, email: true } },
+                  owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+                }
               }
             }
           }
         }
-      }
-    });
+      });
+    } else {
+      addedParticipant = await prisma.chatParticipant.create({
+        data: {
+          chatId,
+          userId: targetUserId,
+          ownerId: targetOwnerId,
+          onModel,
+          isPending: true
+        },
+        include: {
+          chat: {
+            include: {
+              participants: {
+                include: {
+                  user: { select: { id: true, name: true, profilePicture: true, email: true } },
+                  owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+                }
+              }
+            }
+          }
+        }
+      });
+    }
 
     res.json(addedParticipant.chat);
   } catch (error) {
@@ -531,15 +557,19 @@ export const removeFromGroup = async (req, res) => {
 
     if (!chat) return res.status(404).json({ message: "Chat not found" });
 
-    await prisma.chatParticipant.delete({
+    const targetParticipant = await prisma.chatParticipant.findFirst({
       where: {
-        chatId_userId_ownerId: {
-          chatId,
-          userId: onModel === "User" ? userId : null,
-          ownerId: onModel === "Owner" ? userId : null
-        }
+        chatId,
+        userId: onModel === "User" ? userId : null,
+        ownerId: onModel === "Owner" ? userId : null
       }
     });
+
+    if (targetParticipant) {
+      await prisma.chatParticipant.delete({
+        where: { id: targetParticipant.id }
+      });
+    }
 
     // Cascading Exit for Communities
     if (chat.isCommunity) {
@@ -680,14 +710,17 @@ export const makeGroupAdmin = async (req, res) => {
       return res.status(403).json({ message: "Only admins can promote others to admin" });
     }
 
-    const updatedParticipant = await prisma.chatParticipant.update({
+    const targetParticipant = await prisma.chatParticipant.findFirst({
       where: {
-        chatId_userId_ownerId: {
-          chatId,
-          userId: onModel === "User" ? userId : null,
-          ownerId: onModel === "Owner" ? userId : null
-        }
-      },
+        chatId,
+        userId: onModel === "User" ? userId : null,
+        ownerId: onModel === "Owner" ? userId : null
+      }
+    });
+    if (!targetParticipant) return res.status(404).json({ message: "Participant not found" });
+
+    const updatedParticipant = await prisma.chatParticipant.update({
+      where: { id: targetParticipant.id },
       data: { isAdmin: true },
       include: {
         chat: {
@@ -721,14 +754,17 @@ export const dismissGroupAdmin = async (req, res) => {
       return res.status(403).json({ message: "Only admins can dismiss others from admin" });
     }
 
-    const updatedParticipant = await prisma.chatParticipant.update({
+    const targetParticipant = await prisma.chatParticipant.findFirst({
       where: {
-        chatId_userId_ownerId: {
-          chatId,
-          userId: onModel === "User" ? userId : null,
-          ownerId: onModel === "Owner" ? userId : null
-        }
-      },
+        chatId,
+        userId: onModel === "User" ? userId : null,
+        ownerId: onModel === "Owner" ? userId : null
+      }
+    });
+    if (!targetParticipant) return res.status(404).json({ message: "Participant not found" });
+
+    const updatedParticipant = await prisma.chatParticipant.update({
+      where: { id: targetParticipant.id },
       data: { isAdmin: false },
       include: {
         chat: {
@@ -761,13 +797,11 @@ export const togglePinChat = async (req, res) => {
   const { participantData: self } = resolveCurrentUser(req);
 
   try {
-    const participant = await prisma.chatParticipant.findUnique({
+    const participant = await prisma.chatParticipant.findFirst({
       where: {
-        chatId_userId_ownerId: {
-          chatId,
-          userId: self.userId,
-          ownerId: self.ownerId
-        }
+        chatId,
+        userId: self.userId,
+        ownerId: self.ownerId
       }
     });
 
@@ -775,7 +809,7 @@ export const togglePinChat = async (req, res) => {
 
     const updatedParticipant = await prisma.chatParticipant.update({
       where: { id: participant.id },
-      data: { isPinned: !participant.isPinned },
+      data: { pinnedAt: participant.pinnedAt ? null : new Date() },
       include: {
         chat: {
           include: {

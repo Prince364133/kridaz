@@ -9,8 +9,10 @@ import {
   listUserBroadcasts,
   updateBroadcast,
   endBroadcast,
-  deleteBroadcast
+  deleteBroadcast,
+  createOAuth2Client
 } from '../../services/youtubeService.js';
+import { redisClient as redis } from '../../config/redis.js';
 import { createFacebookLiveStream } from '../../services/facebookService.js';
 import { endFacebookLiveStream } from '../../services/facebookService.js';
 import crypto from 'crypto';
@@ -50,28 +52,33 @@ const thumbnailUpload = multer({
  *       302:
  *         description: Redirects to Google Auth
  */
-router.get('/oauth/start', verifyAuth, (req, res) => {
-  const userId = req.user.id;
-  const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    process.env.YOUTUBE_REDIRECT_URI || `${process.env.APP_BASE_URL || 'https://kridaz.com'}/api/youtube/oauth/callback`
-  );
+router.get('/oauth/start', verifyAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const oauth2Client = createOAuth2Client();
 
-  const url = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    prompt: 'consent',
-    scope: [
-      'https://www.googleapis.com/auth/youtube',
-      'https://www.googleapis.com/auth/youtube.upload'
-    ],
-    state: userId.toString()
-  });
+    const nonce = crypto.randomBytes(16).toString('hex');
+    const stateKey = `oauth:state:youtube:${userId}`;
+    await redis.set(stateKey, nonce, 'EX', 900); // 15 minutes TTL
 
-  if (req.headers.accept?.includes('application/json')) {
-    return res.json({ url });
+    const url = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      prompt: 'consent',
+      scope: [
+        'https://www.googleapis.com/auth/youtube',
+        'https://www.googleapis.com/auth/youtube.upload'
+      ],
+      state: `${userId}:${nonce}`
+    });
+
+    if (req.headers.accept?.includes('application/json')) {
+      return res.json({ url });
+    }
+    res.redirect(url);
+  } catch (error) {
+    logger.error('YouTube startOAuth Error:', error.message);
+    res.status(500).json({ success: false, message: error.message });
   }
-  res.redirect(url);
 });
 
 /**
@@ -334,23 +341,29 @@ router.post('/stream/end/:matchId', verifyAuth, async (req, res) => {
 // Other routes (callback, account management, etc.) kept intact for brevity in replacement
 // but adding summaries to common ones.
 
-router.get('/oauth/url', verifyAuth, (req, res) => {
-  const userId = req.user.id;
-  const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    process.env.YOUTUBE_REDIRECT_URI || `${process.env.APP_BASE_URL || 'https://kridaz.com'}/api/youtube/oauth/callback`
-  );
-  const url = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    prompt: 'consent',
-    scope: [
-      'https://www.googleapis.com/auth/youtube',
-      'https://www.googleapis.com/auth/youtube.upload'
-    ],
-    state: userId.toString()
-  });
-  res.json({ url });
+router.get('/oauth/url', verifyAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const oauth2Client = createOAuth2Client();
+
+    const nonce = crypto.randomBytes(16).toString('hex');
+    const stateKey = `oauth:state:youtube:${userId}`;
+    await redis.set(stateKey, nonce, 'EX', 900); // 15 minutes TTL
+
+    const url = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      prompt: 'consent',
+      scope: [
+        'https://www.googleapis.com/auth/youtube',
+        'https://www.googleapis.com/auth/youtube.upload'
+      ],
+      state: `${userId}:${nonce}`
+    });
+    res.json({ url });
+  } catch (error) {
+    logger.error('YouTube oauthUrl Error:', error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 router.delete('/account/:accountId', verifyAuth, async (req, res) => {
@@ -380,14 +393,26 @@ router.delete('/account/:accountId', verifyAuth, async (req, res) => {
 });
 
 router.get('/oauth/callback', async (req, res) => {
-  const { code, state: userId } = req.query;
+  const { code, state } = req.query;
 
   try {
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      process.env.YOUTUBE_REDIRECT_URI || `${process.env.APP_BASE_URL || 'https://kridaz.com'}/api/youtube/oauth/callback`
-    );
+    if (!code) throw new Error('No code provided');
+    if (!state) throw new Error('No state parameter provided');
+
+    // CSRF State Verification
+    const [userId, nonce] = state.split(':');
+    if (!userId || !nonce) {
+      throw new Error('CSRF validation failed: Invalid state format');
+    }
+
+    const stateKey = `oauth:state:youtube:${userId}`;
+    const storedNonce = await redis.get(stateKey);
+    if (!storedNonce || storedNonce !== nonce) {
+      throw new Error('CSRF validation failed: State nonce mismatch or expired');
+    }
+    await redis.del(stateKey);
+
+    const oauth2Client = createOAuth2Client();
 
     const { tokens } = await oauth2Client.getToken(code);
 

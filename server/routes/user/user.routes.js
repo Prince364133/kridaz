@@ -10,6 +10,7 @@ import walletRouter from "../../modules/wallet/wallet.routes.js";
 import notificationRouter from "../../modules/notification/notification.routes.js";
 import disputeRouter from "../../modules/dispute/dispute.routes.js";
 import playerPublicRouter from "../../modules/player/routes/public.routes.js";
+import userBookingRouter from "../../modules/booking/routes/user.routes.js";
 
 /**
  * @description User actor router. Mounts all user-facing sub-domains.
@@ -32,5 +33,6 @@ userRouter.use("/community", communityRouter);
 userRouter.use("/wallet", walletRouter);
 userRouter.use("/dispute", disputeRouter);
 userRouter.use("/notifications", notificationRouter);
+userRouter.use("/booking", userBookingRouter);
 
 export default userRouter;

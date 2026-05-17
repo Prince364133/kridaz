@@ -391,3 +391,16 @@ export async function getChannelStats(userId) {
     return null;
   }
 }
+
+/**
+ * Creates a basic, unauthenticated Google OAuth2 client.
+ * Serves as a single source of truth for GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and YOUTUBE_REDIRECT_URI.
+ */
+export function createOAuth2Client() {
+  return new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.YOUTUBE_REDIRECT_URI || `${process.env.APP_BASE_URL || 'https://kridaz.com'}/api/youtube/oauth/callback`
+  );
+}
+

@@ -1,5 +1,5 @@
 import { Worker } from "bullmq";
-import ioredis from "ioredis";
+import { bullmqConnection as connection } from "../config/redis.js";
 import logger from "../utils/logger.js";
 import { 
   sendWhatsAppMessage, 
@@ -9,12 +9,6 @@ import {
 } from "../utils/notification.service.js";
 import generateEmail from "../utils/generateEmail.js";
 import { createNotification, notifyAdmins } from "../utils/notificationHelper.js";
-
-const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
-
-const connection = new ioredis(REDIS_URL, {
-  maxRetriesPerRequest: null,
-});
 
 /**
  * Worker to process notification jobs

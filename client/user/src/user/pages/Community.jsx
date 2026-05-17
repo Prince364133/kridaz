@@ -1,15 +1,9 @@
 import { useState, useEffect } from "react";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSelector, useDispatch } from "react-redux";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { followUser, unfollowUser } from "@redux/slices/authSlice";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { Link, useNavigate } from "react-router-dom";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import axiosInstance from "@hooks/useAxiosInstance";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { 
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
   Heart, MessageCircle, Share2, Plus, Image as ImageIcon, X, MoreVertical, Send,
   Loader2, Trash2, Clock, User as UserIcon, Trophy, Edit, Edit3, Twitter, Facebook,
   Link as LinkIcon, Eye, ChevronDown, TrendingUp, Target, BarChart3, Users, Zap,
@@ -17,15 +11,10 @@ import { SOCKET } from '@kridaz/shared-constants/socketEvents';
   Circle, Bookmark, Smile, Search, Play, Video, Home, Bell, PlaySquare
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import toast from "react-hot-toast";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import StoryViewer from "../components/StoryViewer";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import {
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
   communityApi,
   useGetCommunityFeedQuery,
   useGetStoriesFeedQuery,
@@ -44,15 +33,11 @@ import { SOCKET } from '@kridaz/shared-constants/socketEvents';
   useConfirmStoryUploadMutation
 } from "../../redux/api/communityApi";
 import { useGetReelsFeedQuery } from "../../redux/api/reelsApi";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { startUpload } from "../../redux/slices/mediaUploadSlice";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import ReelItem from "../../components/common/ReelItem";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSocket } from "@context/SocketContext";
 import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { uploadFileToR2 } from "@utils/mediaUpload";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
 const PRI = "#84CC16";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
@@ -106,7 +91,7 @@ const Community = () => {
       return post.image || post.imageUrl || post.videoUrl;
     }
     if (activeFilter === "Following") {
-      const authorId = post.adminId?._id || post.adminId || post.user?._id || post.user;
+      const authorId = post.adminId?.id || post.adminId?._id || post.user?.id || post.user?._id || post.adminId || post.user;
       return followingIds?.includes(authorId);
     }
     return true;
@@ -121,7 +106,7 @@ const Community = () => {
     const handleNewPost = (newPost) => {
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          if (!draft.posts.find(p => p._id === newPost._id)) {
+          if (!draft.posts.find(p => (p._id || p.id) === (newPost._id || newPost.id))) {
             draft.posts.unshift(newPost);
           }
         })
@@ -136,7 +121,7 @@ const Community = () => {
     const handlePostLiked = ({ postId, likes, likesCount }) => {
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          const post = draft.posts.find(p => p._id === postId);
+          const post = draft.posts.find(p => (p._id || p.id) === postId);
           if (post) {
             post.likes = likes;
           }
@@ -147,7 +132,7 @@ const Community = () => {
     const handlePostCommented = ({ postId, comments }) => {
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          const post = draft.posts.find(p => p._id === postId);
+          const post = draft.posts.find(p => (p._id || p.id) === postId);
           if (post) {
             post.comments = comments;
           }
@@ -163,7 +148,7 @@ const Community = () => {
     const handlePostDeleted = (postId) => {
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          draft.posts = draft.posts.filter(p => p._id !== postId);
+          draft.posts = draft.posts.filter(p => (p._id || p.id) !== postId);
         })
       );
       dispatch(
@@ -176,7 +161,7 @@ const Community = () => {
     const handleMediaProgress = ({ mediaId, progress, status }) => {
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          const post = draft.posts.find(p => p._id === mediaId);
+          const post = draft.posts.find(p => (p._id || p.id) === mediaId);
           if (post) {
             post.status = 'pending';
             post.processingProgress = progress;
@@ -188,7 +173,7 @@ const Community = () => {
     const handleMediaComplete = ({ mediaId, hlsUrl, thumbnailUrl }) => {
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          const post = draft.posts.find(p => p._id === mediaId);
+          const post = draft.posts.find(p => (p._id || p.id) === mediaId);
           if (post) {
             post.status = 'ready';
             post.mediaUrl = hlsUrl;
@@ -248,7 +233,7 @@ const Community = () => {
       try {
         const res = await axiosInstance.get('/api/user/players', { params: { search: searchQuery } });
         if (res.data?.success) {
-          setSearchResults(res.data.players || []);
+          setSearchResults((res.data.players || []).map(p => ({ ...p, _id: p.id || p._id })));
         }
       } catch (err) {
         console.error("Search failed:", err);
@@ -353,6 +338,10 @@ const Community = () => {
     try {
       const mediaItems = [];
       
+      let firstStoryId = null;
+      let firstKey = null;
+      let firstMediaType = null;
+
       // 1. Upload each media file (Fallback for multi-file/text stories)
       for (const file of newStory.mediaFiles) {
         const { data: uploadData } = await getStoryUploadUrl({
@@ -362,17 +351,20 @@ const Community = () => {
 
         await uploadFileToR2(uploadData.uploadUrl, file);
         
-        mediaItems.push({
-          key: uploadData.key,
-          mediaType: file.type.startsWith('video') ? 'video' : 'image'
-        });
+        if (!firstStoryId) {
+          firstStoryId = uploadData.storyId;
+          firstKey = uploadData.key;
+          firstMediaType = file.type.startsWith('video') ? 'video' : 'image';
+        }
       }
 
       // 2. Confirm Story
       await confirmStoryUpload({
+        storyId: firstStoryId,
+        key: firstKey,
+        mediaType: firstMediaType,
         content: newStory.content,
-        durationDays: newStory.durationDays,
-        mediaItems
+        durationDays: newStory.durationDays
       }).unwrap();
 
       toast.success("Story uploaded!");
@@ -561,7 +553,7 @@ const Community = () => {
                   <div className="p-2 space-y-1">
                     {searchResults.map(player => (
                       <div 
-                        key={player._id} 
+                        key={player.id || player._id} 
                         onClick={() => {
                           setShowGlobalSearch(false);
                           navigate(`/profile/${player._id}`);
@@ -760,16 +752,28 @@ const Community = () => {
                 {/* Render Stories */}
                 {stories.map((group, idx) => (
                   <div 
-                    key={group._id} 
+                    key={group.id || group._id || idx} 
                     onClick={() => { setSelectedStoryGroup(group); setCurrentStoryIndex(0); }}
                     className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
                   >
                     <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${idx === 0 ? 'bg-[#84CC16]' : 'bg-white/20'}`}>
                       <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
-                        <div className="w-full h-full rounded-full overflow-hidden bg-[#111]">
-                          {group.stories[0].mediaUrl ? (
+                        <div className="w-full h-full rounded-full overflow-hidden bg-[#111] relative">
+                          {group.stories[0].mediaType === 'video' ? (
+                            group.stories[0].thumbnailUrl || group.stories[0].mediaUrl ? (
+                              <img 
+                                src={group.stories[0].thumbnailUrl || group.stories[0].mediaUrl} 
+                                alt="" 
+                                className={`w-full h-full object-cover ${(group.stories.some(s => s.status === 'pending' || s.status === 'processing')) ? 'blur-sm opacity-50' : ''}`} 
+                              />
+                            ) : (
+                              <div className={`w-full h-full flex items-center justify-center bg-[#111] ${(group.stories.some(s => s.status === 'pending' || s.status === 'processing')) ? 'animate-pulse' : ''}`}>
+                                <PlaySquare size={20} className="text-[#84CC16]" />
+                              </div>
+                            )
+                          ) : group.stories[0].mediaUrl || group.stories[0].rawMediaUrl ? (
                             <img 
-                              src={group.stories[0].thumbnailUrl || group.stories[0].mediaUrl} 
+                              src={group.stories[0].thumbnailUrl || group.stories[0].mediaUrl || group.stories[0].rawMediaUrl} 
                               alt="" 
                               className={`w-full h-full object-cover ${(group.stories.some(s => s.status === 'pending' || s.status === 'processing')) ? 'blur-sm opacity-50' : ''}`} 
                             />
@@ -857,7 +861,7 @@ const Community = () => {
                       <Loader2 size={36} className="text-[#84CC16] animate-spin" />
                     </div>
                   ) : reels.length > 0 ? reels.map((reel, index) => (
-                    <div key={reel._id} className="w-full h-full snap-start snap-always relative bg-black overflow-hidden flex-shrink-0">
+                    <div key={reel.id || reel._id} className="w-full h-full snap-start snap-always relative bg-black overflow-hidden flex-shrink-0">
                       {Math.abs(index - activeReelIndex) <= 2 ? (
                         <ReelItem reel={reel} isVisible={index === activeReelIndex} />
                       ) : (
@@ -888,7 +892,7 @@ const Community = () => {
             ) : (
               <div className="space-y-6">
                 {posts.map(post => (
-                  <div key={post._id} className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 space-y-4">
+                  <div key={post.id || post._id} className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 space-y-4">
                     {/* Post Header */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -976,15 +980,15 @@ const Community = () => {
                     {/* Action Bar */}
                     <div className="flex items-center justify-between pt-1">
                       <div className="flex items-center gap-5">
-                         <button onClick={() => handleLike(post._id)} className="flex items-center gap-2 group">
-                            <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l._id || l) === user?._id) ? 'fill-[#84CC16] text-[#84CC16]' : 'text-white/70 group-hover:text-red-500'}`} />
+                         <button onClick={() => handleLike(post.id || post._id)} className="flex items-center gap-2 group">
+                            <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l._id || l.id || l) === (user?.id || user?._id)) ? 'fill-[#84CC16] text-[#84CC16]' : 'text-white/70 group-hover:text-red-500'}`} />
                             <span className="text-[12px] font-bold text-white">{post.likes?.length || 0}</span>
                          </button>
-                         <button className="flex items-center gap-2 group">
+                         <button onClick={() => setShowComments(prev => ({...prev, [post.id || post._id]: !prev[post.id || post._id]}))} className="flex items-center gap-2 group">
                             <MessageCircle size={20} className="text-white/70 group-hover:text-white transition-colors" />
                             <span className="text-[12px] font-bold text-white">{post.comments?.length || 0}</span>
                          </button>
-                         <button onClick={() => handleShareToPlatform('copy', post._id)} className="flex items-center gap-2 group">
+                         <button onClick={() => handleShareToPlatform('copy', post.id || post._id)} className="flex items-center gap-2 group">
                             <Send size={18} className="text-white/70 group-hover:text-white transition-colors" />
                             <span className="text-[12px] font-bold text-white">Share</span>
                          </button>
@@ -1022,10 +1026,10 @@ const Community = () => {
                         type="text" 
                         placeholder="Add a comment..." 
                         className="flex-1 bg-transparent text-[12px] font-medium outline-none text-white placeholder:text-white/40"
-                        value={commentInputs[post._id] || ""}
-                        onChange={(e) => setCommentInputs({...commentInputs, [post._id]: e.target.value})}
+                        value={commentInputs[post.id || post._id] || ""}
+                        onChange={(e) => setCommentInputs({...commentInputs, [post.id || post._id]: e.target.value})}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleAddComment(post._id);
+                          if (e.key === 'Enter') handleAddComment(post.id || post._id);
                         }}
                       />
                       <button className="text-white/40 hover:text-white">

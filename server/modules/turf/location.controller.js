@@ -9,8 +9,7 @@ export const getStates = async (req, res) => {
     const states = await prisma.turf.findMany({
       where: { 
         status: "approved", 
-        isActive: true,
-        state: { not: null }
+        isActive: true
       },
       select: { state: true },
       distinct: ['state'],
@@ -29,7 +28,7 @@ export const getStates = async (req, res) => {
 export const getCities = async (req, res) => {
   const { state } = req.query;
   try {
-    const where = { status: "approved", isActive: true, city: { not: null } };
+    const where = { status: "approved", isActive: true };
     if (state) where.state = state;
     
     const cities = await prisma.turf.findMany({

@@ -56,9 +56,34 @@ const startServer = () => {
         logger.info("[WORKER] Starting media processing workers...");
         
         // Start Unified Media Worker (Reels, Stories, Community)
+        // Uses an INLINE processor (same process) — NOT sandboxed, ESM & Windows-safe
         const { mediaWorker, mediaQueue } = await import("./queues/media.queue.js");
         trackQueue("media", mediaQueue);
-        logger.info("[MEDIA] Unified sandboxed worker initialized.");
+        logger.info("[MEDIA] Unified inline media worker initialized.");
+
+        // On startup: drain stale failed jobs from previous runs and requeue
+        // any pending DB reels that have a rawVideoUrl (safety net for server restarts)
+        try {
+          const failedJobs = await mediaQueue.getFailed(0, 200);
+          if (failedJobs.length > 0) {
+            logger.info(`[MEDIA] Draining ${failedJobs.length} stale failed jobs from previous runs...`);
+            await Promise.all(failedJobs.map((j) => j.remove()));
+          }
+
+          const { prisma } = await import('./config/prisma.js');
+          const pendingReels = await prisma.reel.findMany({
+            where: { status: 'pending', rawVideoUrl: { not: null } },
+            select: { id: true },
+          });
+          if (pendingReels.length > 0) {
+            logger.info(`[MEDIA] Re-queuing ${pendingReels.length} pending reels from DB...`);
+            for (const reel of pendingReels) {
+              await mediaQueue.add('TRANSCODE_VIDEO', { mediaId: reel.id, mediaType: 'reel' });
+            }
+          }
+        } catch (drainErr) {
+          logger.warn(`[MEDIA] Startup drain/requeue failed (non-fatal): ${drainErr.message}`);
+        }
       } else {
         logger.info("[SERVER] Media workers disabled (API-only mode).");
       }

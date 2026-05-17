@@ -11,7 +11,8 @@ import {
   updateProfile,
   checkUsername,
   generateRecoveryTokens,
-  loginWithRecoveryToken
+  loginWithRecoveryToken,
+  upgradeRequest
 } from "../auth.controller.js";
 import { 
   userRegisterSchema, 
@@ -21,6 +22,7 @@ import {
 } from "../auth.validator.js";
 import { validate } from "../../../middleware/validate.middleware.js";
 import userAuth from "../../../middleware/jwt/user.middleware.js";
+import upload from "../../../middleware/uploads/upload.middleware.js";
 import {
   authLimiter,
   otpLimiter,
@@ -153,5 +155,16 @@ router.put("/updateProfile", userAuth, updateProfile);
  *       - BearerAuth: []
  */
 router.post("/recovery/generate", userAuth, generateRecoveryTokens);
+
+/**
+ * @swagger
+ * /auth/upgrade-request:
+ *   post:
+ *     summary: Submit a role upgrade request
+ *     tags: [Auth]
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post("/upgrade-request", userAuth, upload.array("documents", 10), upgradeRequest);
 
 export default router;

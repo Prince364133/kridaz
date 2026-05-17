@@ -19,9 +19,17 @@ const ReelItem = ({ reel, isVisible }) => {
 
   const isCreator = user?.id === reel.creatorId?._id || user?.id === reel.creatorId;
 
+  const stats = reel.stats || {
+    views: reel.views || 0,
+    likes: reel.likes || 0,
+    comments: reel.comments || 0,
+    shares: reel.shares || 0
+  };
+
   const handleLike = () => {
     setIsLiked(!isLiked);
-    interact({ reelId: reel._id, type: 'like' });
+    // Prisma returns `id` (UUID), not Mongo-style `_id`
+    interact({ reelId: reel.id, type: 'like' });
     if (!isLiked) {
       setShowHeartAnim(true);
       setTimeout(() => setShowHeartAnim(false), 800);
@@ -41,7 +49,7 @@ const ReelItem = ({ reel, isVisible }) => {
     const shareData = {
       title: 'Kridaz Shorts',
       text: reel.caption,
-      url: `${window.location.origin}/shorts/${reel._id}`
+      url: `${window.location.origin}/shorts/${reel.id}`
     };
 
     try {
@@ -51,7 +59,7 @@ const ReelItem = ({ reel, isVisible }) => {
         await navigator.clipboard.writeText(shareData.url);
         toast.success('Link copied to clipboard!');
       }
-      interact({ reelId: reel._id, type: 'share' });
+      interact({ reelId: reel.id, type: 'share' });
     } catch (err) {
       console.error('Share failed:', err);
     }
@@ -60,7 +68,7 @@ const ReelItem = ({ reel, isVisible }) => {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this short?')) {
       try {
-        await deleteReel(reel._id).unwrap();
+        await deleteReel(reel.id).unwrap();
         toast.success('Short deleted');
       } catch (err) {
         toast.error('Failed to delete short');
@@ -73,7 +81,7 @@ const ReelItem = ({ reel, isVisible }) => {
     if (!commentText.trim()) return;
 
     try {
-      await addComment({ reelId: reel._id, text: commentText }).unwrap();
+      await addComment({ reelId: reel.id, text: commentText }).unwrap();
       setCommentText('');
       toast.success('Comment added');
     } catch (err) {
@@ -81,7 +89,8 @@ const ReelItem = ({ reel, isVisible }) => {
     }
   };
 
-  const isProcessing = reel.status === 'pending' && !reel.temp;
+  // Show processing UI for both 'pending' (queued) and 'processing' (worker active)
+  const isProcessing = (reel.status === 'pending' || reel.status === 'processing') && !reel.temp;
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden flex items-center justify-center">
@@ -102,7 +111,9 @@ const ReelItem = ({ reel, isVisible }) => {
             {/* Processing Overlay */}
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm">
               <div className="w-16 h-16 border-4 border-[#84CC16] border-t-transparent rounded-full animate-spin mb-4" />
-              <p className="text-[#84CC16] font-bold text-lg">Optimizing Reel...</p>
+              <p className="text-[#84CC16] font-bold text-lg">
+                {reel.processingStatus || 'Optimizing Reel...'}
+              </p>
               <p className="text-white/60 text-sm mt-2">{reel.processingProgress || 0}% Complete</p>
               
               {/* Progress Bar */}
@@ -110,6 +121,7 @@ const ReelItem = ({ reel, isVisible }) => {
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${reel.processingProgress || 0}%` }}
+                  transition={{ ease: 'easeOut', duration: 0.5 }}
                   className="h-full bg-[#84CC16]"
                 />
               </div>
@@ -145,7 +157,7 @@ const ReelItem = ({ reel, isVisible }) => {
           <button className={`p-2.5 transition-all duration-300 active:scale-150 ${isLiked ? 'text-red-500 scale-110' : 'text-white'}`}>
             <Heart size={40} fill={isLiked ? "currentColor" : "none"} strokeWidth={2.5} className="drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" />
           </button>
-          <span className="text-white text-sm font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{reel.stats.likes || 0}</span>
+          <span className="text-white text-sm font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{stats.likes || 0}</span>
         </div>
         
         <div className="flex flex-col items-center gap-1.5">
@@ -155,7 +167,7 @@ const ReelItem = ({ reel, isVisible }) => {
           >
             <MessageCircle size={40} strokeWidth={2.5} className="drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" />
           </button>
-          <span className="text-white text-sm font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{reel.stats.comments || 0}</span>
+          <span className="text-white text-sm font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{stats.comments || 0}</span>
         </div>
 
         <div className="flex flex-col items-center gap-1.5">
@@ -279,7 +291,7 @@ const ReelItem = ({ reel, isVisible }) => {
               
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-white font-bold text-xl">Comments</h3>
-                <span className="text-white/60 text-sm font-medium">{reel.stats.comments || 0}</span>
+                <span className="text-white/60 text-sm font-medium">{stats.comments || 0}</span>
               </div>
 
               <div className="flex-1 overflow-y-auto mb-6 pr-2 scrollbar-hide">

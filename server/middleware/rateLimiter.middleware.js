@@ -17,8 +17,8 @@ export const authLimiter = rateLimit({
   legacyHeaders: false,
   store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
   message: { success: false, message: 'Too many attempts. Please try again in 15 minutes.' },
-  skipSuccessfulRequests: true, 
-  skip: (req) => process.env.NODE_ENV === 'test',
+  skipSuccessfulRequests: true,
+  skip: (req) => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
 });
 
 /**
@@ -32,7 +32,7 @@ export const otpLimiter = rateLimit({
   legacyHeaders: false,
   store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
   message: { success: false, message: 'Too many OTP requests. Please wait a while.' },
-  skip: (req) => process.env.NODE_ENV === 'test',
+  skip: (req) => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
 });
 
 /**
@@ -45,7 +45,7 @@ export const paymentLimiter = rateLimit({
   legacyHeaders: false,
   store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
   message: { success: false, message: 'Too many payment requests. Please slow down.' },
-  skip: (req) => process.env.NODE_ENV === 'test',
+  skip: (req) => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
 });
 
 /**
@@ -59,5 +59,5 @@ export const globalLimiter = rateLimit({
   legacyHeaders: false,
   store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
   message: { success: false, message: 'Too many requests. Please slow down.' },
-  skip: (req) => process.env.NODE_ENV === 'test' || req.path === '/health' || req.path === '/api/health',
+  skip: (req) => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development' || req.path === '/health' || req.path === '/api/health',
 });

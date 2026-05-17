@@ -32,17 +32,7 @@ const router = express.Router();
  */
 router.get('/search', searchPlayers);
 
-/**
- * @swagger
- * /player/{id}:
- *   get:
- *     summary: Get player profile
- *     tags: [Player]
- */
-router.get('/:id', getPlayerProfile);
-
-// ── Authenticated Routes ────────────────────────────────────────────────────
-router.use(userAuth);
+// ── Authenticated Routes (Static) ───────────────────────────────────────────
 
 /**
  * @swagger
@@ -53,7 +43,7 @@ router.use(userAuth);
  *     security:
  *       - BearerAuth: []
  */
-router.get('/nearby', getNearbyPlayers);
+router.get('/nearby', userAuth, getNearbyPlayers);
 
 /**
  * @swagger
@@ -64,7 +54,7 @@ router.get('/nearby', getNearbyPlayers);
  *     security:
  *       - BearerAuth: []
  */
-router.post('/location', updateUserLocation);
+router.post('/location', userAuth, updateUserLocation);
 
 /**
  * @swagger
@@ -75,7 +65,7 @@ router.post('/location', updateUserLocation);
  *     security:
  *       - BearerAuth: []
  */
-router.patch('/notification-preferences', updateNotificationPreferences);
+router.patch('/notification-preferences', userAuth, updateNotificationPreferences);
 
 /**
  * @swagger
@@ -86,7 +76,20 @@ router.patch('/notification-preferences', updateNotificationPreferences);
  *     security:
  *       - BearerAuth: []
  */
-router.get('/network', getNetwork);
+router.get('/network', userAuth, getNetwork);
+
+// ── Public Parameterized / Wildcard Routes ──────────────────────────────────
+
+/**
+ * @swagger
+ * /player/{id}:
+ *   get:
+ *     summary: Get player profile
+ *     tags: [Player]
+ */
+router.get('/:id', getPlayerProfile);
+
+// ── Authenticated Parameterized / Wildcard Routes ───────────────────────────
 
 /**
  * @swagger
@@ -97,7 +100,7 @@ router.get('/network', getNetwork);
  *     security:
  *       - BearerAuth: []
  */
-router.post('/:id/follow', followPlayer);
+router.post('/:id/follow', userAuth, followPlayer);
 
 /**
  * @swagger
@@ -108,7 +111,7 @@ router.post('/:id/follow', followPlayer);
  *     security:
  *       - BearerAuth: []
  */
-router.post('/:id/unfollow', unfollowPlayer);
+router.post('/:id/unfollow', userAuth, unfollowPlayer);
 
 /**
  * @swagger
@@ -119,6 +122,6 @@ router.post('/:id/unfollow', unfollowPlayer);
  *     security:
  *       - BearerAuth: []
  */
-router.get('/:id/network', getNetworkById);
+router.get('/:id/network', userAuth, getNetworkById);
 
 export default router;

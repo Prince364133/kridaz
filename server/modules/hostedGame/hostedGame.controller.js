@@ -7,6 +7,93 @@ import { generateUserToken } from "../../utils/generateJwtToken.js";
 import WalletService from "../../services/wallet.service.js";
 import logger from "../../utils/logger.js";
 
+const fullGameInclude = {
+  host: { select: { id: true, name: true, profilePicture: true } },
+  turf: { select: { id: true, name: true, city: true, state: true, images: true } },
+  umpire: { select: { id: true, name: true, profilePicture: true } },
+  scorer: { select: { id: true, name: true, profilePicture: true } },
+  streamer: { select: { id: true, name: true, profilePicture: true } },
+  slots: { include: { user: { select: { id: true, name: true, profilePicture: true } } } },
+  teams: {
+    include: {
+      slots: { include: { user: { select: { id: true, name: true, profilePicture: true } } } }
+    }
+  }
+};
+
+const formatGameForClient = (game) => {
+  if (!game) return game;
+  const formatted = JSON.parse(JSON.stringify(game));
+  
+  if (formatted.id) {
+    formatted._id = formatted.id;
+  }
+  
+  if (formatted.slots) {
+    formatted.quickSlots = formatted.slots;
+  }
+  
+  if (Array.isArray(formatted.teams)) {
+    const teamA = formatted.teams.find(t => t.teamKey === 'teamA');
+    const teamB = formatted.teams.find(t => t.teamKey === 'teamB');
+    formatted.teams = { teamA, teamB };
+  }
+  
+  return formatted;
+};
+
+const populateRequestUsers = async (games) => {
+  if (!games || !games.length) return games;
+  
+  const userIds = new Set();
+  games.forEach(game => {
+    if (game.umpireRequest && typeof game.umpireRequest === 'object') {
+      const uReq = game.umpireRequest;
+      if (uReq.userId) userIds.add(uReq.userId);
+    }
+    if (game.scorerRequest && typeof game.scorerRequest === 'object') {
+      const sReq = game.scorerRequest;
+      if (sReq.userId) userIds.add(sReq.userId);
+    }
+    if (game.streamerRequest && typeof game.streamerRequest === 'object') {
+      const stReq = game.streamerRequest;
+      if (stReq.userId) userIds.add(stReq.userId);
+    }
+  });
+
+  if (userIds.size === 0) return games;
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: Array.from(userIds) } },
+    select: { id: true, name: true, profilePicture: true }
+  });
+
+  const userMap = new Map(users.map(u => [u.id, u]));
+
+  games.forEach(game => {
+    if (game.umpireRequest && typeof game.umpireRequest === 'object') {
+      const uReq = game.umpireRequest;
+      if (uReq.userId) {
+        uReq.user = userMap.get(uReq.userId) || null;
+      }
+    }
+    if (game.scorerRequest && typeof game.scorerRequest === 'object') {
+      const sReq = game.scorerRequest;
+      if (sReq.userId) {
+        sReq.user = userMap.get(sReq.userId) || null;
+      }
+    }
+    if (game.streamerRequest && typeof game.streamerRequest === 'object') {
+      const stReq = game.streamerRequest;
+      if (stReq.userId) {
+        stReq.user = userMap.get(stReq.userId) || null;
+      }
+    }
+  });
+
+  return games;
+};
+
 // Helper to check usable balance
 const getUsableBalance = async (userId) => {
   return await WalletService.getUsableBalance(userId, 'user');
@@ -327,7 +414,7 @@ export const createHostedGame = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Game hosted successfully!",
-      game: result,
+      game: formatGameForClient(result),
     });
 
   } catch (error) {
@@ -351,14 +438,12 @@ export const getAllHostedGames = async (req, res) => {
         ...(gameType ? { gameType } : {})
       },
       orderBy: { date: 'asc' },
-      include: {
-        host: { select: { id: true, name: true, profilePicture: true } },
-        turf: { select: { id: true, name: true, city: true, state: true, images: true } },
-        umpire: { select: { id: true, name: true, profilePicture: true } }
-      }
+      include: fullGameInclude
     });
 
-    return res.status(200).json({ games });
+    const formattedGames = games.map(formatGameForClient);
+
+    return res.status(200).json({ games: formattedGames });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -529,25 +614,16 @@ export const approveJoinRequest = async (req, res) => {
 export const getMyHostedGames = async (req, res) => {
   try {
     const hostId = req.user.id || req.user.user;
-    const games = await prisma.hostedGame.findMany({
+    let games = await prisma.hostedGame.findMany({
       where: { hostId },
       orderBy: { date: 'desc' },
-      include: {
-        turf: { select: { id: true, name: true, city: true, state: true, images: true } },
-        umpire: { select: { id: true, name: true, profilePicture: true } },
-        slots: { include: { user: { select: { name: true, profilePicture: true } } } },
-        teams: {
-          include: {
-            slots: { include: { user: { select: { name: true, profilePicture: true } } } }
-          }
-        },
-        umpireRequest: { include: { user: { select: { name: true, profilePicture: true } } } },
-        scorerRequest: { include: { user: { select: { name: true, profilePicture: true } } } },
-        streamerRequest: { include: { user: { select: { name: true, profilePicture: true } } } }
-      }
+      include: fullGameInclude
     });
 
-    return res.status(200).json({ games });
+    games = await populateRequestUsers(games);
+    const formattedGames = games.map(formatGameForClient);
+
+    return res.status(200).json({ games: formattedGames });
   } catch (error) {
     logger.error("Error in getMyHostedGames:", error);
     return res.status(500).json({ message: error.message });
@@ -688,20 +764,14 @@ export const getMyJoinedGames = async (req, res) => {
       where: { userId },
       include: {
         game: {
-          include: {
-            host: true,
-            ground: true,
-            umpire: true,
-            scorer: true,
-            streamer: true
-          }
+          include: fullGameInclude
         }
       },
       orderBy: { game: { date: 'desc' } }
     });
 
     const gamesWithMyInfo = slots.map(slot => {
-      const game = slot.game;
+      const game = formatGameForClient(slot.game);
       return {
         ...game,
         mySlotStatus: slot.status,
@@ -803,21 +873,13 @@ export const getHostedGameByShortId = async (req, res) => {
         OR: orClauses,
         status: { in: ["ACTIVE", "PENDING"] }
       },
-      include: {
-        host: { select: { id: true, name: true, profilePicture: true } },
-        turf: true,
-        umpire: { select: { id: true, name: true, profilePicture: true } },
-        scorer: { select: { id: true, name: true, profilePicture: true } },
-        streamer: { select: { id: true, name: true, profilePicture: true } },
-        umpireRequest: { include: { user: { select: { id: true, name: true, profilePicture: true } } } },
-        scorerRequest: { include: { user: { select: { id: true, name: true, profilePicture: true } } } },
-        streamerRequest: { include: { user: { select: { id: true, name: true, profilePicture: true } } } }
-      }
+      include: fullGameInclude
     });
     
     if (!game) return res.status(404).json({ message: "Game not found" });
+    await populateRequestUsers([game]);
     
-    return res.status(200).json({ success: true, game });
+    return res.status(200).json({ success: true, game: formatGameForClient(game) });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -829,8 +891,7 @@ export const requestToUmpire = async (req, res) => {
     const { gameId } = req.body;
 
     const game = await prisma.hostedGame.findUnique({
-      where: { id: gameId },
-      include: { umpireRequest: true }
+      where: { id: gameId }
     });
     if (!game) throw new Error("Game not found");
     
@@ -846,12 +907,7 @@ export const requestToUmpire = async (req, res) => {
     await prisma.hostedGame.update({
       where: { id: gameId },
       data: {
-        umpireRequest: {
-          upsert: {
-            create: { userId: umpireId, status: "PENDING" },
-            update: { userId: umpireId, status: "PENDING" }
-          }
-        }
+        umpireRequest: { userId: umpireId, status: "PENDING" }
       }
     });
 
@@ -868,24 +924,27 @@ export const handleUmpireRequest = async (req, res) => {
     const { gameId, action } = req.body; // action: 'APPROVE' or 'REJECT'
 
     const game = await prisma.hostedGame.findFirst({
-      where: { id: gameId, hostId },
-      include: { umpireRequest: true }
+      where: { id: gameId, hostId }
     });
     if (!game) throw new Error("Unauthorized or game not found");
 
     if (action === "APPROVE") {
+      const currentRequest = game.umpireRequest || {};
+      const updatedRequest = { ...currentRequest, status: "APPROVED" };
       await prisma.hostedGame.update({
         where: { id: gameId },
         data: {
           umpireId: game.umpireRequest.userId,
-          umpireRequest: { update: { status: "APPROVED" } }
+          umpireRequest: updatedRequest
         }
       });
     } else {
+      const currentRequest = game.umpireRequest || {};
+      const updatedRequest = { ...currentRequest, status: "REJECTED", userId: null };
       await prisma.hostedGame.update({
         where: { id: gameId },
         data: {
-          umpireRequest: { update: { status: "REJECTED", userId: null } }
+          umpireRequest: updatedRequest
         }
       });
     }
@@ -902,8 +961,7 @@ export const requestToStreamer = async (req, res) => {
     const { gameId } = req.body;
 
     const game = await prisma.hostedGame.findUnique({
-      where: { id: gameId },
-      include: { streamerRequest: true }
+      where: { id: gameId }
     });
     if (!game) throw new Error("Game not found");
     
@@ -919,12 +977,7 @@ export const requestToStreamer = async (req, res) => {
     await prisma.hostedGame.update({
       where: { id: gameId },
       data: {
-        streamerRequest: {
-          upsert: {
-            create: { userId: streamerId, status: "PENDING" },
-            update: { userId: streamerId, status: "PENDING" }
-          }
-        }
+        streamerRequest: { userId: streamerId, status: "PENDING" }
       }
     });
 
@@ -941,24 +994,27 @@ export const handleStreamerRequest = async (req, res) => {
     const { gameId, action } = req.body;
 
     const game = await prisma.hostedGame.findFirst({
-      where: { id: gameId, hostId },
-      include: { streamerRequest: true }
+      where: { id: gameId, hostId }
     });
     if (!game) throw new Error("Unauthorized or game not found");
 
     if (action === "APPROVE") {
+      const currentRequest = game.streamerRequest || {};
+      const updatedRequest = { ...currentRequest, status: "APPROVED" };
       await prisma.hostedGame.update({
         where: { id: gameId },
         data: {
           streamerId: game.streamerRequest.userId,
-          streamerRequest: { update: { status: "APPROVED" } }
+          streamerRequest: updatedRequest
         }
       });
     } else {
+      const currentRequest = game.streamerRequest || {};
+      const updatedRequest = { ...currentRequest, status: "REJECTED", userId: null };
       await prisma.hostedGame.update({
         where: { id: gameId },
         data: {
-          streamerRequest: { update: { status: "REJECTED", userId: null } }
+          streamerRequest: updatedRequest
         }
       });
     }
@@ -975,8 +1031,7 @@ export const requestToScorer = async (req, res) => {
     const { gameId } = req.body;
 
     const game = await prisma.hostedGame.findUnique({
-      where: { id: gameId },
-      include: { scorerRequest: true }
+      where: { id: gameId }
     });
     if (!game) throw new Error("Game not found");
     
@@ -992,12 +1047,7 @@ export const requestToScorer = async (req, res) => {
     await prisma.hostedGame.update({
       where: { id: gameId },
       data: {
-        scorerRequest: {
-          upsert: {
-            create: { userId: scorerId, status: "PENDING" },
-            update: { userId: scorerId, status: "PENDING" }
-          }
-        }
+        scorerRequest: { userId: scorerId, status: "PENDING" }
       }
     });
 
@@ -1014,24 +1064,27 @@ export const handleScorerRequest = async (req, res) => {
     const { gameId, action } = req.body;
 
     const game = await prisma.hostedGame.findFirst({
-      where: { id: gameId, hostId },
-      include: { scorerRequest: true }
+      where: { id: gameId, hostId }
     });
     if (!game) throw new Error("Unauthorized or game not found");
 
     if (action === "APPROVE") {
+      const currentRequest = game.scorerRequest || {};
+      const updatedRequest = { ...currentRequest, status: "APPROVED" };
       await prisma.hostedGame.update({
         where: { id: gameId },
         data: {
           scorerId: game.scorerRequest.userId,
-          scorerRequest: { update: { status: "APPROVED" } }
+          scorerRequest: updatedRequest
         }
       });
     } else {
+      const currentRequest = game.scorerRequest || {};
+      const updatedRequest = { ...currentRequest, status: "REJECTED", userId: null };
       await prisma.hostedGame.update({
         where: { id: gameId },
         data: {
-          scorerRequest: { update: { status: "REJECTED", userId: null } }
+          scorerRequest: updatedRequest
         }
       });
     }
@@ -1074,12 +1127,7 @@ export const inviteOfficial = async (req, res) => {
     await prisma.hostedGame.update({
       where: { id: gameId },
       data: {
-        [fieldName]: {
-          upsert: {
-            create: { userId: officialId, status: "PENDING" },
-            update: { userId: officialId, status: "PENDING" }
-          }
-        }
+        [fieldName]: { userId: officialId, status: "PENDING" }
       }
     });
 
@@ -1108,12 +1156,7 @@ export const respondToOfficialInvitation = async (req, res) => {
     const { gameId, type, action } = req.body; // type: 'UMPIRE', 'SCORER', 'STREAMER', action: 'APPROVE', 'REJECT'
 
     const game = await prisma.hostedGame.findUnique({
-      where: { id: gameId },
-      include: {
-        umpireRequest: true,
-        scorerRequest: true,
-        streamerRequest: true
-      }
+      where: { id: gameId }
     });
     if (!game) throw new Error("Game not found");
 
@@ -1141,12 +1184,14 @@ export const respondToOfficialInvitation = async (req, res) => {
     if (!fieldName) throw new Error("Invalid official type");
 
     if (action === "APPROVE") {
+      const currentRequest = game[requestId] || {};
+      const updatedRequest = { ...currentRequest, status: "APPROVED" };
       await prisma.$transaction([
         prisma.hostedGame.update({
           where: { id: gameId },
           data: {
             [fieldName]: userId,
-            [requestId]: { update: { status: "APPROVED" } }
+            [requestId]: updatedRequest
           }
         }),
         prisma.user.update({
@@ -1155,10 +1200,12 @@ export const respondToOfficialInvitation = async (req, res) => {
         })
       ]);
     } else {
+      const currentRequest = game[requestId] || {};
+      const updatedRequest = { ...currentRequest, status: "REJECTED", userId: null };
       await prisma.hostedGame.update({
         where: { id: gameId },
         data: {
-          [requestId]: { update: { status: "REJECTED", userId: null } }
+          [requestId]: updatedRequest
         }
       });
     }
@@ -1307,27 +1354,14 @@ export const getHostedGameById = async (req, res) => {
     const { id } = req.params;
     const game = await prisma.hostedGame.findUnique({
       where: { id },
-      include: {
-        host: { select: { id: true, name: true, profilePicture: true } },
-        turf: true,
-        umpire: { select: { id: true, name: true, profilePicture: true } },
-        scorer: { select: { id: true, name: true, profilePicture: true } },
-        streamer: { select: { id: true, name: true, profilePicture: true } },
-        slots: { include: { user: { select: { id: true, name: true, profilePicture: true } } } },
-        teams: {
-          include: {
-            slots: { include: { user: { select: { id: true, name: true, profilePicture: true } } } }
-          }
-        },
-        umpireRequest: { include: { user: { select: { id: true, name: true, profilePicture: true } } } },
-        scorerRequest: { include: { user: { select: { id: true, name: true, profilePicture: true } } } },
-        streamerRequest: { include: { user: { select: { id: true, name: true, profilePicture: true } } } }
-      }
+      include: fullGameInclude
     });
 
     if (!game) {
       return res.status(404).json({ message: "Game not found" });
     }
+
+    await populateRequestUsers([game]);
 
     // Official setup status for gating
     const officialSetupStatus = {
@@ -1341,7 +1375,7 @@ export const getHostedGameById = async (req, res) => {
 
     return res.status(200).json({ 
       success: true, 
-      game,
+      game: formatGameForClient(game),
       officialSetupStatus 
     });
   } catch (error) {
@@ -1625,12 +1659,7 @@ export const claimInviteSlot = async (req, res) => {
           where: { id: game.id },
           data: {
             umpireId: owner ? owner.id : userId,
-            umpireRequest: {
-              upsert: {
-                create: { userId: owner ? owner.id : userId, status: "APPROVED" },
-                update: { status: "APPROVED" }
-              }
-            }
+            umpireRequest: { userId: owner ? owner.id : userId, status: "APPROVED" }
           }
         });
 

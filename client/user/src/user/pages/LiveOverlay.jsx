@@ -16,9 +16,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { io } from 'socket.io-client';
 import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
@@ -60,7 +58,6 @@ const BADGE_CFG = {
 // ─── CSS injected once into the document head ────────────────────────────────
 const GLOBAL_CSS = `
  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
  * { box-sizing: border-box; margin: 0; padding: 0; }
 

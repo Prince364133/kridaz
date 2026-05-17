@@ -172,6 +172,7 @@ router.post("/validate-coupon", verifyToken, validateCoupon);
  *                 $ref: '#/components/schemas/Booking'
  */
 router.get("/all", verifyToken, getUserBookings);
+router.get("/get-bookings", verifyToken, getUserBookings);
 
 /**
  * @swagger

@@ -24,6 +24,8 @@ const useLoginForm = () => {
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [accountNotFound, setAccountNotFound] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingUser, setOnboardingUser] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -60,7 +62,8 @@ const useLoginForm = () => {
     const isValid = await trigger(["email", "password"]);
     if (!isValid) return;
 
-    if (!turnstileToken) {
+    const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    if (!turnstileToken && !isLocalhost) {
       toast.error("Please complete the bot verification");
       return;
     }
@@ -155,6 +158,12 @@ const useLoginForm = () => {
       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
       toast.success("Logged in with Google!");
       
+      if (result.isNewUser) {
+        setOnboardingUser(result.user);
+        setShowOnboarding(true);
+        return;
+      }
+      
       handleRoleRedirect(result.role);
     } catch (error) {
       toast.error(error.response?.data?.message || "Google login failed");
@@ -178,7 +187,11 @@ const useLoginForm = () => {
     handleGoogleError,
     accountNotFound,
     setAccountNotFound,
-    setTurnstileToken
+    setTurnstileToken,
+    showOnboarding,
+    setShowOnboarding,
+    onboardingUser,
+    setOnboardingUser
   };
 };
 

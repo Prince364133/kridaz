@@ -37,16 +37,29 @@ export const findNearby = async (table, lat, lng, radiusInMeters = 5000, options
   // 2. Haversine formula in SQL to get precise distance
   // 6371000 is Earth's radius in meters
   const nearbyIdsSql = `
-    SELECT "id"
+    SELECT "id",
+      (6371000 * acos(
+        LEAST(GREATEST(
+          cos(radians($5)) * cos(radians("latitude")) * 
+          cos(radians("longitude") - radians($6)) + 
+          sin(radians($5)) * sin(radians("latitude")),
+          -1.0
+        ), 1.0)
+      )) AS "distance"
     FROM "${tableName}"
     WHERE 
       "latitude" BETWEEN $1 AND $2 AND 
       "longitude" BETWEEN $3 AND $4 AND
+      "latitude" IS NOT NULL AND "longitude" IS NOT NULL AND
       (6371000 * acos(
-        cos(radians($5)) * cos(radians("latitude")) * 
-        cos(radians("longitude") - radians($6)) + 
-        sin(radians($5)) * sin(radians("latitude"))
+        LEAST(GREATEST(
+          cos(radians($5)) * cos(radians("latitude")) * 
+          cos(radians("longitude") - radians($6)) + 
+          sin(radians($5)) * sin(radians("latitude")),
+          -1.0
+        ), 1.0)
       )) <= $7
+    ORDER BY "distance" ASC
     LIMIT $8
   `;
 
@@ -65,8 +78,10 @@ export const findNearby = async (table, lat, lng, radiusInMeters = 5000, options
     // Fetch full records with Prisma
     return await prisma[table.toLowerCase()].findMany({
       where: {
-        id: { in: ids },
-        ...where
+        AND: [
+          { id: { in: ids } },
+          where
+        ]
       },
       include,
       take

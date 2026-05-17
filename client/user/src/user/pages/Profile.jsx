@@ -78,8 +78,8 @@ export default function Profile() {
   const [searchParams] = useSearchParams();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  const isOwnProfile = !userId || (currentUser && userId === currentUser._id);
-  const targetUserId = isOwnProfile ? currentUser?._id : userId;
+  const isOwnProfile = !userId || (currentUser && userId === (currentUser.id || currentUser._id));
+  const targetUserId = isOwnProfile ? (currentUser?.id || currentUser?._id) : userId;
 
   const [profileUser, setProfileUser] = useState(isOwnProfile ? currentUser : null);
   const [loadingProfile, setLoadingProfile] = useState(!isOwnProfile);
@@ -136,8 +136,8 @@ export default function Profile() {
         setProfileUser(prev => ({
           ...prev,
           followers: isFollowing 
-            ? prev.followers.filter(id => id !== currentUser._id)
-            : [...(prev.followers || []), currentUser._id]
+            ? prev.followers.filter(id => id !== (currentUser.id || currentUser._id))
+            : [...(prev.followers || []), (currentUser.id || currentUser._id)]
         }));
         toast.success(`${isFollowing ? 'Unfollowed' : 'Following'} ${profileUser.name}`);
       }

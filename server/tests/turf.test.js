@@ -138,7 +138,7 @@ describe("Turf / Venue Module API", () => {
   describe("POST /api/owner/turf/register — venue upload", () => {
     it("should reject turf registration without auth token", async () => {
       const res = await request(app)
-        .post("/api/owner/turf/register")
+        .post("/api/owner/turf/owner/register")
         .field("name", "Ghost Turf");
 
       expect(res.statusCode).toBe(401);
@@ -148,7 +148,7 @@ describe("Turf / Venue Module API", () => {
       if (!ownerToken) return logger.warn("Skipped: no owner token");
 
       const res = await request(app)
-        .post("/api/owner/turf/register")
+        .post("/api/owner/turf/owner/register")
         .set("Authorization", `Bearer ${ownerToken}`)
         .field("name", "Incomplete Turf")
         // missing description, sportTypes, pricePerHour, policies
@@ -163,7 +163,7 @@ describe("Turf / Venue Module API", () => {
       const policies = "A".repeat(210); // Minimum 200 characters as per validator
 
       const res = await request(app)
-        .post("/api/owner/turf/register")
+        .post("/api/owner/turf/owner/register")
         .set("Authorization", `Bearer ${ownerToken}`)
         .field("name", `Test Turf ${ts}`)
         .field("description", "A great cricket ground for testing purposes")
@@ -197,7 +197,7 @@ describe("Turf / Venue Module API", () => {
   // ── 3. Owner turf listing (authenticated) ──────────────────────────────
   describe("GET /api/owner/turf/all — owner's own turfs", () => {
     it("should reject without auth token", async () => {
-      const res = await request(app).get("/api/owner/turf/all");
+      const res = await request(app).get("/api/owner/turf/owner/all");
       expect(res.statusCode).toBe(401);
     });
 
@@ -205,7 +205,7 @@ describe("Turf / Venue Module API", () => {
       if (!ownerToken) return logger.warn("Skipped: no owner token");
 
       const res = await request(app)
-        .get("/api/owner/turf/all")
+        .get("/api/owner/turf/owner/all")
         .set("Authorization", `Bearer ${ownerToken}`);
 
       if (res.statusCode !== 200) logger.info("[owner turfs]", res.body);

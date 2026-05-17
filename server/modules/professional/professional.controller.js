@@ -1,5 +1,4 @@
 import { prisma } from "../../config/prisma.js";
-
 import WalletService from "../../services/wallet.service.js";
 import logger from "../../utils/logger.js";
 
@@ -9,23 +8,27 @@ import logger from "../../utils/logger.js";
 export const getAllProfessionals = async (req, res) => {
   const { role, sport, city, state, searchTerm } = req.query;
   try {
-    let where = {
-      role: { in: ["coach", "umpire", "scorer", "streamer"] }
+    const where = {
+      user: {
+        role: { in: ["COACH", "UMPIRE", "SCORER", "STREAMER"] }
+      }
     };
 
-    if (role && role !== "All") where.role = role.toLowerCase();
+    if (role && role !== "All") {
+      where.user.role = role.toUpperCase();
+    }
     
     if (city && city !== "All") {
-      where.city = { contains: city, mode: "insensitive" };
+      where.user.city = { contains: city, mode: "insensitive" };
     }
     
     if (state && state !== "All") {
-      where.state = { contains: state, mode: "insensitive" };
+      where.user.state = { contains: state, mode: "insensitive" };
     }
     
     if (searchTerm) {
       where.OR = [
-        { name: { contains: searchTerm, mode: "insensitive" } },
+        { user: { name: { contains: searchTerm, mode: "insensitive" } } },
         { specialization: { contains: searchTerm, mode: "insensitive" } }
       ];
     }
@@ -36,18 +39,17 @@ export const getAllProfessionals = async (req, res) => {
 
     const professionals = await prisma.ownerProfile.findMany({
       where,
-      select: {
-        id: true,
-        name: true,
-        role: true,
-        city: true,
-        state: true,
-        image: true,
-        gameTypes: true,
-        specialization: true,
-        experience: true,
-        rating: true,
-        numReviews: true,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            role: true,
+            city: true,
+            state: true,
+            profilePicture: true
+          }
+        }
       },
       orderBy: [
         { rating: "desc" },
@@ -56,7 +58,21 @@ export const getAllProfessionals = async (req, res) => {
       take: 100
     });
 
-    return res.status(200).json({ professionals });
+    const mappedProfessionals = professionals.map(prof => ({
+      id: prof.id,
+      name: prof.user?.name || "",
+      role: prof.user?.role || "",
+      city: prof.user?.city || "",
+      state: prof.user?.state || "",
+      image: prof.user?.profilePicture || null,
+      gameTypes: prof.gameTypes,
+      specialization: prof.specialization,
+      experience: prof.experience,
+      rating: prof.rating,
+      numReviews: prof.numReviews
+    }));
+
+    return res.status(200).json({ professionals: mappedProfessionals });
   } catch (error) {
     logger.error("Error in getAllProfessionals:", error);
     return res.status(500).json({ message: error.message });
@@ -66,15 +82,15 @@ export const getAllProfessionals = async (req, res) => {
 // Get unique states and cities for filters
 export const getProfessionalFilters = async (req, res) => {
   try {
-    const roles = ["coach", "umpire", "scorer", "streamer"];
+    const roles = ["COACH", "UMPIRE", "SCORER", "STREAMER"];
     
-    const statesData = await prisma.ownerProfile.findMany({
+    const statesData = await prisma.user.findMany({
       where: { role: { in: roles } },
       select: { state: true },
       distinct: ['state']
     });
     
-    const citiesData = await prisma.ownerProfile.findMany({
+    const citiesData = await prisma.user.findMany({
       where: { role: { in: roles } },
       select: { city: true },
       distinct: ['city']
@@ -97,6 +113,16 @@ export const getProfessionalById = async (req, res) => {
     const professional = await prisma.ownerProfile.findUnique({
       where: { id },
       include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            role: true,
+            city: true,
+            state: true,
+            profilePicture: true
+          }
+        },
         reviews: {
           include: {
             user: {
@@ -249,6 +275,16 @@ export const handleBookingRequest = async (req, res) => {
         // 2. Add coins to professional
         await WalletService.credit(professionalId, 'owner', booking.totalAmount, tx);
 
+        // Fetch the professional's userId
+        const profProfile = await tx.ownerProfile.findUnique({
+          where: { id: professionalId },
+          select: { userId: true }
+        });
+        if (!profProfile) {
+          throw new Error("Professional profile not found");
+        }
+        const profUserId = profProfile.userId;
+
         // 3. Create wallet transactions
         await tx.walletTransaction.createMany({
           data: [
@@ -260,7 +296,7 @@ export const handleBookingRequest = async (req, res) => {
               description: `Paid for ${booking.bookingType} session with professional`
             },
             {
-              userId: professionalId, // This might need a different field if it's an owner, but WalletTransaction model seems to use userId
+              userId: profUserId,
               amount: booking.totalAmount,
               type: "CREDIT",
               status: "SUCCESS",
@@ -387,44 +423,79 @@ export const updateProfessionalProfile = async (req, res) => {
   } = req.body;
 
   try {
-    const updateData = {
-      // In Prisma OwnerProfile, most of these are top-level fields
-      bio,
-      price: hourlyPrice ? parseFloat(hourlyPrice) : undefined,
-      gameTypes,
-      city,
-      state,
-      gender,
-      dob: dob ? new Date(dob) : undefined,
-      coachingLevel,
-      availabilityTimings,
-      availabilityMode,
-      preferredLocations,
-      trainingTypes,
-      ageGroups,
-      languages,
-      achievements,
-      experience,
-      specialization,
-      certifications,
-      // If some fields still need to be in businessDetails JSON
-      businessDetails: {
-        address,
-        pinCode,
-        specialization,
-        experience
-      }
-    };
+    let updatedProfessional = null;
 
-    const professional = await prisma.ownerProfile.update({
-      where: { id: professionalId },
-      data: updateData
+    await prisma.$transaction(async (tx) => {
+      // 1. Get OwnerProfile to find the associated User ID
+      const owner = await tx.ownerProfile.findUnique({
+        where: { id: professionalId },
+        select: { userId: true }
+      });
+
+      if (!owner) {
+        throw new Error("Owner profile not found");
+      }
+
+      // 2. Update User details if name, city, state are provided
+      const userUpdate = {};
+      if (name) userUpdate.name = name;
+      if (city) userUpdate.city = city;
+      if (state) userUpdate.state = state;
+
+      if (Object.keys(userUpdate).length > 0) {
+        await tx.user.update({
+          where: { id: owner.userId },
+          data: userUpdate
+        });
+      }
+
+      // 3. Update OwnerProfile details
+      const updateData = {
+        bio,
+        price: hourlyPrice ? parseFloat(hourlyPrice) : undefined,
+        gameTypes,
+        gender,
+        dob: dob ? new Date(dob) : undefined,
+        coachingLevel,
+        availabilityTimings,
+        availabilityMode,
+        preferredLocations,
+        trainingTypes,
+        ageGroups,
+        languages,
+        achievements,
+        experience,
+        specialization,
+        certifications,
+        businessDetails: {
+          address,
+          pinCode,
+          specialization,
+          experience
+        }
+      };
+
+      updatedProfessional = await tx.ownerProfile.update({
+        where: { id: professionalId },
+        data: updateData,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              role: true,
+              city: true,
+              state: true,
+              profilePicture: true
+            }
+          }
+        }
+      });
     });
 
-    return res.status(200).json({ message: "Profile updated successfully", professional });
+    return res.status(200).json({ message: "Profile updated successfully", professional: updatedProfessional });
   } catch (error) {
     logger.error("Error in updateProfessionalProfile:", error);
     return res.status(500).json({ message: error.message });
   }
 };
-

@@ -148,9 +148,12 @@ export const getReelsFeed = async (req, res) => {
     // Fetch user's pending reels if it's the first page
     let userPendingReels = [];
     if (!cursor && req.user) {
+      // Fetch reels that are still being processed (pending OR processing)
+      // so they stay visible throughout the full transcoding lifecycle
       userPendingReels = await prisma.reel.findMany({
-        where: { creatorId: req.user.id, status: 'pending' },
-        include: { creator: { select: { id: true, name: true, username: true, profilePicture: true } } }
+        where: { creatorId: req.user.id, status: { in: ['pending', 'processing'] } },
+        include: { creator: { select: { id: true, name: true, username: true, profilePicture: true } } },
+        orderBy: { createdAt: 'desc' }
       });
     }
 
@@ -171,12 +174,36 @@ export const getReelsFeed = async (req, res) => {
     // Map to legacy format
     const formattedReels = reels.map(r => ({
       ...r,
-      creatorId: r.creator
+      creatorId: r.creator,
+      stats: {
+        views: r.views || 0,
+        likes: r.likes || 0,
+        comments: r.comments || 0,
+        shares: r.shares || 0
+      }
     }));
 
     const finalReels = [
-      ...(initialReel ? [{ ...initialReel, creatorId: initialReel.creator }] : []),
-      ...userPendingReels.map(r => ({ ...r, creatorId: r.creator })),
+      ...(initialReel ? [{ 
+        ...initialReel, 
+        creatorId: initialReel.creator,
+        stats: {
+          views: initialReel.views || 0,
+          likes: initialReel.likes || 0,
+          comments: initialReel.comments || 0,
+          shares: initialReel.shares || 0
+        }
+      }] : []),
+      ...userPendingReels.map(r => ({ 
+        ...r, 
+        creatorId: r.creator,
+        stats: {
+          views: r.views || 0,
+          likes: r.likes || 0,
+          comments: r.comments || 0,
+          shares: r.shares || 0
+        }
+      })),
       ...formattedReels
     ];
     
@@ -273,14 +300,14 @@ export const interactWithReel = async (req, res) => {
 export const addComment = async (req, res) => {
   try {
     const { reelId } = req.params;
-    const { text, parentId } = req.body;
+    const { content, parentId } = req.body;
     const userId = req.user.id;
 
     const comment = await prisma.reelComment.create({
       data: {
         userId,
         reelId,
-        text,
+        text: content,
         parentId
       }
     });
@@ -402,7 +429,13 @@ export const getRecommendedReels = async (req, res) => {
     // Map to expected format
     const reelsWithCreator = reels.map(r => ({
       ...r,
-      creatorId: r.creator
+      creatorId: r.creator,
+      stats: {
+        views: r.views || 0,
+        likes: r.likes || 0,
+        comments: r.comments || 0,
+        shares: r.shares || 0
+      }
     }));
 
     const nextCursor = reelsWithCreator.length === limit ? reelsWithCreator[reelsWithCreator.length - 1].id : null;

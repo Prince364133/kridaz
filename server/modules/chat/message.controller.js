@@ -91,13 +91,11 @@ export const sendMessage = async (req, res) => {
     }
 
     // Find the participant record for the sender to connect readBy
-    const senderParticipant = await prisma.chatParticipant.findUnique({
+    const senderParticipant = await prisma.chatParticipant.findFirst({
       where: {
-        chatId_userId_ownerId: {
-          chatId,
-          userId: participantData.userId,
-          ownerId: participantData.ownerId
-        }
+        chatId,
+        userId: participantData.userId,
+        ownerId: participantData.ownerId
       }
     });
 
@@ -202,13 +200,11 @@ export const forwardMessage = async (req, res) => {
     const forwardedMessages = [];
 
     for (const chatId of finalChatIds) {
-      const senderParticipant = await prisma.chatParticipant.findUnique({
+      const senderParticipant = await prisma.chatParticipant.findFirst({
         where: {
-          chatId_userId_ownerId: {
-            chatId,
-            userId: self.userId,
-            ownerId: self.ownerId
-          }
+          chatId,
+          userId: self.userId,
+          ownerId: self.ownerId
         }
       });
 
@@ -304,13 +300,11 @@ export const broadcastMessage = async (req, res) => {
     const sentMessages = [];
 
     for (const chatId of finalChatIds) {
-      const senderParticipant = await prisma.chatParticipant.findUnique({
+      const senderParticipant = await prisma.chatParticipant.findFirst({
         where: {
-          chatId_userId_ownerId: {
-            chatId,
-            userId: self.userId,
-            ownerId: self.ownerId
-          }
+          chatId,
+          userId: self.userId,
+          ownerId: self.ownerId
         }
       });
 
@@ -368,31 +362,36 @@ export const markMessagesRead = async (req, res) => {
   const { participantData: self } = resolveCurrentUser(req);
 
   try {
-    const participant = await prisma.chatParticipant.findUnique({
+    const participant = await prisma.chatParticipant.findFirst({
       where: {
-        chatId_userId_ownerId: {
-          chatId,
-          userId: self.userId,
-          ownerId: self.ownerId
-        }
+        chatId,
+        userId: self.userId,
+        ownerId: self.ownerId
       }
     });
 
     if (!participant) return res.status(404).json({ success: false });
 
-    await prisma.message.updateMany({
+    const unreadMessages = await prisma.message.findMany({
       where: {
         chatId,
         readBy: {
           none: { id: participant.id }
         }
       },
-      data: {
-        readBy: {
-          connect: { id: participant.id }
-        }
-      }
+      select: { id: true }
     });
+
+    for (const msg of unreadMessages) {
+      await prisma.message.update({
+        where: { id: msg.id },
+        data: {
+          readBy: {
+            connect: { id: participant.id }
+          }
+        }
+      });
+    }
 
     res.json({ success: true });
   } catch (error) {
@@ -416,13 +415,11 @@ export const deleteMessages = async (req, res) => {
       await prisma.message.deleteMany({ where: { id: { in: messageIds } } });
     } else {
       // Delete for me: add to deletedBy relation
-      const participant = await prisma.chatParticipant.findUnique({
+      const participant = await prisma.chatParticipant.findFirst({
         where: {
-          chatId_userId_ownerId: {
-            chatId,
-            userId: self.userId,
-            ownerId: self.ownerId
-          }
+          chatId,
+          userId: self.userId,
+          ownerId: self.ownerId
         }
       });
 
@@ -476,13 +473,11 @@ export const clearChat = async (req, res) => {
   }
 
   try {
-    const participant = await prisma.chatParticipant.findUnique({
+    const participant = await prisma.chatParticipant.findFirst({
       where: {
-        chatId_userId_ownerId: {
-          chatId,
-          userId: self.userId,
-          ownerId: self.ownerId
-        }
+        chatId,
+        userId: self.userId,
+        ownerId: self.ownerId
       }
     });
 

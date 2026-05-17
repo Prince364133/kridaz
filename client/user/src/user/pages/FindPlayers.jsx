@@ -1,13 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSelector } from "react-redux";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import axiosInstance from "@hooks/useAxiosInstance";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { 
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
   Search, 
   MapPin, 
   Users,
@@ -29,22 +24,17 @@ import { SOCKET } from '@kridaz/shared-constants/socketEvents';
   Eye,
   EyeOff,
   WifiOff,
-  AlertCircle
+  AlertCircle,
+  Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import toast from "react-hot-toast";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import StoryViewer from "../components/StoryViewer";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import NearbyPlayersMap from "../components/map/NearbyPlayersMap";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 import { useSocket } from "../../context/SocketContext";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
+import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 import { haversineMeters } from "../utils/geoUtils";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
 const PRI = "#84CC16";
 const HEADING_STYLE = { fontFamily: '"Outfit", sans-serif' };
@@ -58,83 +48,128 @@ const MOCK_PLAYERS = [
   { _id: "m4", name: "Simulated Rahul", latOffset: -0.015, lngOffset: -0.015, sport: "Cricket" }
 ];
 
-const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvatarClick, currentUser, navigate, gateInteraction }) => {
+const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, navigate, gateInteraction }) => {
   const shapes = [
     "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
     "circle(50% at 50% 50%)",
-    "polygon(50% 0%, 100% 100%, 0% 100%)",
     "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)"
   ];
   const shape = shapes[rank % shapes.length];
+  const isFollowing = followingIds.includes(player._id);
+
+  // Stat helpers — real data when API provides it, "—" as placeholder otherwise
+  const followers    = player.followers?.length ?? player.followersCount ?? "—";
+  const totalMatches = player.stats?.totalMatches ?? player.matchesPlayed ?? "—";
+  const sport        = (player.sportTypes?.[0] || player.sportType || player.interests?.[0] || "Sport").toUpperCase();
+  const totalScore   = player.stats?.totalScore ?? player.totalScore ?? "—";
+  const kridazScore  = player.kridazRating ?? player.stats?.kridazScore ?? player.kridazScore ?? "—";
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-black rounded-[16px] border border-[#84CC16]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-[#84CC16]/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+      onClick={() => navigate(`/profile/${player._id}`)}
+      className="relative bg-black rounded-[20px] border border-[#84CC16]/20 overflow-hidden flex flex-col cursor-pointer group hover:border-[#84CC16]/60 hover:shadow-[0_0_40px_rgba(132,204,22,0.12)] transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
     >
-      <div className="flex justify-end items-start p-4 absolute top-0 left-0 right-0 z-20">
+      {/* Top badges */}
+      <div className="flex justify-between items-center px-3 pt-3 absolute top-0 left-0 right-0 z-20">
+        <div className="px-2 py-1 bg-black/60 backdrop-blur-md rounded-full border border-[#84CC16]/30 flex items-center gap-1">
+          <Trophy size={9} className="text-[#84CC16]" />
+          <span className="text-[8px] font-black text-[#84CC16] uppercase tracking-widest">{sport}</span>
+        </div>
         <div className="p-1.5 bg-[#84CC16]/10 rounded-lg border border-[#84CC16]/20">
-          <ShieldCheck size={14} className="text-[#84CC16]" />
+          <ShieldCheck size={13} className="text-[#84CC16]" />
         </div>
       </div>
 
-      <div className="h-40 relative mt-2 flex items-center justify-center overflow-hidden">
-        <div 
-          className="absolute w-52 h-52 bg-[#84CC16]/10 border border-[#84CC16]/30 blur-sm opacity-50 group-hover:opacity-80 transition-opacity duration-700"
-          style={{ clipPath: shape }}
-        />
-        <div 
-          className="absolute w-48 h-48 border-2 border-[#84CC16]/40"
-          style={{ clipPath: shape }}
-        />
+      {/* Avatar Section */}
+      <div className="h-44 relative mt-0 flex items-center justify-center overflow-hidden">
+        <div className="absolute w-56 h-56 bg-[#84CC16]/8 border border-[#84CC16]/20 blur-sm opacity-40 group-hover:opacity-70 transition-opacity duration-700" style={{ clipPath: shape }} />
+        <div className="absolute w-52 h-52 border border-[#84CC16]/30 group-hover:border-[#84CC16]/60 transition-colors duration-500" style={{ clipPath: shape }} />
         <div className="relative w-full h-full flex items-center justify-center z-10 pointer-events-none">
-          <img 
-            src={player.profilePicture || "https://pngimg.com/d/cricket_PNG102.png"} 
-            alt="" 
-            className="h-[95%] w-[90%] object-contain filter drop-shadow-[0_10px_30px_rgba(132,204,22,0.4)] group-hover:scale-110 transition-transform duration-700 select-none"
+          <img
+            src={player.profilePicture || "https://pngimg.com/d/cricket_PNG102.png"}
+            alt={player.name}
+            className="h-[90%] w-[85%] object-contain filter drop-shadow-[0_10px_30px_rgba(132,204,22,0.35)] group-hover:scale-105 transition-transform duration-700 select-none"
           />
         </div>
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-          <div className="bg-black border-2 border-[#84CC16] w-12 h-14 flex items-center justify-center" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
-            <span className="text-[#84CC16] font-black text-sm uppercase">
+        {/* Hexagon Initials Badge */}
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20">
+          <div className="bg-black border-2 border-[#84CC16] w-10 h-12 flex items-center justify-center shadow-[0_0_10px_rgba(132,204,22,0.3)]" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
+            <span className="text-[#84CC16] font-black text-[10px] uppercase">
               {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 px-3 pt-4 pb-2 flex flex-col items-center text-center">
-        <h3 className="text-sm font-black text-white uppercase tracking-tight mb-1 truncate w-full" style={HEADING_STYLE}>
+      {/* Name + Location */}
+      <div className="px-4 pt-2 text-center">
+        <h3 className="text-[13px] font-black text-white uppercase tracking-tight truncate w-full" style={HEADING_STYLE}>
           {player.name}
         </h3>
-        <div className="flex items-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-4">
-          <MapPin size={10} className="text-[#84CC16]" />
-          {player.city || 'Athletic'}
+        <div className="flex items-center justify-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
+          <MapPin size={9} className="text-[#84CC16]" />
+          {player.city || "Athletic"}
         </div>
-        <div className="grid grid-cols-3 w-full border-t border-white/5 pt-2 mb-2">
-          <div className="flex flex-col items-center">
-            <span className="text-[#84CC16] text-[6px] font-black uppercase tracking-widest mb-1">Matches</span>
-            <span className="text-white font-black text-[10px]">—</span>
-          </div>
-          <div className="flex flex-col items-center border-x border-white/5">
-            <span className="text-[#84CC16] text-[6px] font-black uppercase tracking-widest mb-1">Runs</span>
-            <span className="text-white font-black text-[10px]">—</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-[#84CC16] text-[6px] font-black uppercase tracking-widest mb-1">Strike Rate</span>
-            <span className="text-white font-black text-[10px]">—</span>
+      </div>
+
+      {/* Followers + Kridaz Score row */}
+      <div className="mx-4 mt-2 flex items-center justify-between bg-white/[0.03] border border-white/5 rounded-xl px-3 py-2">
+        <div className="flex flex-col items-center gap-0.5">
+          <span className="text-[7px] font-black text-gray-500 uppercase tracking-widest">Followers</span>
+          <div className="flex items-center gap-1">
+            <Users size={9} className="text-[#84CC16]" />
+            <span className="text-white font-black text-[11px]">{followers}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 w-full mt-auto">
-          <button onClick={() => handleFollowToggle(player._id)} className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player._id) ? "bg-white/5 text-white/20 border border-white/10" : "bg-[#84CC16] text-black hover:bg-[#a3e635]"}`}>
-            {followingIds.includes(player._id) ? "Following" : "Follow"}
-          </button>
-          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#84CC16] transition-all">
-            <MessageCircle size={18} />
-          </button>
+        <div className="w-px h-8 bg-white/5" />
+        <div className="flex flex-col items-center gap-0.5">
+          <span className="text-[7px] font-black text-gray-500 uppercase tracking-widest">Kridaz Score</span>
+          <div className="flex items-center gap-1">
+            <Zap size={9} className="text-[#84CC16]" fill="currentColor" />
+            <span className="text-[#84CC16] font-black text-[11px]">{kridazScore}</span>
+          </div>
         </div>
+      </div>
+
+      {/* Matches + Total Score grid */}
+      <div className="grid grid-cols-2 gap-2 mx-4">
+        <div className="flex flex-col items-center bg-white/[0.03] border border-white/5 rounded-xl py-2 gap-0.5">
+          <span className="text-[7px] font-black text-gray-500 uppercase tracking-widest">Matches</span>
+          <div className="flex items-center gap-1">
+            <Target size={9} className="text-[#84CC16]" />
+            <span className="text-white font-black text-[12px]">{totalMatches}</span>
+          </div>
+        </div>
+        <div className="flex flex-col items-center bg-white/[0.03] border border-white/5 rounded-xl py-2 gap-0.5">
+          <span className="text-[7px] font-black text-gray-500 uppercase tracking-widest">Total Score</span>
+          <div className="flex items-center gap-1">
+            <Star size={9} className="text-[#84CC16]" fill="currentColor" />
+            <span className="text-white font-black text-[12px]">{totalScore}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex items-center gap-2 mx-4 mb-4">
+        <button
+          onClick={(e) => { e.stopPropagation(); handleFollowToggle(player._id); }}
+          className={`flex-1 h-10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+            isFollowing
+              ? "bg-white/5 text-white/30 border border-white/10"
+              : "bg-[#84CC16] text-black hover:bg-[#a3e635] shadow-[0_4px_12px_rgba(132,204,22,0.25)]"
+          }`}
+        >
+          {isFollowing ? "Following" : "Follow"}
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); gateInteraction(() => navigate(`/messages?userId=${player._id}`)); }}
+          className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#84CC16] hover:border-[#84CC16]/40 transition-all"
+        >
+          <MessageCircle size={16} />
+        </button>
       </div>
     </motion.div>
   );
@@ -478,7 +513,7 @@ const FindPlayers = () => {
         }
       });
       if (response.data.success) {
-        setPlayers(response.data.players || []);
+        setPlayers((response.data.players || []).map(p => ({ ...p, _id: p.id || p._id })));
         if (response.data.followingIds) setFollowingIds(response.data.followingIds);
       }
     } catch (error) {
@@ -505,7 +540,7 @@ const FindPlayers = () => {
           setHasShownLimitToast(true);
         }
         const mapPlayers = res.data.players.map(p => ({
-          _id: p._id,
+          _id: p.id || p._id,
           name: p.name,
           username: p.username,
           profilePicture: p.profilePicture,

@@ -60,7 +60,7 @@ const Leaderboard = () => {
         // In a real app, we would pass sport and category to the API
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/leaderboard?sport=${selectedSport.toLowerCase()}&category=${category}`);
         if (response.data.success) {
-          setPlayers(response.data.players || []);
+          setPlayers((response.data.players || []).map(p => ({ ...p, _id: p.id || p._id })));
         }
       } catch (err) {
         console.error("Leaderboard fetch error:", err);

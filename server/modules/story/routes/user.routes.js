@@ -9,6 +9,7 @@ import {
   confirmStory
 } from '../story.controller.js';
 import userAuth from '../../../middleware/jwt/user.middleware.js';
+import { optionalAuth } from '../../../middleware/jwt/auth.middleware.js';
 import upload from '../../../middleware/uploads/upload.middleware.js';
 
 const router = express.Router();
@@ -20,7 +21,7 @@ const router = express.Router();
  *   description: User Stories and Short-lived Media
  */
 
-router.use(userAuth);
+// router.use(userAuth);
 
 /**
  * @swagger
@@ -31,7 +32,7 @@ router.use(userAuth);
  *     security:
  *       - BearerAuth: []
  */
-router.get('/upload-url', getUploadUrl);
+router.get('/upload-url', userAuth, getUploadUrl);
 
 /**
  * @swagger
@@ -42,7 +43,7 @@ router.get('/upload-url', getUploadUrl);
  *     security:
  *       - BearerAuth: []
  */
-router.post('/confirm-upload', confirmStory);
+router.post('/confirm-upload', userAuth, confirmStory);
 
 /**
  * @swagger
@@ -53,7 +54,7 @@ router.post('/confirm-upload', confirmStory);
  *     security:
  *       - BearerAuth: []
  */
-router.post('/', createStory);
+router.post('/', userAuth, createStory);
 
 /**
  * @swagger
@@ -64,7 +65,7 @@ router.post('/', createStory);
  *     security:
  *       - BearerAuth: []
  */
-router.get('/feed', getStories);
+router.get('/feed', optionalAuth, getStories);
 
 /**
  * @swagger
@@ -75,7 +76,7 @@ router.get('/feed', getStories);
  *     security:
  *       - BearerAuth: []
  */
-router.post('/:id/view', viewStory);
+router.post('/:id/view', userAuth, viewStory);
 
 /**
  * @swagger
@@ -91,7 +92,7 @@ router.post('/:id/view', viewStory);
  *     security:
  *       - BearerAuth: []
  */
-router.put('/:id', upload.single('media'), updateStory);
-router.delete('/:id', deleteStory);
+router.put('/:id', userAuth, upload.single('media'), updateStory);
+router.delete('/:id', userAuth, deleteStory);
 
 export default router;

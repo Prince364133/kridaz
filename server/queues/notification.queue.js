@@ -1,17 +1,11 @@
 import { Queue } from "bullmq";
-import ioredis from "ioredis";
+import { bullmqConnection as connection } from "../config/redis.js";
 import logger from "../utils/logger.js";
-
-const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
-
-// Redis Connection for BullMQ
-const connection = new ioredis(REDIS_URL, {
-  maxRetriesPerRequest: null, // Required for BullMQ
-});
 
 connection.on("error", (err) => {
   logger.error("[Notification Queue] Redis connection error:", err);
 });
+
 
 // Create the Queue
 export const notificationQueue = new Queue("notifications", {

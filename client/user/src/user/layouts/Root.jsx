@@ -19,9 +19,12 @@ const Root = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    // Only show onboarding for regular users who haven't selected sports
-    if (isAuthenticated && user?.role === "user" && (!user?.sportTypes || user?.sportTypes?.length === 0)) {
-      setShowOnboarding(true);
+    // Show onboarding for regular users who have an incomplete profile
+    if (isAuthenticated && user?.role?.toLowerCase() === "user") {
+      const isIncomplete = !user.phone || !user.gender || !user.location || !user.sportTypes || user.sportTypes.length === 0;
+      if (isIncomplete) {
+        setShowOnboarding(true);
+      }
     }
   }, [isAuthenticated, user]);
 

@@ -108,11 +108,14 @@ export default function Home() {
  const [loadingStates, setLoadingStates] = useState(false);
  const [loadingCities, setLoadingCities] = useState(false);
 
- useEffect(() => {
- if (isLoggedIn && role === 'user' && user && (!user.sportTypes || user.sportTypes.length === 0)) {
- setShowInterests(true);
- }
- }, [isLoggedIn, role, user]);
+  useEffect(() => {
+    if (isLoggedIn && role?.toLowerCase() === 'user' && user && (!user.sportTypes || user.sportTypes.length === 0)) {
+      const isBasicComplete = user.phone && user.gender && user.location;
+      if (isBasicComplete) {
+        setShowInterests(true);
+      }
+    }
+  }, [isLoggedIn, role, user]);
 
  const detectLocation = () => {
  setLocationStatus("detecting");
@@ -198,33 +201,33 @@ export default function Home() {
  }, []);
 
  useEffect(() => {
- const fetchPlayers = async () => {
- try {
- const params = {
- ...playerFilters,
- sortBy: 'newest',
- };
- const res = await axiosInstance.get("/api/user/players", { params });
- setPlayers(res.data.players || []);
- } catch (error) {
- console.error("Error fetching players:", error);
- }
- };
+    const fetchPlayers = async () => {
+      try {
+        const params = {
+          ...playerFilters,
+          sortBy: 'newest',
+        };
+        const res = await axiosInstance.get("/api/user/players", { params });
+        setPlayers((res.data.players || []).map(p => ({ ...p, _id: p.id || p._id })));
+      } catch (error) {
+        console.error("Error fetching players:", error);
+      }
+    };
 
- const fetchFollowingStatus = async () => {
- if (!isLoggedIn) return;
- try {
- const response = await axiosInstance.get("/api/user/players/network");
- const ids = (response.data.following || []).filter(p => p).map(p => p._id);
- setFollowingIds(ids);
- } catch (error) {
- console.error("Error fetching network:", error);
- }
- };
+    const fetchFollowingStatus = async () => {
+      if (!isLoggedIn) return;
+      try {
+        const response = await axiosInstance.get("/api/user/players/network");
+        const ids = (response.data.following || []).filter(p => p).map(p => p.id || p._id);
+        setFollowingIds(ids);
+      } catch (error) {
+        console.error("Error fetching network:", error);
+      }
+    };
 
- fetchPlayers();
- fetchFollowingStatus();
- }, [playerFilters, userLocation, isLoggedIn]);
+    fetchPlayers();
+    fetchFollowingStatus();
+  }, [playerFilters, userLocation, isLoggedIn]);
 
  useEffect(() => {
  const fetchStates = async () => {
@@ -753,10 +756,10 @@ export default function Home() {
  hostedGames.slice(0, 5).map((g, i) => {
  const isQuick = g.gameMode === 'QUICK';
  const openSlots = isQuick 
- ? g.quickSlots.filter(s => s.status === 'OPEN').length
+ ? (g.quickSlots?.filter(s => s.status === 'OPEN')?.length || 0)
  : (g.teams?.teamA?.slots?.filter(s => s.status === 'OPEN').length || 0) + (g.teams?.teamB?.slots?.filter(s => s.status === 'OPEN').length || 0);
  const totalSlots = isQuick
- ? g.quickSlots.length
+ ? (g.quickSlots?.length || 0)
  : (g.teams?.teamA?.slots?.length || 0) + (g.teams?.teamB?.slots?.length || 0);
  const hostInitial = g.host?.name?.[0]?.toUpperCase() || '?';
  const bgImg = g.ground?.images?.[0] || 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&q=80';

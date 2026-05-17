@@ -1,0 +1,82 @@
+const fs = require('fs');
+const p = 'c:/Users/saavi/OneDrive/Desktop/kridaz/kridaz/client/user/src/user/components/messages/ChatWindow.jsx';
+let content = fs.readFileSync(p, 'utf8');
+
+const oldHandleSendMessage = `  const handleSendMessage = async (e) => {
+  e.preventDefault();
+  if (!message.trim()) return;
+
+  socket.emit(SOCKET.STOP_TYPING, chat._id);
+  setIsTyping(false);
+  if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+  try {
+  const data = await sendMessageMutation({
+  chatId: chat._id,
+  content: message
+  }).unwrap();
+
+  socket.emit(SOCKET.NEW_MESSAGE, data);
+  setMessages((prev) => [...prev, data]);
+  setMessage('');
+  } catch (err) {
+  console.error("Failed to send message:", err);
+  }
+  };`;
+
+const newHandleSendMessage = `  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+
+    socket.emit(SOCKET.STOP_TYPING, chat._id);
+    setIsTyping(false);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+    const msgToSend = message;
+    setMessage('');
+
+    const tempMessageId = "temp_" + Date.now();
+    const tempMessage = {
+      _id: tempMessageId,
+      content: msgToSend,
+      sender: { user: user },
+      createdAt: new Date().toISOString(),
+      chat: chat._id,
+      readBy: [],
+      isTemp: true
+    };
+    
+    setMessages((prev) => [...prev, tempMessage]);
+
+    try {
+      const data = await sendMessageMutation({
+        chatId: chat._id,
+        content: msgToSend
+      }).unwrap();
+
+      socket.emit(SOCKET.NEW_MESSAGE, data);
+      setMessages((prev) => prev.map(m => m._id === tempMessageId ? data : m));
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      setMessages((prev) => prev.filter(m => m._id !== tempMessageId));
+    }
+  };`;
+
+content = content.replace(oldHandleSendMessage, newHandleSendMessage);
+
+const oldTickMark = `<svg className={\`w-4 h-[11px] \${isRead ? 'text-[#34B7F1]' : 'text-[#84CC16]/40'}\`} viewBox="0 0 20 12" fill="none">
+  <path d="M1 6l4 4L13 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  <path d="M7 6l4 4L19 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"/>
+  </svg>`;
+
+const newTickMark = `<svg className={\`w-4 h-[11px] \${isRead ? 'text-[#34B7F1]' : 'text-[#84CC16]/40'}\`} viewBox="0 0 20 12" fill="none">
+  <path d="M1 6l4 4L13 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  {(isRead || otherOnline) && (
+    <path d="M7 6l4 4L19 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"/>
+  )}
+  </svg>`;
+
+content = content.replace(oldTickMark, newTickMark);
+
+fs.writeFileSync(p, content);
+console.log('done');

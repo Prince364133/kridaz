@@ -16,8 +16,8 @@ const cleanupUserData = async (userIds) => {
     
     await prisma.$transaction([
       // 1. Content: Posts & Stories
-      prisma.communityPost.deleteMany({ where: { authorId: { in: userIds }, authorModel: 'User' } }),
-      prisma.story.deleteMany({ where: { userId: { in: userIds }, userModel: 'User' } }),
+      prisma.post.deleteMany({ where: { authorId: { in: userIds } } }),
+      prisma.story.deleteMany({ where: { userId: { in: userIds } } }),
       
       // 2. Gameplay: Games & Matches
       prisma.hostedGame.deleteMany({ where: { hostId: { in: userIds } } }),
@@ -39,12 +39,12 @@ const cleanupUserData = async (userIds) => {
       
       // 7. Messaging
       prisma.chatParticipant.deleteMany({ where: { userId: { in: userIds } } }),
-      prisma.message.deleteMany({ where: { userId: { in: userIds } } }),
+      prisma.message.deleteMany({ where: { senderUserId: { in: userIds } } }),
     ]);
 
     if (ownerIds.length > 0) {
       await prisma.$transaction([
-        prisma.review.deleteMany({ where: { ownerId: { in: ownerIds } } }),
+        prisma.review.deleteMany({ where: { professionalId: { in: ownerIds } } }),
         prisma.withdrawalRequest.deleteMany({ where: { ownerId: { in: ownerIds } } }),
         prisma.turf.deleteMany({ where: { ownerId: { in: ownerIds } } }),
         prisma.ownerProfile.deleteMany({ where: { id: { in: ownerIds } } })
@@ -86,7 +86,7 @@ export const getAllUsers = async (req, res) => {
           phone: true,
           role: true,
           walletBalance: true,
-          isEmailVerified: true,
+          isVerified: true,
           status: true,
           createdAt: true
         },
@@ -136,24 +136,24 @@ export const getAdminDashboardData = async (req, res) => {
       userWalletAggr
     ] = await Promise.all([
       prisma.user.count(),
-      prisma.ownerProfile.count({ where: { role: { in: ["venu_owners", "owner", "VERIFIED_VENUE_OWNER"] } } }),
+      prisma.ownerProfile.count({ where: { user: { role: { in: ["VENUE_OWNER", "OWNER"] } } } }),
       prisma.turf.count(),
       prisma.turf.count({ where: { status: "pending" } }),
       prisma.booking.count(),
       prisma.ownerRequest.count({ where: { status: "pending" } }),
-      prisma.ownerProfile.count({ where: { role: "coach" } }),
-      prisma.ownerProfile.count({ where: { role: "umpire" } }),
-      prisma.ownerProfile.count({ where: { role: "streamer" } }),
-      prisma.ownerProfile.count({ where: { role: "scorer" } }),
+      prisma.ownerProfile.count({ where: { user: { role: "COACH" } } }),
+      prisma.ownerProfile.count({ where: { user: { role: "UMPIRE" } } }),
+      prisma.ownerProfile.count({ where: { user: { role: "STREAMER" } } }),
+      prisma.ownerProfile.count({ where: { user: { role: "SCORER" } } }),
       prisma.withdrawalRequest.aggregate({
         where: { status: "COMPLETED" },
         _sum: { amount: true }
       }),
       prisma.supportTicket.count({ where: { status: "OPEN" } }),
       prisma.dispute.count({ where: { status: "PENDING" } }),
-      prisma.communityPost.count(),
+      prisma.post.count(),
       prisma.hostedGame.count(),
-      prisma.blog.count({ where: { status: "published" } }),
+      prisma.blog.count({ where: { status: "PUBLISHED" } }),
       prisma.user.aggregate({
         _sum: { walletBalance: true }
       })
@@ -162,7 +162,7 @@ export const getAdminDashboardData = async (req, res) => {
     const recentAuditLogs = await prisma.auditLog.findMany({
       orderBy: { createdAt: 'desc' },
       take: 5,
-      include: { admin: { select: { name: true } } }
+      include: { user: { select: { name: true } } }
     });
 
     const thirtyDaysAgo = new Date();
@@ -203,7 +203,10 @@ export const getAdminDashboardData = async (req, res) => {
       totalHostedGames,
       publishedBlogs,
       totalUserWalletBalance: userWalletAggr._sum.walletBalance || 0,
-      recentAuditLogs: recentAuditLogs,
+      recentAuditLogs: recentAuditLogs.map(log => ({
+        ...log,
+        admin: log.user
+      })),
       bookingHistory,
       platformHealth: {
         uptime: "99.9%",
@@ -255,12 +258,37 @@ export const getAllOwners = async (req, res) => {
   }
   try {
     const owners = await prisma.ownerProfile.findMany({
-      where: { role: { in: ["venu_owners", "owner", "VERIFIED_VENUE_OWNER"] } },
+      where: {
+        user: {
+          role: { in: ["VENUE_OWNER", "OWNER"] }
+        }
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+            phone: true,
+            status: true,
+            createdAt: true
+          }
+        }
+      },
       take: 200
     });
+
+    const mappedOwners = owners.map(o => ({
+      ...o,
+      name: o.user?.name || o.businessName,
+      email: o.user?.email || "",
+      phone: o.user?.phone || "",
+      status: o.user?.status || "active",
+      createdAt: o.user?.createdAt || o.createdAt
+    }));
+
     res.status(200).json({
       message: "Fetched all owners",
-      owners: owners,
+      owners: mappedOwners,
     });
   } catch (error) {
     logger.error("Error in getAllOwners: ", error);
@@ -314,18 +342,19 @@ export const getAllRequestedOwners = async (req, res) => {
   }
   try {
     const ownerRequests = await prisma.ownerRequest.findMany({
-      where: { status: "pending", role: { in: ["venu_owners", "owner"] } },
-      include: { userId_ref: { select: { profilePicture: true, name: true } } }
+      where: { status: "pending", role: { in: ["venu_owners", "owner", "venue_owner"] } },
+      include: { user: { select: { profilePicture: true, name: true } } }
     });
     const ownerRejectedRequests = await prisma.ownerRequest.findMany({
-      where: { status: "rejected", role: { in: ["venu_owners", "owner"] } },
-      include: { userId_ref: { select: { profilePicture: true, name: true } } }
+      where: { status: "rejected", role: { in: ["venu_owners", "owner", "venue_owner"] } },
+      include: { user: { select: { profilePicture: true, name: true } } }
     });
 
     // Map fields for frontend compatibility
     const mapRequest = (r) => ({
       ...r,
-      userId: r.userId_ref
+      userId_ref: r.user,
+      userId: r.user
     });
 
     res.status(200).json({
@@ -347,12 +376,39 @@ export const getAllProfessionals = async (req, res) => {
   }
   try {
     const professionals = await prisma.ownerProfile.findMany({
-      where: { role: { in: ["coach", "umpire", "streamer", "scorer"] } },
+      where: {
+        user: {
+          role: { in: ["COACH", "UMPIRE", "STREAMER", "SCORER"] }
+        }
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+            phone: true,
+            role: true,
+            status: true,
+            createdAt: true
+          }
+        }
+      },
       take: 200
     });
+
+    const mappedProfessionals = professionals.map(p => ({
+      ...p,
+      name: p.user?.name || p.businessName,
+      email: p.user?.email || "",
+      phone: p.user?.phone || "",
+      role: p.user?.role || "",
+      status: p.user?.status || "active",
+      createdAt: p.user?.createdAt || p.createdAt
+    }));
+
     res.status(200).json({
       message: "Fetched all professionals",
-      professionals: professionals,
+      professionals: mappedProfessionals,
     });
   } catch (error) {
     logger.error("Error in getAllProfessionals: ", error);
@@ -374,7 +430,6 @@ export const getProfessionalDetails = async (req, res) => {
       include: {
         profBookings: {
           include: {
-            turf: { select: { name: true, location: true } },
             user: { select: { name: true, profilePicture: true, email: true, phone: true } }
           }
         }
@@ -389,16 +444,21 @@ export const getProfessionalDetails = async (req, res) => {
     const matches = await prisma.hostedGame.findMany({
       where: { umpireId: id },
       include: {
-        host: { select: { name: true, profilePicture: true, email: true } },
-        ground: { select: { name: true, location: true } }
+        host: { select: { id: true, name: true, email: true } },
+        turf: { select: { name: true, location: true } }
       },
       orderBy: { date: 'desc' }
     });
 
+    const formattedMatches = matches.map(m => ({
+      ...m,
+      ground: m.turf
+    }));
+
     return res.status(200).json({
       success: true,
       profile: { ...professional, bookings: professional.profBookings },
-      matches: matches
+      matches: formattedMatches
     });
   } catch (error) {
     logger.error("Error in getProfessionalDetails: ", error);
@@ -417,19 +477,20 @@ export const getAllRequestedProfessionals = async (req, res) => {
         status: "pending", 
         role: { in: ["coach", "umpire", "streamer", "scorer"] } 
       },
-      include: { userId_ref: { select: { profilePicture: true, name: true } } }
+      include: { user: { select: { profilePicture: true, name: true } } }
     });
     const professionalRejectedRequests = await prisma.ownerRequest.findMany({
       where: {
         status: "rejected",
         role: { in: ["coach", "umpire", "streamer", "scorer"] }
       },
-      include: { userId_ref: { select: { profilePicture: true, name: true } } }
+      include: { user: { select: { profilePicture: true, name: true } } }
     });
 
     const mapRequest = (r) => ({
       ...r,
-      userId: r.userId_ref
+      userId_ref: r.user,
+      userId: r.user
     });
 
     res.status(200).json({
@@ -452,18 +513,19 @@ export const getAllVerificationRequests = async (req, res) => {
   try {
     const pendingRequests = await prisma.ownerRequest.findMany({
       where: { status: "pending" },
-      include: { userId_ref: { select: { profilePicture: true, name: true } } },
+      include: { user: { select: { profilePicture: true, name: true } } },
       orderBy: { createdAt: 'desc' }
     });
     const rejectedRequests = await prisma.ownerRequest.findMany({
       where: { status: "rejected" },
-      include: { userId_ref: { select: { profilePicture: true, name: true } } },
+      include: { user: { select: { profilePicture: true, name: true } } },
       orderBy: { createdAt: 'desc' }
     });
     
     const mapRequest = (r) => ({
       ...r,
-      userId: r.userId_ref
+      userId_ref: r.user,
+      userId: r.user
     });
 
     res.status(200).json({
@@ -493,68 +555,59 @@ export const approveOwnerRequest = async (req, res) => {
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      // Check if an owner profile already exists
-      let owner = await tx.ownerProfile.findFirst({
-        where: { email: ownerRequest.email }
+      let targetUserId = ownerRequest.userId;
+
+      if (!targetUserId) {
+        let existingUser = await tx.user.findUnique({
+          where: { email: ownerRequest.email }
+        });
+
+        if (!existingUser) {
+          existingUser = await tx.user.create({
+            data: {
+              email: ownerRequest.email,
+              username: ownerRequest.email.split('@')[0] + '_' + Math.random().toString(36).substring(2, 7),
+              name: ownerRequest.name,
+              phone: ownerRequest.phone,
+              password: 'defaultHashedPassword', // Placeholder since password can be updated later/via recovery
+              role: ownerRequest.role.toUpperCase(),
+              isVerified: true
+            }
+          });
+        }
+        targetUserId = existingUser.id;
+      }
+
+      let owner = await tx.ownerProfile.findUnique({
+        where: { userId: targetUserId }
       });
 
       if (!owner) {
-        let password = "";
-        let googleId = "";
-        if (ownerRequest.userId) {
-          const user = await tx.user.findUnique({ where: { id: ownerRequest.userId } });
-          if (user) {
-            password = user.password;
-            googleId = user.googleId;
-          }
-        }
-
         owner = await tx.ownerProfile.create({
           data: {
-            id: ownerRequest.userId || undefined, // Use userId as ID if present
-            userId: ownerRequest.userId,
-            name: ownerRequest.name,
-            email: ownerRequest.email,
-            phone: ownerRequest.phone,
-            password: password,
-            googleId: googleId,
-            role: ownerRequest.role,
-            businessDetails: ownerRequest.businessDetails,
-            ownerDocuments: ownerRequest.documents,
-            isVerified: true,
-            verificationStatus: "verified",
-            approvalDetails: {
-              adminName,
-              adminDesignation,
-              approvedAt: new Date()
-            }
+            userId: targetUserId,
+            businessName: ownerRequest.name,
+            verified: true,
+            verificationDocs: ownerRequest.documents || {},
+            businessDetails: ownerRequest.businessDetails || {}
           }
         });
       } else {
         owner = await tx.ownerProfile.update({
           where: { id: owner.id },
           data: {
-            role: ownerRequest.role,
-            userId: ownerRequest.userId || owner.userId,
-            ownerDocuments: ownerRequest.documents,
-            isVerified: true,
-            verificationStatus: "verified",
-            approvalDetails: {
-              adminName,
-              adminDesignation,
-              approvedAt: new Date()
-            }
+            verified: true,
+            verificationDocs: ownerRequest.documents || owner.verificationDocs,
+            businessDetails: ownerRequest.businessDetails || owner.businessDetails
           }
         });
       }
 
       // Sync role back to User
-      if (ownerRequest.userId) {
-        await tx.user.update({
-          where: { id: ownerRequest.userId },
-          data: { role: ownerRequest.role }
-        });
-      }
+      await tx.user.update({
+        where: { id: targetUserId },
+        data: { role: ownerRequest.role.toUpperCase() }
+      });
 
       // Update request status
       return tx.ownerRequest.update({
@@ -1196,16 +1249,19 @@ export const batchUpdateOwnerStatus = async (req, res) => {
   }
 
   try {
-    const result = await prisma.ownerProfile.updateMany({
+    const owners = await prisma.ownerProfile.findMany({
       where: { id: { in: ownerIds } },
-      data: { status }
+      select: { userId: true }
     });
+    const userIds = owners.map(o => o.userId).filter(Boolean);
 
-    // Also update associated User status if they exist
-    const owners = await prisma.ownerProfile.findMany({ where: { id: { in: ownerIds } } });
-    const userIds = owners.filter(o => o.userId).map(o => o.userId);
+    let count = 0;
     if (userIds.length > 0) {
-      await prisma.user.updateMany({ where: { id: { in: userIds } }, data: { status } });
+      const result = await prisma.user.updateMany({
+        where: { id: { in: userIds } },
+        data: { status }
+      });
+      count = result.count;
     }
 
     // Log the batch action
@@ -1214,10 +1270,10 @@ export const batchUpdateOwnerStatus = async (req, res) => {
       "BATCH_OWNER_STATUS_UPDATE",
       "USER_MANAGEMENT",
       null,
-      { count: result.count, status, ownerIds }
+      { count, status, ownerIds }
     );
 
-    res.status(200).json({ success: true, message: `Successfully updated ${result.count} records to ${status}`, count: result.count });
+    res.status(200).json({ success: true, message: `Successfully updated ${count} records to ${status}`, count });
   } catch (error) {
     logger.error("Error in batchUpdateOwnerStatus:", error);
     res.status(500).json({ success: false, message: "Internal server error" });

@@ -1,22 +1,15 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { Check, Trophy, Activity, Zap, Target, MapPin, Phone, User as UserIcon, ChevronRight, ChevronLeft, Loader2 } from "lucide-react";
-import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import axiosInstance from "@hooks/useAxiosInstance";
-import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import toast from "react-hot-toast";
-import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
-import { useDispatch } from "react-redux";
-import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
+import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "../../redux/slices/authSlice";
-import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { searchLocations } from "../../utils/locationService";
-import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
-import { useRef, useEffect } from "react";
-import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 
 const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
@@ -28,6 +21,24 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
     password: "",
     confirmPassword: ""
   });
+
+  // Populate existing fields if available
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        phone: user.phone || prev.phone,
+        gender: user.gender || prev.gender,
+        location: user.location || prev.location,
+        sportTypes: user.sportTypes || prev.sportTypes,
+      }));
+
+      // If signed up via Google, skip password creation (Step 1)
+      if (user.googleId) {
+        setStep(2);
+      }
+    }
+  }, [user]);
 
   const [locationSuggestions, setLocationSuggestions] = useState([]);
   const [isSearchingLocation, setIsSearchingLocation] = useState(false);
@@ -87,7 +98,10 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
   };
 
   const handleBack = () => {
-    setStep(prev => prev - 1);
+    const minStep = user?.googleId ? 2 : 1;
+    if (step > minStep) {
+      setStep(prev => prev - 1);
+    }
   };
 
   // Location Autocomplete Effect
@@ -162,7 +176,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
         <div className="flex h-1.5 bg-[#000000]">
           <div 
             className="bg-[#CCFF00] transition-all duration-500 shadow-[0_0_10px_#CCFF00]" 
-            style={{ width: `${(step / 4) * 100}%` }}
+            style={{ width: `${((step - (user?.googleId ? 1 : 0)) / (user?.googleId ? 3 : 4)) * 100}%` }}
           />
         </div>
 
@@ -177,9 +191,9 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
             </h2>
             <p className="text-white/40 text-sm font-medium uppercase tracking-[0.2em]">
               {step === 1 && "Step 1 of 4: Create Password"}
-              {step === 2 && "Step 2 of 4: Basic Profile"}
-              {step === 3 && "Step 3 of 4: Your Location"}
-              {step === 4 && "Step 4 of 4: Your Interests"}
+              {step === 2 && (user?.googleId ? "Step 1 of 3: Basic Profile" : "Step 2 of 4: Basic Profile")}
+              {step === 3 && (user?.googleId ? "Step 2 of 3: Your Location" : "Step 3 of 4: Your Location")}
+              {step === 4 && (user?.googleId ? "Step 3 of 3: Your Interests" : "Step 4 of 4: Your Interests")}
             </p>
           </div>
 
@@ -349,7 +363,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
 
           {/* Footer Actions */}
           <div className="flex gap-4 pt-4">
-            {step > 1 && (
+            {step > (user?.googleId ? 2 : 1) && (
               <button
                 onClick={handleBack}
                 className="flex-1 bg-[#000000] hover:bg-white/10 text-white h-16 rounded-[8px] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all border border-[#2D2D2D]"
