@@ -17,7 +17,7 @@ const ReelItem = ({ reel, isVisible }) => {
   const [commentText, setCommentText] = useState('');
   const [addComment] = useAddCommentMutation();
 
-  const isCreator = user?.id === reel.creatorId?._id || user?.id === reel.creatorId;
+  const isCreator = user?.id === reel.creatorId?.id || user?.id === reel.creatorId?._id || user?.id === reel.creatorId;
 
   const stats = reel.stats || {
     views: reel.views || 0,
@@ -124,7 +124,7 @@ const ReelItem = ({ reel, isVisible }) => {
           </div>
         ) : (
           <ReelPlayer 
-            reelId={reel._id}
+            reelId={reel.id}
             hlsUrl={reel.hlsUrl || reel.rawVideoUrl} 
             isVisible={isVisible} 
             poster={reel.thumbnailUrl}
@@ -231,7 +231,7 @@ const ReelItem = ({ reel, isVisible }) => {
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full border-2 border-white/80 overflow-hidden shadow-lg">
             <img 
-              src={reel.creatorId?.profilePicture || `https://avatar.vercel.sh/${reel.creatorId?._id || 'kridaz'}`} 
+              src={reel.creatorId?.profilePicture || `https://avatar.vercel.sh/${reel.creatorId?.id || reel.creatorId?._id || 'kridaz'}`}  
               alt={reel.creatorId?.username} 
               className="w-full h-full object-cover"
             />
