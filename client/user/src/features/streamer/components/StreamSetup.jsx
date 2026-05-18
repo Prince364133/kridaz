@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import * as Sentry from "@sentry/react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { 
@@ -190,7 +191,7 @@ export default function StreamSetup() {
         setSelectedPlatforms(prev => ({ ...prev, [fbRes.data[0].accountId]: true }));
       }
     } catch (err) {
-      console.log("Facebook account fetch error", err);
+      Sentry.captureException(err);
     } finally {
       if (!silent) setFbLoading(false);
     }
@@ -206,7 +207,7 @@ export default function StreamSetup() {
         setSelectedPlatforms(prev => ({ ...prev, [res.data[0].accountId]: true }));
       }
     } catch (err) {
-      console.log("YouTube account fetch error", err);
+      Sentry.captureException(err);
     } finally {
       if (!silent) setChannelLoading(false);
     }

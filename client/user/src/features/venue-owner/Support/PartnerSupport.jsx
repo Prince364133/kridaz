@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import {
   LifeBuoy, MessageSquare, ChevronRight, Clock, AlertCircle, Zap,
   HelpCircle, Landmark, Shield, X, Plus
@@ -76,19 +77,19 @@ const PartnerSupport = () => {
 
     setUploading(true);
     try {
-      console.log("PartnerSupport.jsx: Starting image upload for", files.length, "files");
+      Sentry.addBreadcrumb({ message: `PartnerSupport.jsx: Starting image upload for ${files.length} files` });
       const uploadPromises = files.map(async (file) => {
         const data = new FormData();
         data.append("file", file);
         data.append("folder", "kridaz/support");
         
-        console.log(`PartnerSupport.jsx: Uploading ${file.name} (${file.size} bytes)...`);
+        Sentry.addBreadcrumb({ message: `PartnerSupport.jsx: Uploading ${file.name} (${file.size} bytes)...` });
         const res = await axiosInstance.post("/api/upload", data, {
           headers: { "Content-Type": "multipart/form-data" }
         });
         
         if (res.data.success) {
-          console.log(`PartnerSupport.jsx: Successfully uploaded ${file.name}. URL:`, res.data.url);
+          Sentry.addBreadcrumb({ message: `PartnerSupport.jsx: Successfully uploaded ${file.name}. URL: ${res.data.url}` });
           return res.data.url;
         } else {
           throw new Error(res.data.message || "Upload failed");

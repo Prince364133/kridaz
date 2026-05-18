@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import * as Sentry from "@sentry/react";
 import {
   format,
   parse,
@@ -83,7 +84,7 @@ const useTimeSelection = (
       }));
       setBookedTime(formattedBookedTime);
     } catch (error) {
-      console.log("Error in fetchByDate", error.message);
+      Sentry.captureException(error);
     }
   };
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useRequestUpgradeMutation } from "@redux/api/businessApi";
@@ -175,7 +176,7 @@ export default function BusinessRegistration() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting registration bundle via RTK Query mutation...", { formData, files });
+    Sentry.addBreadcrumb({ message: "Submitting registration bundle via RTK Query mutation..." });
 
     if (hasRoleConflict) {
       toast.error("Role conflict detected. Please contact support.");
@@ -254,7 +255,7 @@ export default function BusinessRegistration() {
         }
       });
 
-      console.log("Triggering requestUpgrade RTK Mutation...");
+      Sentry.addBreadcrumb({ message: "Triggering requestUpgrade RTK Mutation..." });
       const response = await requestUpgrade(data).unwrap();
 
       if (response.success) {

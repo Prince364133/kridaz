@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import TurfCard from "./TurfCard.jsx";
 import TurfCardSkeleton from "@components/ui/TurfCardSkeleton.jsx";
 import useTurfData from "../hooks/useTurfData.jsx";
@@ -107,6 +108,9 @@ const Turf = () => {
 
   return (
     <div className="min-h-screen bg-black text-white pb-20 overflow-x-hidden">
+      <Helmet>
+        <title>Turf | Kridaz</title>
+      </Helmet>
       <div className="max-w-screen-2xl mx-auto px-6 pt-0 relative z-10">
 
         {/* ── Sticky Search Bar ────────────────────────────────────── */}

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { Helmet } from "react-helmet-async";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { 
   Search, 
@@ -756,6 +757,9 @@ const FindPlayers = () => {
 
   return (
     <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 overflow-hidden" : "min-h-screen pt-20 overflow-y-auto no-scrollbar"}`}>
+      <Helmet>
+        <title>Find Players | Kridaz</title>
+      </Helmet>
       
       {activeTab === "players" && (
         <>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { Helmet } from "react-helmet-async";
 import { followUser, unfollowUser } from "@redux/slices/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -461,6 +462,9 @@ const Community = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white pt-4 pb-12 px-4 md:px-6 xl:pl-[100px] font-sans relative">
+      <Helmet>
+        <title>Community | Kridaz</title>
+      </Helmet>
       
       {/* ================= FAR LEFT COLUMN (NAVBAR) ================= */}
       <div className="hidden xl:flex flex-col gap-2 fixed left-0 top-[80px] w-[80px] z-50">

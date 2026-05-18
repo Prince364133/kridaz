@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import useSignUpForm from "../hooks/useSignUpForm";
 import GoogleAuthButton from "../components/GoogleAuthButton";
@@ -84,7 +85,7 @@ const SignUp = () => {
       if (emailParam) {
         const decodedEmail = decodeURIComponent(emailParam);
         setValue("email", decodedEmail);
-        console.log("Auto-filled player email from URL:", decodedEmail);
+        Sentry.addBreadcrumb({ message: `Auto-filled player email from URL: ${decodedEmail}` });
       }
       toast.success("Joining via invitation link!");
     }
@@ -95,7 +96,7 @@ const SignUp = () => {
       if (emailParam) {
         const decodedEmail = decodeURIComponent(emailParam);
         setValue("email", decodedEmail);
-        console.log("Auto-filled umpire email from URL:", decodedEmail);
+        Sentry.addBreadcrumb({ message: `Auto-filled umpire email from URL: ${decodedEmail}` });
       }
       
       const fetchInviteDetails = async () => {

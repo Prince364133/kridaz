@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { Helmet } from "react-helmet-async";
 import {
   User, MapPin, Clock, IndianRupee, Calendar, Zap, Activity,
   ArrowRight, ShieldCheck, Trophy, Star, Camera, Edit2, MessageSquare, Heart, Edit3, Trash2, Loader2, Send, MessageCircle,
@@ -188,6 +189,9 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-black text-white pb-24 overflow-x-hidden">
+      <Helmet>
+        <title>Profile | Kridaz</title>
+      </Helmet>
       
       <div className="relative">
         <div className="h-72 relative overflow-hidden rounded-b-[32px]">

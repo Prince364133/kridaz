@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useGetReelsFeedQuery, reelsApi } from '@redux/api/reelsApi';
 import ReelItem from '../components/ReelItem';
 import { ChevronLeft, Camera } from 'lucide-react';
@@ -184,6 +185,9 @@ const ReelsFeed = () => {
 
   return (
     <div className="fixed inset-0 h-[100dvh] w-full bg-black overflow-hidden z-50 flex justify-center">
+      <Helmet>
+        <title>Shorts | Kridaz</title>
+      </Helmet>
       {/* Header Overlay */}
       <div className="absolute top-0 w-full max-w-[500px] p-6 flex items-center justify-between z-30 pointer-events-none">
         <button 

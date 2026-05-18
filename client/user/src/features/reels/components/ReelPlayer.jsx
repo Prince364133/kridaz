@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import * as Sentry from "@sentry/react";
 import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { useTrackHeartbeatMutation } from '@redux/api/reelsApi';
 import Hls from 'hls.js';
@@ -93,11 +94,11 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
         if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
-              console.log('[REEL_PLAYER] Network error, trying to recover...');
+              Sentry.addBreadcrumb({ message: '[REEL_PLAYER] Network error, trying to recover...' });
               hls.startLoad();
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
-              console.log('[REEL_PLAYER] Media error, trying to recover...');
+              Sentry.addBreadcrumb({ message: '[REEL_PLAYER] Media error, trying to recover...' });
               hls.recoverMediaError();
               break;
             default:
@@ -120,7 +121,7 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
       // Native HLS (Safari) or raw MP4
       video.src = src;
       if (isVisible) {
-        video.play().catch(e => console.log('Auto-play blocked'));
+        video.play().catch(e => Sentry.addBreadcrumb({ message: 'Auto-play blocked' }));
       }
     }
 
