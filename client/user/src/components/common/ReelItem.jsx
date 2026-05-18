@@ -101,8 +101,8 @@ const ReelItem = ({ reel, isVisible }) => {
             
             {/* Processing Overlay */}
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm">
-              <div className="w-16 h-16 border-4 border-[#84CC16] border-t-transparent rounded-full animate-spin mb-4" />
-              <p className="text-[#84CC16] font-bold text-lg">Optimizing Reel...</p>
+              <div className="w-16 h-16 border-4 border-[#55DEE8] border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-[#55DEE8] font-bold text-lg">Optimizing Reel...</p>
               <p className="text-white/60 text-sm mt-2">{reel.processingProgress || 0}% Complete</p>
               
               {/* Progress Bar */}
@@ -110,7 +110,7 @@ const ReelItem = ({ reel, isVisible }) => {
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${reel.processingProgress || 0}%` }}
-                  className="h-full bg-[#84CC16]"
+                  className="h-full bg-[#55DEE8]"
                 />
               </div>
             </div>
@@ -298,12 +298,12 @@ const ReelItem = ({ reel, isVisible }) => {
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Add a comment..."
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#84CC16] transition-colors pr-14"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#55DEE8] transition-colors pr-14"
                 />
                 <button 
                   type="submit"
                   disabled={!commentText.trim()}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#84CC16] font-bold text-sm px-3 py-2 disabled:opacity-30 transition-opacity"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#55DEE8] font-bold text-sm px-3 py-2 disabled:opacity-30 transition-opacity"
                 >
                   Post
                 </button>

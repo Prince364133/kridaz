@@ -44,7 +44,7 @@ export default function CoachLanding() {
       <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
         style={{ backgroundImage: `radial-gradient(${GRADIENT_START} 1px, transparent 1px)`, backgroundSize: "36px 36px" }}
       />
-      {/* ── Blue glow blob */}
+      {/* ── Glow blob */}
       <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full pointer-events-none"
         style={{ background: `radial-gradient(circle, rgba(85,222,232,0.12) 0%, transparent 70%)` }}
       />
@@ -57,7 +57,7 @@ export default function CoachLanding() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-[10px] md:text-xs font-semibold mb-4 md:mb-6 uppercase tracking-widest"
               style={{ background: "rgba(85,222,232,0.08)", borderColor: "rgba(85,222,232,0.25)" }}
             >
-              <span style={{ background: GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              <span style={{ background: GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontFamily: "'Inter'" }}>
                 Professional Coaches
               </span>
             </div>
@@ -65,7 +65,7 @@ export default function CoachLanding() {
               Build Your <br />
               <span style={{ background: GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Legacy.</span>
             </h1>
-            <p className="text-gray-400 mb-8 max-w-lg mx-auto md:mx-0 leading-relaxed" style={{ fontFamily: "'Inter'", fontSize: "20px" }}>
+            <p className="text-gray-400 mb-6 max-w-lg mx-auto md:mx-0 leading-relaxed text-sm md:text-base" style={{ fontFamily: "'Inter'" }}>
               Take your coaching business to the next level. Kridaz provides the digital infrastructure to manage your students, schedule sessions, and grow your brand.
             </p>
             <button
@@ -91,8 +91,8 @@ export default function CoachLanding() {
                   <b.icon size={20} className="md:w-6 md:h-6" stroke="url(#primaryGradient)" />
                 </div>
                 <div>
-                  <h3 className="font-display text-xl md:text-2xl uppercase mb-1 md:mb-2">{b.title}</h3>
-                  <p className="text-gray-400 text-xs md:text-sm leading-relaxed">{b.desc}</p>
+                  <h3 className="text-xl md:text-2xl uppercase mb-1 md:mb-2 font-bold text-white" style={{ fontFamily: "'Open Sans'" }}>{b.title}</h3>
+                  <p className="text-gray-400 leading-relaxed text-sm md:text-base" style={{ fontFamily: "'Inter'" }}>{b.desc}</p>
                 </div>
               </div>
             ))}
@@ -101,7 +101,7 @@ export default function CoachLanding() {
 
         {/* ── How It Works ── */}
         <div className="mt-20 md:mt-32 text-center">
-          <h2 className="font-display text-3xl md:text-5xl font-black text-white mb-10 md:mb-12 uppercase tracking-tight">How to Scale Your Academy</h2>
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-10 md:mb-12 uppercase tracking-tight" style={{ fontFamily: "'Open Sans'" }}>How to Scale Your Academy</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
             {[
               { icon: Users, title: "Setup Academy", desc: "List your sports, define age groups, and set your fee structure." },
@@ -110,10 +110,10 @@ export default function CoachLanding() {
             ].map((step, i) => (
               <div key={i} className="p-6 md:p-8 bg-white/5 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-white/10 hover:border-[#55DEE8]/30 transition-all group">
                 <div className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 md:mb-6 rounded-xl md:rounded-2xl bg-white/10 group-hover:bg-[#55DEE8]/20 transition-colors">
-                  <step.icon className="w-6 h-6 md:w-7 md:h-7 text-white group-hover:text-[#55DEE8] transition-colors" />
+                  <step.icon className="w-6 h-6 md:w-7 md:h-7 text-white transition-colors" stroke="currentColor" />
                 </div>
-                <h3 className="text-lg md:text-xl font-bold text-white mb-2 md:mb-3 uppercase tracking-wider font-display">{step.title}</h3>
-                <p className="text-gray-400 text-xs md:text-sm">{step.desc}</p>
+                <h3 className="text-lg md:text-xl font-bold text-white mb-2 md:mb-3 uppercase tracking-wider" style={{ fontFamily: "'Open Sans'" }}>{step.title}</h3>
+                <p className="text-gray-400 text-sm md:text-base leading-relaxed" style={{ fontFamily: "'Inter'" }}>{step.desc}</p>
               </div>
             ))}
           </div>
@@ -121,7 +121,7 @@ export default function CoachLanding() {
 
         {/* ── Testimonials ── */}
         <div className="mt-20 md:mt-32 max-w-4xl mx-auto">
-          <h2 className="font-display text-3xl md:text-5xl font-black text-white text-center mb-10 md:mb-16 uppercase tracking-tight">Coach Spotlight</h2>
+          <h2 className="text-3xl md:text-5xl font-black text-white text-center mb-10 md:mb-16 uppercase tracking-tight" style={{ fontFamily: "'Open Sans'" }}>Coach Spotlight</h2>
           <div className="grid gap-6 md:gap-8">
             {[
               { 
@@ -135,14 +135,14 @@ export default function CoachLanding() {
                 <div className="absolute top-0 right-0 p-4 md:p-8 opacity-10 group-hover:opacity-20 transition-opacity">
                   <t.icon size={60} className="md:w-20 md:h-20" />
                 </div>
-                <p className="text-lg md:text-2xl text-gray-200 font-medium relative z-10 leading-relaxed mb-6 md:mb-8">
+                <p className="text-gray-200 font-medium relative z-10 leading-relaxed mb-6 md:mb-8 text-sm md:text-base" style={{ fontFamily: "'Inter'" }}>
                   {t.text}
                 </p>
                 <div className="flex items-center gap-4 relative z-10">
                   <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border" style={{ backgroundColor: "rgba(85,222,232,0.2)", borderColor: "rgba(85,222,232,0.4)" }} />
                   <div>
-                    <div className="text-white text-xs md:text-base font-bold uppercase tracking-wider">{t.name}</div>
-                    <div className="text-[10px] md:text-sm font-semibold" style={{ background: GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{t.role}</div>
+                    <div className="text-white font-bold uppercase tracking-wider" style={{ fontFamily: "'Open Sans'" }}>{t.name}</div>
+                    <div className="font-semibold text-sm md:text-base" style={{ background: GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontFamily: "'Inter'" }}>{t.role}</div>
                   </div>
                 </div>
               </div>
@@ -170,7 +170,7 @@ export default function CoachLanding() {
               <div className="grid grid-cols-2 gap-4 md:gap-6">
                 {/* Aadhaar Upload Box Skeleton */}
                 <label className="flex flex-col items-center gap-3 md:gap-4 cursor-pointer group">
-                  <span className="text-white font-black tracking-wider uppercase text-center" style={{ fontFamily: "'Inter'", fontSize: "14px" }}>AADHAAR CARD</span>
+                  <span className="text-white font-black tracking-wider uppercase text-center text-sm md:text-base" style={{ fontFamily: "'Inter'" }}>AADHAAR CARD</span>
                   <div className="relative w-full h-[110px] md:h-[130px] bg-[#D9D9D9] rounded-[10px] p-2 md:p-3 overflow-hidden shadow-inner flex flex-col justify-between group-hover:ring-2 group-hover:ring-[#55DEE8] transition-all">
                     {/* Hover Overlay */}
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center z-10 backdrop-blur-sm">
@@ -202,7 +202,7 @@ export default function CoachLanding() {
 
                 {/* PAN Upload Box Skeleton */}
                 <label className="flex flex-col items-center gap-3 md:gap-4 cursor-pointer group">
-                  <span className="text-white font-black tracking-wider uppercase text-center" style={{ fontFamily: "'Inter'", fontSize: "14px" }}>PAN CARD</span>
+                  <span className="text-white font-black tracking-wider uppercase text-center text-sm md:text-base" style={{ fontFamily: "'Inter'" }}>PAN CARD</span>
                   <div className="relative w-full h-[110px] md:h-[130px] bg-[#D9D9D9] rounded-[10px] overflow-hidden shadow-inner flex flex-col justify-between group-hover:ring-2 group-hover:ring-[#BFF367] transition-all">
                     {/* Hover Overlay */}
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center z-10 backdrop-blur-sm">
@@ -248,7 +248,7 @@ export default function CoachLanding() {
                 <button 
                   type="submit" 
                   className="w-full max-w-[240px] py-3 rounded-[10px] font-bold text-black uppercase tracking-widest hover:brightness-110 transition-all"
-                  style={{ background: GRADIENT, fontFamily: "'Inter'", fontSize: "16px" }}
+                  style={{ background: GRADIENT, fontFamily: "'Inter'" }}
                 >
                   Submit Documents
                 </button>

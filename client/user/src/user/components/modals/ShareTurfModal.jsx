@@ -99,7 +99,7 @@ const ShareTurfModal = ({ isOpen, onClose, turf }) => {
               placeholder="Search friends..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#84CC16]/50 transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#55DEE8]/50 transition-colors"
             />
           </div>
         </div>
@@ -121,7 +121,7 @@ const ShareTurfModal = ({ isOpen, onClose, turf }) => {
                   key={user._id}
                   onClick={() => toggleUser(user._id)}
                   className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all ${
-                    isSelected ? 'bg-[#84CC16]/10' : 'hover:bg-white/5'
+                    isSelected ? 'bg-[#55DEE8]/10' : 'hover:bg-white/5'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -136,7 +136,7 @@ const ShareTurfModal = ({ isOpen, onClose, turf }) => {
                     </div>
                   </div>
                   <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${
-                    isSelected ? 'bg-[#84CC16] border-[#84CC16]' : 'border-white/20'
+                    isSelected ? 'bg-[#55DEE8] border-[#55DEE8]' : 'border-white/20'
                   }`}>
                     {isSelected && <Check size={14} className="text-black" />}
                   </div>
@@ -151,7 +151,7 @@ const ShareTurfModal = ({ isOpen, onClose, turf }) => {
             <button
               onClick={handleShare}
               disabled={isSending}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-[#84CC16] text-black font-black uppercase tracking-wider text-sm rounded-xl hover:bg-[#95e61a] transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-[#55DEE8] text-black font-black uppercase tracking-wider text-sm rounded-xl hover:bg-[#95e61a] transition-colors disabled:opacity-50"
             >
               <Send size={16} />
               {isSending ? "Sharing..." : `Share with ${selectedUsers.length} friend${selectedUsers.length > 1 ? 's' : ''}`}

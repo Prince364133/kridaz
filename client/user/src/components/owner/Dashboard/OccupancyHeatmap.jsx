@@ -63,7 +63,7 @@ const OccupancyHeatmap = () => {
           <select 
             value={selectedTurf} 
             onChange={(e) => setSelectedTurf(e.target.value)}
-            className="bg-[#151617] border border-[#2D2D2D] text-white text-[10px] font-bold uppercase tracking-widest rounded-[6px] px-3 py-1.5 focus:outline-none focus:border-[#CCFF00]/50 transition-all cursor-pointer hover:border-[#CCFF00]/30"
+            className="bg-[#151617] border border-[#2D2D2D] text-white text-[10px] font-bold uppercase tracking-widest rounded-[6px] px-3 py-1.5 focus:outline-none focus:border-[#55DEE8]/50 transition-all cursor-pointer hover:border-[#55DEE8]/30"
           >
             <option value="" disabled>Select Facility</option>
             {turfs.map(turf => (
@@ -77,7 +77,7 @@ const OccupancyHeatmap = () => {
               <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Empty</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-[2px] bg-[#CCFF00]" />
+              <div className="w-3 h-3 rounded-[2px] bg-[#55DEE8]" />
               <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Booked</span>
             </div>
           </div>
@@ -131,7 +131,7 @@ const OccupancyHeatmap = () => {
                 <h3 className="text-xl font-black text-white uppercase tracking-tight">
                   {days[selectedSlot.day]} @ {selectedSlot.hour === 0 ? '12 AM' : selectedSlot.hour < 12 ? `${selectedSlot.hour} AM` : selectedSlot.hour === 12 ? '12 PM' : `${selectedSlot.hour-12} PM`}
                 </h3>
-                <p className="text-sm text-[#CCFF00] font-medium uppercase tracking-widest mt-1">
+                <p className="text-sm text-[#55DEE8] font-medium uppercase tracking-widest mt-1">
                   {selectedSlot.count} ACTIVE BOOKINGS
                 </p>
               </div>
@@ -146,14 +146,14 @@ const OccupancyHeatmap = () => {
             <div className="max-h-[60vh] overflow-y-auto p-6 space-y-4 no-scrollbar">
               {selectedSlot.details.length > 0 ? (
                 selectedSlot.details.map((b, idx) => (
-                  <div key={idx} className="bg-[#000000] p-5 rounded-[8px] border border-[#2D2D2D] hover:border-[#CCFF00]/30 transition-all group">
+                  <div key={idx} className="bg-[#000000] p-5 rounded-[8px] border border-[#2D2D2D] hover:border-[#55DEE8]/30 transition-all group">
                     <div className="flex items-center justify-between mb-4">
                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-[6px] bg-[#CCFF00] flex items-center justify-center text-black font-black text-lg">
+                          <div className="w-10 h-10 rounded-[6px] bg-[#55DEE8] flex items-center justify-center text-black font-black text-lg">
                              {b.user[0]}
                           </div>
                           <div>
-                             <h4 className="text-white font-bold uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">{b.user}</h4>
+                             <h4 className="text-white font-bold uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors">{b.user}</h4>
                              <p className="text-[10px] text-[#999999] uppercase tracking-widest">{b.turf}</p>
                           </div>
                        </div>
@@ -166,17 +166,17 @@ const OccupancyHeatmap = () => {
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#2D2D2D]">
                        <div className="space-y-2">
                           <div className="flex items-center gap-2 text-[#999999]">
-                             <Phone size={12} className="text-[#CCFF00]" />
+                             <Phone size={12} className="text-[#55DEE8]" />
                              <span className="text-[11px] font-medium">{b.phone || 'N/A'}</span>
                           </div>
                           <div className="flex items-center gap-2 text-[#999999]">
-                             <Mail size={12} className="text-[#CCFF00]" />
+                             <Mail size={12} className="text-[#55DEE8]" />
                              <span className="text-[11px] font-medium truncate">{b.email || 'N/A'}</span>
                           </div>
                        </div>
                        <div className="space-y-2">
                           <div className="flex items-center gap-2 text-[#999999]">
-                             <Clock size={12} className="text-[#CCFF00]" />
+                             <Clock size={12} className="text-[#55DEE8]" />
                              <span className="text-[11px] font-medium">{b.time}</span>
                           </div>
                        </div>

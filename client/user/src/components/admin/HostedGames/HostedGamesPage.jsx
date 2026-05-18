@@ -121,7 +121,7 @@ const HostedGamesPage = () => {
 
   return (
     <div className="min-h-screen bg-[#000000] text-white p-6 lg:p-10 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#55DEE8]/5 blur-[120px] pointer-events-none" />
       
       <div className="max-w-7xl mx-auto space-y-10 relative z-10">
         
@@ -129,8 +129,8 @@ const HostedGamesPage = () => {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-white/5 pb-10">
           <div>
             <h1 className="text-4xl font-black text-white uppercase tracking-tight flex items-center gap-4">
-              <Trophy className="text-[#CCFF00]" size={36} />
-              Hosted Games <span className="text-[#CCFF00]">Management</span>
+              <Trophy className="text-[#55DEE8]" size={36} />
+              Hosted Games <span className="text-[#55DEE8]">Management</span>
             </h1>
             <p className="text-gray-500 mt-2 font-medium tracking-wide uppercase text-xs">
               Monitor, moderate and manage all community-organized match records
@@ -140,11 +140,11 @@ const HostedGamesPage = () => {
           <div className="flex items-center gap-4">
             <button 
               onClick={fetchGames}
-              className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-[#CCFF00] hover:border-[#CCFF00]/40 transition-all"
+              className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-[#55DEE8] hover:border-[#55DEE8]/40 transition-all"
             >
               <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
             </button>
-            <div className="bg-[#CCFF00]/10 border border-[#CCFF00]/20 text-[#CCFF00] px-4 py-2 rounded-xl font-black text-sm uppercase tracking-tighter">
+            <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 text-[#55DEE8] px-4 py-2 rounded-xl font-black text-sm uppercase tracking-tighter">
               {games.length} Total Games
             </div>
           </div>
@@ -152,13 +152,13 @@ const HostedGamesPage = () => {
 
         {/* Bulk Actions Bar */}
         {selectedIds.length > 0 && (
-          <div className="sticky top-6 z-[40] bg-[#0d0d0d] border border-[#CCFF00]/30 rounded-2xl p-4 shadow-2xl flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
+          <div className="sticky top-6 z-[40] bg-[#0d0d0d] border border-[#55DEE8]/30 rounded-2xl p-4 shadow-2xl flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
             <div className="flex items-center gap-6 pl-4">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded bg-[#CCFF00] flex items-center justify-center text-black font-black text-xs">
+                <div className="w-6 h-6 rounded bg-[#55DEE8] flex items-center justify-center text-black font-black text-xs">
                   {selectedIds.length}
                 </div>
-                <span className="text-xs font-black uppercase tracking-widest text-[#CCFF00]">Selected</span>
+                <span className="text-xs font-black uppercase tracking-widest text-[#55DEE8]">Selected</span>
               </div>
               <button 
                 onClick={() => setSelectedIds([])}
@@ -202,7 +202,7 @@ const HostedGamesPage = () => {
                 placeholder="Search by game type, host name or ground..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white focus:outline-none focus:border-[#CCFF00]/40 transition-all font-medium"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white focus:outline-none focus:border-[#55DEE8]/40 transition-all font-medium"
               />
             </div>
             <div className="md:col-span-4 flex gap-2">
@@ -211,7 +211,7 @@ const HostedGamesPage = () => {
                 <select 
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white appearance-none focus:outline-none focus:border-[#CCFF00]/40 transition-all font-bold text-xs uppercase tracking-widest"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white appearance-none focus:outline-none focus:border-[#55DEE8]/40 transition-all font-bold text-xs uppercase tracking-widest"
                 >
                   <option value="ALL">All Status</option>
                   <option value="ACTIVE">Active</option>
@@ -242,7 +242,7 @@ const HostedGamesPage = () => {
                   type="checkbox" 
                   checked={filteredGames.length > 0 && selectedIds.length === filteredGames.length}
                   onChange={handleSelectAll}
-                  className="w-5 h-5 rounded border-white/10 bg-white/5 text-[#CCFF00] focus:ring-[#CCFF00]/50"
+                  className="w-5 h-5 rounded border-white/10 bg-white/5 text-[#55DEE8] focus:ring-[#55DEE8]/50"
                 />
               </div>
               <div className="col-span-3">Game Type / ID</div>
@@ -257,10 +257,10 @@ const HostedGamesPage = () => {
                 key={game._id}
                 onClick={() => handleSelect(game._id)}
                 className={`group relative bg-[#0d0d0d] border transition-all duration-500 rounded-2xl p-6 overflow-hidden cursor-pointer ${
-                  selectedIds.includes(game._id) ? "border-[#CCFF00] bg-[#CCFF00]/5" : "border-white/5 hover:border-[#CCFF00]/40"
+                  selectedIds.includes(game._id) ? "border-[#55DEE8] bg-[#55DEE8]/5" : "border-white/5 hover:border-[#55DEE8]/40"
                 }`}
               >
-                <div className={`absolute inset-y-0 left-0 w-1 bg-[#CCFF00] transition-transform duration-500 ${
+                <div className={`absolute inset-y-0 left-0 w-1 bg-[#55DEE8] transition-transform duration-500 ${
                   selectedIds.includes(game._id) ? "scale-y-100" : "scale-y-0 group-hover:scale-y-100"
                 }`} />
                 
@@ -275,17 +275,17 @@ const HostedGamesPage = () => {
                         e.stopPropagation();
                         handleSelect(game._id);
                       }}
-                      className="w-5 h-5 rounded border-white/10 bg-white/5 text-[#CCFF00] focus:ring-[#CCFF00]/50"
+                      className="w-5 h-5 rounded border-white/10 bg-white/5 text-[#55DEE8] focus:ring-[#55DEE8]/50"
                     />
                   </div>
 
                   {/* Match Info */}
                   <div className="lg:col-span-3 flex items-center gap-5">
-                    <div className="w-12 h-12 rounded-xl bg-[#CCFF00]/10 flex items-center justify-center text-[#CCFF00] border border-[#CCFF00]/20">
+                    <div className="w-12 h-12 rounded-xl bg-[#55DEE8]/10 flex items-center justify-center text-[#55DEE8] border border-[#55DEE8]/20">
                       <Activity size={24} />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-[15px] font-black text-white uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors truncate">
+                      <h3 className="text-[15px] font-black text-white uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors truncate">
                         {game.gameType}
                       </h3>
                       <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mt-1">
@@ -342,7 +342,7 @@ const HostedGamesPage = () => {
                         e.stopPropagation();
                         navigate(`/match/${game._id}`);
                       }}
-                      className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:bg-[#CCFF00] hover:text-black hover:border-[#CCFF00] transition-all"
+                      className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:bg-[#55DEE8] hover:text-black hover:border-[#55DEE8] transition-all"
                     >
                       <Eye size={18} />
                     </button>

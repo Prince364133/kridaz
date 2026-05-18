@@ -10,9 +10,9 @@
 
 /* ── Design Tokens ──────────────────────────────────────────────── */
 :root {
-  --primary:       #84CC16;
-  --primary-glow:  rgba(132, 204, 22, 0.1);
-  --primary-dark:  #5F9300;
+  --primary:       #55DEE8;
+  --primary-glow:  rgba(85, 222, 232, 0.1);
+  --primary-dark:  #00b4c2;
   --bg-base:       #000000;
   --surface:       #0A0A0A;
   --surface-2:     #111111;

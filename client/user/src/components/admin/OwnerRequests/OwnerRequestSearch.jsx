@@ -10,7 +10,7 @@ const OwnerRequestSearch = ({ searchTerm, handleSearch }) => {
         value={searchTerm}
         onChange={(e) => handleSearch(e.target.value)}
         placeholder="SEARCH AUTHORIZATION QUEUE BY NAME, EMAIL OR BUSINESS..."
-        className="w-full bg-[#2D2D2D] border border-[#404040] rounded-[6px] py-2.5 pl-9 pr-4 text-[14px] text-white focus:outline-none focus:border-[#CCFF00] transition-all font-inter placeholder:text-[#999999] uppercase tracking-wider"
+        className="w-full bg-[#2D2D2D] border border-[#404040] rounded-[6px] py-2.5 pl-9 pr-4 text-[14px] text-white focus:outline-none focus:border-[#55DEE8] transition-all font-inter placeholder:text-[#999999] uppercase tracking-wider"
       />
     </div>
   );

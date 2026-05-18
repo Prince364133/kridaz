@@ -76,7 +76,7 @@ const CoachSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       >
         {/* Active Glow/Background */}
         {isActive && !isLogout && (
-          <div className="absolute inset-x-2 inset-y-1 bg-[#CCFF00] rounded-[6px] -z-10 shadow-[var(--shadow-2)] transition-all duration-300" />
+          <div className="absolute inset-x-2 inset-y-1 bg-[#55DEE8] rounded-[6px] -z-10 shadow-[var(--shadow-2)] transition-all duration-300" />
         )}
         
         {/* Hover Background */}
@@ -96,7 +96,7 @@ const CoachSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
                 ? "text-white/20 group-hover:text-red-500" 
                 : isActive 
                   ? "text-black" 
-                  : "text-[#878C9F] group-hover:text-[#CCFF00]"
+                  : "text-[#878C9F] group-hover:text-[#55DEE8]"
             }`} 
           />
         </div>
@@ -126,7 +126,7 @@ const CoachSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       >
         <div className="flex flex-col p-4 border-b border-[#2D2D2D] bg-[#000000] gap-4 lg:hidden">
           <div className="flex items-center justify-end">
-            <button onClick={toggleSidebar} className="text-white hover:text-[#CCFF00] transition-colors">
+            <button onClick={toggleSidebar} className="text-white hover:text-[#55DEE8] transition-colors">
               <X size={20} />
             </button>
           </div>

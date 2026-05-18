@@ -44,9 +44,9 @@ const ImageUploadZone = ({ value, onChange, onFileSelect }) => {
         className={`
           relative flex flex-col items-center justify-center w-full h-36 rounded-2xl border-2 border-dashed cursor-pointer transition-all
           ${dragging
-            ? "border-[#84CC16] bg-[#84CC16]/10 scale-[1.01]"
+            ? "border-[#55DEE8] bg-[#55DEE8]/10 scale-[1.01]"
             : value
-              ? "border-[#84CC16]/40 bg-[#84CC16]/5 hover:border-[#84CC16]/60"
+              ? "border-[#55DEE8]/40 bg-[#55DEE8]/5 hover:border-[#55DEE8]/60"
               : "border-white/10 bg-white/2 hover:bg-white/5 hover:border-white/20"
           }
         `}
@@ -60,13 +60,13 @@ const ImageUploadZone = ({ value, onChange, onFileSelect }) => {
         />
         {value ? (
           <>
-            <CheckCircle2 size={28} className="text-[#84CC16] mb-2" />
-            <p className="text-[11px] font-bold text-[#84CC16] uppercase tracking-widest">Image Ready</p>
+            <CheckCircle2 size={28} className="text-[#55DEE8] mb-2" />
+            <p className="text-[11px] font-bold text-[#55DEE8] uppercase tracking-widest">Image Ready</p>
             <p className="text-[10px] text-gray-600 mt-1 uppercase tracking-wider">Click to replace</p>
           </>
         ) : (
           <>
-            <UploadCloud size={32} className={`mb-2 transition-colors ${dragging ? "text-[#84CC16]" : "text-gray-500"}`} />
+            <UploadCloud size={32} className={`mb-2 transition-colors ${dragging ? "text-[#55DEE8]" : "text-gray-500"}`} />
             <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
               {dragging ? "Drop to Upload" : "Click or Drag & Drop"}
             </p>
@@ -341,8 +341,8 @@ export const BlogManagement = () => {
                   {editingItem ? "Edit Article" : "Create Article"}
                 </h2>
                 <div className="flex items-center gap-2 mt-1">
-                  <div className="w-2 h-2 rounded-full bg-[#84CC16] animate-pulse" />
-                  <span className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest">System Ready</span>
+                  <div className="w-2 h-2 rounded-full bg-[#55DEE8] animate-pulse" />
+                  <span className="text-[10px] font-bold text-[#55DEE8] uppercase tracking-widest">System Ready</span>
                 </div>
               </div>
               <button
@@ -476,7 +476,7 @@ export const BlogManagement = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-4 rounded-2xl bg-lime-500 text-black font-bold hover:bg-lime-400 transition-all shadow-[0_0_30px_rgba(132,204,22,0.4)] uppercase tracking-widest text-xs disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 py-4 rounded-2xl bg-lime-500 text-black font-bold hover:bg-lime-400 transition-all shadow-[0_0_30px_rgba(85,222,232,0.4)] uppercase tracking-widest text-xs disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {submitting ? (
                     <>

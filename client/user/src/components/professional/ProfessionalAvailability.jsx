@@ -15,7 +15,7 @@ export default function ProfessionalAvailability() {
   const { user, role } = useSelector((state) => state.auth);
   
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
@@ -215,7 +215,7 @@ export default function ProfessionalAvailability() {
                       className={`relative flex flex-col items-center justify-center p-3 rounded-lg border transition-all duration-300 ${
                         isSelected 
                         ? "text-black shadow-lg" 
-                        : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#CCFF00]/30 hover:bg-[#2D2D2D]/50"
+                        : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/30 hover:bg-[#2D2D2D]/50"
                       }`}
                       style={{ 
                         backgroundColor: isSelected ? themeColor : undefined,

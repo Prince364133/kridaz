@@ -7,7 +7,7 @@ const OwnerList = ({ owners, selectedIds, onSelect, onDelete, onToggleStatus }) 
     <div className="relative">
       {owners.length === 0 ? (
         <div className="bg-[#000000] p-20 rounded-[8px] border border-[#2D2D2D] text-center relative overflow-hidden group min-h-[400px] flex items-center justify-center">
-          <div className="absolute inset-0 bg-[#CCFF00]/5 opacity-100 transition-opacity blur-[80px]" />
+          <div className="absolute inset-0 bg-[#55DEE8]/5 opacity-100 transition-opacity blur-[80px]" />
           <div className="relative z-10 space-y-4">
              <div className="w-16 h-16 mx-auto rounded-full bg-[#2D2D2D] flex items-center justify-center text-gray-500 border border-[#404040]">
                <Building size={24} />

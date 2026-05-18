@@ -54,7 +54,7 @@ export default function CoachReviews() {
     <div className="space-y-8 animate-fade-in font-open-sans">
       <div className="pb-6 border-b border-white/5">
         <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-white font-inter">
-          User <span className="text-[#CCFF00]">Reviews</span>
+          User <span className="text-[#55DEE8]">Reviews</span>
         </h1>
         <p className="text-[#999999] text-xs font-semibold uppercase tracking-wider font-inter mt-1">Engage with your students and players</p>
       </div>
@@ -68,7 +68,7 @@ export default function CoachReviews() {
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {reviews.map((review) => (
-            <div key={review._id} className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-[#CCFF00]/30 transition-all shadow-[var(--shadow-2)]">
+            <div key={review._id} className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-[#55DEE8]/30 transition-all shadow-[var(--shadow-2)]">
               <div className="p-6 lg:p-8">
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex gap-4">
@@ -80,7 +80,7 @@ export default function CoachReviews() {
                   </div>
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={14} className={i < review.rating ? "fill-[#CCFF00] text-[#CCFF00]" : "text-[#2D2D2D]"} />
+                      <Star key={i} size={14} className={i < review.rating ? "fill-[#55DEE8] text-[#55DEE8]" : "text-[#2D2D2D]"} />
                     ))}
                   </div>
                 </div>
@@ -90,8 +90,8 @@ export default function CoachReviews() {
                 </div>
 
                 {review.reply ? (
-                  <div className="ml-8 p-6 bg-[#CCFF00]/5 border-l-4 border-[#CCFF00] rounded-r-[6px]">
-                    <p className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-wider mb-2 flex items-center gap-2 font-inter">
+                  <div className="ml-8 p-6 bg-[#55DEE8]/5 border-l-4 border-[#55DEE8] rounded-r-[6px]">
+                    <p className="text-[10px] font-bold text-[#55DEE8] uppercase tracking-wider mb-2 flex items-center gap-2 font-inter">
                       <Reply size={12} /> Your Response
                     </p>
                     <p className="text-[13px] text-[#999999] italic font-open-sans">"{review.reply}"</p>
@@ -101,7 +101,7 @@ export default function CoachReviews() {
                   <div className="ml-8 space-y-4 animate-in slide-in-from-top-4 duration-300">
                     <textarea 
                       placeholder="Type your response..."
-                      className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[6px] p-4 text-[13px] text-white focus:border-[#CCFF00] outline-none h-24 resize-none font-open-sans"
+                      className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[6px] p-4 text-[13px] text-white focus:border-[#55DEE8] outline-none h-24 resize-none font-open-sans"
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                     />
@@ -109,7 +109,7 @@ export default function CoachReviews() {
                       <button 
                         onClick={() => handleReply(review._id)}
                         disabled={actionLoading}
-                        className="flex-1 h-12 bg-[#CCFF00] text-black rounded-[6px] font-bold uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 hover:scale-[0.98] transition-all font-inter shadow-[var(--shadow-2)]"
+                        className="flex-1 h-12 bg-[#55DEE8] text-black rounded-[6px] font-bold uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 hover:scale-[0.98] transition-all font-inter shadow-[var(--shadow-2)]"
                       >
                         {actionLoading ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />} Post Reply
                       </button>
@@ -124,7 +124,7 @@ export default function CoachReviews() {
                 ) : (
                   <button 
                     onClick={() => setReplyingTo(review._id)}
-                    className="ml-8 text-[11px] font-bold text-[#CCFF00] uppercase tracking-wider flex items-center gap-2 hover:translate-x-2 transition-transform font-inter"
+                    className="ml-8 text-[11px] font-bold text-[#55DEE8] uppercase tracking-wider flex items-center gap-2 hover:translate-x-2 transition-transform font-inter"
                   >
                     <MessageSquare size={14} /> Reply to Review
                   </button>

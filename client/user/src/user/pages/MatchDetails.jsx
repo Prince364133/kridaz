@@ -61,7 +61,7 @@ const MatchDetails = () => {
  </div>
  </div>
  <div className="flex items-center gap-2">
- <button onClick={() => { const shareUrl = window.location.href; if (navigator.share) { navigator.share({ title: "Join Match", url: shareUrl }).catch(() => { navigator.clipboard.writeText(shareUrl); toast.success("Link copied!"); }); } else { navigator.clipboard.writeText(shareUrl); toast.success("Link copied!"); } }} className="p-3 bg-white/5 rounded-2xl hover:bg-[#CCFF00]/10 hover:text-[#CCFF00] transition-all group">
+ <button onClick={() => { const shareUrl = window.location.href; if (navigator.share) { navigator.share({ title: "Join Match", url: shareUrl }).catch(() => { navigator.clipboard.writeText(shareUrl); toast.success("Link copied!"); }); } else { navigator.clipboard.writeText(shareUrl); toast.success("Link copied!"); } }} className="p-3 bg-white/5 rounded-2xl hover:bg-[#55DEE8]/10 hover:text-[#55DEE8] transition-all group">
  <Share2 size={18} className="text-gray-400" />
  </button>
  </div>
@@ -105,7 +105,7 @@ const MatchDetails = () => {
  {isCompleted ? (
  <button 
  onClick={() => navigate(`/analytics/${game._id}`)}
- className="h-16 px-10 bg-primary text-black font-black uppercase text-sm tracking-widest rounded-2xl shadow-[0_20px_50px_rgba(132,204,22,0.3)] hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
+ className="h-16 px-10 bg-primary text-black font-black uppercase text-sm tracking-widest rounded-2xl shadow-[0_20px_50px_rgba(85,222,232,0.3)] hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
  >
  View Full Analytics <Activity size={20} />
  </button>
@@ -114,7 +114,7 @@ const MatchDetails = () => {
  {isUmpire && (
  <button 
  onClick={() => window.open(`/scoring/${game._id}`, '_blank', 'noopener,noreferrer')}
- className="h-16 px-10 bg-primary text-black font-black uppercase text-sm tracking-widest rounded-2xl shadow-[0_20px_50px_rgba(132,204,22,0.3)] hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
+ className="h-16 px-10 bg-primary text-black font-black uppercase text-sm tracking-widest rounded-2xl shadow-[0_20px_50px_rgba(85,222,232,0.3)] hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
  >
  Launch Scoring Console <Zap size={20} fill="currentColor" />
  </button>

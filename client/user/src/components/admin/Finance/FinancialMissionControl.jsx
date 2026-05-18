@@ -60,7 +60,7 @@ const FinancialMissionControl = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case "PENDING": return "text-yellow-500 bg-yellow-500/10 border-yellow-500/20";
-      case "COMPLETED": return "text-[#CCFF00] bg-[#CCFF00]/10 border-[#CCFF00]/20";
+      case "COMPLETED": return "text-[#55DEE8] bg-[#55DEE8]/10 border-[#55DEE8]/20";
       case "REJECTED": return "text-red-500 bg-red-500/10 border-red-500/20";
       default: return "text-gray-500 bg-gray-500/10 border-gray-500/20";
     }
@@ -82,17 +82,17 @@ const FinancialMissionControl = () => {
   return (
     <div className="min-h-screen bg-[#000000] text-white overflow-x-hidden">
       {/* Background Glows */}
-      <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-[#CCFF00]/5 blur-[120px] pointer-events-none z-0" />
-      <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-[#CCFF00]/5 blur-[120px] pointer-events-none z-0" />
+      <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-[#55DEE8]/5 blur-[120px] pointer-events-none z-0" />
+      <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-[#55DEE8]/5 blur-[120px] pointer-events-none z-0" />
 
       <div className="relative z-10 p-6 lg:p-10 space-y-10 max-w-[1600px] mx-auto pb-32">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="w-1.5 h-8 bg-[#CCFF00] rounded-full shadow-[0_0_15px_rgba(204,255,0,0.5)]" />
+              <div className="w-1.5 h-8 bg-[#55DEE8] rounded-full shadow-[0_0_15px_rgba(204,255,0,0.5)]" />
               <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic">
-                FINANCIAL <span className="text-[#CCFF00]">MISSION CONTROL</span>
+                FINANCIAL <span className="text-[#55DEE8]">MISSION CONTROL</span>
               </h1>
             </div>
             <p className="text-gray-400 font-medium tracking-wider uppercase text-xs ml-4">
@@ -107,7 +107,7 @@ const FinancialMissionControl = () => {
                 onClick={() => setActiveTab(tab)}
                 className={`px-6 py-2 rounded-[6px] text-[11px] font-bold uppercase tracking-widest transition-all ${
                   activeTab === tab 
-                    ? "bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.1)]" 
+                    ? "bg-[#55DEE8] text-black shadow-[0_0_20px_rgba(204,255,0,0.1)]" 
                     : "text-gray-500 hover:text-white"
                 }`}
               >
@@ -175,7 +175,7 @@ const FinancialMissionControl = () => {
                   <input 
                     type="text"
                     placeholder="Search partner, email or account..."
-                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-2.5 pl-11 pr-4 text-[13px] text-white focus:outline-none focus:border-[#CCFF00] transition-all font-inter"
+                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-2.5 pl-11 pr-4 text-[13px] text-white focus:outline-none focus:border-[#55DEE8] transition-all font-inter"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -183,7 +183,7 @@ const FinancialMissionControl = () => {
                 <div className="flex items-center gap-3 w-full md:w-auto">
                   <Filter className="text-gray-500" size={16} />
                   <select 
-                    className="flex-1 md:w-48 bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-2.5 px-4 text-[13px] text-white focus:outline-none focus:border-[#CCFF00] transition-all cursor-pointer uppercase font-bold tracking-wider"
+                    className="flex-1 md:w-48 bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-2.5 px-4 text-[13px] text-white focus:outline-none focus:border-[#55DEE8] transition-all cursor-pointer uppercase font-bold tracking-wider"
                     value={payoutFilter}
                     onChange={(e) => setPayoutFilter(e.target.value)}
                   >
@@ -214,8 +214,8 @@ const FinancialMissionControl = () => {
                         <tr>
                           <td colSpan="6" className="px-6 py-24 text-center">
                             <div className="flex flex-col items-center gap-4">
-                              <div className="w-10 h-10 border-2 border-[#CCFF00] border-t-transparent rounded-full animate-spin" />
-                              <p className="text-[11px] font-black uppercase tracking-widest text-[#CCFF00]">Synchronizing Treasury Data...</p>
+                              <div className="w-10 h-10 border-2 border-[#55DEE8] border-t-transparent rounded-full animate-spin" />
+                              <p className="text-[11px] font-black uppercase tracking-widest text-[#55DEE8]">Synchronizing Treasury Data...</p>
                             </div>
                           </td>
                         </tr>
@@ -236,15 +236,15 @@ const FinancialMissionControl = () => {
                                 onClick={() => req.owner?._id && navigate(`/profile/${req.owner._id}`)}
                                 className="flex items-center gap-3 cursor-pointer group/partner"
                               >
-                                <div className="w-9 h-9 rounded-[6px] bg-[#CCFF00]/10 border border-[#CCFF00]/20 flex items-center justify-center overflow-hidden group-hover/partner:border-[#CCFF00] transition-colors">
+                                <div className="w-9 h-9 rounded-[6px] bg-[#55DEE8]/10 border border-[#55DEE8]/20 flex items-center justify-center overflow-hidden group-hover/partner:border-[#55DEE8] transition-colors">
                                   {req.owner?.profilePicture ? (
                                     <img src={req.owner.profilePicture} alt="" className="w-full h-full object-cover" />
                                   ) : (
-                                    <span className="text-[#CCFF00] font-bold text-xs">{req.owner?.name?.charAt(0)}</span>
+                                    <span className="text-[#55DEE8] font-bold text-xs">{req.owner?.name?.charAt(0)}</span>
                                   )}
                                 </div>
                                 <div>
-                                  <p className="font-bold text-white text-[14px] tracking-tight uppercase group-hover/partner:text-[#CCFF00] transition-colors">{req.owner?.name}</p>
+                                  <p className="font-bold text-white text-[14px] tracking-tight uppercase group-hover/partner:text-[#55DEE8] transition-colors">{req.owner?.name}</p>
                                   <p className="text-[10px] text-[#878C9F] uppercase tracking-widest font-medium">{req.owner?.role || "PARTNER"}</p>
                                 </div>
                               </div>
@@ -252,12 +252,12 @@ const FinancialMissionControl = () => {
                             <td className="px-6 py-4">
                               <div className="space-y-0.5">
                                 <p className="text-[12px] text-gray-300 font-semibold flex items-center gap-1.5 uppercase tracking-tight">
-                                  <Building size={12} className="text-[#CCFF00]" /> {req.bankDetails?.bankName}
+                                  <Building size={12} className="text-[#55DEE8]" /> {req.bankDetails?.bankName}
                                 </p>
                                 <p className="text-[11px] text-[#878C9F] font-mono tracking-tighter">
                                   {req.bankDetails?.accountNumber}
                                 </p>
-                                <p className="text-[9px] text-[#CCFF00]/60 font-mono tracking-widest uppercase">{req.bankDetails?.ifscCode}</p>
+                                <p className="text-[9px] text-[#55DEE8]/60 font-mono tracking-widest uppercase">{req.bankDetails?.ifscCode}</p>
                               </div>
                             </td>
                             <td className="px-6 py-4">
@@ -281,7 +281,7 @@ const FinancialMissionControl = () => {
                                       const tid = prompt("Enter Transfer Transaction ID:");
                                       if(tid) handleApprove(req._id, tid);
                                     }}
-                                    className="p-2 bg-[#CCFF00]/10 text-[#CCFF00] hover:bg-[#CCFF00] hover:text-black rounded-[6px] transition-all border border-[#CCFF00]/20"
+                                    className="p-2 bg-[#55DEE8]/10 text-[#55DEE8] hover:bg-[#55DEE8] hover:text-black rounded-[6px] transition-all border border-[#55DEE8]/20"
                                   >
                                     <CheckCircle size={16} />
                                   </button>
@@ -315,7 +315,7 @@ const FinancialMissionControl = () => {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
               <div className="bg-[#0A0A0A] p-8 rounded-[8px] border border-[#2D2D2D]">
                 <div className="mb-8">
-                  <h3 className="text-xl font-black uppercase tracking-tighter italic mb-1">Pending <span className="text-[#CCFF00]">KYC Verifications</span></h3>
+                  <h3 className="text-xl font-black uppercase tracking-tighter italic mb-1">Pending <span className="text-[#55DEE8]">KYC Verifications</span></h3>
                   <p className="text-[#878C9F] text-[11px] font-medium uppercase tracking-widest">Partner bank accounts awaiting treasury clearance</p>
                 </div>
 
@@ -327,23 +327,23 @@ const FinancialMissionControl = () => {
                     </div>
                   ) : (
                     kycQueue.map((owner) => (
-                      <div key={owner._id} className="bg-[#1A1A1A] border border-[#2D2D2D] p-6 rounded-[8px] hover:border-[#CCFF00]/30 transition-all group relative overflow-hidden flex flex-col">
+                      <div key={owner._id} className="bg-[#1A1A1A] border border-[#2D2D2D] p-6 rounded-[8px] hover:border-[#55DEE8]/30 transition-all group relative overflow-hidden flex flex-col">
                         <div className="absolute top-0 right-0 p-4 opacity-20">
-                           <ShieldCheck size={20} className="text-[#CCFF00]" />
+                           <ShieldCheck size={20} className="text-[#55DEE8]" />
                         </div>
                         <div 
                           onClick={() => owner._id && navigate(`/profile/${owner._id}`)}
                           className="flex items-start gap-4 mb-6 cursor-pointer group/profile"
                         >
-                          <div className="w-12 h-12 rounded-[6px] bg-[#CCFF00]/10 flex items-center justify-center overflow-hidden border border-[#CCFF00]/20 group-hover/profile:border-[#CCFF00] transition-colors">
+                          <div className="w-12 h-12 rounded-[6px] bg-[#55DEE8]/10 flex items-center justify-center overflow-hidden border border-[#55DEE8]/20 group-hover/profile:border-[#55DEE8] transition-colors">
                             {owner.profilePicture ? (
                               <img src={owner.profilePicture} alt="" className="w-full h-full object-cover" />
                             ) : (
-                              <span className="text-[#CCFF00] font-black text-xl">{owner.name?.charAt(0)}</span>
+                              <span className="text-[#55DEE8] font-black text-xl">{owner.name?.charAt(0)}</span>
                             )}
                           </div>
                           <div>
-                            <h4 className="font-bold text-white uppercase tracking-tight text-[15px] group-hover/profile:text-[#CCFF00] transition-colors">{owner.name}</h4>
+                            <h4 className="font-bold text-white uppercase tracking-tight text-[15px] group-hover/profile:text-[#55DEE8] transition-colors">{owner.name}</h4>
                             <p className="text-[10px] text-[#878C9F] uppercase tracking-widest">{owner.email}</p>
                           </div>
                         </div>
@@ -359,14 +359,14 @@ const FinancialMissionControl = () => {
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-[9px] font-black uppercase text-[#878C9F] tracking-widest">IFSC</span>
-                            <span className="text-xs text-[#CCFF00] font-mono font-bold">{owner.bankingDetails?.ifscCode}</span>
+                            <span className="text-xs text-[#55DEE8] font-mono font-bold">{owner.bankingDetails?.ifscCode}</span>
                           </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3 mt-auto">
                           <button 
                             onClick={() => verifyKYC(owner._id, "VERIFIED")}
-                            className="py-3 bg-[#CCFF00] text-black text-[10px] font-black uppercase tracking-widest rounded-[6px] hover:shadow-[0_0_20px_rgba(204,255,0,0.2)] transition-all"
+                            className="py-3 bg-[#55DEE8] text-black text-[10px] font-black uppercase tracking-widest rounded-[6px] hover:shadow-[0_0_20px_rgba(204,255,0,0.2)] transition-all"
                           >
                             Verify
                           </button>
@@ -388,14 +388,14 @@ const FinancialMissionControl = () => {
           {activeTab === "settings" && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl">
               <div className="bg-[#0A0A0A] p-8 lg:p-10 rounded-[8px] border border-[#2D2D2D] space-y-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px]"></div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/5 blur-[60px]"></div>
                 
                 <div className="flex items-center gap-4 border-b border-[#2D2D2D] pb-8">
-                  <div className="p-3.5 bg-[#CCFF00]/10 text-[#CCFF00] rounded-[8px] border border-[#CCFF00]/20">
+                  <div className="p-3.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded-[8px] border border-[#55DEE8]/20">
                     <Settings size={24} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black uppercase tracking-tighter italic">Settlement <span className="text-[#CCFF00]">Logistics</span></h3>
+                    <h3 className="text-xl font-black uppercase tracking-tighter italic">Settlement <span className="text-[#55DEE8]">Logistics</span></h3>
                     <p className="text-[#878C9F] text-[11px] font-medium uppercase tracking-widest mt-1">Global Payout Orchestration & Thresholds</p>
                   </div>
                 </div>
@@ -410,8 +410,8 @@ const FinancialMissionControl = () => {
                           onClick={() => updatePayoutSettings({ ...payoutSettings, payoutDay: day })}
                           className={`py-3.5 rounded-[6px] text-[11px] font-black uppercase tracking-widest transition-all border ${
                             payoutSettings?.payoutDay === day 
-                              ? "bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_0_15px_rgba(204,255,0,0.15)]" 
-                              : "bg-[#1A1A1A] text-gray-500 border-[#2D2D2D] hover:border-[#CCFF00]/30"
+                              ? "bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_0_15px_rgba(204,255,0,0.15)]" 
+                              : "bg-[#1A1A1A] text-gray-500 border-[#2D2D2D] hover:border-[#55DEE8]/30"
                           }`}
                         >
                           {day}
@@ -422,9 +422,9 @@ const FinancialMissionControl = () => {
                   </div>
 
                   <div className="pt-8 border-t border-[#2D2D2D] space-y-4">
-                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#CCFF00]/20 transition-all">
+                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#55DEE8]/20 transition-all">
                       <div className="flex items-center gap-4">
-                        <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] group-hover:scale-110 transition-transform">
+                        <div className="p-2 bg-[#55DEE8]/10 rounded-[6px] text-[#55DEE8] group-hover:scale-110 transition-transform">
                            <IndianRupee size={18} />
                         </div>
                         <div>
@@ -432,12 +432,12 @@ const FinancialMissionControl = () => {
                           <p className="text-[10px] text-[#878C9F] uppercase tracking-widest mt-0.5">Minimum processing value</p>
                         </div>
                       </div>
-                      <p className="font-mono text-[#CCFF00] text-xl font-black italic">Rs 5,000</p>
+                      <p className="font-mono text-[#55DEE8] text-xl font-black italic">Rs 5,000</p>
                     </div>
 
-                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#CCFF00]/20 transition-all">
+                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#55DEE8]/20 transition-all">
                       <div className="flex items-center gap-4">
-                        <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] group-hover:scale-110 transition-transform">
+                        <div className="p-2 bg-[#55DEE8]/10 rounded-[6px] text-[#55DEE8] group-hover:scale-110 transition-transform">
                            <Zap size={18} />
                         </div>
                         <div>
@@ -450,15 +450,15 @@ const FinancialMissionControl = () => {
                           type="number"
                           value={payoutSettings?.platformFeePercentage || 5}
                           onChange={(e) => updatePayoutSettings({ ...payoutSettings, platformFeePercentage: Number(e.target.value) })}
-                          className="w-16 bg-black/40 border border-[#2D2D2D] rounded-[4px] px-2 py-1 text-[#CCFF00] font-mono text-lg font-black text-center focus:outline-none focus:border-[#CCFF00]"
+                          className="w-16 bg-black/40 border border-[#2D2D2D] rounded-[4px] px-2 py-1 text-[#55DEE8] font-mono text-lg font-black text-center focus:outline-none focus:border-[#55DEE8]"
                         />
-                        <span className="text-[#CCFF00] font-black">%</span>
+                        <span className="text-[#55DEE8] font-black">%</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#CCFF00]/20 transition-all">
+                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#55DEE8]/20 transition-all">
                       <div className="flex items-center gap-4">
-                        <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] group-hover:scale-110 transition-transform">
+                        <div className="p-2 bg-[#55DEE8]/10 rounded-[6px] text-[#55DEE8] group-hover:scale-110 transition-transform">
                            <ShieldCheck size={18} />
                         </div>
                         <div>
@@ -471,15 +471,15 @@ const FinancialMissionControl = () => {
                           type="number"
                           value={payoutSettings?.gstPercentage || 18}
                           onChange={(e) => updatePayoutSettings({ ...payoutSettings, gstPercentage: Number(e.target.value) })}
-                          className="w-16 bg-black/40 border border-[#2D2D2D] rounded-[4px] px-2 py-1 text-[#CCFF00] font-mono text-lg font-black text-center focus:outline-none focus:border-[#CCFF00]"
+                          className="w-16 bg-black/40 border border-[#2D2D2D] rounded-[4px] px-2 py-1 text-[#55DEE8] font-mono text-lg font-black text-center focus:outline-none focus:border-[#55DEE8]"
                         />
-                        <span className="text-[#CCFF00] font-black">%</span>
+                        <span className="text-[#55DEE8] font-black">%</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#CCFF00]/20 transition-all">
+                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#55DEE8]/20 transition-all">
                       <div className="flex items-center gap-4">
-                        <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] group-hover:scale-110 transition-transform">
+                        <div className="p-2 bg-[#55DEE8]/10 rounded-[6px] text-[#55DEE8] group-hover:scale-110 transition-transform">
                            <ExternalLink size={18} />
                         </div>
                         <div>
@@ -492,9 +492,9 @@ const FinancialMissionControl = () => {
                           type="number"
                           value={payoutSettings?.gatewayFeePercentage || 2}
                           onChange={(e) => updatePayoutSettings({ ...payoutSettings, gatewayFeePercentage: Number(e.target.value) })}
-                          className="w-16 bg-black/40 border border-[#2D2D2D] rounded-[4px] px-2 py-1 text-[#CCFF00] font-mono text-lg font-black text-center focus:outline-none focus:border-[#CCFF00]"
+                          className="w-16 bg-black/40 border border-[#2D2D2D] rounded-[4px] px-2 py-1 text-[#55DEE8] font-mono text-lg font-black text-center focus:outline-none focus:border-[#55DEE8]"
                         />
-                        <span className="text-[#CCFF00] font-black">%</span>
+                        <span className="text-[#55DEE8] font-black">%</span>
                       </div>
                     </div>
                   </div>
@@ -508,12 +508,12 @@ const FinancialMissionControl = () => {
   );
 };
 
-const FinanceStatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend, trendColor = "text-[#CCFF00]" }) => {
+const FinanceStatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend, trendColor = "text-[#55DEE8]" }) => {
   return (
-    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#CCFF00]/30 transition-all duration-500 min-h-[140px] shadow-2xl">
+    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#55DEE8]/30 transition-all duration-500 min-h-[140px] shadow-2xl">
       <Icon className="absolute -right-4 -bottom-4 w-20 h-20 text-white/[0.02] group-hover:text-white/[0.04] transition-colors" />
       <div className="flex items-center justify-between mb-5 relative z-10">
-        <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] flex items-center justify-center border border-[#CCFF00]/20 shadow-sm transition-all">
+        <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[6px] text-[#55DEE8] flex items-center justify-center border border-[#55DEE8]/20 shadow-sm transition-all">
           <Icon size={18} />
         </div>
         <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-white/5 ${trendColor} border border-white/5`}>

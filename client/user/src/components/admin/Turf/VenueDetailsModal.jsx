@@ -49,7 +49,7 @@ const VenueDetailsModal = ({ isOpen, onClose, turf, onApprove, onReject }) => {
 
               <div className="absolute bottom-0 left-0 w-full p-8 lg:p-12 space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="px-4 py-1.5 bg-[#CCFF00] text-black text-[10px] font-black uppercase tracking-widest rounded-full">
+                  <span className="px-4 py-1.5 bg-[#55DEE8] text-black text-[10px] font-black uppercase tracking-widest rounded-full">
                     Venue Verification
                   </span>
                   <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
@@ -75,7 +75,7 @@ const VenueDetailsModal = ({ isOpen, onClose, turf, onApprove, onReject }) => {
                   
                   {/* Description */}
                   <section className="space-y-4">
-                    <div className="flex items-center gap-2 text-[#CCFF00] text-xs font-black uppercase tracking-[0.2em]">
+                    <div className="flex items-center gap-2 text-[#55DEE8] text-xs font-black uppercase tracking-[0.2em]">
                       <Info size={14} />
                       <span>The Proposition</span>
                     </div>
@@ -87,7 +87,7 @@ const VenueDetailsModal = ({ isOpen, onClose, turf, onApprove, onReject }) => {
                   {/* Visuals Grid */}
                   {turf.images && turf.images.length > 0 && (
                     <section className="space-y-6">
-                      <div className="flex items-center gap-2 text-[#CCFF00] text-xs font-black uppercase tracking-[0.2em]">
+                      <div className="flex items-center gap-2 text-[#55DEE8] text-xs font-black uppercase tracking-[0.2em]">
                         <Globe size={14} />
                         <span>Venue Gallery</span>
                       </div>
@@ -103,13 +103,13 @@ const VenueDetailsModal = ({ isOpen, onClose, turf, onApprove, onReject }) => {
 
                   {/* Facilities */}
                   <section className="space-y-6">
-                    <div className="flex items-center gap-2 text-[#CCFF00] text-xs font-black uppercase tracking-[0.2em]">
+                    <div className="flex items-center gap-2 text-[#55DEE8] text-xs font-black uppercase tracking-[0.2em]">
                       <Shield size={14} />
                       <span>Amenities & Hardware</span>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {turf.facilities?.map((facility, i) => (
-                        <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col items-center gap-3 text-center group hover:border-[#CCFF00]/30 transition-all">
+                        <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col items-center gap-3 text-center group hover:border-[#55DEE8]/30 transition-all">
                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{facility}</span>
                         </div>
                       ))}
@@ -121,7 +121,7 @@ const VenueDetailsModal = ({ isOpen, onClose, turf, onApprove, onReject }) => {
                 <div className="space-y-8">
                   
                   {/* Pricing Card */}
-                  <div className="p-8 bg-[#CCFF00] rounded-3xl space-y-1 shadow-2xl shadow-[#CCFF00]/10">
+                  <div className="p-8 bg-[#55DEE8] rounded-3xl space-y-1 shadow-2xl shadow-[#55DEE8]/10">
                     <p className="text-black/60 text-[10px] font-black uppercase tracking-widest">Base Hourly Rate</p>
                     <div className="flex items-baseline gap-1">
                       <span className="text-4xl font-black text-black">Rs {turf.pricePerHour}</span>
@@ -147,7 +147,7 @@ const VenueDetailsModal = ({ isOpen, onClose, turf, onApprove, onReject }) => {
                             <span className="text-white font-bold text-sm">{contact.name}</span>
                             <span className="text-gray-500 text-xs">{contact.phone}</span>
                           </div>
-                          <a href={`tel:${contact.phone}`} className="p-2 bg-[#CCFF00]/10 text-[#CCFF00] rounded-full">
+                          <a href={`tel:${contact.phone}`} className="p-2 bg-[#55DEE8]/10 text-[#55DEE8] rounded-full">
                             <Phone size={14} />
                           </a>
                         </div>
@@ -171,7 +171,7 @@ const VenueDetailsModal = ({ isOpen, onClose, turf, onApprove, onReject }) => {
                   </button>
                   <button 
                     onClick={() => onApprove(turf._id)}
-                    className="flex-1 py-5 bg-[#CCFF00] text-black font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-[#CCFF00]/80 transition-all flex items-center justify-center gap-3 shadow-xl shadow-[#CCFF00]/20"
+                    className="flex-1 py-5 bg-[#55DEE8] text-black font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-[#55DEE8]/80 transition-all flex items-center justify-center gap-3 shadow-xl shadow-[#55DEE8]/20"
                   >
                     <Check size={16} />
                     Verify & Approve
@@ -189,7 +189,7 @@ const VenueDetailsModal = ({ isOpen, onClose, turf, onApprove, onReject }) => {
 const MetaItem = ({ icon: Icon, label, val }) => (
   <div className="space-y-2">
     <div className="flex items-center gap-2 text-gray-500">
-      <Icon size={12} className="text-[#CCFF00]" />
+      <Icon size={12} className="text-[#55DEE8]" />
       <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
     </div>
     <p className="text-white font-bold text-sm leading-tight">{val}</p>

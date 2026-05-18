@@ -41,7 +41,7 @@ const TurfList = () => {
       {/* ── Navigation ───────────────────────────────────────────── */}
       <button 
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] hover:text-[#CCFF00] transition-colors group w-fit"
+        className="flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] hover:text-[#55DEE8] transition-colors group w-fit"
       >
         <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
         Back to Directory
@@ -51,22 +51,22 @@ const TurfList = () => {
       {owner && (
         <div className="relative group">
           {/* Decorative background glow */}
-          <div className="absolute -inset-4 bg-gradient-to-r from-[#CCFF00]/5 to-transparent rounded-[40px] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="absolute -inset-4 bg-gradient-to-r from-[#55DEE8]/5 to-transparent rounded-[40px] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
           
           <div className="relative bms-card p-8 sm:p-10 overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#CCFF00]/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#55DEE8]/5 rounded-full -mr-32 -mt-32 blur-3xl" />
             
             <div className="flex flex-col lg:flex-row gap-10 items-start lg:items-center">
               {/* Profile Avatar Container */}
               <div className="relative shrink-0">
-                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-zinc-900 rounded-3xl border-2 border-[#CCFF00]/20 flex items-center justify-center overflow-hidden shadow-2xl relative z-10">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-zinc-900 rounded-3xl border-2 border-[#55DEE8]/20 flex items-center justify-center overflow-hidden shadow-2xl relative z-10">
                   {owner.profilePicture ? (
                     <img src={owner.profilePicture} alt={owner.name} className="w-full h-full object-cover" />
                   ) : (
-                    <User size={48} className="text-[#CCFF00]/40" />
+                    <User size={48} className="text-[#55DEE8]/40" />
                   )}
                 </div>
-                <div className="absolute -bottom-2 -right-2 bg-[#CCFF00] text-black p-2 rounded-xl shadow-lg z-20">
+                <div className="absolute -bottom-2 -right-2 bg-[#55DEE8] text-black p-2 rounded-xl shadow-lg z-20">
                   <ShieldCheck size={18} />
                 </div>
               </div>
@@ -75,7 +75,7 @@ const TurfList = () => {
               <div className="flex-1 space-y-6 w-full">
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-[0.2em] bg-[#CCFF00]/5 px-3 py-1 rounded-full border border-[#CCFF00]/10">
+                    <span className="text-[10px] font-black text-[#55DEE8] uppercase tracking-[0.2em] bg-[#55DEE8]/5 px-3 py-1 rounded-full border border-[#55DEE8]/10">
                       Verified Partner
                     </span>
                     <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">
@@ -98,8 +98,8 @@ const TurfList = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="flex items-center gap-4 group/item">
-                    <div className="p-3 bg-white/5 rounded-xl border border-white/5 group-hover/item:border-[#CCFF00]/30 transition-colors">
-                      <Mail size={16} className="text-[#CCFF00]" />
+                    <div className="p-3 bg-white/5 rounded-xl border border-white/5 group-hover/item:border-[#55DEE8]/30 transition-colors">
+                      <Mail size={16} className="text-[#55DEE8]" />
                     </div>
                     <div>
                       <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Operational Email</p>
@@ -108,8 +108,8 @@ const TurfList = () => {
                   </div>
 
                   <div className="flex items-center gap-4 group/item">
-                    <div className="p-3 bg-white/5 rounded-xl border border-white/5 group-hover/item:border-[#CCFF00]/30 transition-colors">
-                      <Phone size={16} className="text-[#CCFF00]" />
+                    <div className="p-3 bg-white/5 rounded-xl border border-white/5 group-hover/item:border-[#55DEE8]/30 transition-colors">
+                      <Phone size={16} className="text-[#55DEE8]" />
                     </div>
                     <div>
                       <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Primary Contact</p>
@@ -118,8 +118,8 @@ const TurfList = () => {
                   </div>
 
                   <div className="flex items-center gap-4 group/item">
-                    <div className="p-3 bg-white/5 rounded-xl border border-white/5 group-hover/item:border-[#CCFF00]/30 transition-colors">
-                      <Calendar size={16} className="text-[#CCFF00]" />
+                    <div className="p-3 bg-white/5 rounded-xl border border-white/5 group-hover/item:border-[#55DEE8]/30 transition-colors">
+                      <Calendar size={16} className="text-[#55DEE8]" />
                     </div>
                     <div>
                       <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Partnership Since</p>
@@ -134,7 +134,7 @@ const TurfList = () => {
                 {owner.approvalDetails?.adminName && (
                   <div className="pt-6 border-t border-white/5 flex flex-wrap gap-x-12 gap-y-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-[#CCFF00] shadow-[0_0_10px_rgba(204,255,0,0.5)]" />
+                      <div className="w-2 h-2 rounded-full bg-[#55DEE8] shadow-[0_0_10px_rgba(204,255,0,0.5)]" />
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">
                         Approved By: <span className="text-white">{owner.approvalDetails.adminName}</span>
                       </p>
@@ -159,12 +159,12 @@ const TurfList = () => {
               <div className="w-full lg:w-48 p-6 bg-white/5 rounded-3xl border border-white/5 space-y-4">
                 <div className="text-center">
                   <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Total Assets</p>
-                  <p className="text-4xl font-display text-[#CCFF00] tracking-tighter">{turfData?.length || 0}</p>
+                  <p className="text-4xl font-display text-[#55DEE8] tracking-tighter">{turfData?.length || 0}</p>
                 </div>
                 <div className="h-px bg-white/5 w-full" />
                 <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-500 px-2">
                   <span>Growth</span>
-                  <div className="flex items-center gap-1 text-[#CCFF00]">
+                  <div className="flex items-center gap-1 text-[#55DEE8]">
                     <TrendingUp size={10} />
                     <span>+12%</span>
                   </div>
@@ -179,8 +179,8 @@ const TurfList = () => {
       <div className="space-y-8">
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-4">
-            <div className="p-2 bg-[#CCFF00]/10 rounded-lg border border-[#CCFF00]/20">
-              <Building2 size={20} className="text-[#CCFF00]" />
+            <div className="p-2 bg-[#55DEE8]/10 rounded-lg border border-[#55DEE8]/20">
+              <Building2 size={20} className="text-[#55DEE8]" />
             </div>
             <div>
               <h2 className="text-xl font-display uppercase tracking-tight text-white leading-none">Listed Grounds</h2>

@@ -392,7 +392,7 @@ export const MarketingManagement = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 rounded-xl bg-lime-500 text-black font-bold hover:bg-lime-400 transition-all shadow-[0_0_20px_rgba(132,204,22,0.3)]"
+                  className="flex-1 py-3 rounded-xl bg-lime-500 text-black font-bold hover:bg-lime-400 transition-all shadow-[0_0_20px_rgba(85,222,232,0.3)]"
                 >
                   SAVE {activeTab.toUpperCase().slice(0, -1)}
                 </button>

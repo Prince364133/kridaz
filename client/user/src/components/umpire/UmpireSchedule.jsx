@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 export default function UmpireSchedule() {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
   const portalName = isScorer ? "SCORER" : "OFFICIAL";
 
   const { dashboardData, loading, error } = useUmpireDashboard();

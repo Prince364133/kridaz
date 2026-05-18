@@ -14,7 +14,7 @@ import RaiseDisputeModal from "../../components/dispute/RaiseDisputeModal";
 const BG = "#000000";
 const CARD = "#000000";
 const BORDER = "#2D2D2D";
-const ACCENT = "#CCFF00";
+const ACCENT = "#55DEE8";
 const MUTED = "#878C9F";
 const MUTED2 = "#999999";
 
@@ -63,7 +63,7 @@ const TurfBookingHistory = () => {
         </div>
         <h2 className="text-xl font-black text-white uppercase tracking-tight">No Bookings Yet</h2>
         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-2">Explore local arenas and book your first game!</p>
-        <Link to="/" className="mt-6 px-6 py-3 rounded-full bg-[#CCFF00] text-black text-[10px] font-black uppercase tracking-widest hover:bg-[#b3ff00] transition-colors">
+        <Link to="/" className="mt-6 px-6 py-3 rounded-full bg-[#55DEE8] text-black text-[10px] font-black uppercase tracking-widest hover:bg-[#b3ff00] transition-colors">
           Explore Venues
         </Link>
       </div>
@@ -74,7 +74,7 @@ const TurfBookingHistory = () => {
         const slotOver = new Date() > new Date(booking.playEndTime);
 
         return (
-          <div key={booking._id} className="bg-[#111111] border border-white/5 rounded-[24px] p-4 flex flex-col md:flex-row gap-6 hover:border-[#CCFF00]/30 transition-colors group relative overflow-hidden">
+          <div key={booking._id} className="bg-[#111111] border border-white/5 rounded-[24px] p-4 flex flex-col md:flex-row gap-6 hover:border-[#55DEE8]/30 transition-colors group relative overflow-hidden">
             
             {/* Left Image */}
             <div className="w-full md:w-64 h-40 shrink-0 rounded-2xl overflow-hidden bg-[#222]">
@@ -85,7 +85,7 @@ const TurfBookingHistory = () => {
             <div className="flex-1 flex flex-col justify-between py-2">
               <div>
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="px-2 py-1 bg-[#CCFF00]/10 text-[#CCFF00] rounded text-[9px] font-black uppercase tracking-widest">{booking.turf?.sportType || 'FOOTBALL'}</span>
+                  <span className="px-2 py-1 bg-[#55DEE8]/10 text-[#55DEE8] rounded text-[9px] font-black uppercase tracking-widest">{booking.turf?.sportType || 'FOOTBALL'}</span>
                   <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">BOOKING ID: #{booking._id?.slice(-5).toUpperCase() || 'B7402'}</span>
                 </div>
                 <h2 className="text-xl font-black text-white uppercase tracking-tight mb-4">{booking.turf?.name || 'Decathlon Sports Arena'}</h2>
@@ -101,7 +101,7 @@ const TurfBookingHistory = () => {
 
               {/* Actions Row */}
               <div className="flex flex-wrap items-center gap-2 mt-4 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <Link to={`/booking-pass/${booking._id}`} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-[#CCFF00] hover:text-black hover:border-[#CCFF00] text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                <Link to={`/booking-pass/${booking._id}`} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-[#55DEE8] hover:text-black hover:border-[#55DEE8] text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                   <Ticket size={12} /> Pass
                 </Link>
                 <Link to={`/booking-invoice/${booking._id}`} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
@@ -118,7 +118,7 @@ const TurfBookingHistory = () => {
                   </button>
                 )}
                 {booking.status === "COMPLETED" && (
-                  <button onClick={() => openReviewModal(booking.turf._id)} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:text-[#CCFF00] text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                  <button onClick={() => openReviewModal(booking.turf._id)} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-[#55DEE8]/50 hover:text-[#55DEE8] text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                     Review
                   </button>
                 )}

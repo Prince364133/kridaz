@@ -201,8 +201,8 @@ const CheckoutPage = () => {
  animate={{ opacity: 1, scale: 1 }}
  className="bg-zinc-900 border border-zinc-800 p-12 rounded-[3rem] text-center max-w-xl w-full relative overflow-hidden"
  >
- <div className="absolute top-0 left-0 w-full h-1 bg-[#CCFF00]" />
- <div className="w-24 h-24 bg-[#CCFF00] rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_50px_rgba(204,255,0,0.3)]">
+ <div className="absolute top-0 left-0 w-full h-1 bg-[#55DEE8]" />
+ <div className="w-24 h-24 bg-[#55DEE8] rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_50px_rgba(204,255,0,0.3)]">
  <Check size={48} className="text-black stroke-[3px]" />
  </div>
  
@@ -212,7 +212,7 @@ const CheckoutPage = () => {
  <div className="grid grid-cols-1 gap-4">
  <Link 
  to={`/booking-pass/${bookingId}`}
- className="bg-[#CCFF00] text-black h-16 rounded-2xl font-black uppercase text-sm tracking-widest flex items-center justify-center gap-3 hover:scale-[1.02] transition-all"
+ className="bg-[#55DEE8] text-black h-16 rounded-2xl font-black uppercase text-sm tracking-widest flex items-center justify-center gap-3 hover:scale-[1.02] transition-all"
  >
  Download Digital Pass
  <ArrowRight size={20} />
@@ -242,7 +242,7 @@ const CheckoutPage = () => {
  Back to Pitch
  </button>
  <div className="flex items-center gap-3">
- <ShieldCheck size={20} className="text-[#CCFF00]" />
+ <ShieldCheck size={20} className="text-[#55DEE8]" />
  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Kridaz Secure Checkout</span>
  </div>
  </div>
@@ -264,7 +264,7 @@ const CheckoutPage = () => {
  <div className="space-y-2">
  <h3 className="text-xl font-black uppercase tracking-tight">{turfName}</h3>
  <div className="flex items-center gap-2 text-zinc-500 text-[10px] font-bold uppercase">
- <MapPin size={14} className="text-[#CCFF00]" />
+ <MapPin size={14} className="text-[#55DEE8]" />
  {turfLocation || "Verified Arena"}
  </div>
  </div>
@@ -275,14 +275,14 @@ const CheckoutPage = () => {
  <div className="bg-black/40 p-5 rounded-2xl border border-zinc-800/50">
  <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Schedule</p>
  <div className="flex items-center gap-2">
- <Calendar size={16} className="text-[#CCFF00]" />
+ <Calendar size={16} className="text-[#55DEE8]" />
  <span className="text-sm font-black uppercase tracking-tight">{format(new Date(selectedDate), "EEE, MMM d")}</span>
  </div>
  </div>
  <div className="bg-black/40 p-5 rounded-2xl border border-zinc-800/50">
  <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Timing</p>
  <div className="flex items-center gap-2">
- <Clock size={16} className="text-[#CCFF00]" />
+ <Clock size={16} className="text-[#55DEE8]" />
  <span className="text-sm font-black uppercase tracking-tight">{startTime} ({duration}hr)</span>
  </div>
  </div>
@@ -296,7 +296,7 @@ const CheckoutPage = () => {
  </div>
 
  {appliedCoupon && (
- <div className="flex justify-between text-[11px] font-bold uppercase tracking-widest text-[#CCFF00]">
+ <div className="flex justify-between text-[11px] font-bold uppercase tracking-widest text-[#55DEE8]">
  <span>Discount ({appliedCoupon.code})</span>
  <span>-₹{discount}</span>
  </div>
@@ -304,7 +304,7 @@ const CheckoutPage = () => {
  <div className="h-px bg-zinc-800 my-4" />
  <div className="flex justify-between items-baseline">
  <span className="text-xs font-black uppercase tracking-[0.2em] text-white">Total Value</span>
- <span className="text-4xl font-black text-[#CCFF00]">₹{total}</span>
+ <span className="text-4xl font-black text-[#55DEE8]">₹{total}</span>
  </div>
  </div>
 
@@ -318,7 +318,7 @@ const CheckoutPage = () => {
  placeholder="COUPON CODE"
  value={couponCode}
  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
- className="w-full bg-black border border-zinc-800 rounded-xl py-4 pl-12 pr-4 text-xs font-bold uppercase tracking-widest focus:border-[#CCFF00]/50 outline-none transition-all placeholder:text-zinc-700"
+ className="w-full bg-black border border-zinc-800 rounded-xl py-4 pl-12 pr-4 text-xs font-bold uppercase tracking-widest focus:border-[#55DEE8]/50 outline-none transition-all placeholder:text-zinc-700"
  />
  </div>
  <button 
@@ -343,9 +343,9 @@ const CheckoutPage = () => {
  <h3 className="text-xl font-black uppercase tracking-tight">Select Payment Plan</h3>
  <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Flexible advance options available</p>
  </div>
- <div className="bg-[#CCFF00]/10 px-3 py-1.5 rounded-full flex items-center gap-2">
- <Zap size={14} className="text-[#CCFF00] fill-[#CCFF00]" />
- <span className="text-[9px] font-black text-[#CCFF00] uppercase tracking-widest">Secure Pay</span>
+ <div className="bg-[#55DEE8]/10 px-3 py-1.5 rounded-full flex items-center gap-2">
+ <Zap size={14} className="text-[#55DEE8] fill-[#55DEE8]" />
+ <span className="text-[9px] font-black text-[#55DEE8] uppercase tracking-widest">Secure Pay</span>
  </div>
  </div>
 
@@ -356,11 +356,11 @@ const CheckoutPage = () => {
  onClick={() => setPaymentPercentage(pct)}
  className={`relative p-6 rounded-[2rem] border-2 transition-all flex flex-col items-center gap-2 group ${
  paymentPercentage === pct 
- ? "bg-[#CCFF00]/5 border-[#CCFF00] text-[#CCFF00]" 
+ ? "bg-[#55DEE8]/5 border-[#55DEE8] text-[#55DEE8]" 
  : "bg-black/40 border-zinc-800 text-zinc-500 hover:border-zinc-700"
  }`}
  >
- <span className={`text-2xl font-black ${paymentPercentage === pct ? "text-[#CCFF00]" : "text-zinc-400"}`}>
+ <span className={`text-2xl font-black ${paymentPercentage === pct ? "text-[#55DEE8]" : "text-zinc-400"}`}>
  {pct}%
  </span>
  <span className="text-[9px] font-black uppercase tracking-widest">
@@ -369,7 +369,7 @@ const CheckoutPage = () => {
  {paymentPercentage === pct && (
  <motion.div 
  layoutId="active-plan"
- className="absolute -top-2 -right-2 w-6 h-6 bg-[#CCFF00] rounded-full flex items-center justify-center text-black shadow-lg"
+ className="absolute -top-2 -right-2 w-6 h-6 bg-[#55DEE8] rounded-full flex items-center justify-center text-black shadow-lg"
  >
  <Check size={14} strokeWidth={4} />
  </motion.div>
@@ -381,7 +381,7 @@ const CheckoutPage = () => {
  <div className="grid grid-cols-2 gap-4 pt-2">
  <div className="bg-black/20 p-4 rounded-2xl border border-zinc-800/50 flex flex-col items-center text-center">
  <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Pay Now</p>
- <p className="text-xl font-black text-[#CCFF00]">₹{amountToPay}</p>
+ <p className="text-xl font-black text-[#55DEE8]">₹{amountToPay}</p>
  </div>
  <div className="bg-black/20 p-4 rounded-2xl border border-zinc-800/50 flex flex-col items-center text-center">
  <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Pay at Venue</p>
@@ -404,33 +404,33 @@ const CheckoutPage = () => {
  <button 
  onClick={() => setPaymentMode("WALLET")}
  className={`group relative flex items-center justify-between p-6 rounded-[1.5rem] border-2 transition-all ${
- paymentMode === "WALLET" ? "bg-[#CCFF00]/5 border-[#CCFF00]" : "bg-black/40 border-zinc-800 hover:border-zinc-700"
+ paymentMode === "WALLET" ? "bg-[#55DEE8]/5 border-[#55DEE8]" : "bg-black/40 border-zinc-800 hover:border-zinc-700"
  }`}
  >
  <div className="flex items-center gap-5">
- <div className={`p-4 rounded-2xl ${paymentMode === "WALLET" ? "bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]" : "bg-zinc-800 text-zinc-500"}`}>
+ <div className={`p-4 rounded-2xl ${paymentMode === "WALLET" ? "bg-[#55DEE8] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]" : "bg-zinc-800 text-zinc-500"}`}>
  <Wallet size={24} />
  </div>
  <div className="text-left">
  <div className="flex items-center gap-3">
  <p className={`text-sm font-black uppercase tracking-tight ${paymentMode === "WALLET" ? "text-white" : "text-zinc-400"}`}>Kridaz Wallet</p>
- <span className="bg-[#CCFF00]/10 text-[#CCFF00] text-[8px] font-black px-2 py-0.5 rounded-full uppercase">{settings?.cashbackPercentage || 5}% Cashback</span>
+ <span className="bg-[#55DEE8]/10 text-[#55DEE8] text-[8px] font-black px-2 py-0.5 rounded-full uppercase">{settings?.cashbackPercentage || 5}% Cashback</span>
  </div>
  <p className="text-[10px] font-bold text-zinc-500 mt-0.5 uppercase tracking-widest">Available Balance: ₹{currentBalance}</p>
  </div>
  </div>
- {paymentMode === "WALLET" && <Check size={20} className="text-[#CCFF00] stroke-[3px]" />}
+ {paymentMode === "WALLET" && <Check size={20} className="text-[#55DEE8] stroke-[3px]" />}
  </button>
 
  {/* UPI */}
  <button 
  onClick={() => setPaymentMode("UPI")}
  className={`flex items-center justify-between p-6 rounded-[1.5rem] border-2 transition-all ${
- paymentMode === "UPI" ? "bg-[#CCFF00]/5 border-[#CCFF00]" : "bg-black/40 border-zinc-800 hover:border-zinc-700"
+ paymentMode === "UPI" ? "bg-[#55DEE8]/5 border-[#55DEE8]" : "bg-black/40 border-zinc-800 hover:border-zinc-700"
  }`}
  >
  <div className="flex items-center gap-5">
- <div className={`p-4 rounded-2xl ${paymentMode === "UPI" ? "bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]" : "bg-zinc-800 text-zinc-500"}`}>
+ <div className={`p-4 rounded-2xl ${paymentMode === "UPI" ? "bg-[#55DEE8] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]" : "bg-zinc-800 text-zinc-500"}`}>
  <Smartphone size={24} />
  </div>
  <div className="text-left">
@@ -438,18 +438,18 @@ const CheckoutPage = () => {
  <p className="text-[10px] font-bold text-zinc-500 mt-0.5 uppercase tracking-widest ">Google Pay, PhonePe, Paytm</p>
  </div>
  </div>
- {paymentMode === "UPI" && <Check size={20} className="text-[#CCFF00] stroke-[3px]" />}
+ {paymentMode === "UPI" && <Check size={20} className="text-[#55DEE8] stroke-[3px]" />}
  </button>
 
  {/* Card */}
  <button 
  onClick={() => setPaymentMode("CARD")}
  className={`flex items-center justify-between p-6 rounded-[1.5rem] border-2 transition-all ${
- paymentMode === "CARD" ? "bg-[#CCFF00]/5 border-[#CCFF00]" : "bg-black/40 border-zinc-800 hover:border-zinc-700"
+ paymentMode === "CARD" ? "bg-[#55DEE8]/5 border-[#55DEE8]" : "bg-black/40 border-zinc-800 hover:border-zinc-700"
  }`}
  >
  <div className="flex items-center gap-5">
- <div className={`p-4 rounded-2xl ${paymentMode === "CARD" ? "bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]" : "bg-zinc-800 text-zinc-500"}`}>
+ <div className={`p-4 rounded-2xl ${paymentMode === "CARD" ? "bg-[#55DEE8] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]" : "bg-zinc-800 text-zinc-500"}`}>
  <CardIcon size={24} />
  </div>
  <div className="text-left">
@@ -457,7 +457,7 @@ const CheckoutPage = () => {
  <p className="text-[10px] font-bold text-zinc-500 mt-0.5 uppercase tracking-widest">Visa, Mastercard, RuPay</p>
  </div>
  </div>
- {paymentMode === "CARD" && <Check size={20} className="text-[#CCFF00] stroke-[3px]" />}
+ {paymentMode === "CARD" && <Check size={20} className="text-[#55DEE8] stroke-[3px]" />}
  </button>
  </div>
 
@@ -473,7 +473,7 @@ const CheckoutPage = () => {
  </div>
  <button
  onClick={() => navigate("/wallet")}
- className="w-full bg-[#CCFF00] text-black h-16 rounded-[1.5rem] font-black uppercase text-sm tracking-[0.2em] flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(204,255,0,0.2)]"
+ className="w-full bg-[#55DEE8] text-black h-16 rounded-[1.5rem] font-black uppercase text-sm tracking-[0.2em] flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(204,255,0,0.2)]"
  >
  <PlusCircle size={20} />
  Recharge Wallet Now
@@ -483,7 +483,7 @@ const CheckoutPage = () => {
  <button
  onClick={handleConfirmPayment}
  disabled={isProcessing}
- className="w-full bg-[#CCFF00] text-black h-20 rounded-[1.5rem] font-black uppercase text-base tracking-[0.2em] flex items-center justify-center gap-4 shadow-[0_15px_40px_rgba(204,255,0,0.25)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+ className="w-full bg-[#55DEE8] text-black h-20 rounded-[1.5rem] font-black uppercase text-base tracking-[0.2em] flex items-center justify-center gap-4 shadow-[0_15px_40px_rgba(204,255,0,0.25)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
  >
  {isProcessing ? (
  <div className="flex items-center gap-4">

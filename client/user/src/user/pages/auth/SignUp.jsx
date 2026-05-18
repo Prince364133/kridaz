@@ -209,13 +209,13 @@ const SignUp = () => {
                   </div>
                   <div className="space-y-4 group/field">
                     <div className="relative">
-                      <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                      <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                       <input 
                         {...register("otp")}
                         type="text" 
                         placeholder="Email OTP"
                         maxLength={6}
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
                       />
                     </div>
                     {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
@@ -223,13 +223,13 @@ const SignUp = () => {
 
                   <div className="space-y-4 group/field">
                     <div className="relative">
-                      <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                      <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                       <input 
                         {...register("phoneOtp")}
                         type="text" 
                         placeholder="WhatsApp OTP"
                         maxLength={6}
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
                       />
                     </div>
                     {errors.phoneOtp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.phoneOtp.message}</p>}
@@ -239,7 +239,7 @@ const SignUp = () => {
                   <button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-[#84CC16] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
+                    className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
                   >
                     {loading ? "Verifying..." : "Verify & Create Account"}
                     {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
@@ -267,14 +267,14 @@ const SignUp = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                       {/* Full Name */}
                       <div className="space-y-2 group/field">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Full Name</label>
+                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Full Name</label>
                         <div className="relative">
-                          <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                          <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                           <input 
                             {...register("name")}
                             type="text" 
                             placeholder="John Doe"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
                         {errors.name && <p className="text-xs text-red-500 mt-1 ml-1">{errors.name.message}</p>}
@@ -282,9 +282,9 @@ const SignUp = () => {
 
                       {/* Username */}
                       <div className="space-y-2 group/field relative">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Username</label>
+                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Username</label>
                         <div className="relative">
-                          <UserSquare2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                          <UserSquare2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                           <input 
                             {...register("username")}
                             onInput={(e) => { e.target.value = e.target.value.toLowerCase(); }}
@@ -293,7 +293,7 @@ const SignUp = () => {
                             className={`w-full bg-white/[0.03] border rounded-xl h-14 pl-12 pr-12 text-white text-sm placeholder:text-white/20 outline-none transition-all ${
                               usernameStatus === 'available' ? 'border-green-500/50' : 
                               usernameStatus === 'unavailable' ? 'border-red-500/50' : 
-                              'border-white/5 focus:border-[#84CC16]/50'
+                              'border-white/5 focus:border-[#55DEE8]/50'
                             }`}
                           />
                           
@@ -311,14 +311,14 @@ const SignUp = () => {
 
                       {/* Email */}
                       <div className="space-y-2 group/field">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Email Address</label>
+                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Email Address</label>
                         <div className="relative">
-                          <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                          <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                           <input 
                             {...register("email")}
                             type="email" 
                             placeholder="name@example.com"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
                         {errors.email && <p className="text-xs text-red-500 mt-1 ml-1">{errors.email.message}</p>}
@@ -326,14 +326,14 @@ const SignUp = () => {
 
                       {/* Phone */}
                       <div className="space-y-2 group/field">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Phone Number</label>
+                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Phone Number</label>
                         <div className="relative">
-                          <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                          <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                           <input 
                             {...register("phone")}
                             type="text" 
                             placeholder="+91 00000 00000"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
                         {errors.phone && <p className="text-xs text-red-500 mt-1 ml-1">{errors.phone.message}</p>}
@@ -343,12 +343,12 @@ const SignUp = () => {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:col-span-2">
                         {/* Gender */}
                         <div className="space-y-2 group/field">
-                          <label className="text-[11px] font-black text-white/40 uppercase tracking-widest ml-1 group-focus-within/field:text-[#84CC16] transition-colors">Gender</label>
+                          <label className="text-[11px] font-black text-white/40 uppercase tracking-widest ml-1 group-focus-within/field:text-[#55DEE8] transition-colors">Gender</label>
                           <div className="relative">
-                            <UserSquare2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors z-10 pointer-events-none" />
+                            <UserSquare2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors z-10 pointer-events-none" />
                             <select 
                               {...register("gender")}
-                              className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm appearance-none outline-none transition-all cursor-pointer hover:bg-white/[0.05]"
+                              className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm appearance-none outline-none transition-all cursor-pointer hover:bg-white/[0.05]"
                               defaultValue=""
                             >
                               <option value="" disabled className="bg-black text-white/40">Select Gender</option>
@@ -364,17 +364,17 @@ const SignUp = () => {
 
                         {/* Favorite Sports */}
                         <div className="space-y-2 group/field">
-                          <label className="text-[11px] font-black text-white/40 uppercase tracking-widest ml-1 group-focus-within/field:text-[#84CC16] transition-colors">Favorite Sports</label>
+                          <label className="text-[11px] font-black text-white/40 uppercase tracking-widest ml-1 group-focus-within/field:text-[#55DEE8] transition-colors">Favorite Sports</label>
                           <div className="relative">
-                            <Trophy size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors z-10 pointer-events-none" />
+                            <Trophy size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors z-10 pointer-events-none" />
                             <div 
-                              className={`w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 py-3 flex items-center gap-2 cursor-pointer transition-all overflow-hidden hover:bg-white/[0.05] ${showSportsDropdown ? 'border-[#84CC16]/50 ring-1 ring-[#84CC16]/20' : ''}`}
+                              className={`w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 py-3 flex items-center gap-2 cursor-pointer transition-all overflow-hidden hover:bg-white/[0.05] ${showSportsDropdown ? 'border-[#55DEE8]/50 ring-1 ring-[#55DEE8]/20' : ''}`}
                               onClick={() => setShowSportsDropdown(!showSportsDropdown)}
                             >
                               {selectedSports.length > 0 ? (
                                 <div className="flex gap-1 overflow-x-auto no-scrollbar">
                                   {selectedSports.map(sport => (
-                                    <span key={sport} className="bg-[#84CC16] text-black text-[9px] font-black px-1.5 py-0.5 rounded flex-shrink-0 uppercase tracking-tighter">
+                                    <span key={sport} className="bg-[#55DEE8] text-black text-[9px] font-black px-1.5 py-0.5 rounded flex-shrink-0 uppercase tracking-tighter">
                                       {sport}
                                     </span>
                                   ))}
@@ -401,7 +401,7 @@ const SignUp = () => {
                                         }}
                                         className={`flex items-center justify-between p-2 rounded-lg border transition-all text-[10px] font-bold uppercase tracking-wider ${
                                           isSelected 
-                                            ? "bg-[#84CC16] border-[#84CC16] text-black" 
+                                            ? "bg-[#55DEE8] border-[#55DEE8] text-black" 
                                             : "bg-white/5 border-white/10 text-white/40 hover:border-white/20 hover:text-white"
                                         }`}
                                       >
@@ -419,16 +419,16 @@ const SignUp = () => {
 
                       {/* Location */}
                       <div className="space-y-2 group/field md:col-span-2">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Location</label>
+                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Location</label>
                         <div className="relative flex gap-2">
                           <div className="relative flex-1">
-                            <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                            <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                             <input 
                               {...register("location")}
                               type="text" 
                               autoComplete="off"
                               placeholder="City, State"
-                              className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                              className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                             />
                             
                             {/* Suggestions Dropdown */}
@@ -450,8 +450,8 @@ const SignUp = () => {
                                         }}
                                         className="w-full flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 text-left transition-all group/item"
                                       >
-                                        <div className="p-2 bg-white/5 rounded-lg group-hover/item:bg-[#84CC16]/10 transition-colors mt-0.5">
-                                          <Navigation size={14} className="text-gray-500 group-hover/item:text-[#84CC16]" />
+                                        <div className="p-2 bg-white/5 rounded-lg group-hover/item:bg-[#55DEE8]/10 transition-colors mt-0.5">
+                                          <Navigation size={14} className="text-gray-500 group-hover/item:text-[#55DEE8]" />
                                         </div>
                                         <div className="flex flex-col min-w-0">
                                           <span className="text-[11px] font-bold text-white uppercase tracking-wider truncate">
@@ -470,7 +470,7 @@ const SignUp = () => {
 
                             {isSearching && (
                               <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                <div className="w-4 h-4 border-2 border-[#84CC16]/30 border-t-[#84CC16] rounded-full animate-spin" />
+                                <div className="w-4 h-4 border-2 border-[#55DEE8]/30 border-t-[#55DEE8] rounded-full animate-spin" />
                               </div>
                             )}
                           </div>
@@ -480,7 +480,7 @@ const SignUp = () => {
                             disabled={isFetchingLocation}
                             className="bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl h-14 px-4 flex items-center justify-center gap-2 text-white/80 transition-colors disabled:opacity-50 min-w-[120px]"
                           >
-                            <Locate size={18} className={isFetchingLocation ? "animate-pulse text-[#84CC16]" : ""} />
+                            <Locate size={18} className={isFetchingLocation ? "animate-pulse text-[#55DEE8]" : ""} />
                             <span className="text-sm whitespace-nowrap">{isFetchingLocation ? "Fetching..." : "Locate"}</span>
                           </button>
                         </div>
@@ -489,14 +489,14 @@ const SignUp = () => {
 
                       {/* Password */}
                       <div className="space-y-2 group/field">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Password</label>
+                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Password</label>
                         <div className="relative">
-                          <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                          <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                           <input 
                             {...register("password")}
                             type="password" 
                             placeholder="••••••••"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
                         {errors.password && <p className="text-xs text-red-500 mt-1 ml-1">{errors.password.message}</p>}
@@ -504,14 +504,14 @@ const SignUp = () => {
 
                       {/* Confirm Password */}
                       <div className="space-y-2 group/field">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#84CC16] transition-colors ml-1">Confirm Password</label>
+                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Confirm Password</label>
                         <div className="relative">
-                          <ShieldCheck size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#84CC16] transition-colors" />
+                          <ShieldCheck size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                           <input 
                             {...register("confirmPassword")}
                             type="password" 
                             placeholder="••••••••"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
                         {errors.confirmPassword && <p className="text-xs text-red-500 mt-1 ml-1">{errors.confirmPassword.message}</p>}
@@ -530,7 +530,7 @@ const SignUp = () => {
                     <button 
                       type="submit" 
                       disabled={loading}
-                      className="w-full bg-[#84CC16] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
+                      className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
                     >
                       {loading ? "Sending OTP..." : "Continue"}
                       {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
@@ -542,7 +542,7 @@ const SignUp = () => {
               {/* Back to Login */}
               <div className="pt-8 mt-10 border-t border-white/5 flex flex-col items-center justify-center text-center">
                 <p className="text-sm text-white/60">
-                  Already have an account? <Link to="/login" className="text-[#84CC16] hover:underline ml-2 font-semibold">Login</Link>
+                  Already have an account? <Link to="/login" className="text-[#55DEE8] hover:underline ml-2 font-semibold">Login</Link>
                 </p>
               </div>
             </div>

@@ -8,7 +8,7 @@ import ClockPicker from "../common/ClockPicker";
 
 export default function CoachAvailability() {
   const { user } = useSelector((state) => state.auth);
-  const themeColor = "#CCFF00";
+  const themeColor = "#55DEE8";
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -164,7 +164,7 @@ export default function CoachAvailability() {
                       className={`relative flex flex-col items-center justify-center p-3 rounded-lg border transition-all duration-300 ${
                         isSelected 
                         ? "text-black border-transparent shadow-lg" 
-                        : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#CCFF00]/30 hover:bg-[#2D2D2D]/50"
+                        : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/30 hover:bg-[#2D2D2D]/50"
                       }`}
                       style={isSelected ? { backgroundColor: themeColor, boxShadow: `0 0 20px ${themeColor}66` } : {}}
                     >

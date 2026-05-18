@@ -93,7 +93,7 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
                 <input 
                   type="text"
                   placeholder="EX: KRIDAZ1234"
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-white text-sm font-black tracking-[0.2em] focus:outline-none focus:border-[#CCFF00]/50 uppercase transition-all"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-white text-sm font-black tracking-[0.2em] focus:outline-none focus:border-[#55DEE8]/50 uppercase transition-all"
                   value={teamCode}
                   onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
                   maxLength={10}
@@ -104,7 +104,7 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
                 disabled={isFinding}
                 className="px-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all flex items-center justify-center"
               >
-                {isFinding ? <Loader2 size={18} className="animate-spin text-[#CCFF00]" /> : <Search size={18} className="text-[#CCFF00]" />}
+                {isFinding ? <Loader2 size={18} className="animate-spin text-[#55DEE8]" /> : <Search size={18} className="text-[#55DEE8]" />}
               </button>
             </div>
           </div>
@@ -118,23 +118,23 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
                 className="space-y-6"
               >
                 {/* Team Found Card */}
-                <div className="bg-[#CCFF00]/5 border border-[#CCFF00]/20 rounded-2xl p-4 flex items-center gap-4">
+                <div className="bg-[#55DEE8]/5 border border-[#55DEE8]/20 rounded-2xl p-4 flex items-center gap-4">
                   <div className="w-14 h-14 rounded-xl bg-black border border-white/10 flex items-center justify-center shrink-0">
                     {foundTeam.logo ? (
                       <img src={foundTeam.logo} alt="" className="w-full h-full object-cover rounded-xl" />
                     ) : (
-                      <Users className="text-[#CCFF00]" size={24} />
+                      <Users className="text-[#55DEE8]" size={24} />
                     )}
                   </div>
                   <div className="flex-1 overflow-hidden">
                     <h3 className="text-white font-black uppercase tracking-tight truncate">{foundTeam.name}</h3>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] text-[#CCFF00] font-black uppercase tracking-widest">{foundTeam.sportType}</span>
+                      <span className="text-[10px] text-[#55DEE8] font-black uppercase tracking-widest">{foundTeam.sportType}</span>
                       <span className="w-1 h-1 rounded-full bg-white/10" />
                       <span className="text-[10px] text-white/40 font-bold">{foundTeam.city}</span>
                     </div>
                   </div>
-                  <div className="bg-[#CCFF00] text-black p-1.5 rounded-lg">
+                  <div className="bg-[#55DEE8] text-black p-1.5 rounded-lg">
                     <CheckCircle2 size={16} />
                   </div>
                 </div>
@@ -143,7 +143,7 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Challenge With Your Team</label>
                   <select 
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 px-4 text-white text-sm font-bold focus:outline-none focus:border-[#CCFF00]/50 outline-none appearance-none"
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 px-4 text-white text-sm font-bold focus:outline-none focus:border-[#55DEE8]/50 outline-none appearance-none"
                     value={selectedMyTeam}
                     onChange={(e) => setSelectedMyTeam(e.target.value)}
                   >
@@ -157,7 +157,7 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
                 <button 
                   onClick={handleSendRequest}
                   disabled={isRequesting}
-                  className="w-full py-4 bg-[#CCFF00] hover:bg-[#b8e600] disabled:bg-white/10 disabled:text-white/20 text-black font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-[#CCFF00]/10 transition-all flex items-center justify-center gap-3"
+                  className="w-full py-4 bg-[#55DEE8] hover:bg-[#b8e600] disabled:bg-white/10 disabled:text-white/20 text-black font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-[#55DEE8]/10 transition-all flex items-center justify-center gap-3"
                 >
                   {isRequesting ? (
                     <Loader2 size={20} className="animate-spin" />

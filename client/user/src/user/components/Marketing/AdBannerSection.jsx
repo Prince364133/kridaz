@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { gsap } from "gsap";
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
 
 export const AdBannerSection = ({ banners = [] }) => {
  const [currentIndex, setCurrentIndex] = useState(0);
@@ -54,7 +54,7 @@ export const AdBannerSection = ({ banners = [] }) => {
  <div className="absolute top-0 left-0 w-full h-1 bg-white/10 z-30">
  <div 
  ref={progressRef}
- className="h-full bg-primary shadow-[0_0_15px_#84CC16]"
+ className="h-full bg-primary shadow-[0_0_15px_#55DEE8]"
  style={{ backgroundColor: PRI }}
  />
  </div>

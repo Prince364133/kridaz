@@ -46,7 +46,7 @@ class ErrorBoundary extends React.Component {
               </button>
               <a
                 href="/"
-                className="flex-1 bg-[#84CC16] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                className="flex-1 bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
               >
                 <Home size={16} /> RETURN HOME
               </a>

@@ -155,7 +155,7 @@ const ReelsFeed = () => {
   if (isLoading && !data) {
     return (
       <div className="h-screen w-full bg-black flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#84CC16] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-[#55DEE8] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -215,7 +215,7 @@ const ReelsFeed = () => {
         
         {isFetching && (
           <div className="h-full w-full flex items-center justify-center snap-start">
-            <div className="w-8 h-8 border-3 border-[#84CC16] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-3 border-[#55DEE8] border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}
 
@@ -225,7 +225,7 @@ const ReelsFeed = () => {
             <p className="text-gray-400 text-center">Be the first one to post a reel!</p>
             <button 
               onClick={() => navigate('/reels/upload')}
-              className="mt-6 px-6 py-2 bg-[#84CC16] text-black font-bold rounded-full hover:scale-105 active:scale-95 transition-transform"
+              className="mt-6 px-6 py-2 bg-[#55DEE8] text-black font-bold rounded-full hover:scale-105 active:scale-95 transition-transform"
             >
               Create Short
             </button>

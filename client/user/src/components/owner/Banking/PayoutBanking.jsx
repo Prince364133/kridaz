@@ -19,7 +19,7 @@ import { useSelector } from "react-redux";
 const PayoutBanking = () => {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
   const vaultTitle = isScorer ? "Payout & Settlement" : "Marketplace Vault";
 
   const { bankingDetails, walletBalance, payoutSettings, loading: bankingLoading, isPayoutDay, updateBanking, requestPayout, verifyPassword } = useBanking();

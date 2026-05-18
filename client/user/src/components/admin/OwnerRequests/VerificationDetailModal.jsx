@@ -50,7 +50,7 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
             onClick={() => request.userId && (window.location.href = `/profile/${request.userId}`)}
             className="flex items-center gap-4 cursor-pointer group/header"
           >
-            <div className={`w-12 h-12 rounded-[6px] bg-[#2D2D2D] border border-[#404040] flex items-center justify-center overflow-hidden text-[20px] font-bold ${isRejected ? 'text-red-500' : 'text-[#CCFF00]'} uppercase group-hover/header:border-[#CCFF00] transition-colors`}>
+            <div className={`w-12 h-12 rounded-[6px] bg-[#2D2D2D] border border-[#404040] flex items-center justify-center overflow-hidden text-[20px] font-bold ${isRejected ? 'text-red-500' : 'text-[#55DEE8]'} uppercase group-hover/header:border-[#55DEE8] transition-colors`}>
               {request.userId?.profilePicture ? (
                 <img src={request.userId.profilePicture} alt="" className="w-full h-full object-cover" />
               ) : (
@@ -59,14 +59,14 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
             </div>
             <div>
               <div className="flex items-center gap-3">
-                <h2 className="text-xl font-bold text-white uppercase tracking-tight group-hover/header:text-[#CCFF00] transition-colors">{request.name}</h2>
-                <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-black uppercase tracking-[0.2em] ${isRejected ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20'}`}>
+                <h2 className="text-xl font-bold text-white uppercase tracking-tight group-hover/header:text-[#55DEE8] transition-colors">{request.name}</h2>
+                <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-black uppercase tracking-[0.2em] ${isRejected ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20'}`}>
                   {request.role}
                 </span>
-                <ExternalLink size={14} className="text-[#CCFF00] opacity-0 group-hover/header:opacity-100 transition-opacity" />
+                <ExternalLink size={14} className="text-[#55DEE8] opacity-0 group-hover/header:opacity-100 transition-opacity" />
               </div>
               <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
-                <Zap size={10} className="text-[#CCFF00]" /> PARTNER VERIFICATION DOSSIER #{request._id?.slice(-8)}
+                <Zap size={10} className="text-[#55DEE8]" /> PARTNER VERIFICATION DOSSIER #{request._id?.slice(-8)}
               </p>
             </div>
           </div>
@@ -84,7 +84,7 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
               
               <section className="space-y-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <User size={14} className="text-[#CCFF00]" />
+                  <User size={14} className="text-[#55DEE8]" />
                   <h3 className="text-[10px] font-black text-[#878C9F] uppercase tracking-[0.3em]">Identity Core</h3>
                 </div>
                 <div className="space-y-4">
@@ -96,7 +96,7 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
 
               <section className="space-y-6 pt-6 border-t border-[#2D2D2D]/50">
                 <div className="flex items-center gap-2 mb-4">
-                  <Briefcase size={14} className="text-[#CCFF00]" />
+                  <Briefcase size={14} className="text-[#55DEE8]" />
                   <h3 className="text-[10px] font-black text-[#878C9F] uppercase tracking-[0.3em]">Entity Operations</h3>
                 </div>
                 <div className="space-y-4">
@@ -123,7 +123,7 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
               <section>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
-                    <Database size={16} className="text-[#CCFF00]" />
+                    <Database size={16} className="text-[#55DEE8]" />
                     <h3 className="text-[12px] font-black text-white uppercase tracking-[0.2em]">Verification Dossier</h3>
                   </div>
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-[#1A1A1A] px-2 py-1 rounded-[4px] border border-[#2D2D2D]">
@@ -186,11 +186,11 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
               <section className="pt-10 border-t border-[#2D2D2D]/50">
                  <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
-                    <ImageIcon size={16} className="text-[#CCFF00]" />
+                    <ImageIcon size={16} className="text-[#55DEE8]" />
                     <h3 className="text-[12px] font-black text-white uppercase tracking-[0.2em]">Associated Assets / Grounds</h3>
                   </div>
                   {grounds.length > 0 && (
-                    <span className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest bg-[#CCFF00]/5 px-2 py-1 rounded-[4px] border border-[#CCFF00]/20">
+                    <span className="text-[10px] font-bold text-[#55DEE8] uppercase tracking-widest bg-[#55DEE8]/5 px-2 py-1 rounded-[4px] border border-[#55DEE8]/20">
                       {grounds.length} Detected
                     </span>
                   )}
@@ -198,7 +198,7 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
 
                 {loadingGrounds ? (
                   <div className="flex items-center justify-center py-10">
-                    <div className="w-8 h-8 border-2 border-[#CCFF00] border-t-transparent rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-[#55DEE8] border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : grounds.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -230,7 +230,7 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
                 <button 
                   onClick={() => onAccept(request._id)}
                   disabled={isProcessing}
-                  className="px-8 py-3 bg-[#CCFF00] text-black text-[12px] font-black uppercase tracking-[0.2em] rounded-[6px] hover:bg-[#DFFF00] transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(204,255,0,0.2)] disabled:opacity-50"
+                  className="px-8 py-3 bg-[#55DEE8] text-black text-[12px] font-black uppercase tracking-[0.2em] rounded-[6px] hover:bg-[#DFFF00] transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(204,255,0,0.2)] disabled:opacity-50"
                 >
                   Authorize Partner
                 </button>
@@ -246,7 +246,7 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
                 <button 
                   onClick={() => onAccept(request._id)}
                   disabled={isProcessing}
-                  className="px-8 py-3 bg-[#CCFF00] text-black text-[12px] font-black uppercase tracking-[0.2em] rounded-[6px] hover:bg-[#DFFF00] transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(204,255,0,0.2)] disabled:opacity-50"
+                  className="px-8 py-3 bg-[#55DEE8] text-black text-[12px] font-black uppercase tracking-[0.2em] rounded-[6px] hover:bg-[#DFFF00] transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(204,255,0,0.2)] disabled:opacity-50"
                 >
                   Approve Authorization <ChevronRight size={16} />
                 </button>
@@ -262,18 +262,18 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
 const IdentityItem = ({ label, value, icon: Icon }) => (
   <div className="group">
     <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest mb-1.5">{label}</p>
-    <div className="flex items-center gap-3 bg-white/[0.03] p-3 rounded-[6px] border border-[#2D2D2D] group-hover:border-[#CCFF00]/30 transition-colors">
-       <Icon size={14} className="text-[#CCFF00]/60 group-hover:text-[#CCFF00]" />
+    <div className="flex items-center gap-3 bg-white/[0.03] p-3 rounded-[6px] border border-[#2D2D2D] group-hover:border-[#55DEE8]/30 transition-colors">
+       <Icon size={14} className="text-[#55DEE8]/60 group-hover:text-[#55DEE8]" />
        <span className="text-[13px] font-semibold text-white tracking-tight break-all uppercase">{value || "NOT PROVIDED"}</span>
     </div>
   </div>
 );
 
 const DocumentSlot = ({ label, doc }) => (
-  <div className={`group relative p-4 rounded-[8px] border transition-all ${doc ? 'bg-[#111111] border-[#2D2D2D] hover:border-[#CCFF00]/40' : 'bg-black/40 border-[#2D2D2D] border-dashed opacity-60'}`}>
+  <div className={`group relative p-4 rounded-[8px] border transition-all ${doc ? 'bg-[#111111] border-[#2D2D2D] hover:border-[#55DEE8]/40' : 'bg-black/40 border-[#2D2D2D] border-dashed opacity-60'}`}>
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className={`w-8 h-8 rounded-[4px] flex items-center justify-center ${doc ? 'bg-[#CCFF00]/10 text-[#CCFF00]' : 'bg-gray-800 text-gray-500'}`}>
+        <div className={`w-8 h-8 rounded-[4px] flex items-center justify-center ${doc ? 'bg-[#55DEE8]/10 text-[#55DEE8]' : 'bg-gray-800 text-gray-500'}`}>
           <FileText size={16} />
         </div>
         <div>
@@ -288,7 +288,7 @@ const DocumentSlot = ({ label, doc }) => (
           href={doc.url} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="p-2 hover:bg-[#CCFF00]/10 rounded-full text-[#CCFF00] transition-colors"
+          className="p-2 hover:bg-[#55DEE8]/10 rounded-full text-[#55DEE8] transition-colors"
         >
           <ExternalLink size={14} />
         </a>
@@ -304,10 +304,10 @@ const DocumentCard = ({ doc }) => (
     href={doc.url} 
     target="_blank" 
     rel="noopener noreferrer"
-    className="group bg-[#111111] border border-[#2D2D2D] rounded-[8px] p-4 flex items-center justify-between hover:border-[#CCFF00]/40 transition-all hover:bg-[#CCFF00]/5"
+    className="group bg-[#111111] border border-[#2D2D2D] rounded-[8px] p-4 flex items-center justify-between hover:border-[#55DEE8]/40 transition-all hover:bg-[#55DEE8]/5"
   >
     <div className="flex items-center gap-4">
-       <div className="w-10 h-10 rounded-[4px] bg-[#1A1A1A] border border-[#2D2D2D] flex items-center justify-center text-gray-400 group-hover:text-[#CCFF00] group-hover:border-[#CCFF00]/30 transition-all">
+       <div className="w-10 h-10 rounded-[4px] bg-[#1A1A1A] border border-[#2D2D2D] flex items-center justify-center text-gray-400 group-hover:text-[#55DEE8] group-hover:border-[#55DEE8]/30 transition-all">
           <FileText size={20} />
        </div>
        <div>
@@ -315,15 +315,15 @@ const DocumentCard = ({ doc }) => (
          <p className="text-[9px] font-medium text-gray-500 uppercase tracking-widest">Verified Artifact</p>
        </div>
     </div>
-    <ExternalLink size={14} className="text-gray-600 group-hover:text-[#CCFF00] transition-colors" />
+    <ExternalLink size={14} className="text-gray-600 group-hover:text-[#55DEE8] transition-colors" />
   </a>
 );
 
 const GroundCard = ({ ground }) => (
-  <div className="group bg-[#111111] border border-[#2D2D2D] rounded-[8px] overflow-hidden hover:border-[#CCFF00]/40 transition-all">
+  <div className="group bg-[#111111] border border-[#2D2D2D] rounded-[8px] overflow-hidden hover:border-[#55DEE8]/40 transition-all">
     <div className="h-32 bg-[#1A1A1A] relative overflow-hidden">
       <img src={ground.image} alt={ground.name} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
-      <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-[2px] bg-black/60 backdrop-blur-md border border-white/10 text-[8px] font-black text-[#CCFF00] uppercase tracking-widest">
+      <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-[2px] bg-black/60 backdrop-blur-md border border-white/10 text-[8px] font-black text-[#55DEE8] uppercase tracking-widest">
         {ground.status}
       </div>
     </div>

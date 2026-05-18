@@ -2,7 +2,7 @@ import { ArrowRight, CheckCircle, BarChart3, CalendarDays, Trophy } from "lucide
 import { Link } from "react-router-dom";
 import ScrollToTop from "@components/common/ScrollToTop";
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
 
 const benefits = [
   { icon: CalendarDays, title: "Automated Bookings", desc: "No more phone calls. Let players book your turf 24/7." },
@@ -32,7 +32,7 @@ export default function VenueOwnerLanding() {
       />
       {/* ── Glow blob */}
       <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{ background: `radial-gradient(circle, rgba(132,204,22,0.12) 0%, transparent 70%)` }}
+        style={{ background: `radial-gradient(circle, rgba(85,222,232,0.12) 0%, transparent 70%)` }}
       />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -41,7 +41,7 @@ export default function VenueOwnerLanding() {
           <div className="text-center md:text-left">
             <div
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-[10px] md:text-xs font-semibold mb-4 md:mb-6 uppercase tracking-widest"
-              style={{ background: "rgba(132,204,22,0.08)", borderColor: "rgba(132,204,22,0.25)", color: PRI }}
+              style={{ background: "rgba(85,222,232,0.08)", borderColor: "rgba(85,222,232,0.25)", color: PRI }}
             >
               Venue Partners
             </div>
@@ -69,7 +69,7 @@ export default function VenueOwnerLanding() {
               >
                 <div
                   className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shrink-0 border"
-                  style={{ borderColor: "rgba(132,204,22,0.2)", backgroundColor: "rgba(132,204,22,0.08)" }}
+                  style={{ borderColor: "rgba(85,222,232,0.2)", backgroundColor: "rgba(85,222,232,0.08)" }}
                 >
                   <b.icon size={20} className="md:w-6 md:h-6" style={{ color: PRI }} />
                 </div>

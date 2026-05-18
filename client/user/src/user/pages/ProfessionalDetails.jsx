@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 import { format, addDays, startOfToday } from "date-fns";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
 
 export default function ProfessionalDetails() {
   const { id } = useParams();
@@ -99,7 +99,7 @@ export default function ProfessionalDetails() {
 
   if (loading && !pro) return (
     <div className="min-h-screen bg-black flex items-center justify-center">
-      <Loader2 className="animate-spin text-[#84CC16]" size={40} />
+      <Loader2 className="animate-spin text-[#55DEE8]" size={40} />
     </div>
   );
 
@@ -120,8 +120,8 @@ export default function ProfessionalDetails() {
             <div className="bg-neutral-900/40 rounded-[40px] border border-neutral-800 p-8 md:p-12 mb-8">
               <div className="flex flex-col md:flex-row gap-8 items-start">
                 <div className="relative">
-                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-[32px] overflow-hidden border-4 border-[#84CC16]/20">
-                    <div className="w-full h-full bg-[#84CC16]/10 flex items-center justify-center overflow-hidden">
+                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-[32px] overflow-hidden border-4 border-[#55DEE8]/20">
+                    <div className="w-full h-full bg-[#55DEE8]/10 flex items-center justify-center overflow-hidden">
                       {pro.profilePicture ? (
                         <img 
                           src={pro.profilePicture} 
@@ -137,13 +137,13 @@ export default function ProfessionalDetails() {
                         className="w-full h-full flex items-center justify-center bg-[#1a1a1a]"
                         style={{ display: pro.profilePicture ? 'none' : 'flex' }}
                       >
-                        <span className="text-[#84CC16] font-black text-5xl tracking-tighter">
+                        <span className="text-[#55DEE8] font-black text-5xl tracking-tighter">
                           {pro.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
                         </span>
                       </div>
                     </div>
                   </div>
-                  <div className="absolute -bottom-2 -right-2 bg-[#84CC16] p-2 rounded-xl shadow-xl">
+                  <div className="absolute -bottom-2 -right-2 bg-[#55DEE8] p-2 rounded-xl shadow-xl">
                     <Shield size={20} className="text-black" />
                   </div>
                 </div>
@@ -151,15 +151,15 @@ export default function ProfessionalDetails() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h1 className="font-display text-4xl md:text-5xl uppercase leading-none">{pro.name}</h1>
-                    <span className="px-3 py-1 rounded-full bg-[#84CC16]/10 text-[#84CC16] text-[10px] font-bold tracking-widest border border-[#84CC16]/20 uppercase">
+                    <span className="px-3 py-1 rounded-full bg-[#55DEE8]/10 text-[#55DEE8] text-[10px] font-bold tracking-widest border border-[#55DEE8]/20 uppercase">
                       PRO {pro.role}
                     </span>
                   </div>
                   
                   <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-6">
-                    <span className="flex items-center gap-1"><MapPin size={14} className="text-[#84CC16]" /> {pro.city}, {pro.state}</span>
-                    <span className="flex items-center gap-1"><Star size={14} className="fill-[#84CC16] text-[#84CC16]" /> {pro.rating?.toFixed(1) || "5.0"} ({pro.numReviews || 0} reviews)</span>
-                    <span className="flex items-center gap-1"><Award size={14} className="text-[#84CC16]" /> {pro.businessDetails?.experience || "5+ Years"} exp</span>
+                    <span className="flex items-center gap-1"><MapPin size={14} className="text-[#55DEE8]" /> {pro.city}, {pro.state}</span>
+                    <span className="flex items-center gap-1"><Star size={14} className="fill-[#55DEE8] text-[#55DEE8]" /> {pro.rating?.toFixed(1) || "5.0"} ({pro.numReviews || 0} reviews)</span>
+                    <span className="flex items-center gap-1"><Award size={14} className="text-[#55DEE8]" /> {pro.businessDetails?.experience || "5+ Years"} exp</span>
                   </div>
 
                   <p className="text-gray-400 leading-relaxed mb-8 max-w-2xl">
@@ -181,7 +181,7 @@ export default function ProfessionalDetails() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               <div className="bg-neutral-900/40 rounded-[40px] border border-neutral-800 p-8">
                 <h3 className="font-display text-xl uppercase mb-6 flex items-center gap-2">
-                  <Shield size={18} className="text-[#84CC16]" /> Certifications
+                  <Shield size={18} className="text-[#55DEE8]" /> Certifications
                 </h3>
                 <div className="grid grid-cols-3 gap-3">
                   {pro.certifications?.length > 0 ? pro.certifications.map((cert, i) => (
@@ -198,7 +198,7 @@ export default function ProfessionalDetails() {
 
               <div className="bg-neutral-900/40 rounded-[40px] border border-neutral-800 p-8">
                 <h3 className="font-display text-xl uppercase mb-6 flex items-center gap-2">
-                  <Star size={18} className="text-[#84CC16]" /> User Reviews
+                  <Star size={18} className="text-[#55DEE8]" /> User Reviews
                 </h3>
                 {reviews.length === 0 ? (
                   <div className="text-center py-4">
@@ -210,7 +210,7 @@ export default function ProfessionalDetails() {
                       <div key={i} className="border-b border-neutral-800 pb-4 last:border-0 last:pb-0">
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full border border-white/10 overflow-hidden bg-[#84CC16]/10 flex items-center justify-center shrink-0">
+                            <div className="w-6 h-6 rounded-full border border-white/10 overflow-hidden bg-[#55DEE8]/10 flex items-center justify-center shrink-0">
                               {review.user?.profilePicture ? (
                                 <img 
                                   src={review.user.profilePicture} 
@@ -225,7 +225,7 @@ export default function ProfessionalDetails() {
                                 className="w-full h-full flex items-center justify-center"
                                 style={{ display: review.user?.profilePicture ? 'none' : 'flex' }}
                               >
-                                <span className="text-[#84CC16] font-black text-[8px]">
+                                <span className="text-[#55DEE8] font-black text-[8px]">
                                   {review.user?.name ? review.user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : '?'}
                                 </span>
                               </div>
@@ -234,7 +234,7 @@ export default function ProfessionalDetails() {
                           </div>
                           <div className="flex items-center gap-0.5">
                             {[...Array(5)].map((_, i) => (
-                              <Star key={i} size={8} className={i < review.rating ? "fill-[#84CC16] text-[#84CC16]" : "text-neutral-800"} />
+                              <Star key={i} size={8} className={i < review.rating ? "fill-[#55DEE8] text-[#55DEE8]" : "text-neutral-800"} />
                             ))}
                           </div>
                         </div>
@@ -250,7 +250,7 @@ export default function ProfessionalDetails() {
           {/* Right Column: Booking Widget */}
           <div className="lg:col-span-4">
             <div className="sticky top-24">
-              <div className="bg-[#84CC16] rounded-[40px] p-8 text-black mb-6 shadow-2xl shadow-[#84CC16]/20">
+              <div className="bg-[#55DEE8] rounded-[40px] p-8 text-black mb-6 shadow-2xl shadow-[#55DEE8]/20">
                 <div className="flex justify-between items-end mb-6">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest opacity-60">Price per {pro.role === "coach" ? "hour" : "match"}</p>
@@ -277,7 +277,7 @@ export default function ProfessionalDetails() {
               <div className="bg-neutral-900 border border-neutral-800 rounded-[40px] p-8">
                 <h4 className="font-display text-lg uppercase mb-6 flex items-center justify-between">
                   Select Schedule
-                  <CalendarDays size={18} className="text-[#84CC16]" />
+                  <CalendarDays size={18} className="text-[#55DEE8]" />
                 </h4>
 
                 {/* Date Selection */}
@@ -291,7 +291,7 @@ export default function ProfessionalDetails() {
                         onClick={() => setSelectedDate(dateStr)}
                         className={`flex flex-col items-center justify-center min-w-[60px] h-20 rounded-2xl border transition-all ${
                           isSelected 
-                          ? "bg-[#84CC16] border-[#84CC16] text-black" 
+                          ? "bg-[#55DEE8] border-[#55DEE8] text-black" 
                           : "bg-black border-neutral-800 text-gray-500 hover:border-gray-600"
                         }`}
                       >
@@ -305,7 +305,7 @@ export default function ProfessionalDetails() {
                 {/* Slots */}
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Available Slots</p>
                 {loading ? (
-                   <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-[#84CC16]" size={24} /></div>
+                   <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-[#55DEE8]" size={24} /></div>
                 ) : !availability || availability.slots.length === 0 ? (
                   <div className="text-center py-10 bg-black/40 rounded-2xl border border-dashed border-neutral-800 mb-8">
                     <p className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">No slots available</p>
@@ -321,7 +321,7 @@ export default function ProfessionalDetails() {
                           !slot.isAvailable 
                           ? "bg-neutral-900 border-neutral-950 text-neutral-800 cursor-not-allowed line-through" 
                           : selectedSlots.some(s => s.startTime === slot.startTime)
-                          ? "bg-[#84CC16]/20 border-[#84CC16] text-[#84CC16]"
+                          ? "bg-[#55DEE8]/20 border-[#55DEE8] text-[#55DEE8]"
                           : "bg-black border-neutral-800 text-gray-400 hover:border-gray-600"
                         }`}
                       >
@@ -336,7 +336,7 @@ export default function ProfessionalDetails() {
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Special Request (Optional)</label>
                   <textarea 
                     placeholder="E.g. Focus on batting drills..."
-                    className="w-full bg-black border border-neutral-800 rounded-2xl p-4 text-xs font-medium focus:border-[#84CC16] outline-none transition-colors h-24 resize-none"
+                    className="w-full bg-black border border-neutral-800 rounded-2xl p-4 text-xs font-medium focus:border-[#55DEE8] outline-none transition-colors h-24 resize-none"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                   />
@@ -349,13 +349,13 @@ export default function ProfessionalDetails() {
                       <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total Amount</p>
                       <p className="text-2xl font-display text-white">₹{selectedSlots.length * (pro.price || 0)}</p>
                     </div>
-                    <p className="text-[10px] font-bold text-[#84CC16] uppercase tracking-widest">{selectedSlots.length} Slots Selected</p>
+                    <p className="text-[10px] font-bold text-[#55DEE8] uppercase tracking-widest">{selectedSlots.length} Slots Selected</p>
                   </div>
 
                   <button 
                     onClick={handleBooking}
                     disabled={bookingLoading || selectedSlots.length === 0}
-                    className="w-full bg-[#84CC16] text-black py-4 rounded-[20px] font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
+                    className="w-full bg-[#55DEE8] text-black py-4 rounded-[20px] font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
                   >
                     {bookingLoading ? <Loader2 className="animate-spin mx-auto" size={20} /> : "Send Booking Request"}
                   </button>

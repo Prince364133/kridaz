@@ -25,8 +25,8 @@ const MapController = ({ userLocation, setMap }) => {
 
 const createMarkerIcon = (item, type) => {
   const pic = item.profilePicture || item.logo || item.image || "https://bms-common-bucket.s3.ap-south-1.amazonaws.com/default-avatar.png";
-  const mainColor = type === 'players' ? "#84CC16" : "#3B82F6";
-  const shadowColor = type === 'players' ? "rgba(132,204,22,0.3)" : "rgba(59,130,246,0.3)";
+  const mainColor = type === 'players' ? "#55DEE8" : "#3B82F6";
+  const shadowColor = type === 'players' ? "rgba(85,222,232,0.3)" : "rgba(59,130,246,0.3)";
 
   const iconHtml = `
     <div class="relative flex items-center justify-center w-10 h-10">
@@ -61,9 +61,9 @@ const PlayerMap = ({ items = [], itemType = 'players', userLocation, onItemClick
   const currentUserIcon = useMemo(() => L.divIcon({
     html: `
       <div class="relative flex items-center justify-center w-12 h-12">
-        <div class="absolute inset-0 bg-[#84CC16]/20 rounded-full animate-ping opacity-20"></div>
-        <div class="absolute inset-2 bg-[#84CC16]/40 rounded-full animate-pulse"></div>
-        <div class="relative w-4 h-4 bg-[#84CC16] rounded-full border-2 border-black shadow-[0_0_15px_#84CC16]"></div>
+        <div class="absolute inset-0 bg-[#55DEE8]/20 rounded-full animate-ping opacity-20"></div>
+        <div class="absolute inset-2 bg-[#55DEE8]/40 rounded-full animate-pulse"></div>
+        <div class="relative w-4 h-4 bg-[#55DEE8] rounded-full border-2 border-black shadow-[0_0_15px_#55DEE8]"></div>
       </div>
     `,
     className: 'current-user-marker',
@@ -115,9 +115,9 @@ const PlayerMap = ({ items = [], itemType = 'players', userLocation, onItemClick
               center={mapCenter}
               radius={selectedRadius * 1000}
               pathOptions={{
-                fillColor: '#84CC16',
+                fillColor: '#55DEE8',
                 fillOpacity: 0.05,
-                color: '#84CC16',
+                color: '#55DEE8',
                 weight: 1,
                 dashArray: '5, 10'
               }}
@@ -141,7 +141,7 @@ const PlayerMap = ({ items = [], itemType = 'players', userLocation, onItemClick
               <Popup className={`custom-${itemType}-popup`}>
                 <div className="flex flex-col gap-3 p-1 min-w-[160px] bg-black text-white">
                   <div className="flex items-center gap-2.5">
-                    <div className={`w-10 h-10 rounded-full border-2 border-${itemType === 'players' ? '[#84CC16]' : '[#3B82F6]'} overflow-hidden bg-black flex-shrink-0 shadow-[0_0_10px_rgba(0,0,0,0.5)]`}>
+                    <div className={`w-10 h-10 rounded-full border-2 border-${itemType === 'players' ? '[#55DEE8]' : '[#3B82F6]'} overflow-hidden bg-black flex-shrink-0 shadow-[0_0_10px_rgba(0,0,0,0.5)]`}>
                       <img 
                         src={item.profilePicture || item.logo || item.image || "https://bms-common-bucket.s3.ap-south-1.amazonaws.com/default-avatar.png"} 
                         className="w-full h-full object-cover" 
@@ -160,7 +160,7 @@ const PlayerMap = ({ items = [], itemType = 'players', userLocation, onItemClick
                   <div className="flex flex-wrap gap-1.5">
                     {itemType === 'players' ? (
                       item.sportTypes?.slice(0, 2).map(s => (
-                        <span key={s} className="text-[8px] bg-[#84CC16]/10 text-[#84CC16] px-2 py-0.5 rounded-md border border-[#84CC16]/20 font-black uppercase tracking-widest">
+                        <span key={s} className="text-[8px] bg-[#55DEE8]/10 text-[#55DEE8] px-2 py-0.5 rounded-md border border-[#55DEE8]/20 font-black uppercase tracking-widest">
                           {s}
                         </span>
                       ))
@@ -178,7 +178,7 @@ const PlayerMap = ({ items = [], itemType = 'players', userLocation, onItemClick
                   
                   <button 
                     onClick={() => onItemClick?.(item._id)}
-                    className={`w-full bg-${itemType === 'players' ? '[#84CC16]' : '[#3B82F6]'} text-black text-[10px] font-black py-2 rounded-lg mt-1 transition-all uppercase tracking-[0.1em] shadow-lg`}
+                    className={`w-full bg-${itemType === 'players' ? '[#55DEE8]' : '[#3B82F6]'} text-black text-[10px] font-black py-2 rounded-lg mt-1 transition-all uppercase tracking-[0.1em] shadow-lg`}
                   >
                     {itemType === 'players' ? 'VIEW IN LIST' : 'VIEW TEAM'}
                   </button>
@@ -195,7 +195,7 @@ const PlayerMap = ({ items = [], itemType = 'players', userLocation, onItemClick
       <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
          <button 
            onClick={handleRecenter}
-           className="w-10 h-10 bg-black/80 backdrop-blur-md border border-[#84CC16]/30 rounded-xl flex items-center justify-center text-[#84CC16] hover:bg-[#84CC16] hover:text-black transition-all shadow-2xl"
+           className="w-10 h-10 bg-black/80 backdrop-blur-md border border-[#55DEE8]/30 rounded-xl flex items-center justify-center text-[#55DEE8] hover:bg-[#55DEE8] hover:text-black transition-all shadow-2xl"
            title="Recenter Map"
          >
            <Navigation size={18} />

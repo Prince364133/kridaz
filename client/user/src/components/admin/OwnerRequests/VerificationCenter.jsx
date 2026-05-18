@@ -75,8 +75,8 @@ const VerificationCenter = () => {
     <div className="bg-[#000000]">
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 lg:space-y-10 animate-fade-in pt-0 pb-24 relative">
         {/* Background Glows */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#55DEE8]/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#55DEE8]/5 blur-[120px] pointer-events-none" />
 
         <div className="space-y-8 lg:space-y-10 relative z-10">
           
@@ -84,7 +84,7 @@ const VerificationCenter = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic text-white">
-                PARTNER <span className="text-[#CCFF00]">MISSION CONTROL</span>
+                PARTNER <span className="text-[#55DEE8]">MISSION CONTROL</span>
               </h1>
               <p className="text-gray-500 font-medium tracking-wider uppercase text-[10px] mt-2">
                 Unified Governance • Compliance Oversight • Role Verification
@@ -93,7 +93,7 @@ const VerificationCenter = () => {
             <div className="hidden lg:flex items-center gap-6">
                <div className="text-right">
                   <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Pending</p>
-                  <p className="text-2xl font-black text-[#CCFF00] italic">{requests.length}</p>
+                  <p className="text-2xl font-black text-[#55DEE8] italic">{requests.length}</p>
                </div>
                <div className="w-[1px] h-10 bg-[#2D2D2D]" />
                <div className="text-right">
@@ -110,7 +110,7 @@ const VerificationCenter = () => {
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div>
                   <div className="flex items-center gap-3 mb-1">
-                    <div className="p-1.5 bg-[#CCFF00]/10 text-[#CCFF00] rounded-[4px] border border-[#CCFF00]/20">
+                    <div className="p-1.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded-[4px] border border-[#55DEE8]/20">
                       <ShieldCheck size={16} />
                     </div>
                     <h2 className="text-xl font-semibold text-white uppercase tracking-tight">
@@ -130,7 +130,7 @@ const VerificationCenter = () => {
                         onClick={() => setActiveTab(tab)}
                         className={`px-4 py-1.5 rounded-[4px] text-[11px] font-semibold uppercase tracking-wider transition-all ${
                           activeTab === tab
-                            ? "bg-[#CCFF00] text-black"
+                            ? "bg-[#55DEE8] text-black"
                             : "text-[#878C9F] hover:text-white"
                         }`}
                       >
@@ -143,15 +143,15 @@ const VerificationCenter = () => {
                   <div className="relative">
                     <button 
                       onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-                      className="h-9 px-4 bg-[#0F0F0F] border border-[#2D2D2D] text-white rounded-[6px] flex items-center gap-3 hover:border-[#CCFF00]/50 transition-all min-w-[160px] justify-between group"
+                      className="h-9 px-4 bg-[#0F0F0F] border border-[#2D2D2D] text-white rounded-[6px] flex items-center gap-3 hover:border-[#55DEE8]/50 transition-all min-w-[160px] justify-between group"
                     >
                       <div className="flex items-center gap-2">
-                        <Users size={14} className="text-[#CCFF00]" />
+                        <Users size={14} className="text-[#55DEE8]" />
                         <span className="text-[10px] font-black uppercase tracking-[0.2em]">
                           {roleOptions.find(r => r.id === roleFilter)?.label || "ROLES"}
                         </span>
                       </div>
-                      <ChevronDown size={12} className={`text-gray-500 transition-transform ${isRoleDropdownOpen ? 'rotate-180 text-[#CCFF00]' : ''}`} />
+                      <ChevronDown size={12} className={`text-gray-500 transition-transform ${isRoleDropdownOpen ? 'rotate-180 text-[#55DEE8]' : ''}`} />
                     </button>
 
                     {isRoleDropdownOpen && (
@@ -166,10 +166,10 @@ const VerificationCenter = () => {
                                 setIsRoleDropdownOpen(false);
                               }}
                               className={`w-full px-4 py-3 text-left text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-between
-                                ${roleFilter === role.id ? 'bg-[#CCFF00]/10 text-[#CCFF00]' : 'text-gray-400 hover:bg-white/[0.03] hover:text-white'}`}
+                                ${roleFilter === role.id ? 'bg-[#55DEE8]/10 text-[#55DEE8]' : 'text-gray-400 hover:bg-white/[0.03] hover:text-white'}`}
                             >
                               {role.label}
-                              {roleFilter === role.id && <Zap size={10} className="text-[#CCFF00]" />}
+                              {roleFilter === role.id && <Zap size={10} className="text-[#55DEE8]" />}
                             </button>
                           ))}
                         </div>
@@ -185,7 +185,7 @@ const VerificationCenter = () => {
           {/* Main List Area */}
           {displayRequests.length === 0 ? (
             <div className="bg-[#000000] p-20 rounded-[8px] border border-[#2D2D2D] text-center relative overflow-hidden group min-h-[400px] flex items-center justify-center">
-              <div className="absolute inset-0 bg-[#CCFF00]/5 opacity-0 group-hover:opacity-100 transition-opacity blur-[80px]" />
+              <div className="absolute inset-0 bg-[#55DEE8]/5 opacity-0 group-hover:opacity-100 transition-opacity blur-[80px]" />
               <div className="relative z-10 space-y-4">
                  <div className="w-16 h-16 mx-auto rounded-full bg-[#2D2D2D] flex items-center justify-center text-gray-500 border border-[#404040]">
                    {activeTab === "pending" ? <Clock size={24} /> : <Filter size={24} />}
@@ -237,7 +237,7 @@ const VerificationCenter = () => {
                 <div className="space-y-2">
                   <h3 className="text-xl font-display uppercase tracking-tight text-white">Partner Authorization</h3>
                   <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                    Confirming credentials for <span className="text-[#CCFF00]">{selectedRequest?.name}</span>
+                    Confirming credentials for <span className="text-[#55DEE8]">{selectedRequest?.name}</span>
                   </p>
                 </div>
 
@@ -249,7 +249,7 @@ const VerificationCenter = () => {
                       value={adminInfo.name}
                       onChange={(e) => setAdminInfo({...adminInfo, name: e.target.value})}
                       placeholder="ENTER FULL NAME"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-[#CCFF00]/50 transition-colors uppercase font-bold"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-[#55DEE8]/50 transition-colors uppercase font-bold"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -259,7 +259,7 @@ const VerificationCenter = () => {
                       value={adminInfo.designation}
                       onChange={(e) => setAdminInfo({...adminInfo, designation: e.target.value})}
                       placeholder="E.G. OPERATIONS HEAD"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-[#CCFF00]/50 transition-colors uppercase font-bold"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-[#55DEE8]/50 transition-colors uppercase font-bold"
                     />
                   </div>
                 </div>
@@ -274,7 +274,7 @@ const VerificationCenter = () => {
                   <button 
                     onClick={confirmApproval}
                     disabled={!adminInfo.name || !adminInfo.designation}
-                    className="py-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-black bg-[#CCFF00] hover:bg-[#b8e600] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(204,255,0,0.2)]"
+                    className="py-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-black bg-[#55DEE8] hover:bg-[#b8e600] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(204,255,0,0.2)]"
                   >
                     Authorize Partner
                   </button>

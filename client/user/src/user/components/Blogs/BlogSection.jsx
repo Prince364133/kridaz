@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronRight, Eye, ThumbsUp, Share2 } from 'lucide-react';
 import axios from 'axios';
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
 
 const BlogSection = () => {
  const [blogs, setBlogs] = useState([]);

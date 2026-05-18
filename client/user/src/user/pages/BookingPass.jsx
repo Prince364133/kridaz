@@ -14,7 +14,7 @@ import RaiseDisputeModal from "../components/dispute/RaiseDisputeModal";
 const BG      = "#000000";
 const CARD_BG = "#000000";
 const BORDER  = "#2D2D2D";
-const ACCENT  = "#CCFF00";
+const ACCENT  = "#55DEE8";
 const MUTED   = "#878C9F";
 const MUTED2  = "#999999";
 

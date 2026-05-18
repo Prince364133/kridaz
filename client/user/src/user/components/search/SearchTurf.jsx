@@ -102,7 +102,7 @@ const SearchTurf = ({ onSearch }) => {
  return (
  <div className="w-full animate-fade-in-up relative z-[50]">
  <div className="relative group">
- <div className="relative flex flex-row items-center bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl p-1.5 shadow-2xl transition-all duration-500 hover:border-[#84CC16]/30 min-h-[56px] md:min-h-[64px]">
+ <div className="relative flex flex-row items-center bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl p-1.5 shadow-2xl transition-all duration-500 hover:border-[#55DEE8]/30 min-h-[56px] md:min-h-[64px]">
  
  {/* Sport Selector */}
  <div className="flex-1 min-w-[80px] relative z-[100] border-r border-white/5" ref={sportDropdownRef}>
@@ -110,14 +110,14 @@ const SearchTurf = ({ onSearch }) => {
  onClick={() => { setShowSportDropdown(!showSportDropdown); setShowStateDropdown(false); setShowCityDropdown(false); }}
  className="flex items-center gap-3 w-full h-full px-4 py-2 transition-all hover:bg-white/5 rounded-xl group/btn"
  >
- <div className="p-2 bg-white/5 rounded-lg group-hover/btn:bg-[#84CC16]/10 transition-colors">
- <Trophy size={14} className={`${showSportDropdown ? "text-[#84CC16]" : "text-gray-500"}`} />
+ <div className="p-2 bg-white/5 rounded-lg group-hover/btn:bg-[#55DEE8]/10 transition-colors">
+ <Trophy size={14} className={`${showSportDropdown ? "text-[#55DEE8]" : "text-gray-500"}`} />
  </div>
  <div className="flex flex-col text-left">
  <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Sport</span>
  <span className="text-[12px] font-bold text-white uppercase tracking-tight truncate w-full">{sport || "All"}</span>
  </div>
- <ChevronDown size={12} className={`ml-auto text-gray-600 transition-transform duration-500 ${showSportDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
+ <ChevronDown size={12} className={`ml-auto text-gray-600 transition-transform duration-500 ${showSportDropdown ? "rotate-180 text-[#55DEE8]" : ""}`} />
  </button>
 
  {showSportDropdown && (
@@ -125,9 +125,9 @@ const SearchTurf = ({ onSearch }) => {
  <div className="p-2 max-h-[300px] overflow-y-auto grid grid-cols-1 gap-1 custom-scrollbar">
  <button
  onClick={() => { setSport(""); setShowSportDropdown(false); }}
- className="flex items-center px-4 py-3 rounded-xl hover:bg-[#84CC16]/10 text-left transition-colors group/item"
+ className="flex items-center px-4 py-3 rounded-xl hover:bg-[#55DEE8]/10 text-left transition-colors group/item"
  >
- <Trophy size={14} className="mr-3 text-gray-600 group-hover/item:text-[#84CC16]" />
+ <Trophy size={14} className="mr-3 text-gray-600 group-hover/item:text-[#55DEE8]" />
  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">All Categories</span>
  </button>
  <div className="h-px bg-white/5 my-1" />
@@ -135,7 +135,7 @@ const SearchTurf = ({ onSearch }) => {
  <button
  key={s}
  onClick={() => { setSport(s); setShowSportDropdown(false); }}
- className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${sport === s ? "bg-[#84CC16] text-black shadow-[0_0_15px_rgba(132,204,22,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+ className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${sport === s ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
  >
  <span className={`text-[11px] font-bold uppercase tracking-wider ${sport === s ? "text-black" : ""}`}>{s}</span>
  </button>
@@ -151,14 +151,14 @@ const SearchTurf = ({ onSearch }) => {
  onClick={() => { setShowStateDropdown(!showStateDropdown); setShowSportDropdown(false); setShowCityDropdown(false); }}
  className="flex items-center gap-3 w-full h-full px-4 py-2 transition-all hover:bg-white/5 rounded-xl group/btn"
  >
- <div className="p-2 bg-white/5 rounded-lg group-hover/btn:bg-[#84CC16]/10 transition-colors">
- <MapPin size={14} className={`${selectedState ? "text-[#84CC16]" : "text-gray-500"}`} />
+ <div className="p-2 bg-white/5 rounded-lg group-hover/btn:bg-[#55DEE8]/10 transition-colors">
+ <MapPin size={14} className={`${selectedState ? "text-[#55DEE8]" : "text-gray-500"}`} />
  </div>
  <div className="flex flex-col text-left flex-1 min-w-0">
  <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">State</span>
  <span className="text-[12px] font-bold text-white uppercase tracking-tight truncate">{selectedState || "All"}</span>
  </div>
- <ChevronDown size={12} className={`ml-auto text-gray-600 transition-transform duration-500 flex-shrink-0 ${showStateDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
+ <ChevronDown size={12} className={`ml-auto text-gray-600 transition-transform duration-500 flex-shrink-0 ${showStateDropdown ? "rotate-180 text-[#55DEE8]" : ""}`} />
  </button>
 
  {showStateDropdown && (
@@ -166,9 +166,9 @@ const SearchTurf = ({ onSearch }) => {
  <div className="p-2 max-h-[300px] overflow-y-auto grid grid-cols-1 gap-1 custom-scrollbar">
  <button
  onClick={() => { setSelectedState(""); setShowStateDropdown(false); }}
- className="flex items-center px-4 py-3 rounded-xl hover:bg-[#84CC16]/10 text-left transition-colors group/item"
+ className="flex items-center px-4 py-3 rounded-xl hover:bg-[#55DEE8]/10 text-left transition-colors group/item"
  >
- <MapPin size={14} className="mr-3 text-gray-600 group-hover/item:text-[#84CC16]" />
+ <MapPin size={14} className="mr-3 text-gray-600 group-hover/item:text-[#55DEE8]" />
  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">All States</span>
  </button>
  <div className="h-px bg-white/5 my-1" />
@@ -176,14 +176,14 @@ const SearchTurf = ({ onSearch }) => {
  <button
  key={st}
  onClick={() => { setSelectedState(st); setShowStateDropdown(false); }}
- className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${selectedState === st ? "bg-[#84CC16] text-black shadow-[0_0_15px_rgba(132,204,22,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+ className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${selectedState === st ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
  >
  <span className={`text-[11px] font-bold uppercase tracking-wider ${selectedState === st ? "text-black" : ""}`}>{st}</span>
  </button>
  ))}
  {loadingStates ? (
  <div className="px-4 py-6 flex flex-col items-center justify-center text-center">
- <Loader2 className="w-5 h-5 text-[#84CC16] animate-spin mb-2" />
+ <Loader2 className="w-5 h-5 text-[#55DEE8] animate-spin mb-2" />
  <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Loading states...</p>
  </div>
  ) : states.length === 0 ? (
@@ -202,14 +202,14 @@ const SearchTurf = ({ onSearch }) => {
  onClick={() => { setShowCityDropdown(!showCityDropdown); setShowSportDropdown(false); setShowStateDropdown(false); }}
  className="flex items-center gap-3 w-full h-full px-4 py-2 transition-all hover:bg-white/5 rounded-xl group/btn"
  >
- <div className="p-2 bg-white/5 rounded-lg group-hover/btn:bg-[#84CC16]/10 transition-colors">
- <Building2 size={14} className={`${selectedCity ? "text-[#84CC16]" : "text-gray-500"}`} />
+ <div className="p-2 bg-white/5 rounded-lg group-hover/btn:bg-[#55DEE8]/10 transition-colors">
+ <Building2 size={14} className={`${selectedCity ? "text-[#55DEE8]" : "text-gray-500"}`} />
  </div>
  <div className="flex flex-col text-left flex-1 min-w-0">
  <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">City</span>
  <span className="text-[12px] font-bold text-white uppercase tracking-tight truncate">{selectedCity || "All"}</span>
  </div>
- <ChevronDown size={12} className={`ml-auto text-gray-600 transition-transform duration-500 flex-shrink-0 ${showCityDropdown ? "rotate-180 text-[#84CC16]" : ""}`} />
+ <ChevronDown size={12} className={`ml-auto text-gray-600 transition-transform duration-500 flex-shrink-0 ${showCityDropdown ? "rotate-180 text-[#55DEE8]" : ""}`} />
  </button>
 
  {showCityDropdown && (
@@ -217,9 +217,9 @@ const SearchTurf = ({ onSearch }) => {
  <div className="p-2 max-h-[300px] overflow-y-auto grid grid-cols-1 gap-1 custom-scrollbar">
  <button
  onClick={() => { setSelectedCity(""); setShowCityDropdown(false); }}
- className="flex items-center px-4 py-3 rounded-xl hover:bg-[#84CC16]/10 text-left transition-colors group/item"
+ className="flex items-center px-4 py-3 rounded-xl hover:bg-[#55DEE8]/10 text-left transition-colors group/item"
  >
- <Building2 size={14} className="mr-3 text-gray-600 group-hover/item:text-[#84CC16]" />
+ <Building2 size={14} className="mr-3 text-gray-600 group-hover/item:text-[#55DEE8]" />
  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">All Cities</span>
  </button>
  <div className="h-px bg-white/5 my-1" />
@@ -227,14 +227,14 @@ const SearchTurf = ({ onSearch }) => {
  <button
  key={ct}
  onClick={() => { setSelectedCity(ct); setShowCityDropdown(false); }}
- className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${selectedCity === ct ? "bg-[#84CC16] text-black shadow-[0_0_15px_rgba(132,204,22,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+ className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${selectedCity === ct ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
  >
  <span className={`text-[11px] font-bold uppercase tracking-wider ${selectedCity === ct ? "text-black" : ""}`}>{ct}</span>
  </button>
  ))}
  {loadingCities ? (
  <div className="px-4 py-6 flex flex-col items-center justify-center text-center">
- <Loader2 className="w-5 h-5 text-[#84CC16] animate-spin mb-2" />
+ <Loader2 className="w-5 h-5 text-[#55DEE8] animate-spin mb-2" />
  <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Loading cities...</p>
  </div>
  ) : cities.length === 0 ? (
@@ -252,7 +252,7 @@ const SearchTurf = ({ onSearch }) => {
  {/* Reset Filter */}
  <button
  onClick={resetFilters}
- className="flex items-center justify-center p-3 text-gray-500 hover:text-[#84CC16] transition-colors group/reset"
+ className="flex items-center justify-center p-3 text-gray-500 hover:text-[#55DEE8] transition-colors group/reset"
  title="Reset Filters"
  >
  <RotateCcw className="w-4 h-4 transition-transform duration-500 group-hover/reset:rotate-[-180deg]" />

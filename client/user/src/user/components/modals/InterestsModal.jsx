@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { X, Trophy, Check, Loader2 } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
@@ -65,7 +65,7 @@ const InterestsModal = ({ isOpen, onClose, onSaved }) => {
  onClick={() => toggleSport(sport)}
  className={`flex items-center justify-between p-4 rounded-[8px] border transition-all duration-300 ${
  isSelected 
- ? "bg-[#CCFF00] border-[#CCFF00] text-black scale-[1.02]" 
+ ? "bg-[#55DEE8] border-[#55DEE8] text-black scale-[1.02]" 
  : "bg-[#000000] border-[#2D2D2D] text-white/60 hover:border-white/20"
  }`}
  >

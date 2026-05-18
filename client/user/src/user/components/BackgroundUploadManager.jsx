@@ -177,7 +177,7 @@ const BackgroundUploadManager = () => {
             {/* Progress Bar */}
             <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
               <motion.div 
-                className={`h-full ${status === 'error' ? 'bg-red-500' : 'bg-[#84CC16]'}`}
+                className={`h-full ${status === 'error' ? 'bg-red-500' : 'bg-[#55DEE8]'}`}
                 initial={{ width: 0 }}
                 animate={{ width: `${status === 'error' ? 100 : progress}%` }}
                 transition={{ duration: 0.3 }}
@@ -198,9 +198,9 @@ const BackgroundUploadManager = () => {
 
           <div className="flex-shrink-0">
             {status === 'uploading' || status === 'finalizing' ? (
-              <Loader2 size={24} className="animate-spin text-[#84CC16]" />
+              <Loader2 size={24} className="animate-spin text-[#55DEE8]" />
             ) : status === 'success' ? (
-              <CheckCircle size={24} className="text-[#84CC16]" />
+              <CheckCircle size={24} className="text-[#55DEE8]" />
             ) : (
               <button onClick={() => dispatch(clearUpload())}>
                 <XCircle size={24} className="text-red-500" />

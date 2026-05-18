@@ -60,13 +60,13 @@ const MatchAnalytics = () => {
       ctx.fillRect(0, 0, W, H);
 
       // Top accent bar
-      ctx.fillStyle = '#CCFF00';
+      ctx.fillStyle = '#55DEE8';
       ctx.fillRect(0, 0, W, 5);
 
       let y = 30;
 
       // Brand title
-      ctx.fillStyle = '#CCFF00';
+      ctx.fillStyle = '#55DEE8';
       ctx.font = 'bold 38px Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('KRIDAZ', W / 2, y + 38);
@@ -105,7 +105,7 @@ const MatchAnalytics = () => {
         ctx.textAlign = 'center';
         ctx.fillText(label, tx + tileW / 2, y + 26);
         // Value
-        ctx.fillStyle = '#CCFF00';
+        ctx.fillStyle = '#55DEE8';
         ctx.font = 'bold 26px Arial, sans-serif';
         ctx.fillText(value, tx + tileW / 2, y + 72);
       });
@@ -154,7 +154,7 @@ const MatchAnalytics = () => {
           ctx.textAlign = 'left';
           ctx.fillText((s.user?.name || '—').toUpperCase(), cols.name, ry + 26);
           // Stats
-          ctx.fillStyle = '#CCFF00';
+          ctx.fillStyle = '#55DEE8';
           ctx.font = 'bold 16px Arial, sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText(s.runs ?? 0, cols.runs, ry + 26);
@@ -184,7 +184,7 @@ const MatchAnalytics = () => {
       ctx.fillText(`kridaz.com  •  ${new Date().toLocaleDateString()}`, W / 2, y + 24);
 
       // Bottom accent
-      ctx.fillStyle = '#CCFF00';
+      ctx.fillStyle = '#55DEE8';
       ctx.fillRect(0, H - 4, W, 4);
 
       // Export
@@ -248,7 +248,7 @@ const MatchAnalytics = () => {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center">
-          <div className="w-12 h-12 rounded-full border-2 border-[#84CC16] border-t-transparent animate-spin mb-4" />
+          <div className="w-12 h-12 rounded-full border-2 border-[#55DEE8] border-t-transparent animate-spin mb-4" />
           <p className="text-gray-500 uppercase tracking-widest text-[10px] font-bold">Analyzing Match Data...</p>
         </div>
       </div>
@@ -276,7 +276,7 @@ const MatchAnalytics = () => {
           <button 
             onClick={handleShare}
             disabled={isCapturing}
-            className="p-3 bg-[#84CC16]/10 text-[#84CC16] border border-[#84CC16]/20 rounded-2xl hover:bg-[#84CC16] hover:text-black transition-all disabled:opacity-50 flex items-center gap-2"
+            className="p-3 bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 rounded-2xl hover:bg-[#55DEE8] hover:text-black transition-all disabled:opacity-50 flex items-center gap-2"
           >
             <Share2 size={18} />
             <span className="text-[10px] font-black uppercase tracking-widest hidden md:block">Share Card</span>
@@ -288,7 +288,7 @@ const MatchAnalytics = () => {
         {/* Branding for Capture */}
         {isCapturing && (
           <div className="text-center py-8 border-b border-white/5 mb-8">
-            <h2 className="text-4xl font-black text-[#84CC16] tracking-tighter uppercase mb-2">Kridaz Performance</h2>
+            <h2 className="text-4xl font-black text-[#55DEE8] tracking-tighter uppercase mb-2">Kridaz Performance</h2>
             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em]">Official Match Scorecard</p>
           </div>
         )}
@@ -297,7 +297,7 @@ const MatchAnalytics = () => {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden bg-gradient-to-br from-[#84CC16] to-[#4D7C0F] rounded-[2.5rem] p-8"
+            className="relative overflow-hidden bg-gradient-to-br from-[#55DEE8] to-[#4D7C0F] rounded-[2.5rem] p-8"
           >
             <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
               <div className="relative">
@@ -337,22 +337,22 @@ const MatchAnalytics = () => {
 
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#84CC16]/30 transition-colors">
+          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Runs</span>
             <div className="flex items-baseline gap-2">
               <span className="text-4xl font-black text-white">{scoring?.innings[0]?.totalRuns || 0}</span>
               <span className="text-sm font-bold text-gray-500">/ {scoring?.innings[0]?.totalWickets || 0}</span>
             </div>
           </div>
-          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#84CC16]/30 transition-colors">
+          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Run Rate</span>
-            <span className="text-4xl font-black text-[#84CC16]">{stats?.runRate || '0.00'}</span>
+            <span className="text-4xl font-black text-[#55DEE8]">{stats?.runRate || '0.00'}</span>
           </div>
-          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#84CC16]/30 transition-colors">
+          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Fours</span>
             <span className="text-4xl font-black text-white">{stats?.totalFours || 0}</span>
           </div>
-          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#84CC16]/30 transition-colors">
+          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Sixes</span>
             <span className="text-4xl font-black text-white">{stats?.totalSixes || 0}</span>
           </div>
@@ -362,7 +362,7 @@ const MatchAnalytics = () => {
         <div className="bg-[#0A0A0A] border border-white/5 rounded-[2.5rem] p-8">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
-              <Award className="text-[#84CC16]" />
+              <Award className="text-[#55DEE8]" />
               Impact Leaders
             </h3>
           </div>
@@ -386,13 +386,13 @@ const MatchAnalytics = () => {
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: mvp?.points > 0 ? `${(player.points / mvp.points) * 100}%` : '0%' }}
-                      className="h-full bg-[#84CC16]"
+                      className="h-full bg-[#55DEE8]"
                     />
                   </div>
                 </div>
                 <div className="text-right">
                   <span className="block text-[10px] font-bold text-gray-500 uppercase">Points</span>
-                  <span className="text-lg font-black text-[#84CC16]">{player.points}</span>
+                  <span className="text-lg font-black text-[#55DEE8]">{player.points}</span>
                 </div>
               </div>
             ))}
@@ -422,7 +422,7 @@ const MatchAnalytics = () => {
                   <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
                     <td className="px-8 py-4 font-bold text-sm uppercase">{s.user?.name}</td>
                     <td className="px-4 py-4 text-[10px] text-gray-500 font-bold uppercase">{s.outStatus || 'Not Out'}</td>
-                    <td className="px-4 py-4 text-right font-black text-[#84CC16]">{s.runs}</td>
+                    <td className="px-4 py-4 text-right font-black text-[#55DEE8]">{s.runs}</td>
                     <td className="px-4 py-4 text-right text-gray-400 text-sm">{s.balls}</td>
                     <td className="px-4 py-4 text-right text-gray-400 text-sm">{s.fours}</td>
                     <td className="px-4 py-4 text-right text-gray-400 text-sm">{s.sixes}</td>

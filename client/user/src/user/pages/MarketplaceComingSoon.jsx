@@ -7,7 +7,7 @@ const MarketplaceComingSoon = () => {
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 relative overflow-hidden">
       {/* Dynamic Background */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#84CC16]/10 blur-[150px] rounded-full animate-pulse" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#55DEE8]/10 blur-[150px] rounded-full animate-pulse" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
       </div>
 
@@ -15,16 +15,16 @@ const MarketplaceComingSoon = () => {
         {/* Animated Icon Container */}
         <div className="flex justify-center mb-4">
           <div className="relative group">
-            <div className="absolute -inset-4 bg-[#84CC16]/20 rounded-full blur-xl group-hover:bg-[#84CC16]/30 transition-all duration-500 animate-pulse" />
-            <div className="relative w-24 h-24 bg-zinc-900 border border-[#84CC16]/30 rounded-[2rem] flex items-center justify-center shadow-2xl">
-              <ShoppingBag size={42} className="text-[#84CC16]" />
+            <div className="absolute -inset-4 bg-[#55DEE8]/20 rounded-full blur-xl group-hover:bg-[#55DEE8]/30 transition-all duration-500 animate-pulse" />
+            <div className="relative w-24 h-24 bg-zinc-900 border border-[#55DEE8]/30 rounded-[2rem] flex items-center justify-center shadow-2xl">
+              <ShoppingBag size={42} className="text-[#55DEE8]" />
             </div>
           </div>
         </div>
 
         {/* Status Badge */}
-        <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-zinc-900/50 border border-zinc-800 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-[#84CC16]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#84CC16] animate-ping" />
+        <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-zinc-900/50 border border-zinc-800 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-[#55DEE8]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#55DEE8] animate-ping" />
           Development in Progress
         </div>
 
@@ -34,7 +34,7 @@ const MarketplaceComingSoon = () => {
             Market<br />
             <span className="text-zinc-500">Place</span>
           </h1>
-          <p className="text-xl md:text-2xl font-bold text-[#84CC16] uppercase tracking-wide">
+          <p className="text-xl md:text-2xl font-bold text-[#55DEE8] uppercase tracking-wide">
             The Ultimate Sports Arsenal
           </p>
         </div>
@@ -52,7 +52,7 @@ const MarketplaceComingSoon = () => {
             { icon: Clock, label: "Coming Q3" }
           ].map((item, i) => (
             <div key={i} className="p-4 bg-zinc-900/30 border border-zinc-800 rounded-2xl flex flex-col items-center gap-2">
-              <item.icon size={20} className="text-[#84CC16]" />
+              <item.icon size={20} className="text-[#55DEE8]" />
               <span className="text-[10px] font-black uppercase tracking-wider">{item.label}</span>
             </div>
           ))}
@@ -62,7 +62,7 @@ const MarketplaceComingSoon = () => {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
           <Link 
             to="/" 
-            className="w-full sm:w-auto bg-[#84CC16] text-black px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 transition-all shadow-[0_20px_40px_rgba(132,204,22,0.2)]"
+            className="w-full sm:w-auto bg-[#55DEE8] text-black px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 transition-all shadow-[0_20px_40px_rgba(85,222,232,0.2)]"
           >
             Back to Arena
           </Link>
@@ -77,7 +77,7 @@ const MarketplaceComingSoon = () => {
       {/* Decorative Elements */}
       <div className="fixed bottom-10 left-10 hidden xl:block animate-bounce-slow">
         <div className="flex flex-col items-start">
-          <div className="w-1 h-20 bg-gradient-to-t from-[#84CC16] to-transparent opacity-20 mb-4" />
+          <div className="w-1 h-20 bg-gradient-to-t from-[#55DEE8] to-transparent opacity-20 mb-4" />
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-800 vertical-text rotate-180">SYSTEMS.LOADING</p>
         </div>
       </div>

@@ -38,8 +38,8 @@ const UserFooter = () => {
   return (
     <footer className={`bg-black text-white relative overflow-hidden border-t border-white/5 pt-8 pb-12 font-sans ${!isHomePage ? 'hidden md:block' : ''}`}>
       {/* ── AMBIENT DECOR ── */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#84CC16]/5 blur-[150px] pointer-events-none rounded-full" />
-      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-[#84CC16]/5 blur-[150px] pointer-events-none rounded-full" />
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#55DEE8]/5 blur-[150px] pointer-events-none rounded-full" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-[#55DEE8]/5 blur-[150px] pointer-events-none rounded-full" />
       
       <div className="container mx-auto px-6 lg:px-12 relative z-10">
         
@@ -60,7 +60,7 @@ const UserFooter = () => {
             
             <div className="flex gap-4 pt-4">
               {[Facebook, Linkedin, Instagram].map((Icon, i) => (
-                <Link key={i} to="#" className="w-10 h-10 rounded-sm border border-white/10 flex items-center justify-center text-white/30 hover:text-[#84CC16] hover:border-[#84CC16]/30 transition-all hover:-translate-y-1">
+                <Link key={i} to="#" className="w-10 h-10 rounded-sm border border-white/10 flex items-center justify-center text-white/30 hover:text-[#55DEE8] hover:border-[#55DEE8]/30 transition-all hover:-translate-y-1">
                   <Icon size={18} />
                 </Link>
               ))}
@@ -83,7 +83,7 @@ const UserFooter = () => {
                       {link}
                     </Link>
                     {idx < regions[0].links.length - 1 && (
-                      <span className="w-1 h-1 bg-[#84CC16]/20 rounded-full" />
+                      <span className="w-1 h-1 bg-[#55DEE8]/20 rounded-full" />
                     )}
                   </React.Fragment>
                 ))}
@@ -120,13 +120,13 @@ const UserFooter = () => {
 
             {/* Email */}
             <div className="flex items-center gap-2">
-              <Mail size={14} className="text-[#84CC16]/60 shrink-0" />
+              <Mail size={14} className="text-[#55DEE8]/60 shrink-0" />
               <span className="text-sm text-white/80">contact@kridaz.com</span>
             </div>
 
             {/* Office */}
             <div className="flex items-center gap-2">
-              <Globe size={14} className="text-[#84CC16]/60 shrink-0" />
+              <Globe size={14} className="text-[#55DEE8]/60 shrink-0" />
               <span className="text-sm text-white/80">Hyderabad, TS, India</span>
             </div>
 
@@ -136,9 +136,9 @@ const UserFooter = () => {
             {/* Partner CTA */}
             <Link
               to="/partners"
-              className="flex items-center gap-2 text-sm font-bold text-white hover:text-[#84CC16] transition-colors group"
+              className="flex items-center gap-2 text-sm font-bold text-white hover:text-[#55DEE8] transition-colors group"
             >
-              <Building2 size={15} className="group-hover:text-[#84CC16] transition-colors" />
+              <Building2 size={15} className="group-hover:text-[#55DEE8] transition-colors" />
               Partner With Us
               <ArrowUpRight size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </Link>

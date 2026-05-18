@@ -1019,12 +1019,12 @@ const HostGame = () => {
                         {/* Upload button */}
                         <label
                           htmlFor={`img-upload-${teamKey}`}
-                          className="flex-1 flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-[#CCFF00]/30 rounded-2xl cursor-pointer hover:border-[#CCFF00]/60 hover:bg-[#CCFF00]/5 transition-all group"
+                          className="flex-1 flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-[#55DEE8]/30 rounded-2xl cursor-pointer hover:border-[#55DEE8]/60 hover:bg-[#55DEE8]/5 transition-all group"
                         >
-                          <div className="w-8 h-8 rounded-full bg-[#CCFF00]/10 border border-[#CCFF00]/20 flex items-center justify-center group-hover:bg-[#CCFF00]/20 transition-all">
-                            <ImageIcon size={16} className="text-[#CCFF00]" />
+                          <div className="w-8 h-8 rounded-full bg-[#55DEE8]/10 border border-[#55DEE8]/20 flex items-center justify-center group-hover:bg-[#55DEE8]/20 transition-all">
+                            <ImageIcon size={16} className="text-[#55DEE8]" />
                           </div>
-                          <span className="text-[10px] font-black text-[#CCFF00]/70 uppercase tracking-widest">
+                          <span className="text-[10px] font-black text-[#55DEE8]/70 uppercase tracking-widest">
                             {gameData[teamKey].imageName ? 'Change Photo' : 'Upload Photo'}
                           </span>
                           {gameData[teamKey].imageName && (
@@ -1050,14 +1050,14 @@ const HostGame = () => {
                               onClick={() => setGameData(prev => ({ ...prev, [teamKey]: { ...prev[teamKey], image: img.url, imageName: null } }))}
                               className={`relative rounded-xl overflow-hidden border-2 transition-all shrink-0 w-20 aspect-video ${
                                 gameData[teamKey].image === img.url
-                                  ? 'border-[#CCFF00] shadow-[0_0_10px_rgba(204,255,0,0.3)]'
+                                  ? 'border-[#55DEE8] shadow-[0_0_10px_rgba(204,255,0,0.3)]'
                                   : 'border-transparent hover:border-white/20'
                               }`}
                             >
                               <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
                               {gameData[teamKey].image === img.url && (
-                                <div className="absolute inset-0 bg-[#CCFF00]/20 flex items-center justify-center">
-                                  <CheckCircle2 size={14} className="text-[#CCFF00]" />
+                                <div className="absolute inset-0 bg-[#55DEE8]/20 flex items-center justify-center">
+                                  <CheckCircle2 size={14} className="text-[#55DEE8]" />
                                 </div>
                               )}
                               <p className="absolute bottom-0 left-0 right-0 bg-black/70 text-[6px] font-black text-white text-center py-0.5 uppercase">{img.label}</p>
@@ -1071,7 +1071,7 @@ const HostGame = () => {
                     <div className="space-y-3">
                       {gameData[teamKey].slots.map((slot, idx) => (
                         <div key={idx} className="flex items-center gap-3 group">
-                          <div className="flex-1 flex items-center gap-4 bg-neutral-900 border border-neutral-800 p-4 rounded-2xl group-hover:border-[#CCFF00]/30 transition-all">
+                          <div className="flex-1 flex items-center gap-4 bg-neutral-900 border border-neutral-800 p-4 rounded-2xl group-hover:border-[#55DEE8]/30 transition-all">
                             <input 
                               className="bg-transparent text-xs font-black uppercase tracking-widest outline-none w-full"
                               value={slot.role}
@@ -1091,7 +1091,7 @@ const HostGame = () => {
 
                     <button
                       onClick={() => addSlot(teamKey)}
-                      className="w-full py-4 border-2 border-dashed border-neutral-800 rounded-2xl text-neutral-500 text-xs font-black uppercase tracking-widest hover:border-[#CCFF00]/30 hover:text-[#CCFF00] transition-all flex items-center justify-center gap-2 bg-neutral-900/30"
+                      className="w-full py-4 border-2 border-dashed border-neutral-800 rounded-2xl text-neutral-500 text-xs font-black uppercase tracking-widest hover:border-[#55DEE8]/30 hover:text-[#55DEE8] transition-all flex items-center justify-center gap-2 bg-neutral-900/30"
                     >
                       <Plus size={16} /> Add More Slots
                     </button>

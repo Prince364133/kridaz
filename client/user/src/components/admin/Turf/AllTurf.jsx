@@ -95,13 +95,13 @@ export const AllTurf = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
-            <div className="flex items-center gap-3 text-[#CCFF00] font-bold text-xs uppercase tracking-widest">
+            <div className="flex items-center gap-3 text-[#55DEE8] font-bold text-xs uppercase tracking-widest">
                <Activity size={14} className="animate-pulse" />
                <span>Venue Management</span>
             </div>
             <div className="relative">
               <h1 className="text-4xl md:text-5xl font-black tracking-tight uppercase text-white leading-none">
-                Platform <span className="text-[#CCFF00]">Venues</span>
+                Platform <span className="text-[#55DEE8]">Venues</span>
               </h1>
               <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-3">Manage and monitor all platform venues</p>
             </div>
@@ -115,7 +115,7 @@ export const AllTurf = () => {
                 onClick={() => setActiveFilter(filter.id)}
                 className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                   activeFilter === filter.id 
-                    ? "bg-[#CCFF00] text-black shadow-lg shadow-[#CCFF00]/20" 
+                    ? "bg-[#55DEE8] text-black shadow-lg shadow-[#55DEE8]/20" 
                     : "text-gray-500 hover:text-white hover:bg-white/5"
                 }`}
               >
@@ -127,7 +127,7 @@ export const AllTurf = () => {
 
         {!filteredTurfs || filteredTurfs.length === 0 ? (
           <div className="relative p-20 rounded-[32px] border border-white/5 bg-white/[0.02] text-center overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-full bg-[#CCFF00]/5 blur-[100px]"></div>
+            <div className="absolute top-0 left-0 w-full h-full bg-[#55DEE8]/5 blur-[100px]"></div>
             <div className="relative space-y-6">
                <PackageOpen size={80} className="mx-auto text-gray-800" />
                <div className="space-y-2">

@@ -57,11 +57,11 @@ export default function AdminDashboard() {
     amount: item.amount,
   }));
 
-  const COLORS = ["#CCFF00", "#10B981", "#3B82F6", "#6366F1"];
+  const COLORS = ["#55DEE8", "#10B981", "#3B82F6", "#6366F1"];
 
   return (
     <div className="p-4 lg:p-10 space-y-8 lg:space-y-12 animate-fade-in pt-2 pb-24 lg:pb-12 bg-[#000000] relative">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#55DEE8]/5 blur-[120px] pointer-events-none" />
       
       {/* High-Level Command Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-5 relative z-10">
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
             subtitle="30-Day Financial Performance Telemetry"
             action={
               <div className="flex items-center gap-2 bg-[#2D2D2D] p-1 rounded-[6px]">
-                <span className="px-3 py-1 bg-[#CCFF00] text-black text-[10px] font-bold uppercase rounded-[4px]">Live</span>
+                <span className="px-3 py-1 bg-[#55DEE8] text-black text-[10px] font-bold uppercase rounded-[4px]">Live</span>
               </div>
             }
           >
@@ -122,8 +122,8 @@ export default function AdminDashboard() {
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="#CCFF00" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#55DEE8" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#55DEE8" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff05" />
@@ -131,9 +131,9 @@ export default function AdminDashboard() {
                   <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 10}} />
                   <Tooltip 
                     contentStyle={{backgroundColor: '#0A0A0A', border: '1px solid #2D2D2D', borderRadius: '12px'}}
-                    itemStyle={{color: '#CCFF00', fontWeight: 'bold', textTransform: 'uppercase'}}
+                    itemStyle={{color: '#55DEE8', fontWeight: 'bold', textTransform: 'uppercase'}}
                   />
-                  <Area type="monotone" dataKey="amount" stroke="#CCFF00" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
+                  <Area type="monotone" dataKey="amount" stroke="#55DEE8" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -151,7 +151,7 @@ export default function AdminDashboard() {
             </div>
             <button 
               onClick={() => navigate("/admin/marketing")}
-              className="w-full mt-6 py-3 bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:bg-[#CCFF00]/5 text-white hover:text-[#CCFF00] rounded-xl transition-all font-bold uppercase text-[10px] tracking-widest group"
+              className="w-full mt-6 py-3 bg-white/5 border border-white/10 hover:border-[#55DEE8]/50 hover:bg-[#55DEE8]/5 text-white hover:text-[#55DEE8] rounded-xl transition-all font-bold uppercase text-[10px] tracking-widest group"
             >
               Open CMS Hub <ChevronRight className="w-3 h-3 inline ml-2 group-hover:translate-x-1 transition-transform" />
             </button>
@@ -159,9 +159,9 @@ export default function AdminDashboard() {
 
           {/* Governance Feed */}
           <div className="p-6 bg-[#000000] rounded-[8px] border border-[#2D2D2D] relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#CCFF00]/5 blur-[40px]" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[#55DEE8]/5 blur-[40px]" />
             <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider mb-6 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#CCFF00]" />
+              <ShieldCheck className="w-4 h-4 text-[#55DEE8]" />
               Governance Stream
             </h2>
             <div className="space-y-4 pr-2">
@@ -171,8 +171,8 @@ export default function AdminDashboard() {
                   onClick={() => navigate("/admin/audit")}
                   className="border-l border-[#2D2D2D] pl-4 py-1 relative cursor-pointer hover:bg-white/[0.02] transition-colors"
                 >
-                  <div className="absolute top-0 left-[-4.5px] w-2 h-2 rounded-full bg-[#CCFF00]/50" />
-                  <p className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-tight">{log.action}</p>
+                  <div className="absolute top-0 left-[-4.5px] w-2 h-2 rounded-full bg-[#55DEE8]/50" />
+                  <p className="text-[10px] font-bold text-[#55DEE8] uppercase tracking-tight">{log.action}</p>
                   <p className="text-[11px] text-white/80 mt-0.5">{log.details?.email || log.module}</p>
                   <div className="flex justify-between items-center mt-1">
                     <span className="text-[9px] text-gray-500 font-medium">By {log.admin?.name || "Admin"}</span>
@@ -192,16 +192,16 @@ export default function AdminDashboard() {
 const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend, trendNegative, onClick }) => (
   <div 
     onClick={onClick}
-    className={`bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#CCFF00]/30 transition-all duration-500 min-h-[140px] shadow-2xl ${onClick ? 'cursor-pointer' : ''}`}
+    className={`bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#55DEE8]/30 transition-all duration-500 min-h-[140px] shadow-2xl ${onClick ? 'cursor-pointer' : ''}`}
   >
     <Icon className="absolute -right-4 -bottom-4 w-20 h-20 text-white/[0.02] group-hover:text-white/[0.04] transition-colors" />
     <div className="flex items-center justify-between mb-5 relative z-10">
-      <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] flex items-center justify-center border border-[#CCFF00]/20 shadow-sm">
+      <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[6px] text-[#55DEE8] flex items-center justify-center border border-[#55DEE8]/20 shadow-sm">
         <Icon size={20} />
       </div>
       <div className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 ${
         trend === 'Stable' || trend === 'Optimal' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-        trendNegative ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20'
+        trendNegative ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20'
       }`}>
         {trend}
       </div>
@@ -219,7 +219,7 @@ const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend, 
 
 const ChartCard = ({ title, subtitle, children, action }) => (
   <div className="bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-2xl relative overflow-hidden group flex flex-col h-full">
-    <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px] group-hover:bg-[#CCFF00]/10 transition-colors pointer-events-none"></div>
+    <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/5 blur-[60px] group-hover:bg-[#55DEE8]/10 transition-colors pointer-events-none"></div>
     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 relative z-10 shrink-0">
       <div>
         <h2 className="text-[14px] font-bold text-white uppercase tracking-wider leading-none mb-2">{title}</h2>
@@ -234,11 +234,11 @@ const ChartCard = ({ title, subtitle, children, action }) => (
 const ModerationItem = ({ icon: Icon, label, count, color = "text-white", onClick }) => (
   <div 
     onClick={onClick}
-    className={`flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:border-[#CCFF00]/30 transition-all ${onClick ? 'cursor-pointer hover:bg-[#CCFF00]/5' : ''}`}
+    className={`flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:border-[#55DEE8]/30 transition-all ${onClick ? 'cursor-pointer hover:bg-[#55DEE8]/5' : ''}`}
   >
     <div className="flex items-center gap-3">
       <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
-        <Icon className="w-4 h-4 text-[#CCFF00]" />
+        <Icon className="w-4 h-4 text-[#55DEE8]" />
       </div>
       <span className="text-[11px] font-bold text-gray-400 uppercase tracking-tight">{label}</span>
     </div>

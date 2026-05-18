@@ -20,7 +20,7 @@ import { useSelector } from "react-redux";
 export default function OwnerRevenue() {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
   const portalTitle = isScorer ? "Earnings Dossier" : "Revenue Engine";
 
   const { revenueData, loading: revenueLoading } = useOwnerRevenue();

@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 export default function ProfessionalReviews() {
   const { role, user: authUser } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
 
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);

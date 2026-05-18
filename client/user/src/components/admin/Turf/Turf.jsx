@@ -21,7 +21,7 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete }) => {
   return (
     <div 
       onClick={() => navigate(`/admin/turfs/${turf._id}`)}
-      className="bms-card group flex flex-col relative cursor-pointer hover:border-[#CCFF00]/40 transition-all duration-500 overflow-hidden"
+      className="bms-card group flex flex-col relative cursor-pointer hover:border-[#55DEE8]/40 transition-all duration-500 overflow-hidden"
     >
       {/* ── Image ─────────────────────────────────────────────────── */}
       <div className="relative overflow-hidden" style={{ height: "220px" }}>
@@ -35,7 +35,7 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete }) => {
         
         {/* Price badge */}
         <div className="absolute top-4 left-4">
-          <span className="bg-[#CCFF00] text-black px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
+          <span className="bg-[#55DEE8] text-black px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
             Rs {turf.pricePerHour}/hr
           </span>
         </div>
@@ -50,19 +50,19 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete }) => {
       {/* ── Body ──────────────────────────────────────────────────── */}
       <div className="flex flex-col flex-1 p-6 gap-4">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-[0.2em]">Arena</span>
+          <span className="text-[10px] font-black text-[#55DEE8] uppercase tracking-[0.2em]">Arena</span>
           <div className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
-            <Star size={10} className="text-[#CCFF00] fill-[#CCFF00]" />
+            <Star size={10} className="text-[#55DEE8] fill-[#55DEE8]" />
             <span className="text-white text-[10px] font-bold tracking-tighter">{turf.avgRating || "NEW"}</span>
           </div>
         </div>
 
         <div className="space-y-1">
-          <h3 className="font-display text-xl uppercase tracking-tighter text-white group-hover:text-[#CCFF00] transition-colors leading-none line-clamp-2">
+          <h3 className="font-display text-xl uppercase tracking-tighter text-white group-hover:text-[#55DEE8] transition-colors leading-none line-clamp-2">
             {turf.name}
           </h3>
           <div className="flex items-center gap-1.5 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
-            <MapPin size={10} className="text-[#CCFF00]" />
+            <MapPin size={10} className="text-[#55DEE8]" />
             <span className="truncate">{turf.location}</span>
           </div>
         </div>

@@ -75,14 +75,14 @@ const ProfessionalManagement = ({ role }) => {
 
   return (
     <div className="min-h-screen bg-[#000000] text-white p-6 lg:p-10 relative overflow-hidden font-inter">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#CCFF00]/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#55DEE8]/5 blur-[120px] pointer-events-none" />
       <div className="space-y-12">
         {/* Header Section */}
         <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-8 border-b border-[#2D2D2D] pb-10">
           <div className="relative">
-            <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#CCFF00] rounded-full shadow-[0_0_20px_rgba(204,255,0,0.4)]"></div>
+            <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#55DEE8] rounded-full shadow-[0_0_20px_rgba(204,255,0,0.4)]"></div>
             <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none">
-              Manage <span className="text-[#CCFF00]">{role}s</span>
+              Manage <span className="text-[#55DEE8]">{role}s</span>
             </h1>
             <p className="admin-subheading mt-4 ml-1">
               Active Professional Roster • System Telemetry
@@ -91,17 +91,17 @@ const ProfessionalManagement = ({ role }) => {
 
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative w-full lg:w-80 group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00] transition-colors w-4 h-4" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors w-4 h-4" />
               <input
                 type="text"
                 placeholder={`Search ${role}s by name...`}
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-[#CCFF00]/50 transition-all font-inter"
+                className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all font-inter"
               />
             </div>
-            <div className="px-5 py-2.5 bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-full">
-              <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">
+            <div className="px-5 py-2.5 bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-full">
+              <span className="text-[10px] font-black text-[#55DEE8] uppercase tracking-widest">
                 Total: {professionals.length}
               </span>
             </div>
@@ -110,13 +110,13 @@ const ProfessionalManagement = ({ role }) => {
 
         {/* Bulk Actions Bar */}
         {selectedIds.length > 0 && (
-          <div className="sticky top-6 z-[40] bg-[#0d0d0d] border border-[#CCFF00]/30 rounded-2xl p-4 shadow-2xl flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
+          <div className="sticky top-6 z-[40] bg-[#0d0d0d] border border-[#55DEE8]/30 rounded-2xl p-4 shadow-2xl flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
             <div className="flex items-center gap-6 pl-4">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded bg-[#CCFF00] flex items-center justify-center text-black font-black text-xs">
+                <div className="w-6 h-6 rounded bg-[#55DEE8] flex items-center justify-center text-black font-black text-xs">
                   {selectedIds.length}
                 </div>
-                <span className="text-xs font-black uppercase tracking-widest text-[#CCFF00]">Selected</span>
+                <span className="text-xs font-black uppercase tracking-widest text-[#55DEE8]">Selected</span>
               </div>
               <button 
                 onClick={() => setSelectedIds([])}
@@ -153,7 +153,7 @@ const ProfessionalManagement = ({ role }) => {
         {/* Content Section */}
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#CCFF00]"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#55DEE8]"></div>
           </div>
         ) : (
           <div className="space-y-6">
@@ -164,7 +164,7 @@ const ProfessionalManagement = ({ role }) => {
                   type="checkbox" 
                   checked={professionals.length > 0 && selectedIds.length === professionals.length}
                   onChange={handleSelectAll}
-                  className="w-5 h-5 rounded border-[#2D2D2D] bg-[#0d0d0d] text-[#CCFF00] focus:ring-[#CCFF00]/50"
+                  className="w-5 h-5 rounded border-[#2D2D2D] bg-[#0d0d0d] text-[#55DEE8] focus:ring-[#55DEE8]/50"
                 />
               </div>
               <div className="col-span-3">Professional Profile</div>
@@ -176,7 +176,7 @@ const ProfessionalManagement = ({ role }) => {
 
             {professionals.length === 0 ? (
               <div className="relative p-20 rounded-[16px] border border-[#2D2D2D] bg-[#000000] text-center overflow-hidden">
-                <div className="absolute inset-0 bg-[#CCFF00]/5 blur-[100px]" />
+                <div className="absolute inset-0 bg-[#55DEE8]/5 blur-[100px]" />
                 <div className="relative z-10 space-y-4">
                   <p className="text-2xl font-black text-white uppercase tracking-tighter">No {role}s Found</p>
                 </div>
@@ -187,14 +187,14 @@ const ProfessionalManagement = ({ role }) => {
                   <div 
                     key={prof._id} 
                     className={`group relative bg-[#000000] border transition-all duration-500 rounded-[12px] p-4 lg:px-8 lg:py-5 shadow-xl overflow-hidden cursor-pointer ${
-                      selectedIds.includes(prof._id) ? "border-[#CCFF00] bg-[#CCFF00]/5" : "border-[#2D2D2D] hover:border-[#CCFF00]/40"
+                      selectedIds.includes(prof._id) ? "border-[#55DEE8] bg-[#55DEE8]/5" : "border-[#2D2D2D] hover:border-[#55DEE8]/40"
                     }`}
                     onClick={(e) => {
                       if (e.target.closest('button') || e.target.closest('input[type="checkbox"]')) return;
                       navigate(`/admin/professionals/${prof._id}`);
                     }}
                   >
-                    <div className={`absolute inset-y-0 left-0 w-1 bg-[#CCFF00] transition-transform duration-500 shadow-[0_0_15px_#CCFF00] ${
+                    <div className={`absolute inset-y-0 left-0 w-1 bg-[#55DEE8] transition-transform duration-500 shadow-[0_0_15px_#55DEE8] ${
                       selectedIds.includes(prof._id) ? "scale-y-100" : "scale-y-0 group-hover:scale-y-100"
                     }`} />
 
@@ -208,13 +208,13 @@ const ProfessionalManagement = ({ role }) => {
                             e.stopPropagation();
                             handleSelect(prof._id);
                           }}
-                          className="w-5 h-5 rounded border-[#2D2D2D] bg-[#0d0d0d] text-[#CCFF00] focus:ring-[#CCFF00]/50"
+                          className="w-5 h-5 rounded border-[#2D2D2D] bg-[#0d0d0d] text-[#55DEE8] focus:ring-[#55DEE8]/50"
                         />
                       </div>
 
                       {/* Profile */}
                       <div className="lg:col-span-3 flex items-center gap-5">
-                        <div className="relative w-11 h-11 rounded-[10px] bg-[#CCFF00]/10 flex items-center justify-center text-[18px] font-black text-[#CCFF00] uppercase border border-[#CCFF00]/20 overflow-hidden">
+                        <div className="relative w-11 h-11 rounded-[10px] bg-[#55DEE8]/10 flex items-center justify-center text-[18px] font-black text-[#55DEE8] uppercase border border-[#55DEE8]/20 overflow-hidden">
                           {prof.profilePicture ? (
                             <img src={prof.profilePicture} alt="" className="w-full h-full object-cover" />
                           ) : (
@@ -222,7 +222,7 @@ const ProfessionalManagement = ({ role }) => {
                           )}
                         </div>
                         <div className="min-w-0">
-                          <h3 className="text-[15px] font-black text-white uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors truncate">
+                          <h3 className="text-[15px] font-black text-white uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors truncate">
                             {prof.name}
                           </h3>
                         </div>
@@ -286,7 +286,7 @@ const ProfessionalManagement = ({ role }) => {
                             e.stopPropagation();
                             navigate(`/admin/professionals/${prof._id}`);
                           }}
-                          className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:bg-[#CCFF00] hover:text-black transition-all"
+                          className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:bg-[#55DEE8] hover:text-black transition-all"
                         >
                           <ExternalLink size={16} />
                         </button>

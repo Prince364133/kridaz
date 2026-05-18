@@ -57,7 +57,7 @@ const OwnerCalendar = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
            <div className="flex items-center gap-12">
               <div className="space-y-1">
-                 <p className="text-[#CCFF00] text-[12px] font-black uppercase tracking-[4px]">{format(selectedDate, "EEEE")}</p>
+                 <p className="text-[#55DEE8] text-[12px] font-black uppercase tracking-[4px]">{format(selectedDate, "EEEE")}</p>
                  <div className="flex items-baseline gap-3">
                     <span className="text-5xl font-black text-white tracking-tighter">{format(selectedDate, "dd")}</span>
                     <span className="text-4xl font-bold text-[#444] tracking-tighter uppercase">{format(selectedDate, "MMM yyyy")}</span>
@@ -71,7 +71,7 @@ const OwnerCalendar = () => {
                  <button onClick={handleNextDay} className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] hover:bg-[#252525] rounded-[8px] border border-[#2D2D2D] transition-all">
                     <ChevronRight size={20} className="text-[#888]" />
                  </button>
-                 <button onClick={handleToday} className="ml-4 px-6 py-2 bg-[#1A1A1A] border border-[#2D2D2D] rounded-[8px] text-[12px] font-black uppercase tracking-[3px] hover:text-[#CCFF00] transition-all">
+                 <button onClick={handleToday} className="ml-4 px-6 py-2 bg-[#1A1A1A] border border-[#2D2D2D] rounded-[8px] text-[12px] font-black uppercase tracking-[3px] hover:text-[#55DEE8] transition-all">
                     Today
                  </button>
               </div>
@@ -80,7 +80,7 @@ const OwnerCalendar = () => {
            <div className="flex items-center gap-12">
               <div className="flex items-center gap-8">
                  <div className="flex items-center gap-3">
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#CCFF00]" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#55DEE8]" />
                     <span className="text-[10px] font-black text-[#888] uppercase tracking-[2px]">Confirmed</span>
                  </div>
                  <div className="flex items-center gap-3">
@@ -94,7 +94,7 @@ const OwnerCalendar = () => {
               </div>
 
               <div className="px-5 py-2 bg-[#1A1A1A] border border-[#2D2D2D] rounded-full flex items-center gap-3">
-                 <div className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse" />
+                 <div className="w-2 h-2 rounded-full bg-[#55DEE8] animate-pulse" />
                  <span className="text-[11px] font-black text-white uppercase tracking-[2px]">{data?.stats?.averageLoad || 0}% Load</span>
               </div>
            </div>
@@ -104,7 +104,7 @@ const OwnerCalendar = () => {
         <div className="bg-[#111] border border-[#2D2D2D] rounded-[12px] overflow-hidden flex flex-col shadow-2xl relative min-h-[600px]">
           {loading && (
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
-               <Loader2 className="w-8 h-8 text-[#CCFF00] animate-spin" />
+               <Loader2 className="w-8 h-8 text-[#55DEE8] animate-spin" />
             </div>
           )}
 
@@ -133,7 +133,7 @@ const OwnerCalendar = () => {
                  <div className="w-[320px] p-8 border-r border-[#2D2D2D] shrink-0 flex flex-col justify-center">
                     <div className="flex items-center gap-3 mb-2">
                        <h3 className="text-lg font-black text-white tracking-tight uppercase">{facility.name}</h3>
-                       <div className="w-2 h-2 rounded-full bg-[#CCFF00]" />
+                       <div className="w-2 h-2 rounded-full bg-[#55DEE8]" />
                     </div>
                     <div className="flex items-center gap-3">
                        <span className="px-3 py-1 bg-[#222] text-[9px] font-black text-[#888] uppercase tracking-[2px] rounded-[4px] border border-[#333]">{facility.category}</span>
@@ -150,7 +150,7 @@ const OwnerCalendar = () => {
                       
                       const getStatusColor = () => {
                          if (source === 'PARTNER_MANUAL') return 'border-[#EF4444]'; // Using Red for manual as per "Restricted" visual
-                         return 'border-[#CCFF00]';
+                         return 'border-[#55DEE8]';
                       };
 
                       return (
@@ -165,14 +165,14 @@ const OwnerCalendar = () => {
                                       {source === 'PARTNER_MANUAL' ? 'Direct Entry' : 'Premium Member'}
                                    </p>
                                 </div>
-                                <div className="flex items-center gap-2 text-[#555] group-hover:text-[#CCFF00] transition-colors">
+                                <div className="flex items-center gap-2 text-[#555] group-hover:text-[#55DEE8] transition-colors">
                                    <Clock size={12} />
                                    <span className="text-[10px] font-black uppercase tracking-widest">1 hr</span>
                                 </div>
                              </div>
                            ) : (
-                             <div className="w-full h-full rounded-[12px] border border-dashed border-[#2D2D2D]/50 flex items-center justify-center group cursor-pointer hover:border-[#CCFF00]/30 transition-all">
-                                <div className="w-2 h-2 rounded-full bg-[#1A1A1A] group-hover:bg-[#CCFF00]/20" />
+                             <div className="w-full h-full rounded-[12px] border border-dashed border-[#2D2D2D]/50 flex items-center justify-center group cursor-pointer hover:border-[#55DEE8]/30 transition-all">
+                                <div className="w-2 h-2 rounded-full bg-[#1A1A1A] group-hover:bg-[#55DEE8]/20" />
                              </div>
                            )}
                         </div>
@@ -194,11 +194,11 @@ const OwnerCalendar = () => {
         {/* Footer Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
            {[
-             { label: 'Confirmed Slots', value: data?.stats?.confirmedSlots || 0, trend: '+12%', icon: Activity, color: '#CCFF00' },
+             { label: 'Confirmed Slots', value: data?.stats?.confirmedSlots || 0, trend: '+12%', icon: Activity, color: '#55DEE8' },
              { label: 'Utilized Revenue', value: `Rs ${(data?.stats?.totalRevenue || 0).toLocaleString()}`, trend: '+Rs 1.2k', icon: Zap, color: '#3B82F6' },
-             { label: 'Average Load', value: `${data?.stats?.averageLoad || 0}%`, trend: 'Stable', icon: Clock, color: '#CCFF00' },
+             { label: 'Average Load', value: `${data?.stats?.averageLoad || 0}%`, trend: 'Stable', icon: Clock, color: '#55DEE8' },
            ].map((stat, i) => (
-             <div key={i} className="bg-[#111] border border-[#2D2D2D] p-8 rounded-[12px] flex flex-col justify-between relative overflow-hidden group hover:border-[#CCFF00]/30 transition-all">
+             <div key={i} className="bg-[#111] border border-[#2D2D2D] p-8 rounded-[12px] flex flex-col justify-between relative overflow-hidden group hover:border-[#55DEE8]/30 transition-all">
                 <div className="relative z-10">
                    <p className="text-[11px] font-black text-[#555] uppercase tracking-[3px] mb-4">{stat.label}</p>
                    <h3 className="text-4xl font-black text-white tracking-tighter">{stat.value}</h3>
@@ -207,7 +207,7 @@ const OwnerCalendar = () => {
                    <div className={`px-3 py-1 bg-white/[0.03] border border-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-[${stat.color}]`}>
                       {stat.trend}
                    </div>
-                   <stat.icon className="text-[#222] group-hover:text-[#CCFF00]/20 transition-colors" size={32} />
+                   <stat.icon className="text-[#222] group-hover:text-[#55DEE8]/20 transition-colors" size={32} />
                 </div>
              </div>
            ))}

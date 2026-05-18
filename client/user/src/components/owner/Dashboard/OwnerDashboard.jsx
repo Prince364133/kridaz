@@ -40,7 +40,7 @@ const OwnerDashboard = () => {
   const { dashboardData, loading, error } = useOwnerDashboard();
   const { role, user } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
   const dashboardTitle = isScorer ? "SCORER Dashboard" : "Dashboard Overview";
 
   const [timeFilter, setTimeFilter] = useState("Month");
@@ -181,7 +181,7 @@ const OwnerDashboard = () => {
                         className={`px-4 py-1.5 rounded-[4px] text-[11px] font-normal uppercase tracking-wider transition-all font-inter ${
                           (revenueFilter === "Week" && filter === "Weekly") ||
                           (revenueFilter === "Month" && filter === "Monthly")
-                            ? "bg-[#CCFF00] text-black"
+                            ? "bg-[#55DEE8] text-black"
                             : "text-[#999999] hover:text-[#FFFFFF]"
                         }`}
                       >
@@ -452,7 +452,7 @@ const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, themeCo
 
 const ChartCard = ({ title, subtitle, children, action, className = "h-full" }) => (
   <div className={`bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] relative overflow-hidden group flex flex-col ${className}`}>
-    <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px] group-hover:bg-[#CCFF00]/10 transition-colors"></div>
+    <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/5 blur-[60px] group-hover:bg-[#55DEE8]/10 transition-colors"></div>
     <div className="flex flex-col gap-2 mb-6 relative z-10 shrink-0">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
         <div>

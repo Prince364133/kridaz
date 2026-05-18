@@ -55,16 +55,16 @@ const DashboardProfile = () => {
           <p className="text-[12px] font-normal text-[#999999] uppercase tracking-widest">Identity and professional credentials</p>
         </div>
         <div className="flex items-center gap-4">
-           <div className="flex items-center gap-2 px-4 py-2 bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-[6px]">
-             <Shield size={14} className="text-[#CCFF00]" />
-             <span className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest">{roleLabel} Verified</span>
+           <div className="flex items-center gap-2 px-4 py-2 bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-[6px]">
+             <Shield size={14} className="text-[#55DEE8]" />
+             <span className="text-[10px] font-bold text-[#55DEE8] uppercase tracking-widest">{roleLabel} Verified</span>
            </div>
            <button 
              onClick={() => setIsEditing(!isEditing)}
              className={`flex items-center gap-2 px-6 py-2.5 rounded-[6px] font-normal text-[13px] uppercase tracking-wider transition-all border ${
                isEditing 
                  ? "bg-white/10 text-white border-white/20" 
-                 : "bg-[#CCFF00] text-black border-transparent hover:bg-[#BFFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]"
+                 : "bg-[#55DEE8] text-black border-transparent hover:bg-[#BFFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]"
              }`}
            >
              {isEditing ? "Discard Changes" : "Edit Profile"}
@@ -76,7 +76,7 @@ const DashboardProfile = () => {
         {/* Left Column: Profile Card */}
         <div className="lg:col-span-4 space-y-6 lg:space-y-8">
           <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-8 lg:p-10 relative overflow-hidden shadow-[var(--shadow-2)]">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px]" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/5 blur-[60px]" />
             
             <div className="relative flex flex-col items-center">
               <div className="relative mb-10 group">
@@ -93,11 +93,11 @@ const DashboardProfile = () => {
                   </div>
                   {isEditing && (
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                      <Camera size={32} className="text-[#CCFF00]" />
+                      <Camera size={32} className="text-[#55DEE8]" />
                     </div>
                   )}
                 </div>
-                <div className="absolute -bottom-3 -right-3 w-12 h-12 bg-[#CCFF00] text-black rounded-[8px] flex items-center justify-center shadow-lg border-4 border-black z-10">
+                <div className="absolute -bottom-3 -right-3 w-12 h-12 bg-[#55DEE8] text-black rounded-[8px] flex items-center justify-center shadow-lg border-4 border-black z-10">
                    <Zap size={20} strokeWidth={2.5} />
                 </div>
               </div>
@@ -141,10 +141,10 @@ const DashboardProfile = () => {
         <div className="lg:col-span-8 space-y-6 lg:space-y-8">
           {/* Main Information Card */}
           <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-8 lg:p-10 shadow-[var(--shadow-2)] relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-[#CCFF00]/50 via-transparent to-transparent" />
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-[#55DEE8]/50 via-transparent to-transparent" />
             
             <div className="flex items-center gap-4 mb-12">
-              <div className="p-3 bg-[#2D2D2D] rounded-[8px] text-[#CCFF00] border border-[#404040]">
+              <div className="p-3 bg-[#2D2D2D] rounded-[8px] text-[#55DEE8] border border-[#404040]">
                 <Settings size={24} />
               </div>
               <div>
@@ -162,7 +162,7 @@ const DashboardProfile = () => {
 
             {isEditing && (
               <div className="mt-12 pt-8 border-t border-[#2D2D2D] flex justify-end">
-                <button className="flex items-center gap-3 px-12 py-4 bg-[#CCFF00] text-black rounded-[6px] font-normal text-[14px] uppercase tracking-[0.1em] hover:bg-[#BFFF00] hover:shadow-[0_4px_20px_rgba(204,255,0,0.3)] transition-all active:scale-95 font-[Arial]">
+                <button className="flex items-center gap-3 px-12 py-4 bg-[#55DEE8] text-black rounded-[6px] font-normal text-[14px] uppercase tracking-[0.1em] hover:bg-[#BFFF00] hover:shadow-[0_4px_20px_rgba(204,255,0,0.3)] transition-all active:scale-95 font-[Arial]">
                   <Save size={18} strokeWidth={2.5} />
                   Save Changes
                 </button>
@@ -208,7 +208,7 @@ const DashboardProfile = () => {
 const ProfileDetailItem = ({ icon: Icon, label, value }) => (
   <div className="flex items-center justify-between group/item">
     <div className="flex items-center gap-3">
-      <div className="p-2 bg-[#2D2D2D] rounded-[4px] text-[#999999] group-hover/item:text-[#CCFF00] transition-colors"><Icon size={14} /></div>
+      <div className="p-2 bg-[#2D2D2D] rounded-[4px] text-[#999999] group-hover/item:text-[#55DEE8] transition-colors"><Icon size={14} /></div>
       <span className="text-[11px] font-normal text-[#999999] uppercase tracking-wider">{label}</span>
     </div>
     <span className="text-[12px] font-semibold text-white tracking-tight">{value}</span>
@@ -219,38 +219,38 @@ const InfoField = ({ label, value, icon: Icon, prefix, disabled }) => (
   <div className="space-y-3">
     <label className="text-[10px] font-medium text-[#878C9F] uppercase tracking-[2px] ml-1">{label}</label>
     <div className="relative group/input">
-      {Icon && <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999999] group-focus-within/input:text-[#CCFF00] transition-colors" size={18} />}
-      {prefix && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999999] text-[13px] font-bold group-focus-within/input:text-[#CCFF00] transition-colors">{prefix}</div>}
+      {Icon && <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999999] group-focus-within/input:text-[#55DEE8] transition-colors" size={18} />}
+      {prefix && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999999] text-[13px] font-bold group-focus-within/input:text-[#55DEE8] transition-colors">{prefix}</div>}
       <input 
         type="text" 
         defaultValue={value}
         disabled={disabled}
-        className={`w-full bg-[#151617] border border-[#2D2D2D] rounded-[6px] py-4 pr-4 text-[14px] text-white focus:outline-none focus:border-[#CCFF00]/50 disabled:opacity-40 transition-all font-inter ${Icon ? 'pl-12' : prefix ? 'pl-14' : 'pl-4'}`}
+        className={`w-full bg-[#151617] border border-[#2D2D2D] rounded-[6px] py-4 pr-4 text-[14px] text-white focus:outline-none focus:border-[#55DEE8]/50 disabled:opacity-40 transition-all font-inter ${Icon ? 'pl-12' : prefix ? 'pl-14' : 'pl-4'}`}
       />
     </div>
   </div>
 );
 
 const DashboardMiniCard = ({ title, value, icon: Icon, desc }) => (
-  <div className="bg-[#000000] border border-[#2D2D2D] p-6 rounded-[8px] flex items-center justify-between group hover:border-[#CCFF00]/20 transition-all shadow-[var(--shadow-2)]">
+  <div className="bg-[#000000] border border-[#2D2D2D] p-6 rounded-[8px] flex items-center justify-between group hover:border-[#55DEE8]/20 transition-all shadow-[var(--shadow-2)]">
     <div className="space-y-1">
       <h4 className="text-[12px] font-normal text-[#878C9F] uppercase tracking-wider">{title}</h4>
       <p className="text-2xl font-semibold text-white tracking-tight">{value}</p>
       <p className="text-[10px] text-[#999999] uppercase tracking-tight">{desc}</p>
     </div>
-    <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-[6px] flex items-center justify-center text-[#CCFF00] border border-[#CCFF00]/20 group-hover:scale-110 transition-transform">
+    <div className="w-12 h-12 bg-[#55DEE8]/10 rounded-[6px] flex items-center justify-center text-[#55DEE8] border border-[#55DEE8]/20 group-hover:scale-110 transition-transform">
       <Icon size={24} />
     </div>
   </div>
 );
 
 const QuickSettingAction = ({ icon: Icon, title, desc }) => (
-  <div className="bg-[#000000] border border-[#2D2D2D] p-6 rounded-[8px] flex items-center gap-5 hover:border-[#CCFF00]/20 transition-all cursor-pointer group shadow-[var(--shadow-2)]">
-    <div className="p-4 bg-[#2D2D2D] rounded-[8px] text-[#999999] group-hover:bg-[#CCFF00]/10 group-hover:text-[#CCFF00] transition-all border border-[#404040] shadow-inner">
+  <div className="bg-[#000000] border border-[#2D2D2D] p-6 rounded-[8px] flex items-center gap-5 hover:border-[#55DEE8]/20 transition-all cursor-pointer group shadow-[var(--shadow-2)]">
+    <div className="p-4 bg-[#2D2D2D] rounded-[8px] text-[#999999] group-hover:bg-[#55DEE8]/10 group-hover:text-[#55DEE8] transition-all border border-[#404040] shadow-inner">
       <Icon size={22} />
     </div>
     <div>
-      <h4 className="text-[14px] font-semibold text-white uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">{title}</h4>
+      <h4 className="text-[14px] font-semibold text-white uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors">{title}</h4>
       <p className="text-[11px] font-normal text-[#999999] uppercase tracking-widest">{desc}</p>
     </div>
   </div>

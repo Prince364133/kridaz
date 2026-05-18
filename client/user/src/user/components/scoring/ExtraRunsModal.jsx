@@ -9,7 +9,7 @@ import { X } from 'lucide-react';
  * Lets the umpire specify how many runs were scored off the delivery.
  */
 
-const THEME_COLOR = '#CCFF00';
+const THEME_COLOR = '#55DEE8';
 
 const EXTRA_META = {
   WIDE:    { label: 'Wide',     color: THEME_COLOR, note: '1 wide penalty already included' },

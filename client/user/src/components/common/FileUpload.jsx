@@ -73,13 +73,13 @@ const FileUpload = ({ label, onUploadSuccess, folder = "kridaz/verification", ac
 
   return (
     <div className="space-y-3 group/field">
-      <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-[#CCFF00] transition-colors ml-1">
+      <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-[#55DEE8] transition-colors ml-1">
         {label}
       </label>
       
       <div className={`relative min-h-[120px] rounded-2xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center p-4 overflow-hidden ${
         uploadedUrl 
-          ? "border-[#CCFF00]/50 bg-[#CCFF00]/5" 
+          ? "border-[#55DEE8]/50 bg-[#55DEE8]/5" 
           : "border-white/5 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]"
       }`}>
         
@@ -108,7 +108,7 @@ const FileUpload = ({ label, onUploadSuccess, folder = "kridaz/verification", ac
               {preview ? (
                 <img src={preview} alt="Preview" className="w-full h-full object-cover" />
               ) : (
-                <FileText size={24} className="text-[#CCFF00]" />
+                <FileText size={24} className="text-[#55DEE8]" />
               )}
             </div>
 
@@ -122,11 +122,11 @@ const FileUpload = ({ label, onUploadSuccess, folder = "kridaz/verification", ac
               <div className="mt-2 flex items-center gap-2">
                 {uploading ? (
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-[#CCFF00] animate-pulse" />
-                    <span className="text-[8px] font-bold text-[#CCFF00] uppercase tracking-widest animate-pulse">Uploading...</span>
+                    <div className="w-2 h-2 rounded-full bg-[#55DEE8] animate-pulse" />
+                    <span className="text-[8px] font-bold text-[#55DEE8] uppercase tracking-widest animate-pulse">Uploading...</span>
                   </div>
                 ) : uploadedUrl ? (
-                  <div className="flex items-center gap-2 text-[#CCFF00]">
+                  <div className="flex items-center gap-2 text-[#55DEE8]">
                     <CheckCircle size={10} />
                     <span className="text-[8px] font-bold uppercase tracking-widest">Uploaded Successfully</span>
                   </div>

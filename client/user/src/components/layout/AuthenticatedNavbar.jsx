@@ -42,7 +42,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const user = useSelector((state) => state?.auth?.user);
   const role = useSelector((state) => state?.auth?.role);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
 
   const { notifications, loading, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
 

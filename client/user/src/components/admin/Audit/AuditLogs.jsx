@@ -28,7 +28,7 @@ const AuditLogs = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight uppercase flex items-center gap-4">
-              <Shield className="text-[#84CC16]" size={40} />
+              <Shield className="text-[#55DEE8]" size={40} />
               Audit <span className="text-white/50">Trails</span>
             </h1>
             <p className="text-gray-400 text-sm mt-2 font-medium tracking-wide">Immutable log of all administrative actions</p>
@@ -39,7 +39,7 @@ const AuditLogs = () => {
              <input 
                type="text"
                placeholder="Search logs..."
-               className="bg-[#111] border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm w-full md:w-80 focus:outline-none focus:border-[#84CC16] transition-all"
+               className="bg-[#111] border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm w-full md:w-80 focus:outline-none focus:border-[#55DEE8] transition-all"
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
              />
@@ -89,7 +89,7 @@ const AuditLogs = () => {
                            </td>
                            <td className="px-6 py-4">
                               <div className="flex items-center gap-2">
-                                 <div className="w-6 h-6 rounded bg-[#84CC16]/20 flex items-center justify-center text-[#84CC16] border border-[#84CC16]/30">
+                                 <div className="w-6 h-6 rounded bg-[#55DEE8]/20 flex items-center justify-center text-[#55DEE8] border border-[#55DEE8]/30">
                                     <User size={12} />
                                  </div>
                                  <span className="text-white font-bold">{log.admin?.name}</span>
@@ -101,7 +101,7 @@ const AuditLogs = () => {
                               </span>
                            </td>
                            <td className="px-6 py-4">
-                              <span className="text-[#84CC16] font-bold">{log.action}</span>
+                              <span className="text-[#55DEE8] font-bold">{log.action}</span>
                            </td>
                            <td className="px-6 py-4">
                               <div className="flex items-center gap-4">
@@ -138,7 +138,7 @@ const AuditLogs = () => {
               </div>
            </div>
            <div className="bg-[#111] border border-white/10 p-6 rounded-2xl flex items-start gap-4">
-              <div className="w-10 h-10 bg-[#84CC16]/10 rounded-xl flex items-center justify-center text-[#84CC16] border border-[#84CC16]/20">
+              <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-xl flex items-center justify-center text-[#55DEE8] border border-[#55DEE8]/20">
                  <Terminal size={20} />
               </div>
               <div>

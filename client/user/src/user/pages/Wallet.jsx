@@ -83,7 +83,7 @@ const WalletPage = () => {
           email: user?.email || "",
         },
         theme: {
-          color: "#84CC16",
+          color: "#55DEE8",
         },
       };
 
@@ -104,7 +104,7 @@ const WalletPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-[#84CC16] animate-spin" />
+        <Loader2 className="w-10 h-10 text-[#55DEE8] animate-spin" />
       </div>
     );
   }
@@ -119,7 +119,7 @@ const WalletPage = () => {
             <p className="text-zinc-500 font-bold uppercase text-xs tracking-widest">Manage your coins & transactions</p>
           </div>
           <div className="flex items-center gap-3 px-6 py-4 bg-zinc-900/50 border border-zinc-800 rounded-3xl">
-            <ShieldCheck className="w-5 h-5 text-[#84CC16]" />
+            <ShieldCheck className="w-5 h-5 text-[#55DEE8]" />
             <span className="text-[10px] font-bold uppercase text-zinc-400">Military-Grade Security Active</span>
           </div>
         </div>
@@ -127,7 +127,7 @@ const WalletPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Balance Card */}
           <div className="md:col-span-5 space-y-6">
-            <div className="relative group overflow-hidden bg-gradient-to-br from-[#84CC16] to-[#4D7C0F] p-8 rounded-[2.5rem] shadow-2xl shadow-[#84CC16]/20 animate-slide-in-left">
+            <div className="relative group overflow-hidden bg-gradient-to-br from-[#55DEE8] to-[#4D7C0F] p-8 rounded-[2.5rem] shadow-2xl shadow-[#55DEE8]/20 animate-slide-in-left">
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
                 <Wallet className="w-32 h-32 text-black" />
               </div>
@@ -165,7 +165,7 @@ const WalletPage = () => {
             {/* Top-up Form */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-[2.5rem] space-y-6">
               <h2 className="text-lg font-bold uppercase tracking-tight flex items-center gap-3">
-                <Plus className="w-5 h-5 text-[#84CC16]" />
+                <Plus className="w-5 h-5 text-[#55DEE8]" />
                 Top-up Wallet
               </h2>
               <div className="space-y-4">
@@ -176,7 +176,7 @@ const WalletPage = () => {
                     value={topupAmount}
                     onChange={(e) => setTopupAmount(e.target.value)}
                     placeholder="Enter amount (e.g. 500)"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-5 pl-14 pr-6 text-xl font-bold focus:border-[#84CC16] focus:ring-1 focus:ring-[#84CC16] transition-all outline-none"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-5 pl-14 pr-6 text-xl font-bold focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] transition-all outline-none"
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-2">
@@ -184,7 +184,7 @@ const WalletPage = () => {
                     <button
                       key={amt}
                       onClick={() => setTopupAmount(amt.toString())}
-                      className="py-3 rounded-xl border border-zinc-800 hover:border-[#84CC16] hover:text-[#84CC16] font-bold text-xs uppercase transition-all"
+                      className="py-3 rounded-xl border border-zinc-800 hover:border-[#55DEE8] hover:text-[#55DEE8] font-bold text-xs uppercase transition-all"
                     >
                       +{amt}
                     </button>
@@ -193,7 +193,7 @@ const WalletPage = () => {
                 <button
                   onClick={handleTopup}
                   disabled={isProcessing}
-                  className="w-full bg-[#84CC16] text-black h-16 rounded-2xl font-black uppercase tracking-wider flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
+                  className="w-full bg-[#55DEE8] text-black h-16 rounded-2xl font-black uppercase tracking-wider flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
                 >
                   {isProcessing ? (
                     <Loader2 className="w-6 h-6 animate-spin" />
@@ -212,7 +212,7 @@ const WalletPage = () => {
           <div className="md:col-span-7 bg-zinc-900/50 border border-zinc-800 rounded-[2.5rem] overflow-hidden flex flex-col">
             <div className="p-8 border-b border-zinc-800 flex items-center justify-between">
               <h2 className="text-lg font-bold uppercase tracking-tight flex items-center gap-3">
-                <History className="w-5 h-5 text-[#84CC16]" />
+                <History className="w-5 h-5 text-[#55DEE8]" />
                 Coin Activity
               </h2>
               <span className="text-[10px] font-bold text-zinc-500 uppercase">Recent 20 entries</span>
@@ -257,7 +257,7 @@ const WalletPage = () => {
                         </p>
                         <div className="flex flex-col items-end gap-1">
                           <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${
-                            tx.status === "SUCCESS" ? "bg-[#84CC16]/10 text-[#84CC16]" : 
+                            tx.status === "SUCCESS" ? "bg-[#55DEE8]/10 text-[#55DEE8]" : 
                             tx.status === "PENDING" ? "bg-amber-500/10 text-amber-500" : 
                             "bg-rose-500/10 text-rose-500"
                           }`}>
@@ -279,7 +279,7 @@ const WalletPage = () => {
                                     toast.error("Failed to check status");
                                   }
                                 }}
-                                className="text-[8px] font-bold text-[#84CC16] hover:underline uppercase"
+                                className="text-[8px] font-bold text-[#55DEE8] hover:underline uppercase"
                               >
                                 Check Status
                               </button>

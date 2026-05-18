@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { ArrowLeft, Eye, ThumbsUp, Clock, User, Tag, Calendar, ChevronRight } from "lucide-react";
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
 const BDR = "#2A2A2A";
 
 export default function BlogDetail() {
@@ -154,11 +154,11 @@ export default function BlogDetail() {
             [&_h3]:text-white [&_h3]:text-2xl [&_h3]:font-black [&_h3]:uppercase [&_h3]:tracking-tight [&_h3]:mt-8 [&_h3]:mb-3
             [&_p]:mb-6 [&_p]:leading-relaxed
             [&_strong]:text-white [&_strong]:font-bold
-            [&_a]:text-[#84CC16] [&_a]:no-underline hover:[&_a]:underline
+            [&_a]:text-[#55DEE8] [&_a]:no-underline hover:[&_a]:underline
             [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2
             [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:space-y-2
             [&_li]:leading-relaxed
-            [&_blockquote]:border-l-4 [&_blockquote]:border-[#84CC16] [&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-gray-500
+            [&_blockquote]:border-l-4 [&_blockquote]:border-[#55DEE8] [&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-gray-500
             [&_hr]:border-white/10 [&_hr]:my-10
             [&_img]:rounded-2xl [&_img]:w-full [&_img]:object-cover"
           dangerouslySetInnerHTML={{ __html: blog.content }}

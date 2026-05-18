@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 
 const TermsOfService = () => {
   return (
-    <div className="min-h-screen bg-[#050505] text-white pt-24 pb-12 font-sans selection:bg-[#84CC16]/30">
+    <div className="min-h-screen bg-[#050505] text-white pt-24 pb-12 font-sans selection:bg-[#55DEE8]/30">
       <div className="container mx-auto px-6 max-w-4xl">
-        <h1 className="text-4xl font-black mb-8 uppercase tracking-tight text-[#84CC16]">Terms of Service</h1>
+        <h1 className="text-4xl font-black mb-8 uppercase tracking-tight text-[#55DEE8]">Terms of Service</h1>
         
         <div className="space-y-8 text-white/70 leading-relaxed text-sm md:text-base">
           <section>
@@ -35,12 +35,12 @@ const TermsOfService = () => {
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">6. Contact Us</h2>
-            <p>If you have any questions about these Terms, please contact us at <a href="mailto:contact@kridaz.com" className="text-[#84CC16] hover:underline">contact@kridaz.com</a>.</p>
+            <p>If you have any questions about these Terms, please contact us at <a href="mailto:contact@kridaz.com" className="text-[#55DEE8] hover:underline">contact@kridaz.com</a>.</p>
           </section>
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/10">
-          <Link to="/" className="text-[#84CC16] hover:underline font-bold uppercase tracking-wider text-sm">
+          <Link to="/" className="text-[#55DEE8] hover:underline font-bold uppercase tracking-wider text-sm">
             ← Back to Home
           </Link>
         </div>

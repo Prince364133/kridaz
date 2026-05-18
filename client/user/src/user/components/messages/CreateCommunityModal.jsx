@@ -40,8 +40,8 @@ const CreateCommunityModal = ({ isOpen, onClose, onSuccess }) => {
   const renderStep0 = () => (
     <div className="flex flex-col items-center text-center space-y-8 animate-fade-in p-8">
       <div className="relative">
-        <div className="w-32 h-32 rounded-[40px] bg-[#84CC16]/10 flex items-center justify-center relative overflow-hidden group">
-          <Globe size={48} className="text-[#84CC16]" />
+        <div className="w-32 h-32 rounded-[40px] bg-[#55DEE8]/10 flex items-center justify-center relative overflow-hidden group">
+          <Globe size={48} className="text-[#55DEE8]" />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
             <Camera size={24} className="text-white" />
           </div>
@@ -57,8 +57,8 @@ const CreateCommunityModal = ({ isOpen, onClose, onSuccess }) => {
 
       <div className="w-full space-y-4 pt-4">
         <div className="flex items-center gap-4 text-left p-4 bg-white/[0.02] rounded-2xl border border-white/5">
-          <div className="w-10 h-10 rounded-xl bg-[#84CC16]/10 flex items-center justify-center shrink-0">
-            <Globe size={20} className="text-[#84CC16]" />
+          <div className="w-10 h-10 rounded-xl bg-[#55DEE8]/10 flex items-center justify-center shrink-0">
+            <Globe size={20} className="text-[#55DEE8]" />
           </div>
           <div>
             <p className="text-white font-bold text-sm">Organize groups</p>
@@ -69,7 +69,7 @@ const CreateCommunityModal = ({ isOpen, onClose, onSuccess }) => {
 
       <button 
         onClick={() => setStep(1)}
-        className="w-full py-5 bg-[#84CC16] text-black font-black uppercase tracking-[0.2em] rounded-3xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+        className="w-full py-5 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] rounded-3xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
       >
         Get Started <ChevronRight size={20} />
       </button>
@@ -80,29 +80,29 @@ const CreateCommunityModal = ({ isOpen, onClose, onSuccess }) => {
     <div className="space-y-8 animate-slide-in p-8">
       <div className="space-y-6">
         <div>
-          <label className="block text-[10px] font-black text-[#84CC16] uppercase tracking-[0.3em] mb-3 ml-1">Community Details</label>
+          <label className="block text-[10px] font-black text-[#55DEE8] uppercase tracking-[0.3em] mb-3 ml-1">Community Details</label>
           <div className="space-y-4">
             <input
               type="text"
               autoFocus
               value={communityName}
               onChange={(e) => setCommunityName(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-5 text-white focus:border-[#84CC16] outline-none transition-all font-bold text-lg placeholder:text-white/10"
+              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-5 text-white focus:border-[#55DEE8] outline-none transition-all font-bold text-lg placeholder:text-white/10"
               placeholder="Community Name"
             />
             <textarea
               value={communityDescription}
               onChange={(e) => setCommunityDescription(e.target.value)}
               rows={4}
-              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-5 text-white focus:border-[#84CC16] outline-none transition-all font-medium placeholder:text-white/10 resize-none text-base"
+              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-5 text-white focus:border-[#55DEE8] outline-none transition-all font-medium placeholder:text-white/10 resize-none text-base"
               placeholder="Community Description"
             />
           </div>
         </div>
 
-        <div className="bg-[#84CC16]/5 border border-[#84CC16]/10 rounded-2xl p-5 flex items-start gap-4">
-          <Lock size={20} className="text-[#84CC16] shrink-0 mt-0.5" />
-          <p className="text-[12px] text-[#84CC16]/80 leading-relaxed font-semibold uppercase tracking-wide">
+        <div className="bg-[#55DEE8]/5 border border-[#55DEE8]/10 rounded-2xl p-5 flex items-start gap-4">
+          <Lock size={20} className="text-[#55DEE8] shrink-0 mt-0.5" />
+          <p className="text-[12px] text-[#55DEE8]/80 leading-relaxed font-semibold uppercase tracking-wide">
             Once created, you can start adding groups to organize your community members.
           </p>
         </div>
@@ -118,7 +118,7 @@ const CreateCommunityModal = ({ isOpen, onClose, onSuccess }) => {
         <button
           onClick={handleSubmit}
           disabled={isCreating || !communityName.trim()}
-          className="flex-1 py-5 bg-[#84CC16] text-black font-black uppercase tracking-[0.2em] rounded-3xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30"
+          className="flex-1 py-5 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] rounded-3xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30"
         >
           {isCreating ? 'Creating...' : 'Create Community'}
         </button>

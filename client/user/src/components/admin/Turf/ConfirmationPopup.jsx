@@ -35,10 +35,10 @@ const ConfirmationPopup = ({
     },
     success: {
       icon: CheckCircle,
-      color: "text-[#CCFF00]",
-      bg: "bg-[#CCFF00]/10",
-      border: "border-[#CCFF00]/20",
-      btn: "bg-[#CCFF00] hover:bg-[#CCFF00]/80 text-black",
+      color: "text-[#55DEE8]",
+      bg: "bg-[#55DEE8]/10",
+      border: "border-[#55DEE8]/20",
+      btn: "bg-[#55DEE8] hover:bg-[#55DEE8]/80 text-black",
     },
   };
 
@@ -98,7 +98,7 @@ const ConfirmationPopup = ({
                       value={adminData.name}
                       onChange={(e) => setAdminData({ ...adminData, name: e.target.value })}
                       placeholder="Enter your full name"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#CCFF00]/50 outline-none transition-all placeholder:text-gray-600"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#55DEE8]/50 outline-none transition-all placeholder:text-gray-600"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -108,7 +108,7 @@ const ConfirmationPopup = ({
                       value={adminData.designation}
                       onChange={(e) => setAdminData({ ...adminData, designation: e.target.value })}
                       placeholder="e.g. Platform Supervisor"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#CCFF00]/50 outline-none transition-all placeholder:text-gray-600"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#55DEE8]/50 outline-none transition-all placeholder:text-gray-600"
                     />
                   </div>
                   {error && <p className="text-red-500 text-[10px] font-bold uppercase text-center">{error}</p>}

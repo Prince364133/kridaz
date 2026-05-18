@@ -118,10 +118,10 @@ const Turf = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 border-b border-white/5 pb-6 gap-4">
           <div className="flex flex-col gap-1">
             <h2 className="text-base md:text-lg font-bold uppercase tracking-[0.05em] text-white flex items-center gap-3 font-sans">
-              <MapPin size={18} className="text-[#84CC16]" />
+              <MapPin size={18} className="text-[#55DEE8]" />
               {locationStatus === "detecting" ? (
                 <span className="flex items-center gap-2">
-                  <Loader2 size={16} className="animate-spin text-[#84CC16]" />
+                  <Loader2 size={16} className="animate-spin text-[#55DEE8]" />
                   DETECTING LOCATION...
                 </span>
               ) : locationStatus === "granted" ? (

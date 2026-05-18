@@ -13,7 +13,7 @@ import { format } from "date-fns";
 export default function ProfessionalBookings() {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
