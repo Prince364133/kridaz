@@ -13,6 +13,7 @@ import { addUsernameToBloom, checkUsernameBloom, blacklistOtpIdentifier, isOtpBl
 import { logAudit } from "../../utils/auditLogger.js";
 import logger from "../../utils/logger.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
+import axios from "axios";
 
 
 
@@ -779,9 +780,10 @@ export const googleAuth = async (req, res) => {
       });
       payload = ticket.getPayload();
     } else if (accessToken) {
-      const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`);
-      if (!response.ok) throw new Error("Failed to fetch user info from Google");
-      payload = await response.json();
+      const response = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+        params: { access_token: accessToken }
+      });
+      payload = response.data;
     } else {
       return res.status(400).json({ success: false, message: "No Google credentials provided" });
     }

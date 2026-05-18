@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { useSelector } from 'react-redux';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
 const SocketContext = createContext();
 

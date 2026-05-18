@@ -37,6 +37,17 @@ async function checkIsAdmin(chatId, participantData) {
   return !!participant;
 }
 
+// In-memory registry to serialize concurrent chat creation requests for the same participant pair
+const inFlightChatCreations = new Map();
+
+const getCreationKey = (userIdA, ownerIdA, userIdB, ownerIdB) => {
+  const ids = [
+    `${userIdA || ''}-${ownerIdA || ''}`,
+    `${userIdB || ''}-${ownerIdB || ''}`
+  ].sort();
+  return ids.join(':::');
+};
+
 /**
  * Access or create a one-on-one chat
  */
@@ -50,7 +61,25 @@ export const accessChat = async (req, res) => {
     ? { ownerId: userId, userId: null, onModel: "Owner" }
     : { userId: userId, ownerId: null, onModel: "User" };
 
-  try {
+  const key = getCreationKey(
+    currentParticipant.userId,
+    currentParticipant.ownerId,
+    targetParticipant.userId,
+    targetParticipant.ownerId
+  );
+
+  // If a request for this exact participant pair is already in flight, await its completion
+  if (inFlightChatCreations.has(key)) {
+    try {
+      const existingChat = await inFlightChatCreations.get(key);
+      return res.status(200).json(existingChat);
+    } catch (err) {
+      // If the in-flight creation failed, fall through to attempt again
+    }
+  }
+
+  // Helper inside accessChat that does the DB query and creation
+  const performAccessOrCreate = async () => {
     // Find existing 1-on-1 chat
     const existingChats = await prisma.chat.findMany({
       where: {
@@ -84,7 +113,7 @@ export const accessChat = async (req, res) => {
     );
 
     if (chat) {
-      return res.status(200).json(chat);
+      return chat;
     }
 
     // Create new 1-on-1 chat
@@ -116,10 +145,21 @@ export const accessChat = async (req, res) => {
       }
     });
 
-    return res.status(200).json(newChat);
+    return newChat;
+  };
+
+  const creationPromise = performAccessOrCreate();
+  inFlightChatCreations.set(key, creationPromise);
+
+  try {
+    const result = await creationPromise;
+    return res.status(200).json(result);
   } catch (error) {
     logger.error("Error in accessChat:", error);
     return res.status(400).json({ message: error.message });
+  } finally {
+    // Make sure we clean up the registry so subsequent accesses start fresh lookups
+    inFlightChatCreations.delete(key);
   }
 };
 
