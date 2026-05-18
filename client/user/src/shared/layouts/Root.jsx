@@ -21,6 +21,11 @@ const Root = () => {
   useEffect(() => {
     // Show onboarding for regular users who have an incomplete profile
     if (isAuthenticated && user?.role?.toLowerCase() === "user") {
+      const isDismissed = localStorage.getItem("kridaz_onboarding_dismissed") === "true" || sessionStorage.getItem("kridaz_onboarding_dismissed") === "true";
+      if (isDismissed) {
+        setShowOnboarding(false);
+        return;
+      }
       const isIncomplete = !user.phone || !user.gender || (!user.location && !user.city) || !user.sportTypes || user.sportTypes.length === 0;
       if (isIncomplete) {
         setShowOnboarding(true);
@@ -44,8 +49,14 @@ const Root = () => {
       />
       <OnboardingModal 
         isOpen={showOnboarding} 
-        onClose={() => setShowOnboarding(false)} 
-        onComplete={() => setShowOnboarding(false)}
+        onClose={() => {
+          setShowOnboarding(false);
+          sessionStorage.setItem("kridaz_onboarding_dismissed", "true");
+        }} 
+        onComplete={() => {
+          setShowOnboarding(false);
+          localStorage.setItem("kridaz_onboarding_dismissed", "true");
+        }}
       />
       <ScrollToTop />
       {!isReelsPage && <Navbar />}

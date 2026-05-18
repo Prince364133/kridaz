@@ -156,6 +156,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
       if (res.data.success) {
         dispatch(updateUser(res.data.user));
         toast.success("Profile completed! Welcome to the arena.");
+        localStorage.setItem("kridaz_onboarding_dismissed", "true");
         onComplete();
         onClose();
       }
