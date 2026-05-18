@@ -1477,9 +1477,8 @@ export const updateProfile = async (req, res) => {
       phone,
       bio,
       gender,
-      city,
+      city: city || location,
       state,
-      location: location || undefined,
       sportTypes: finalInterests,
       ...(hashedPassword && { password: hashedPassword })
     };
