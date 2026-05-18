@@ -29,7 +29,11 @@ const Root = () => {
       const isIncomplete = !user.phone || !user.gender || (!user.location && !user.city) || !user.sportTypes || user.sportTypes.length === 0;
       if (isIncomplete) {
         setShowOnboarding(true);
+      } else {
+        setShowOnboarding(false);
       }
+    } else {
+      setShowOnboarding(false);
     }
   }, [isAuthenticated, user]);
 

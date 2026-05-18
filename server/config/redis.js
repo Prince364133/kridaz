@@ -12,12 +12,17 @@ import logger from '../utils/logger.js';
 
 dotenv.config();
 
-const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+const REDIS_URL = (process.env.NODE_ENV === 'production')
+  ? (process.env.REDIS_URL || 'redis://localhost:6379')
+  : (process.env.LOCAL_REDIS_URL || 'redis://localhost:6379');
 
-if (!process.env.REDIS_URL && process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production' && !process.env.REDIS_URL) {
   logger.error('[REDIS] FATAL: REDIS_URL env var is NOT set in production! Falling back to localhost will likely fail.');
-} else if (!process.env.REDIS_URL) {
-  logger.warn('[REDIS] WARNING: REDIS_URL env var is not set. Falling back to localhost.');
+} else {
+  const obfuscatedUrl = REDIS_URL.includes('@') 
+    ? REDIS_URL.replace(/(redis:\/\/.*:)(.*)(@.*)/, '$1****$3')
+    : REDIS_URL;
+  logger.info(`[REDIS] Using Redis connection: ${obfuscatedUrl}`);
 }
 
 // ── General-purpose client (presence, rate-limit, live state) ──────────────
