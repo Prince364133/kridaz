@@ -1,163 +1,156 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 import { 
-  Trophy, 
-  MapPin, 
-  Calendar, 
-  Clock, 
-  LogOut, 
-  CheckCircle2, 
-  AlertTriangle 
+  Users, LogOut, Clock, MapPin, 
+  Trophy, Info, Calendar, Coins, User
 } from 'lucide-react';
-import useJoinedGames from '../hooks/useJoinedGames';
+import { useNavigate } from 'react-router-dom';
 
 const MyJoinedGames = () => {
-  const {
-    joinedGames,
-    loading,
-    isLeaving,
-    handleLeave,
-    refetch
-  } = useJoinedGames();
+  const navigate = useNavigate();
+  const [joinedGames, setJoinedGames] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Find user's slot status inside a specific game
-  const getUserSlotDetails = (game) => {
-    // Current user's slot
-    let foundSlot = null;
-    let foundTeam = '';
-
-    if (game.gameMode === 'QUICK') {
-      foundSlot = game.quickSlotsData?.find(s => s.status === 'JOINED' || s.status === 'HELD');
-      foundTeam = 'Quick Roster';
-    } else {
-      const slotA = game.teamA?.slots?.find(s => s.status === 'JOINED' || s.status === 'HELD');
-      if (slotA) {
-        foundSlot = slotA;
-        foundTeam = game.teamA.name || 'Team A';
-      } else {
-        const slotB = game.teamB?.slots?.find(s => s.status === 'JOINED' || s.status === 'HELD');
-        if (slotB) {
-          foundSlot = slotB;
-          foundTeam = game.teamB.name || 'Team B';
-        }
-      }
+  const fetchJoinedGames = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/hosted-game/my-joined`, { withCredentials: true });
+      setJoinedGames(res.data.games);
+    } catch (err) {
+      toast.error("Failed to fetch your joined games");
+    } finally {
+      setLoading(false);
     }
-    return {
-      role: foundSlot?.role || 'Player',
-      status: foundSlot?.status || 'HELD',
-      team: foundTeam
-    };
+  };
+
+  useEffect(() => {
+    fetchJoinedGames();
+  }, []);
+
+  const handleLeave = async (gameId) => {
+    if (!window.confirm("Are you sure you want to leave this game? Your coins will be refunded or released.")) return;
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/hosted-game/leave`, {
+        gameId
+      }, { withCredentials: true });
+
+      if (res.data.success) {
+        toast.success(res.data.message);
+        fetchJoinedGames();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to leave game");
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-12 px-4 sm:px-6 lg:px-8">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[30%] -right-[10%] w-[70%] h-[70%] rounded-full bg-violet-900/10 blur-[130px]" />
-        <div className="absolute -bottom-[30%] -left-[10%] w-[70%] h-[70%] rounded-full bg-fuchsia-900/10 blur-[130px]" />
+    <div className="min-h-screen bg-neutral-900 text-white p-4 pb-24">
+      <div className="max-w-4xl mx-auto mb-8">
+        <h1 className="text-3xl font-black italic tracking-tighter uppercase">MY JOINED MATCHES</h1>
+        <p className="text-neutral-400">Games you've requested to join or have already joined</p>
       </div>
 
-      <div className="relative max-w-5xl mx-auto space-y-8">
-        {/* Header section */}
-        <div className="flex justify-between items-center border-b border-white/5 pb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
-              Joined Matchups
-            </h1>
-            <p className="text-sm text-slate-400 mt-1">
-              Verify your roster status, check match locations, or exit reservation slots.
-            </p>
-          </div>
-        </div>
-
-        {/* Listings display */}
+      <div className="max-w-4xl mx-auto space-y-6">
         {loading ? (
-          <div className="space-y-4">
-            {[1, 2].map((n) => (
-              <div key={n} className="h-32 rounded-2xl bg-slate-900/40 animate-pulse border border-white/5" />
-            ))}
-          </div>
+          [1, 2].map(i => <div key={i} className="h-48 bg-neutral-800 rounded-3xl animate-pulse" />)
         ) : joinedGames.length === 0 ? (
-          <div className="p-12 text-center rounded-3xl border border-white/5 bg-slate-900/20 backdrop-blur-md">
-            <Trophy className="h-14 w-14 text-slate-600 mx-auto mb-4" />
-            <h3 className="font-bold text-lg text-slate-300">No Joined Matchups</h3>
-            <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
-              You haven't staked any roster spots on active matches. Explore the board to join the action!
-            </p>
-            <button
-              onClick={() => window.location.href = '/games/join'}
-              className="mt-6 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 font-semibold text-white inline-flex items-center gap-2 text-sm shadow"
-            >
-              Explore Match Board
+          <div className="py-20 text-center bg-neutral-800/20 rounded-3xl border-2 border-dashed border-neutral-800">
+            <Trophy size={48} className="mx-auto mb-4 text-neutral-700" />
+            <h3 className="text-xl font-bold">No matches joined yet</h3>
+            <p className="text-neutral-500 mb-6">Explore games hosted by the community and join one!</p>
+            <button onClick={() => navigate('/join-games')} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-xl">
+              Find Games
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
-            {joinedGames.map((game) => {
-              const userSlot = getUserSlotDetails(game);
-              const isPending = userSlot.status === 'HELD';
-              
-              return (
-                <div 
-                  key={game.id}
-                  className="rounded-2xl border border-white/5 bg-slate-900/60 backdrop-blur-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300 hover:border-white/10"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-500/10 text-violet-400 border border-violet-500/20">
-                        {game.gameType}
-                      </span>
-                      <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-950 border border-white/5 text-slate-400">
-                        {game.gameMode}
-                      </span>
-                      {isPending ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse">
-                          <AlertTriangle className="h-3 w-3" /> Pending Host Approval
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          <CheckCircle2 className="h-3 w-3" /> Confirmed Roster
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="font-bold text-lg text-slate-200 mt-2 truncate">
-                      {game.ground?.name || 'Local Street Pitch'}
-                    </h3>
+          joinedGames.map(game => (
+            <div key={game._id} className="bg-neutral-800/50 border border-neutral-800 rounded-3xl overflow-hidden relative">
+              {game.status === 'CANCELLED' && (
+                <div className="absolute inset-0 bg-black/60 z-10 flex items-center justify-center backdrop-blur-[2px]">
+                   <span className="bg-red-500 text-white px-6 py-2 rounded-full font-black uppercase italic tracking-tighter transform -rotate-12">
+                     GAME CANCELLED
+                   </span>
+                </div>
+              )}
 
-                    {/* Sub details */}
-                    <div className="flex flex-wrap gap-4 text-xs text-slate-400 mt-2">
-                      <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5 text-slate-500" /> {new Date(game.date).toLocaleDateString()}</span>
-                      <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5 text-slate-500" /> {game.time}</span>
-                      <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5 text-slate-500" /> {game.city}</span>
-                    </div>
-
-                    {/* Personal roster details slot */}
-                    <div className="mt-4 p-3 rounded-xl bg-slate-950 border border-white/5 inline-flex items-center gap-4 text-xs">
-                      <div>
-                        <span className="text-slate-500 block uppercase font-bold tracking-wider text-[9px]">Assigned Role</span>
-                        <span className="font-bold text-slate-200 block mt-0.5">{userSlot.role}</span>
-                      </div>
-                      <div className="border-l border-white/10 h-6" />
-                      <div>
-                        <span className="text-slate-500 block uppercase font-bold tracking-wider text-[9px]">Squad / Team</span>
-                        <span className="font-bold text-slate-200 block mt-0.5">{userSlot.team}</span>
-                      </div>
-                    </div>
+              <div className="p-6 border-b border-neutral-800">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      {game.gameType}
+                    </span>
+                    <h2 className="text-2xl font-black mt-1 uppercase italic tracking-tighter">
+                      {game.gameMode === 'QUICK' 
+                        ? `${game.gameType} Quick Match` 
+                        : `${game.teams?.teamA?.name || 'Team A'} vs ${game.teams?.teamB?.name || 'Team B'}`}
+                    </h2>
                   </div>
-
-                  {/* Leave Action block */}
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => handleLeave(game.id)}
-                      disabled={isLeaving}
-                      className="px-4 py-2 text-xs font-semibold rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 flex items-center gap-1.5"
-                    >
-                      <LogOut className="h-4 w-4" /> Leave Game
-                    </button>
+                  <div className="text-right">
+                    <p className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${
+                      game.mySlotStatus === 'PENDING' ? 'bg-orange-500/20 text-orange-500' : 'bg-green-500/20 text-green-500'
+                    }`}>
+                      {game.mySlotStatus}
+                    </p>
+                    <p className="text-xs text-neutral-500 mt-2 font-bold uppercase">{game.myRole}</p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex flex-wrap gap-4 text-xs font-medium text-neutral-400">
+                    <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-full">
+                      <Calendar size={14} className="text-yellow-500" /> {new Date(game.date).toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-full">
+                      <Clock size={14} className="text-yellow-500" /> {game.time}
+                    </div>
+                    <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-full">
+                      <MapPin size={14} className="text-yellow-500" /> {game.ground?.name || 'Self-Arranged'}
+                    </div>
+                  </div>
+                  
+                  {game.status !== 'CANCELLED' && (
+                    <button 
+                      onClick={() => handleLeave(game._id)}
+                      className="flex items-center gap-2 px-4 py-1.5 bg-neutral-800 text-neutral-400 text-[10px] font-black rounded-full hover:bg-red-500 hover:text-white transition-all uppercase tracking-wider"
+                    >
+                      <LogOut size={12} /> Leave Match
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-4 bg-neutral-900/50 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                   <div className="w-8 h-8 bg-[#84CC16]/10 rounded-full flex items-center justify-center border border-white/10 overflow-hidden shrink-0">
+                      {game.host?.profilePicture ? (
+                        <img 
+                          src={game.host.profilePicture} 
+                          className="w-full h-full object-cover" 
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div 
+                        className="w-full h-full flex items-center justify-center"
+                        style={{ display: game.host?.profilePicture ? 'none' : 'flex' }}
+                      >
+                        <User size={16} className="text-[#84CC16]" />
+                      </div>
+                   </div>
+                   <div className="text-[10px]">
+                      <p className="text-neutral-500 font-bold uppercase">Hosted By</p>
+                      <p className="font-black uppercase tracking-tighter">{game.host?.name}</p>
+                   </div>
+                </div>
+                <div className="flex items-center gap-1 text-yellow-500 font-black">
+                  <Coins size={14} /> {game.perPlayerCharge}
+                </div>
+              </div>
+            </div>
+          ))
         )}
       </div>
     </div>

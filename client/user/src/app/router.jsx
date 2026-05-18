@@ -11,18 +11,7 @@ import PublicRoute from "@components/ProtectedRoute/PublicRoute";
 import { NotFound, RootRedirect, ErrorBoundary } from "@components/common";
 
 // ΓöÇΓöÇ Spinner shown while any lazy chunk loads ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const PageLoader = () => (
-  <>
-    <style>{`@keyframes _pg_spin { to { transform: rotate(360deg); } }`}</style>
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{
-        width: 32, height: 32, borderRadius: "50%",
-        border: "3px solid #e5e7eb", borderTopColor: "#10b981",
-        animation: "_pg_spin 0.8s linear infinite"
-      }} />
-    </div>
-  </>
-);
+const PageLoader = () => null;
 
 // ΓöÇΓöÇ Lazy: User Portal Pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const UserHome               = lazy(() => import("@user/pages/Home"));
