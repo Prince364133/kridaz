@@ -28,3 +28,5 @@ export const updateProfessionalProfileSchema = z.object({
 export type ProfessionalRole = z.infer<typeof professionalRoleSchema>;
 export type ProfessionalProfile = z.infer<typeof professionalProfileSchema>;
 export type UpdateProfessionalProfileInput = z.infer<typeof updateProfessionalProfileSchema>;
+export type Professional = ProfessionalProfile;
+
