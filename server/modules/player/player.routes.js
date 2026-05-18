@@ -1,30 +1,22 @@
 import express from 'express';
-import { 
-  searchPlayers, 
-  followPlayer, 
-  unfollowPlayer, 
-  getNetwork,
-  getPlayerProfile,
-  getNetworkById,
-  getNearbyPlayers,
-  updateUserLocation,
-  updateNotificationPreferences
-} from './player.controller.js';
-import userAuth from "../../middleware/jwt/user.middleware.js";
+import userPlayerRouter from './routes/user.routes.js';
+import adminPlayerRouter from './routes/admin.routes.js';
 
-const router = express.Router();
+/**
+ * Player Domain Router
+ * Mounts actor-specific sub-routers for the Player module.
+ * 
+ * Routes:
+ * /api/player/...
+ */
 
-router.get('/search', searchPlayers);
-router.get('/nearby', userAuth, getNearbyPlayers);
-router.post('/location', userAuth, updateUserLocation);
-router.patch('/notification-preferences', userAuth, updateNotificationPreferences);
-router.get('/network', userAuth, getNetwork);
-router.get('/:id', getPlayerProfile);
+const playerRouter = express.Router();
 
-router.use(userAuth); // Protect social/network routes
+// Mount Actor Sub-Routers
+playerRouter.use('/user', userPlayerRouter);
+playerRouter.use('/admin', adminPlayerRouter);
 
-router.post('/:id/follow', followPlayer);
-router.post('/:id/unfollow', unfollowPlayer);
-router.get('/:id/network', getNetworkById);
+// Fallback / Root - Map to user routes
+playerRouter.use('/', userPlayerRouter);
 
-export default router;
+export default playerRouter;

@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import chalk from "chalk";
+import logger from "./logger.js";
 
 export default async function generateEmail(to, subject, html, attachments = []) {
   try {
@@ -20,7 +20,7 @@ export default async function generateEmail(to, subject, html, attachments = [])
     };
     await transporter.sendMail(mailOptions);
   } catch (e) {
-    console.log(chalk.redBright.bold("Error in generateEmail"), e);
+    logger.error("Error in generateEmail", e);
   }
 }
 

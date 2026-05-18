@@ -1,7 +1,8 @@
-import AuditLog from "../models/auditLog.model.js";
+import { prisma } from "../config/prisma.js";
+import logger from "./logger.js";
 
 /**
- * Log an administrative action to the database.
+ * Log an administrative action to the database using Prisma.
  * @param {Object} req - Express request object
  * @param {String} action - Name of the action (e.g. "APPROVE_PROFESSIONAL")
  * @param {String} module - Module name (e.g. "USER_MANAGEMENT")
@@ -10,18 +11,44 @@ import AuditLog from "../models/auditLog.model.js";
  */
 export const logAdminAction = async (req, action, module, targetId = null, details = {}) => {
   try {
-    const adminId = req.user.id; // Assuming req.user is populated by admin middleware
+    const adminId = req.user?.id;
     
-    await AuditLog.create({
-      admin: adminId,
-      action,
-      module,
-      targetId,
-      details,
-      ipAddress: req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress,
-      userAgent: req.headers['user-agent']
+    await prisma.auditLog.create({
+      data: {
+        userId: adminId,
+        action,
+        module,
+        targetId,
+        details,
+        ipAddress: req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || "unknown_ip",
+        userAgent: req.headers['user-agent']
+      }
     });
   } catch (error) {
-    console.error("FAILED_TO_LOG_AUDIT_ACTION:", error);
+    logger.error("FAILED_TO_LOG_AUDIT_ACTION", error);
+  }
+};
+
+/**
+ * Enhanced audit logger that accepts explicit userId.
+ */
+export const logAudit = async ({ userId, action, module, targetId, details, req }) => {
+  try {
+    const ipAddress = req ? (req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || "unknown_ip") : null;
+    const userAgent = req ? req.headers['user-agent'] : null;
+
+    await prisma.auditLog.create({
+      data: {
+        userId,
+        action,
+        module,
+        targetId,
+        details,
+        ipAddress,
+        userAgent
+      }
+    });
+  } catch (error) {
+    logger.error("Audit Logging Error", error);
   }
 };

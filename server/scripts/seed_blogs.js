@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
-import Blog from "./models/blog.model.js";
+import { prisma } from "../config/prisma.js";
 import dotenv from "dotenv";
+import logger from "../utils/logger.js";
 
 dotenv.config();
 
@@ -11,10 +11,9 @@ const blogs = [
     content: "Full analysis of the recent performance...",
     imageUrl: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&q=80",
     readTime: "2 MINS READ",
-    date: "23RD JULY 2024",
     category: "Sports",
-    views: "1.2k",
-    likes: "450",
+    views: 1200,
+    likes: 450,
     order: 1
   },
   {
@@ -23,10 +22,9 @@ const blogs = [
     content: "Detailed report on the evolution...",
     imageUrl: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800&q=80",
     readTime: "3 MINS READ",
-    date: "11TH JULY 2024",
     category: "Cricket",
-    views: "890",
-    likes: "312",
+    views: 890,
+    likes: 312,
     order: 2
   },
   {
@@ -35,10 +33,9 @@ const blogs = [
     content: "Every move analyzed...",
     imageUrl: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800&q=80",
     readTime: "1 MIN READ",
-    date: "20TH MAY 2024",
     category: "Football",
-    views: "2.4k",
-    likes: "890",
+    views: 2400,
+    likes: 890,
     order: 3
   },
   {
@@ -47,28 +44,28 @@ const blogs = [
     content: "The path to the trophy...",
     imageUrl: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800&q=80",
     readTime: "5 MINS READ",
-    date: "17TH MAY 2024",
     category: "Cricket",
-    views: "3.1k",
-    likes: "1.2k",
+    views: 3100,
+    likes: 1200,
     order: 4
   }
 ];
 
 const seedBlogs = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/kridaz");
-    console.log("Connected to MongoDB for seeding blogs...");
+    logger.info("Seeding blogs with Prisma...");
 
-    await Blog.deleteMany({});
-    console.log("Cleared existing blogs.");
+    await prisma.blog.deleteMany({});
+    logger.info("Cleared existing blogs.");
 
-    await Blog.insertMany(blogs);
-    console.log("Successfully seeded blogs!");
+    await prisma.blog.createMany({
+      data: blogs
+    });
+    logger.info("Successfully seeded blogs!");
 
-    process.exit();
+    process.exit(0);
   } catch (error) {
-    console.error("Error seeding blogs:", error);
+    logger.error("Error seeding blogs:", error);
     process.exit(1);
   }
 };

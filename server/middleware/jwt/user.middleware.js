@@ -25,12 +25,15 @@ const verifyUserToken = async (req, res, next) => {
     // Attach the decoded user information to the request with normalization
     req.user = {
       ...decoded,
-      id: decoded.id || decoded._id || (decoded.user && (decoded.user.id || decoded.user._id))
+      id: decoded.id || (decoded.user && decoded.user.id)
     };
     next();
   } catch (err) {
-    // Return 401 on verification error (expired or malformed token)
-    return res.status(401).json({ message: "Unauthorized: Session expired or invalid" });
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ success: false, message: "TOKEN_EXPIRED" });
+    }
+    // Return 403 on verification error (malformed or tampered token)
+    return res.status(403).json({ success: false, message: "Unauthorized: Session invalid" });
   }
 };
 

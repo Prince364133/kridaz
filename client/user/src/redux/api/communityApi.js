@@ -99,7 +99,7 @@ export const communityApi = baseApi.injectEndpoints({
               communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
                 if (!draft.posts) draft.posts = [];
                 // Check if post already exists (to avoid duplicates from refetch)
-                const exists = draft.posts.some(p => p._id === result.post._id);
+                const exists = draft.posts.some(p => (p._id || p.id) === (result.post._id || result.post.id));
                 if (!exists) {
                   draft.posts.unshift(result.post);
                 }
@@ -134,7 +134,7 @@ export const communityApi = baseApi.injectEndpoints({
                 if (draft.stories) {
                   // Find or create group for the author (using userId field from backend)
                   const author = result.story.userId;
-                  const groupIndex = draft.stories.findIndex(g => g.author._id === author._id);
+                  const groupIndex = draft.stories.findIndex(g => (g.author._id || g.author.id) === (author._id || author.id));
                   if (groupIndex !== -1) {
                     draft.stories[groupIndex].stories.unshift(result.story);
                   } else {

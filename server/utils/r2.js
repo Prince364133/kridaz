@@ -4,6 +4,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import fs from 'fs-extra';
 import path from 'path';
 import dotenv from 'dotenv';
+import logger from './logger.js';
 
 dotenv.config();
 
@@ -44,7 +45,7 @@ export const uploadToR2 = async (filePath, key, contentType) => {
       url: `${process.env.REELS_CDN_URL}/${key}`
     };
   } catch (error) {
-    console.error(`[R2_UPLOAD_ERROR] Failed to upload ${key}:`, error);
+    logger.error(`[R2_UPLOAD_ERROR] Failed to upload ${key}:`, error);
     throw error;
   }
 };
@@ -89,7 +90,7 @@ export const deleteFromR2 = async (key) => {
     await r2Client.send(command);
     return { success: true };
   } catch (error) {
-    console.error(`[R2_DELETE_ERROR] Failed to delete ${key}:`, error);
+    logger.error(`[R2_DELETE_ERROR] Failed to delete ${key}:`, error);
     throw error;
   }
 };
@@ -113,7 +114,7 @@ export const deleteDirectoryFromR2 = async (prefix) => {
     await r2Client.send(deleteCommand);
     return { success: true };
   } catch (error) {
-    console.error(`[R2_DELETE_DIR_ERROR] Failed to delete prefix ${prefix}:`, error);
+    logger.error(`[R2_DELETE_DIR_ERROR] Failed to delete prefix ${prefix}:`, error);
     throw error;
   }
 };

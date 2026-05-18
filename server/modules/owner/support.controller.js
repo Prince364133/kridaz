@@ -1,13 +1,11 @@
-import SupportTicket from "../../models/supportTicket.model.js";
-import Owner from "../../models/owner.model.js";
-import { notifyAdmins } from "../../utils/notificationHelper.js";
+import { prisma } from "../../config/prisma.js";
+import NotificationService from "../../services/notification.service.js";
 
 export const createTicket = async (req, res) => {
-  const ownerData = req.owner;
+  const { id: userId } = req.owner;
+  const { subject, message, category, images } = req.body;
+  
   try {
-    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
-    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
-    const ownerId = ownerRecord._id;
     if (message.length > 10000) {
       return res.status(400).json({ message: "Message exceeds 10,000 characters limit" });
     }
@@ -16,17 +14,18 @@ export const createTicket = async (req, res) => {
       return res.status(400).json({ message: "Maximum 5 images allowed" });
     }
 
-    const ticket = await SupportTicket.create({
-      owner: ownerId,
-      subject,
-      message,
-      category,
-      images,
-      status: "OPEN"
+    const ticket = await prisma.supportTicket.create({
+      data: {
+        userId,
+        subject,
+        description: message,
+        category,
+        status: "OPEN"
+      }
     });
 
-    // Notify Admin
-    await notifyAdmins({
+    // Notify Admin (Queued)
+    NotificationService.notifyAdmins({
       title: "New Support Ticket",
       message: `New ${category} ticket from partner: "${subject}"`,
       type: "SUPPORT",
@@ -40,13 +39,15 @@ export const createTicket = async (req, res) => {
 };
 
 export const getMyTickets = async (req, res) => {
-  const ownerData = req.owner;
+  const { id: userId } = req.owner;
   try {
-    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
-    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
-    const ownerId = ownerRecord._id;
-
-    const tickets = await SupportTicket.find({ owner: ownerId }).sort({ createdAt: -1 });
+    const tickets = await prisma.supportTicket.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        replies: true
+      }
+    });
     res.status(200).json({ success: true, tickets });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -54,35 +55,37 @@ export const getMyTickets = async (req, res) => {
 };
 
 export const addReply = async (req, res) => {
-  const ownerData = req.owner;
+  const { id: userId } = req.owner;
   const { ticketId } = req.params;
   const { message } = req.body;
+  
   try {
-    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
-    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
-    const ownerId = ownerRecord._id;
-
-    const ticket = await SupportTicket.findOne({ _id: ticketId, owner: ownerId });
+    const ticket = await prisma.supportTicket.findFirst({
+      where: { id: ticketId, userId }
+    });
+    
     if (!ticket) return res.status(404).json({ message: "Ticket not found" });
 
-    ticket.replies.push({
-      sender: "OWNER",
-      message,
-      createdAt: new Date()
+    const reply = await prisma.ticketReply.create({
+      data: {
+        ticketId,
+        senderType: "USER",
+        senderId: userId,
+        message
+      }
     });
-    ticket.lastRepliedAt = new Date();
-    await ticket.save();
 
-    // Notify Admin
-    await notifyAdmins({
+    // Notify Admin (Queued)
+    NotificationService.notifyAdmins({
       title: "Partner Replied to Ticket",
       message: `Partner replied to ticket: "${ticket.subject}"`,
       type: "SUPPORT",
       link: "/admin/support"
     });
 
-    res.status(200).json({ success: true, ticket });
+    res.status(200).json({ success: true, reply });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+

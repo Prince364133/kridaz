@@ -1,8 +1,7 @@
 import crypto from "crypto";
-import WalletTransaction from "../../models/walletTransaction.model.js";
-import User from "../../models/user.model.js";
-import Owner from "../../models/owner.model.js";
-import Booking from "../../models/booking.model.js";
+import { prisma } from "../../config/prisma.js";
+import logger from "../../utils/logger.js";
+import { paymentTotal } from "../../utils/metrics.js";
 
 /**
  * Handle Razorpay Webhooks
@@ -20,14 +19,14 @@ export const handleRazorpayWebhook = async (req, res) => {
     const digest = shasum.digest("hex");
 
     if (digest !== signature) {
-      console.error("[WEBHOOK] Invalid signature detected");
+      logger.error("[WEBHOOK] Invalid signature detected");
       return res.status(400).json({ status: "invalid_signature" });
     }
 
     const event = req.body.event;
     const payload = req.body.payload;
 
-    console.log(`[WEBHOOK] Received event: ${event}`);
+    logger.info(`[WEBHOOK] Received event: ${event}`);
 
     // 2. Handle Events
     switch (event) {
@@ -40,12 +39,12 @@ export const handleRazorpayWebhook = async (req, res) => {
         break;
 
       default:
-        console.log(`[WEBHOOK] Unhandled event: ${event}`);
+        logger.info(`[WEBHOOK] Unhandled event: ${event}`);
     }
 
     return res.status(200).json({ status: "ok" });
   } catch (error) {
-    console.error("[WEBHOOK] Error:", error.message);
+    logger.error("[WEBHOOK] Error:", error.message);
     return res.status(500).json({ status: "error", message: error.message });
   }
 };
@@ -58,42 +57,67 @@ async function handlePaymentCaptured(payment) {
   const { order_id, id: payment_id, status } = payment;
 
   // Check if it's a Wallet Topup
-  const transaction = await WalletTransaction.findOne({ 
-    razorpayOrderId: order_id,
-    status: "PENDING" 
+  const transaction = await prisma.walletTransaction.findFirst({
+    where: { 
+      razorpayOrderId: order_id,
+      status: "PENDING" 
+    }
   });
 
   if (transaction) {
-    console.log(`[WEBHOOK] Processing wallet topup for order: ${order_id}`);
+    logger.info(`[WEBHOOK] Processing wallet topup for order: ${order_id}`);
     
-    // Find the user/owner
-    const user = await User.findById(transaction.user) || await Owner.findOne({ userId: transaction.user });
+    // Find the user or owner
+    const user = await prisma.user.findUnique({ where: { id: transaction.userId } });
+    const owner = !user ? await prisma.ownerProfile.findFirst({ where: { userId: transaction.userId } }) : null;
     
-    if (user) {
-      const Model = (user.role === "user") ? User : Owner;
-      
-      // Update balance if not already updated by frontend
-      await Model.findByIdAndUpdate(user._id, { 
-        $inc: { walletBalance: transaction.amount } 
-      });
+    if (user || owner) {
+      await prisma.$transaction(async (tx) => {
+        if (user) {
+          await tx.user.update({
+            where: { id: user.id },
+            data: { walletBalance: { increment: transaction.amount } }
+          });
+        } else {
+          await tx.ownerProfile.update({
+            where: { id: owner.id },
+            data: { walletBalance: { increment: transaction.amount } }
+          });
+        }
 
-      transaction.status = "SUCCESS";
-      transaction.razorpayPaymentId = payment_id;
-      await transaction.save();
+        await tx.walletTransaction.update({
+          where: { id: transaction.id },
+          data: {
+            status: "SUCCESS",
+            razorpayPaymentId: payment_id
+          }
+        });
+      });
       
-      console.log(`[WEBHOOK] Wallet topped up for ${user.name}`);
+      logger.info(`[WEBHOOK] Wallet topped up for ${user?.name || owner?.businessName}`);
+      paymentTotal.inc({ status: "success" });
     }
     return;
   }
 
   // Check if it's a Booking
-  const booking = await Booking.findOne({ 
-    "payment.orderId": order_id,
-    status: "PENDING" // Assuming there's a pending status for bookings
+  const booking = await prisma.booking.findFirst({
+    where: { 
+      orderId: order_id,
+      status: "PENDING"
+    }
   });
 
   if (booking) {
-    console.log(`[WEBHOOK] Processing booking confirmation for order: ${order_id}`);
-    // Add booking confirmation logic here if needed
+    logger.info(`[WEBHOOK] Processing booking confirmation for order: ${order_id}`);
+    await prisma.booking.update({
+      where: { id: booking.id },
+      data: {
+        status: "CONFIRMED",
+        paymentId: payment_id,
+        paymentStatus: "SUCCESS"
+      }
+    });
+    paymentTotal.inc({ status: "success" });
   }
 }

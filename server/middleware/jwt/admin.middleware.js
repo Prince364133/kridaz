@@ -23,7 +23,7 @@ const verifyAdminToken = async (req, res, next) => {
     // Support both {id, role} and {user: {role}} or similar structures
     const role = decoded.role || (decoded.user && decoded.user.role);
     
-    if (role !== "admin" && role !== "BMSP_ADMIN") {
+    if (role?.toUpperCase() !== "ADMIN") {
       console.warn("Admin Access Denied. Token Role:", role, "Full Payload:", decoded);
       return res.status(403).json({ success: false, message: "Unauthorized: Admin privileges required" });
     }
@@ -31,7 +31,7 @@ const verifyAdminToken = async (req, res, next) => {
     // Normalize for controllers expecting req.user or specific id/role placement
     const normalizedUser = {
       ...decoded,
-      id: decoded.id || decoded._id || (decoded.user && (decoded.user.id || decoded.user._id)),
+      id: decoded.id || (decoded.user && decoded.user.id),
       role: role
     };
 
@@ -40,7 +40,10 @@ const verifyAdminToken = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Admin Middleware Error:", error.message);
-    return res.status(401).json({ message: "Session expired or invalid token", error: error.message });
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ success: false, message: "TOKEN_EXPIRED" });
+    }
+    return res.status(403).json({ success: false, message: "Session expired or invalid token", error: error.message });
   }
 };
 

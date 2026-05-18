@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
+    "checkJs": true,
+    "maxNodeModuleJsDepth": 0,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@app/*": ["src/app/*"],
+      "@components/*": ["src/shared/components/*"],
+      "@hooks/useAxiosInstance": ["src/infrastructure/axios.js"],
+      "@user/hooks/useAxiosInstance": ["src/infrastructure/axios.js"],
+      "@hooks/*": ["src/shared/hooks/*"],
+      "@utils/*": ["src/shared/utils/*"],
+      "@layouts/*": ["src/shared/layouts/*"],
+      "@services/*": ["src/shared/services/*"],
+      "@infrastructure/*": ["src/infrastructure/*"],
+      "@lib/*": ["src/shared/lib/*"],
+      "@redux/*": ["src/redux/*"],
+      "@pages/*": ["src/pages/*"],
+      "@features/*": ["src/features/*"],
+      "@context/*": ["src/context/*"],
+      "@user/components/*": ["src/shared/components/*"],
+      "@user/pages/*": ["src/pages/*"],
+      "@user/layouts/*": ["src/shared/layouts/*"],
+      "@user/hooks/*": ["src/shared/hooks/*"],
+      "@user/utils/*": ["src/shared/utils/*"],
+      "@user/services/*": ["src/shared/services/*"],
+      "@user/*": ["src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}

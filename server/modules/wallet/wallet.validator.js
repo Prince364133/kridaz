@@ -13,3 +13,10 @@ export const verifyTopupSchema = z.object({
     razorpay_signature: z.string().min(1, "Signature is required"),
   }),
 });
+
+export const requestWithdrawalSchema = z.object({
+  body: z.object({
+    amount: z.number().min(500, "Minimum withdrawal is Rs 500").max(100000, "Maximum withdrawal is Rs 1,00,000"),
+    bankDetails: z.record(z.any()).optional(),
+  }),
+});

@@ -1,9 +1,5 @@
-import mongoose from "mongoose";
-import chalk from "chalk";
-import Booking from "../models/booking.model.js";
-import Owner from "../models/owner.model.js";
-import WalletTransaction from "../models/walletTransaction.model.js";
-import TimeSlot from "../models/timeSlot.model.js";
+import { prisma } from "../config/prisma.js";
+import logger from "./logger.js";
 import * as Sentry from "@sentry/node";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -13,48 +9,43 @@ import * as Sentry from "@sentry/node";
 /**
  * Backfill playStartTime / playEndTime on older CONFIRMED bookings that were
  * created before the Phase 1 schema migration added those fields.
- * Only runs once on startup — finds bookings with status=CONFIRMED and no
- * playStartTime, then copies times from their linked TimeSlot document.
  */
 const backfillPlayTimes = async () => {
   try {
-    const stale = await Booking.find({
-      status: "CONFIRMED",
-      playStartTime: { $exists: false },
-      timeSlot: { $exists: true, $ne: null },
-    }).select("_id timeSlot");
+    const stale = await prisma.booking.findMany({
+      where: {
+        status: "CONFIRMED",
+        playStartTime: null,
+        timeSlotId: { not: null },
+      },
+      include: { timeSlot: true },
+    });
 
     if (stale.length === 0) return;
 
-    const slotIds = stale.map((b) => b.timeSlot);
-    const slots = await TimeSlot.find({ _id: { $in: slotIds } }).lean();
-    const slotMap = Object.fromEntries(slots.map((s) => [s._id.toString(), s]));
+    logger.info(`[SETTLEMENT] Backfilling ${stale.length} legacy bookings...`);
 
-    const bulkOps = stale
-      .filter((b) => slotMap[b.timeSlot?.toString()])
-      .map((b) => {
-        const slot = slotMap[b.timeSlot.toString()];
-        return {
-          updateOne: {
-            filter: { _id: b._id },
-            update: {
-              $set: {
-                playStartTime: slot.startTime,
-                playEndTime: slot.endTime,
-              },
-            },
+    let count = 0;
+    // We still need to update each booking since playStartTime varies per booking
+    // but we saved the N lookups.
+    for (const b of stale) {
+      if (b.timeSlot) {
+        await prisma.booking.update({
+          where: { id: b.id },
+          data: {
+            playStartTime: b.timeSlot.startTime,
+            playEndTime: b.timeSlot.endTime,
           },
-        };
-      });
+        });
+        count++;
+      }
+    }
 
-    if (bulkOps.length > 0) {
-      await Booking.bulkWrite(bulkOps);
-      console.log(
-        chalk.cyan(`[SETTLEMENT] Backfilled playStartTime on ${bulkOps.length} legacy bookings.`)
-      );
+    if (count > 0) {
+      logger.info(`[SETTLEMENT] Backfilled playStartTime on ${count} legacy bookings.`);
     }
   } catch (err) {
-    console.error(chalk.red("[SETTLEMENT] Backfill error:"), err.message);
+    logger.error("[SETTLEMENT] Backfill error", err);
     Sentry.captureException(err, { tags: { job: "backfillPlayTimes" } });
   }
 };
@@ -62,287 +53,281 @@ const backfillPlayTimes = async () => {
 // ─────────────────────────────────────────────────────────────────────────────
 // Phase A — CONFIRMED → PLAYING → IN_REVIEW_WINDOW
 // Runs every 5 minutes.
-//
-// Logic:
-//   1. Find CONFIRMED bookings where playStartTime <= now
-//      → status = "PLAYING"   (play has started but not ended yet)
-//   2. Find PLAYING bookings where playEndTime <= now
-//      → status = "IN_REVIEW_WINDOW"
-//      → revenueStatus = "IN_PROGRESS"
-//      → reviewWindowEndsAt = playEndTime + 2 hours
-//      → owner.pendingBalance  -= ownerRevenue
-//      → owner.inProgressBalance += ownerRevenue
 // ─────────────────────────────────────────────────────────────────────────────
 export const runPlayingTransition = async () => {
   const now = new Date();
 
   // ── Step 1: CONFIRMED → PLAYING ──────────────────────────────────────────
   try {
-    const result = await Booking.updateMany(
-      {
+    const result = await prisma.booking.updateMany({
+      where: {
         status: "CONFIRMED",
-        playStartTime: { $lte: now },
+        playStartTime: { lte: now },
       },
-      { $set: { status: "PLAYING" } }
-    );
-    if (result.modifiedCount > 0) {
-      console.log(
-        chalk.blue(`[SETTLEMENT] Phase A-1: ${result.modifiedCount} booking(s) → PLAYING`)
-      );
+      data: { status: "PLAYING" },
+    });
+
+    if (result.count > 0) {
+      logger.info(`[SETTLEMENT] Phase A-1: ${result.count} booking(s) → PLAYING`);
     }
   } catch (err) {
-    console.error(chalk.red("[SETTLEMENT] Phase A-1 error:"), err.message);
+    logger.error("[SETTLEMENT] Phase A-1 error:", err);
     Sentry.captureException(err, { tags: { job: "runPlayingTransition_Phase1" } });
   }
 
   // ── Step 2: PLAYING → IN_REVIEW_WINDOW ───────────────────────────────────
-  const playingBookings = await Booking.find({
-    status: "PLAYING",
-    playEndTime: { $lte: now },
-  })
-    .populate({
-      path: "turf",
-      populate: { path: "owner", select: "_id userId pendingBalance inProgressBalance" },
-    })
-    .lean();
-
-  if (playingBookings.length === 0) return;
-
-  const isReplicaSet = mongoose.connection.host.includes('replica') || mongoose.connection.replicaSet;
-  const session = isReplicaSet ? await mongoose.startSession() : null;
-  if (session) session.startTransaction();
-  
   try {
-    for (const booking of playingBookings) {
-      if (!booking.turf?.owner) continue;
-
-      const reviewWindowEndsAt = new Date(booking.playEndTime.getTime() + 2 * 60 * 60 * 1000);
-      const ownerRevenue = booking.ownerRevenue || booking.totalPrice;
-
-      // Shift funds: pendingBalance → inProgressBalance
-      await Owner.findByIdAndUpdate(
-        booking.turf.owner._id,
-        {
-          $inc: {
-            pendingBalance: -ownerRevenue,
-            inProgressBalance: ownerRevenue,
+    const playingBookings = await prisma.booking.findMany({
+      where: {
+        status: "PLAYING",
+        playEndTime: { lte: now },
+      },
+      include: {
+        turf: {
+          include: {
+            owner: true,
           },
         },
-        { session }
-      );
+      },
+    });
 
-      await Booking.findByIdAndUpdate(
-        booking._id,
-        {
-          $set: {
-            status: "IN_REVIEW_WINDOW",
-            revenueStatus: "IN_PROGRESS",
-            reviewWindowEndsAt,
+    if (playingBookings.length === 0) return;
+
+    const reviewWindowEndsAt = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+
+    await prisma.$transaction(async (tx) => {
+      const ownerBalanceChanges = new Map();
+      const bookingIds = playingBookings.map(b => b.id);
+
+      for (const booking of playingBookings) {
+        if (!booking.turf?.owner) continue;
+
+        const ownerRevenue = booking.ownerRevenue || booking.totalPrice;
+        const ownerId = booking.turf.owner.id;
+
+        // Group balance updates
+        const current = ownerBalanceChanges.get(ownerId) || { pending: 0, inProgress: 0 };
+        ownerBalanceChanges.set(ownerId, {
+          pending: current.pending - ownerRevenue,
+          inProgress: current.inProgress + ownerRevenue
+        });
+      }
+
+      // 1. Bulk Update Owner Balances
+      for (const [ownerId, changes] of ownerBalanceChanges.entries()) {
+        await tx.ownerProfile.update({
+          where: { id: ownerId },
+          data: {
+            pendingBalance: { increment: changes.pending },
+            inProgressBalance: { increment: changes.inProgress },
           },
-        },
-        { session }
-      );
-    }
+        });
+      }
 
-    if (session) await session.commitTransaction();
-    console.log(
-      chalk.blue(
-        `[SETTLEMENT] Phase A-2: ${playingBookings.length} booking(s) → IN_REVIEW_WINDOW`
-      )
-    );
+      // 2. Bulk Update Bookings
+      await tx.booking.updateMany({
+        where: { id: { in: bookingIds } },
+        data: {
+          status: "IN_REVIEW_WINDOW",
+          revenueStatus: "IN_PROGRESS",
+          reviewWindowEndsAt,
+        },
+      });
+    });
+
+    logger.info(`[SETTLEMENT] Phase A-2: ${playingBookings.length} booking(s) → IN_REVIEW_WINDOW`);
   } catch (err) {
-    if (session) await session.abortTransaction();
-    console.error(chalk.red("[SETTLEMENT] Phase A-2 error:"), err.message);
+    logger.error("[SETTLEMENT] Phase A-2 error:", err);
     Sentry.captureException(err, { tags: { job: "runPlayingTransition_Phase2" } });
-  } finally {
-    if (session) session.endSession();
   }
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Phase B — IN_REVIEW_WINDOW → COMPLETED  (auto-settle)
 // Runs every 15 minutes.
-//
-// Logic:
-//   Find IN_REVIEW_WINDOW bookings where reviewWindowEndsAt <= now AND
-//   revenueStatus is still IN_PROGRESS (no dispute raised — disputes change it
-//   to FROZEN immediately).
-//
-//   For each:
-//     → booking.status           = "COMPLETED"
-//     → booking.revenueStatus    = "SETTLED"
-//     → booking.settledAt        = now
-//     → owner.inProgressBalance -= ownerRevenue
-//     → owner.walletBalance     += ownerRevenue
-//     → Create WalletTransaction (type: "SETTLEMENT", status: "SUCCESS")
 // ─────────────────────────────────────────────────────────────────────────────
 export const runAutoSettle = async () => {
   const now = new Date();
 
-  const eligibleBookings = await Booking.find({
-    status: "IN_REVIEW_WINDOW",
-    revenueStatus: "IN_PROGRESS",
-    reviewWindowEndsAt: { $lte: now },
-  })
-    .populate({
-      path: "turf",
-      select: "name owner",
-      populate: { path: "owner", select: "_id userId" },
-    })
-    .lean();
-
-  if (eligibleBookings.length === 0) return;
-
-  const isReplicaSet = mongoose.connection.host.includes('replica') || mongoose.connection.replicaSet;
-  const session = isReplicaSet ? await mongoose.startSession() : null;
-  if (session) session.startTransaction();
-
-  let settledCount = 0;
   try {
-    for (const booking of eligibleBookings) {
-      if (!booking.turf?.owner) {
-        console.warn(chalk.yellow(`[SETTLEMENT] Booking ${booking._id}: no owner — skipping.`));
-        continue;
+    const eligibleBookings = await prisma.booking.findMany({
+      where: {
+        status: "IN_REVIEW_WINDOW",
+        revenueStatus: "IN_PROGRESS",
+        reviewWindowEndsAt: { lte: now },
+      },
+      include: {
+        turf: {
+          include: {
+            owner: true,
+          },
+        },
+      },
+    });
+
+    if (eligibleBookings.length === 0) return;
+
+    await prisma.$transaction(async (tx) => {
+      const ownerBalanceChanges = new Map();
+      const walletTransactions = [];
+      const bookingIds = eligibleBookings.map(b => b.id);
+
+      for (const booking of eligibleBookings) {
+        if (!booking.turf?.owner) continue;
+
+        const ownerRevenue = booking.ownerRevenue || booking.totalPrice;
+        const ownerId = booking.turf.owner.id;
+        const userId = booking.turf.owner.userId;
+
+        // Group balance updates
+        const current = ownerBalanceChanges.get(ownerId) || { inProgress: 0, wallet: 0 };
+        ownerBalanceChanges.set(ownerId, {
+          inProgress: current.inProgress - ownerRevenue,
+          wallet: current.wallet + ownerRevenue
+        });
+
+        // Collect wallet transactions for bulk create
+        walletTransactions.push({
+          userId: userId,
+          amount: ownerRevenue,
+          type: "SETTLEMENT",
+          status: "SUCCESS",
+          description: `Auto-settled: booking #${booking.id.slice(-6).toUpperCase()} at ${booking.turf?.name || "Ground"}`,
+          bookingId: booking.id,
+        });
       }
 
-      const ownerRevenue = booking.ownerRevenue || booking.totalPrice;
-      const owner = booking.turf.owner;
-      const walletUserId = owner.userId || owner._id;
-
-      await Owner.findByIdAndUpdate(
-        owner._id,
-        {
-          $inc: {
-            inProgressBalance: -ownerRevenue,
-            walletBalance: ownerRevenue,
+      // 1. Bulk Update Owner Balances
+      for (const [ownerId, changes] of ownerBalanceChanges.entries()) {
+        await tx.ownerProfile.update({
+          where: { id: ownerId },
+          data: {
+            inProgressBalance: { increment: changes.inProgress },
+            walletBalance: { increment: changes.wallet },
           },
+        });
+      }
+
+      // 2. Bulk Create Wallet Transactions
+      if (walletTransactions.length > 0) {
+        await tx.walletTransaction.createMany({
+          data: walletTransactions
+        });
+      }
+
+      // 3. Bulk Update Bookings
+      await tx.booking.updateMany({
+        where: { id: { in: bookingIds } },
+        data: {
+          status: "COMPLETED",
+          revenueStatus: "SETTLED",
+          settledAt: now,
         },
-        { session }
-      );
+      });
+    });
 
-      await WalletTransaction.create(
-        [
-          {
-            user: walletUserId,
-            amount: ownerRevenue,
-            type: "SETTLEMENT",
-            status: "SUCCESS",
-            description: `Auto-settled: booking #${booking._id.toString().slice(-6).toUpperCase()} at ${booking.turf?.name || "Ground"}`,
-            bookingId: booking._id,
-          },
-        ],
-        { session }
-      );
-
-      await Booking.findByIdAndUpdate(
-        booking._id,
-        {
-          $set: {
-            status: "COMPLETED",
-            revenueStatus: "SETTLED",
-            settledAt: now,
-          },
-        },
-        { session }
-      );
-
-      settledCount++;
-    }
-
-    if (session) await session.commitTransaction();
-    if (settledCount > 0) {
-      console.log(
-        chalk.green(`[SETTLEMENT] Phase B: Auto-settled ${settledCount} booking(s) ✓`)
-      );
-    }
+    logger.info(`[SETTLEMENT] Phase B: Auto-settled ${eligibleBookings.length} booking(s) ✓`);
   } catch (err) {
-    if (session) await session.abortTransaction();
-    console.error(chalk.red("[SETTLEMENT] Phase B error:"), err.message);
+    logger.error("[SETTLEMENT] Phase B error:", err);
     Sentry.captureException(err, { tags: { job: "runAutoSettle" } });
-  } finally {
-    if (session) session.endSession();
   }
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Legacy compatibility shim
-// Handles any remaining bookings that were settled under the old 12-hour
-// PENDING→CONFIRMED flow (revenueStatus: "PENDING", status: "CONFIRMED"/"COMPLETED")
-// but still have no playStartTime set (pre-migration bookings).
-// Can be removed once all old bookings are settled.
+// Handles any remaining bookings that were settled under the old 12-hour flow
 // ─────────────────────────────────────────────────────────────────────────────
 const runLegacySettlement = async () => {
   const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
 
-  const legacyBookings = await Booking.find({
-    revenueStatus: "PENDING",
-    status: { $in: ["CONFIRMED", "COMPLETED"] },
-    playStartTime: { $exists: false },
-  })
-    .populate("timeSlot")
-    .populate({ path: "turf", populate: { path: "owner", select: "_id userId" } })
-    .lean();
-
-  if (legacyBookings.length === 0) return;
-
-  const session = await mongoose.startSession();
-  session.startTransaction();
-  let legacyCount = 0;
-
   try {
-    for (const booking of legacyBookings) {
-      if (!booking.timeSlot?.endTime || !booking.turf?.owner) continue;
-      if (new Date(booking.timeSlot.endTime) > twelveHoursAgo) continue;
-
-      const amount = booking.ownerRevenue || booking.totalPrice;
-      const owner = booking.turf.owner;
-      const walletUserId = owner.userId || owner._id;
-
-      await Owner.findByIdAndUpdate(
-        owner._id,
-        { $inc: { pendingBalance: -amount, walletBalance: amount } },
-        { session }
-      );
-
-      await WalletTransaction.create(
-        [
-          {
-            user: walletUserId,
-            amount,
-            type: "SETTLEMENT",
-            status: "SUCCESS",
-            description: `Legacy settlement: booking #${booking._id.toString().slice(-6).toUpperCase()}`,
-            bookingId: booking._id,
-          },
-        ],
-        { session }
-      );
-
-      await Booking.findByIdAndUpdate(
-        booking._id,
-        {
-          $set: {
-            status: "COMPLETED",
-            revenueStatus: "SETTLED",
-            settledAt: new Date(),
+    const legacyBookings = await prisma.booking.findMany({
+      where: {
+        revenueStatus: "PENDING",
+        status: { in: ["CONFIRMED", "COMPLETED"] },
+        playStartTime: null,
+      },
+      include: {
+        timeSlot: true,
+        turf: {
+          include: {
+            owner: true,
           },
         },
-        { session }
-      );
+      },
+    });
 
-      legacyCount++;
-    }
+    if (legacyBookings.length === 0) return;
 
-    await session.commitTransaction();
+    let legacyCount = 0;
+    await prisma.$transaction(async (tx) => {
+      const ownerBalanceChanges = new Map();
+      const walletTransactions = [];
+      const eligibleBookingIds = [];
+
+      for (const booking of legacyBookings) {
+        if (!booking.timeSlot?.endTime || !booking.turf?.owner) continue;
+        if (new Date(booking.timeSlot.endTime) > twelveHoursAgo) continue;
+
+        const amount = booking.ownerRevenue || booking.totalPrice;
+        const ownerId = booking.turf.owner.id;
+        const userId = booking.turf.owner.userId;
+
+        eligibleBookingIds.push(booking.id);
+
+        const current = ownerBalanceChanges.get(ownerId) || { pending: 0, wallet: 0 };
+        ownerBalanceChanges.set(ownerId, {
+          pending: current.pending - amount,
+          wallet: current.wallet + amount
+        });
+
+        walletTransactions.push({
+          userId: userId,
+          amount,
+          type: "SETTLEMENT",
+          status: "SUCCESS",
+          description: `Legacy settlement: booking #${booking.id.slice(-6).toUpperCase()}`,
+          bookingId: booking.id,
+        });
+      }
+
+      // 1. Bulk Update Owner Balances
+      for (const [ownerId, changes] of ownerBalanceChanges.entries()) {
+        await tx.ownerProfile.update({
+          where: { id: ownerId },
+          data: {
+            pendingBalance: { increment: changes.pending },
+            walletBalance: { increment: changes.wallet },
+          },
+        });
+      }
+
+      // 2. Bulk Create Wallet Transactions
+      if (walletTransactions.length > 0) {
+        await tx.walletTransaction.createMany({
+          data: walletTransactions
+        });
+      }
+
+      // 3. Bulk Update Bookings
+      await tx.booking.updateMany({
+        where: { id: { in: eligibleBookingIds } },
+        data: {
+          status: "COMPLETED",
+          revenueStatus: "SETTLED",
+          settledAt: new Date(),
+        },
+      });
+
+      legacyCount = eligibleBookingIds.length;
+    });
+
     if (legacyCount > 0) {
-      console.log(chalk.cyan(`[SETTLEMENT] Legacy: settled ${legacyCount} old booking(s) ✓`));
+      logger.info(`[SETTLEMENT] Legacy: settled ${legacyCount} old booking(s) ✓`);
     }
   } catch (err) {
-    await session.abortTransaction();
-    console.error(chalk.red("[SETTLEMENT] Legacy settlement error:"), err.message);
+    logger.error("[SETTLEMENT] Legacy settlement error", err);
     Sentry.captureException(err, { tags: { job: "runLegacySettlement" } });
-  } finally {
-    session.endSession();
   }
 };
 
@@ -352,31 +337,28 @@ import { redisClient as redis } from "../config/redis.js";
 // Entry point — called from server.js after DB connects
 // ─────────────────────────────────────────────────────────────────────────────
 export const initSettlementWorker = () => {
-  console.log(chalk.magenta("[SETTLEMENT] Initializing settlement worker..."));
+  logger.info("[SETTLEMENT] Initializing settlement worker...");
 
   // One-time backfill for pre-migration bookings
   backfillPlayTimes();
 
-  // Startup run — guarded by a 2-minute Redis lock to prevent duplicate execution
-  // on rapid restarts (e.g. Render deploy restarts the dyno while BullMQ fires).
+  // Startup run — guarded by a 2-minute Redis lock
   const lockKey = 'kridaz:settlement:startup:lock';
   redis.set(lockKey, '1', 'EX', 120, 'NX').then((result) => {
     if (result === 'OK') {
-      // We acquired the lock — safe to run startup jobs
-      console.log(chalk.magenta('[SETTLEMENT] Startup lock acquired. Running immediate jobs...'));
+      logger.info('[SETTLEMENT] Startup lock acquired. Running immediate jobs...');
       runPlayingTransition();
       runAutoSettle();
       runLegacySettlement();
     } else {
-      console.log(chalk.yellow('[SETTLEMENT] Startup lock already held. Skipping immediate run (BullMQ will handle it).'));
+      logger.info('[SETTLEMENT] Startup lock already held. Skipping immediate run.');
     }
   }).catch((err) => {
-    // Redis unavailable or error — run anyway, accept the small duplicate risk
-    console.warn(chalk.yellow(`[SETTLEMENT] Redis lock failed (${err.message}). Running immediate jobs anyway.`));
+    logger.warn(`[SETTLEMENT] Redis lock failed. Running immediate jobs anyway.`, err);
     runPlayingTransition();
     runAutoSettle();
     runLegacySettlement();
   });
 
-  console.log(chalk.magenta('[SETTLEMENT] Worker functions ready. Scheduling handled by BullMQ.'));
+  logger.info('[SETTLEMENT] Worker functions ready. Scheduling handled by BullMQ.');
 };

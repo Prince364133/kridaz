@@ -1,5 +1,6 @@
 import QRCode from "qrcode";
 import cloudinary from "./cloudinary.js"
+import logger from "./logger.js";
 
 async function generateQRCode(url) {
   try {
@@ -11,10 +12,10 @@ async function generateQRCode(url) {
       folder: "kridaz/qrcode"
     });
 
-    console.log("QR code URL generated and uploaded successfully!");
+    logger.info("QR code URL generated and uploaded successfully!");
     return uploadResponse.secure_url;
   } catch (error) {
-    console.error("Error generating or uploading QR code:", error);
+    logger.error("Error generating or uploading QR code:", error);
     throw error;
   }
 }

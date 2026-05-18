@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import QRCode from 'qrcode';
+import logger from './logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -70,7 +71,7 @@ export const generateInvoice = async (booking, turf, user) => {
 
       doc.fontSize(10)
          .fillColor(grayColor)
-         .text(`Invoice Number: TS-${booking._id.toString().slice(-6).toUpperCase()}`, 50, 165)
+         .text(`Invoice Number: TS-${booking.id.toString().slice(-6).toUpperCase()}`, 50, 165)
          .text(`Booking Date: ${new Date(booking.createdAt).toLocaleDateString()}`, 50, 180)
          .text(`Payment Method: Online Payment`, 50, 195);
 
@@ -120,8 +121,8 @@ export const generateInvoice = async (booking, turf, user) => {
       const summaryTop = rowTop + 50;
 
       // QR Code Generation
-      const clientUrl = process.env.USER_URL || (process.env.CLIENT_URLS ? process.env.CLIENT_URLS.split(',')[0] : 'http://localhost:5174');
-      const bookingPassUrl = `${clientUrl}/booking-pass/${booking._id}`;
+      const clientUrl = process.env.USER_URL || (process.env.CLIENT_URLS ? process.env.CLIENT_URLS.split(',')[0] : 'https://kridaz.com'); // Default to domain if no env found
+      const bookingPassUrl = `${clientUrl}/booking-pass/${booking.id}`;
       
       try {
         const qrCodeDataUrl = await QRCode.toDataURL(bookingPassUrl, { margin: 1, color: { dark: '#000000', light: '#FFFFFF' } });
@@ -130,7 +131,7 @@ export const generateInvoice = async (booking, turf, user) => {
            .fillColor(grayColor)
            .text('Scan for Entry Pass', 55, summaryTop + 105);
       } catch (qrError) {
-        console.error("QR Code generation failed:", qrError);
+        logger.error("QR Code generation failed:", qrError);
       }
 
       // Summary Section

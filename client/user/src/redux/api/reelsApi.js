@@ -22,10 +22,10 @@ export const reelsApi = baseApi.injectEndpoints({
         
         if (!currentCache) return newItems;
         
-        // Pagination: combine and deduplicate
+        // Pagination: combine and deduplicate on Prisma `id` field (UUID)
         const combinedReels = [...currentCache.reels, ...newItems.reels];
         const uniqueReels = combinedReels.filter((v, i, a) => 
-          a.findIndex(t => t._id === v._id) === i
+          a.findIndex(t => t.id === v.id) === i
         );
         
         return {
@@ -66,12 +66,12 @@ export const reelsApi = baseApi.injectEndpoints({
         body: data,
       }),
       async onQueryStarted({ reelId, type }, { dispatch, queryFulfilled }) {
-        // Optimistic update for likes
+        // Optimistic update for likes — Prisma UUID is `id`, not `_id`
         if (type === 'like') {
           const patchResult = dispatch(
             reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-              if (!draft || !draft.reels) return;
-              const reel = draft.reels.find((r) => r._id === reelId);
+              if (!draft?.reels) return;
+              const reel = draft.reels.find((r) => r.id === reelId);
               if (reel) {
                 reel.stats.likes += 1;
               }
@@ -94,8 +94,9 @@ export const reelsApi = baseApi.injectEndpoints({
       async onQueryStarted({ reelId }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-            if (!draft || !draft.reels) return;
-            const reel = draft.reels.find((r) => r._id === reelId);
+            if (!draft?.reels) return;
+            // Prisma UUID is `id`, not Mongo `_id`
+            const reel = draft.reels.find((r) => r.id === reelId);
             if (reel) {
               reel.stats.comments += 1;
             }
@@ -116,8 +117,9 @@ export const reelsApi = baseApi.injectEndpoints({
       async onQueryStarted(reelId, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-            if (!draft || !draft.reels) return;
-            draft.reels = draft.reels.filter((r) => r._id !== reelId);
+            if (!draft?.reels) return;
+            // Prisma UUID is `id`, not Mongo `_id`
+            draft.reels = draft.reels.filter((r) => r.id !== reelId);
           })
         );
         try {
@@ -138,7 +140,7 @@ export const reelsApi = baseApi.injectEndpoints({
         if (!currentCache) return newItems;
         const combinedReels = [...currentCache.reels, ...newItems.reels];
         const uniqueReels = combinedReels.filter((v, i, a) => 
-          a.findIndex(t => t._id === v._id) === i
+          a.findIndex(t => t.id === v.id) === i
         );
         return {
           ...newItems,

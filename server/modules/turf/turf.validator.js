@@ -39,3 +39,10 @@ export const turfUpdateSchema = z.object({
     policies: z.string().min(200, "Venue policies must be at least 200 characters long").optional(),
   }),
 });
+
+export const locationQuerySchema = z.object({
+  query: z.object({
+    state: z.string().min(1, "State filter must not be empty").optional(),
+  }),
+});
+

@@ -1,12 +1,11 @@
-import mongoose from "mongoose";
+import { PrismaClient } from "@prisma/client";
 import dotenv from "dotenv";
 import * as argon2 from "argon2";
-import Owner from "../models/owner.model.js";
-import User from "../models/user.model.js";
-import Match from "../models/match.model.js";
-import Session from "../models/session.model.js";
+import logger from "../utils/logger.js";
 
 dotenv.config();
+
+const prisma = new PrismaClient();
 
 const COACH_EMAIL = "11saafgdfviksolutions@gmail.com";
 const UMPIRE_EMAIL = "saafgdfviksolutions@gmail.com";
@@ -14,139 +13,160 @@ const PASSWORD = "364133";
 
 const seedPartnerData = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/kridaz");
-    console.log("Connected to MongoDB...");
-
+    logger.info("Connecting to database...");
+    await prisma.$connect();
+    
     const hashedPassword = await argon2.hash(PASSWORD);
 
     // 1. Create/Update Coach
-    let coach = await Owner.findOne({ email: COACH_EMAIL });
-    if (!coach) {
-      coach = new Owner({
-        name: "Expert Coach",
-        email: COACH_EMAIL,
-        phone: "9876543210",
-        password: hashedPassword,
-        role: "coach"
+    let coachUser = await prisma.user.findUnique({ where: { email: COACH_EMAIL } });
+    if (!coachUser) {
+      coachUser = await prisma.user.create({
+        data: {
+          name: "Expert Coach",
+          email: COACH_EMAIL,
+          username: "expert_coach",
+          password: hashedPassword,
+          role: "COACH"
+        }
       });
-      await coach.save();
-      console.log("Coach account created.");
-    } else {
-      coach.role = "coach";
-      coach.password = hashedPassword;
-      await coach.save();
-      console.log("Coach account updated.");
+    }
+
+    let coachProfile = await prisma.ownerProfile.findUnique({ where: { userId: coachUser.id } });
+    if (!coachProfile) {
+      coachProfile = await prisma.ownerProfile.create({
+        data: {
+          userId: coachUser.id,
+          businessName: "Coach Academy",
+          role: "coach",
+          verified: true
+        }
+      });
+      logger.info("Coach account created.");
     }
 
     // 2. Create/Update Umpire
-    let umpire = await Owner.findOne({ email: UMPIRE_EMAIL });
-    if (!umpire) {
-      umpire = new Owner({
-        name: "Pro Umpire",
-        email: UMPIRE_EMAIL,
-        phone: "9876543211",
-        password: hashedPassword,
-        role: "umpire"
+    let umpireUser = await prisma.user.findUnique({ where: { email: UMPIRE_EMAIL } });
+    if (!umpireUser) {
+      umpireUser = await prisma.user.create({
+        data: {
+          name: "Pro Umpire",
+          email: UMPIRE_EMAIL,
+          username: "pro_umpire",
+          password: hashedPassword,
+          role: "UMPIRE"
+        }
       });
-      await umpire.save();
-      console.log("Umpire account created.");
-    } else {
-      umpire.role = "umpire";
-      umpire.password = hashedPassword;
-      await umpire.save();
-      console.log("Umpire account updated.");
+    }
+
+    let umpireProfile = await prisma.ownerProfile.findUnique({ where: { userId: umpireUser.id } });
+    if (!umpireProfile) {
+      umpireProfile = await prisma.ownerProfile.create({
+        data: {
+          userId: umpireUser.id,
+          businessName: "Elite Umpiring",
+          role: "umpire",
+          verified: true
+        }
+      });
+      logger.info("Umpire account created.");
     }
 
     // 3. Create some Test Users (Students/Players)
-    const users = await User.find().limit(5);
-    let studentIds = users.map(u => u._id);
-    if (studentIds.length === 0) {
-      const newUser = new User({
-        name: "Test Player",
-        email: "player@test.com",
-        phone: "1234567890",
-        password: hashedPassword
+    let players = await prisma.user.findMany({ take: 5, where: { role: 'USER' } });
+    if (players.length === 0) {
+      const player = await prisma.user.create({
+        data: {
+          name: "Test Player",
+          email: "player@test.com",
+          username: "test_player",
+          password: hashedPassword,
+          role: "USER"
+        }
       });
-      await newUser.save();
-      studentIds = [newUser._id];
-      console.log("Test player created.");
+      players = [player];
+      logger.info("Test player created.");
     }
 
-    // 4. Seed Matches for Umpire
-    await Match.deleteMany({ umpire: umpire._id });
-    const matches = [
+    const playerIds = players.map(p => p.id);
+
+    // 4. Seed Matches (HostedGame) for Umpire
+    await prisma.hostedGame.deleteMany({
+      where: { umpireId: umpireUser.id }
+    });
+
+    const matchData = [
       {
-        name: "Corporate Cricket League - Final",
-        venue: "Skyline Arena",
-        date: new Date(Date.now() + 86400000), // Tomorrow
+        hostId: coachUser.id, // Just picking someone as host
+        gameType: "Cricket",
+        date: new Date(Date.now() + 86400000),
         time: "10:00 AM",
-        umpire: umpire._id,
-        status: "upcoming",
-        teams: ["Tech Titans", "Finance Flyers"]
+        umpireId: umpireUser.id,
+        status: "ACTIVE",
+        city: "Mumbai",
+        state: "Maharashtra"
       },
       {
-        name: "Weekend Bash - Group Stage",
-        venue: "Green Field Turf",
-        date: new Date(Date.now() + 172800000), // Day after tomorrow
+        hostId: coachUser.id,
+        gameType: "Cricket",
+        date: new Date(Date.now() + 172800000),
         time: "04:00 PM",
-        umpire: umpire._id,
-        status: "upcoming",
-        teams: ["Strikers FC", "United XI"]
-      },
-      {
-        name: "Junior Championship",
-        venue: "Olympic Sports Complex",
-        date: new Date(Date.now() - 86400000), // Yesterday
-        time: "09:00 AM",
-        umpire: umpire._id,
-        status: "completed",
-        teams: ["Young Guns", "Rising Stars"],
-        result: "Young Guns won by 2 wickets"
+        umpireId: umpireUser.id,
+        status: "ACTIVE",
+        city: "Pune",
+        state: "Maharashtra"
       }
     ];
-    await Match.insertMany(matches);
-    console.log("Matches seeded for Umpire.");
+
+    for (const m of matchData) {
+      await prisma.hostedGame.create({ data: m });
+    }
+    logger.info("Matches seeded for Umpire.");
 
     // 5. Seed Sessions for Coach
-    await Session.deleteMany({ coach: coach._id });
-    const sessions = [
+    await prisma.professionalSession.deleteMany({
+      where: { ownerId: coachProfile.id }
+    });
+
+    const sessionData = [
       {
-        name: "Advanced Batting Drills",
-        type: "Group",
-        date: new Date(Date.now() + 43200000), // Today evening
-        time: "06:00 PM",
-        coach: coach._id,
-        students: studentIds,
-        status: "upcoming"
+        ownerId: coachProfile.id,
+        title: "Advanced Batting Drills",
+        type: "GROUP",
+        date: new Date(Date.now() + 43200000),
+        startTime: "06:00 PM",
+        status: "UPCOMING",
+        students: {
+          connect: playerIds.map(id => ({ id }))
+        }
       },
       {
-        name: "Private Bowling Masterclass",
-        type: "Private",
-        date: new Date(Date.now() + 259200000), // 3 days later
-        time: "08:00 AM",
-        coach: coach._id,
-        students: [studentIds[0]],
-        status: "upcoming"
-      },
-      {
-        name: "Strength & Conditioning",
-        type: "Group",
-        date: new Date(Date.now() - 172800000), // 2 days ago
-        time: "07:00 AM",
-        coach: coach._id,
-        students: studentIds,
-        status: "completed"
+        ownerId: coachProfile.id,
+        title: "Private Bowling Masterclass",
+        type: "PRIVATE",
+        date: new Date(Date.now() + 259200000),
+        startTime: "08:00 AM",
+        status: "UPCOMING",
+        students: {
+          connect: [{ id: playerIds[0] }]
+        }
       }
     ];
-    await Session.insertMany(sessions);
-    console.log("Sessions seeded for Coach.");
 
-    console.log("Partner seeding successful!");
+    for (const s of sessionData) {
+      await prisma.professionalSession.create({ data: s });
+    }
+    logger.info("Sessions seeded for Coach.");
+
+    logger.info("Partner seeding successful!");
+    await prisma.$disconnect();
     process.exit(0);
   } catch (error) {
-    console.error("Seeding error:", error);
+    logger.error("Seeding error:", error);
+    await prisma.$disconnect();
     process.exit(1);
   }
 };
 
 seedPartnerData();
+

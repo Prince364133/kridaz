@@ -1,10 +1,11 @@
-import Notification from "../models/notification.model.js";
+import { prisma } from "../config/prisma.js";
+import logger from "./logger.js";
 
 /**
  * Create a new notification in the database
  * @param {Object} params - Notification parameters
- * @param {string} params.recipientId - ID of the User, Owner, or Admin
- * @param {string} params.recipientModel - "User", "Owner", or "Admin"
+ * @param {string} params.recipientId - ID of the User or Owner
+ * @param {string} params.recipientModel - "User" or "Owner"
  * @param {string} params.title - Notification title
  * @param {string} params.message - Notification content
  * @param {string} params.type - Category (e.g., BOOKING, DISPUTE, WALLET)
@@ -21,19 +22,29 @@ export const createNotification = async ({
   metadata = {}
 }) => {
   try {
-    const notification = await Notification.create({
-      recipient: recipientId,
-      recipientModel,
+    const data = {
       title,
       message,
       type,
-      actionUrl,
+      link: actionUrl,
       metadata,
+      recipientModel,
       isRead: false
+    };
+
+    if (recipientModel === 'User' || recipientModel === 'Admin') {
+      data.userId = recipientId;
+    } else if (recipientModel === 'Owner') {
+      data.ownerId = recipientId;
+    }
+
+    const notification = await prisma.notification.create({
+      data
     });
     return notification;
   } catch (error) {
-    console.error("[NOTIFICATION_UTIL] Error creating notification:", error);
+    logger.error("[NOTIFICATION_UTIL] Error creating notification", error);
     return null;
   }
 };
+

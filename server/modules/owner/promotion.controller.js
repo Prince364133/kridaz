@@ -1,44 +1,41 @@
-import Coupon from "../../models/coupon.model.js";
-import Turf from "../../models/turf.model.js";
-import Owner from "../../models/owner.model.js";
+import { prisma } from "../../config/prisma.js";
+import logger from "../../utils/logger.js";
 
 // Create a new promotion/coupon
 export const createPromotion = async (req, res) => {
   try {
     const { code, discountType, discountValue, validUntil, usageLimit, turfId } = req.body;
-    const ownerData = req.owner;
-    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
-    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
-    const ownerId = ownerRecord._id;
+    const { id: ownerId } = req.owner;
 
     // Check if code already exists
-    const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
+    const existingCoupon = await prisma.coupon.findUnique({ where: { code: code.toUpperCase() } });
     if (existingCoupon) {
       return res.status(400).json({ message: "Coupon code already exists" });
     }
 
     // If a specific turf is selected, verify the owner owns it
     if (turfId && turfId !== "all") {
-      const turf = await Turf.findOne({ _id: turfId, owner: ownerId });
+      const turf = await prisma.turf.findFirst({ where: { id: turfId, ownerId } });
       if (!turf) {
         return res.status(403).json({ message: "You do not own this turf" });
       }
     }
 
-    const newCoupon = new Coupon({
-      code: code.toUpperCase(),
-      ownerId,
-      turfId: turfId === "all" ? null : turfId,
-      discountType,
-      discountValue,
-      validUntil,
-      usageLimit: usageLimit || 0
+    const newCoupon = await prisma.coupon.create({
+      data: {
+        code: code.toUpperCase(),
+        ownerId,
+        turfId: turfId === "all" ? null : turfId,
+        discountType,
+        discountValue: parseFloat(discountValue),
+        validUntil: new Date(validUntil),
+        usageLimit: parseInt(usageLimit) || 0
+      }
     });
 
-    await newCoupon.save();
     res.status(201).json({ message: "Promotion created successfully", coupon: newCoupon });
   } catch (error) {
-    console.error("Error creating promotion:", error);
+    logger.error("Error creating promotion:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -46,15 +43,16 @@ export const createPromotion = async (req, res) => {
 // Get all promotions for the logged-in owner
 export const getPromotions = async (req, res) => {
   try {
-    const ownerData = req.owner;
-    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
-    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
-    const ownerId = ownerRecord._id;
-    const coupons = await Coupon.find({ ownerId }).populate("turfId", "name").sort({ createdAt: -1 });
+    const { id: ownerId } = req.owner;
+    const coupons = await prisma.coupon.findMany({
+      where: { ownerId },
+      include: { turf: { select: { name: true } } },
+      orderBy: { createdAt: 'desc' }
+    });
     
     // Format the response for the frontend
     const formattedCoupons = coupons.map(c => ({
-      _id: c._id,
+      id: c.id,
       code: c.code,
       discountType: c.discountType,
       discountValue: c.discountValue,
@@ -62,12 +60,12 @@ export const getPromotions = async (req, res) => {
       usageLimit: c.usageLimit,
       timesUsed: c.timesUsed,
       isActive: c.isActive,
-      turfName: c.turfId ? c.turfId.name : "All Grounds"
+      turfName: c.turf ? c.turf.name : "All Grounds"
     }));
 
     res.status(200).json(formattedCoupons);
   } catch (error) {
-    console.error("Error fetching promotions:", error);
+    logger.error("Error fetching promotions:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -76,19 +74,18 @@ export const getPromotions = async (req, res) => {
 export const deletePromotion = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerData = req.owner;
-    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
-    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
-    const ownerId = ownerRecord._id;
+    const { id: ownerId } = req.owner;
 
-    const coupon = await Coupon.findOneAndDelete({ _id: id, ownerId });
+    const coupon = await prisma.coupon.findFirst({ where: { id, ownerId } });
     if (!coupon) {
       return res.status(404).json({ message: "Promotion not found" });
     }
 
+    await prisma.coupon.delete({ where: { id } });
+
     res.status(200).json({ message: "Promotion deleted successfully" });
   } catch (error) {
-    console.error("Error deleting promotion:", error);
+    logger.error("Error deleting promotion:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -97,22 +94,22 @@ export const deletePromotion = async (req, res) => {
 export const togglePromotionStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const ownerData = req.owner;
-    const ownerRecord = await Owner.findOne({ $or: [{ _id: ownerData.ownerId }, { userId: ownerData.id }] });
-    if (!ownerRecord) return res.status(404).json({ message: "Owner not found" });
-    const ownerId = ownerRecord._id;
+    const { id: ownerId } = req.owner;
 
-    const coupon = await Coupon.findOne({ _id: id, ownerId });
+    const coupon = await prisma.coupon.findFirst({ where: { id, ownerId } });
     if (!coupon) {
       return res.status(404).json({ message: "Promotion not found" });
     }
 
-    coupon.isActive = !coupon.isActive;
-    await coupon.save();
+    const updatedCoupon = await prisma.coupon.update({
+      where: { id },
+      data: { isActive: !coupon.isActive }
+    });
 
-    res.status(200).json({ message: "Promotion status updated", isActive: coupon.isActive });
+    res.status(200).json({ message: "Promotion status updated", isActive: updatedCoupon.isActive });
   } catch (error) {
-    console.error("Error toggling promotion status:", error);
+    logger.error("Error toggling promotion status:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+

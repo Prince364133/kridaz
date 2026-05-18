@@ -15,17 +15,18 @@ export const generateShortId = () => {
 };
 
 /**
- * Computes a comprehensive snapshot of the live score for overlays and broadcast
+ * Computes a comprehensive snapshot of the live score for overlays and broadcast.
+ * @param {Object} scoring - The CricketMatch Prisma object (includes innings, playerStats, timeline).
+ * @param {Object} match - The HostedGame Prisma object (includes teams/slots).
  */
-export const computeScoreSnapshot = (scoringDoc, matchDoc) => {
-  const currentInningsIndex = scoringDoc.currentInningsIndex || 0;
-  const currentInnings = scoringDoc.innings[currentInningsIndex];
+export const computeScoreSnapshot = (scoring, match) => {
+  const currentInningsIndex = scoring.currentInningsIndex || 0;
+  const currentInnings = scoring.innings.find(i => i.inningsIndex === currentInningsIndex);
   
   if (!currentInnings) return null;
 
-  const battingTeamName = currentInnings.battingTeam === "teamA" ? 
-    (matchDoc.teams?.teamA?.name || "Team A") : 
-    (matchDoc.teams?.teamB?.name || "Team B");
+  const isTeamABatting = currentInnings.battingTeam === "teamA";
+  const battingTeamName = isTeamABatting ? (match.teamA?.name || "Team A") : (match.teamB?.name || "Team B");
 
   // Calculate Overs & Balls
   const totalValidBalls = currentInnings.totalBalls || 0;
@@ -38,86 +39,74 @@ export const computeScoreSnapshot = (scoringDoc, matchDoc) => {
   const totalWickets = currentInnings.totalWickets || 0;
   const crr = totalValidBalls > 0 ? (totalRuns / (totalValidBalls / 6)).toFixed(2) : "0.00";
 
-  // Last 6 balls
-  const lastBalls = scoringDoc.timeline.slice(-6).map(ball => {
+  // Last 6 balls from timeline
+  const lastBalls = (scoring.timeline || []).slice(-6).map(ball => {
     if (ball.isWicket) return { type: 'wicket', label: 'W', isExtra: ball.isExtra };
-    if (ball.runs === 4) return { type: 'boundary', label: '4', isExtra: ball.isExtra };
-    if (ball.runs === 6) return { type: 'boundary', label: '6', isExtra: ball.isExtra };
+    if (ball.runs === 4 && !ball.isExtra) return { type: 'boundary', label: '4', isExtra: false };
+    if (ball.runs === 6 && !ball.isExtra) return { type: 'boundary', label: '6', isExtra: false };
     return { type: 'run', label: ball.runs.toString(), isExtra: ball.isExtra };
   });
 
-  // Calculate Target & Chase Info (if 2nd Innings)
+  // Target & Chase Info
   let target = null;
   let runsNeeded = null;
   let ballsRemaining = null;
   
   if (currentInningsIndex === 1) {
-    const firstInnings = scoringDoc.innings[0];
+    const firstInnings = scoring.innings.find(i => i.inningsIndex === 0);
     target = (firstInnings?.totalRuns || 0) + 1;
     runsNeeded = Math.max(0, target - totalRuns);
-    
-    // Use match-specific overs if available
-    const maxOvers = matchDoc.oversPerInnings || 20;
+    const maxOvers = match.oversPerInnings || 20;
     ballsRemaining = Math.max(0, (maxOvers * 6) - totalValidBalls);
   }
 
-  const result = scoringDoc.result || null;
-
-  // Find player name from matchDoc slots
+  // Resolver for player names using slots
   const getPlayerName = (userId) => {
     if (!userId) return "Unknown";
-    const idStr = userId.toString();
     const allSlots = [
-      ...(matchDoc.teams?.teamA?.slots || []),
-      ...(matchDoc.teams?.teamB?.slots || [])
+      ...(match.teamA?.slots || []),
+      ...(match.teamB?.slots || [])
     ];
-    const slot = allSlots.find(s => s.user?._id?.toString() === idStr || s.user === idStr);
-    return slot?.user?.name || slot?.user?.username || "Player";
+    const slot = allSlots.find(s => s.userId === userId);
+    return slot?.user?.name || "Player";
   };
 
-  // Find active batters
-  const activeBatters = scoringDoc.battingStats?.filter(b => b.outStatus === "NOT_OUT").map(b => ({
-    id: b.user,
-    name: getPlayerName(b.user),
-    runs: b.runs,
-    balls: b.balls,
-    fours: b.fours,
-    sixes: b.sixes,
-    strikeRate: b.strikeRate
-  })) || [];
+  // Active Batters
+  const activeBatters = [scoring.strikerId, scoring.nonStrikerId].filter(id => id).map(id => {
+    const stat = scoring.playerStats.find(s => s.userId === id);
+    return {
+      id: id,
+      name: getPlayerName(id),
+      runs: stat?.battingRuns || 0,
+      balls: stat?.battingBalls || 0,
+      fours: stat?.battingFours || 0,
+      sixes: stat?.battingSixes || 0,
+      strikeRate: stat?.battingBalls > 0 ? Number(((stat.battingRuns / stat.battingBalls) * 100).toFixed(2)) : 0
+    };
+  });
 
-  // Find current bowler from last ball
+  // Current Bowler
   let currentBowler = null;
-  const lastBall = scoringDoc.timeline[scoringDoc.timeline.length - 1];
-  if (lastBall?.bowler) {
-    const bStats = scoringDoc.bowlingStats?.find(b => b.user?.toString() === lastBall.bowler.toString());
+  if (scoring.bowlerId) {
+    const bStat = scoring.playerStats.find(s => s.userId === scoring.bowlerId);
     currentBowler = {
-      id: lastBall.bowler,
-      name: getPlayerName(lastBall.bowler),
-      overs: bStats ? Math.floor(bStats.balls / 6) : 0,
-      balls: bStats ? (bStats.balls % 6) : 0,
-      runs: bStats?.runs || 0,
-      wickets: bStats?.wickets || 0,
-      economy: bStats?.economy || 0
+      id: scoring.bowlerId,
+      name: getPlayerName(scoring.bowlerId),
+      overs: bStat ? Math.floor(bStat.bowlingBalls / 6) : 0,
+      balls: bStat ? (bStat.bowlingBalls % 6) : 0,
+      runs: bStat?.bowlingRuns || 0,
+      wickets: bStat?.bowlingWickets || 0,
+      economy: bStat?.bowlingBalls > 0 ? Number(((bStat.bowlingRuns / bStat.bowlingBalls) * 6).toFixed(2)) : 0
     };
   }
 
-  // Calculate Partnership
-  const activeBatStats = scoringDoc.battingStats?.filter(b => b.outStatus === "NOT_OUT") || [];
-  let partnershipRuns = 0;
-  let partnershipBalls = 0;
-  if (activeBatStats.length >= 2) {
-    // This is a simplification; a true partnership would track since the last wicket.
-    // For now, we'll sum the current batters' runs/balls as a proxy for the current stand.
-    partnershipRuns = activeBatStats.reduce((sum, b) => sum + (b.runs || 0), 0);
-    partnershipBalls = activeBatStats.reduce((sum, b) => sum + (b.balls || 0), 0);
-  }
-
   return {
-    matchId: scoringDoc.matchId,
+    matchId: scoring.gameId,
     battingTeamName,
     totalRuns,
     totalWickets,
+    runs: totalRuns,
+    wickets: totalWickets,
     overs,
     balls,
     overString,
@@ -127,12 +116,8 @@ export const computeScoreSnapshot = (scoringDoc, matchDoc) => {
     ballsRemaining,
     rrr: (runsNeeded && ballsRemaining) ? ((runsNeeded / ballsRemaining) * 6).toFixed(2) : null,
     last6Balls: lastBalls,
-    lastBallRaw: lastBall || null,
     batters: activeBatters,
     bowler: currentBowler,
-    partnership: { runs: partnershipRuns, balls: partnershipBalls },
-    commentary: matchDoc.lastCommentary || null,
-    tickerTheme: matchDoc.tickerTheme || "classic",
-    result
+    result: scoring.status === "COMPLETED" ? "Match Ended" : null
   };
 };

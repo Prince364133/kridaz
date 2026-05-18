@@ -1,20 +1,25 @@
-import FeatureFlag from "../../models/featureFlag.model.js";
+import { prisma } from "../../config/prisma.js";
+import logger from "../../utils/logger.js";
 
 // @desc    Get all feature flags
 // @route   GET /api/features
 // @access  Public
 export const getAllFeatureFlags = async (req, res) => {
   try {
-    const flags = await FeatureFlag.find({});
+    const flags = await prisma.featureFlag.findMany({});
     // Convert array to an object map { key: enabled } for easier frontend consumption
     const flagMap = flags.reduce((acc, flag) => {
       acc[flag.key] = flag.enabled;
       return acc;
     }, {});
 
-    res.status(200).json({ success: true, data: flags, flagsMap: flagMap });
+    res.status(200).json({ 
+      success: true, 
+      data: flags, 
+      flagsMap: flagMap 
+    });
   } catch (error) {
-    console.error("Error in getAllFeatureFlags:", error);
+    logger.error("Error in getAllFeatureFlags:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -27,18 +32,22 @@ export const toggleFeatureFlag = async (req, res) => {
     const { key } = req.params;
     const { enabled } = req.body;
 
-    let flag = await FeatureFlag.findOne({ key });
+    const existingFlag = await prisma.featureFlag.findUnique({ where: { key } });
 
-    if (!flag) {
+    if (!existingFlag) {
       return res.status(404).json({ success: false, message: "Feature flag not found" });
     }
 
-    flag.enabled = enabled !== undefined ? enabled : !flag.enabled;
-    await flag.save();
+    const updatedFlag = await prisma.featureFlag.update({
+      where: { key },
+      data: {
+        enabled: enabled !== undefined ? enabled : !existingFlag.enabled
+      }
+    });
 
-    res.status(200).json({ success: true, data: flag });
+    res.status(200).json({ success: true, data: updatedFlag });
   } catch (error) {
-    console.error("Error in toggleFeatureFlag:", error);
+    logger.error("Error in toggleFeatureFlag:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -63,14 +72,24 @@ export const seedFeatureFlags = async (req, res) => {
       },
     ];
 
-    for (const df of defaultFlags) {
-      await FeatureFlag.updateOne({ key: df.key }, { $set: df }, { upsert: true });
-    }
+    await prisma.$transaction(
+      defaultFlags.map(df => 
+        prisma.featureFlag.upsert({
+          where: { key: df.key },
+          update: { name: df.name, description: df.description, enabled: df.enabled },
+          create: df
+        })
+      )
+    );
 
-    const allFlags = await FeatureFlag.find({});
-    res.status(200).json({ success: true, data: allFlags, message: "Flags seeded successfully" });
+    const allFlags = await prisma.featureFlag.findMany({});
+    res.status(200).json({ 
+      success: true, 
+      data: allFlags, 
+      message: "Flags seeded successfully" 
+    });
   } catch (error) {
-    console.error("Error in seedFeatureFlags:", error);
+    logger.error("Error in seedFeatureFlags:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

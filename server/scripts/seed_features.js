@@ -1,14 +1,11 @@
-import mongoose from "mongoose";
+import { prisma } from "../config/prisma.js";
 import dotenv from "dotenv";
-import FeatureFlag from "../models/featureFlag.model.js";
+import logger from "../utils/logger.js";
 
-dotenv.config({ path: "../.env" });
+dotenv.config();
 
 const seed = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/kridaz");
-    console.log("Connected to MongoDB.");
-
     const defaultFlags = [
       {
         key: "find_professionals",
@@ -24,14 +21,20 @@ const seed = async () => {
       },
     ];
 
-    for (const df of defaultFlags) {
-      await FeatureFlag.updateOne({ key: df.key }, { $set: df }, { upsert: true });
-    }
+    await prisma.$transaction(
+      defaultFlags.map(df => 
+        prisma.featureFlag.upsert({
+          where: { key: df.key },
+          update: df,
+          create: df
+        })
+      )
+    );
 
-    console.log("Feature flags seeded successfully.");
+    logger.info("Feature flags seeded successfully.");
     process.exit(0);
   } catch (err) {
-    console.error("Error:", err);
+    logger.error("Error:", err);
     process.exit(1);
   }
 };

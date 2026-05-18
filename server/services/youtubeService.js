@@ -1,23 +1,30 @@
 import { google } from 'googleapis';
-import User from '../models/user.model.js';
+import { prisma } from '../config/prisma.js';
 import sharp from 'sharp';
 import { Readable } from 'stream';
+import logger from "../utils/logger.js";
 
 /**
  * Builds an authenticated Google API client for a given user.
- * Handles token refresh automatically.
+ * Reads socialAccounts JSON from Prisma User and handles token refresh.
  */
 export async function getYoutubeClientForUser(userId, accountId = null) {
-  const user = await User.findById(userId).select('socialAccounts');
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { socialAccounts: true }
+  });
+
   if (!user || !user.socialAccounts) {
     throw new Error('User not found or social accounts missing.');
   }
-  
+
+  const accounts = Array.isArray(user.socialAccounts) ? user.socialAccounts : [];
+
   let account;
   if (accountId) {
-    account = user.socialAccounts.find(acc => acc.platform === 'youtube' && acc.accountId === accountId);
+    account = accounts.find(acc => acc.platform === 'youtube' && acc.accountId === accountId);
   } else {
-    account = user.socialAccounts.find(acc => acc.platform === 'youtube');
+    account = accounts.find(acc => acc.platform === 'youtube');
   }
 
   if (!account?.accessToken) {
@@ -33,26 +40,35 @@ export async function getYoutubeClientForUser(userId, accountId = null) {
   oauth2Client.setCredentials({
     access_token: account.accessToken,
     refresh_token: account.refreshToken,
-    expiry_date: account.expiry?.getTime()
+    expiry_date: account.expiry ? new Date(account.expiry).getTime() : undefined
   });
 
-  // Auto-refresh logic (simplified for multi-account)
-  const expiresAt = account.expiry?.getTime() || 0;
+  // Auto-refresh logic for expiring tokens
+  const expiresAt = account.expiry ? new Date(account.expiry).getTime() : 0;
   if (expiresAt < Date.now() + 5 * 60 * 1000 && account.refreshToken) {
     try {
       const { credentials } = await oauth2Client.refreshAccessToken();
-      await User.updateOne(
-        { _id: userId, 'socialAccounts.accountId': account.accountId },
-        { 
-          $set: { 
-            'socialAccounts.$.accessToken': credentials.access_token,
-            'socialAccounts.$.expiry': new Date(credentials.expiry_date)
-          } 
+
+      // Update the specific socialAccount entry via Prisma JSON update
+      const updatedAccounts = accounts.map(acc => {
+        if (acc.platform === 'youtube' && acc.accountId === account.accountId) {
+          return {
+            ...acc,
+            accessToken: credentials.access_token,
+            expiry: new Date(credentials.expiry_date).toISOString()
+          };
         }
-      );
+        return acc;
+      });
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: { socialAccounts: updatedAccounts }
+      });
+
       oauth2Client.setCredentials(credentials);
     } catch (err) {
-      console.error("Token refresh failed", err);
+      logger.error('[YouTube] Token refresh failed:', err.message);
     }
   }
 
@@ -79,7 +95,7 @@ export async function createYoutubeLiveStream(userId, {
       part: ['snippet', 'status', 'contentDetails'],
       requestBody: {
         snippet: {
-          title:              title.substring(0, 100),    // YouTube 100 char limit
+          title:              title.substring(0, 100),
           description:        (description || '').substring(0, 5000),
           scheduledStartTime: scheduledStartTime
         },
@@ -88,11 +104,11 @@ export async function createYoutubeLiveStream(userId, {
           selfDeclaredMadeForKids: false
         },
         contentDetails: {
-          enableAutoStart:    true,    // stream starts when OBS connects
-          enableAutoStop:     true,    // stream ends when OBS disconnects
-          enableDvr:          true,    // allows viewers to rewind live stream
-          enableEmbed:        true,    // allow embedding on your platform
-          latencyPreference:  'normal' // "ultraLow" | "low" | "normal"
+          enableAutoStart:   true,
+          enableAutoStop:    true,
+          enableDvr:         true,
+          enableEmbed:       true,
+          latencyPreference: 'normal'
         }
       }
     });
@@ -101,7 +117,7 @@ export async function createYoutubeLiveStream(userId, {
     const broadcastId = broadcast.id;
     const liveChatId = broadcast.snippet.liveChatId;
 
-    // STEP B: Create the ingestion stream (this gives the stream key)
+    // STEP B: Create the ingestion stream
     const streamResponse = await youtube.liveStreams.insert({
       part: ['snippet', 'cdn', 'contentDetails'],
       requestBody: {
@@ -109,20 +125,20 @@ export async function createYoutubeLiveStream(userId, {
           title: `${title} — Ingestion Stream`
         },
         cdn: {
-          frameRate:      resolution === '480p' ? '30fps' : '60fps',
-          ingestionType:  'rtmp',
-          resolution:     resolution || '1080p'
+          frameRate:     resolution === '480p' ? '30fps' : '60fps',
+          ingestionType: 'rtmp',
+          resolution:    resolution || '1080p'
         },
         contentDetails: {
-          isReusable: false    // tied to this specific broadcast
+          isReusable: false
         }
       }
     });
 
     const stream = streamResponse.data;
     const streamId  = stream.id;
-    const rtmpUrl   = stream.cdn.ingestionInfo.ingestionAddress;    // e.g. "rtmps://a.rtmp.youtube.com/live2/"
-    const streamKey = stream.cdn.ingestionInfo.streamName;          // the secret key
+    const rtmpUrl   = stream.cdn.ingestionInfo.ingestionAddress;
+    const streamKey = stream.cdn.ingestionInfo.streamName;
 
     // STEP C: Bind broadcast to ingestion stream
     await youtube.liveBroadcasts.bind({
@@ -131,12 +147,11 @@ export async function createYoutubeLiveStream(userId, {
       streamId: streamId
     });
 
-    // Return everything the UI needs:
     return {
       broadcastId,
       streamId,
       liveChatId,
-      youtubeVideoId: broadcastId,   // video ID = broadcast ID for live streams
+      youtubeVideoId: broadcastId,
       rtmpUrl,
       streamKey,
       watchUrl: `https://www.youtube.com/watch?v=${broadcastId}`,
@@ -157,7 +172,6 @@ export async function uploadThumbnail(userId, broadcastId, imageBuffer, mimeType
   try {
     const youtube = await getYoutubeClientForUser(userId);
 
-    // Resize to 1280×720 using sharp (if not already that size):
     const resized = await sharp(imageBuffer)
       .resize(1280, 720, { fit: 'cover', position: 'center' })
       .jpeg({ quality: 90 })
@@ -167,14 +181,13 @@ export async function uploadThumbnail(userId, broadcastId, imageBuffer, mimeType
       videoId: broadcastId,
       media: {
         mimeType: 'image/jpeg',
-        body:     Readable.from(resized)   // Node.js Readable stream
+        body:     Readable.from(resized)
       }
     });
 
     return { success: true };
   } catch (err) {
-    // Thumbnail failure is non-critical — don't fail the whole stream creation
-    console.warn('[YouTube] Thumbnail upload failed:', err.message);
+    logger.warn('[YouTube] Thumbnail upload failed:', err.message);
     return { success: false, error: err.message };
   }
 }
@@ -190,7 +203,6 @@ export async function listUserBroadcasts(userId, maxResults = 10) {
       part: ['snippet', 'status', 'contentDetails'],
       mine: true,
       maxResults,
-      // Fetch all statuses to show both upcoming and past:
       broadcastStatus: 'all',
       broadcastType:   'all'
     });
@@ -241,7 +253,6 @@ export async function updateBroadcast(userId, broadcastId, { title, description,
 
 /**
  * Transitions the broadcast to "complete" status
- * This archives it on YouTube as a regular video
  */
 export async function endBroadcast(userId, broadcastId, accountId = null) {
   const youtube = await getYoutubeClientForUser(userId, accountId);
@@ -254,8 +265,7 @@ export async function endBroadcast(userId, broadcastId, accountId = null) {
     });
     return { success: true };
   } catch (err) {
-    // If already complete or not found — don't crash
-    console.warn('[YouTube] End broadcast failed:', err.message);
+    logger.warn('[YouTube] End broadcast failed:', err.message);
     return { success: false, error: err.message };
   }
 }
@@ -272,6 +282,9 @@ export async function deleteBroadcast(userId, broadcastId) {
   }
 }
 
+/**
+ * Fetches and caches YouTube channel info into User.socialAccounts (Prisma JSON field)
+ */
 export async function fetchAndStoreYoutubeChannel(userId, accessToken) {
   try {
     const oauth2Client = new google.auth.OAuth2();
@@ -286,83 +299,108 @@ export async function fetchAndStoreYoutubeChannel(userId, accessToken) {
     const channel = response.data.items?.[0];
     if (!channel) return;
 
-    const user = await User.findById(userId);
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { socialAccounts: true }
+    });
     if (!user) return;
 
-    user.youtubeChannelId = channel.id;
-    user.youtubeChannelName = channel.snippet.title;
-    user.youtubeChannelThumb = channel.snippet.thumbnails?.default?.url || null;
+    const accounts = Array.isArray(user.socialAccounts) ? user.socialAccounts : [];
 
-    const existingIndex = user.socialAccounts.findIndex(acc => acc.accountId === channel.id && acc.platform === 'youtube');
     const accountData = {
-      platform: 'youtube',
-      accountId: channel.id,
+      platform:    'youtube',
+      accountId:   channel.id,
       accountName: channel.snippet.title,
       accessToken: accessToken,
-      thumbnail: channel.snippet.thumbnails?.default?.url || null,
-      expiry: new Date(Date.now() + 3600 * 1000)
+      thumbnail:   channel.snippet.thumbnails?.default?.url || null,
+      expiry:      new Date(Date.now() + 3600 * 1000).toISOString()
     };
 
-    if (existingIndex > -1) {
-      user.socialAccounts[existingIndex] = { ...user.socialAccounts[existingIndex].toObject(), ...accountData };
-    } else {
-      user.socialAccounts.push(accountData);
-    }
+    const existingIndex = accounts.findIndex(
+      acc => acc.accountId === channel.id && acc.platform === 'youtube'
+    );
 
-    await user.save();
+    const updatedAccounts = existingIndex > -1
+      ? accounts.map((acc, i) => (i === existingIndex ? { ...acc, ...accountData } : acc))
+      : [...accounts, accountData];
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        youtubeChannelId:    channel.id,
+        youtubeChannelName:  channel.snippet.title,
+        youtubeChannelThumb: channel.snippet.thumbnails?.default?.url || null,
+        socialAccounts:      updatedAccounts
+      }
+    });
   } catch (err) {
-    console.warn('[YouTube] Could not fetch channel info:', err.message);
+    logger.warn('[YouTube] Could not fetch channel info:', err.message);
   }
 }
+
+/**
+ * Fetches live channel statistics from YouTube API.
+ * Falls back to cached data from Prisma if API call fails.
+ */
 export async function getChannelStats(userId) {
   try {
-    console.log(`[YouTube] Fetching stats for user: ${userId}`);
     const youtube = await getYoutubeClientForUser(userId);
-    console.log(`[YouTube] Client created for user: ${userId}`);
     const response = await youtube.channels.list({
       part: ['statistics', 'snippet'],
       mine: true
     });
 
     const channel = response.data.items?.[0];
-    if (!channel) {
-      console.warn(`[YouTube] No channel found for user: ${userId}`);
-      return null;
-    }
-
-    console.log(`[YouTube] Found channel: ${channel.snippet.title} for user: ${userId}`);
+    if (!channel) return null;
 
     return {
       subscribers: parseInt(channel.statistics.subscriberCount) || 0,
-      views: parseInt(channel.statistics.viewCount) || 0,
-      videos: parseInt(channel.statistics.videoCount) || 0,
-      name: channel.snippet.title,
-      thumbnail: channel.snippet.thumbnails?.default?.url || null
+      views:       parseInt(channel.statistics.viewCount) || 0,
+      videos:      parseInt(channel.statistics.videoCount) || 0,
+      name:        channel.snippet.title,
+      thumbnail:   channel.snippet.thumbnails?.default?.url || null
     };
   } catch (err) {
-    console.warn('[YouTube] Could not fetch live channel stats:', err.message);
-    
-    // Fallback: Try to get from cached data in User model
+    logger.warn('[YouTube] Could not fetch live channel stats:', err.message);
+
+    // Fallback: read from Prisma cache
     try {
-      const user = await User.findById(userId).select('socialAccounts youtubeChannelName youtubeChannelThumb');
-      const account = user?.socialAccounts?.find(acc => acc.platform === 'youtube');
-      
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { socialAccounts: true, youtubeChannelName: true, youtubeChannelThumb: true }
+      });
+
+      const accounts = Array.isArray(user?.socialAccounts) ? user.socialAccounts : [];
+      const account = accounts.find(acc => acc.platform === 'youtube');
+
       if (account || user?.youtubeChannelName) {
-        console.log('[YouTube] Returning cached statistics for user:', userId);
         const stats = account?.metadata?.statistics || {};
         return {
           subscribers: parseInt(stats.subscriberCount) || 0,
-          views: parseInt(stats.viewCount) || 0,
-          videos: parseInt(stats.videoCount) || 0,
-          name: account?.accountName || user?.youtubeChannelName || 'YouTube Channel',
-          thumbnail: account?.thumbnail || user?.youtubeChannelThumb || null,
-          isCached: true
+          views:       parseInt(stats.viewCount) || 0,
+          videos:      parseInt(stats.videoCount) || 0,
+          name:        account?.accountName || user?.youtubeChannelName || 'YouTube Channel',
+          thumbnail:   account?.thumbnail || user?.youtubeChannelThumb || null,
+          isCached:    true
         };
       }
     } catch (fallbackErr) {
-      console.error('[YouTube] Fallback stats retrieval failed:', fallbackErr.message);
+      logger.error('[YouTube] Fallback stats retrieval failed:', fallbackErr.message);
     }
-    
+
     return null;
   }
 }
+
+/**
+ * Creates a basic, unauthenticated Google OAuth2 client.
+ * Serves as a single source of truth for GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and YOUTUBE_REDIRECT_URI.
+ */
+export function createOAuth2Client() {
+  return new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.YOUTUBE_REDIRECT_URI || `${process.env.APP_BASE_URL || 'https://kridaz.com'}/api/youtube/oauth/callback`
+  );
+}
+

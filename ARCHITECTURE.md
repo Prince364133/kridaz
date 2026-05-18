@@ -6,18 +6,11 @@ Kridaz is a unified platform for turf booking and partner management (Venue Owne
 ## Directory Structure
 
 ### Backend (`/server`)
-- **`modules/`**: Domain-driven modules containing controllers, validators, and services.
-  - `auth/`: Authentication and registration.
-  - `turf/`: Turf management and search.
-  - `booking/`: Reservation and payment logic.
-  - `owner/`: Partner-specific dashboard and metrics.
-  - `review/`: Ratings and feedback.
-  - `blog/`: Article management.
-  - `player/`: Public profile management.
-  - `admin/`: System-level administration.
-- **`models/`**: Mongoose models for data persistence.
-- **`middleware/`**: Shared middleware (JWT, validation, error handling).
-- **`routes/`**: Route definitions that consume module controllers.
+- **`modules/`**: Domain-driven, self-contained vertical slices. Each module contains its own controllers, services, validators, and localized route trees (e.g. `routes/admin.routes.js`, `routes/user.routes.js`, `routes/public.routes.js`).
+- **`routes/`**: Centralized **Actor Gateways** (e.g., `admin.routes.js`, `owner.routes.js`, `user.routes.js`) that mount authentication wrappers and delegate directly to modular sub-routers.
+  - **`index.js`**: Central application gateway that registers and configures all system endpoints dynamically, maintaining complete actor segregation.
+- **`middleware/`**: Shared middleware including JWT authentication, standard request logging, and general error-handling boundaries.
+
 
 ### Frontend (`/client/user`)
 - **`src/components/`**: Atomic components and layout elements.
@@ -47,6 +40,6 @@ Kridaz is a unified platform for turf booking and partner management (Venue Owne
 - **Consistent Layering**: The separation of Controllers, Validators, and Services ensures that multiple developers can work on different layers without merge conflicts.
 
 ## Technologies
-- **Backend**: Node.js, Express, MongoDB (Mongoose), Zod.
+- **Backend**: Node.js, Express, PostgreSQL (Prisma ORM), Zod.
 - **Frontend**: React, Vite, Redux Toolkit, Tailwind CSS, Axios.
 - **Testing**: Jest, Supertest.

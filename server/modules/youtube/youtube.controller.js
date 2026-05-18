@@ -1,6 +1,6 @@
 import { youtubeService } from "../../services/youtubeService.js";
-import HostedGame from "../../models/hostedGame.model.js";
-import User from "../../models/user.model.js";
+import { prisma } from "../../config/prisma.js";
+import logger from "../../utils/logger.js";
 
 // NOTE: tempTokens was removed — tokens are now persisted in the User document
 // so they survive server restarts. The active OAuth flow lives in youtube.routes.js
@@ -31,16 +31,33 @@ export const oauthCallback = async (req, res) => {
     const tokens = await youtubeService.getTokens(code);
 
     if (userId) {
-      await User.findByIdAndUpdate(userId, {
-        youtubeAccessToken:  tokens.access_token,
-        youtubeRefreshToken: tokens.refresh_token || undefined,
-        youtubeTokenExpiry:  tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          youtubeAccessToken:  tokens.access_token,
+          youtubeRefreshToken: tokens.refresh_token || undefined,
+          youtubeTokenExpiry:  tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
+          oauth: {
+            upsert: {
+              create: {
+                youtubeAccessToken:  tokens.access_token,
+                youtubeRefreshToken: tokens.refresh_token || undefined,
+                youtubeTokenExpiry:  tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
+              },
+              update: {
+                youtubeAccessToken:  tokens.access_token,
+                youtubeRefreshToken: tokens.refresh_token || undefined,
+                youtubeTokenExpiry:  tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
+              }
+            }
+          }
+        }
       });
     }
 
     res.send("Authentication successful. You can close this window.");
   } catch (error) {
-    console.error("[YouTube] oauthCallback error:", error);
+    logger.error("[YouTube] oauthCallback error:", error);
     res.status(500).send("Authentication failed.");
   }
 };
@@ -55,9 +72,23 @@ export const createLiveStream = async (req, res) => {
   try {
     // ── Load tokens from DB ──────────────────────────────────────────────────
     const userId = req.user?.id;
-    const user = await User.findById(userId).select(
-      "youtubeAccessToken youtubeRefreshToken youtubeTokenExpiry"
-    );
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        youtubeAccessToken: true,
+        youtubeRefreshToken: true,
+        youtubeTokenExpiry: true,
+        oauth: {
+          select: {
+            youtubeAccessToken: true,
+            youtubeRefreshToken: true,
+            youtubeTokenExpiry: true
+          }
+        }
+      }
+    });
+
+    const oauth = user?.oauth || user;
 
     if (!user?.youtubeAccessToken) {
       return res.status(401).json({
@@ -67,32 +98,46 @@ export const createLiveStream = async (req, res) => {
     }
 
     const tokens = {
-      access_token:  user.youtubeAccessToken,
-      refresh_token: user.youtubeRefreshToken,
-      expiry_date:   user.youtubeTokenExpiry?.getTime(),
+      access_token:  oauth.youtubeAccessToken,
+      refresh_token: oauth.youtubeRefreshToken,
+      expiry_date:   oauth.youtubeTokenExpiry?.getTime(),
     };
 
     // ── Build broadcast ──────────────────────────────────────────────────────
-    const match = await HostedGame.findById(matchId);
+    const match = await prisma.hostedGame.findUnique({
+      where: { id: matchId },
+      include: {
+        teams: true
+      }
+    });
+    
     if (!match) {
       return res.status(404).json({ success: false, message: "Match not found" });
     }
 
+    const teamA = match.teams.find(t => t.teamKey === 'teamA');
+    const teamB = match.teams.find(t => t.teamKey === 'teamB');
+
     const broadcastDetails = {
       title: `${match.gameType} Match - Kridaz Live`,
-      description: `Live broadcast of the match between ${match.teams?.teamA?.name || "Team A"} and ${match.teams?.teamB?.name || "Team B"}.`,
+      description: `Live broadcast of the match between ${teamA?.name || "Team A"} and ${teamB?.name || "Team B"}.`,
       privacyStatus: "unlisted", // Change to public for actual broadcasting
     };
 
     const streamData = await youtubeService.createBroadcast(tokens, broadcastDetails);
 
-    match.youtubeVideoId = streamData.broadcastId;
-    match.streamStatus = "starting";
-    await match.save();
+    await prisma.hostedGame.update({
+      where: { id: matchId },
+      data: {
+        youtubeVideoId: streamData.broadcastId,
+        streamStatus: "starting"
+      }
+    });
 
     res.json({ success: true, streamData });
   } catch (error) {
-    console.error("[YouTube] createLiveStream error:", error);
+    logger.error("[YouTube] createLiveStream error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
+

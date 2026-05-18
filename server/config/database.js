@@ -1,37 +1,14 @@
-import mongoose from "mongoose";
-import dns from 'node:dns/promises';
+import { prisma } from "./prisma.js";
+import logger from "../utils/logger.js";
 
 export default async function connectDB() {
-  const host = process.env.MONGO_URI.split("@")[1].split(":")[0];
+  logger.info("[DATABASE] Verifying PostgreSQL connection..."); 
   try {
-    const lookup = await dns.lookup(host);
-    console.log(`[DATABASE] Host ${host} resolved to ${lookup.address}`);
-  } catch (dnsErr) {
-    console.error(`[DATABASE] DNS Resolution failed for ${host}:`, dnsErr.message);
-  }
-
-  console.log("[DATABASE] Attempting to connect to URI:", process.env.MONGO_URI.split("@")[1]); 
-  try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 15000, 
-      connectTimeoutMS: 15000,
-      maxPoolSize: 20,        // Default is 5, too low for production
-      minPoolSize: 5,         // Keep 5 warm at all times
-      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
-    });
-    console.log(`[DATABASE] Success! Connected to database: ${conn.connection.name}`);
-    
-    // List collections to verify access
-    const collections = await mongoose.connection.db.listCollections().toArray();
-    console.log("[DATABASE] Available Collections:", collections.map(c => c.name));
-    return conn;
+    await prisma.$queryRaw`SELECT 1`;
+    logger.info("[DATABASE] Success! Connected to PostgreSQL.");
+    return true;
   } catch (err) {
-    console.error("[DATABASE] Connection Failed!");
-    console.error("[DATABASE] Error Name:", err.name);
-    console.error("[DATABASE] Error Message:", err.message);
-    if (err.reason) {
-      console.error("[DATABASE] Error Reason:", JSON.stringify(err.reason, null, 2));
-    }
+    logger.error("[DATABASE] PostgreSQL Connection Failed!", err);
     throw err;
   }
 }

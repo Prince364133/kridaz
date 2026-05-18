@@ -1,17 +1,10 @@
 import { Server } from "socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { redisClient as redis, pubClient, subClient } from "./redis.js";
-import User from "../models/user.model.js";
-
+import { prisma } from "./prisma.js";
+import logger from "../utils/logger.js";
+import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 let io;
-
-const haversineDistance = (lat1, lng1, lat2, lng2) => {
-  const R = 6371000; // Earth radius in meters
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-};
 
 const socketConfig = (server) => {
   io = new Server(server, {
@@ -19,119 +12,68 @@ const socketConfig = (server) => {
     cors: {
       origin: process.env.CLIENT_URLS 
         ? process.env.CLIENT_URLS.split(",").map((url) => url.trim()) 
-        : ["http://localhost:5174", "https://kridaz.vercel.app"],
+        : ["https://kridaz.com", "https://owner.kridaz.com", "https://kridaz.vercel.app"],
     },
   });
 
-  // ── Redis Adapter (Enables horizontal scaling) ───────────────────────────────
   io.adapter(createAdapter(pubClient, subClient));
 
-  const onlineUsers = new Map(); // Local fallback — kept for within-process lookups
-
-  // ── Redis presence tracking ─────────────────────────────────────────────────
-
-  // Debounce: batch all presence changes within a 2-second window into one broadcast
-  let presenceTimer = null;
   const schedulePresenceBroadcast = async () => {
-    if (presenceTimer) return;
-    presenceTimer = setTimeout(async () => {
-      try {
+    try {
+      // Use distributed lock to prevent N broadcasts from N instances
+      const lockKey = 'kridaz:presence:broadcast:lock';
+      // Attempt to set lock with a 1000ms expiration, only if it does not exist (NX)
+      const acquired = await redis.set(lockKey, 'locked', 'PX', 1000, 'NX');
+      
+      if (acquired) {
         const count = await redis.scard('kridaz:online:users');
-        io.emit('online_users_count', { count });
-      } catch (e) { /* silent — presence is non-critical */ } finally {
-        presenceTimer = null;
+        io.emit(SOCKET.ONLINE_USERS_COUNT, { count });
       }
-    }, 2000);
+    } catch (e) { /* silent */ }
   };
 
   io.on("connection", (socket) => {
-    socket.on("setup", (userData) => {
-      const userId = userData?.id || userData?._id;
+    // TODO (Prometheus P4-2): Increment socket_connections_total gauge here
+
+    socket.on("setup", async (userData) => {
+      const userId = userData?.id;
       if (!userId) return;
 
       socket.userId = userId;
       socket.join(userId);
 
-      onlineUsers.set(userId, {
-        odid: userId,
-        socketId: socket.id,
-        lastSeen: new Date(),
-      });
+      // Update lastSeen in Postgres
+      prisma.user.update({
+        where: { id: userId },
+        data: { lastSeen: new Date() }
+      }).catch(() => {});
 
-      User.findByIdAndUpdate(userId, { lastSeen: new Date() }).catch(err => console.log("DB Update Error:", err));
-
-      // Redis-backed presence — cross-instance, debounced broadcast
-      redis.sadd('kridaz:online:users', userId.toString())
-        .then(() => redis.expire('kridaz:online:users', 86400)) // 24-hr TTL safety net
-        .then(() => schedulePresenceBroadcast())
-        .catch(() => { /* non-critical */ });
+      await redis.sadd('kridaz:online:users', userId.toString());
+      await redis.expire('kridaz:online:users', 86400);
+      schedulePresenceBroadcast();
+      
       socket.emit("connected");
     });
 
-    socket.on("join chat", (room) => socket.join(room));
-
-    socket.on("joinMatch", async (matchId) => {
-      socket.join(matchId);
-
-
-      // Phase 3: snap-on-join — send current live score immediately
-      try {
-        const { liveStateService } = await import("../services/liveState.service.js");
-        const snapshot = await liveStateService.getLiveScore(matchId);
-        if (snapshot) socket.emit("scoreUpdated", snapshot);
-      } catch (e) {
-        console.warn("[Socket] snap-on-join failed:", e.message);
-      }
-    });
-
-    // Phase 3: OBS overlay joins with a JWT token for verification
-    socket.on("overlayJoin", async ({ matchId, token }) => {
-      try {
-        const jwt = await import("jsonwebtoken");
-        const secret = process.env.OVERLAY_TOKEN_SECRET;
-        if (!secret) {
-          console.error('[FATAL] OVERLAY_TOKEN_SECRET env var is not set.');
-          socket.emit('overlayError', { message: 'Server configuration error' });
-          return;
-        }
-        const payload = jwt.default.verify(token, secret);
-        if (payload && payload.matchId?.toString() === matchId?.toString()) {
-          socket.join(matchId);
-          // Send current snapshot to this overlay client
-          const { liveStateService } = await import("../services/liveState.service.js");
-          const snapshot = await liveStateService.getLiveScore(matchId);
-          if (snapshot) socket.emit("scoreUpdated", snapshot);
-        } else {
-          socket.emit("overlayError", { message: "Invalid overlay token" });
-        }
-      } catch (e) {
-        console.warn("[Socket] overlayJoin token error:", e.message);
-        socket.emit("overlayError", { message: "Token verification failed" });
-      }
-    });
-
-    socket.on("scoreUpdate", (data) => {
-      const { matchId, score } = data;
-      socket.to(matchId).emit("scoreUpdated", score);
-    });
+    socket.on(SOCKET.JOIN_CHAT, (room) => socket.join(room));
 
     socket.on("typing", (room) => socket.in(room).emit("typing", room));
     socket.on("stop typing", (room) => socket.in(room).emit("stop typing", room));
 
-    socket.on("new message", (newMessageRecieved) => {
-      var chat = newMessageRecieved.chat;
-      if (!chat.users) return;
+    socket.on("new message", (newMessageReceived) => {
+      const chat = newMessageReceived.chat;
+      if (!chat) return;
 
-      chat.users.forEach((u) => {
-        const userId = u.user?._id || u.user;
-        const senderId =
-          newMessageRecieved.sender?.user?._id ||
-          newMessageRecieved.sender?.user ||
-          newMessageRecieved.sender?._id ||
-          newMessageRecieved.sender;
-        if (userId == senderId) return;
+      // Handle both legacy 'users' and new Prisma 'participants'
+      const participants = chat.participants || chat.users || [];
+      const sender = newMessageReceived.sender;
+      const senderId = sender?.userId || sender?.ownerId || sender?.id;
 
-        socket.in(userId).emit("message recieved", newMessageRecieved);
+      participants.forEach((p) => {
+        const targetId = p.userId || p.ownerId || p.user;
+        if (targetId && targetId !== senderId) {
+          socket.in(targetId).emit(SOCKET.MESSAGE_RECEIVED, newMessageReceived);
+        }
       });
     });
 
@@ -144,114 +86,72 @@ const socketConfig = (server) => {
       socket.in(chatId).emit("message deleted", { chatId, messageIds });
     });
 
-    socket.on("update_location", async (data) => {
+    socket.on("location:update", async (data) => {
       const { lat, lng } = data;
       if (!socket.userId || isNaN(lat) || isNaN(lng)) return;
-      try {
-        await User.findByIdAndUpdate(socket.userId, {
-          locationData: {
-            type: "Point",
-            coordinates: [parseFloat(lng), parseFloat(lat)]
-          }
-        });
-      } catch (err) {
-        console.error("Error updating location via socket:", err.message);
-      }
-    });
- 
-    socket.on("location:update", async (data) => {
-      // data = { lat, lng }
-      const { lat, lng } = data;
-      if (!socket.userId || !lat || !lng) return;
- 
-      // Rate limiting (per socket)
+
       const now = Date.now();
-      if (socket.lastLocationUpdate && now - socket.lastLocationUpdate < 2000) {
-        return;
-      }
+      if (socket.lastLocationUpdate && now - socket.lastLocationUpdate < 2000) return;
       socket.lastLocationUpdate = now;
- 
+
       try {
-        // Store location in Redis with 5-minute TTL
         await redis.set(
           `kridaz:location:${socket.userId}`,
-          JSON.stringify({ lat: data.lat, lng: data.lng, updatedAt: now }),
-          "EX",
-          300
+          JSON.stringify({ lat, lng, updatedAt: now }),
+          "EX", 300
         );
- 
-        // Update MongoDB (debounced — only every 30 seconds per user)
+
         if (!socket.lastDbLocationWrite || now - socket.lastDbLocationWrite > 30000) {
-          User.findByIdAndUpdate(socket.userId, {
-            locationData: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] }
-          }).catch(() => {});
-          socket.lastDbLocationWrite = now;
+          // Update PostGIS location in Postgres
+            await prisma.$executeRaw`
+              UPDATE "User" 
+              SET "geoPoint" = ST_GeomFromText(${`POINT(${lng} ${lat})`}, 4326)::geography,
+                  latitude = ${lat},
+                  longitude = ${lng}
+              WHERE id = ${socket.userId}
+            `;
+            // Sync with UserProfile
+            await prisma.$executeRaw`
+              UPDATE "UserProfile" 
+              SET latitude = ${lat}, 
+                  longitude = ${lng}
+              WHERE "userId" = ${socket.userId}
+            `;
+            socket.lastDbLocationWrite = now;
         }
- 
-        // 1. Add/Update this user's location in the global geo-index
+
         await redis.geoadd("kridaz:geo:online", lng, lat, socket.userId.toString());
+        const nearbyUserIds = await redis.georadius("kridaz:geo:online", lng, lat, 10, "km");
 
-        // 2. Find nearby users within 10km using Redis (O(log N))
-        const nearbyUserIds = await redis.georadius(
-          "kridaz:geo:online",
-          lng,
-          lat,
-          10,
-          "km"
-        );
-
-        // 3. Notify them
-        if (nearbyUserIds && nearbyUserIds.length > 0) {
+        if (nearbyUserIds) {
           nearbyUserIds.forEach((uid) => {
             if (uid !== socket.userId.toString()) {
-              io.to(uid).emit("nearby:location:update", {
-                userId: socket.userId,
-                lat,
-                lng
-              });
+              io.to(uid).emit("nearby:location:update", { userId: socket.userId, lat, lng });
             }
           });
         }
       } catch (err) {
-        console.error("Location update socket error:", err);
-      }
-    });
- 
-    socket.on("location:start", async (data) => {
-      // data = { lat, lng, radiusKm }
-      const { lat, lng } = data;
-      if (!socket.userId || !lat || !lng) return;
- 
-      try {
-        await redis.set(
-          `kridaz:location:${socket.userId}`,
-          JSON.stringify({ lat, lng, updatedAt: Date.now() }),
-          "EX",
-          300
-        );
-        await redis.geoadd("kridaz:geo:online", lng, lat, socket.userId.toString());
-        socket.emit("location:start:ack", { success: true });
-      } catch (err) {
-        console.error("Location start socket error:", err);
+        logger.error("Location update error:", err);
       }
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
+      // TODO (Prometheus P4-2): Decrement socket_connections_total gauge here
+
       if (socket.userId) {
         const lastSeen = new Date();
-        onlineUsers.delete(socket.userId);
-        User.findByIdAndUpdate(socket.userId, { lastSeen }).catch(err => console.log("DB Update Error:", err));
+        prisma.user.update({
+          where: { id: socket.userId },
+          data: { lastSeen }
+        }).catch(() => {});
 
-        // Redis-backed presence — remove and debounce the broadcast
-        redis.srem('kridaz:online:users', socket.userId.toString())
-          .then(() => schedulePresenceBroadcast())
-          .catch(() => { /* non-critical */ });
- 
-        // Clear real-time location from Redis
-        redis.del(`kridaz:location:${socket.userId}`).catch(() => {});
-        redis.zrem("kridaz:geo:online", socket.userId.toString()).catch(() => {});
+        await redis.srem('kridaz:online:users', socket.userId.toString());
+        schedulePresenceBroadcast();
 
-        io.emit("user last seen", { userId: socket.userId, lastSeen }); // kept as-is
+        await redis.del(`kridaz:location:${socket.userId}`);
+        await redis.zrem("kridaz:geo:online", socket.userId.toString());
+
+        io.emit("user last seen", { userId: socket.userId, lastSeen });
       }
     });
   });

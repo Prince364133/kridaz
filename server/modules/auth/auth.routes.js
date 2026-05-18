@@ -1,33 +1,22 @@
-import express from "express";
-import { 
-  registerUser, 
-  registerOwner, 
-  login, 
-  logout,
-  ownerRequest,
-  checkUsername,
-  getUmpireInviteDetails,
-  requestUpgrade
-} from "./auth.controller.js";
-import { 
-  userRegisterSchema, 
-  userLoginSchema,
-  ownerRegisterSchema,
-  ownerRequestSchema
-} from "./auth.validator.js";
-import { validate } from "../../middleware/validate.middleware.js";
-import { protect } from "../../middleware/auth.middleware.js";
-import { validateTurnstile } from "../../middleware/turnstile.middleware.js";
+import { Router } from "express";
+import userAuthRouter from "./routes/user.routes.js";
+import ownerAuthRouter from "./routes/owner.routes.js";
 
-const router = express.Router();
+/**
+ * Auth Domain Router
+ * Mounts actor-specific sub-routers for Authentication and Profile management.
+ * 
+ * Routes:
+ * /api/auth/...
+ */
 
-router.post("/user/register", validateTurnstile, validate(userRegisterSchema), registerUser);
-router.post("/owner/register", validateTurnstile, validate(ownerRegisterSchema), registerOwner);
-router.post("/login", validateTurnstile, validate(userLoginSchema), login);
-router.post("/logout", logout);
-router.post("/owner/request", validate(ownerRequestSchema), ownerRequest);
-router.post("/request-upgrade", protect, requestUpgrade);
-router.get("/check-username", checkUsername);
-router.get("/umpire-invite-details", getUmpireInviteDetails);
+const authRouter = Router();
 
-export default router;
+// Mount Actor Sub-Routers
+authRouter.use("/user", userAuthRouter);
+authRouter.use("/owner", ownerAuthRouter);
+
+// Fallback / Root - Map to user routes
+authRouter.use("/", userAuthRouter);
+
+export default authRouter;

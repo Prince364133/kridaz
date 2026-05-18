@@ -1,4 +1,5 @@
-import Notification from "../models/notification.model.js";
+import { prisma } from "../config/prisma.js";
+import logger from "./logger.js";
 
 /**
  * Create a notification for a user or partner
@@ -20,18 +21,25 @@ export const createNotification = async ({
   metadata = {}
 }) => {
   try {
-    const notification = await Notification.create({
-      recipient: recipientId,
-      recipientModel,
+    const data = {
       title,
       message,
       type,
       link,
-      metadata
-    });
+      metadata,
+      recipientModel
+    };
+
+    if (recipientModel === 'User') {
+      data.userId = recipientId;
+    } else {
+      data.ownerId = recipientId;
+    }
+
+    const notification = await prisma.notification.create({ data });
     return notification;
   } catch (error) {
-    console.error("[CREATE_NOTIFICATION_ERROR]:", error.message);
+    logger.error("[CREATE_NOTIFICATION_ERROR]", error);
   }
 };
 
@@ -40,23 +48,27 @@ export const createNotification = async ({
  */
 export const notifyAdmins = async ({ title, message, type, link, metadata = {} }) => {
   try {
-    const Owner = (await import("../models/owner.model.js")).default;
-    const admins = await Owner.find({ role: { $in: ["admin", "BMSP_ADMIN"] } }).select("_id");
+    const admins = await prisma.user.findMany({
+      where: { role: { in: ["ADMIN"] } },
+      select: { id: true }
+    });
     
     const notifications = admins.map(admin => ({
-      recipient: admin._id,
-      recipientModel: 'Owner',
+      userId: admin.id,
+      recipientModel: 'User',
       title,
       message,
       type,
       link,
-      metadata
+      metadata: metadata || {}
     }));
 
     if (notifications.length > 0) {
-      await Notification.insertMany(notifications);
+      await prisma.notification.createMany({
+        data: notifications
+      });
     }
   } catch (error) {
-    console.error("[NOTIFY_ADMINS_ERROR]:", error.message);
+    logger.error("[NOTIFY_ADMINS_ERROR]", error);
   }
 };
