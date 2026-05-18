@@ -29,7 +29,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
         ...prev,
         phone: user.phone || prev.phone,
         gender: user.gender || prev.gender,
-        location: user.location || prev.location,
+        location: user.location || user.city || prev.location,
         sportTypes: user.sportTypes || prev.sportTypes,
       }));
 

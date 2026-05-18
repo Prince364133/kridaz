@@ -110,7 +110,7 @@ export default function Home() {
 
   useEffect(() => {
     if (isLoggedIn && role?.toLowerCase() === 'user' && user && (!user.sportTypes || user.sportTypes.length === 0)) {
-      const isBasicComplete = user.phone && user.gender && user.location;
+      const isBasicComplete = user.phone && user.gender && (user.location || user.city);
       if (isBasicComplete) {
         setShowInterests(true);
       }
