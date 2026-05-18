@@ -8,6 +8,7 @@ const router = express.Router();
 router.get("/grounds", controller.getGroundsForHosting);
 router.get("/umpires", controller.getUmpiresForHosting);
 router.get("/streamers", controller.getStreamersForHosting);
+router.get("/scorers", controller.getScorersForHosting);
 router.get("/list", controller.getAllHostedGames);
 router.get("/verify-invite", controller.verifyInviteToken); // Phase 2D — magic-link verification
 

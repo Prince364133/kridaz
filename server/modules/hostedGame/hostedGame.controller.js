@@ -90,6 +90,22 @@ export const getStreamersForHosting = async (req, res) => {
   }
 };
 
+export const getScorersForHosting = async (req, res) => {
+  try {
+    const { city, state, gameType } = req.query;
+    let query = { role: /scorer/i };
+    
+    if (city) query.city = new RegExp(city, "i");
+    if (state) query.state = new RegExp(state, "i");
+    if (gameType) query.gameTypes = gameType;
+
+    const scorers = await Owner.find(query).select("name email phone profilePicture price gameTypes city state");
+    return res.status(200).json({ scorers });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 export const createHostedGame = async (req, res) => {
   try {
     const result = await runInTransaction(async ({ session, isTransactional }) => {
@@ -97,7 +113,7 @@ export const createHostedGame = async (req, res) => {
       console.log("Creating hosted game for host:", hostId);
 
       const {
-        gameType, date, time, groundId, umpireId, streamerId, ground, umpire, streamer,
+        gameType, date, time, groundId, umpireId, streamerId, scorerId, ground, umpire, streamer, scorer,
         perPlayerCharge, teamA, teamB, city, state,
         // Quick Game specific fields
         gameMode = "PROFESSIONAL",
@@ -111,6 +127,7 @@ export const createHostedGame = async (req, res) => {
       const finalGroundId = groundId || ground?._id;
       const finalUmpireId = umpireId || umpire?._id;
       const finalStreamerId = streamerId || streamer?._id;
+      const finalScorerId = scorerId || scorer?._id;
 
       if (!hostId) {
          throw new Error("Host ID missing. Please login again.");
@@ -120,6 +137,7 @@ export const createHostedGame = async (req, res) => {
       let groundCost = 0;
       let umpireCost = 0;
       let streamerCost = 0;
+      let scorerCost = 0;
 
       if (finalGroundId) {
         const g = await Turf.findById(finalGroundId);
@@ -136,7 +154,12 @@ export const createHostedGame = async (req, res) => {
         streamerCost = s?.price || 0;
       }
 
-      const totalCost = groundCost + umpireCost + streamerCost;
+      if (finalScorerId) {
+        const sc = await Owner.findById(finalScorerId);
+        scorerCost = sc?.price || 0;
+      }
+
+      const totalCost = groundCost + umpireCost + streamerCost + scorerCost;
 
       // 2. Check Balance
       const usableBalance = await getUsableBalance(hostId);
@@ -232,6 +255,7 @@ export const createHostedGame = async (req, res) => {
         ground: finalGroundId,
         umpire: finalUmpireId,
         streamer: finalStreamerId,
+        scorer: finalScorerId,
         perPlayerCharge,
         groundCost,
         umpireCost,

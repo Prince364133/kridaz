@@ -9,7 +9,7 @@ import {
   Trophy, Calendar, Clock, MapPin, 
   Users, UserCheck, ChevronRight, Search,
   ArrowLeft, Coins, CheckCircle2, AlertCircle,
-  ShieldCheck, Zap, Trash2, Plus, ImageIcon, ChevronUp, ChevronDown,
+  ShieldCheck, Zap, Trash2, Plus, Minus, ImageIcon, ChevronUp, ChevronDown,
   Gift, Mail, Info, ShieldAlert
 } from 'lucide-react';
 import { useGetMyTeamsQuery } from '@redux/api/teamApi';
@@ -83,6 +83,7 @@ const HostGame = () => {
     groundId: null,
     umpireId: null,
     streamerId: null,
+    scorerId: null,
     perPlayerCharge: 0,
     gameMode: 'PROFESSIONAL',
     quickPlayerCount: 0,
@@ -96,9 +97,11 @@ const HostGame = () => {
   const [grounds, setGrounds] = useState([]);
   const [umpires, setUmpires] = useState([]);
   const [streamers, setStreamers] = useState([]);
+  const [scorers, setScorers] = useState([]);
   const [selectedGround, setSelectedGround] = useState(null);
   const [selectedUmpire, setSelectedUmpire] = useState(null);
   const [selectedStreamer, setSelectedStreamer] = useState(null);
+  const [selectedScorer, setSelectedScorer] = useState(null);
 
   // Location dropdown state
   const [states, setStates] = useState([]);
@@ -234,15 +237,25 @@ const HostGame = () => {
     }
   };
 
+  const fetchScorers = async () => {
+    try {
+      const res = await axiosInstance.get(`/api/hosted-game/scorers?city=${gameData.city}&state=${gameData.state}&gameType=${gameData.gameType}`);
+      setScorers(res.data.scorers);
+    } catch (err) {
+      toast.error("Failed to fetch scorers");
+    }
+  };
+
   useEffect(() => {
     if (step === 3 && gameData.gameType) {
       fetchGrounds();
       fetchUmpires();
       fetchStreamers();
+      fetchScorers();
     }
   }, [step, gameData.gameType, gameData.city, gameData.state]);
 
-  const totalCost = (selectedGround?.pricePerHour || 0) + (selectedUmpire?.price || 0) + (selectedStreamer?.price || 0);
+  const totalCost = (selectedGround?.pricePerHour || 0) + (selectedUmpire?.price || 0) + (selectedStreamer?.price || 0) + (selectedScorer?.price || 0);
 
   const initSlots = (sport) => {
     const defaults = SPORT_DEFAULTS[sport] || [{ role: "Player", count: 5 }];
@@ -359,20 +372,24 @@ const HostGame = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#000] text-white pt-24 pb-24 px-6">
+    <div className="min-h-screen bg-[#000] text-white pt-8 pb-24 px-6">
       <div className={`max-w-4xl mx-auto transition-all duration-700 ${mounted ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
         
         {/* Header */}
-        <div className="flex items-center justify-between mb-12">
-          <div>
-            <h1 className="text-3xl font-black mb-2 tracking-tight">Host a Match</h1>
-            <p className="text-neutral-500 font-medium">Create a game and find players in your area</p>
+        <div className="hidden sm:flex items-center justify-between mb-4 gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-[24px] sm:text-3xl xl:text-4xl 2xl:text-5xl font-black mb-1 sm:mb-2 tracking-tight font-open-sans normal-case truncate">Host a Match</h1>
+            <p className="text-xs sm:text-[20px] text-neutral-500 font-medium font-inter truncate sm:truncate-none sm:whitespace-normal whitespace-nowrap">Create a game and find players in your area</p>
           </div>
-          <div className="flex gap-2">
+          <div className="hidden md:flex gap-2 shrink-0">
             {[1, 2, 3, 4, 5].map(s => (
               <div 
                 key={s}
-                className={`w-8 h-1.5 rounded-full transition-all duration-500 ${step >= s ? 'bg-yellow-500' : 'bg-neutral-800'}`}
+                className={`w-8 h-1.5 rounded-full transition-all duration-500 ${
+                  step >= s 
+                    ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367]' 
+                    : 'bg-neutral-800'
+                }`}
               />
             ))}
           </div>
@@ -380,57 +397,109 @@ const HostGame = () => {
 
         {/* Step 1: Game Mode Selection */}
         {step === 1 && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-12 max-w-2xl mx-auto py-10">
-            <div className="text-center space-y-4">
-              <h2 className="text-4xl font-black tracking-tight">Select Game Mode</h2>
-              <p className="text-neutral-500 font-medium">How do you want to organize your players?</p>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 max-w-3xl mx-auto py-2">
+            <div className="text-center space-y-3">
+              <h2 className="text-[24px] sm:text-[30px] xl:text-[34px] font-black tracking-tight font-open-sans uppercase">SELECT GAME MODE</h2>
+              <p className="hidden sm:block text-[20px] text-neutral-500 font-medium font-inter">How do you want to organize your players?</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => setGameData({ ...gameData, gameMode: 'QUICK' })}
-                className={`p-8 rounded-[40px] border-4 transition-all text-left group relative overflow-hidden ${
+                className={`px-3 py-4 sm:px-8 sm:py-5 rounded-[15px] border-[1.5px] transition-all text-center flex flex-col items-center justify-center relative overflow-hidden ${
                   gameData.gameMode === 'QUICK' 
-                  ? 'border-yellow-500 bg-yellow-500/10' 
-                  : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
+                  ? 'border-transparent shadow-[0_0_30px_rgba(85,222,232,0.1)]' 
+                  : 'border-neutral-800 bg-neutral-900/40 hover:border-neutral-700'
                 }`}
+                style={
+                  gameData.gameMode === 'QUICK'
+                  ? {
+                      border: '1.5px solid transparent',
+                      backgroundImage: 'linear-gradient(#0c0d0f, #0c0d0f), linear-gradient(90deg, #55DEE8, #BFF367)',
+                      backgroundClip: 'padding-box, border-box',
+                      backgroundOrigin: 'border-box',
+                    }
+                  : {}
+                }
               >
-                <div className={`w-16 h-16 rounded-3xl flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 ${
-                  gameData.gameMode === 'QUICK' ? 'bg-yellow-500 text-black' : 'bg-neutral-800 text-neutral-500'
-                }`}>
-                  <Zap size={32} />
+                <div className="flex flex-col items-center justify-center w-full">
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-2 sm:mb-2.5 border transition-all duration-500 relative ${
+                    gameData.gameMode === 'QUICK' 
+                    ? 'border-transparent bg-neutral-900 text-white' 
+                    : 'border-neutral-800 bg-neutral-900/50 text-neutral-500'
+                  }`}
+                  style={
+                    gameData.gameMode === 'QUICK'
+                    ? {
+                        border: '2px solid transparent',
+                        backgroundImage: 'linear-gradient(#0c0d0f, #0c0d0f), linear-gradient(135deg, #BFF367, #55DEE8, transparent, transparent)',
+                        backgroundClip: 'padding-box, border-box',
+                        backgroundOrigin: 'border-box',
+                      }
+                    : {}
+                  }
+                  >
+                    <Zap className={`w-5 h-5 sm:w-6 sm:h-6 ${gameData.gameMode === 'QUICK' ? 'text-white animate-pulse' : 'text-neutral-500'}`} />
+                  </div>
+                  <h3 className={`text-xs sm:text-xl font-black mb-0 font-open-sans tracking-wide uppercase ${gameData.gameMode === 'QUICK' ? 'text-white' : 'text-neutral-400'}`}>QUICK GAME</h3>
+                  <div className="hidden sm:block w-8 h-[2px] bg-neutral-800 my-2 rounded-full mx-auto" />
+                  <p className="hidden sm:block text-[20px] text-neutral-400 leading-relaxed font-medium font-inter text-center">
+                    One simple pool of players. No team split required. Best for casual matches or single-team practice.
+                  </p>
                 </div>
-                <h3 className={`text-2xl font-black mb-2 ${gameData.gameMode === 'QUICK' ? 'text-white' : 'text-neutral-400'}`}>Quick Game</h3>
-                <p className="text-sm text-neutral-500 leading-relaxed font-medium">
-                  One simple pool of players. No team split required. Best for casual matches or single-team practice.
-                </p>
                 {gameData.gameMode === 'QUICK' && (
-                  <div className="absolute top-6 right-6">
-                    <CheckCircle2 className="text-yellow-500" size={24} />
+                  <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
+                    <CheckCircle2 className="text-[#55DEE8] w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                 )}
               </button>
 
               <button
                 onClick={() => setGameData({ ...gameData, gameMode: 'PROFESSIONAL' })}
-                className={`p-8 rounded-[40px] border-4 transition-all text-left group relative overflow-hidden ${
+                className={`px-3 py-4 sm:px-8 sm:py-5 rounded-[15px] border-[1.5px] transition-all text-center flex flex-col items-center justify-center relative overflow-hidden ${
                   gameData.gameMode === 'PROFESSIONAL' 
-                  ? 'border-yellow-500 bg-yellow-500/10' 
-                  : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
+                  ? 'border-transparent shadow-[0_0_30px_rgba(85,222,232,0.15)]' 
+                  : 'border-neutral-800 bg-neutral-900/40 hover:border-neutral-700'
                 }`}
+                style={
+                  gameData.gameMode === 'PROFESSIONAL'
+                  ? {
+                      border: '1.5px solid transparent',
+                      backgroundImage: 'linear-gradient(#0c0d0f, #0c0d0f), linear-gradient(90deg, #55DEE8, #BFF367)',
+                      backgroundClip: 'padding-box, border-box',
+                      backgroundOrigin: 'border-box',
+                    }
+                  : {}
+                }
               >
-                <div className={`w-16 h-16 rounded-3xl flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6 ${
-                  gameData.gameMode === 'PROFESSIONAL' ? 'bg-yellow-500 text-black' : 'bg-neutral-800 text-neutral-500'
-                }`}>
-                  <ShieldCheck size={32} />
+                <div className="flex flex-col items-center justify-center w-full">
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-2 sm:mb-2.5 border transition-all duration-500 relative ${
+                    gameData.gameMode === 'PROFESSIONAL' 
+                    ? 'border-transparent bg-neutral-900 text-white' 
+                    : 'border-neutral-800 bg-neutral-900/50 text-neutral-500'
+                  }`}
+                  style={
+                    gameData.gameMode === 'PROFESSIONAL'
+                    ? {
+                        border: '2px solid transparent',
+                        backgroundImage: 'linear-gradient(#0c0d0f, #0c0d0f), linear-gradient(135deg, #BFF367, #55DEE8, transparent, transparent)',
+                        backgroundClip: 'padding-box, border-box',
+                        backgroundOrigin: 'border-box',
+                      }
+                    : {}
+                  }
+                  >
+                    <ShieldCheck className={`w-5 h-5 sm:w-6 sm:h-6 ${gameData.gameMode === 'PROFESSIONAL' ? 'text-white animate-pulse' : 'text-neutral-500'}`} />
+                  </div>
+                  <h3 className={`text-xs sm:text-xl font-black mb-0 font-open-sans tracking-wide uppercase ${gameData.gameMode === 'PROFESSIONAL' ? 'text-white' : 'text-neutral-400'}`}>PROFESSIONAL</h3>
+                  <div className="hidden sm:block w-8 h-[2px] bg-neutral-800 my-2 rounded-full mx-auto" />
+                  <p className="hidden sm:block text-[20px] text-neutral-400 leading-relaxed font-medium font-inter text-center">
+                    Two balanced teams (A vs B). Assign specific roles and define unique team identities.
+                  </p>
                 </div>
-                <h3 className={`text-2xl font-black mb-2 ${gameData.gameMode === 'PROFESSIONAL' ? 'text-white' : 'text-neutral-400'}`}>Professional</h3>
-                <p className="text-sm text-neutral-500 leading-relaxed font-medium">
-                  Two balanced teams (A vs B). Assign specific roles and define unique team identities.
-                </p>
                 {gameData.gameMode === 'PROFESSIONAL' && (
-                  <div className="absolute top-6 right-6">
-                    <CheckCircle2 className="text-yellow-500" size={24} />
+                  <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
+                    <CheckCircle2 className="text-[#55DEE8] w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                 )}
               </button>
@@ -440,9 +509,9 @@ const HostGame = () => {
               <button
                 onClick={() => setStep(2)}
                 disabled={!gameData.gameMode}
-                className="flex-1 py-5 bg-yellow-500 text-black font-black rounded-3xl hover:bg-yellow-400 transition-all text-lg shadow-[0_10px_30px_rgba(234,179,8,0.2)] uppercase tracking-widest disabled:opacity-50"
+                className="flex-1 py-3 sm:py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-xl sm:rounded-2xl hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-wider disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
               >
-                Next: Sport & Time
+                NEXT: SPORT & TIME
               </button>
             </div>
           </motion.div>
@@ -608,14 +677,15 @@ const HostGame = () => {
         {/* Step 3: Grounds & Umpires */}
         {step === 3 && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-10">
               {/* Grounds */}
               <section className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-black text-neutral-400 uppercase tracking-widest">Select Ground</label>
+                <div className="flex items-center justify-between gap-2">
+
+                  <label className="text-xs font-black text-neutral-400 uppercase tracking-widest whitespace-nowrap">Select Ground</label>
                   <span className="text-[10px] text-neutral-500 font-black px-3 py-1 bg-neutral-800 rounded-full uppercase tracking-tighter">Optional</span>
                 </div>
-                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
+                <div className="space-y-6 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
                   {grounds.length > 0 ? grounds.map(g => (
                     <div 
                       key={g._id}
@@ -623,7 +693,7 @@ const HostGame = () => {
                         setSelectedGround(g);
                         setGameData({ ...gameData, groundId: g._id });
                       }}
-                      className={`p-5 rounded-3xl border-2 transition-all cursor-pointer group ${
+                      className={`p-5 rounded-[15px] border-2 transition-all cursor-pointer group ${
                         selectedGround?._id === g._id 
                         ? 'border-yellow-500 bg-yellow-500/10' 
                         : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
@@ -633,7 +703,7 @@ const HostGame = () => {
                         <img src={g.images[0]} className="w-24 h-24 rounded-2xl object-cover" />
                         <div className="flex-1">
                           <h3 className="font-black text-base mb-1 tracking-tight">{g.name}</h3>
-                          <p className="text-[11px] text-neutral-500 mb-3 flex items-center gap-1 font-medium">
+                          <p className="hidden sm:flex text-[11px] text-neutral-500 mb-3 items-center gap-1 font-medium">
                             <MapPin size={12} /> {g.location}
                           </p>
                           <div className="flex items-center justify-between">
@@ -645,7 +715,10 @@ const HostGame = () => {
                     </div>
                   )) : (
                     <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
-                      <p className="text-neutral-500 text-sm italic font-medium">No {gameData.gameType} grounds found in {gameData.city}, {gameData.state}.</p>
+                      <p className="text-neutral-500 text-sm italic font-medium">
+                        <span className="sm:hidden">No {gameData.gameType} grounds found.</span>
+                        <span className="hidden sm:inline">No {gameData.gameType} grounds found in {gameData.city}, {gameData.state}.</span>
+                      </p>
                     </div>
                   )}
                 </div>
@@ -655,20 +728,20 @@ const HostGame = () => {
               <section className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <label className="text-xs font-black text-neutral-400 uppercase tracking-widest">Hire Umpire / Coach</label>
+                    <label className="text-xs font-black text-neutral-400 uppercase tracking-widest whitespace-nowrap">Hire Umpire / Coach</label>
                     <button 
                       onClick={() => setShowCustomUmpireModal(true)}
-                      className="p-1 bg-yellow-500 text-black rounded-full hover:bg-yellow-400 transition-all shadow-[0_0_10px_rgba(234,179,8,0.3)]"
+                      className="p-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-full hover:scale-105 transition-all shadow-[0_0_10px_rgba(85,222,232,0.3)]"
                     >
                       <Plus size={14} />
                     </button>
                   </div>
                   <span className="text-[10px] text-neutral-500 font-black px-3 py-1 bg-neutral-800 rounded-full uppercase tracking-tighter">Optional</span>
                 </div>
-                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
+                <div className="space-y-6 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
                   {customUmpireData.name && (
                     <div 
-                      className="p-5 rounded-3xl border-2 border-yellow-500 bg-yellow-500/10 transition-all cursor-default"
+                      className="p-5 rounded-[15px] border-2 border-yellow-500 bg-yellow-500/10 transition-all cursor-default"
                     >
                       <div className="flex gap-5 items-center">
                         <div className="w-14 h-14 rounded-full bg-neutral-800 flex items-center justify-center text-yellow-500 border border-yellow-500/30">
@@ -704,7 +777,7 @@ const HostGame = () => {
                           setGameData({ ...gameData, umpireId: u._id });
                         }
                       }}
-                      className={`p-5 rounded-3xl border-2 transition-all cursor-pointer group ${
+                      className={`p-5 rounded-[15px] border-2 transition-all cursor-pointer group ${
                         selectedUmpire?._id === u._id 
                         ? 'border-yellow-500 bg-yellow-500/10' 
                         : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
@@ -728,7 +801,10 @@ const HostGame = () => {
                     </div>
                   )) : (
                     <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
-                      <p className="text-neutral-500 text-sm italic font-medium">No {gameData.gameType} experts available in {gameData.city}, {gameData.state}.</p>
+                      <p className="text-neutral-500 text-sm italic font-medium">
+                        <span className="sm:hidden">No {gameData.gameType} experts available.</span>
+                        <span className="hidden sm:inline">No {gameData.gameType} experts available in {gameData.city}, {gameData.state}.</span>
+                      </p>
                     </div>
                   )}
                 </div>
@@ -736,13 +812,13 @@ const HostGame = () => {
 
               {/* Streamers */}
               <section className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-3">
-                    <label className="text-xs font-black text-neutral-400 uppercase tracking-widest">Hire Streamer</label>
+                    <label className="text-xs font-black text-neutral-400 uppercase tracking-widest whitespace-nowrap">Hire Streamer</label>
                   </div>
                   <span className="text-[10px] text-neutral-500 font-black px-3 py-1 bg-neutral-800 rounded-full uppercase tracking-tighter">Optional</span>
                 </div>
-                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
+                <div className="space-y-6 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
                   {streamers.length > 0 ? streamers.map(s => (
                     <div 
                       key={s._id}
@@ -755,7 +831,7 @@ const HostGame = () => {
                           setGameData({ ...gameData, streamerId: s._id });
                         }
                       }}
-                      className={`p-5 rounded-3xl border-2 transition-all cursor-pointer group ${
+                      className={`p-5 rounded-[15px] border-2 transition-all cursor-pointer group ${
                         selectedStreamer?._id === s._id 
                         ? 'border-yellow-500 bg-yellow-500/10' 
                         : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
@@ -779,18 +855,79 @@ const HostGame = () => {
                     </div>
                   )) : (
                     <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
-                      <p className="text-neutral-500 text-sm italic font-medium">No {gameData.gameType} streamers available in {gameData.city}, {gameData.state}.</p>
+                      <p className="text-neutral-500 text-sm italic font-medium">
+                        <span className="sm:hidden">No {gameData.gameType} streamers available.</span>
+                        <span className="hidden sm:inline">No {gameData.gameType} streamers available in {gameData.city}, {gameData.state}.</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* Scorers */}
+              <section className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <label className="text-xs font-black text-neutral-400 uppercase tracking-widest whitespace-nowrap">Hire Scorer</label>
+                  </div>
+                  <span className="text-[10px] text-neutral-500 font-black px-3 py-1 bg-neutral-800 rounded-full uppercase tracking-tighter">Optional</span>
+                </div>
+                <div className="space-y-6 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
+                  {scorers.length > 0 ? scorers.map(s => (
+                    <div 
+                      key={s._id}
+                      onClick={() => {
+                        if (selectedScorer?._id === s._id) {
+                          setSelectedScorer(null);
+                          setGameData({ ...gameData, scorerId: null });
+                        } else {
+                          setSelectedScorer(s);
+                          setGameData({ ...gameData, scorerId: s._id });
+                        }
+                      }}
+                      className={`p-5 rounded-[15px] border-2 transition-all cursor-pointer group ${
+                        selectedScorer?._id === s._id 
+                        ? 'border-yellow-500 bg-yellow-500/10' 
+                        : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-5">
+                        <img src={s.profilePicture || "https://ui-avatars.com/api/?name="+s.name} className="w-16 h-16 rounded-full object-cover border-2 border-neutral-800" />
+                        <div className="flex-1">
+                          <h3 className="font-black text-base mb-1 tracking-tight">{s.name}</h3>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-yellow-500 font-black text-sm">₹{s.price}</span>
+                            <div className="flex gap-1">
+                              {s.gameTypes?.slice(0, 2).map(t => (
+                                <span key={t} className="text-[8px] px-2 py-0.5 bg-neutral-800 text-neutral-500 rounded-full font-black uppercase tracking-tighter">{t}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        {selectedScorer?._id === s._id && <CheckCircle2 className="text-yellow-500" size={24} />}
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
+                      <p className="text-neutral-500 text-sm italic font-medium">
+                        <span className="sm:hidden">No {gameData.gameType} scorers available.</span>
+                        <span className="hidden sm:inline">No {gameData.gameType} scorers available in {gameData.city}, {gameData.state}.</span>
+                      </p>
                     </div>
                   )}
                 </div>
               </section>
             </div>
-
-            <div className="flex gap-4">
-              <button onClick={() => setStep(2)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-3xl border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest">Back</button>
+             <div className="flex gap-4">
+              <button 
+                onClick={() => setStep(2)} 
+                className="flex-1 py-3 sm:py-3.5 bg-neutral-900/60 text-neutral-400 font-bold rounded-xl sm:rounded-2xl border border-neutral-800 hover:border-neutral-700 transition-all duration-300 text-sm sm:text-base font-open-sans uppercase tracking-wider"
+              >
+                Back
+              </button>
               <button
                 onClick={() => setStep(4)}
-                className="flex-[2] py-5 bg-yellow-500 text-black font-black rounded-3xl hover:bg-yellow-400 transition-all text-lg shadow-[0_10px_30px_rgba(234,179,8,0.2)] uppercase tracking-widest"
+                className="flex-[2] py-3 sm:py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-xl sm:rounded-2xl hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-wider"
               >
                 Continue to Player Setup
               </button>
@@ -800,76 +937,72 @@ const HostGame = () => {
 
         {/* Step 4: Setup (Quick vs Professional) */}
         {step === 4 && gameData.gameMode === 'QUICK' && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-12">
-            <div className="bg-neutral-900/50 border-2 border-neutral-800 rounded-[40px] p-10 text-center space-y-10">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8 max-w-2xl mx-auto">
+            <div className="bg-neutral-900/40 border border-neutral-800/80 rounded-[15px] p-8 sm:p-12 text-center space-y-10 shadow-xl shadow-black/30">
               <div className="max-w-md mx-auto space-y-4">
-                <div className="w-20 h-20 bg-yellow-500/10 rounded-[28px] flex items-center justify-center mx-auto">
-                  <Users className="text-yellow-500" size={40} />
+                <div className="w-16 h-16 bg-[#55DEE8]/8 rounded-full flex items-center justify-center mx-auto border border-[#55DEE8]/20 shadow-[0_0_20px_rgba(85,222,232,0.08)]">
+                  <Users className="text-[#55DEE8]" size={28} />
                 </div>
-                <h2 className="text-3xl font-black tracking-tight">Total Players</h2>
-                <p className="text-neutral-500 font-medium">How many players (including you) are playing in this quick game?</p>
+                <h2 className="text-3xl font-bold tracking-tight text-white font-open-sans uppercase tracking-wider">Total Players</h2>
+                <p className="hidden sm:block text-neutral-400 font-inter text-[20px] max-w-md mx-auto leading-relaxed">
+                  How many players (including you) are playing in this quick game?
+                </p>
               </div>
 
               {/* Number Input / Slider */}
-              <div className="flex items-center justify-center gap-8">
+              <div className="flex items-center justify-center gap-10 py-4">
                 <button 
                   onClick={() => setGameData(prev => ({ ...prev, quickPlayerCount: Math.max(2, prev.quickPlayerCount - 1) }))}
-                  className="w-16 h-16 rounded-2xl bg-neutral-800 text-white font-black text-2xl hover:bg-neutral-700 transition-all flex items-center justify-center border border-white/5"
+                  className="w-14 h-14 rounded-full bg-neutral-950 border border-[#55DEE8]/30 text-[#55DEE8] hover:bg-[#55DEE8]/10 transition-all duration-300 flex items-center justify-center shadow-[0_4px_20px_rgba(85,222,232,0.15)] active:scale-95 cursor-pointer"
                 >
-                  -
+                  <Minus size={22} className="text-[#55DEE8]" />
                 </button>
-                <div className="text-7xl font-black text-white tabular-nums tracking-tighter">
-                  {gameData.quickPlayerCount || 0}
+                <div className="w-24 text-center">
+                  <span className="text-7xl font-black text-white font-open-sans tracking-tight select-none tabular-nums">
+                    {gameData.quickPlayerCount || 0}
+                  </span>
                 </div>
                 <button 
                   onClick={() => setGameData(prev => ({ ...prev, quickPlayerCount: Math.min(22, prev.quickPlayerCount + 1) }))}
-                  className="w-16 h-16 rounded-2xl bg-neutral-800 text-white font-black text-2xl hover:bg-neutral-700 transition-all flex items-center justify-center border border-white/5"
+                  className="w-14 h-14 rounded-full bg-neutral-950 border border-[#BFF367]/30 text-[#BFF367] hover:bg-[#BFF367]/10 transition-all duration-300 flex items-center justify-center shadow-[0_4px_20px_rgba(191,243,103,0.15)] active:scale-95 cursor-pointer"
                 >
-                  +
+                  <Plus size={22} className="text-[#BFF367]" />
                 </button>
               </div>
 
               {/* Pricing Section (Internal to Quick Setup) */}
-              <div className="bg-black/40 p-8 rounded-3xl border border-white/5 space-y-6">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="bg-neutral-950/40 p-8 rounded-[15px] border border-neutral-800/80 space-y-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
                   <div className="text-left space-y-1">
-                    <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">Entry Fee per Player</span>
-                    <p className="text-xs text-neutral-400 font-medium">What each player pays to join (₹)</p>
+                    <span className="font-inter text-[20px] font-bold text-neutral-300">Entry Fee per Player</span>
+                    <p className="hidden sm:block font-inter text-[20px] text-neutral-500">What each player pays to join (₹)</p>
                   </div>
-                  <div className="flex items-center gap-4 bg-black p-2 px-4 rounded-2xl border border-neutral-800 focus-within:border-yellow-500/50 transition-all">
-                    <Coins className="text-yellow-500" size={20} />
+                  <div className="flex items-center gap-3 bg-neutral-900/60 p-3 px-4 rounded-xl border border-neutral-800 focus-within:border-[#55DEE8] focus-within:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300">
+                    <Coins className="text-[#55DEE8]" size={18} />
                     <input 
                       type="number"
                       placeholder="0"
                       value={gameData.perPlayerCharge || ''}
                       onChange={(e) => setGameData({ ...gameData, perPlayerCharge: parseInt(e.target.value) || 0 })}
-                      className="w-24 bg-transparent border-none text-right font-black text-2xl outline-none focus:ring-0 text-white"
+                      className="w-20 bg-transparent border-none text-right font-bold text-xl outline-none focus:ring-0 text-white p-0"
                     />
                   </div>
                 </div>
                 
-                <div className="pt-4 border-t border-white/5 flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                      <Users size={16} className="text-yellow-500" />
-                    </div>
-                    <span className="text-xs font-black uppercase tracking-tight text-neutral-400">
-                      {gameData.quickPlayerCount} Total Slots
-                    </span>
-                  </div>
-                  <p className="text-[10px] font-black text-neutral-600 uppercase tracking-widest">
-                    You + {gameData.quickPlayerCount - 1} Other Players
-                  </p>
+                <div className="pt-5 border-t border-neutral-800/60 flex justify-center items-center">
+                  <span className="px-4 py-1.5 bg-neutral-900 border border-neutral-800 font-inter text-[20px] font-bold text-neutral-400 rounded-[15px]">
+                    You + {gameData.quickPlayerCount - 1} Players
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <button onClick={() => setStep(3)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-3xl border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest">Back</button>
+            <div className="flex gap-4 max-w-lg mx-auto w-full">
+              <button onClick={() => setStep(3)} className="flex-1 py-4 bg-neutral-900 hover:bg-neutral-850 text-neutral-400 font-bold rounded-[15px] border border-neutral-800 hover:border-neutral-700 transition-all text-base uppercase tracking-wider font-open-sans">Back</button>
               <button
                 disabled={gameData.quickPlayerCount < 2}
                 onClick={initQuickSlots}
-                className="flex-[2] py-5 bg-yellow-500 text-black font-black rounded-3xl hover:bg-yellow-400 transition-all text-lg shadow-[0_10px_30px_rgba(234,179,8,0.2)] disabled:opacity-50 uppercase tracking-widest"
+                className="flex-[2] py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[15px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] disabled:opacity-50 uppercase tracking-wider"
               >
                 SETUP SLOTS
               </button>
@@ -883,14 +1016,14 @@ const HostGame = () => {
             <div className="flex items-center justify-between gap-4">
               <div className="text-left space-y-1">
                 <h2 className="text-4xl font-black tracking-tight">Manage Slots</h2>
-                <p className="text-neutral-500 font-medium italic">Assign players to slots or leave them open for the community</p>
+                <p className="hidden sm:block text-neutral-500 font-medium italic">Assign players to slots or leave them open for the community</p>
               </div>
               <button 
                 onClick={() => {
                   setFillingTeamKey('quick');
                   setShowTeamFillModal(true);
                 }}
-                className="flex items-center gap-2 px-6 py-3 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl text-yellow-500 font-black text-xs uppercase tracking-widest hover:bg-yellow-500 hover:text-black transition-all"
+                className="flex items-center gap-2 px-6 py-3 bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-2xl text-[#55DEE8] font-black text-xs uppercase tracking-widest hover:bg-gradient-to-r hover:from-[#55DEE8] hover:to-[#BFF367] hover:text-black transition-all"
               >
                 <ShieldCheck size={16} /> Fill from My Team
               </button>
@@ -901,14 +1034,14 @@ const HostGame = () => {
                 <div 
                   key={idx}
                   onClick={() => idx !== 0 && setActiveSlotPicker({ idx })}
-                  className={`relative p-6 rounded-[32px] border-2 transition-all cursor-pointer group flex flex-col items-center justify-center text-center h-48 ${
+                  className={`relative p-6 rounded-[15px] border-2 transition-all cursor-pointer group flex flex-col items-center justify-center text-center h-48 ${
                     slot.userId || slot.customPlayer
-                    ? 'border-yellow-500/30 bg-yellow-500/5' 
+                    ? 'border-[#55DEE8]/30 bg-[#55DEE8]/5' 
                     : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
                   }`}
                 >
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-3 transition-transform duration-500 group-hover:scale-110 ${
-                    slot.userId || slot.customPlayer ? 'bg-yellow-500 text-black' : 'bg-neutral-800 text-neutral-500'
+                    slot.userId || slot.customPlayer ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black' : 'bg-neutral-800 text-neutral-500'
                   }`}>
                     {slot.userId === user?._id ? <ShieldCheck size={28} /> : (slot.userId || slot.customPlayer ? <UserCheck size={28} /> : <Plus size={28} />)}
                   </div>
@@ -935,7 +1068,7 @@ const HostGame = () => {
                   )}
 
                   {idx === 0 && (
-                    <div className="absolute top-4 right-4 text-yellow-500">
+                    <div className="absolute top-4 right-4 text-[#55DEE8]">
                       <CheckCircle2 size={16} />
                     </div>
                   )}
@@ -953,7 +1086,7 @@ const HostGame = () => {
               <button onClick={() => setStep(4)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-3xl border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest">Back</button>
               <button
                 onClick={() => setStep(5)}
-                className="flex-[2] py-5 bg-yellow-500 text-black font-black rounded-3xl hover:bg-yellow-400 transition-all text-lg shadow-[0_10px_30px_rgba(234,179,8,0.2)] uppercase tracking-widest"
+                className="flex-[2] py-5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-3xl hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-lg shadow-[0_10px_30px_rgba(85,222,232,0.25)] uppercase tracking-widest"
               >
                 PREVIEW MATCH
               </button>
@@ -993,10 +1126,10 @@ const HostGame = () => {
                           setFillingTeamKey(teamKey);
                           setShowTeamFillModal(true);
                         }}
-                        className="p-3 bg-neutral-800 rounded-2xl text-neutral-500 hover:text-yellow-500 transition-all border border-white/5"
+                        className="p-3 bg-neutral-800 rounded-[15px] text-neutral-500 hover:text-[#55DEE8] transition-all border border-white/5 group"
                         title="Fill from My Team"
                       >
-                        <ShieldCheck size={20} />
+                        <ShieldCheck size={20} className="group-hover:text-[#55DEE8] transition-colors" />
                       </button>
                     </div>
 
@@ -1019,12 +1152,12 @@ const HostGame = () => {
                         {/* Upload button */}
                         <label
                           htmlFor={`img-upload-${teamKey}`}
-                          className="flex-1 flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-[#CCFF00]/30 rounded-2xl cursor-pointer hover:border-[#CCFF00]/60 hover:bg-[#CCFF00]/5 transition-all group"
+                          className="flex-1 flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-[#55DEE8]/30 rounded-[15px] cursor-pointer hover:border-[#BFF367]/60 hover:bg-[#55DEE8]/5 transition-all group"
                         >
-                          <div className="w-8 h-8 rounded-full bg-[#CCFF00]/10 border border-[#CCFF00]/20 flex items-center justify-center group-hover:bg-[#CCFF00]/20 transition-all">
-                            <ImageIcon size={16} className="text-[#CCFF00]" />
+                          <div className="w-8 h-8 rounded-full bg-[#55DEE8]/10 border border-[#55DEE8]/20 flex items-center justify-center group-hover:bg-[#BFF367]/20 transition-all">
+                            <ImageIcon size={16} className="text-[#55DEE8] group-hover:text-[#BFF367] transition-colors" />
                           </div>
-                          <span className="text-[10px] font-black text-[#CCFF00]/70 uppercase tracking-widest">
+                          <span className="text-[10px] font-black bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent uppercase tracking-widest">
                             {gameData[teamKey].imageName ? 'Change Photo' : 'Upload Photo'}
                           </span>
                           {gameData[teamKey].imageName && (
@@ -1123,7 +1256,7 @@ const HostGame = () => {
               <button onClick={() => setStep(3)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-3xl border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest">Back</button>
               <button
                 onClick={() => setStep(5)}
-                className="flex-[2] py-5 bg-yellow-500 text-black font-black rounded-3xl hover:bg-yellow-400 transition-all text-lg shadow-[0_10px_30px_rgba(234,179,8,0.2)] uppercase tracking-widest"
+                className="flex-[2] py-5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[15px] hover:scale-[1.01] active:scale-[0.99] transition-all text-lg shadow-[0_20px_40px_rgba(85,222,232,0.25)] font-open-sans uppercase tracking-wider"
               >
                 PREVIEW MATCH
               </button>
@@ -1134,24 +1267,24 @@ const HostGame = () => {
         {/* Step 5: Preview & Finalize */}
         {step === 5 && (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-10">
-            <div className="bg-yellow-500/10 border-2 border-yellow-500/20 p-10 rounded-[40px] relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/5 blur-[100px] -mr-32 -mt-32" />
+            <div className="bg-[#55DEE8]/10 border-2 border-[#55DEE8]/20 p-10 rounded-[15px] relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#55DEE8]/5 blur-[100px] -mr-32 -mt-32" />
               <div className="relative z-10">
                 <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-10">
                   <div className="space-y-3">
-                    <span className="bg-yellow-500 text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                    <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest font-open-sans">
                       {gameData.gameMode === 'QUICK' ? 'Quick Game' : 'Professional Match'}
                     </span>
-                    <h2 className="text-5xl font-black tracking-tight">{gameData.gameType} Battle</h2>
-                    <div className="flex flex-wrap items-center gap-4 text-yellow-500 font-black text-sm uppercase tracking-widest">
-                      <span className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-xl border border-yellow-500/20"><Calendar size={16} /> {gameData.date}</span>
-                      <span className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-xl border border-yellow-500/20"><Clock size={16} /> {gameData.time}</span>
+                    <h2 className="text-5xl font-black tracking-tight font-open-sans uppercase">{gameData.gameType} Battle</h2>
+                    <div className="flex flex-wrap items-center gap-4 text-[#55DEE8] font-black text-sm uppercase tracking-widest font-inter">
+                      <span className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-xl border border-[#55DEE8]/20"><Calendar size={16} /> {gameData.date}</span>
+                      <span className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-xl border border-[#55DEE8]/20"><Clock size={16} /> {gameData.time}</span>
                     </div>
                   </div>
                   <div className="bg-black/40 border border-white/5 p-6 rounded-3xl backdrop-blur-xl text-center min-w-[180px]">
-                    <p className="text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1">Total Reservation</p>
-                    <p className="text-4xl font-black text-yellow-500 flex items-center justify-center gap-2">
-                      <Coins size={32} /> {totalCost}
+                    <p className="text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1 font-inter">Total Reservation</p>
+                    <p className="text-4xl font-black text-[#BFF367] flex items-center justify-center gap-2 font-open-sans">
+                      <Coins size={32} className="text-[#55DEE8]" /> {totalCost}
                     </p>
                   </div>
                 </div>
@@ -1159,62 +1292,62 @@ const HostGame = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
                   <div className="bg-black/20 border border-white/5 p-6 rounded-3xl flex items-center gap-5">
                     <div className="w-16 h-16 bg-neutral-800 rounded-2xl flex items-center justify-center">
-                      <MapPin className="text-yellow-500" size={32} />
+                      <MapPin className="text-[#55DEE8]" size={32} />
                     </div>
                     <div>
-                      <p className="text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1">Venue</p>
-                      <p className="font-black text-lg truncate leading-none">{selectedGround?.name || 'Self-Arranged'}</p>
-                      <p className="text-xs text-neutral-500 mt-1 font-medium italic">{selectedGround?.location}</p>
+                      <p className="text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1 font-inter">Venue</p>
+                      <p className="font-black text-lg truncate leading-none font-open-sans">{selectedGround?.name || 'Self-Arranged'}</p>
+                      <p className="hidden sm:block text-xs text-neutral-500 mt-1 font-medium italic font-inter">{selectedGround?.location}</p>
                     </div>
                   </div>
                   <div className="bg-black/20 border border-white/5 p-6 rounded-3xl flex items-center gap-5">
                     <div className="w-16 h-16 bg-neutral-800 rounded-2xl flex items-center justify-center">
-                      <UserCheck className="text-yellow-500" size={32} />
+                      <UserCheck className="text-[#BFF367]" size={32} />
                     </div>
                     <div>
-                      <p className="text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1">Expert</p>
-                      <p className="font-black text-lg truncate leading-none">{selectedUmpire?.name || 'No Umpire'}</p>
-                      <p className="text-xs text-neutral-500 mt-1 font-medium italic">{selectedUmpire?.role || 'Professional'}</p>
+                      <p className="text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1 font-inter">Expert</p>
+                      <p className="font-black text-lg truncate leading-none font-open-sans">{selectedUmpire?.name || 'No Umpire'}</p>
+                      <p className="text-xs text-neutral-500 mt-1 font-medium italic font-inter">{selectedUmpire?.role || 'Professional'}</p>
                     </div>
                   </div>
                 </div>
 
                 {gameData.gameMode === 'QUICK' ? (
-                  <div className="p-8 bg-black/40 border border-white/5 rounded-[32px] text-center space-y-4">
+                  <div className="p-8 bg-black/40 border border-white/5 rounded-[15px] text-center space-y-4">
                     <div className="flex items-center justify-center -space-x-4">
                       {Array.from({ length: Math.min(gameData.quickPlayerCount, 8) }).map((_, i) => (
-                        <div key={i} className="w-14 h-14 rounded-full border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-yellow-500">
+                        <div key={i} className="w-14 h-14 rounded-full border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[#55DEE8]">
                           <Users size={20} />
                         </div>
                       ))}
                       {gameData.quickPlayerCount > 8 && (
-                        <div className="w-14 h-14 rounded-full border-4 border-neutral-900 bg-neutral-700 flex items-center justify-center text-[10px] font-black">
+                        <div className="w-14 h-14 rounded-full border-4 border-neutral-900 bg-neutral-700 flex items-center justify-center text-[10px] font-black font-inter">
                           +{gameData.quickPlayerCount - 8}
                         </div>
                       )}
                     </div>
-                    <p className="text-sm font-black uppercase tracking-[0.2em] text-neutral-400">
-                      Single Pool: <span className="text-yellow-500">{gameData.quickPlayerCount} Player Slots</span>
+                    <p className="text-sm font-black uppercase tracking-[0.2em] text-neutral-400 font-inter">
+                      Single Pool: <span className="text-[#BFF367]">{gameData.quickPlayerCount} Player Slots</span>
                     </p>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between p-6 bg-black/40 border border-white/5 rounded-[32px]">
+                  <div className="flex items-center justify-between p-6 bg-black/40 border border-white/5 rounded-[15px]">
                     <div className="flex -space-x-3">
                       {gameData.teamA.slots.slice(0, 5).map((_, i) => (
-                        <div key={i} className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-blue-500/20 text-blue-500 flex items-center justify-center text-xs font-black">
+                        <div key={i} className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-blue-500/20 text-blue-500 flex items-center justify-center text-xs font-black font-open-sans">
                           A
                         </div>
                       ))}
-                      {gameData.teamA.slots.length > 5 && <div className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[10px] font-black">+{gameData.teamA.slots.length - 5}</div>}
+                      {gameData.teamA.slots.length > 5 && <div className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[10px] font-black font-open-sans">+{gameData.teamA.slots.length - 5}</div>}
                     </div>
-                    <div className="px-6 py-2 bg-neutral-800 rounded-2xl border border-neutral-700 text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em] italic">VS</div>
+                    <div className="px-6 py-2 bg-neutral-800 rounded-2xl border border-neutral-700 text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em] italic font-inter">VS</div>
                     <div className="flex -space-x-3">
                       {gameData.teamB.slots.slice(0, 5).map((_, i) => (
-                        <div key={i} className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-red-500/20 text-red-500 flex items-center justify-center text-xs font-black">
+                        <div key={i} className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-red-500/20 text-red-500 flex items-center justify-center text-xs font-black font-open-sans">
                           B
                         </div>
                       ))}
-                      {gameData.teamB.slots.length > 5 && <div className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[10px] font-black">+{gameData.teamB.slots.length - 5}</div>}
+                      {gameData.teamB.slots.length > 5 && <div className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[10px] font-black font-open-sans">+{gameData.teamB.slots.length - 5}</div>}
                     </div>
                   </div>
                 )}
@@ -1222,10 +1355,10 @@ const HostGame = () => {
             </div>
 
             <div className="flex gap-4">
-              <button onClick={() => setStep(gameData.gameMode === 'QUICK' ? 4.5 : 4)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-3xl border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest">Back</button>
+              <button onClick={() => setStep(gameData.gameMode === 'QUICK' ? 4.5 : 4)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-[15px] border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest font-open-sans">Back</button>
               <button
                 onClick={() => setShowConfirm(true)}
-                className="flex-[2] py-5 bg-yellow-500 text-black font-black rounded-3xl hover:bg-yellow-400 transition-all text-xl shadow-[0_20px_40px_rgba(234,179,8,0.2)]"
+                className="flex-[2] py-5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[15px] hover:scale-[1.01] active:scale-[0.99] transition-all text-xl shadow-[0_20px_40px_rgba(85,222,232,0.25)] font-open-sans uppercase tracking-wider"
               >
                 CONFIRM & HOST GAME
               </button>
