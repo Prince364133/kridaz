@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeft, Download, Loader2, ShieldCheck } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -9,7 +9,7 @@ const BookingInvoice = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const invoiceDownloadUrl = `${import.meta.env.VITE_API_URL}/api/user/booking/invoice/${id}`;
+  const invoiceDownloadUrl = `${/** @type {any} */(import.meta).env.VITE_API_URL}/api/user/booking/invoice/${id}`;
 
   useEffect(() => {
     const fetchBooking = async () => {

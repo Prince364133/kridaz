@@ -74,7 +74,7 @@ const avatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.le
 export default function Home() {
  const dispatch = useDispatch();
  const navigate = useNavigate();
- const { isLoggedIn, role, user } = useSelector((state) => state.auth);
+ const { isLoggedIn, role, user } = useSelector((/** @type {any} */ state) => state.auth);
  const { gateInteraction } = useLoginOnDemand();
  const [showInterests, setShowInterests] = useState(false);
  const [activeTab, setActiveTab] = useState("venues");

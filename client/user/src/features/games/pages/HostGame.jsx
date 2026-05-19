@@ -158,7 +158,7 @@ const SPORT_ICONS = {
 
 const HostGame = () => {
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector((/** @type {any} */ state) => state.auth);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showCoinAnim, setShowCoinAnim] = useState(false);
@@ -663,8 +663,8 @@ const HostGame = () => {
                       type="date"
                       value={gameData.date}
                       onChange={(e) => setGameData({ ...gameData, date: e.target.value })}
-                      onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                      onFocus={(e) => e.target.showPicker && e.target.showPicker()}
+                      onClick={(e) => { const el = /** @type {any} */(e.target); el.showPicker?.(); }}
+                      onFocus={(e) => { const el = /** @type {any} */(e.target); el.showPicker?.(); }}
                       className="w-full bg-[#000] border border-neutral-800/80 rounded-[15px] py-4 pl-12 pr-4 text-sm focus:border-cyan-400/80 focus:ring-1 focus:ring-cyan-400/30 outline-none transition-all font-bold text-white placeholder-neutral-500 cursor-pointer"
                     />
                   </div>

@@ -44,7 +44,7 @@ const CheckoutPage = () => {
   const { turfId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector((/** @type {any} */ state) => state.auth);
   
   // Extract booking data from location state or fallback
   const bookingData = location.state || {};

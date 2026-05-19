@@ -56,7 +56,7 @@ const RacketIcon = ({ className }) => (
 );
 
 const TurfDetails = () => {
-  const { isLoggedIn } = useSelector((state) => state.auth);
+  const { isLoggedIn } = useSelector((/** @type {any} */ state) => state.auth);
   const { id } = useParams();
   const navigate = useNavigate();
   const { loading, turfs } = useTurfData();

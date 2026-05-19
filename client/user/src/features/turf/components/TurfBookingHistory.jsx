@@ -29,7 +29,7 @@ const STATUS_META = {
 
 // ── Helper: hours until slot ───────────────────────────────────────────────
 const hoursUntil = (dateStr) =>
- (new Date(dateStr) - new Date()) / (1000 * 60 * 60);
+  (new Date(dateStr).getTime() - new Date().getTime()) / (1000 * 60 * 60);
 
 const TurfBookingHistory = () => {
  const { loading, bookings, cancelBooking } = useBookingHistory();

@@ -8,6 +8,7 @@
     "checkJs": true,
     "maxNodeModuleJsDepth": 0,
     "baseUrl": ".",
+    "types": ["vite/client"],
     "paths": {
       "@/*": ["src/*"],
       "@app/*": ["src/app/*"],

@@ -76,7 +76,7 @@ const AchievementCard = ({ icon: Icon, title, rarity, year }) => {
 
 export default function Profile() {
   const { userId } = useParams();
-  const { user: currentUser, followingIds } = useSelector((state) => state.auth);
+  const { user: currentUser, followingIds } = useSelector((/** @type {any} */ state) => state.auth);
   const { gateInteraction } = useLoginOnDemand();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -860,6 +860,7 @@ export default function Profile() {
           onClose={() => setViewingStoryGroup(null)} 
           onDelete={isOwnProfile ? (id) => toast.error("Delete logic not mapped") : null} 
           currentUser={currentUser} 
+          isAdmin={currentUser?.role === 'BMSP_SUPER_ADMIN' || currentUser?.role === 'BMSP_ADMIN'} 
           initialIndex={initialStoryIndex} 
         />
       )}
