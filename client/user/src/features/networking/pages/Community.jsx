@@ -31,10 +31,10 @@ import {
   useConfirmCommunityPostMutation,
   useLazyGetStoryUploadUrlQuery,
   useConfirmStoryUploadMutation
-} from "../../redux/api/communityApi";
-import { useGetReelsFeedQuery } from "../../redux/api/reelsApi";
-import { startUpload } from "../../redux/slices/mediaUploadSlice";
-import ReelItem from "../../components/common/ReelItem";
+} from "@redux/api/communityApi";
+import { useGetReelsFeedQuery } from "@redux/api/reelsApi";
+import { startUpload } from "@redux/slices/mediaUploadSlice";
+import ReelItem from "@features/reels/components/ReelItem";
 import { useSocket } from "@context/SocketContext";
 import { uploadFileToR2 } from "@utils/mediaUpload";
 
@@ -71,6 +71,7 @@ const Community = () => {
   const { socket } = useSocket();
 
   const [activeFilter, setActiveFilter] = useState("All");
+  const [activeSportFilter, setActiveSportFilter] = useState("");
   const [activePanel, setActivePanel] = useState(null); // 'messages' | 'notifications' | null
   const togglePanel = (panel) => setActivePanel(prev => prev === panel ? null : panel);
 
@@ -209,7 +210,7 @@ const Community = () => {
   const [newPost, setNewPost] = useState({ title: '', content: '', image: null, sport: '' });
   const [postImagePreview, setPostImagePreview] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
-  const [activeSportFilter, setActiveSportFilter] = useState("");
+
 
   const [showStoryModal, setShowStoryModal] = useState(false);
   const [newStory, setNewStory] = useState({ content: '', mediaFiles: [], durationDays: 1 });

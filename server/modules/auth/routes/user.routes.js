@@ -27,7 +27,7 @@ import {
   authLimiter,
   otpLimiter,
 } from "../../../middleware/rateLimiter.middleware.js";
-import { validateTurnstile } from "../../../middleware/turnstile.middleware.js";
+import { verifyTurnstile } from "../../../middleware/turnstile.middleware.js";
 
 const router = express.Router();
 
@@ -47,7 +47,7 @@ const router = express.Router();
  *     summary: Send OTP to email
  *     tags: [Auth]
  */
-router.post("/send-otp", otpLimiter, validateTurnstile, validate(sendOtpSchema), sendOtp);
+router.post("/send-otp", otpLimiter, verifyTurnstile, validate(sendOtpSchema), sendOtp);
 
 /**
  * @swagger
@@ -56,7 +56,7 @@ router.post("/send-otp", otpLimiter, validateTurnstile, validate(sendOtpSchema),
  *     summary: Register a new user
  *     tags: [Auth]
  */
-router.post("/register", authLimiter, validateTurnstile, validate(userRegisterSchema), registerUser);
+router.post("/register", authLimiter, verifyTurnstile, validate(userRegisterSchema), registerUser);
 
 /**
  * @swagger
@@ -65,7 +65,7 @@ router.post("/register", authLimiter, validateTurnstile, validate(userRegisterSc
  *     summary: Login Step 1 - Password verification
  *     tags: [Auth]
  */
-router.post("/login-step1", otpLimiter, validateTurnstile, validate(loginStep1Schema), loginStep1);
+router.post("/login-step1", otpLimiter, verifyTurnstile, validate(loginStep1Schema), loginStep1);
 
 /**
  * @swagger
@@ -74,7 +74,7 @@ router.post("/login-step1", otpLimiter, validateTurnstile, validate(loginStep1Sc
  *     summary: Login Step 2 - Complete login
  *     tags: [Auth]
  */
-router.post("/login", authLimiter, validateTurnstile, validate(userLoginSchema), login);
+router.post("/login", authLimiter, verifyTurnstile, validate(userLoginSchema), login);
 
 /**
  * @swagger

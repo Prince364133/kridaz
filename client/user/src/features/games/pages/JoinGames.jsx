@@ -45,7 +45,7 @@ const JoinGames = () => {
  const fetchGames = async (city = '', state = '', sport = 'All Sports') => {
  try {
  setLoading(true);
- let url = `${/** @type {any} */(import.meta).env.VITE_API_URL}/api/hosted-game/list?`;
+ let url = `${import.meta.env.VITE_API_URL}/api/hosted-game/list?`;
  if (city) url += `city=${city}&`;
  if (state) url += `state=${state}&`;
  if (sport !== 'All Sports') url += `gameType=${sport}&`;

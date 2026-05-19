@@ -242,7 +242,7 @@ const ScoringApp = () => {
               <button
                 onClick={async () => {
                   try {
-                    const response = await fetch(`${/** @type {any} */(import.meta).env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/next-innings`, {
+                    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/next-innings`, {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json',
@@ -508,7 +508,7 @@ const ScoringApp = () => {
                     onClick={async () => {
                       if (liveLoading) return;
                       setLiveLoading(true);
-                      const apiBase = /** @type {any} */(import.meta).env.VITE_API_URL || 'http://localhost:6001';
+                      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:6001';
                       if (!liveEnabled) {
                         try {
                           const response = await fetch(`${apiBase}/api/scoring/${matchId}/go-live`, {
@@ -577,7 +577,7 @@ const ScoringApp = () => {
                         onClick={async () => {
                           const vidId = document.getElementById('ytVideoId')?.['value'] || '';
                           try {
-                            const response = await fetch(`${/** @type {any} */(import.meta).env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/${matchId}/stream-config`, {
+                            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/${matchId}/stream-config`, {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',
