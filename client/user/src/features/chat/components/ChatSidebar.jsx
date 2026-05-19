@@ -1,7 +1,7 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
-import { useGetChatsQuery, useRespondToInvitationMutation, useTogglePinChatMutation, useDeleteChatMutation, useRemoveFromGroupMutation } from '../../../redux/api/chatApi';
+import React, { useState, useEffect, useRef } from 'react';
+import { useGetChatsQuery, useRespondToInvitationMutation, useTogglePinChatMutation, useDeleteChatMutation, useRemoveFromGroupMutation } from '@redux/api/chatApi';
 import { useSelector } from 'react-redux';
-import { useSocket } from '../../../context/SocketContext';
+import { useSocket } from '@context/SocketContext';
 import { 
   MessageSquare, 
   Plus, 
@@ -18,7 +18,7 @@ import {
   PinOff,
   Trash2
 } from 'lucide-react';
-import ConfirmModal from '../modals/ConfirmModal';
+import ConfirmModal from '@components/modals/ConfirmModal';
 
 const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateCommunity, onEditProfile, onChatDeleted }) => {
   const { user } = useSelector((state) => state.auth);

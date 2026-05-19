@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { useGetMyTeamsQuery, useGetOpponentTeamsQuery } from '../../../redux/api/teamApi';
+import React, { useState } from 'react';
+import { useGetMyTeamsQuery, useGetOpponentTeamsQuery } from '@redux/api/teamApi';
 import { Plus, Users, Search, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AddOpponentModal from './AddOpponentModal';

@@ -10,7 +10,7 @@ import {
  Search, Filter, Coins, ChevronRight,
  UserCheck, Trophy, Info, Zap, ShieldCheck, X, Share2
 } from 'lucide-react';
-import { fetchStates, fetchCities } from '../utils/locationService';
+import { fetchStates, fetchCities } from '@utils/locationService';
 import CoinAnimation from '@components/CoinAnimation';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 

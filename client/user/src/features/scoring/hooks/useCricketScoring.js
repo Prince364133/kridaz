@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import useAxiosInstance from '../useAxiosInstance';
+import useAxiosInstance from '@hooks/useAxiosInstance';
 
 /**
  * Central hook for all cricket scoring operations.

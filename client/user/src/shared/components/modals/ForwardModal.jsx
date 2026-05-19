@@ -1,6 +1,6 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { X, Search, Check, Send } from 'lucide-react';
-import { useGetFollowersFollowingQuery, useForwardMessageMutation } from '../../../redux/api/chatApi';
+import { useGetFollowersFollowingQuery, useForwardMessageMutation } from '@redux/api/chatApi';
 
 const ForwardModal = ({ isOpen, onClose, messageId }) => {
   const [searchQuery, setSearchQuery] = useState('');

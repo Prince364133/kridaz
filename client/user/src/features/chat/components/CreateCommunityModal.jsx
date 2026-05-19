@@ -1,5 +1,5 @@
-ï»¿import React, { useState } from 'react';
-import { useCreateGroupChatMutation } from '../../../redux/api/chatApi';
+import React, { useState } from 'react';
+import { useCreateGroupChatMutation } from '@redux/api/chatApi';
 import { 
   Globe, 
   X, 
@@ -51,7 +51,7 @@ const CreateCommunityModal = ({ isOpen, onClose, onSuccess }) => {
       <div className="space-y-3 max-w-sm">
         <h2 className="text-3xl font-black text-white italic uppercase tracking-tight leading-tight">Create a New Community</h2>
         <p className="text-white/40 text-sm font-medium leading-relaxed">
-          Bring your related groupsÎ“Ã‡Ã¶like neighborhoods, schools, or work teamsÎ“Ã‡Ã¶together under one umbrella.
+          Bring your related groupsGÇölike neighborhoods, schools, or work teamsGÇötogether under one umbrella.
         </p>
       </div>
 

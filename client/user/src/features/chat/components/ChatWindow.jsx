@@ -1,6 +1,6 @@
-﻿import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useGetMessagesQuery, useSendMessageMutation, useMarkMessagesReadMutation, useRemoveFromGroupMutation, useDeleteMessagesMutation, useCreateGroupChatMutation, useDeleteChatMutation, useGetChatsQuery } from '../../../redux/api/chatApi';
-import { useSocket } from '../../../context/SocketContext';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useGetMessagesQuery, useSendMessageMutation, useMarkMessagesReadMutation, useRemoveFromGroupMutation, useDeleteMessagesMutation, useCreateGroupChatMutation, useDeleteChatMutation, useGetChatsQuery } from '@redux/api/chatApi';
+import { useSocket } from '@context/SocketContext';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import GroupInfoModal from './GroupInfoModal';

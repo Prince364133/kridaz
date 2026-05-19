@@ -1,6 +1,6 @@
 import axios from "axios";
-import { store } from "../redux/store";
-import { logout, restoreAuth } from "../redux/slices/authSlice";
+import { store } from "@redux/store";
+import { logout, restoreAuth } from "@redux/slices/authSlice";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "",

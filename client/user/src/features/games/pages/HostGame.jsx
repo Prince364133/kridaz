@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useGetMyTeamsQuery } from '@redux/api/teamApi';
 import CoinAnimation from '@components/CoinAnimation';
-import { fetchStates, fetchCities } from '../utils/locationService';
+import { fetchStates, fetchCities } from '@utils/locationService';
 
 const MOCK_TEAM_IMAGES = [
   { label: "Stadium Night",  url: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&q=80" },

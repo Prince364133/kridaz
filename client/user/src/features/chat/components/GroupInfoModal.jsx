@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { 
   useUpdateGroupMutation, 
@@ -8,7 +8,7 @@ import {
   useMakeGroupAdminMutation, 
   useDismissGroupAdminMutation,
   useGetChatsQuery 
-} from '../../../redux/api/chatApi';
+} from '@redux/api/chatApi';
 
 const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  const { user } = useSelector((state) => state.auth);

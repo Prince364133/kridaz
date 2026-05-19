@@ -1,7 +1,7 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Users, Send, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
-import { useLazyFindTeamByCodeQuery, useRequestOpponentMutation } from '../../../redux/api/teamApi';
+import { useLazyFindTeamByCodeQuery, useRequestOpponentMutation } from '@redux/api/teamApi';
 import toast from 'react-hot-toast';
 
 const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {

@@ -1,7 +1,7 @@
-﻿import React from 'react';
+import React from 'react';
 import { Users, UserPlus, Trophy, Calendar, Mail, Phone, Shield, ChevronRight, Check, X, Search, Copy } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useHandleOpponentRequestMutation } from '../../../redux/api/teamApi';
+import { useHandleOpponentRequestMutation } from '@redux/api/teamApi';
 import toast from 'react-hot-toast';
 
 const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {

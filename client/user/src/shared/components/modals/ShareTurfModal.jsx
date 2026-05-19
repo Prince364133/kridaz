@@ -1,6 +1,6 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { X, Search, Check, Send } from 'lucide-react';
-import { useGetFollowersFollowingQuery, useBroadcastMessageMutation } from '../../../redux/api/chatApi';
+import { useGetFollowersFollowingQuery, useBroadcastMessageMutation } from '@redux/api/chatApi';
 
 const ShareTurfModal = ({ isOpen, onClose, turf }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,7 +42,7 @@ const ShareTurfModal = ({ isOpen, onClose, turf }) => {
     
     // Construct the message content with ground details and URL
     const turfUrl = `${window.location.origin}/turf/${turf._id}`;
-    const content = `Check out this ground: ${turf.name}\n≡ƒôì ${turf.city || turf.location || 'Location'}\n≡ƒÆ░ Starting Γé╣${turf.pricePerHour || 800}/hr\n\nLink: ${turfUrl}`;
+    const content = `Check out this ground: ${turf.name}\n=��� ${turf.city || turf.location || 'Location'}\n=�Ʀ Starting G�${turf.pricePerHour || 800}/hr\n\nLink: ${turfUrl}`;
     const media = turf.images?.[0] || turf.image ? [{ url: turf.images?.[0] || turf.image, type: 'image' }] : [];
 
     try {
