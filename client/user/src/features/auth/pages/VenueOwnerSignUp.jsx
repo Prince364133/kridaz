@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import useSignUpForm from "@hooks/useSignUpForm";
+import useSignUpForm from "../hooks/useSignUpForm";
 import { GoogleLogin } from "@react-oauth/google";
 import FileUpload from "@components/common/FileUpload";
 import {

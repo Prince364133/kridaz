@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import useSignUpForm from "@hooks/useSignUpForm";
+import useSignUpForm from "../hooks/useSignUpForm";
 import FileUpload from "@components/common/FileUpload";
 import {
   ArrowRight,
