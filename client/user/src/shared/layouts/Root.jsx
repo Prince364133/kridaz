@@ -2,13 +2,13 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
-import Navbar from "../components/layout/Navbar";
-import MobileBottomNav from "../components/layout/MobileBottomNav";
-import UserFooter from "../components/layout/UserFooter";
-import ScrollToTop from "../components/common/ScrollToTop";
-import BackgroundUploadManager from "../components/BackgroundUploadManager";
-import OnboardingModal from "../components/modals/OnboardingModal";
-import LoginModal from "../components/modals/LoginModal";
+import Navbar from "@components/layout/Navbar";
+import MobileBottomNav from "@components/layout/MobileBottomNav";
+import UserFooter from "@components/layout/UserFooter";
+import ScrollToTop from "@components/common/ScrollToTop";
+import BackgroundUploadManager from "@components/BackgroundUploadManager";
+import OnboardingModal from "@components/modals/OnboardingModal";
+import LoginModal from "@components/modals/LoginModal";
 import { closeLoginModal } from "@redux/slices/uiSlice";
 
 const Root = () => {

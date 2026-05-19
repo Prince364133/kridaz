@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Helmet } from "react-helmet-async";
 import axiosInstance from "@hooks/useAxiosInstance";
+import { fetchStates, fetchCities } from "@utils/locationService";
 import { 
   Search, 
   MapPin, 
@@ -30,7 +31,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import StoryViewer from "../components/StoryViewer";
+import StoryViewer from "@features/networking/components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import NearbyPlayersMap from "@components/map/NearbyPlayersMap";
 import { useSocket } from "@context/SocketContext";
@@ -304,7 +305,48 @@ const FindPlayers = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [followingIds, setFollowingIds] = useState([]);
-  const [filters, setFilters] = useState({ city: "", sport: "" });
+  const [filters, setFilters] = useState({ state: "", city: "", sport: "" });
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [loadingStates, setLoadingStates] = useState(false);
+  const [loadingCities, setLoadingCities] = useState(false);
+
+  // Fetch states on mount
+  useEffect(() => {
+    const loadStates = async () => {
+      try {
+        setLoadingStates(true);
+        const fetchedStates = await fetchStates();
+        setStates(fetchedStates || []);
+      } catch (err) {
+        console.error("Failed to load states:", err);
+      } finally {
+        setLoadingStates(false);
+      }
+    };
+    loadStates();
+  }, []);
+
+  // Fetch cities when selected state changes
+  useEffect(() => {
+    const loadCities = async () => {
+      if (!filters.state) {
+        setCities([]);
+        return;
+      }
+      try {
+        setLoadingCities(true);
+        const fetchedCities = await fetchCities(filters.state);
+        setCities(fetchedCities || []);
+      } catch (err) {
+        console.error("Failed to load cities:", err);
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+    loadCities();
+  }, [filters.state]);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "players";
   
@@ -495,6 +537,7 @@ const FindPlayers = () => {
     try {
       setLoading(true);
       const params = {
+        state: filters.state,
         city: filters.city,
         sportType: filters.sport,
         search: searchQuery,
@@ -503,6 +546,7 @@ const FindPlayers = () => {
       
       const response = await axiosInstance.get("/api/user/players", {
         params: {
+          state: filters.state,
           city: filters.city,
           sport: filters.sport,
           search: searchQuery,
@@ -685,7 +729,13 @@ const FindPlayers = () => {
   };
 
   const handleFilterChange = (name, value) => {
-    setFilters(prev => ({ ...prev, [name]: value }));
+    setFilters(prev => {
+      const updated = { ...prev, [name]: value };
+      if (name === "state") {
+        updated.city = "";
+      }
+      return updated;
+    });
   };
 
   const handleFollowToggle = async (targetUserId) => {
@@ -970,16 +1020,30 @@ const FindPlayers = () => {
                 <option value="">All Sports</option>
                 {sports.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
-              <div className="relative group">
-                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#84CC16]" size={10} />
-                <input 
-                  type="text"
-                  placeholder="LOCATION..."
-                  value={filters.city}
-                  onChange={(e) => handleFilterChange("city", e.target.value)}
-                  className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#84CC16] focus:border-[#84CC16]/50 outline-none w-24 md:w-28 placeholder:text-white/20"
-                />
-              </div>
+              <select 
+                value={filters.state}
+                onChange={(e) => handleFilterChange("state", e.target.value)}
+                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#84CC16] focus:border-[#84CC16]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
+              >
+                <option value="" className="bg-[#0a0a0a]">All States</option>
+                {states.map(s => (
+                  <option key={s} value={s} className="bg-[#0a0a0a]">{s}</option>
+                ))}
+              </select>
+
+              <select 
+                value={filters.city}
+                onChange={(e) => handleFilterChange("city", e.target.value)}
+                disabled={!filters.state}
+                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#84CC16] focus:border-[#84CC16]/50 outline-none cursor-pointer hover:bg-white/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <option value="" className="bg-[#0a0a0a]">
+                  {loadingCities ? "Loading..." : !filters.state ? "Select State" : "All Cities"}
+                </option>
+                {cities.map(c => (
+                  <option key={c} value={c} className="bg-[#0a0a0a]">{c}</option>
+                ))}
+              </select>
 
               {activeTab === "players" && (
                 <button 

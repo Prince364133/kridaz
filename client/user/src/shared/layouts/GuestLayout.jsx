@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
-import PublicNavbar from "../components/layout/GuestNavbar";
-import PartnerFooter from "../components/layout/PartnerFooter";
-import ScrollToTop from "../components/common/ScrollToTop";
+import PublicNavbar from "@components/layout/GuestNavbar";
+import PartnerFooter from "@components/layout/PartnerFooter";
+import ScrollToTop from "@components/common/ScrollToTop";
 
 const PublicLayout = () => {
   const location = useLocation();

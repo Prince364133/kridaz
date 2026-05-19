@@ -24,7 +24,7 @@ export const createOrder = async (totalPrice) => {
   const response = await axiosInstance.post("/api/user/booking/create-order", {
     totalPrice,
   });
-  return response.data;
+    return response.data;
 };
 
 export const handlePayment = async (order, user) => {

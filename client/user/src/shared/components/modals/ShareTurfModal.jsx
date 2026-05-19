@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { X, Search, Check, Send } from 'lucide-react';
-import { useGetFollowersFollowingQuery, useBroadcastMessageMutation } from '../../../redux/api/chatApi';
+import { useGetFollowersFollowingQuery, useBroadcastMessageMutation } from '@redux/api/chatApi';
 
 const ShareTurfModal = ({ isOpen, onClose, turf }) => {
   const [searchQuery, setSearchQuery] = useState('');

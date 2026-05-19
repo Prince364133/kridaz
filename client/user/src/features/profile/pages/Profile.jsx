@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Helmet } from "react-helmet-async";
 import {
   User, MapPin, Clock, IndianRupee, Calendar, Zap, Activity,
   ArrowRight, ShieldCheck, Trophy, Star, Camera, Edit2, MessageSquare, Heart, Edit3, Trash2, Loader2, Send, MessageCircle,
@@ -17,10 +16,10 @@ import { login, logout, updateUser, followUser, unfollowUser } from "@redux/slic
 import useBookingHistory from "@hooks/useBookingHistory";
 import useWriteReview from "@hooks/useWriteReview";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
-import { TurfBookingHistory } from "@features/turf";
+import TurfBookingHistory from "@features/turf/components/TurfBookingHistory";
 import TurfBookingHistorySkeleton from "@components/ui/TurfBookingHistorySkeleton";
-import { StoryViewer } from "@features/networking";
-import EditProfileModal from "../components/EditProfileModal";
+import StoryViewer from "@features/networking/components/StoryViewer";
+import EditProfileModal from "@features/profile/components/EditProfileModal";
 
 const PRI = "#84CC16";
 
@@ -79,8 +78,8 @@ export default function Profile() {
   const [searchParams] = useSearchParams();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  const isOwnProfile = !userId || (currentUser && userId === (currentUser.id || currentUser._id));
-  const targetUserId = isOwnProfile ? (currentUser?.id || currentUser?._id) : userId;
+  const isOwnProfile = !userId || (currentUser && userId === currentUser._id);
+  const targetUserId = isOwnProfile ? currentUser?._id : userId;
 
   const [profileUser, setProfileUser] = useState(isOwnProfile ? currentUser : null);
   const [loadingProfile, setLoadingProfile] = useState(!isOwnProfile);
@@ -137,8 +136,8 @@ export default function Profile() {
         setProfileUser(prev => ({
           ...prev,
           followers: isFollowing 
-            ? prev.followers.filter(id => id !== (currentUser.id || currentUser._id))
-            : [...(prev.followers || []), (currentUser.id || currentUser._id)]
+            ? prev.followers.filter(id => id !== currentUser._id)
+            : [...(prev.followers || []), currentUser._id]
         }));
         toast.success(`${isFollowing ? 'Unfollowed' : 'Following'} ${profileUser.name}`);
       }
@@ -189,9 +188,6 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-black text-white pb-24 overflow-x-hidden">
-      <Helmet>
-        <title>Profile | Kridaz</title>
-      </Helmet>
       
       <div className="relative">
         <div className="h-72 relative overflow-hidden rounded-b-[32px]">

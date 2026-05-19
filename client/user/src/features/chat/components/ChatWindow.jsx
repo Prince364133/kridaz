@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
-import { useGetMessagesQuery, useSendMessageMutation, useMarkMessagesReadMutation, useRemoveFromGroupMutation, useDeleteMessagesMutation, useCreateGroupChatMutation, useDeleteChatMutation, useGetChatsQuery } from '../../../redux/api/chatApi';
-import { useSocket } from '../../../context/SocketContext';
+import { useGetMessagesQuery, useSendMessageMutation, useMarkMessagesReadMutation, useRemoveFromGroupMutation, useDeleteMessagesMutation, useCreateGroupChatMutation, useDeleteChatMutation, useGetChatsQuery } from '@redux/api/chatApi';
+import { useSocket } from '@context/SocketContext';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import GroupInfoModal from './GroupInfoModal';
@@ -68,7 +67,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  if (hasUnread) {
  const myIdToSend = user?._id || user?.id;
- socket.emit(SOCKET.MESSAGES_READ, { chatId: chat._id, userId: myIdToSend });
+ socket.emit('messages read', { chatId: chat._id, userId: myIdToSend });
  markMessagesReadMutation(chat._id).catch(console.error);
  }
  }
@@ -76,13 +75,13 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  useEffect(() => {
  if (socket && chat) {
- socket.emit(SOCKET.JOIN_CHAT, chat._id);
+ socket.emit('join chat', chat._id);
 
  const handleNewMessage = (newMessage) => {
  if (chat._id === (newMessage.chat?._id || newMessage.chat)) {
  setMessages((prev) => [...prev, newMessage]);
  // Mark as read immediately since chat is open
- socket.emit(SOCKET.MESSAGES_READ, { chatId: chat._id, userId: user?._id || user?.id });
+ socket.emit('messages read', { chatId: chat._id, userId: user?._id || user?.id });
  }
  };
 
@@ -108,16 +107,16 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  }
  };
 
- socket.on(SOCKET.MESSAGE_RECEIVED, handleNewMessage);
- socket.on(SOCKET.TYPING, handleTyping);
- socket.on(SOCKET.STOP_TYPING, handleStopTyping);
- socket.on(SOCKET.MESSAGES_READ, handleMessagesRead);
+ socket.on('message recieved', handleNewMessage);
+ socket.on('typing', handleTyping);
+ socket.on('stop typing', handleStopTyping);
+ socket.on('messages read', handleMessagesRead);
 
  return () => {
- socket.off(SOCKET.MESSAGE_RECEIVED, handleNewMessage);
- socket.off(SOCKET.TYPING, handleTyping);
- socket.off(SOCKET.STOP_TYPING, handleStopTyping);
- socket.off(SOCKET.MESSAGES_READ, handleMessagesRead);
+ socket.off('message recieved', handleNewMessage);
+ socket.off('typing', handleTyping);
+ socket.off('stop typing', handleStopTyping);
+ socket.off('messages read', handleMessagesRead);
  };
  }
  }, [socket, chat]);
@@ -126,43 +125,27 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  scrollRef.current?.scrollIntoView({ behavior: "smooth" });
  }, [messages, showTypingIndicator]);
 
-   const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!message.trim()) return;
+ const handleSendMessage = async (e) => {
+ e.preventDefault();
+ if (!message.trim()) return;
 
-    socket.emit(SOCKET.STOP_TYPING, chat._id);
-    setIsTyping(false);
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+ socket.emit('stop typing', chat._id);
+ setIsTyping(false);
+ if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
-    const msgToSend = message;
-    setMessage('');
+ try {
+ const data = await sendMessageMutation({
+ chatId: chat._id,
+ content: message
+ }).unwrap();
 
-    const tempMessageId = "temp_" + Date.now();
-    const tempMessage = {
-      _id: tempMessageId,
-      content: msgToSend,
-      sender: { user: user },
-      createdAt: new Date().toISOString(),
-      chat: chat._id,
-      readBy: [],
-      isTemp: true
-    };
-    
-    setMessages((prev) => [...prev, tempMessage]);
-
-    try {
-      const data = await sendMessageMutation({
-        chatId: chat._id,
-        content: msgToSend
-      }).unwrap();
-
-      socket.emit(SOCKET.NEW_MESSAGE, data);
-      setMessages((prev) => prev.map(m => m._id === tempMessageId ? data : m));
-    } catch (err) {
-      console.error("Failed to send message:", err);
-      setMessages((prev) => prev.filter(m => m._id !== tempMessageId));
-    }
-  };
+ socket.emit('new message', data);
+ setMessages((prev) => [...prev, data]);
+ setMessage('');
+ } catch (err) {
+ console.error("Failed to send message:", err);
+ }
+ };
 
  const typingHandler = (e) => {
  setMessage(e.target.value);
@@ -171,13 +154,13 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  if (!isTyping) {
  setIsTyping(true);
- socket.emit(SOCKET.TYPING, chat._id);
+ socket.emit('typing', chat._id);
  }
 
  if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
  typingTimeoutRef.current = setTimeout(() => {
- socket.emit(SOCKET.STOP_TYPING, chat._id);
+ socket.emit('stop typing', chat._id);
  setIsTyping(false);
  }, 3000);
  };
@@ -630,6 +613,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
    const aid = (admin.user?._id || admin.user)?.toString();
    return aid === myId?.toString();
  });
+ const canMessage = !chat.adminOnlyMessages || isActuallyAdmin;
 
  return (
  <div className="flex-1 flex flex-col p-6 animate-fade-in">
@@ -851,11 +835,9 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  </span>
  {isMine && (
  <svg className={`w-4 h-[11px] ${isRead ? 'text-[#34B7F1]' : 'text-[#84CC16]/40'}`} viewBox="0 0 20 12" fill="none">
-  <path d="M1 6l4 4L13 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  {(isRead || otherOnline) && (
-    <path d="M7 6l4 4L19 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"/>
-  )}
-  </svg>
+ <path d="M1 6l4 4L13 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+ <path d="M7 6l4 4L19 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"/>
+ </svg>
  )}
  </div>
  </div>

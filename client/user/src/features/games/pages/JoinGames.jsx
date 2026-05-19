@@ -10,7 +10,7 @@ import {
  Search, Filter, Coins, ChevronRight,
  UserCheck, Trophy, Info, Zap, ShieldCheck, X, Share2
 } from 'lucide-react';
-import { fetchStates, fetchCities } from '@utils/locationService';
+import { fetchStates, fetchCities } from '../utils/locationService';
 import CoinAnimation from '@components/CoinAnimation';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
@@ -230,7 +230,7 @@ const JoinGames = () => {
  Join <span className="text-[#CCFF00]">Games</span>
  </h1>
  <p className="text-sm md:text-xl font-medium text-[#999999] tracking-tight max-w-xl">
- Competitive Matchmaking ΓÇó Discover & participate in matches hosted by the elite sports community.
+ Competitive Matchmaking • Discover & participate in matches hosted by the elite sports community.
  </p>
  </div>
 
@@ -398,9 +398,9 @@ const JoinGames = () => {
  style={{ minHeight: '480px' }}
  onClick={() => setSelectedGame(game)}
  >
- {/* ΓöÇΓöÇ Background: Split Team Images (Top Half) ΓöÇΓöÇ */}
+ {/* ── Background: Split Team Images (Top Half) ── */}
  <div className="absolute inset-x-0 top-0 h-[48%] z-0 overflow-hidden">
- {/* Team A ΓÇö Left Half */}
+ {/* Team A — Left Half */}
  <div className="absolute inset-y-0 left-0 w-1/2 overflow-hidden">
  <img
  src={game.teams?.teamA?.image || "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&q=80"}
@@ -408,7 +408,7 @@ const JoinGames = () => {
  className="w-full h-full object-cover object-right scale-110 group-hover:scale-125 transition-transform duration-700"
  />
  </div>
- {/* Team B ΓÇö Right Half */}
+ {/* Team B — Right Half */}
  <div className="absolute inset-y-0 right-0 w-1/2 overflow-hidden">
  <img
  src={game.teams?.teamB?.image || "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80"}
@@ -417,7 +417,7 @@ const JoinGames = () => {
  />
  </div>
 
- {/* Center vignette ΓÇö vintage blend where images meet */}
+ {/* Center vignette — vintage blend where images meet */}
  <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-28 bg-gradient-to-r from-transparent via-black to-transparent opacity-90" />
  {/* Edge vignettes (left + right) */}
  <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-black/70 to-transparent" />
@@ -430,7 +430,7 @@ const JoinGames = () => {
  </div>
 
 
- {/* ΓöÇΓöÇ Content ΓöÇΓöÇ */}
+ {/* ── Content ── */}
  <div className="relative z-10 flex flex-col h-full p-5" style={{ minHeight: '480px' }}>
 
  {/* Top Row: Sport badge + Coins */}
@@ -521,7 +521,9 @@ const JoinGames = () => {
  ) : (
  <div className="flex items-baseline gap-2 flex-wrap">
  <span>{game.teams?.teamA?.name}</span>
- <span className="text-[#CCFF00] text-sm">VS</span>
+                      <span className="text-[#CCFF00] text-[10px] md:text-sm flex items-center">
+                        V<span className="w-[1px] h-3 bg-[#CCFF00] ml-[1px] mr-[3px] opacity-60" />S
+                      </span>
  <span>{game.teams?.teamB?.name}</span>
  </div>
  )}
@@ -542,7 +544,7 @@ const JoinGames = () => {
  <div>
  <p className="text-[7px] font-black text-[#CCFF00]/60 uppercase tracking-widest mb-0.5">Start Date & Time</p>
  <p className="text-[13px] font-black text-white">
- {new Date(game.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} ΓÇó {game.time}
+ {new Date(game.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {game.time}
  </p>
  </div>
  </div>
@@ -667,7 +669,7 @@ const JoinGames = () => {
  )}
  <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter font-open-sans">Match Intelligence</h2>
  </div>
- <button onClick={() => setSelectedGame(null)} className="w-10 h-10 bg-[#121212] border border-[#2D2D2D] rounded-full flex items-center justify-center text-[#CCFF00] hover:bg-[#CCFF00] hover:text-black transition-all">Γ£ò</button>
+ <button onClick={() => setSelectedGame(null)} className="w-10 h-10 bg-[#121212] border border-[#2D2D2D] rounded-full flex items-center justify-center text-[#CCFF00] hover:bg-[#CCFF00] hover:text-black transition-all">✕</button>
  </div>
 
  <div className="p-8 lg:p-12">
@@ -859,7 +861,7 @@ const JoinGames = () => {
  </div>
  <div className="flex items-center justify-between">
  <span className="text-[10px] font-bold text-white/40 uppercase">Date/Time</span>
- <span className="text-sm font-black text-white">{new Date(inviteData.game.date).toLocaleDateString()} ΓÇó {inviteData.game.time}</span>
+ <span className="text-sm font-black text-white">{new Date(inviteData.game.date).toLocaleDateString()} • {inviteData.game.time}</span>
  </div>
  <div className="flex items-center justify-between">
  <span className="text-[10px] font-bold text-white/40 uppercase">Location</span>

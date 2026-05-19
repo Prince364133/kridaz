@@ -5,7 +5,6 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import { Search, MapPin, Star, ChevronRight, Users, User, Calendar, Shield, Trophy, Activity, Award, CheckCircle, Filter, Loader2, Check, X, LayoutGrid, Video } from "lucide-react";
 import toast from "react-hot-toast";
 import { fetchStates, fetchCities } from "@user/utils/locationService";
-import { ProfessionalMapper } from "../mappers/professional.mapper";
 
 const PRI = "#84CC16";
 const BDR = "#2A2A2A";
@@ -72,8 +71,7 @@ export default function FindProfessionals() {
         searchTerm
       };
       const res = await axiosInstance.get("/api/professional/list", { params });
-      const mapped = ProfessionalMapper.toClientList(res.data.professionals || []);
-      setProfessionals(mapped);
+      setProfessionals(res.data.professionals || []);
     } catch (error) {
       console.error("Error fetching professionals:", error);
       toast.error("Failed to load professionals");

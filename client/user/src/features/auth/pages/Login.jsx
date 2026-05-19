@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Helmet } from "react-helmet-async";
-import useLoginForm from "../hooks/useLoginForm";
-import GoogleAuthButton from "../components/GoogleAuthButton";
-import Turnstile from "react-turnstile";
+import useLoginForm from "@hooks/useLoginForm";
+import GoogleAuthButton from "@user/components/auth/GoogleAuthButton";
 import OnboardingModal from "@components/modals/OnboardingModal";
 import { 
   ArrowRight, 
@@ -22,6 +20,7 @@ import {
   Fingerprint,
   Radio
 } from "lucide-react";
+import { FormField } from "@components/common";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -36,10 +35,11 @@ const Login = () => {
     handleGoogleError,
     showOnboarding,
     setShowOnboarding,
-    accountNotFound,
-    setTurnstileToken
+    onboardingUser,
+    accountNotFound
   } = useLoginForm();
   const [mounted, setMounted] = useState(false);
+  const dispatch = useDispatch(); // for quick demo button
 
   const { isLoggedIn, role } = useSelector((state) => state.auth);
   
@@ -59,10 +59,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-start pt-4 lg:pt-10 pb-12 font-sans">
-      <Helmet>
-        <title>Login | Kridaz</title>
-        <meta name="description" content="Login to Kridaz to book sport turfs, track live scores, upload reels, and join games with other players." />
-      </Helmet>
       {/* ── BACKGROUND LAYER ── */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-black" />
@@ -192,15 +188,6 @@ const Login = () => {
                           </Link>
                         </div>
                       )}
-                      
-                      {/* Turnstile Bot Protection */}
-                      <div className="flex justify-center my-4">
-                        <Turnstile
-                          sitekey="0x4AAAAAAA7f_T_9-vI7yP6U"
-                          onVerify={(token) => setTurnstileToken(token)}
-                          theme="dark"
-                        />
-                      </div>
                       
                       <button 
                         type="submit" 

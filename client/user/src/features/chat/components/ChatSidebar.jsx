@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
-import { useGetChatsQuery, useRespondToInvitationMutation, useTogglePinChatMutation, useDeleteChatMutation, useRemoveFromGroupMutation } from '../../../redux/api/chatApi';
+import { useGetChatsQuery, useRespondToInvitationMutation, useTogglePinChatMutation, useDeleteChatMutation, useRemoveFromGroupMutation } from '@redux/api/chatApi';
 import { useSelector } from 'react-redux';
-import { useSocket } from '../../../context/SocketContext';
+import { useSocket } from '@context/SocketContext';
 import { 
   MessageSquare, 
   Plus, 
@@ -19,7 +18,7 @@ import {
   PinOff,
   Trash2
 } from 'lucide-react';
-import ConfirmModal from '../../../shared/components/modals/ConfirmModal';
+import ConfirmModal from '../modals/ConfirmModal';
 
 const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateCommunity, onEditProfile, onChatDeleted }) => {
   const { user } = useSelector((state) => state.auth);
@@ -107,20 +106,20 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
       refetch();
     };
 
-    socket.on(SOCKET.MESSAGE_RECEIVED, handleNewMessage);
-    socket.on(SOCKET.TYPING, handleTyping);
-    socket.on(SOCKET.STOP_TYPING, handleStopTyping);
-    socket.on(SOCKET.CHAT_UPDATED, handleChatUpdated);
-    socket.on(SOCKET.CHAT_DELETED, handleChatDeleted);
-    socket.on(SOCKET.USER_PROFILE_UPDATED, handleProfileUpdated);
+    socket.on('message recieved', handleNewMessage);
+    socket.on('typing', handleTyping);
+    socket.on('stop typing', handleStopTyping);
+    socket.on('chat updated', handleChatUpdated);
+    socket.on('chat deleted', handleChatDeleted);
+    socket.on('user profile updated', handleProfileUpdated);
 
     return () => {
-      socket.off(SOCKET.MESSAGE_RECEIVED, handleNewMessage);
-      socket.off(SOCKET.TYPING, handleTyping);
-      socket.off(SOCKET.STOP_TYPING, handleStopTyping);
-      socket.off(SOCKET.CHAT_UPDATED, handleChatUpdated);
-      socket.off(SOCKET.CHAT_DELETED, handleChatDeleted);
-      socket.off(SOCKET.USER_PROFILE_UPDATED, handleProfileUpdated);
+      socket.off('message recieved', handleNewMessage);
+      socket.off('typing', handleTyping);
+      socket.off('stop typing', handleStopTyping);
+      socket.off('chat updated', handleChatUpdated);
+      socket.off('chat deleted', handleChatDeleted);
+      socket.off('user profile updated', handleProfileUpdated);
     };
   }, [socket, selectedChatId, refetch]);
 
@@ -593,7 +592,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                               openConfirmModal(
                                 "Delete Group",
                                 "Permanently delete this group and all messages for everyone?",
-                                  handleDelete
+                                handleDelete
                               );
                             }}
                             className="w-full px-3 py-2 text-left text-sm text-red-500 font-semibold hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"

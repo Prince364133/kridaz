@@ -12,7 +12,7 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell 
 } from 'recharts';
 import useDashboardData from "@hooks/admin/useDashboardData";
-import DashboardSkeleton from "@features/venue-owner/Dashboard/DashboardSkeleton";
+import DashboardSkeleton from "../../owner/Dashboard/DashboardSkeleton";
 
 export default function AdminDashboard() {
   const { data: dashboardData, loading, error } = useDashboardData();

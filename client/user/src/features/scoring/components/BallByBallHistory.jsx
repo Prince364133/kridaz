@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Shield } from 'lucide-react';
+import { Filter, User, Circle, Shield } from 'lucide-react';
 
 const ballColor = (ball) => {
   if (ball.isWicket) return 'bg-red-600 text-white';
@@ -63,7 +63,7 @@ const BallByBallHistory = ({ matchData }) => {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="space-y-4 font-inter">
+      <div className="space-y-4">
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
           {[['all','All'],['wicket','Wickets'],['boundary','Boundaries'],['extra','Extras'],['dot','Dots']].map(([val, label]) => (
             <button key={val} onClick={() => setFilterType(val)}
@@ -101,7 +101,7 @@ const BallByBallHistory = ({ matchData }) => {
       </div>
 
       {/* Timeline */}
-      <div className="space-y-8 font-inter">
+      <div className="space-y-8">
         {Object.keys(groupedByOver).sort((a,b) => b-a).map(over => (
           <div key={over} className="space-y-4">
             <div className="flex items-center gap-4">

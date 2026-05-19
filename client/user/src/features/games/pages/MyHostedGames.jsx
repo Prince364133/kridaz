@@ -116,7 +116,7 @@ const MyHostedGames = () => {
             <Trophy size={48} className="mx-auto mb-4 text-neutral-700" />
             <h3 className="text-xl font-bold">No games hosted yet</h3>
             <p className="text-neutral-500 mb-6">Start hosting and build your community!</p>
-            <button onClick={() => navigate('/host-game')} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-xl">
+            <button onClick={() => window.location.href='/host-game'} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-xl">
               Host Now
             </button>
           </div>
@@ -178,7 +178,7 @@ const MyHostedGames = () => {
                            onClick={() => {
                              const el = document.getElementById(`pro-services-${game._id}`);
                              el?.scrollIntoView({ behavior: 'smooth' });
-                             toast("Venue, Umpire, Scorer & Streamer required!", { icon: 'ΓÜá∩╕Å' });
+                             toast("Venue, Umpire, Scorer & Streamer required!", { icon: '⚠️' });
                            }}
                            className="px-4 py-1.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-black rounded-full hover:bg-amber-500/20 transition-all uppercase tracking-wider flex items-center gap-1"
                          >

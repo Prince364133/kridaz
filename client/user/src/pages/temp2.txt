@@ -1,0 +1,11 @@
+          user: profileUser,
+          stories: res.data.stories
+        });
+      }
+    } catch (error) {
+      toast.error("Failed to load stories");
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'posts' || activeTab === 'stories') {

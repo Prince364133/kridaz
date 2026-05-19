@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useGetMyTeamsQuery, useGetOpponentTeamsQuery } from '@redux/api/teamApi';
 import { Plus, Users, Search, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import AddOpponentModal from './AddOpponentModal';
 
 const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {

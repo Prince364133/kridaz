@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useGetChatsQuery, useCreateGroupChatMutation, useAddGroupsToCommunityMutation } from '../../../redux/api/chatApi';
+import { useGetChatsQuery, useCreateGroupChatMutation, useAddGroupsToCommunityMutation } from '@redux/api/chatApi';
 import { 
   Plus, 
   X, 

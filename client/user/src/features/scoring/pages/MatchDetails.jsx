@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
  Trophy, Calendar, Clock, MapPin, 
  Users, Shield, ArrowLeft, Zap,
- Activity, Share2, User
+ Info, Activity, Share2, User, CheckCircle
 } from 'lucide-react';
 import axiosInstance from '@hooks/useAxiosInstance';
 import { toast } from 'react-hot-toast';
@@ -21,9 +21,7 @@ const MatchDetails = () => {
  const fetchGameDetails = async () => {
  try {
  const res = await axiosInstance.get(`/api/hosted-game/${matchId}`);
- const fetchedGame = res.data.game;
- // Ensure fallback roles/structures match LLD
- setGame(fetchedGame);
+ setGame(res.data.game);
  } catch (err) {
  toast.error("Failed to load match details");
  navigate(-1);
@@ -47,7 +45,7 @@ const MatchDetails = () => {
  const isUmpire = user && game.umpire && (user._id === game.umpire._id || user.id === game.umpire._id);
 
  return (
- <div className="min-h-screen bg-[#050505] text-white pb-32 font-inter">
+ <div className="min-h-screen bg-[#050505] text-white pb-32">
  {/* Dynamic Header */}
  <div className="sticky top-0 z-50 bg-black/60 backdrop-blur-2xl border-b border-white/5 p-4">
  <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -157,7 +155,7 @@ const MatchDetails = () => {
  >
  <div className="w-10 h-10 rounded-full bg-neutral-800 border border-white/10 overflow-hidden flex items-center justify-center">
  {slot.user?.profilePicture ? (
- <img src={slot.user.profilePicture} className="w-full h-full object-cover" alt="" />
+ <img src={slot.user.profilePicture} className="w-full h-full object-cover" />
  ) : (
  <User size={20} className="text-gray-600" />
  )}
@@ -246,7 +244,6 @@ const MatchDetails = () => {
  <img 
  src={game.ground.images?.[0] || 'https://images.unsplash.com/photo-1591333139265-2967724a9131?q=80&w=1000'} 
  className="w-full h-full object-cover opacity-60"
- alt=""
  />
  </div>
  <div>

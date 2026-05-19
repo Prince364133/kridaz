@@ -23,7 +23,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  if (!storyGroup) return null;
 
  const currentStory = storyGroup.stories[currentStoryIndex];
- const isOwner = currentUser && ((storyGroup.user.id || storyGroup.user._id) === (currentUser.id || currentUser._id) || storyGroup.user === (currentUser.id || currentUser._id));
+ const isOwner = currentUser && (storyGroup.user._id === currentUser._id || storyGroup.user === currentUser._id);
 
  return (
  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black animate-in fade-in duration-300">
@@ -97,7 +97,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  {/* Footer */}
  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black to-transparent flex items-center gap-4 z-[110]">
  <Link 
- to={`/profile/${storyGroup.user.id || storyGroup.user._id}`} 
+ to={`/profile/${storyGroup.user._id}`} 
  className="w-10 h-10 rounded-full border-2 border-[#CCFF00] overflow-hidden hover:opacity-80 transition-opacity shrink-0"
  onClick={(e) => e.stopPropagation()}
  >
@@ -105,7 +105,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  </Link>
  <div className="flex-1 min-w-0">
  <Link 
- to={`/profile/${storyGroup.user.id || storyGroup.user._id}`} 
+ to={`/profile/${storyGroup.user._id}`} 
  className="hover:opacity-80 transition-opacity inline-block max-w-full"
  onClick={(e) => e.stopPropagation()}
  >
@@ -140,7 +140,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  <button 
  onClick={(e) => {
  e.stopPropagation();
- onDelete(currentStory.id || currentStory._id);
+ onDelete(currentStory._id);
  }}
  className="p-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl transition-all shrink-0 border border-red-500/20"
  >
@@ -180,8 +180,8 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  <div className="space-y-2">
  {currentStory.viewers.map((viewer) => (
  <Link
- key={viewer.id || viewer._id}
- to={`/profile/${viewer.id || viewer._id}`}
+ key={viewer._id}
+ to={`/profile/${viewer._id}`}
  onClick={() => onClose()}
  className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
  >

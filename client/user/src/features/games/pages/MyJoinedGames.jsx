@@ -6,10 +6,8 @@ import {
   Users, LogOut, Clock, MapPin, 
   Trophy, Info, Calendar, Coins, User
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const MyJoinedGames = () => {
-  const navigate = useNavigate();
   const [joinedGames, setJoinedGames] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -59,7 +57,7 @@ const MyJoinedGames = () => {
             <Trophy size={48} className="mx-auto mb-4 text-neutral-700" />
             <h3 className="text-xl font-bold">No matches joined yet</h3>
             <p className="text-neutral-500 mb-6">Explore games hosted by the community and join one!</p>
-            <button onClick={() => navigate('/join-games')} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-xl">
+            <button onClick={() => window.location.href='/join-games'} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-xl">
               Find Games
             </button>
           </div>

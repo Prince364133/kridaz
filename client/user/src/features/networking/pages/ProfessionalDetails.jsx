@@ -10,7 +10,6 @@ import {
 import toast from "react-hot-toast";
 import { format, addDays, startOfToday } from "date-fns";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
-import { ProfessionalMapper } from "../mappers/professional.mapper";
 
 const PRI = "#84CC16";
 
@@ -38,8 +37,7 @@ export default function ProfessionalDetails() {
     try {
       setLoading(true);
       const res = await axiosInstance.get(`/api/professional/details/${id}?date=${selectedDate}`);
-      const mapped = ProfessionalMapper.toClientModel(res.data.professional);
-      setPro(mapped);
+      setPro(res.data.professional);
       setAvailability(res.data.availability);
       setReviews(res.data.reviews);
       setSelectedSlots([]); // Clear slots on date change

@@ -8,7 +8,7 @@ import {
   useMakeGroupAdminMutation, 
   useDismissGroupAdminMutation,
   useGetChatsQuery 
-} from '../../../redux/api/chatApi';
+} from '@redux/api/chatApi';
 
 const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  const { user } = useSelector((state) => state.auth);
@@ -130,7 +130,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
  </svg>
  </button>
-         <h2 className="text-base font-bold text-white tracking-wide">{chat.isCommunity ? "Community info" : "Group info"}</h2>
+        <h2 className="text-base font-bold text-white tracking-wide">{chat.isCommunity ? "Community info" : "Group info"}</h2>
  </div>
 
  <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -266,7 +266,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  </svg>
  </button>
  </div>
-  ))}
+ ))}
  </div>
  </div>
  )}

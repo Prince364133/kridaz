@@ -1,31 +1,31 @@
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { useState } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
-import { login } from "@redux/slices/authSlice";
+import {login} from "@redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 
-const loginSchema = z.object({
-  email: z
+const loginSchema = yup.object().shape({
+  email: yup
     .string()
-    .email("Enter a valid email")
-    .min(1, "Enter your email"),
-  password: z
+    .required("Enter your email")
+    .matches(
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      "Enter a valid email"
+    ),
+  password: yup
     .string()
+    .required("Enter your password")
     .min(6, "Password must be at least 6 characters long"),
-  otp: z.string().optional()
 });
 
 const useLoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [accountNotFound, setAccountNotFound] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState(null);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [onboardingUser, setOnboardingUser] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -36,7 +36,7 @@ const useLoginForm = () => {
     trigger,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(loginSchema),
+    resolver: yupResolver(loginSchema),
   });
 
   const handleRoleRedirect = (role) => {
@@ -62,21 +62,11 @@ const useLoginForm = () => {
     const isValid = await trigger(["email", "password"]);
     if (!isValid) return;
 
-    const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    if (!turnstileToken && !isLocalhost) {
-      toast.error("Please complete the bot verification");
-      return;
-    }
-
     setLoading(true);
     setAccountNotFound(false); // Reset on new attempt
     try {
       const { email, password } = getValues();
-      const response = await axiosInstance.post("/api/user/auth/login-step1", { 
-        email, 
-        password,
-        "cf-turnstile-response": turnstileToken
-      });
+      const response = await axiosInstance.post("/api/user/auth/login-step1", { email, password });
       const result = response.data;
 
       if (result.token) {
@@ -111,12 +101,7 @@ const useLoginForm = () => {
     setLoading(true);
     try {
       const { email } = getValues();
-      const response = await axiosInstance.post("/api/user/auth/login", { 
-        email, 
-        otp: data.otp, 
-        password: data.password,
-        "cf-turnstile-response": turnstileToken
-      });
+      const response = await axiosInstance.post("/api/user/auth/login", { email, otp: data.otp, password: data.password });
       const result = response.data;
       
       dispatch(login({ token: result.token, role: result.role, user: result.user }));
@@ -158,12 +143,6 @@ const useLoginForm = () => {
       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${result.token}`;
       toast.success("Logged in with Google!");
       
-      if (result.isNewUser) {
-        setOnboardingUser(result.user);
-        setShowOnboarding(true);
-        return;
-      }
-      
       handleRoleRedirect(result.role);
     } catch (error) {
       toast.error(error.response?.data?.message || "Google login failed");
@@ -186,12 +165,7 @@ const useLoginForm = () => {
     handleGoogleSuccess,
     handleGoogleError,
     accountNotFound,
-    setAccountNotFound,
-    setTurnstileToken,
-    showOnboarding,
-    setShowOnboarding,
-    onboardingUser,
-    setOnboardingUser
+    setAccountNotFound
   };
 };
 

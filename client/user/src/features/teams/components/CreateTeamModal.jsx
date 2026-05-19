@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 const CITIES = ['Haldwani', 'Lalkuan', 'Nainital', 'Rampur', 'Rudrapur', 'Dehradun', 'Delhi', 'Noida', 'Gurugram'];
 const SPORT_TYPES = ['CRICKET', 'FOOTBALL', 'BASKETBALL', 'BADMINTON', 'VOLLEYBALL', 'TENNIS'];
 
-const CreateTeamModal = ({ isOpen, onClose }) => {
+const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
   const [createTeam, { isLoading }] = useCreateTeamMutation();
   const [formData, setFormData] = useState({
     name: '',
@@ -52,6 +52,9 @@ const CreateTeamModal = ({ isOpen, onClose }) => {
       const result = await createTeam(data).unwrap();
       if (result.success) {
         toast.success('Team created successfully!');
+        if (onSuccess) {
+          onSuccess(result.team);
+        }
         onClose();
         resetForm();
       }

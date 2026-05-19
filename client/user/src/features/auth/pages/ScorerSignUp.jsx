@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import useSignUpForm from "../hooks/useSignUpForm";
+import useSignUpForm from "@hooks/useSignUpForm";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { GoogleLogin } from "@react-oauth/google";
 import FileUpload from "@components/common/FileUpload";

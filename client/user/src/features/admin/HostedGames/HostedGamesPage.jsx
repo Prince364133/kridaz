@@ -5,7 +5,7 @@ import {
   Clock, ShieldAlert, CheckCircle2, X, Ban, CheckCircle
 } from "lucide-react";
 import { format } from "date-fns";
-import axiosInstance from "../../../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import HostedGamesSkeleton from "./HostedGamesSkeleton";
 import { useNavigate } from "react-router-dom";
 import ConfirmationModal from "../../shared/ConfirmationModal";

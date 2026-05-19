@@ -9,7 +9,7 @@ import { X } from 'lucide-react';
  * Lets the umpire specify how many runs were scored off the delivery.
  */
 
-const THEME_COLOR = '#CCFF00';
+const THEME_COLOR = '#00C187';
 
 const EXTRA_META = {
   WIDE:    { label: 'Wide',     color: THEME_COLOR, note: '1 wide penalty already included' },
@@ -61,16 +61,16 @@ const ExtraRunsModal = ({ extraType = 'WIDE', onConfirm, onClose }) => {
 
           {/* Quick-select buttons */}
           <div className="px-6 py-6 space-y-6">
-            <div className="flex gap-3 justify-between">
+            <div className="flex gap-2.5 justify-between">
               {QUICK_RUNS.map((r) => (
                 <button
                   key={r}
                   onClick={() => setRuns(r)}
-                  style={runs === r ? { background: THEME_COLOR, color: '#000', boxShadow: `0 0 20px ${THEME_COLOR}4d` } : {}}
-                  className={`flex-1 h-14 rounded-xl text-xl font-black transition-all ${
+                  style={runs === r ? { background: THEME_COLOR, color: '#000', boxShadow: `0 0 20px ${THEME_COLOR}33` } : {}}
+                  className={`flex-1 h-14 rounded-2xl text-xl font-black transition-all ${
                     runs === r
                       ? 'scale-105'
-                      : 'bg-white/5 text-neutral-400 border border-white/5 hover:border-white/10'
+                      : 'bg-neutral-900/50 text-neutral-400 border border-white/5 hover:border-white/10'
                   }`}
                 >
                   {r}
@@ -100,22 +100,14 @@ const ExtraRunsModal = ({ extraType = 'WIDE', onConfirm, onClose }) => {
               <span className="font-black text-lg" style={{ color: THEME_COLOR }}>{totalDisplay}</span>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-4">
-              <button
-                onClick={onClose}
-                className="flex-1 py-5 rounded-xl font-black text-white text-[11px] uppercase tracking-[0.2em] transition-all bg-white/5 border border-white/5 hover:bg-white/10 active:scale-95"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => onConfirm(runs)}
-                className="flex-[2] py-5 rounded-xl font-black text-black text-[11px] uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl"
-                style={{ backgroundColor: THEME_COLOR, boxShadow: `0 10px 30px ${THEME_COLOR}33` }}
-              >
-                Confirm {meta.label}
-              </button>
-            </div>
+            {/* Confirm */}
+            <button
+              onClick={() => onConfirm(runs)}
+              className="w-full py-5 rounded-2xl font-black text-black text-[13px] uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl"
+              style={{ backgroundColor: THEME_COLOR, boxShadow: `0 10px 30px ${THEME_COLOR}33` }}
+            >
+              Confirm {meta.label}
+            </button>
           </div>
         </motion.div>
       </div>

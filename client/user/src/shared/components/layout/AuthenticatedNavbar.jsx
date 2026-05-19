@@ -22,7 +22,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import axiosInstance from "@hooks/useAxiosInstance";
 import ManualBookingModal from "@features/venue-owner/ManualBookingModal";
-import useNotifications from "../../hooks/shared/useNotifications";
+import useNotifications from "@hooks/shared/useNotifications";
 import { formatDistanceToNow } from 'date-fns';
 
 /**

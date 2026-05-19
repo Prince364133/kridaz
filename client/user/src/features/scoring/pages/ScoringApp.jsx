@@ -1,14 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, X } from 'lucide-react';
+import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
-import { Helmet } from 'react-helmet-async';
-import useCricketScoring from '../hooks/useCricketScoring';
-import BallByBallHistory from '../components/BallByBallHistory';
-import InningsSetupModal from '../components/InningsSetupModal';
-import WicketModal from '../components/WicketModal';
-import ExtraRunsModal from '../components/ExtraRunsModal';
+import useCricketScoring from '@hooks/shared/useCricketScoring';
+import BallByBallHistory from '@features/scoring/components/BallByBallHistory';
+import InningsSetupModal from '@features/scoring/components/InningsSetupModal';
+import WicketModal from '@features/scoring/components/WicketModal';
+import ExtraRunsModal from '@features/scoring/components/ExtraRunsModal';
 
 /**
  * ScoringApp — The primary match scoring console.
@@ -392,9 +391,6 @@ const ScoringApp = () => {
 
   return (
     <div className="min-h-screen bg-[#000] text-white selection:bg-[#00C187] selection:text-black font-inter">
-      <Helmet>
-        <title>Scoring App | Kridaz</title>
-      </Helmet>
       {/* Header */}
       <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-2xl border-b border-white/5 p-5">
         <div className="max-w-xl mx-auto flex items-center justify-between">

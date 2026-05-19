@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Search, Filter, Download, Plus, Phone, Mail, ExternalLink, User, Loader2 } from "lucide-react";
-import useCustomers from "../../../hooks/owner/useCustomers";
+import useCustomers from "@hooks/owner/useCustomers";
 import { Link } from "react-router-dom";
 
 const getStatusColor = (status) => {

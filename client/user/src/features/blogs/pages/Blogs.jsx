@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Eye, ThumbsUp, ArrowLeft, Search } from 'lucide-react';
+import { ChevronRight, Eye, ThumbsUp, ArrowLeft, Search, Calendar, Clock, Tag } from 'lucide-react';
 import axios from 'axios';
 
 const PRI = "#84CC16";
+const BDR = "#2A2A2A";
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);

@@ -1,7 +1,6 @@
-import { PHONE_REGEX } from '@kridaz/shared-constants/validation';
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
@@ -9,47 +8,71 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { login } from "@redux/slices/authSlice";
 
-const registerSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  username: z
+const registerSchema = yup.object().shape({
+  name: yup.string().required("Name is required"),
+  username: yup
     .string()
+    .required("Username is required")
     .min(3, "Username must be at least 3 characters")
-    .regex(/^[a-z0-9_]+$/, "Username can only contain lowercase letters, numbers, and underscores"),
-  email: z.string().email("Enter a valid email"),
-  phone: z.string().regex(PHONE_REGEX, "Enter a valid 10-digit phone number"),
-  gender: z.string().min(1, "Select your gender").optional(),
-  dob: z.string().min(1, "Date of Birth is required").optional(),
-  address: z.string().min(1, "Address is required").optional(),
-  city: z.string().min(1, "City is required").optional(),
-  state: z.string().min(1, "State is required").optional(),
-  pinCode: z.string().regex(/^[0-9]{6}$/, "Enter a valid 6-digit PIN code").optional(),
-  sportTypes: z.array(z.string()).min(1, "Select at least one sport expertise").optional(),
-  experience: z.string().min(1, "Years of experience is required").optional(),
-  coachingLevel: z.string().min(1, "Coaching level is required").optional(),
-  sessionFee: z.any().optional(),
-  availabilityTimings: z.string().min(1, "Availability timings are required").optional(),
-  availabilityMode: z.string().min(1, "Select availability mode").optional(),
-  preferredLocations: z.string().min(1, "Preferred training locations are required").optional(),
-  bio: z.string().min(20, "Bio should be at least 20 characters").optional(),
-  location: z.string().optional(),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
-  confirmPassword: z.string().min(1, "Confirm your password"),
-  otp: z.string().optional(),
-  phoneOtp: z.string().optional(),
-  role: z.string().min(1, "Role is required"),
-  businessDetails: z.object({
-    businessName: z.string().optional(),
-    registrationNumber: z.string().optional(),
+    .matches(/^[a-z0-9_]+$/, "Username can only contain lowercase letters, numbers, and underscores"),
+  email: yup
+    .string()
+    .required("Enter your email")
+    .matches(
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      "Enter a valid email"
+    ),
+  phone: yup
+    .string()
+    .required("Enter your phone number")
+    .matches(/^[0-9]{10}$/, "Enter a valid 10-digit phone number"),
+  gender: yup.string().required("Select your gender"),
+  dob: yup.string().required("Date of Birth is required"),
+  address: yup.string().required("Address is required"),
+  city: yup.string().required("City is required"),
+  state: yup.string().required("State is required"),
+  pinCode: yup.string().required("PIN Code is required").matches(/^[0-9]{6}$/, "Enter a valid 6-digit PIN code"),
+  sportTypes: yup.array().min(1, "Select at least one sport expertise").required("Sport expertise is required"),
+  experience: yup.string().required("Years of experience is required"),
+  coachingLevel: yup.string().required("Coaching level is required"),
+  sessionFee: yup.number().typeError("Session fee must be a number").required("Session fee is required"),
+  availabilityTimings: yup.string().required("Availability timings are required"),
+  availabilityMode: yup.string().required("Select availability mode"),
+  preferredLocations: yup.string().required("Preferred training locations are required"),
+  bio: yup.string().required("Bio/About is required").min(20, "Bio should be at least 20 characters"),
+  location: yup.string().optional(),
+  password: yup
+    .string()
+    .required("Enter your password")
+    .min(6, "Password must be at least 6 characters long"),
+  confirmPassword: yup
+    .string()
+    .required("Confirm your password")
+    .oneOf([yup.ref("password"), null], "Passwords must match"),
+  otp: yup.string().when("$showOtpInput", {
+    is: true,
+    then: () => yup.string().required("Email OTP is required").min(6, "OTP must be 6 characters"),
+    otherwise: () => yup.string().notRequired(),
+  }),
+  phoneOtp: yup.string().when("$showOtpInput", {
+    is: true,
+    then: () => yup.string().required("WhatsApp OTP is required").min(6, "OTP must be 6 characters"),
+    otherwise: () => yup.string().notRequired(),
+  }),
+  role: yup.string().required("Role is required"),
+  businessDetails: yup.object().shape({
+    businessName: yup.string().optional(),
+    registrationNumber: yup.string().optional(),
   }).optional(),
-  documents: z.array(
-    z.object({
-      name: z.string().min(1),
-      url: z.string().min(1),
-    })
-  ).optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords must match",
-  path: ["confirmPassword"],
+  documents: yup.array()
+    .min(3, "At least 3 verification documents are required")
+    .of(
+      yup.object().shape({
+        name: yup.string().required(),
+        url: yup.string().required(),
+      })
+    )
+    .required("Verification documents are required"),
 });
 
 /**
@@ -66,7 +89,6 @@ const useSignUpForm = (predefinedRole = "user") => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingUser, setOnboardingUser] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
-  const [turnstileToken, setTurnstileToken] = useState(null);
 
   // Determine API base path based on role
   const apiPath = predefinedRole === "user" ? "/api/user/auth" : "/api/owner/auth";
@@ -80,7 +102,7 @@ const useSignUpForm = (predefinedRole = "user") => {
     watch,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(registerSchema),
+    resolver: yupResolver(registerSchema),
     context: { showOtpInput },
     defaultValues: {
       role: predefinedRole,
@@ -130,20 +152,10 @@ const useSignUpForm = (predefinedRole = "user") => {
       return;
     }
 
-    const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    if (!turnstileToken && !isLocalhost) {
-      toast.error("Please complete the bot verification");
-      return;
-    }
-
     setLoading(true);
     try {
       const { email, phone } = getValues();
-      const response = await axiosInstance.post(`${apiPath}/send-otp`, { 
-        email, 
-        phone,
-        "cf-turnstile-response": turnstileToken 
-      });
+      const response = await axiosInstance.post(`${apiPath}/send-otp`, { email, phone });
       toast.success(response.data.message || "OTPs sent to your email and WhatsApp");
       setShowOtpInput(true);
     } catch (error) {
@@ -170,13 +182,7 @@ const useSignUpForm = (predefinedRole = "user") => {
     setLoading(true);
     const inviteToken = localStorage.getItem("pendingInvite");
     const umpireInvite = localStorage.getItem("umpireInvite");
-    const payload = { 
-      ...data, 
-      role: predefinedRole, 
-      inviteToken, 
-      umpireInvite,
-      "cf-turnstile-response": turnstileToken
-    };
+    const payload = { ...data, role: predefinedRole, inviteToken, umpireInvite };
     try {
       const response = await axiosInstance.post(`${apiPath}/register`, payload);
       const result = response.data;
@@ -208,7 +214,7 @@ const useSignUpForm = (predefinedRole = "user") => {
     // but the user might want it. Let's stick to simple request for now as requested.
     setLoading(true);
     try {
-      await axiosInstance.post(`${apiPath}/ownerRequest`, data);
+      const response = await axiosInstance.post(`${apiPath}/ownerRequest`, data);
       toast.success("Application submitted successfully! Our team will review it shortly.");
       navigate("/partners");
     } catch (error) {
@@ -246,8 +252,9 @@ const useSignUpForm = (predefinedRole = "user") => {
       toast.success("Successfully logged in with Google!");
 
       const user = result.user;
-      
-      if (result.isNewUser) {
+      const isMissingDetails = !user.phone || !user.gender || !user.location;
+
+      if (isMissingDetails && result.role === "user") {
         setOnboardingUser(user);
         setShowOnboarding(true);
         return;
@@ -290,7 +297,6 @@ const useSignUpForm = (predefinedRole = "user") => {
     handleGoogleSuccess,
     handleGoogleError,
     usernameStatus,
-    setTurnstileToken,
     showOnboarding,
     setShowOnboarding,
     onboardingUser,

@@ -5,7 +5,7 @@ import {
   ChevronRight, ExternalLink, Image as ImageIcon, AlertCircle,
   CreditCard, Calendar, Clock, Phone
 } from "lucide-react";
-import useDisputes from "../../../hooks/admin/useDisputes";
+import useDisputes from "@hooks/admin/useDisputes";
 
 const DisputeManager = () => {
   const { disputes, loading, processingId, handleResolve, handleReply } = useDisputes();

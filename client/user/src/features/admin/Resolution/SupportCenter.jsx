@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MessageSquare, Clock, CheckCircle, AlertCircle, Search, Filter, Send, User, ChevronRight } from "lucide-react";
-import useSupport from "../../../hooks/admin/useSupport";
+import useSupport from "@hooks/admin/useSupport";
 
 const SupportCenter = () => {
   const { tickets, loading, processingId, handleUpdateStatus, handleReply, handleToggleAgentStatus } = useSupport();

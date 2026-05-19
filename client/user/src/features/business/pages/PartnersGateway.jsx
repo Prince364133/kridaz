@@ -193,14 +193,14 @@ export default function PartnersGateway() {
           <div className="relative z-10 space-y-10">
             <div className="space-y-4">
               <h2 className="text-5xl font-bold text-white uppercase tracking-tight">Ready to Scale Your Operations?</h2>
-              <p className="text-sm text-white/30 uppercase tracking-[0.4em]">Direct access to the partner dashboard</p>
+              <p className="text-sm text-white/30 uppercase tracking-[0.4em]">Direct access to the Venue Owner Dashboard</p>
             </div>
 
             <Link
               to="/login"
               className="bg-white/5 hover:bg-white/10 border border-white/10 text-white h-16 px-16 rounded-xl text-lg font-bold tracking-widest uppercase inline-flex items-center gap-4 transition-all"
             >
-              ACCESS PARTNER PORTAL <ArrowRight className="w-5 h-5" />
+              ACCESS Venue Owner Portal <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
         </div>
@@ -208,3 +208,4 @@ export default function PartnersGateway() {
     </div>
   );
 }
+

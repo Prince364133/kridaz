@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Helmet } from "react-helmet-async";
 import { followUser, unfollowUser } from "@redux/slices/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -13,7 +12,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import StoryViewer from "../components/StoryViewer";
+import StoryViewer from "@features/networking/components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import {
   communityApi,
@@ -27,18 +26,11 @@ import {
   useAddCommentMutation,
   useDeleteCommentMutation,
   useUploadStoryMutation,
-  useDeleteStoryMutation,
-  useLazyGetCommunityUploadUrlQuery,
-  useConfirmCommunityPostMutation,
-  useLazyGetStoryUploadUrlQuery,
-  useConfirmStoryUploadMutation
+  useDeleteStoryMutation
 } from "@redux/api/communityApi";
 import { useGetReelsFeedQuery } from "@redux/api/reelsApi";
-import { startUpload } from "@redux/slices/mediaUploadSlice";
-import { ReelItem } from "@features/reels";
+import ReelItem from "@features/reels/components/ReelItem";
 import { useSocket } from "@context/SocketContext";
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
-import { uploadFileToR2 } from "@utils/mediaUpload";
 
 const PRI = "#84CC16";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
@@ -65,11 +57,6 @@ const Community = () => {
   const [uploadStory] = useUploadStoryMutation();
   const [deleteStory] = useDeleteStoryMutation();
 
-  const [getCommunityUploadUrl] = useLazyGetCommunityUploadUrlQuery();
-  const [confirmCommunityPost] = useConfirmCommunityPostMutation();
-  const [getStoryUploadUrl] = useLazyGetStoryUploadUrlQuery();
-  const [confirmStoryUpload] = useConfirmStoryUploadMutation();
-
   const { socket } = useSocket();
 
   const [activeFilter, setActiveFilter] = useState("All");
@@ -92,7 +79,7 @@ const Community = () => {
       return post.image || post.imageUrl || post.videoUrl;
     }
     if (activeFilter === "Following") {
-      const authorId = post.adminId?.id || post.adminId?._id || post.user?.id || post.user?._id || post.adminId || post.user;
+      const authorId = post.adminId?._id || post.adminId || post.user?._id || post.user;
       return followingIds?.includes(authorId);
     }
     return true;
@@ -107,7 +94,7 @@ const Community = () => {
     const handleNewPost = (newPost) => {
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          if (!draft.posts.find(p => (p._id || p.id) === (newPost._id || newPost.id))) {
+          if (!draft.posts.find(p => p._id === newPost._id)) {
             draft.posts.unshift(newPost);
           }
         })
@@ -122,7 +109,7 @@ const Community = () => {
     const handlePostLiked = ({ postId, likes, likesCount }) => {
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          const post = draft.posts.find(p => (p._id || p.id) === postId);
+          const post = draft.posts.find(p => p._id === postId);
           if (post) {
             post.likes = likes;
           }
@@ -133,7 +120,7 @@ const Community = () => {
     const handlePostCommented = ({ postId, comments }) => {
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          const post = draft.posts.find(p => (p._id || p.id) === postId);
+          const post = draft.posts.find(p => p._id === postId);
           if (post) {
             post.comments = comments;
           }
@@ -149,7 +136,7 @@ const Community = () => {
     const handlePostDeleted = (postId) => {
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          draft.posts = draft.posts.filter(p => (p._id || p.id) !== postId);
+          draft.posts = draft.posts.filter(p => p._id !== postId);
         })
       );
       dispatch(
@@ -159,47 +146,16 @@ const Community = () => {
       );
     };
 
-    const handleMediaProgress = ({ mediaId, progress, status }) => {
-      dispatch(
-        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          const post = draft.posts.find(p => (p._id || p.id) === mediaId);
-          if (post) {
-            post.status = 'pending';
-            post.processingProgress = progress;
-          }
-        })
-      );
-    };
-
-    const handleMediaComplete = ({ mediaId, hlsUrl, thumbnailUrl }) => {
-      dispatch(
-        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          const post = draft.posts.find(p => (p._id || p.id) === mediaId);
-          if (post) {
-            post.status = 'ready';
-            post.mediaUrl = hlsUrl;
-            post.image = thumbnailUrl;
-            post.processingProgress = 100;
-          }
-        })
-      );
-      dispatch(communityApi.util.invalidateTags(['Community', 'Stories']));
-    };
-
-    socket.on(SOCKET.NEW_COMMUNITY_POST, handleNewPost);
-    socket.on(SOCKET.COMMUNITY_POST_LIKED, handlePostLiked);
-    socket.on(SOCKET.COMMUNITY_POST_COMMENTED, handlePostCommented);
-    socket.on(SOCKET.COMMUNITY_POST_DELETED, handlePostDeleted);
-    socket.on(SOCKET.MEDIA_PROCESSING_PROGRESS, handleMediaProgress);
-    socket.on(SOCKET.MEDIA_PROCESSING_COMPLETE, handleMediaComplete);
+    socket.on('new_community_post', handleNewPost);
+    socket.on('community_post_liked', handlePostLiked);
+    socket.on('community_post_commented', handlePostCommented);
+    socket.on('community_post_deleted', handlePostDeleted);
 
     return () => {
-      socket.off(SOCKET.NEW_COMMUNITY_POST, handleNewPost);
-      socket.off(SOCKET.COMMUNITY_POST_LIKED, handlePostLiked);
-      socket.off(SOCKET.COMMUNITY_POST_COMMENTED, handlePostCommented);
-      socket.off(SOCKET.COMMUNITY_POST_DELETED, handlePostDeleted);
-      socket.off(SOCKET.MEDIA_PROCESSING_PROGRESS, handleMediaProgress);
-      socket.off(SOCKET.MEDIA_PROCESSING_COMPLETE, handleMediaComplete);
+      socket.off('new_community_post', handleNewPost);
+      socket.off('community_post_liked', handlePostLiked);
+      socket.off('community_post_commented', handlePostCommented);
+      socket.off('community_post_deleted', handlePostDeleted);
     };
   }, [socket, dispatch]);
 
@@ -217,7 +173,6 @@ const Community = () => {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
 
   const [commentInputs, setCommentInputs] = useState({});
-  const [showComments, setShowComments] = useState({});
 
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -235,7 +190,7 @@ const Community = () => {
       try {
         const res = await axiosInstance.get('/api/user/players', { params: { search: searchQuery } });
         if (res.data?.success) {
-          setSearchResults((res.data.players || []).map(p => ({ ...p, _id: p.id || p._id })));
+          setSearchResults(res.data.players || []);
         }
       } catch (err) {
         console.error("Search failed:", err);
@@ -258,39 +213,24 @@ const Community = () => {
     e.preventDefault();
     if (!newPost.content && !newPost.image) return toast.error("Content or image is required");
 
+    const formData = new FormData();
+    if (newPost.title) formData.append('title', newPost.title);
+    if (newPost.content) formData.append('content', newPost.content);
+    if (newPost.image) formData.append('image', newPost.image);
+
     setIsPublishing(true);
     try {
       if (editingPost) {
-        // We'll keep update post as is or refactor later if needed, 
-        // usually it's just updating text.
-        const formData = new FormData();
-        if (newPost.title) formData.append('title', newPost.title);
-        if (newPost.content) formData.append('content', newPost.content);
         await updatePost({ id: editingPost._id, data: formData }).unwrap();
-        toast.success("Post updated!");
+        toast.success("Post updated successfully!");
         closePostModal();
       } else {
-        if (newPost.image) {
-          // Use Flash Upload (Backgrounding)
-          dispatch(startUpload({
-            id: Date.now().toString(),
-            file: newPost.image,
-            previewUrl: URL.createObjectURL(newPost.image),
-            metadata: {
-              type: 'community',
-              title: newPost.title,
-              content: newPost.content || ''
-            }
-          }));
-        } else {
-          // Plain text post (unlikely with current UI but handled)
-          await createPost({ title: newPost.title, content: newPost.content }).unwrap();
-          toast.success("Post created!");
-        }
+        await createPost(formData).unwrap();
+        toast.success("Post created successfully!");
         closePostModal();
       }
     } catch (error) {
-      toast.error(error?.data?.message || error.message || "Failed to save post");
+      toast.error(error?.data?.message || "Failed to save post");
     } finally {
       setIsPublishing(false);
     }
@@ -318,63 +258,20 @@ const Community = () => {
     e.preventDefault();
     if (!newStory.content && newStory.mediaFiles.length === 0) return toast.error("Story must have content or media");
 
-    // If exactly one media file, use Flash Upload (Backgrounding)
-    if (newStory.mediaFiles.length === 1 && !newStory.content) {
-      const file = newStory.mediaFiles[0];
-      dispatch(startUpload({
-        id: Date.now().toString(),
-        file,
-        previewUrl: URL.createObjectURL(file),
-        metadata: {
-          type: 'story',
-          content: ''
-        }
-      }));
-      setNewStory({ content: '', mediaFiles: [], durationDays: 1 });
-      setStoryMediaPreviews([]);
-      setShowStoryModal(false);
-      return;
-    }
+    const formData = new FormData();
+    formData.append('content', newStory.content);
+    formData.append('durationDays', newStory.durationDays);
+    newStory.mediaFiles.forEach((file) => formData.append('media', file));
 
     setIsPublishing(true);
     try {
-      const mediaItems = [];
-      
-      let firstStoryId = null;
-      let firstKey = null;
-      let firstMediaType = null;
-
-      // 1. Upload each media file (Fallback for multi-file/text stories)
-      for (const file of newStory.mediaFiles) {
-        const { data: uploadData } = await getStoryUploadUrl({
-          contentType: file.type,
-          fileName: file.name
-        }).unwrap();
-
-        await uploadFileToR2(uploadData.uploadUrl, file);
-        
-        if (!firstStoryId) {
-          firstStoryId = uploadData.storyId;
-          firstKey = uploadData.key;
-          firstMediaType = file.type.startsWith('video') ? 'video' : 'image';
-        }
-      }
-
-      // 2. Confirm Story
-      await confirmStoryUpload({
-        storyId: firstStoryId,
-        key: firstKey,
-        mediaType: firstMediaType,
-        content: newStory.content,
-        durationDays: newStory.durationDays
-      }).unwrap();
-
+      await uploadStory(formData).unwrap();
       toast.success("Story uploaded!");
       setNewStory({ content: '', mediaFiles: [], durationDays: 1 });
       setStoryMediaPreviews([]);
       setShowStoryModal(false);
     } catch (error) {
-      toast.error(error?.data?.message || error.message || "Failed to upload story");
+      toast.error(error?.data?.message || "Failed to upload story");
     } finally {
       setIsPublishing(false);
     }
@@ -462,9 +359,6 @@ const Community = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white pt-4 pb-12 px-4 md:px-6 xl:pl-[100px] font-sans relative">
-      <Helmet>
-        <title>Community | Kridaz</title>
-      </Helmet>
       
       {/* ================= FAR LEFT COLUMN (NAVBAR) ================= */}
       <div className="hidden xl:flex flex-col gap-2 fixed left-0 top-[80px] w-[80px] z-50">
@@ -558,7 +452,7 @@ const Community = () => {
                   <div className="p-2 space-y-1">
                     {searchResults.map(player => (
                       <div 
-                        key={player.id || player._id} 
+                        key={player._id} 
                         onClick={() => {
                           setShowGlobalSearch(false);
                           navigate(`/profile/${player._id}`);
@@ -757,31 +651,15 @@ const Community = () => {
                 {/* Render Stories */}
                 {stories.map((group, idx) => (
                   <div 
-                    key={group.id || group._id || idx} 
+                    key={group._id} 
                     onClick={() => { setSelectedStoryGroup(group); setCurrentStoryIndex(0); }}
                     className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
                   >
                     <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${idx === 0 ? 'bg-[#84CC16]' : 'bg-white/20'}`}>
                       <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
-                        <div className="w-full h-full rounded-full overflow-hidden bg-[#111] relative">
-                          {group.stories[0].mediaType === 'video' ? (
-                            group.stories[0].thumbnailUrl || group.stories[0].mediaUrl ? (
-                              <img 
-                                src={group.stories[0].thumbnailUrl || group.stories[0].mediaUrl} 
-                                alt="" 
-                                className={`w-full h-full object-cover ${(group.stories.some(s => s.status === 'pending' || s.status === 'processing')) ? 'blur-sm opacity-50' : ''}`} 
-                              />
-                            ) : (
-                              <div className={`w-full h-full flex items-center justify-center bg-[#111] ${(group.stories.some(s => s.status === 'pending' || s.status === 'processing')) ? 'animate-pulse' : ''}`}>
-                                <PlaySquare size={20} className="text-[#84CC16]" />
-                              </div>
-                            )
-                          ) : group.stories[0].mediaUrl || group.stories[0].rawMediaUrl ? (
-                            <img 
-                              src={group.stories[0].thumbnailUrl || group.stories[0].mediaUrl || group.stories[0].rawMediaUrl} 
-                              alt="" 
-                              className={`w-full h-full object-cover ${(group.stories.some(s => s.status === 'pending' || s.status === 'processing')) ? 'blur-sm opacity-50' : ''}`} 
-                            />
+                        <div className="w-full h-full rounded-full overflow-hidden bg-[#111]">
+                          {group.stories[0].mediaUrl ? (
+                            <img src={group.stories[0].mediaUrl} alt="" className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#84CC16] font-bold bg-[#111]">
                                {group.stories[0].content?.slice(0, 15)}
@@ -866,7 +744,7 @@ const Community = () => {
                       <Loader2 size={36} className="text-[#84CC16] animate-spin" />
                     </div>
                   ) : reels.length > 0 ? reels.map((reel, index) => (
-                    <div key={reel.id || reel._id} className="w-full h-full snap-start snap-always relative bg-black overflow-hidden flex-shrink-0">
+                    <div key={reel._id} className="w-full h-full snap-start snap-always relative bg-black overflow-hidden flex-shrink-0">
                       {Math.abs(index - activeReelIndex) <= 2 ? (
                         <ReelItem reel={reel} isVisible={index === activeReelIndex} />
                       ) : (
@@ -897,7 +775,7 @@ const Community = () => {
             ) : (
               <div className="space-y-6">
                 {posts.map(post => (
-                  <div key={post.id || post._id} className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 space-y-4">
+                  <div key={post._id} className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 space-y-4">
                     {/* Post Header */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -922,78 +800,36 @@ const Community = () => {
                       </div>
                     </div>
 
-                    {(post.image || post.imageUrl || post.mediaUrl) && (
+                    {/* Post Media */}
+                    {(post.image || post.imageUrl) && (
                       <div className="relative rounded-[16px] overflow-hidden group border border-white/5 bg-[#111]">
                         <img 
-                          src={post.image || post.imageUrl || post.thumbnailUrl} 
-                          className={`w-full object-cover max-h-[500px] transition-all duration-500 ${(post.status === 'pending' || post.status === 'processing') ? 'blur-xl scale-110 opacity-50' : ''}`} 
+                          src={post.image || post.imageUrl} 
+                          className="w-full object-cover max-h-[500px]" 
                         />
-                        
-                        {/* Progress Overlay for Pending/Processing Posts */}
-                        {(post.status === 'pending' || post.status === 'processing') && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm z-10">
-                            <div className="w-24 h-24 relative flex items-center justify-center">
-                              {/* Circular Progress (SVG) */}
-                              <svg className="w-full h-full transform -rotate-90">
-                                <circle
-                                  cx="48"
-                                  cy="48"
-                                  r="40"
-                                  stroke="currentColor"
-                                  strokeWidth="6"
-                                  fill="transparent"
-                                  className="text-white/10"
-                                />
-                                <circle
-                                  cx="48"
-                                  cy="48"
-                                  r="40"
-                                  stroke="#84CC16"
-                                  strokeWidth="6"
-                                  fill="transparent"
-                                  strokeDasharray={2 * Math.PI * 40}
-                                  strokeDashoffset={2 * Math.PI * 40 * (1 - (post.processingProgress || 0) / 100)}
-                                  className="transition-all duration-300"
-                                />
-                              </svg>
-                              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <span className="text-[14px] font-black text-white">{post.processingProgress || 0}%</span>
-                              </div>
-                            </div>
-                            <div className="mt-4 flex flex-col items-center gap-1">
-                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#84CC16] animate-pulse">
-                                {post.status === 'processing' ? 'Optimizing Media' : 'Preparing Upload'}
-                              </span>
-                              <div className="flex gap-1">
-                                <span className="w-1 h-1 bg-[#84CC16] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                                <span className="w-1 h-1 bg-[#84CC16] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                                <span className="w-1 h-1 bg-[#84CC16] rounded-full animate-bounce"></span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Video Icon for processed videos */}
-                        {post.mediaType === 'video' && post.status === 'ready' && (
-                          <div className="absolute top-4 right-4 p-1.5 bg-black/60 backdrop-blur-md rounded">
-                             <Video size={14} className="text-white" />
-                          </div>
-                        )}
+                        {/* Decorative Overlays (for parity with image) */}
+                        <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-2.5 py-1.5 rounded flex items-center gap-1.5">
+                           <Play size={10} className="fill-white text-white" />
+                           <span className="text-[10px] font-bold">Reels</span>
+                        </div>
+                        <div className="absolute top-4 right-4 p-1.5 bg-black/60 backdrop-blur-md rounded">
+                           <Video size={14} className="text-white" />
+                        </div>
                       </div>
                     )}
 
                     {/* Action Bar */}
                     <div className="flex items-center justify-between pt-1">
                       <div className="flex items-center gap-5">
-                         <button onClick={() => handleLike(post.id || post._id)} className="flex items-center gap-2 group">
-                            <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l._id || l.id || l) === (user?.id || user?._id)) ? 'fill-[#84CC16] text-[#84CC16]' : 'text-white/70 group-hover:text-red-500'}`} />
+                         <button onClick={() => handleLike(post._id)} className="flex items-center gap-2 group">
+                            <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l._id || l) === user?._id) ? 'fill-[#84CC16] text-[#84CC16]' : 'text-white/70 group-hover:text-red-500'}`} />
                             <span className="text-[12px] font-bold text-white">{post.likes?.length || 0}</span>
                          </button>
-                         <button onClick={() => setShowComments(prev => ({...prev, [post.id || post._id]: !prev[post.id || post._id]}))} className="flex items-center gap-2 group">
+                         <button className="flex items-center gap-2 group">
                             <MessageCircle size={20} className="text-white/70 group-hover:text-white transition-colors" />
                             <span className="text-[12px] font-bold text-white">{post.comments?.length || 0}</span>
                          </button>
-                         <button onClick={() => handleShareToPlatform('copy', post.id || post._id)} className="flex items-center gap-2 group">
+                         <button onClick={() => handleShareToPlatform('copy', post._id)} className="flex items-center gap-2 group">
                             <Send size={18} className="text-white/70 group-hover:text-white transition-colors" />
                             <span className="text-[12px] font-bold text-white">Share</span>
                          </button>
@@ -1031,39 +867,16 @@ const Community = () => {
                         type="text" 
                         placeholder="Add a comment..." 
                         className="flex-1 bg-transparent text-[12px] font-medium outline-none text-white placeholder:text-white/40"
-                        value={commentInputs[post.id || post._id] || ""}
-                        onChange={(e) => setCommentInputs({...commentInputs, [post.id || post._id]: e.target.value})}
+                        value={commentInputs[post._id] || ""}
+                        onChange={(e) => setCommentInputs({...commentInputs, [post._id]: e.target.value})}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleAddComment(post.id || post._id);
+                          if (e.key === 'Enter') handleAddComment(post._id);
                         }}
                       />
                       <button className="text-white/40 hover:text-white">
                         <Smile size={16} />
                       </button>
                     </div>
-
-                    {/* Comments List */}
-                    {showComments[post.id || post._id] && post.comments && post.comments.length > 0 && (
-                      <div className="mt-4 space-y-3 pl-2 border-l-2 border-white/10 max-h-[250px] overflow-y-auto custom-scrollbar">
-                        {post.comments.map((comment) => (
-                          <div key={comment.id || comment._id} className="flex gap-2 text-[12px] items-start">
-                            <img 
-                              src={comment.user?.profilePicture || "/default-avatar.png"} 
-                              className="w-6 h-6 rounded-full object-cover border border-white/10 mt-0.5" 
-                            />
-                            <div className="flex-1 bg-white/5 rounded-xl p-2.5">
-                              <div className="flex justify-between items-center">
-                                <span className="font-bold text-white/90">{comment.user?.name || "Player"}</span>
-                                <span className="text-[10px] text-white/40">
-                                  {new Date(comment.createdAt).toLocaleDateString()}
-                                </span>
-                              </div>
-                              <p className="text-white/70 mt-1">{comment.text}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
 
                   </div>
                 ))}

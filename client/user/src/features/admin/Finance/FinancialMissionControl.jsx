@@ -19,8 +19,8 @@ import {
   Activity
 } from "lucide-react";
 import CountUp from "react-countup";
-import useAdminFinance from "../../../hooks/admin/useAdminFinance";
-import useWithdrawals from "../../../hooks/admin/useWithdrawals";
+import useAdminFinance from "@hooks/admin/useAdminFinance";
+import useWithdrawals from "@hooks/admin/useWithdrawals";
 
 const FinancialMissionControl = () => {
   const navigate = useNavigate();

@@ -1,4 +1,6 @@
-import { Users, UserPlus, Trophy, Calendar, Phone, Shield, ChevronRight, Check, X, Search, Copy } from 'lucide-react';
+import React from 'react';
+import { Users, UserPlus, Trophy, Calendar, Mail, Phone, Shield, ChevronRight, Check, X, Search, Copy } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useHandleOpponentRequestMutation } from '@redux/api/teamApi';
 import toast from 'react-hot-toast';
 
@@ -245,7 +247,7 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
                     <Search className="text-white/10" />
                   </div>
                   <p className="text-white/20 text-[10px] font-black uppercase tracking-widest">No Opponents Linked</p>
-                  <p className="text-white/10 text-[9px] mt-1">Use the &quot;Add Opponent&quot; search to find rivals</p>
+                  <p className="text-white/10 text-[9px] mt-1">Use the "Add Opponent" search to find rivals</p>
                 </div>
               )}
             </div>

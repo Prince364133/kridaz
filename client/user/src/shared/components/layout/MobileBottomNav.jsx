@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Home, Search, PlayCircle, Users, User, Zap, Coins } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
-import { reelsApi } from "../../../redux/api/reelsApi";
+import { reelsApi } from "@redux/api/reelsApi";
 import { useCallback } from "react";
 
 const MobileBottomNav = () => {

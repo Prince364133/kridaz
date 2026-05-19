@@ -25,7 +25,7 @@ const UserPage = () => {
     if (selectedUsers.length === users.length) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(users.map(u => u.id || u._id));
+      setSelectedUsers(users.map(u => u._id));
     }
   };
 
@@ -55,7 +55,7 @@ const UserPage = () => {
     const { type, target } = modalConfig;
     
     if (type === "DELETE_SINGLE") {
-      await deleteUser(target.id || target._id);
+      await deleteUser(target._id);
     } else if (type === "DELETE_BATCH") {
       await batchDeleteUsers(target);
       setSelectedUsers([]);
@@ -177,9 +177,9 @@ const UserPage = () => {
               <div className="space-y-3">
                 {users.map((user) => (
                   <UserCard 
-                    key={user.id || user._id} 
+                    key={user._id} 
                     user={user} 
-                    isSelected={selectedUsers.includes(user.id || user._id)}
+                    isSelected={selectedUsers.includes(user._id)}
                     onSelect={handleSelectUser}
                     onToggleStatus={toggleUserStatus}
                     onDelete={openDeleteModal}

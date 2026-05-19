@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCreateGroupChatMutation } from '../../../redux/api/chatApi';
+import { useCreateGroupChatMutation } from '@redux/api/chatApi';
 import { 
   Globe, 
   X, 

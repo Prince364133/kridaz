@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Upload, X, CheckCircle, AlertCircle, FileText, ImageIcon } from "lucide-react";
-import axiosInstance from "../../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 
 const FileUpload = ({ label, onUploadSuccess, folder = "kridaz/verification", accept = "image/*,.pdf" }) => {

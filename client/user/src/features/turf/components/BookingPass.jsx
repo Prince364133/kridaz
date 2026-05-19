@@ -1,5 +1,4 @@
 import React from "react";
-import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
 import { 
   MapPin, 
@@ -17,7 +16,7 @@ import {
   User as UserIcon,
   ExternalLink
 } from "lucide-react";
-import useBookingPass from "../hooks/useBookingPass";
+import useBookingPass from "@hooks/useBookingPass";
 import { motion } from "framer-motion";
 
 const BookingPass = () => {
@@ -54,13 +53,10 @@ const BookingPass = () => {
     );
   }
 
-  const { turf, timeSlot, totalPrice, qrCode } = booking;
+  const { turf, timeSlot, user, totalPrice, qrCode } = booking;
 
   return (
     <div className="min-h-screen bg-black text-white pt-8 pb-20 px-4">
-      <Helmet>
-        <title>Booking Pass | Kridaz</title>
-      </Helmet>
       <div className="container mx-auto max-w-2xl">
         {/* Header Navigation */}
         <div className="flex justify-between items-center mb-10">

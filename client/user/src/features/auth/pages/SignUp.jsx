@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import * as Sentry from "@sentry/react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import useSignUpForm from "../hooks/useSignUpForm";
-import GoogleAuthButton from "../components/GoogleAuthButton";
-import Turnstile from "react-turnstile";
+import useSignUpForm from "@hooks/useSignUpForm";
+import GoogleAuthButton from "@user/components/auth/GoogleAuthButton";
 import OnboardingModal from "@components/modals/OnboardingModal";
 import { 
   ArrowRight, 
@@ -30,11 +28,11 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
-  Navigation,
-  Trophy
+  Navigation
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { searchLocations } from "@utils/locationService";
+import { Trophy } from "lucide-react";
+import { searchLocations } from "../../utils/locationService";
 import axiosInstance from "@hooks/useAxiosInstance";
 
 const SPORTS = [
@@ -55,7 +53,6 @@ const SignUp = () => {
     handleGoogleSuccess,
     handleGoogleError,
     usernameStatus,
-    setTurnstileToken,
     showOnboarding,
     setShowOnboarding,
     onboardingUser
@@ -85,7 +82,7 @@ const SignUp = () => {
       if (emailParam) {
         const decodedEmail = decodeURIComponent(emailParam);
         setValue("email", decodedEmail);
-        Sentry.addBreadcrumb({ message: `Auto-filled player email from URL: ${decodedEmail}` });
+        console.log("Auto-filled player email from URL:", decodedEmail);
       }
       toast.success("Joining via invitation link!");
     }
@@ -96,7 +93,7 @@ const SignUp = () => {
       if (emailParam) {
         const decodedEmail = decodeURIComponent(emailParam);
         setValue("email", decodedEmail);
-        Sentry.addBreadcrumb({ message: `Auto-filled umpire email from URL: ${decodedEmail}` });
+        console.log("Auto-filled umpire email from URL:", decodedEmail);
       }
       
       const fetchInviteDetails = async () => {
@@ -519,15 +516,6 @@ const SignUp = () => {
                       </div>
                     </div>
 
-                    {/* Turnstile Bot Protection */}
-                    <div className="flex justify-center my-4">
-                      <Turnstile
-                        sitekey="0x4AAAAAAA7f_T_9-vI7yP6U"
-                        onVerify={(token) => setTurnstileToken(token)}
-                        theme="dark"
-                      />
-                    </div>
-
                     <button 
                       type="submit" 
                       disabled={loading}
@@ -579,3 +567,4 @@ const SignUp = () => {
 };
 
 export default SignUp;
+

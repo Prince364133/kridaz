@@ -1,145 +1,169 @@
-import { ArrowRight, CheckCircle, BarChart3, CalendarDays, Trophy } from "lucide-react";
+import { ArrowRight, CheckCircle, BarChart3, CalendarDays, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import ScrollToTop from "@components/common/ScrollToTop";
 
-const PRI = "#84CC16";
-
-const benefits = [
-  { icon: CalendarDays, title: "Automated Bookings", desc: "No more phone calls. Let players book your turf 24/7." },
-  { icon: BarChart3, title: "Revenue Tracking", desc: "Real-time insights into your earnings, peak hours, and customer retention." },
-  { icon: CheckCircle, title: "Seamless Management", desc: "Block out maintenance hours, set dynamic pricing, and manage staff." }
-];
-
-const BG = "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=1800&q=80&auto=format&fit=crop";
+const PRI = "#BFF367"; // New primary accent matching the gradient's vibrant stop
 
 export default function VenueOwnerLanding() {
   return (
-    <div className="relative min-h-screen text-white pt-4 pb-20 overflow-hidden" style={{ backgroundColor: "#000" }}>
+    <div className="relative min-h-screen text-white overflow-hidden bg-black flex flex-col justify-center">
       <ScrollToTop />
+      
+      {/* ── Google Fonts Import */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Inter:wght@100..900&display=swap');
+      `}</style>
       
       {/* ── Background Image */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${BG})` }}
+        className="absolute inset-0 bg-cover bg-right md:bg-center bg-no-repeat pointer-events-none"
+        style={{ 
+          backgroundImage: `url(/venue-partner-bg.png)`,
+        }}
       />
-      {/* ── Dark overlay */}
-      <div className="absolute inset-0"
-        style={{ background: "linear-gradient(160deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.72) 40%, rgba(0,0,0,0.88) 100%)" }}
+      
+      {/* ── Gradient Overlay */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "linear-gradient(to right, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.85) 35%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.2) 100%)"
+        }}
       />
-      {/* ── Accent dot grid */}
-      <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{ backgroundImage: `radial-gradient(${PRI} 1px, transparent 1px)`, backgroundSize: "36px 36px" }}
-      />
-      {/* ── Glow blob */}
-      <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{ background: `radial-gradient(circle, rgba(132,204,22,0.12) 0%, transparent 70%)` }}
+      <div 
+        className="absolute inset-0 bg-black/30 pointer-events-none"
       />
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        {/* ── Hero Section ── */}
-        <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center min-h-[70vh] md:min-h-[80vh] py-10 md:py-0">
-          <div className="text-center md:text-left">
-            <div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-[10px] md:text-xs font-semibold mb-4 md:mb-6 uppercase tracking-widest"
-              style={{ background: "rgba(132,204,22,0.08)", borderColor: "rgba(132,204,22,0.25)", color: PRI }}
+      <div className="max-w-[1440px] mx-auto px-6 md:pl-12 lg:pl-16 md:pr-8 w-full relative z-10 pt-16 pb-16 flex flex-col justify-between min-h-[75vh]">
+        {/* Main Content Area */}
+        <div className="flex flex-col justify-center flex-grow max-w-4xl">
+          {/* Badge Tagline */}
+          <div className="mb-4">
+            <span
+              className="inline-block px-4 py-1.5 rounded-full border text-[10px] md:text-xs font-black uppercase tracking-widest"
+              style={{ 
+                background: "rgba(191, 243, 103, 0.06)", 
+                borderColor: "rgba(191, 243, 103, 0.3)", 
+                color: PRI 
+              }}
             >
-              Venue Partners
+              For Venue Owners & Partners
+            </span>
+          </div>
+
+          {/* Headline */}
+          <h1 
+            className="text-4xl sm:text-5xl md:text-7xl font-extrabold leading-[1.05] tracking-tight uppercase mb-4"
+            style={{ fontFamily: "'Open Sans', sans-serif" }}
+          >
+            Grow Your Venue. <br />
+            <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent">
+              Maximize Every Slot.
+            </span>
+          </h1>
+
+          {/* Paragraph (Subheading) */}
+          <p 
+            className="text-gray-300 leading-relaxed mb-8 max-w-2xl"
+            style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}
+          >
+            Kridaz helps you automate bookings, manage operations, and connect with thousands of players looking for venues like yours.
+          </p>
+
+          {/* Features Horizontal Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 mb-8 border-t border-white/5 pt-6">
+            {/* Feature 1 */}
+            <div className="flex gap-4 md:pr-4">
+              <div
+                className="w-12 h-12 flex items-center justify-center shrink-0 border"
+                style={{ 
+                  borderColor: "rgba(191,243,103,0.2)", 
+                  backgroundColor: "rgba(191,243,103,0.08)",
+                  borderRadius: "15px"
+                }}
+              >
+                <CalendarDays size={22} style={{ color: PRI }} />
+              </div>
+              <div>
+                <h3 
+                  className="text-sm md:text-base font-bold uppercase tracking-wider text-white mb-1.5"
+                  style={{ fontFamily: "'Open Sans', sans-serif" }}
+                >
+                  Automated Bookings
+                </h3>
+                <p className="text-gray-400 text-xs leading-relaxed">No more phone calls. Let players book your turf 24/7.</p>
+              </div>
             </div>
-            <h1 className="font-display text-4xl md:text-7xl leading-[1.1] md:leading-none uppercase mb-6">
-              Maximize Your <br /><span style={{ color: PRI }}>Turf Utilization.</span>
-            </h1>
-            <p className="text-gray-400 text-base md:text-lg mb-8 max-w-lg mx-auto md:mx-0">
-              Transform your sports facility into a fully automated, high-yield business. Kridaz connects you with thousands of local players actively looking for venues.
-            </p>
+
+            {/* Feature 2 */}
+            <div className="flex gap-4 md:px-4 md:border-l md:border-r border-white/10">
+              <div
+                className="w-12 h-12 flex items-center justify-center shrink-0 border"
+                style={{ 
+                  borderColor: "rgba(191,243,103,0.2)", 
+                  backgroundColor: "rgba(191,243,103,0.08)",
+                  borderRadius: "15px"
+                }}
+              >
+                <BarChart3 size={22} style={{ color: PRI }} />
+              </div>
+              <div>
+                <h3 
+                  className="text-sm md:text-base font-bold uppercase tracking-wider text-white mb-1.5"
+                  style={{ fontFamily: "'Open Sans', sans-serif" }}
+                >
+                  Revenue Tracking
+                </h3>
+                <p className="text-gray-400 text-xs leading-relaxed">Real-time insights into your earnings, peak hours, and customer retention.</p>
+              </div>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="flex gap-4 md:pl-4">
+              <div
+                className="w-12 h-12 flex items-center justify-center shrink-0 border"
+                style={{ 
+                  borderColor: "rgba(191,243,103,0.2)", 
+                  backgroundColor: "rgba(191,243,103,0.08)",
+                  borderRadius: "15px"
+                }}
+              >
+                <CheckCircle size={22} style={{ color: PRI }} />
+              </div>
+              <div>
+                <h3 
+                  className="text-sm md:text-base font-bold uppercase tracking-wider text-white mb-1.5"
+                  style={{ fontFamily: "'Open Sans', sans-serif" }}
+                >
+                  Seamless Management
+                </h3>
+                <p className="text-gray-400 text-xs leading-relaxed">Block maintenance hours, set dynamic pricing, and manage your team with ease.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 sm:gap-8">
             <Link
               to="/business/register?role=venu_owners"
-              className="inline-flex items-center gap-3 font-bold text-black rounded-full px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest text-sm md:text-base"
-              style={{ backgroundColor: PRI }}
+              className="inline-flex items-center justify-center gap-3 font-black text-black rounded-full px-8 py-4.5 hover:brightness-110 hover:shadow-[0_0_20px_rgba(85,222,232,0.3)] transition-all bg-gradient-to-r from-[#55DEE8] to-[#BFF367] uppercase tracking-widest text-xs md:text-sm"
             >
-              Register Your Venue <ArrowRight size={20} />
+              Register Your Venue <ArrowRight size={18} />
             </Link>
-          </div>
 
-          <div className="grid gap-4 md:gap-6">
-            {benefits.map((b, i) => (
-              <div
-                key={i}
-                className="flex gap-4 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-white/10 backdrop-blur-sm"
-                style={{ background: "rgba(10,10,10,0.75)" }}
-              >
-                <div
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shrink-0 border"
-                  style={{ borderColor: "rgba(132,204,22,0.2)", backgroundColor: "rgba(132,204,22,0.08)" }}
-                >
-                  <b.icon size={20} className="md:w-6 md:h-6" style={{ color: PRI }} />
-                </div>
-                <div>
-                  <h3 className="font-display text-xl md:text-2xl uppercase mb-1 md:mb-2">{b.title}</h3>
-                  <p className="text-gray-400 text-xs md:text-sm leading-relaxed">{b.desc}</p>
-                </div>
+            <button
+              onClick={() => alert("Demo video coming soon!")}
+              className="inline-flex items-center gap-4 text-left group"
+            >
+              <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center shrink-0 group-hover:border-white/50 group-hover:scale-105 transition-all">
+                <Play size={16} fill="white" className="ml-0.5 text-white" />
               </div>
-            ))}
+              <div>
+                <div className="text-white text-xs md:text-sm font-black uppercase tracking-wider">Watch Demo</div>
+                <div className="text-gray-400 text-[10px] md:text-xs">See how it works</div>
+              </div>
+            </button>
           </div>
         </div>
-
-        {/* ── How It Works ── */}
-        <div className="mt-20 md:mt-32 text-center">
-          <h2 className="font-display text-3xl md:text-5xl font-black text-white mb-10 md:mb-12 uppercase">How It Works</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
-            {[
-              { icon: CalendarDays, title: "Create Your Profile", desc: "Add venue details, photos and pricing in minutes." },
-              { icon: BarChart3, title: "Set Availability", desc: "Define open hours, block maintenance slots and set dynamic pricing." },
-              { icon: CheckCircle, title: "Start Receiving Bookings", desc: "Players book instantly, payments flow directly to you." }
-            ].map((step, i) => (
-              <div key={i} className="p-6 md:p-8 bg-white/5 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-white/10 hover:border-lime-500/30 transition-all group">
-                <div className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 md:mb-6 rounded-xl md:rounded-2xl bg-white/10 group-hover:bg-lime-500/20 transition-colors">
-                  <step.icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
-                </div>
-                <h3 className="text-lg md:text-xl font-bold text-white mb-2 md:mb-3 uppercase tracking-wider">{step.title}</h3>
-                <p className="text-gray-400 text-xs md:text-sm">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Testimonials ── */}
-        <div className="mt-20 md:mt-32 max-w-4xl mx-auto">
-          <h2 className="font-display text-3xl md:text-5xl font-black text-white text-center mb-10 md:mb-16 uppercase tracking-tight">Success Stories</h2>
-          <div className="grid gap-6 md:gap-8">
-            {[
-              { 
-                text: "“Kridaz turned idle slots into steady revenue. The dashboard is a total game‑changer for my business operations.”", 
-                name: "Priya Sharma", 
-                role: "Arena 51 Owner", 
-                icon: Trophy 
-              },
-              { 
-                text: "“Automated bookings freed up my staff’s time and boosted our evening bookings by 35%. Highly recommended.”", 
-                name: "Rajesh Kumar", 
-                role: "The Pitch Manager", 
-                icon: BarChart3 
-              }
-            ].map((t, i) => (
-              <div key={i} className="p-6 md:p-10 bg-white/5 backdrop-blur-md rounded-[2rem] md:rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 md:p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <t.icon size={60} className="md:w-20 md:h-20" />
-                </div>
-                <p className="text-lg md:text-2xl text-gray-200 font-medium relative z-10 leading-relaxed mb-6 md:mb-8">
-                  {t.text}
-                </p>
-                <div className="flex items-center gap-4 relative z-10">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-lime-500/20 border border-lime-500/40" />
-                  <div>
-                    <div className="text-white text-xs md:text-base font-bold uppercase tracking-wider">{t.name}</div>
-                    <div className="text-lime-500 text-[10px] md:text-sm font-semibold">{t.role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-
       </div>
     </div>
   );

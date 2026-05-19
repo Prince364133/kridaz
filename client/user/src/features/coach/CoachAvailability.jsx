@@ -4,7 +4,7 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import { Calendar, Clock, Plus, Trash2, Save, Loader2, CalendarDays, Zap } from "lucide-react";
 import toast from "react-hot-toast";
 import { format, addDays, startOfToday, parse } from "date-fns";
-import ClockPicker from "../common/ClockPicker";
+import ClockPicker from "@components/common/ClockPicker";
 
 export default function CoachAvailability() {
   const { user } = useSelector((state) => state.auth);

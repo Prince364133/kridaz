@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { logout } from "@redux/slices/authSlice";
-import { reelsApi } from "../../../redux/api/reelsApi";
+import { reelsApi } from "@redux/api/reelsApi";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 

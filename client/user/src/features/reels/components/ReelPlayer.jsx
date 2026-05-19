@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import * as Sentry from "@sentry/react";
 import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { useTrackHeartbeatMutation } from '@redux/api/reelsApi';
 import Hls from 'hls.js';
 
-const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
+const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -30,6 +29,7 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
       interval = setInterval(() => {
         if (!videoRef.current.paused) {
           watchTimeRef.current += 1;
+          // Send heartbeat every 5 seconds
           if (watchTimeRef.current % 5 === 0) {
             trackHeartbeat({ 
               reelId, 
@@ -42,87 +42,48 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
     }
     return () => {
       if (interval) clearInterval(interval);
-      if (watchTimeRef.current > 0) {
+      // Send final heartbeat on unmount/deactivate
+      if (watchTimeRef.current % 5 !== 0 && watchTimeRef.current > 0) {
         trackHeartbeat({ 
           reelId, 
-          watchTime: watchTimeRef.current % 5 || 5, 
+          watchTime: watchTimeRef.current % 5, 
           completed: videoRef.current?.ended 
         });
       }
       watchTimeRef.current = 0;
     };
-  }, [isVisible, reelId, trackHeartbeat, isLoaded]);
+  }, [isVisible, reelId, trackHeartbeat]);
 
-  // Unified HLS Lifecycle & Visibility Effect
+  // HLS Initialization
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !hlsUrl) return;
 
+    // Check for HLS support
     const src = finalHlsUrl || hlsUrl;
-    if (!src) return;
-
-    const isHls = src.endsWith('.m3u8') || src.includes('.m3u8');
-
-    if (isHls && Hls.isSupported()) {
-      const hls = new Hls({
-        capLevelToPlayerSize: true,
-        autoStartLoad: false, 
-        startLevel: -1, // Auto
-        // Aggressive buffering
-        maxBufferLength: isVisible ? 30 : 10, 
-        maxMaxBufferLength: isVisible ? 60 : 20,
-        enableWorker: true,
-        lowLatencyMode: true,
-        xhrSetup: (xhr, url) => {
-          xhr.withCredentials = false; // CDN assets are public
-        }
-      });
-
-      hlsRef.current = hls;
-      hls.loadSource(src);
-      hls.attachMedia(video);
-
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        setIsLoaded(true);
-        if (isVisible) {
-          video.play().catch(e => console.warn('[REEL_PLAYER] Auto-play blocked:', e));
-        }
-      });
-
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        console.error(`[REEL_PLAYER] [HLS_ERROR] [${reelId}]:`, data.type, data.details, data.fatal);
-        if (data.fatal) {
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              Sentry.addBreadcrumb({ message: '[REEL_PLAYER] Network error, trying to recover...' });
-              hls.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              Sentry.addBreadcrumb({ message: '[REEL_PLAYER] Media error, trying to recover...' });
-              hls.recoverMediaError();
-              break;
-            default:
-              console.error('[REEL_PLAYER] Fatal error, destroying instance');
-              hls.destroy();
-              break;
+    if (src && (src.endsWith('.m3u8') || src.includes('.m3u8'))) {
+      if (Hls.isSupported()) {
+        const hls = new Hls({
+          capLevelToPlayerSize: true,
+          autoStartLoad: true,
+          xhrSetup: (xhr) => {
+            xhr.withCredentials = true;
           }
-        }
-      });
-
-      // Aggressive Preloading Logic
-      if (isVisible) {
-        hls.startLoad(); // Load and play
-      } else if (isNext) {
-        // Pre-fetch manifest AND fragments for the next reel
-        hls.startLoad(); 
+        });
+        hlsRef.current = hls;
+        hls.loadSource(src);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          setIsLoaded(true);
+          if (isVisible) {
+            video.play().catch(() => setIsPlaying(false));
+          }
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = src;
       }
-
-    } else {
-      // Native HLS (Safari) or raw MP4
+    } else if (src) {
       video.src = src;
-      if (isVisible) {
-        video.play().catch(e => Sentry.addBreadcrumb({ message: 'Auto-play blocked' }));
-      }
     }
 
     return () => {
@@ -131,42 +92,42 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
         hlsRef.current = null;
       }
     };
-  }, [finalHlsUrl, hlsUrl, isVisible, isNext]);
+  }, [finalHlsUrl]);
 
-  // Handle Play/Pause based on isVisible
+  // Visibility Play/Pause Logic
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     if (isVisible) {
       if (hlsRef.current) {
-        hlsRef.current.startLoad();
-        // High priority for current video
-        hlsRef.current.config.maxBufferLength = 40; 
+        hlsRef.current.startLoad(); // Start loading segments for HLS
       }
-      video.play().catch(() => setIsPlaying(false));
+      
+      if (video.readyState >= 2) {
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => setIsPlaying(true))
+            .catch(() => setIsPlaying(false));
+        }
+      }
     } else {
       video.pause();
       setIsPlaying(false);
-      if (isNext && hlsRef.current) {
-        // Medium priority for next video: load enough to play instantly but don't hog bandwidth
-        hlsRef.current.startLoad();
-        hlsRef.current.config.maxBufferLength = 10;
-      } else if (hlsRef.current) {
-        hlsRef.current.stopLoad();
-      }
-      
-      if (!isNext) {
-        video.currentTime = 0;
+      if (hlsRef.current) {
+        hlsRef.current.stopLoad(); // Pause loading segments when hidden
       }
     }
-  }, [isVisible, isNext]);
+  }, [isVisible]);
 
   const togglePlay = () => {
     if (videoRef.current.paused) {
       videoRef.current.play();
+      setIsPlaying(true);
     } else {
       videoRef.current.pause();
+      setIsPlaying(false);
     }
   };
 
@@ -181,7 +142,6 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, isNext, poster }) => {
       <video
         ref={videoRef}
         poster={poster}
-        crossOrigin="anonymous"
         className="w-full h-full object-contain"
         loop
         muted={isMuted}

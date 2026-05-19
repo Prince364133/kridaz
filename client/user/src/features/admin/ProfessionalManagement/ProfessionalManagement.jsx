@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, Mail, Phone, MapPin, IndianRupee, Search, ChevronRight, Zap, Briefcase, Trash2, Ban, CheckCircle, X, ExternalLink } from "lucide-react";
-import useProfessionals from "../../../hooks/admin/useProfessionals";
+import useProfessionals from "@hooks/admin/useProfessionals";
 import ConfirmationModal from "../../shared/ConfirmationModal";
 
 const ProfessionalManagement = ({ role }) => {

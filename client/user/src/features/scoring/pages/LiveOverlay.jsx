@@ -1,62 +1,102 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+/**
+ * LiveOverlay.jsx
+ * ────────────────────────────────────────────────────────────────────────────
+ * Transparent OBS Browser-Source overlay for cricket live streaming.
+ *
+ * Usage in OBS:
+ * Sources → + → Browser → URL: /live-overlay/:matchId?token=<overlayToken>
+ * Width: 1920 Height: 1080 ✅ Transparent background
+ *
+ * Architecture:
+ * • On mount → HTTP GET /api/scoring/live-score/:matchId (initial state)
+ * • Then → Socket.io "joinMatch" on room matchId
+ * • Listens → "scoreUpdated" (score data), "ballEvent" (animation trigger)
+ * • On drop → freezes in place; auto-reconnects & re-fetches via HTTP
+ * ────────────────────────────────────────────────────────────────────────────
+ */
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import io from 'socket.io-client';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
+import { io } from 'socket.io-client';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6001';
 
-const BADGE_CFG = {
- six: { bg: 'linear-gradient(135deg, #a3e635 0%, #15803d 100%)', color: '#000', size: 100, label: '6', dur: 3200 },
- four: { bg: 'linear-gradient(135deg, #facc15 0%, #ca8a04 100%)', color: '#000', size: 84, label: '4', dur: 2800 },
- wicket: { bg: 'linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)', color: '#fff', size: 90, label: 'OUT', dur: 4000 },
- wide: { bg: '#2563eb', color: '#fff', size: 64, label: 'WD', dur: 1800 },
- no_ball: { bg: '#e11d48', color: '#fff', size: 64, label: 'NB', dur: 1800 },
+// ─── Ball colour helpers ─────────────────────────────────────────────────────
+const BALL_STYLES = {
+ wicket: { bg: '#dc2626', color: '#fff' },
+ boundary: { bg: '#22c55e', color: '#000' },
+ six: { bg: '#a855f7', color: '#fff' },
+ four: { bg: '#3b82f6', color: '#fff' },
+ wide: { bg: '#eab308', color: '#000' },
+ no_ball: { bg: '#f97316', color: '#000' },
+ dot: { bg: '#374151', color: '#9ca3af' },
+ run: { bg: '#1f2937', color: '#fff' },
 };
 
 function getBallStyle(ball) {
- if (!ball) return { bg: 'rgba(255,255,255,0.06)', color: '#9ca3af' };
- if (ball.isWicket) return { bg: '#dc2626', color: '#fff' };
- if (ball.extraType === 'WIDE') return { bg: 'rgba(59,130,246,0.15)', color: '#60a5fa' };
- if (ball.extraType === 'NO_BALL') return { bg: 'rgba(244,63,94,0.15)', color: '#fb7185' };
- 
- const runs = ball.runs ?? 0;
- if (runs === 6) return { bg: '#a3e635', color: '#000' };
- if (runs === 4) return { bg: '#facc15', color: '#000' };
- if (runs === 0) return { bg: 'rgba(255,255,255,0.06)', color: '#4b5563' };
- return { bg: 'rgba(255,255,255,0.1)', color: '#fff' };
+ if (!ball) return BALL_STYLES.dot;
+ if (ball.isWicket || ball.type === 'wicket') return BALL_STYLES.wicket;
+ const lbl = ball.label || ball.type || '';
+ if (lbl === '6' || ball.type === 'six') return BALL_STYLES.six;
+ if (lbl === '4' || ball.type === 'four') return BALL_STYLES.four;
+ if (ball.type === 'wide' || lbl === 'wd') return BALL_STYLES.wide;
+ if (ball.type === 'no_ball' || lbl === 'nb') return BALL_STYLES.no_ball;
+ if (lbl === '0' || ball.type === 'dot') return BALL_STYLES.dot;
+ return BALL_STYLES.run;
 }
 
+// ─── Badge config per event type ─────────────────────────────────────────────
+const BADGE_CFG = {
+ six: { label: '6', bg: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff', dur: 2800, size: 96 },
+ four: { label: '4', bg: 'linear-gradient(135deg,#1d4ed8,#3b82f6)', color: '#fff', dur: 2400, size: 80 },
+ wicket: { label: 'W!', bg: 'linear-gradient(135deg,#991b1b,#dc2626)', color: '#fff', dur: 3200, size: 80 },
+ wide: { label: 'WD', bg: 'linear-gradient(135deg,#854d0e,#eab308)', color: '#000', dur: 1600, size: 56 },
+ no_ball: { label: 'NB', bg: 'linear-gradient(135deg,#9a3412,#f97316)', color: '#fff', dur: 1600, size: 56 },
+};
+
+// ─── CSS injected once into the document head ────────────────────────────────
 const GLOBAL_CSS = `
- @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
- @keyframes tickerIn {
- 0% { transform: translateY(100%); opacity: 0; }
- 100% { transform: translateY(0); opacity: 1; }
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+ * { box-sizing: border-box; margin: 0; padding: 0; }
+
+ body, html {
+ background: transparent !important;
+ overflow: hidden;
+ width: 1920px;
+ height: 1080px;
+ font-family: 'Inter', sans-serif;
  }
+
  @keyframes sixFlyIn {
- 0% { transform: scale(0) rotate(-45deg); opacity: 0; filter: blur(20px); }
- 40% { transform: scale(1.1) rotate(10deg); opacity: 1; filter: blur(0); }
- 85% { transform: scale(1) rotate(0deg); opacity: 1; }
- 100% { transform: scale(0.8) translateY(100px); opacity: 0; filter: blur(10px); }
+ 0% { transform: translateX(120px) scale(0.4) rotate(10deg); opacity: 0; }
+ 25% { transform: translateX(-12px) scale(1.2) rotate(-3deg); opacity: 1; }
+ 70% { transform: translateX(0) scale(1) rotate(0deg); opacity: 1; }
+ 100% { transform: translateX(0) scale(0.8); opacity: 0; }
  }
  @keyframes fourSlideUp {
- 0% { transform: translateY(200px) skewX(-15deg); opacity: 0; }
- 25% { transform: translateY(0) skewX(0); opacity: 1; }
- 80% { transform: translateY(0); opacity: 1; }
- 100% { transform: translateY(-100px); opacity: 0; }
+ 0% { transform: translateY(60px) scale(0.5); opacity: 0; }
+ 20% { transform: translateY(-8px) scale(1.1); opacity: 1; }
+ 70% { transform: translateY(0) scale(1); opacity: 1; }
+ 100% { transform: translateY(0) scale(0.85); opacity: 0; }
  }
  @keyframes wicketShake {
- 0% { transform: scale(0.5); opacity: 0; }
- 15% { transform: scale(1.2); opacity: 1; }
- 20%, 40%, 60%, 80% { transform: scale(1) rotate(-5deg); }
- 30%, 50%, 70%, 90% { transform: scale(1) rotate(5deg); }
- 95% { transform: scale(1) rotate(0); opacity: 1; }
- 100% { transform: scale(0) translateY(-100px); opacity: 0; }
+ 0%,100% { transform: translateX(0) scale(1); opacity: 0; }
+ 5% { transform: scale(1.3); opacity: 1; }
+ 15%,45% { transform: translateX(-8px) scale(1); opacity: 1; }
+ 30%,60% { transform: translateX( 8px) scale(1); opacity: 1; }
+ 80% { transform: scale(1); opacity: 1; }
+ 95% { transform: scale(0.9); opacity: 0; }
  }
  @keyframes extraBadge {
- 0% { transform: scale(0.8); opacity: 0; }
- 20% { transform: scale(1); opacity: 1; }
- 80% { transform: scale(1); opacity: 1; }
+ 0% { transform: scale(0.3); opacity: 0; }
+ 15% { transform: scale(1.1); opacity: 1; }
+ 70% { transform: scale(1); opacity: 1; }
  100% { transform: scale(0.8); opacity: 0; }
+ }
+ @keyframes tickerIn {
+ from { transform: translateY(100%); opacity: 0; }
+ to { transform: translateY(0); opacity: 1; }
  }
  @keyframes pulseRed {
  0%,100% { opacity: 1; }
@@ -140,6 +180,7 @@ function BallPill({ ball, size = 36 }) {
 }
 
 // ─── Animated event badge ─────────────────────────────────────────────────────
+
 function EventBadge({ event }) {
  const cfg = BADGE_CFG[event?.type];
  if (!cfg) return null;
@@ -284,7 +325,7 @@ const LiveOverlay = () => {
  if (type === 'four') return `${data.strikerName || ''} finds the boundary!`.trim();
  if (type === 'wicket') return `OUT! ${data.wicketType?.replace(/_/g,' ') || ''}`.trim();
  if (type === 'wide') return 'Wide ball';
- if (type === 'no_ball') return 'No Ball!';
+ if (type === 'no_ball')return 'No Ball!';
  return '';
  }
 
@@ -301,8 +342,8 @@ const LiveOverlay = () => {
  socketRef.current = socket;
 
  const joinRoom = () => {
- socket.emit(SOCKET.JOIN_MATCH, matchId);
- if (token) socket.emit(SOCKET.OVERLAY_JOIN, { matchId, token });
+ socket.emit('joinMatch', matchId);
+ if (token) socket.emit('overlayJoin', { matchId, token });
  };
 
  socket.on('connect', () => {
@@ -314,7 +355,7 @@ const LiveOverlay = () => {
  socket.on('reconnect', () => { setConnected(true); joinRoom(); fetchScore(); });
 
  // Primary score update ────────────────────────────────────────────────────
- socket.on(SOCKET.SCORE_UPDATED, (data) => {
+ socket.on('scoreUpdated', (data) => {
  setScore(data);
  // Derive badge from lastBallRaw if no explicit ballEvent follows
  const lb = data?.lastBallRaw;
@@ -328,11 +369,11 @@ const LiveOverlay = () => {
  });
 
  // Explicit ball event (emitted separately by controller)
- socket.on(SOCKET.BALL_EVENT, (ev) => {
+ socket.on('ballEvent', (ev) => {
  if (ev.type) showBadge(ev.type, ev);
  });
 
- socket.on(SOCKET.MATCH_ENDED, () => {
+ socket.on('matchEnded', () => {
  setScore(prev => prev ? { ...prev, _ended: true } : prev);
  });
 

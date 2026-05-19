@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Helmet } from "react-helmet-async";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { Wallet, Plus, ArrowUpRight, ArrowDownLeft, History, IndianRupee, Loader2, ShieldCheck, Zap } from "lucide-react";
 import toast from "react-hot-toast";
 import { updateUser } from "@redux/slices/authSlice";
-import { loadRazorpay } from "../../../config/razorpay";
+import { loadRazorpay } from "../config/razorpay";
 
 const WalletPage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -112,9 +111,6 @@ const WalletPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white pt-24 pb-20 px-4">
-      <Helmet>
-        <title>Wallet | Kridaz</title>
-      </Helmet>
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">

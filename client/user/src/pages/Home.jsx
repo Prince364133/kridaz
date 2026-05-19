@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { AdBannerSection } from "@components/Marketing/AdBannerSection";
 import { VideoSection } from "@components/Marketing/VideoSection";
 import BlogSection from "@components/Blogs/BlogSection";
-import { TurfCard } from "@features/turf";
+import TurfCard from "@features/turf/components/TurfCard";
 import SearchPlayers from "@components/search/SearchPlayers";
 import SearchTurf from "@components/search/SearchTurf";
 import InterestsModal from "@components/modals/InterestsModal";
@@ -19,12 +19,7 @@ const PRI = "#84CC16";
 const S2 = "#1A1A1A";
 const BDR = "#2A2A2A";
 
-const stats = [
- { value: "500+", label: "Venues" },
- { value: "50K+", label: "Players" },
- { value: "1M+", label: "Bookings" },
- { value: "25+", label: "Cities" },
-];
+
 
 const socialPosts = [
  { image: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800&q=80", likes: "1.2k", comments: "84" },
@@ -108,14 +103,11 @@ export default function Home() {
  const [loadingStates, setLoadingStates] = useState(false);
  const [loadingCities, setLoadingCities] = useState(false);
 
-  useEffect(() => {
-    if (isLoggedIn && role?.toLowerCase() === 'user' && user && (!user.sportTypes || user.sportTypes.length === 0)) {
-      const isBasicComplete = user.phone && user.gender && (user.location || user.city);
-      if (isBasicComplete) {
-        setShowInterests(true);
-      }
-    }
-  }, [isLoggedIn, role, user]);
+ useEffect(() => {
+ if (isLoggedIn && role === 'user' && user && (!user.sportTypes || user.sportTypes.length === 0)) {
+ setShowInterests(true);
+ }
+ }, [isLoggedIn, role, user]);
 
  const detectLocation = () => {
  setLocationStatus("detecting");
@@ -201,33 +193,33 @@ export default function Home() {
  }, []);
 
  useEffect(() => {
-    const fetchPlayers = async () => {
-      try {
-        const params = {
-          ...playerFilters,
-          sortBy: 'newest',
-        };
-        const res = await axiosInstance.get("/api/user/players", { params });
-        setPlayers((res.data.players || []).map(p => ({ ...p, _id: p.id || p._id })));
-      } catch (error) {
-        console.error("Error fetching players:", error);
-      }
-    };
+ const fetchPlayers = async () => {
+ try {
+ const params = {
+ ...playerFilters,
+ sortBy: 'newest',
+ };
+ const res = await axiosInstance.get("/api/user/players", { params });
+ setPlayers(res.data.players || []);
+ } catch (error) {
+ console.error("Error fetching players:", error);
+ }
+ };
 
-    const fetchFollowingStatus = async () => {
-      if (!isLoggedIn) return;
-      try {
-        const response = await axiosInstance.get("/api/user/players/network");
-        const ids = (response.data.following || []).filter(p => p).map(p => p.id || p._id);
-        setFollowingIds(ids);
-      } catch (error) {
-        console.error("Error fetching network:", error);
-      }
-    };
+ const fetchFollowingStatus = async () => {
+ if (!isLoggedIn) return;
+ try {
+ const response = await axiosInstance.get("/api/user/players/network");
+ const ids = (response.data.following || []).filter(p => p).map(p => p._id);
+ setFollowingIds(ids);
+ } catch (error) {
+ console.error("Error fetching network:", error);
+ }
+ };
 
-    fetchPlayers();
-    fetchFollowingStatus();
-  }, [playerFilters, userLocation, isLoggedIn]);
+ fetchPlayers();
+ fetchFollowingStatus();
+ }, [playerFilters, userLocation, isLoggedIn]);
 
  useEffect(() => {
  const fetchStates = async () => {
@@ -365,13 +357,13 @@ export default function Home() {
  <div className="relative w-full px-4 lg:px-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center pt-4 md:pt-0">
  <div className="space-y-4 lg:space-y-6 relative z-10">
  <div>
- <h1 className="font-display leading-[0.9] lg:leading-[0.85] tracking-tighter uppercase" style={{ fontSize: "clamp(2.5rem,10vw,6.5rem)" }}>
+ <h1 className="uppercase" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700", fontSize: "clamp(40px, 6vw, 51.74px)", lineHeight: "1.14", letterSpacing: "0" }}>
  More Than <span style={{ color: PRI }}>Booking.</span><br />
  Where Players<br />Belong.
  </h1>
  <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ color: PRI }}>where champions play</p>
  </div>
- <p className="text-sm lg:text-xl opacity-70 max-w-xl leading-relaxed mb-4 lg:mb-10">
+ <p className="opacity-70 max-w-xl mb-4 lg:mb-10" style={{ fontFamily: "'Inter', sans-serif", fontWeight: "300", fontSize: "20.04px", lineHeight: "119%", letterSpacing: "1.5%" }}>
  Discover premium sports venues, book your slot instantly, and connect with players across India.
  </p>
 
@@ -416,18 +408,30 @@ export default function Home() {
  </div>
  </section>
 
+ {/* ── QUICK LINKS ── */}
+  <section className="border-y border-white/5 bg-black py-10">
+    <div className="max-w-7xl mx-auto px-6 flex flex-wrap md:flex-nowrap items-center justify-around gap-8 overflow-x-auto no-scrollbar">
+      <Link to="/leaderboard" className="flex items-center gap-4 group shrink-0">
+        <Activity size={28} className="text-[#60A5FA] group-hover:scale-110 transition-transform" />
+        <span className="font-black text-sm tracking-[0.2em] uppercase text-[#60A5FA]">LIVE SCORE</span>
+      </Link>
+      
+      <Link to="/join-games" className="flex items-center gap-4 group shrink-0">
+        <Trophy size={28} className="text-[#F59E0B] group-hover:scale-110 transition-transform" />
+        <span className="font-black text-sm tracking-[0.2em] uppercase text-[#F59E0B]">JOIN TOURNAMENTS</span>
+      </Link>
 
- {/* ── STATS ── */}
- <section className="border-y" style={{ borderColor: "#1A1A1A", backgroundColor: "#0A0A0A" }}>
- <div className="w-full px-2 md:px-10 py-6 sm:py-8 grid grid-cols-4 divide-x divide-[#1A1A1A]">
- {stats.map((s) => (
- <div key={s.label} className="px-1 md:px-8 text-center flex flex-col justify-center overflow-hidden group">
- <p className="font-display text-[15px] min-[375px]:text-xl sm:text-3xl lg:text-5xl leading-none tracking-tighter group-hover:text-white transition-colors" style={{ color: PRI }}>{s.value}</p>
- <p className="font-mono text-[5px] min-[375px]:text-[6px] sm:text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.3em] mt-1 sm:mt-2 text-gray-500 group-hover:text-primary transition-colors truncate">{s.label}</p>
- </div>
- ))}
- </div>
- </section>
+      <Link to="/players" className="flex items-center gap-4 group shrink-0">
+        <Search size={28} className="text-[#84CC16] group-hover:scale-110 transition-transform" />
+        <span className="font-black text-sm tracking-[0.2em] uppercase text-[#84CC16]">FIND PLAYERS</span>
+      </Link>
+
+      <Link to="#" className="flex items-center gap-4 group shrink-0">
+        <ShoppingBag size={28} className="text-[#A855F7] group-hover:scale-110 transition-transform" />
+        <span className="font-black text-sm tracking-[0.2em] uppercase text-[#A855F7]">MARKETPLACE</span>
+      </Link>
+    </div>
+  </section>
 
  {/* Mobile Sub-Nav (Hot Bars) */}
  <div className="lg:hidden flex items-center justify-between w-full border-b border-[#1A1A1A] bg-[#0A0A0A] py-3 px-4 gap-3">
@@ -756,10 +760,10 @@ export default function Home() {
  hostedGames.slice(0, 5).map((g, i) => {
  const isQuick = g.gameMode === 'QUICK';
  const openSlots = isQuick 
- ? (g.quickSlots?.filter(s => s.status === 'OPEN')?.length || 0)
+ ? g.quickSlots.filter(s => s.status === 'OPEN').length
  : (g.teams?.teamA?.slots?.filter(s => s.status === 'OPEN').length || 0) + (g.teams?.teamB?.slots?.filter(s => s.status === 'OPEN').length || 0);
  const totalSlots = isQuick
- ? (g.quickSlots?.length || 0)
+ ? g.quickSlots.length
  : (g.teams?.teamA?.slots?.length || 0) + (g.teams?.teamB?.slots?.length || 0);
  const hostInitial = g.host?.name?.[0]?.toUpperCase() || '?';
  const bgImg = g.ground?.images?.[0] || 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&q=80';
@@ -857,7 +861,7 @@ export default function Home() {
  <>Casual {g.gameType} Match</>
  ) : (
  <>{g.teams?.teamA?.name || 'Team A'}{' '}
- <span className="text-[#CCFF00] ">VS</span>{' '}
+ <span className="text-[#CCFF00] text-xs flex items-center">V<span className="w-[1px] h-3 bg-[#CCFF00] ml-[1px] mr-[3px] opacity-60" />S</span>{' '}
  {g.teams?.teamB?.name || 'Team B'}</>
  )}
  </h3>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
   Trophy, Medal, Star, Target, Activity, Search, 
   ChevronRight, ChevronLeft, BarChart3, Users, 
@@ -7,43 +8,28 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useGetLeaderboardQuery } from '@redux/api/leaderboardApi';
-import SidebarIcon from '../components/SidebarIcon';
 
 const PRI = "#84CC16";
+
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif", fontSize: "20px" };
 
-// High-fidelity Skeletal Loading Component
-const LeaderboardSkeleton = () => (
-  <div className="space-y-1">
-    {[...Array(6)].map((_, i) => (
-      <div 
-        key={i} 
-        className="grid grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_1fr] p-5 items-center animate-pulse border-b border-white/5 bg-white/[0.01] rounded-xl"
-      >
-        <div className="w-8 h-8 bg-white/5 rounded-lg" />
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-white/5" />
-          <div className="space-y-2">
-            <div className="w-28 h-4 bg-white/10 rounded" />
-            <div className="w-20 h-2.5 bg-white/5 rounded" />
-          </div>
-        </div>
-        <div className="w-8 h-4 bg-white/5 rounded ml-3" />
-        <div className="w-8 h-4 bg-white/5 rounded ml-3" />
-        <div className="w-8 h-4 bg-white/5 rounded ml-3" />
-        <div className="w-8 h-4 bg-white/5 rounded ml-3" />
-        <div className="w-8 h-4 bg-white/5 rounded ml-3" />
-      </div>
-    ))}
+const SidebarIcon = ({ icon: Icon, active, onClick, label }) => (
+  <div 
+    onClick={onClick}
+    className={`p-3 rounded-xl transition-all cursor-pointer flex flex-col items-center gap-1 group ${active ? 'bg-[#84CC16]/10 text-[#84CC16] border border-[#84CC16]/20 shadow-[0_0_15px_rgba(132,204,22,0.1)]' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
+  >
+    <Icon size={22} strokeWidth={active ? 2.5 : 2} />
+    <span className={`text-[7px] font-black uppercase tracking-widest ${active ? 'text-[#84CC16]' : 'text-gray-600 group-hover:text-gray-400'}`}>{label}</span>
   </div>
 );
 
 const Leaderboard = () => {
   const navigate = useNavigate();
   const [selectedSport, setSelectedSport] = useState('Cricket');
-  const [category, setCategory] = useState('batting');
+  const [category, setCategory] = useState('batting'); // 'batting', 'bowling', or sport-specific stats
+  const [players, setPlayers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const sports = [
     { name: 'Cricket', icon: Trophy },
@@ -63,20 +49,27 @@ const Leaderboard = () => {
   };
 
   useEffect(() => {
-    // Reset category to default when sport changes
+    // Reset category when sport changes
     setCategory(sportCategories[selectedSport][0]);
   }, [selectedSport]);
 
-  // Layered Architecture: Fetching from Service Layer (RTK Query)
-  const { data, isLoading, isFetching } = useGetLeaderboardQuery(
-    { sport: selectedSport, category },
-    { refetchOnMountOrArgChange: true }
-  );
-
-  const rawPlayers = data?.players || [];
-  const players = React.useMemo(() => {
-    return rawPlayers.map(p => ({ ...p, _id: p.id || p._id }));
-  }, [rawPlayers]);
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      setLoading(true);
+      try {
+        // In a real app, we would pass sport and category to the API
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/leaderboard?sport=${selectedSport.toLowerCase()}&category=${category}`);
+        if (response.data.success) {
+          setPlayers(response.data.players || []);
+        }
+      } catch (err) {
+        console.error("Leaderboard fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLeaderboard();
+  }, [category, selectedSport]);
 
   const getRankIcon = (rank) => {
     if (rank === 1) return <div className="w-8 h-10 bg-gradient-to-b from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.4)] border border-yellow-300/30 text-black font-black">1</div>;
@@ -89,6 +82,7 @@ const Leaderboard = () => {
     <div className="h-screen bg-[#050505] text-white font-sans overflow-hidden flex">
       {/* Sidebar Navigation */}
       <div className="w-24 border-r border-white/5 flex flex-col items-center py-10 gap-6 z-30 bg-[#050505] shrink-0">
+        
         {sports.map((sport) => (
           <SidebarIcon 
             key={sport.name}
@@ -98,12 +92,14 @@ const Leaderboard = () => {
             onClick={() => setSelectedSport(sport.name)}
           />
         ))}
+
+
       </div>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col relative overflow-y-auto">
         {/* Background Image with Gradient Overlay */}
-        <div className="absolute top-0 left-0 right-0 h-[400px] z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 h-[400px] z-0 overflow-hidden">
           <img 
             src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2073&auto=format&fit=crop" 
             alt="" 
@@ -182,9 +178,10 @@ const Leaderboard = () => {
               </div>
 
               <div className="divide-y divide-white/5 min-h-[500px]">
-                {isLoading || isFetching ? (
-                  <div className="p-6">
-                    <LeaderboardSkeleton />
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center py-40">
+                    <div className="w-10 h-10 border-2 border-[#84CC16] border-t-transparent rounded-full animate-spin mb-4" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600">Retrieving Arena Data...</p>
                   </div>
                 ) : players.length > 0 ? (
                   players.map((player, idx) => (
@@ -198,16 +195,12 @@ const Leaderboard = () => {
                     >
                       <div className="flex items-center">{getRankIcon(idx + 1)}</div>
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-[#84CC16]/50 transition-all shrink-0">
-                          <img 
-                            src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} 
-                            alt="" 
-                            className="w-full h-full object-cover" 
-                          />
+                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-[#84CC16]/50 transition-all">
+                          <img src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} alt="" className="w-full h-full object-cover" />
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-black uppercase tracking-tight group-hover:text-[#84CC16] transition-colors truncate">{player.name}</p>
-                          <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1 truncate">
+                        <div>
+                          <p className="text-sm font-black uppercase tracking-tight group-hover:text-[#84CC16] transition-colors">{player.name}</p>
+                          <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
                             <MapPin size={10} className="text-[#84CC16]/50" /> {player.city || 'Global Elite'}
                           </p>
                         </div>
@@ -231,8 +224,7 @@ const Leaderboard = () => {
                   </div>
                 )}
                 
-                {/* Standard background filler rows */}
-                {!isLoading && !isFetching && players.length > 0 && players.length < 8 && Array(8 - players.length).fill(0).map((_, i) => (
+                {!loading && players.length > 0 && players.length < 8 && Array(8 - players.length).fill(0).map((_, i) => (
                   <div key={`filler-${i}`} className="grid grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_1fr] p-5 items-center opacity-10 grayscale">
                     <div className="ml-3 font-bold text-xs">{players.length + i + 1}</div>
                     <div className="flex items-center gap-4">
@@ -242,11 +234,11 @@ const Leaderboard = () => {
                         <div className="w-16 h-1 bg-white/5 rounded"></div>
                       </div>
                     </div>
-                    <div className="text-gray-600 font-black ml-3">---</div>
-                    <div className="text-gray-600 font-black ml-3">---</div>
-                    <div className="text-gray-600 font-black ml-3">---</div>
-                    <div className="text-gray-600 font-black ml-3">---</div>
-                    <div className="text-gray-600 font-black ml-3">---</div>
+                    <div className="text-gray-600 font-black">---</div>
+                    <div className="text-gray-600 font-black">---</div>
+                    <div className="text-gray-600 font-black">---</div>
+                    <div className="text-gray-600 font-black">---</div>
+                    <div className="text-gray-600 font-black">---</div>
                   </div>
                 ))}
               </div>
@@ -261,6 +253,7 @@ const Leaderboard = () => {
 
             {/* Sidebar Stats Area */}
             <div className="w-full xl:w-[320px] space-y-6">
+              
               <div className="bg-[#0A0A0A] rounded-3xl border border-white/5 p-6 shadow-2xl">
                 <h3 className="text-xs font-black text-[#84CC16] uppercase tracking-[0.2em] mb-8 text-center" style={HEADING_STYLE}>{selectedSport} Overview</h3>
                 
@@ -275,7 +268,7 @@ const Leaderboard = () => {
 
                 <div className="space-y-5">
                   {[
-                    { label: "Total Players", value: players.length || "---", icon: Users },
+                    { label: "Total Players", value: "---", icon: Users },
                     { label: "Total Matches", value: "---", icon: Clock },
                     { label: "Total Stats", value: "---", icon: Target },
                     { label: "Season Record", value: "---", icon: Star },
@@ -287,7 +280,7 @@ const Leaderboard = () => {
                         <stat.icon size={16} className="text-[#84CC16]/60 group-hover:text-[#84CC16] transition-colors" />
                         <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{stat.label}</span>
                       </div>
-                      <span className="text-xs font-black text-white font-mono">{stat.value}</span>
+                      <span className="text-xs font-black text-white font-mono">---</span>
                     </div>
                   ))}
                 </div>
@@ -296,7 +289,7 @@ const Leaderboard = () => {
               <div className="bg-gradient-to-br from-[#111] to-[#050505] rounded-3xl border border-[#84CC16]/20 p-6 shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-[#84CC16]/5 rounded-full blur-3xl group-hover:bg-[#84CC16]/10 transition-all"></div>
                 <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-2xl bg-[#84CC16]/10 text-[#84CC16] shadow-inner shadow-[#84CC16]/20 shrink-0">
+                  <div className="p-3 rounded-2xl bg-[#84CC16]/10 text-[#84CC16] shadow-inner shadow-[#84CC16]/20">
                     <Crown size={24} strokeWidth={2.5} />
                   </div>
                   <div>
@@ -305,6 +298,7 @@ const Leaderboard = () => {
                   </div>
                 </div>
               </div>
+
             </div>
 
           </div>

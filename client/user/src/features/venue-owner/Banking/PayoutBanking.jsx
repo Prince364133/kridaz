@@ -5,9 +5,9 @@ import {
   FileText, Upload, CheckCircle, AlertCircle, Lock,
   ArrowDownLeft, IndianRupee, Wallet, CalendarDays, Zap, X
 } from "lucide-react";
-import useBanking from "../../../hooks/owner/useBanking";
-import useOwnerDashboard from "../../../hooks/owner/useOwnerDashboard";
-import useOwnerWallet from "../../../hooks/owner/useOwnerWallet";
+import useBanking from "@hooks/owner/useBanking";
+import useOwnerDashboard from "@hooks/owner/useOwnerDashboard";
+import useOwnerWallet from "@hooks/owner/useOwnerWallet";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 

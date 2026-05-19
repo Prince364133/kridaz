@@ -66,7 +66,7 @@ const TermsOfService             = lazy(() => import("@features/legal").then(m =
 const DataDeletionInstructions   = lazy(() => import("@features/legal").then(m => ({ default: m.DataDeletionInstructions })));
 
 
-// ΓöÇΓöÇ Lazy: Owner / Partner Portal Pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ΓöÇΓöÇ Lazy: Owner / Venue Owner Portal Pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const PartnersGateway  = lazy(() => import("@features/business").then(m => ({ default: m.PartnersGateway })));
 
 const VenueOwnerSignUp = lazy(() => import("@features/auth").then(m => ({ default: m.VenueOwnerSignUp })));
@@ -200,9 +200,9 @@ const router = createBrowserRouter([
     ],
   },
 
-  // ΓöÇΓöÇ PARTNER PORTAL (High Priority) ΓöÇΓöÇ
+  // ΓöÇΓöÇ Venue Owner Portal (High Priority) ΓöÇΓöÇ
   {
-    path: "/partner",
+    path: "/venue-owner",
     element: (
       <ProtectedRoute requiredRole="venu_owners">
         <PartnerLayout />
@@ -410,14 +410,16 @@ const router = createBrowserRouter([
   },
 
   // ΓöÇΓöÇ LEGACY & REDIRECTS ΓöÇΓöÇ
-  { path: "/owner",          element: <Navigate to="/partner" replace /> },
+  { path: "/owner",          element: <Navigate to="/venue-owner" replace /> },
   { path: "/venue-owner",    element: <Navigate to="/business/venue" replace /> },
   { path: "/coach-landing",  element: <Navigate to="/business/coach" replace /> },
   { path: "/umpire-landing", element: <Navigate to="/business/official" replace /> },
-  { path: "/partners",       element: <S><PartnersGateway /></S> },
+  { path: "/venue-owners",       element: <S><PartnersGateway /></S> },
 
   // Catch-all (Global)
   { path: "*", element: <NotFound /> },
 ]);
 
 export default router;
+
+
