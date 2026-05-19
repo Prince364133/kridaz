@@ -6,7 +6,10 @@
 
 /* Hide scrollbar but keep scrollable */
 .no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar { -ms-overflow-style: none; }
+@supports (scrollbar-width: none) {
+  .no-scrollbar { scrollbar-width: none; }
+}
 
 /* ── Design Tokens ──────────────────────────────────────────────── */
 :root {
@@ -260,5 +263,9 @@ h1, h2, h3, .font-display {
 }
 .scrollbar-hide {
   -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+}
+@supports (scrollbar-width: none) {
+  .scrollbar-hide {
+    scrollbar-width: none;  /* Firefox */
+  }
 }

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -187,7 +187,7 @@ const MatchDetails = () => {
  {game.umpire ? (
  <div 
  className="flex items-center gap-4 p-4 bg-primary/5 rounded-2xl border border-primary/20 cursor-pointer hover:border-primary/50 transition-all group/u"
- onClick={() => navigate(`/professionals/${game.umpire._id}`)}
+ onClick={() => navigate(`/professionals/${game.umpire.id || game.umpire._id}`)}
  >
  <div className="w-14 h-14 rounded-full border-2 border-primary/20 overflow-hidden group-hover/u:border-primary/50 transition-colors">
  {game.umpire.profilePicture ? (

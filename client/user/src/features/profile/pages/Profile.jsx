@@ -16,9 +16,9 @@ import { login, logout, updateUser, followUser, unfollowUser } from "@redux/slic
 import useBookingHistory from "@hooks/useBookingHistory";
 import useWriteReview from "@hooks/useWriteReview";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
-import TurfBookingHistory from "@features/turf/components/TurfBookingHistory";
+import { TurfBookingHistory } from "@features/turf";
 import TurfBookingHistorySkeleton from "@components/ui/TurfBookingHistorySkeleton";
-import StoryViewer from "@components/StoryViewer";
+import { StoryViewer } from "@features/networking";
 import EditProfileModal from "@components/modals/EditProfileModal";
 
 const PRI = "#BFF367"; // New primary lime accent matching the gradient vibrant stop

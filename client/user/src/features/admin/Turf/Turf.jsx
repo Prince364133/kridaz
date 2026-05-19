@@ -3,7 +3,7 @@ import { MapPin, Clock, Star, Calendar, Check, X } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
-const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete }) => {
+const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete, onViewDetails }) => {
   const navigate = useNavigate();
 
   const getStatusConfig = (status) => {
@@ -29,7 +29,11 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete }) => {
           src={turf.image}
           alt={turf.name}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          onError={(e) => { e.target.onerror = null; e.target.src = "/banner-2.png"; }}
+          onError={(e) => {
+            const target = /** @type {any} */ (e.target);
+            target.onerror = null;
+            target.src = "/banner-2.png";
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
         

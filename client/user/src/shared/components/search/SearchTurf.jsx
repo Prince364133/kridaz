@@ -6,10 +6,20 @@ import { fetchStates, fetchCities } from "@utils/locationService";
  * SearchTurf — unified filter bar for the venue discovery page.
  * Provides Sport, State, and City dropdown filters.
  */
-const SearchTurf = ({ onSearch }) => {
+const SearchTurf = ({ onSearch, userLocation }) => {
  const [sport, setSport] = useState("");
  const [selectedState, setSelectedState] = useState("");
  const [selectedCity, setSelectedCity] = useState("");
+
+ // Prefill from userLocation when it becomes available
+ useEffect(() => {
+   if (userLocation?.state && !selectedState) {
+     setSelectedState(userLocation.state);
+   }
+   if (userLocation?.city && !selectedCity) {
+     setSelectedCity(userLocation.city);
+   }
+ }, [userLocation, selectedState, selectedCity]);
 
  // Location data from API
  const [states, setStates] = useState([]);

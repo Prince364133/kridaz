@@ -254,7 +254,7 @@ export default function FindProfessionals() {
               <div 
                 key={pro._id} 
                 className="group cursor-pointer"
-                onClick={() => navigate(`/professionals/${pro._id}`)}
+                onClick={() => navigate(`/professionals/${pro.id || pro._id}`)}
               >
                 <div className="relative bg-[#1a1a1a] rounded-xl p-1.5 border border-white/10 transition-all duration-500 hover:border-[#55DEE8]/30 hover:shadow-[0_15px_30px_rgba(0,0,0,0.5)]">
                   
@@ -329,7 +329,7 @@ export default function FindProfessionals() {
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/professionals/${pro._id}`);
+                          navigate(`/professionals/${pro.id || pro._id}`);
                         }}
                         className="px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all duration-300 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-sans hover:scale-105 shadow-lg active:scale-95 shrink-0"
                       >

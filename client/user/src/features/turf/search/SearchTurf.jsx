@@ -3,13 +3,23 @@ import { ChevronDown, MapPin, RotateCcw, Building2, Trophy, Loader2 } from "luci
 import { fetchStates, fetchCities } from "@utils/locationService";
 
 /**
- * SearchTurf GÇö unified filter bar for the venue discovery page.
+ * SearchTurf â€” unified filter bar for the venue discovery page.
  * Provides Sport, State, and City dropdown filters.
  */
-const SearchTurf = ({ onSearch }) => {
+const SearchTurf = ({ onSearch, userLocation }) => {
  const [sport, setSport] = useState("");
  const [selectedState, setSelectedState] = useState("");
  const [selectedCity, setSelectedCity] = useState("");
+
+ // Prefill from userLocation when it becomes available
+ useEffect(() => {
+   if (userLocation?.state && !selectedState) {
+     setSelectedState(userLocation.state);
+   }
+   if (userLocation?.city && !selectedCity) {
+     setSelectedCity(userLocation.city);
+   }
+ }, [userLocation, selectedState, selectedCity]);
 
  // Location data from API
  const [states, setStates] = useState([]);
@@ -135,7 +145,7 @@ const SearchTurf = ({ onSearch }) => {
  <button
  key={s}
  onClick={() => { setSport(s); setShowSportDropdown(false); }}
- className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${sport === s ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+ className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${sport === s ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85, 222, 232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
  >
  <span className={`text-[11px] font-bold uppercase tracking-wider ${sport === s ? "text-black" : ""}`}>{s}</span>
  </button>
@@ -176,7 +186,7 @@ const SearchTurf = ({ onSearch }) => {
  <button
  key={st}
  onClick={() => { setSelectedState(st); setShowStateDropdown(false); }}
- className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${selectedState === st ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+ className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${selectedState === st ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85, 222, 232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
  >
  <span className={`text-[11px] font-bold uppercase tracking-wider ${selectedState === st ? "text-black" : ""}`}>{st}</span>
  </button>
@@ -227,7 +237,7 @@ const SearchTurf = ({ onSearch }) => {
  <button
  key={ct}
  onClick={() => { setSelectedCity(ct); setShowCityDropdown(false); }}
- className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${selectedCity === ct ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+ className={`flex items-center px-4 py-2.5 rounded-xl transition-all text-left ${selectedCity === ct ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85, 222, 232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
  >
  <span className={`text-[11px] font-bold uppercase tracking-wider ${selectedCity === ct ? "text-black" : ""}`}>{ct}</span>
  </button>

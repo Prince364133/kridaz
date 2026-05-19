@@ -14,7 +14,7 @@ import {
   useRequestToJoinMutation,
   useGetMyTeamsQuery,
   useRequestOpponentMutation
-} from '../../redux/api/teamApi';
+} from '@redux/api/teamApi';
 import toast from 'react-hot-toast';
 import useLoginOnDemand from '@hooks/useLoginOnDemand';
 

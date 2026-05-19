@@ -4,11 +4,11 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import useBookingHistory from "../../hooks/useBookingHistory";
-import useWriteReview from "../../hooks/useWriteReview";
-import TurfBookingHistorySkeleton from "../../components/ui/TurfBookingHistorySkeleton";
-import WriteReview from "../../components/reviews/WriteReview";
-import RaiseDisputeModal from "../../components/dispute/RaiseDisputeModal";
+import useBookingHistory from "../hooks/useBookingHistory";
+import useWriteReview from "@hooks/useWriteReview";
+import TurfBookingHistorySkeleton from "@components/ui/TurfBookingHistorySkeleton";
+import WriteReview from "@components/reviews/WriteReview";
+import RaiseDisputeModal from "@components/dispute/RaiseDisputeModal";
 
 // ── Design tokens (exact match to OwnerDashboard) ──────────────────────────
 const BG = "#000000";

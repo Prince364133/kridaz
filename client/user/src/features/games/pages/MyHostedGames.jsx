@@ -213,7 +213,7 @@ const MyHostedGames = () => {
                   {/* Team A Slots */}
                   <div className="space-y-3">
                     <h4 className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-2 px-2">TEAM A SLOTS</h4>
-                    {game.teams?.teamA?.map((slot, index) => (
+                    {game.teams?.teamA?.slots?.map((slot, index) => (
                       <div key={`A-${index}`} className="flex items-center justify-between p-3 bg-neutral-900 rounded-2xl border border-neutral-800/50">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center overflow-hidden">
@@ -258,7 +258,7 @@ const MyHostedGames = () => {
                   {/* Team B Slots */}
                   <div className="space-y-3">
                     <h4 className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-2 px-2">TEAM B SLOTS</h4>
-                    {game.teams?.teamB?.map((slot, index) => (
+                    {game.teams?.teamB?.slots?.map((slot, index) => (
                       <div key={`B-${index}`} className="flex items-center justify-between p-3 bg-neutral-900 rounded-2xl border border-neutral-800/50">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center overflow-hidden">

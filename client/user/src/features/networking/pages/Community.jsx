@@ -39,7 +39,7 @@ const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
 const Community = () => {
   // @ts-ignore
   const { user, role, followingIds } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
+  const dispatch = /** @type {any} */ (useDispatch());
   const { gateInteraction } = useLoginOnDemand();
   const navigate = useNavigate();
   const isAdmin = role === 'admin' || role === 'BMSP_ADMIN';

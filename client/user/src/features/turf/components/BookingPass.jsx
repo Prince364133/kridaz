@@ -16,7 +16,7 @@ import {
   User as UserIcon,
   ExternalLink
 } from "lucide-react";
-import useBookingPass from "../../hooks/useBookingPass";
+import useBookingPass from "../hooks/useBookingPass";
 import { motion } from "framer-motion";
 
 const BookingPass = () => {

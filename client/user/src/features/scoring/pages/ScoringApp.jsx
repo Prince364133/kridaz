@@ -125,7 +125,7 @@ const ScoringApp = () => {
     const hostedGame = matchData?.hostedGameId;
     if (hostedGame?.isLive && !liveEnabled) {
       setLiveEnabled(true);
-      const appBase = import.meta.env.VITE_APP_URL || window.location.origin;
+      const appBase = import.meta['env']?.VITE_APP_URL || window.location.origin;
       setLiveUrls({
         obsOverlay: `${appBase}/live-overlay/${matchId}?token=${hostedGame.overlayToken || ''}`,
         publicScoreboard: `${appBase}/live-score/${matchId}`,
@@ -575,7 +575,7 @@ const ScoringApp = () => {
                       />
                       <button 
                         onClick={async () => {
-                          const vidId = document.getElementById('ytVideoId').value;
+                          const vidId = document.getElementById('ytVideoId')?.['value'] || '';
                           try {
                             const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/${matchId}/stream-config`, {
                               method: 'POST',

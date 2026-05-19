@@ -17,6 +17,7 @@ const fileMap = {
     "client/user/src/user/pages/Home.jsx": "client/user/src/pages/Home.jsx",
     "client/user/src/user/pages/Profile.jsx": "client/user/src/features/profile/pages/Profile.jsx",
     "client/user/src/user/pages/JoinGames.jsx": "client/user/src/features/games/pages/JoinGames.jsx",
+    "client/user/src/user/pages/HostGame.jsx": "client/user/src/features/games/pages/HostGame.jsx",
 
     // Turf Feature
     "client/user/src/user/components/turf/TurfDetails.jsx": "client/user/src/features/turf/components/TurfDetails.jsx",

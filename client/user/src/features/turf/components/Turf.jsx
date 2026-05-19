@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import TurfCard from "./TurfCard.jsx";
-import TurfCardSkeleton from "../ui/TurfCardSkeleton.jsx";
-import useTurfData from "../../hooks/useTurfData.jsx";
+import TurfCardSkeleton from "@components/ui/TurfCardSkeleton.jsx";
+import useTurfData from "../hooks/useTurfData.jsx";
 import SearchTurf from "../search/SearchTurf.jsx";
 import { Trophy, MapPin, Loader2 } from "lucide-react";
 
