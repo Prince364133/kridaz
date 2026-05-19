@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import useSignUpForm from "../hooks/useSignUpForm";
-import GoogleAuthButton from "@user/components/auth/GoogleAuthButton";
+import GoogleAuthButton from "../components/GoogleAuthButton";
 import Turnstile from "react-turnstile";
 import OnboardingModal from "@components/modals/OnboardingModal";
 import { 
