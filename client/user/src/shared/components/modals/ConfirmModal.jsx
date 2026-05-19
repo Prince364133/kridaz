@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { X, AlertTriangle } from 'lucide-react';
 
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = "Confirm", cancelText = "Cancel", isDestructive = true }) => {
@@ -11,7 +11,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-5 flex items-start gap-4">
-          <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${isDestructive ? 'bg-red-500/10 text-red-500' : 'bg-[#84CC16]/10 text-[#84CC16]'}`}>
+          <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${isDestructive ? 'bg-red-500/10 text-red-500' : 'bg-[#55DEE8]/10 text-[#55DEE8]'}`}>
             <AlertTriangle size={20} />
           </div>
           <div className="flex-1 pt-1">
@@ -35,7 +35,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
             className={`flex-1 py-3 text-sm font-bold transition-colors ${
               isDestructive 
                 ? 'text-red-500 hover:bg-red-500/10 hover:text-red-400' 
-                : 'text-[#84CC16] hover:bg-[#84CC16]/10 hover:text-[#a3f01b]'
+                : 'text-[#55DEE8] hover:bg-[#55DEE8]/10 hover:text-[#a3f01b]'
             }`}
           >
             {confirmText}

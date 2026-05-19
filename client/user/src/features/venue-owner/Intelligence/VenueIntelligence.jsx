@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Area, AreaChart
@@ -56,7 +56,7 @@ export default function VenueIntelligence() {
   // 3. Sport & Venue Distribution
   const revenueByCategory = dashboardData?.revenueByCategory || [];
   const revenueByVenue = dashboardData?.revenueByVenue || [];
-  const colors = ["bg-[#CCFF00]", "bg-blue-500", "bg-orange-500", "bg-red-500", "bg-purple-500"];
+  const colors = ["bg-[#55DEE8]", "bg-blue-500", "bg-orange-500", "bg-red-500", "bg-purple-500"];
   
   const sportDist = revenueByCategory.length > 0 
     ? revenueByCategory.map((cat, i) => ({
@@ -103,7 +103,7 @@ export default function VenueIntelligence() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
         <div>
           <div className="flex items-center gap-3">
-             <Activity className="text-[#CCFF00]" size={32} />
+             <Activity className="text-[#55DEE8]" size={32} />
              <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] tracking-tight uppercase">Venue Intelligence</h1>
           </div>
           <p className="text-[#878C9F] font-inter text-[20px] mt-1 ml-11">Deep dive into your facility's operational and financial metrics.</p>
@@ -112,32 +112,32 @@ export default function VenueIntelligence() {
 
       {/* Top Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#CCFF00] transition-colors border border-[#CCFF00]/20">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+          <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#55DEE8] transition-colors border border-[#55DEE8]/20">
              <TrendingUp size={20} />
           </div>
           <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Gross Revenue</p>
-          <h3 className="text-2xl font-semibold text-white tracking-tight">₹{(grossRevenue).toLocaleString()}</h3>
+          <h3 className="text-2xl font-semibold text-white tracking-tight">Γé╣{(grossRevenue).toLocaleString()}</h3>
         </div>
 
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#CCFF00] transition-colors border border-[#CCFF00]/20">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+          <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#55DEE8] transition-colors border border-[#55DEE8]/20">
              <Zap size={20} />
           </div>
           <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Total Bookings</p>
           <h3 className="text-2xl font-semibold text-white tracking-tight">{totalBookings}</h3>
         </div>
 
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#CCFF00] transition-colors border border-[#CCFF00]/20">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+          <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#55DEE8] transition-colors border border-[#55DEE8]/20">
              <Target size={20} />
           </div>
           <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Avg. Session Time</p>
           <h3 className="text-2xl font-semibold text-white tracking-tight">{avgSessionTime} min</h3>
         </div>
 
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#CCFF00] transition-colors border border-[#CCFF00]/20">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+          <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#55DEE8] transition-colors border border-[#55DEE8]/20">
              <Percent size={20} />
           </div>
           <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Conversion Rate</p>
@@ -149,7 +149,7 @@ export default function VenueIntelligence() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mt-8">
         
         {/* Revenue & Demand Forecasting */}
-        <div className="lg:col-span-2 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
+        <div className="lg:col-span-2 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
            <div className="flex justify-between items-start mb-6">
               <div>
                  <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Revenue & Demand Forecasting</h2>
@@ -163,8 +163,8 @@ export default function VenueIntelligence() {
                  <AreaChart data={demandData}>
                    <defs>
                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                       <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.3}/>
-                       <stop offset="95%" stopColor="#CCFF00" stopOpacity={0}/>
+                       <stop offset="5%" stopColor="#55DEE8" stopOpacity={0.3}/>
+                       <stop offset="95%" stopColor="#55DEE8" stopOpacity={0}/>
                      </linearGradient>
                    </defs>
                    <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" vertical={false} />
@@ -172,9 +172,9 @@ export default function VenueIntelligence() {
                    <YAxis yAxisId="left" stroke="#878C9F" fontSize={10} tickLine={false} axisLine={false} />
                    <RechartsTooltip 
                      contentStyle={{ backgroundColor: '#111', borderColor: '#2D2D2D', borderRadius: '8px' }}
-                     itemStyle={{ color: '#CCFF00' }}
+                     itemStyle={{ color: '#55DEE8' }}
                    />
-                   <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#CCFF00" strokeWidth={3} fill="url(#colorRevenue)" />
+                   <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#55DEE8" strokeWidth={3} fill="url(#colorRevenue)" />
                  </AreaChart>
                </ResponsiveContainer>
              ) : (
@@ -187,7 +187,7 @@ export default function VenueIntelligence() {
         </div>
 
         {/* Venue DNA */}
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col items-center relative shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col items-center relative shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
            <h2 className="text-xl font-bold font-['Open_Sans'] text-white text-center uppercase tracking-tight">Venue DNA</h2>
            <p className="text-[#878C9F] font-inter text-[20px] text-center mb-4 mt-1">Strategic balance across 5 vectors</p>
            
@@ -197,10 +197,10 @@ export default function VenueIntelligence() {
                  <PolarGrid stroke="#2D2D2D" />
                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#878C9F', fontSize: 10 }} />
                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                 <Radar name="Venue" dataKey="A" stroke="#CCFF00" fill="#CCFF00" fillOpacity={0.4} strokeWidth={2} />
+                 <Radar name="Venue" dataKey="A" stroke="#55DEE8" fill="#55DEE8" fillOpacity={0.4} strokeWidth={2} />
                  <RechartsTooltip 
                    contentStyle={{ backgroundColor: '#111', borderColor: '#2D2D2D', borderRadius: '8px' }}
-                   itemStyle={{ color: '#CCFF00' }}
+                   itemStyle={{ color: '#55DEE8' }}
                  />
                </RadarChart>
              </ResponsiveContainer>
@@ -222,7 +222,7 @@ export default function VenueIntelligence() {
       <div className="grid grid-cols-1 gap-6 lg:gap-8 mt-8">
         
         {/* Venue Comparison & Sport Distribution */}
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative shadow-[var(--shadow-2)] hover:border-[#CCFF00]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
            <div className="flex justify-between items-center mb-1">
               <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Revenue Comparison</h2>
            </div>
@@ -237,7 +237,7 @@ export default function VenueIntelligence() {
                     <div key={venue.name} className="space-y-1">
                       <div className="flex justify-between text-[11px] font-bold text-white">
                         <span>{venue.name}</span>
-                        <span className="text-[#CCFF00]">Rs {venue.value.toLocaleString()}</span>
+                        <span className="text-[#55DEE8]">Rs {venue.value.toLocaleString()}</span>
                       </div>
                       <div className="w-full bg-[#1A1A1A] rounded-[4px] h-6 overflow-hidden relative">
                         <div 

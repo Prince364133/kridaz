@@ -6,8 +6,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#22c55e",
-        "primary-focus": "#16a34a",
+        primary: "#55DEE8",
+        "primary-focus": "#00b4c2",
       },
       backgroundImage: {
         banner: "url('/r.png')",

@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
 /**
- * ExtraRunsModal — P1.4 & P1.5
+ * ExtraRunsModal ΓÇö P1.4 & P1.5
  *
  * Shown when Wide, No-Ball, Bye, or Leg Bye is pressed.
  * Lets the umpire specify how many runs were scored off the delivery.
  */
 
-const THEME_COLOR = '#00C187';
+const THEME_COLOR = '#55DEE8';
 
 const EXTRA_META = {
   WIDE:    { label: 'Wide',     color: THEME_COLOR, note: '1 wide penalty already included' },
   NO_BALL: { label: 'No-Ball',  color: THEME_COLOR, note: '1 no-ball penalty already included' },
-  BYE:     { label: 'Bye',      color: THEME_COLOR, note: 'Runs scored — not credited to batsman' },
-  LEG_BYE: { label: 'Leg Bye',  color: THEME_COLOR, note: 'Runs scored — not credited to batsman' },
+  BYE:     { label: 'Bye',      color: THEME_COLOR, note: 'Runs scored ΓÇö not credited to batsman' },
+  LEG_BYE: { label: 'Leg Bye',  color: THEME_COLOR, note: 'Runs scored ΓÇö not credited to batsman' },
 };
 
 const QUICK_RUNS = [0, 1, 2, 3, 4];
@@ -61,16 +61,16 @@ const ExtraRunsModal = ({ extraType = 'WIDE', onConfirm, onClose }) => {
 
           {/* Quick-select buttons */}
           <div className="px-6 py-6 space-y-6">
-            <div className="flex gap-2.5 justify-between">
+            <div className="flex gap-3 justify-between">
               {QUICK_RUNS.map((r) => (
                 <button
                   key={r}
                   onClick={() => setRuns(r)}
-                  style={runs === r ? { background: THEME_COLOR, color: '#000', boxShadow: `0 0 20px ${THEME_COLOR}33` } : {}}
-                  className={`flex-1 h-14 rounded-2xl text-xl font-black transition-all ${
+                  style={runs === r ? { background: THEME_COLOR, color: '#000', boxShadow: `0 0 20px ${THEME_COLOR}4d` } : {}}
+                  className={`flex-1 h-14 rounded-xl text-xl font-black transition-all ${
                     runs === r
                       ? 'scale-105'
-                      : 'bg-neutral-900/50 text-neutral-400 border border-white/5 hover:border-white/10'
+                      : 'bg-white/5 text-neutral-400 border border-white/5 hover:border-white/10'
                   }`}
                 >
                   {r}
@@ -100,14 +100,22 @@ const ExtraRunsModal = ({ extraType = 'WIDE', onConfirm, onClose }) => {
               <span className="font-black text-lg" style={{ color: THEME_COLOR }}>{totalDisplay}</span>
             </div>
 
-            {/* Confirm */}
-            <button
-              onClick={() => onConfirm(runs)}
-              className="w-full py-5 rounded-2xl font-black text-black text-[13px] uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl"
-              style={{ backgroundColor: THEME_COLOR, boxShadow: `0 10px 30px ${THEME_COLOR}33` }}
-            >
-              Confirm {meta.label}
-            </button>
+            {/* Actions */}
+            <div className="flex gap-4">
+              <button
+                onClick={onClose}
+                className="flex-1 py-5 rounded-xl font-black text-white text-[11px] uppercase tracking-[0.2em] transition-all bg-white/5 border border-white/5 hover:bg-white/10 active:scale-95"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => onConfirm(runs)}
+                className="flex-[2] py-5 rounded-xl font-black text-black text-[11px] uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl"
+                style={{ backgroundColor: THEME_COLOR, boxShadow: `0 10px 30px ${THEME_COLOR}33` }}
+              >
+                Confirm {meta.label}
+              </button>
+            </div>
           </div>
         </motion.div>
       </div>

@@ -218,19 +218,19 @@ const JoinGames = () => {
  return (
  <div className="min-h-screen bg-[#000000] text-white p-6 lg:p-10 pb-24 relative overflow-hidden font-inter">
  {/* Dynamic Background Glow */}
- <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#CCFF00]/5 blur-[150px] pointer-events-none" />
- <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#CCFF00]/5 blur-[150px] pointer-events-none" />
+ <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#55DEE8]/5 blur-[150px] pointer-events-none" />
+ <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#55DEE8]/5 blur-[150px] pointer-events-none" />
 
  <div className="max-w-7xl mx-auto relative z-10">
  {/* Header Section */}
  <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-10 border-b border-[#2D2D2D] pb-10 mb-12">
  <div className="relative">
- <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#CCFF00] rounded-full shadow-[0_0_25px_rgba(204,255,0,0.5)] hidden md:block"></div>
+ <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#55DEE8] rounded-full shadow-[0_0_25px_rgba(204,255,0,0.5)] hidden md:block"></div>
  <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none mb-4 font-open-sans">
- Join <span className="text-[#CCFF00]">Games</span>
+ Join <span className="text-[#55DEE8]">Games</span>
  </h1>
  <p className="text-sm md:text-xl font-medium text-[#999999] tracking-tight max-w-xl">
- Competitive Matchmaking â€¢ Discover & participate in matches hosted by the elite sports community.
+ Competitive Matchmaking GÇó Discover & participate in matches hosted by the elite sports community.
  </p>
  </div>
 
@@ -243,7 +243,7 @@ const JoinGames = () => {
  </button>
  <button 
  onClick={() => gateInteraction(() => navigate('/host-game'))}
- className="px-6 py-3.5 bg-[#CCFF00] text-black font-black text-[11px] uppercase tracking-widest rounded-[12px] flex items-center gap-2.5 hover:scale-105 transition-all duration-500 shadow-[0_0_30px_rgba(204,255,0,0.2)]"
+ className="px-6 py-3.5 bg-[#55DEE8] text-black font-black text-[11px] uppercase tracking-widest rounded-[12px] flex items-center gap-2.5 hover:scale-105 transition-all duration-500 shadow-[0_0_30px_rgba(204,255,0,0.2)]"
  >
  <Trophy size={16} /> Host Match
  </button>
@@ -256,9 +256,9 @@ const JoinGames = () => {
  {/* Search */}
  <div className="md:col-span-4 flex gap-2">
  <div className="relative flex-1 group">
- <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00] transition-colors" size={20} />
+ <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors" size={20} />
  <input 
- className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#CCFF00]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]" 
+ className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#55DEE8]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]" 
  placeholder="Search by sport, venue..." 
  value={search}
  onChange={handleSearch}
@@ -267,7 +267,7 @@ const JoinGames = () => {
  </div>
  <button 
  onClick={() => fetchGames(selectedCity, selectedState, sportFilter)}
- className="px-6 bg-[#CCFF00] text-black font-black text-[11px] uppercase tracking-widest rounded-[12px] hover:scale-105 transition-all shadow-[0_0_20px_rgba(204,255,0,0.2)]"
+ className="px-6 bg-[#55DEE8] text-black font-black text-[11px] uppercase tracking-widest rounded-[12px] hover:scale-105 transition-all shadow-[0_0_20px_rgba(204,255,0,0.2)]"
  >
  Search
  </button>
@@ -288,9 +288,9 @@ const JoinGames = () => {
 
  {/* Sport Filter */}
  <div className="md:col-span-2 relative group">
- <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00] transition-colors" size={18} />
+ <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors" size={18} />
  <select 
- className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 pl-12 pr-4 appearance-none text-sm text-white focus:outline-none focus:border-[#CCFF00]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]"
+ className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 pl-12 pr-4 appearance-none text-sm text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]"
  value={sportFilter}
  onChange={(e) => {
  setSportFilter(e.target.value);
@@ -309,9 +309,9 @@ const JoinGames = () => {
 
  {/* State Dropdown */}
  <div className="md:col-span-3 relative group">
- <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00] transition-colors pointer-events-none" size={16} />
+ <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors pointer-events-none" size={16} />
  <select
- className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 pl-10 pr-4 appearance-none text-sm text-white focus:outline-none focus:border-[#CCFF00]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] disabled:opacity-40"
+ className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 pl-10 pr-4 appearance-none text-sm text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] disabled:opacity-40"
  value={selectedState}
  onChange={(e) => handleStateChange(e.target.value)}
  disabled={loadingStates}
@@ -326,7 +326,7 @@ const JoinGames = () => {
  {/* City Dropdown */}
  <div className="md:col-span-2 relative group">
  <select
- className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 px-4 appearance-none text-sm text-white focus:outline-none focus:border-[#CCFF00]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] disabled:opacity-40"
+ className="w-full bg-[#0d0d0d] border border-white/10 rounded-[12px] py-4 px-4 appearance-none text-sm text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] disabled:opacity-40"
  value={selectedCity}
  onChange={(e) => handleCityChange(e.target.value)}
  disabled={!selectedState || loadingCities}
@@ -343,15 +343,15 @@ const JoinGames = () => {
  {selectedState ? (
  <button
  onClick={handleClearLocation}
- className="w-full flex items-center justify-center gap-1.5 py-4 bg-[#CCFF00]/10 border border-[#CCFF00]/20 hover:bg-red-500/10 hover:border-red-500/30 text-[#CCFF00] hover:text-red-400 rounded-[12px] text-[10px] font-black uppercase tracking-widest transition-all"
+ className="w-full flex items-center justify-center gap-1.5 py-4 bg-[#55DEE8]/10 border border-[#55DEE8]/20 hover:bg-red-500/10 hover:border-red-500/30 text-[#55DEE8] hover:text-red-400 rounded-[12px] text-[10px] font-black uppercase tracking-widest transition-all"
  title="Clear location filter"
  >
  <X size={14} />
  </button>
  ) : (
- <div className="w-full flex items-center justify-center gap-1 py-4 bg-[#CCFF00]/5 border border-[#CCFF00]/10 rounded-[12px]">
- <MapPin size={14} className="text-[#CCFF00]" />
- <span className="text-[9px] font-black text-[#CCFF00]/50 uppercase tracking-widest truncate">
+ <div className="w-full flex items-center justify-center gap-1 py-4 bg-[#55DEE8]/5 border border-[#55DEE8]/10 rounded-[12px]">
+ <MapPin size={14} className="text-[#55DEE8]" />
+ <span className="text-[9px] font-black text-[#55DEE8]/50 uppercase tracking-widest truncate">
  {userLocation.city || 'GLOBAL'}
  </span>
  </div>
@@ -367,10 +367,10 @@ const JoinGames = () => {
  ))
  ) : filteredGames.length === 0 ? (
  <div className="col-span-full py-32 text-center bg-[#0d0d0d] rounded-[32px] border border-[#2D2D2D] relative overflow-hidden">
- <div className="absolute inset-0 bg-[#CCFF00]/5 blur-[100px]" />
+ <div className="absolute inset-0 bg-[#55DEE8]/5 blur-[100px]" />
  <div className="relative z-10 space-y-6">
  <div className="w-24 h-24 bg-white/5 border border-white/5 rounded-full flex items-center justify-center mx-auto shadow-2xl">
- <Info className="text-[#CCFF00]/40" size={48} />
+ <Info className="text-[#55DEE8]/40" size={48} />
  </div>
  <div className="space-y-2">
  <h3 className="text-3xl font-black text-white uppercase tracking-tighter">No Active Matches</h3>
@@ -380,7 +380,7 @@ const JoinGames = () => {
  </div>
  <button 
  onClick={() => navigate('/host-game')}
- className="px-10 py-4 bg-[#CCFF00] text-black font-black text-xs uppercase tracking-[0.2em] rounded-full shadow-[0_0_20px_rgba(204,255,0,0.2)] hover:scale-105 transition-all"
+ className="px-10 py-4 bg-[#55DEE8] text-black font-black text-xs uppercase tracking-[0.2em] rounded-full shadow-[0_0_20px_rgba(204,255,0,0.2)] hover:scale-105 transition-all"
  >
  Create Match
  </button>
@@ -394,13 +394,13 @@ const JoinGames = () => {
  animate={{ opacity: 1, y: 0 }}
  whileHover={{ y: -6, scale: 1.01 }}
  transition={{ duration: 0.3 }}
- className="group relative rounded-[32px] overflow-hidden cursor-pointer bg-[#0A0A0A] border border-white/5 hover:border-[#CCFF00]/30 transition-all duration-500"
+ className="group relative rounded-[32px] overflow-hidden cursor-pointer bg-[#0A0A0A] border border-white/5 hover:border-[#55DEE8]/30 transition-all duration-500"
  style={{ minHeight: '480px' }}
  onClick={() => setSelectedGame(game)}
  >
- {/* â”€â”€ Background: Split Team Images (Top Half) â”€â”€ */}
+ {/* GöÇGöÇ Background: Split Team Images (Top Half) GöÇGöÇ */}
  <div className="absolute inset-x-0 top-0 h-[48%] z-0 overflow-hidden">
- {/* Team A â€” Left Half */}
+ {/* Team A GÇö Left Half */}
  <div className="absolute inset-y-0 left-0 w-1/2 overflow-hidden">
  <img
  src={game.teams?.teamA?.image || "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&q=80"}
@@ -408,7 +408,7 @@ const JoinGames = () => {
  className="w-full h-full object-cover object-right scale-110 group-hover:scale-125 transition-transform duration-700"
  />
  </div>
- {/* Team B â€” Right Half */}
+ {/* Team B GÇö Right Half */}
  <div className="absolute inset-y-0 right-0 w-1/2 overflow-hidden">
  <img
  src={game.teams?.teamB?.image || "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80"}
@@ -417,7 +417,7 @@ const JoinGames = () => {
  />
  </div>
 
- {/* Center vignette â€” vintage blend where images meet */}
+ {/* Center vignette GÇö vintage blend where images meet */}
  <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-28 bg-gradient-to-r from-transparent via-black to-transparent opacity-90" />
  {/* Edge vignettes (left + right) */}
  <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-black/70 to-transparent" />
@@ -430,15 +430,15 @@ const JoinGames = () => {
  </div>
 
 
- {/* â”€â”€ Content â”€â”€ */}
+ {/* GöÇGöÇ Content GöÇGöÇ */}
  <div className="relative z-10 flex flex-col h-full p-5" style={{ minHeight: '480px' }}>
 
  {/* Top Row: Sport badge + Coins */}
  <div className="flex items-start justify-between mb-auto">
  <div className="flex flex-col gap-1.5">
  <div className="flex gap-2">
- <div className="px-4 py-1.5 bg-[#CCFF00]/20 border border-[#CCFF00]/40 rounded-full backdrop-blur-sm inline-flex">
- <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">{game.gameType}</span>
+ <div className="px-4 py-1.5 bg-[#55DEE8]/20 border border-[#55DEE8]/40 rounded-full backdrop-blur-sm inline-flex">
+ <span className="text-[10px] font-black text-[#55DEE8] uppercase tracking-widest">{game.gameType}</span>
  </div>
  {game.gameMode === 'QUICK' && (
  <div className="px-4 py-1.5 bg-blue-500/20 border border-blue-500/40 rounded-full backdrop-blur-sm inline-flex">
@@ -474,10 +474,10 @@ const JoinGames = () => {
  toast.success('Link copied to clipboard!');
  }
  }}
- className="p-1.5 bg-black/50 border border-white/15 hover:border-[#CCFF00]/40 rounded-full flex items-center justify-center transition-all"
+ className="p-1.5 bg-black/50 border border-white/15 hover:border-[#55DEE8]/40 rounded-full flex items-center justify-center transition-all"
  title="Share Match"
  >
- <Share2 size={10} className="text-[#CCFF00]/70" />
+ <Share2 size={10} className="text-[#55DEE8]/70" />
  </button>
  </div>
  </div>
@@ -489,7 +489,7 @@ const JoinGames = () => {
  </div>
  )}
  <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10">
- <Coins size={13} className="text-[#CCFF00]" />
+ <Coins size={13} className="text-[#55DEE8]" />
  <span className="text-sm font-black text-white">{game.perPlayerCharge || 'FREE'}</span>
  </div>
  </div>
@@ -499,10 +499,10 @@ const JoinGames = () => {
  <div className="py-6">
  {/* Divider label */}
  <div className="flex items-center gap-3 mb-3">
- <div className="h-px flex-1 bg-[#CCFF00]/30" />
+ <div className="h-px flex-1 bg-[#55DEE8]/30" />
  <div className="flex items-center gap-2">
- <span className="text-[9px] font-black text-[#CCFF00]/70 uppercase tracking-[0.4em] flex items-center gap-1">
- <Zap size={10} className="text-[#CCFF00]" /> {game.gameMode === 'QUICK' ? 'Casual Pool' : 'Rivalry Ledger'}
+ <span className="text-[9px] font-black text-[#55DEE8]/70 uppercase tracking-[0.4em] flex items-center gap-1">
+ <Zap size={10} className="text-[#55DEE8]" /> {game.gameMode === 'QUICK' ? 'Casual Pool' : 'Rivalry Ledger'}
  </span>
  {game.isLive && (
  <div className="px-2 py-0.5 bg-red-600 rounded-md flex items-center gap-1.5 animate-pulse">
@@ -511,19 +511,17 @@ const JoinGames = () => {
  </div>
  )}
  </div>
- <div className="h-px flex-1 bg-[#CCFF00]/30" />
+ <div className="h-px flex-1 bg-[#55DEE8]/30" />
  </div>
 
  {/* Team Names or Game Title */}
  <h3 className="flex items-center flex-wrap gap-x-3 font-black uppercase leading-none tracking-tighter text-white font-open-sans drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" style={{ fontSize: 'clamp(1.1rem, 3.5vw, 1.8rem)' }}>
  {game.gameMode === 'QUICK' ? (
- <>Casual <span className="text-[#CCFF00]">{game.gameType}</span> Match</>
+ <>Casual <span className="text-[#55DEE8]">{game.gameType}</span> Match</>
  ) : (
  <div className="flex items-baseline gap-2 flex-wrap">
  <span>{game.teams?.teamA?.name}</span>
-                      <span className="text-[#CCFF00] text-[10px] md:text-sm flex items-center">
-                        V<span className="w-[1px] h-3 bg-[#CCFF00] ml-[1px] mr-[3px] opacity-60" />S
-                      </span>
+ <span className="text-[#55DEE8] text-sm">VS</span>
  <span>{game.teams?.teamB?.name}</span>
  </div>
  )}
@@ -536,26 +534,26 @@ const JoinGames = () => {
 
  {/* Date + Time boxes */}
  {/* Consolidated Date & Time */}
- <div className="bg-black/50 border border-[#CCFF00]/20 rounded-[12px] p-3 flex items-center justify-between">
+ <div className="bg-black/50 border border-[#55DEE8]/20 rounded-[12px] p-3 flex items-center justify-between">
  <div className="flex items-center gap-3">
- <div className="w-8 h-8 rounded-lg bg-[#CCFF00]/10 border border-[#CCFF00]/20 flex items-center justify-center">
- <Calendar size={14} className="text-[#CCFF00]" />
+ <div className="w-8 h-8 rounded-lg bg-[#55DEE8]/10 border border-[#55DEE8]/20 flex items-center justify-center">
+ <Calendar size={14} className="text-[#55DEE8]" />
  </div>
  <div>
- <p className="text-[7px] font-black text-[#CCFF00]/60 uppercase tracking-widest mb-0.5">Start Date & Time</p>
+ <p className="text-[7px] font-black text-[#55DEE8]/60 uppercase tracking-widest mb-0.5">Start Date & Time</p>
  <p className="text-[13px] font-black text-white">
- {new Date(game.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} â€¢ {game.time}
+ {new Date(game.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} GÇó {game.time}
  </p>
  </div>
  </div>
- <Clock size={14} className="text-[#CCFF00]/40" />
+ <Clock size={14} className="text-[#55DEE8]/40" />
  </div>
 
  {/* Slots */}
  <div className="flex items-center justify-between pt-1 border-t border-white/5">
  <div className="flex items-center gap-2.5">
- <div className="w-8 h-8 rounded-full bg-[#CCFF00]/10 border border-[#CCFF00]/20 flex items-center justify-center">
- <Users size={14} className="text-[#CCFF00]" />
+ <div className="w-8 h-8 rounded-full bg-[#55DEE8]/10 border border-[#55DEE8]/20 flex items-center justify-center">
+ <Users size={14} className="text-[#55DEE8]" />
  </div>
  <div>
  <p className="text-[11px] font-black text-white leading-none">
@@ -564,13 +562,13 @@ const JoinGames = () => {
  : (game.teams?.teamA?.slots?.filter(s => s.status === 'OPEN').length || 0) + (game.teams?.teamB?.slots?.filter(s => s.status === 'OPEN').length || 0)
  } OPEN
  </p>
- <p className="text-[7px] font-bold text-[#CCFF00]/50 uppercase tracking-widest mt-0.5">Available Capacity</p>
+ <p className="text-[7px] font-bold text-[#55DEE8]/50 uppercase tracking-widest mt-0.5">Available Capacity</p>
  </div>
  </div>
  <div className="flex -space-x-1.5">
  {[...Array(4)].map((_, i) => (
- <div key={i} className="w-6 h-6 rounded-full border border-[#0d0d0d] bg-[#CCFF00]/10 flex items-center justify-center shadow-lg">
- <Users size={10} className="text-[#CCFF00]/50" />
+ <div key={i} className="w-6 h-6 rounded-full border border-[#0d0d0d] bg-[#55DEE8]/10 flex items-center justify-center shadow-lg">
+ <Users size={10} className="text-[#55DEE8]/50" />
  </div>
  ))}
  </div>
@@ -579,12 +577,12 @@ const JoinGames = () => {
  {/* Venue & ID Row */}
  <div className="flex items-center justify-between gap-3 pt-1 border-t border-white/5">
  <div className="flex items-center gap-2 text-white/50 text-[10px] font-bold uppercase tracking-tight truncate max-w-[150px]">
- <MapPin size={10} className="text-[#CCFF00] shrink-0" />
+ <MapPin size={10} className="text-[#55DEE8] shrink-0" />
  <span className="truncate">{game.ground?.name || 'Self-Arranged Venue'}</span>
  </div>
  <button
  onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(game.shortId || game._id); toast.success('Game ID copied!'); }}
- className="text-[8px] font-black text-white/30 hover:text-[#CCFF00] uppercase tracking-widest transition-colors flex items-center gap-1"
+ className="text-[8px] font-black text-white/30 hover:text-[#55DEE8] uppercase tracking-widest transition-colors flex items-center gap-1"
  >
  <Info size={8} /> ID: {game.shortId || game._id.slice(-6).toUpperCase()}
  </button>
@@ -593,11 +591,11 @@ const JoinGames = () => {
  {/* Host + Join */}
  <div className="flex items-center justify-between gap-3 pt-1 border-t border-white/5">
  <div className="flex items-center gap-2.5">
- <div className="w-9 h-9 rounded-full border border-[#CCFF00]/20 bg-[#1A1A1A] flex items-center justify-center overflow-hidden shrink-0">
+ <div className="w-9 h-9 rounded-full border border-[#55DEE8]/20 bg-[#1A1A1A] flex items-center justify-center overflow-hidden shrink-0">
  {game.host?.profilePicture ? (
  <img src={game.host.profilePicture} alt="" className="w-full h-full object-cover" />
  ) : (
- <span className="text-[#CCFF00] font-black text-[11px]">
+ <span className="text-[#55DEE8] font-black text-[11px]">
  {game.host?.name ? game.host.name[0].toUpperCase() : '?'}
  </span>
  )}
@@ -622,7 +620,7 @@ const JoinGames = () => {
  className={`flex items-center gap-2 px-5 py-3 rounded-[12px] font-black text-[11px] uppercase tracking-widest transition-all duration-300 ${
  game.isLive 
  ? 'bg-red-600 text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_30px_rgba(220,38,38,0.6)]' 
- : 'bg-[#CCFF00] text-black shadow-[0_0_20px_rgba(204,255,0,0.4)] hover:shadow-[0_0_30px_rgba(204,255,0,0.6)]'
+ : 'bg-[#55DEE8] text-black shadow-[0_0_20px_rgba(204,255,0,0.4)] hover:shadow-[0_0_30px_rgba(204,255,0,0.6)]'
  }`}>
  {game.isLive ? 'WATCH' : 'JOIN'} <ChevronRight size={14} strokeWidth={3} />
  </button>
@@ -654,22 +652,22 @@ const JoinGames = () => {
  >
  <div className="sticky top-0 z-20 bg-black/50 backdrop-blur-md border-b border-[#2D2D2D] px-8 py-6 flex items-center justify-between">
  <div className="flex items-center gap-4 flex-wrap">
- <div className="px-4 py-1.5 bg-[#CCFF00] text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
+ <div className="px-4 py-1.5 bg-[#55DEE8] text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
  {selectedGame.gameType} Elite
  </div>
  {selectedGame.shortId && (
  <button
  onClick={() => { navigator.clipboard?.writeText(selectedGame.shortId); toast.success('Game ID copied!'); }}
- className="px-3 py-1.5 bg-white/5 border border-white/10 hover:border-[#CCFF00]/40 rounded-full flex items-center gap-1.5 transition-all"
+ className="px-3 py-1.5 bg-white/5 border border-white/10 hover:border-[#55DEE8]/40 rounded-full flex items-center gap-1.5 transition-all"
  title="Click to copy Game ID"
  >
- <Info size={11} className="text-[#CCFF00]" />
+ <Info size={11} className="text-[#55DEE8]" />
  <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">ID: {selectedGame.shortId}</span>
  </button>
  )}
  <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter font-open-sans">Match Intelligence</h2>
  </div>
- <button onClick={() => setSelectedGame(null)} className="w-10 h-10 bg-[#121212] border border-[#2D2D2D] rounded-full flex items-center justify-center text-[#CCFF00] hover:bg-[#CCFF00] hover:text-black transition-all">âœ•</button>
+ <button onClick={() => setSelectedGame(null)} className="w-10 h-10 bg-[#121212] border border-[#2D2D2D] rounded-full flex items-center justify-center text-[#55DEE8] hover:bg-[#55DEE8] hover:text-black transition-all">G£ò</button>
  </div>
 
  <div className="p-8 lg:p-12">
@@ -680,8 +678,8 @@ const JoinGames = () => {
  { icon: Coins, label: "Network Fee", value: selectedGame.perPlayerCharge || 'Free' },
  { icon: ShieldCheck, label: "Security / Umpire", value: selectedGame.umpire ? 'Verified' : 'Unmanaged' }
  ].map((stat, i) => (
- <div key={i} className="bg-[#0d0d0d] border border-[#2D2D2D] p-5 rounded-[20px] text-center group hover:border-[#CCFF00]/40 transition-all">
- <stat.icon className="mx-auto mb-3 text-[#CCFF00]" size={24} />
+ <div key={i} className="bg-[#0d0d0d] border border-[#2D2D2D] p-5 rounded-[20px] text-center group hover:border-[#55DEE8]/40 transition-all">
+ <stat.icon className="mx-auto mb-3 text-[#55DEE8]" size={24} />
  <p className="text-[8px] text-[#878C9F] uppercase font-black tracking-widest mb-1">{stat.label}</p>
  <p className="text-sm font-black text-white uppercase">{stat.value}</p>
  </div>
@@ -694,7 +692,7 @@ const JoinGames = () => {
  <h3 className="text-2xl font-black text-white uppercase tracking-tighter font-open-sans">
  Casual Match Pool
  </h3>
- <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">{selectedGame.quickSlots.length} Total Slots</span>
+ <span className="text-[10px] font-black text-[#55DEE8] uppercase tracking-widest">{selectedGame.quickSlots.length} Total Slots</span>
  </div>
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
  {selectedGame.quickSlots.map((slot, sIdx) => (
@@ -712,12 +710,12 @@ const JoinGames = () => {
  }}
  className={`p-5 rounded-[20px] border transition-all duration-500 text-left group relative overflow-hidden ${
  slot.status === 'OPEN' 
- ? 'bg-[#121212] border-white/5 hover:border-[#CCFF00]/40 hover:bg-[#CCFF00]/5' 
+ ? 'bg-[#121212] border-white/5 hover:border-[#55DEE8]/40 hover:bg-[#55DEE8]/5' 
  : 'bg-black/50 opacity-40 border-transparent'
  }`}
  >
  {slot.status === 'OPEN' && (
- <div className="absolute top-0 left-0 w-1 h-full bg-[#CCFF00] scale-y-0 group-hover:scale-y-100 transition-transform" />
+ <div className="absolute top-0 left-0 w-1 h-full bg-[#55DEE8] scale-y-0 group-hover:scale-y-100 transition-transform" />
  )}
  <div className="flex items-center justify-between mb-1">
  <p className="text-[9px] text-[#878C9F] font-black uppercase tracking-widest">{slot.role || 'Player'}</p>
@@ -748,7 +746,7 @@ const JoinGames = () => {
  <h3 className="text-2xl font-black text-white uppercase tracking-tighter font-open-sans">
  {selectedGame.teams[teamKey].name}
  </h3>
- <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-widest">Team {tIdx === 0 ? 'A' : 'B'}</span>
+ <span className="text-[10px] font-black text-[#55DEE8] uppercase tracking-widest">Team {tIdx === 0 ? 'A' : 'B'}</span>
  </div>
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
  {selectedGame.teams[teamKey].slots.map((slot, sIdx) => (
@@ -766,12 +764,12 @@ const JoinGames = () => {
  }}
  className={`p-5 rounded-[20px] border transition-all duration-500 text-left group relative overflow-hidden ${
  slot.status === 'OPEN' 
- ? 'bg-[#121212] border-white/5 hover:border-[#CCFF00]/40 hover:bg-[#CCFF00]/5' 
+ ? 'bg-[#121212] border-white/5 hover:border-[#55DEE8]/40 hover:bg-[#55DEE8]/5' 
  : 'bg-black/50 opacity-40 border-transparent'
  }`}
  >
  {slot.status === 'OPEN' && (
- <div className="absolute top-0 left-0 w-1 h-full bg-[#CCFF00] scale-y-0 group-hover:scale-y-100 transition-transform" />
+ <div className="absolute top-0 left-0 w-1 h-full bg-[#55DEE8] scale-y-0 group-hover:scale-y-100 transition-transform" />
  )}
  <p className="text-[9px] text-[#878C9F] font-black uppercase tracking-widest mb-1">{slot.role}</p>
  <p className="font-black text-white uppercase tracking-tight">
@@ -801,12 +799,12 @@ const JoinGames = () => {
  exit={{ scale: 0.9, opacity: 0, y: 20 }}
  className="relative bg-[#000000] border border-[#2D2D2D] p-10 rounded-[32px] max-w-md w-full text-center shadow-2xl"
  >
- <div className="w-20 h-20 bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(204,255,0,0.1)]">
- <Coins size={40} className="text-[#CCFF00]" />
+ <div className="w-20 h-20 bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(204,255,0,0.1)]">
+ <Coins size={40} className="text-[#55DEE8]" />
  </div>
  <h2 className="text-3xl font-black text-white uppercase tracking-tighter leading-none mb-4 font-open-sans">Join Protocol</h2>
  <p className="text-[#999999] mb-10 text-sm leading-relaxed">
- Participation requires <span className="text-[#CCFF00] font-black">{selectedGame?.perPlayerCharge || 0} Coins</span>. These will be securely escrowed until match confirmation.
+ Participation requires <span className="text-[#55DEE8] font-black">{selectedGame?.perPlayerCharge || 0} Coins</span>. These will be securely escrowed until match confirmation.
  </p>
  <div className="flex gap-4">
  <button onClick={() => setShowConfirm(false)} className="flex-1 py-4 bg-[#121212] border border-[#2D2D2D] rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Abort</button>
@@ -815,7 +813,7 @@ const JoinGames = () => {
  setShowConfirm(false);
  handleJoinGame();
  }}
- className="flex-1 py-4 bg-[#CCFF00] text-black font-black rounded-xl text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(204,255,0,0.2)] hover:scale-105 transition-all"
+ className="flex-1 py-4 bg-[#55DEE8] text-black font-black rounded-xl text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(204,255,0,0.2)] hover:scale-105 transition-all"
  >
  Confirm
  </button>
@@ -845,14 +843,14 @@ const JoinGames = () => {
  initial={{ scale: 0.9, opacity: 0, y: 20 }}
  animate={{ scale: 1, opacity: 1, y: 0 }}
  exit={{ scale: 0.9, opacity: 0, y: 20 }}
- className="relative bg-[#000000] border border-[#CCFF00]/20 p-8 rounded-[32px] max-w-md w-full shadow-[0_0_50px_rgba(204,255,0,0.1)]"
+ className="relative bg-[#000000] border border-[#55DEE8]/20 p-8 rounded-[32px] max-w-md w-full shadow-[0_0_50px_rgba(204,255,0,0.1)]"
  >
- <div className="w-20 h-20 bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-full flex items-center justify-center mx-auto mb-6">
- <Trophy size={40} className="text-[#CCFF00]" />
+ <div className="w-20 h-20 bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-full flex items-center justify-center mx-auto mb-6">
+ <Trophy size={40} className="text-[#55DEE8]" />
  </div>
  
  <h2 className="text-3xl font-black text-white uppercase tracking-tighter text-center mb-2">Claim Your Slot</h2>
- <p className="text-[#CCFF00] text-[10px] font-black uppercase tracking-[0.3em] text-center mb-6">Reserved For You</p>
+ <p className="text-[#55DEE8] text-[10px] font-black uppercase tracking-[0.3em] text-center mb-6">Reserved For You</p>
  
  <div className="bg-[#121212] border border-white/5 rounded-2xl p-5 mb-8 space-y-4">
  <div className="flex items-center justify-between">
@@ -861,15 +859,15 @@ const JoinGames = () => {
  </div>
  <div className="flex items-center justify-between">
  <span className="text-[10px] font-bold text-white/40 uppercase">Date/Time</span>
- <span className="text-sm font-black text-white">{new Date(inviteData.game.date).toLocaleDateString()} â€¢ {inviteData.game.time}</span>
+ <span className="text-sm font-black text-white">{new Date(inviteData.game.date).toLocaleDateString()} GÇó {inviteData.game.time}</span>
  </div>
  <div className="flex items-center justify-between">
  <span className="text-[10px] font-bold text-white/40 uppercase">Location</span>
  <span className="text-sm font-black text-white uppercase truncate ml-4">{inviteData.game.city}, {inviteData.game.state}</span>
  </div>
  <div className="pt-3 border-t border-white/5 flex items-center justify-between">
- <span className="text-[10px] font-bold text-[#CCFF00] uppercase">Cost</span>
- <span className="text-lg font-black text-[#CCFF00]">{inviteData.mustPay ? `${inviteData.perPlayerCharge} Coins` : 'FREE'}</span>
+ <span className="text-[10px] font-bold text-[#55DEE8] uppercase">Cost</span>
+ <span className="text-lg font-black text-[#55DEE8]">{inviteData.mustPay ? `${inviteData.perPlayerCharge} Coins` : 'FREE'}</span>
  </div>
  </div>
 
@@ -877,7 +875,7 @@ const JoinGames = () => {
  <button onClick={() => setShowInvitePopup(false)} className="flex-1 py-4 bg-[#121212] border border-[#2D2D2D] rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Ignore</button>
  <button
  onClick={handleClaimSlot}
- className="flex-1 py-4 bg-[#CCFF00] text-black font-black rounded-xl text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(204,255,0,0.2)] hover:scale-105 transition-all"
+ className="flex-1 py-4 bg-[#55DEE8] text-black font-black rounded-xl text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(204,255,0,0.2)] hover:scale-105 transition-all"
  >
  Join Match
  </button>

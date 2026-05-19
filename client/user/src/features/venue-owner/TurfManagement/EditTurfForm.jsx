@@ -1,4 +1,4 @@
-import { useForm, Controller } from "react-hook-form";
+﻿import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import DatePicker from 'react-datepicker';
@@ -69,7 +69,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
   const InputWrapper = ({ label, icon: Icon, children, error }) => (
     <div className="space-y-2">
       <label className="flex items-center gap-2 text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px] ml-1">
-        {Icon && <Icon size={12} className="text-[#CCFF00]/60" />}
+        {Icon && <Icon size={12} className="text-[#55DEE8]/60" />}
         {label}
       </label>
       {children}
@@ -82,12 +82,12 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
       <div className="p-6 lg:p-8 space-y-8">
         <header className="flex items-center justify-between border-b border-[#2D2D2D] pb-6">
           <div className="flex items-center gap-3">
-             <div className="w-1.5 h-6 bg-[#CCFF00] rounded-full" />
+             <div className="w-1.5 h-6 bg-[#55DEE8] rounded-full" />
              <h2 className="text-2xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Edit Arena Identity</h2>
           </div>
-          <div className="bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-3 py-1 rounded-[4px] flex items-center gap-2">
-            <ShieldCheck size={12} className="text-[#CCFF00]" />
-            <span className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest">Admin Control</span>
+          <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 px-3 py-1 rounded-[4px] flex items-center gap-2">
+            <ShieldCheck size={12} className="text-[#55DEE8]" />
+            <span className="text-[10px] font-bold text-[#55DEE8] uppercase tracking-widest">Admin Control</span>
           </div>
         </header>
 
@@ -99,7 +99,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                 {...register('name')}
                 placeholder="E.g. Wembley Pro"
                 className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all ${
-                  errors.name ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#CCFF00]/50'
+                  errors.name ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
                 }`}
               />
             </InputWrapper>
@@ -110,7 +110,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                 placeholder="Describe the atmosphere and facilities..."
                 rows={4}
                 className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all resize-none ${
-                  errors.description ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#CCFF00]/50'
+                  errors.description ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
                 }`}
               ></textarea>
             </InputWrapper>
@@ -122,7 +122,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                 placeholder="Rules, cancellation terms, safety... (Min 200 chars)"
                 rows={6}
                 className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all resize-none ${
-                  errors.policies ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#CCFF00]/50'
+                  errors.policies ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
                 }`}
               ></textarea>
               {!errors.policies && (
@@ -139,7 +139,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                   {...register('pricePerHour', { valueAsNumber: true })}
                   placeholder="2500"
                   className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all ${
-                    errors.pricePerHour ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#CCFF00]/50'
+                    errors.pricePerHour ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
                   }`}
                 />
               </InputWrapper>
@@ -150,7 +150,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                   {...register('location')}
                   placeholder="City, State"
                   className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all ${
-                    errors.location ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#CCFF00]/50'
+                    errors.location ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
                   }`}
                 />
               </InputWrapper>
@@ -164,7 +164,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                   <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-3 bg-[#050505] border border-[#2D2D2D] rounded-[8px]">
                     {watch('sportTypes')?.length > 0 ? (
                       watch('sportTypes').map((sport) => (
-                        <span key={sport} className="px-3 py-1 bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
+                        <span key={sport} className="px-3 py-1 bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
                           {sport}
                           <button type="button" onClick={() => setValue('sportTypes', watch('sportTypes').filter(s => s !== sport))} className="hover:text-white transition-colors">
                             <X size={10} />
@@ -176,7 +176,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                     )}
                   </div>
                   <select 
-                    className="w-full bg-[#050505] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-xs text-[#878C9F] focus:outline-none focus:border-[#CCFF00]/50 transition-all appearance-none cursor-pointer"
+                    className="w-full bg-[#050505] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-xs text-[#878C9F] focus:outline-none focus:border-[#55DEE8]/50 transition-all appearance-none cursor-pointer"
                     onChange={(e) => {
                       const val = e.target.value;
                       const current = watch('sportTypes') || [];
@@ -198,7 +198,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                         watch('groundTypes').map((ground) => (
                           <span key={ground} className="px-3 py-1 bg-white/5 text-white border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
                             {ground}
-                            <button type="button" onClick={() => setValue('groundTypes', watch('groundTypes').filter(g => g !== ground))} className="hover:text-[#CCFF00] transition-colors">
+                            <button type="button" onClick={() => setValue('groundTypes', watch('groundTypes').filter(g => g !== ground))} className="hover:text-[#55DEE8] transition-colors">
                               <X size={10} />
                             </button>
                           </span>
@@ -208,7 +208,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                       )}
                     </div>
                     <select 
-                      className="w-full bg-[#050505] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-xs text-[#878C9F] focus:outline-none focus:border-[#CCFF00]/50 transition-all appearance-none cursor-pointer"
+                      className="w-full bg-[#050505] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-xs text-[#878C9F] focus:outline-none focus:border-[#55DEE8]/50 transition-all appearance-none cursor-pointer"
                       onChange={(e) => {
                         const val = e.target.value;
                         const current = watch('groundTypes') || [];
@@ -239,7 +239,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                       )}
                     </div>
                     <select 
-                      className="w-full bg-[#050505] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-xs text-[#878C9F] focus:outline-none focus:border-[#CCFF00]/50 transition-all appearance-none cursor-pointer"
+                      className="w-full bg-[#050505] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-xs text-[#878C9F] focus:outline-none focus:border-[#55DEE8]/50 transition-all appearance-none cursor-pointer"
                       onChange={(e) => {
                         const val = e.target.value;
                         const current = watch('facilities') || [];
@@ -272,7 +272,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                       timeCaption="Time"
                       dateFormat="h:mm aa"
                       className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white focus:outline-none transition-all ${
-                        errors.openTime ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#CCFF00]/50'
+                        errors.openTime ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
                       }`}
                       filterTime={filterPassedTime}
                     />
@@ -294,7 +294,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                       timeCaption="Time"
                       dateFormat="h:mm aa"
                       className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white focus:outline-none transition-all ${
-                        errors.closeTime ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#CCFF00]/50'
+                        errors.closeTime ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
                       }`}
                       filterTime={filterCloseTime}
                       disabled={!getValues('openTime')}
@@ -317,7 +317,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
           </button>
           <button 
             type="submit" 
-            className="w-full sm:w-auto px-10 py-3 bg-[#CCFF00] text-black font-bold uppercase text-[11px] tracking-widest rounded-[8px] hover:bg-[#B3FF00] transition-all flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(204,255,0,0.1)]"
+            className="w-full sm:w-auto px-10 py-3 bg-[#55DEE8] text-black font-bold uppercase text-[11px] tracking-widest rounded-[8px] hover:bg-[#B3FF00] transition-all flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(204,255,0,0.1)]"
           >
             <Save size={14} />
             Commit Deployment

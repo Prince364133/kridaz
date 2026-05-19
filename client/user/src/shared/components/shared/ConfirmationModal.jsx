@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { AlertTriangle, X } from "lucide-react";
 
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = "Confirm", cancelText = "Cancel", type = "danger" }) => {
@@ -9,13 +9,13 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirm
       <div className="relative w-full max-w-md bg-[#0d0d0d] border border-[#2D2D2D] rounded-[24px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
         {/* Top Glow */}
         <div className={`absolute top-0 left-0 w-full h-1 ${
-          type === "danger" ? "bg-red-500" : "bg-[#CCFF00]"
+          type === "danger" ? "bg-red-500" : "bg-[#55DEE8]"
         }`} />
         
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-              type === "danger" ? "bg-red-500/10 text-red-500" : "bg-[#CCFF00]/10 text-[#CCFF00]"
+              type === "danger" ? "bg-red-500/10 text-red-500" : "bg-[#55DEE8]/10 text-[#55DEE8]"
             }`}>
               <AlertTriangle size={24} />
             </div>
@@ -49,7 +49,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirm
               className={`flex-1 py-4 px-6 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg ${
                 type === "danger" 
                   ? "bg-red-500 text-white shadow-red-500/20 hover:bg-red-600" 
-                  : "bg-[#CCFF00] text-black shadow-[#CCFF00]/20 hover:bg-[#b8e600]"
+                  : "bg-[#55DEE8] text-black shadow-[#55DEE8]/20 hover:bg-[#b8e600]"
               }`}
             >
               {confirmText}

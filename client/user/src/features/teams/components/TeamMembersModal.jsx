@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Users, Shield, MapPin, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -33,12 +33,12 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
                   {team.logo ? (
                     <img src={team.logo} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <Users className="text-[#CCFF00]" size={20} />
+                    <Users className="text-[#55DEE8]" size={20} />
                   )}
                 </div>
                 <div>
                   <h3 className="font-bold text-lg text-white">{team.name}</h3>
-                  <p className="text-[10px] text-[#CCFF00] font-black uppercase tracking-widest">{team.memberCount} Squad Members</p>
+                  <p className="text-[10px] text-[#55DEE8] font-black uppercase tracking-widest">{team.memberCount} Squad Members</p>
                 </div>
               </div>
               <button 
@@ -62,7 +62,7 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
                         onClick={() => {
                           if (member.user?._id) navigate(`/profile/${member.user._id}`);
                         }}
-                        className="w-10 h-10 rounded-full border border-white/10 overflow-hidden cursor-pointer hover:border-[#CCFF00] transition-all"
+                        className="w-10 h-10 rounded-full border border-white/10 overflow-hidden cursor-pointer hover:border-[#55DEE8] transition-all"
                       >
                         {member.user?.profilePicture ? (
                           <img src={member.user.profilePicture} alt="" className="w-full h-full object-cover" />
@@ -74,9 +74,9 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-bold text-white group-hover:text-[#CCFF00] transition-colors">{member.user?.name}</p>
+                          <p className="text-sm font-bold text-white group-hover:text-[#55DEE8] transition-colors">{member.user?.name}</p>
                           {member.role === 'OWNER' && (
-                            <Shield size={10} className="text-[#CCFF00]" />
+                            <Shield size={10} className="text-[#55DEE8]" />
                           )}
                         </div>
                         <p className="text-[10px] text-white/20 font-medium uppercase tracking-wider">@{member.user?.username || 'player'}</p>
@@ -87,7 +87,7 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
                       onClick={() => {
                         if (member.user?._id) navigate(`/profile/${member.user._id}`);
                       }}
-                      className="p-2 rounded-xl bg-white/5 text-white/40 opacity-0 group-hover:opacity-100 transition-all hover:bg-[#CCFF00] hover:text-black"
+                      className="p-2 rounded-xl bg-white/5 text-white/40 opacity-0 group-hover:opacity-100 transition-all hover:bg-[#55DEE8] hover:text-black"
                     >
                       <ExternalLink size={14} />
                     </button>
@@ -100,7 +100,7 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
             <div className="p-6 border-t border-white/5 bg-white/[0.01]">
               <button 
                 onClick={() => navigate(`/team/${team._id}`)}
-                className="w-full py-4 bg-[#CCFF00] text-black font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-[#CCFF00]/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                className="w-full py-4 bg-[#55DEE8] text-black font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-[#55DEE8]/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 View Full Team Profile
               </button>

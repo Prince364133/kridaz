@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   X, 
@@ -100,7 +100,7 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       >
         {/* Active Glow/Background */}
         {isActive && !isLogout && (
-          <div className="absolute inset-x-2 inset-y-1 bg-[#84CC16] rounded-xl -z-10 shadow-[0_0_15px_rgba(132,204,22,0.3)] transition-all duration-300" />
+          <div className="absolute inset-x-2 inset-y-1 bg-[#55DEE8] rounded-xl -z-10 shadow-[0_0_15px_rgba(85,222,232,0.3)] transition-all duration-300" />
         )}
         
         {/* Hover Background */}
@@ -120,7 +120,7 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
                 ? "text-white/20 group-hover:text-red-500" 
                 : isActive 
                   ? "text-black" 
-                  : "text-white/20 group-hover:text-[#84CC16]"
+                  : "text-white/20 group-hover:text-[#55DEE8]"
             }`} 
           />
         </div>
@@ -150,7 +150,7 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       >
         <div className="flex flex-col p-4 border-b border-white/5 bg-black/20 gap-4 lg:hidden">
           <div className="flex items-center justify-end">
-            <button onClick={toggleSidebar} className="text-white hover:text-[#84CC16] transition-colors">
+            <button onClick={toggleSidebar} className="text-white hover:text-[#55DEE8] transition-colors">
               <X size={20} />
             </button>
           </div>
@@ -159,11 +159,11 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         {/* Status Section */}
         <div className={`px-4 py-6 border-b border-white/5 transition-all duration-300 ${isMinimized ? "items-center" : ""}`}>
           <div className="flex items-center gap-3">
-             <div className={`flex-shrink-0 w-2 h-2 rounded-full ${isLimitedUmpire ? "bg-amber-500 animate-pulse" : "bg-[#84CC16] shadow-[0_0_10px_rgba(132,204,22,0.5)]"}`} />
+             <div className={`flex-shrink-0 w-2 h-2 rounded-full ${isLimitedUmpire ? "bg-amber-500 animate-pulse" : "bg-[#55DEE8] shadow-[0_0_10px_rgba(85,222,232,0.5)]"}`} />
              {!isMinimized && (
                <div className="animate-in fade-in slide-in-from-left-2 duration-300">
                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 leading-none mb-1">Status</p>
-                  <p className={`text-[10px] font-black uppercase tracking-tight ${isLimitedUmpire ? "text-amber-500" : "text-[#84CC16]"}`}>
+                  <p className={`text-[10px] font-black uppercase tracking-tight ${isLimitedUmpire ? "text-amber-500" : "text-[#55DEE8]"}`}>
                     {isLimitedUmpire ? "Unverified" : "Verified"}
                   </p>
                </div>

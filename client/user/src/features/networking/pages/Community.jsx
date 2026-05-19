@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import StoryViewer from "@features/networking/components/StoryViewer";
+import StoryViewer from "@components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import {
   communityApi,
@@ -26,13 +26,19 @@ import {
   useAddCommentMutation,
   useDeleteCommentMutation,
   useUploadStoryMutation,
-  useDeleteStoryMutation
+  useDeleteStoryMutation,
+  useLazyGetCommunityUploadUrlQuery,
+  useConfirmCommunityPostMutation,
+  useLazyGetStoryUploadUrlQuery,
+  useConfirmStoryUploadMutation
 } from "@redux/api/communityApi";
 import { useGetReelsFeedQuery } from "@redux/api/reelsApi";
-import ReelItem from "@features/reels/components/ReelItem";
+import { startUpload } from "@redux/slices/mediaUploadSlice";
+import ReelItem from "@components/common/ReelItem";
 import { useSocket } from "@context/SocketContext";
+import { uploadFileToR2 } from "@utils/mediaUpload";
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
 
@@ -56,6 +62,11 @@ const Community = () => {
   const [deleteComment] = useDeleteCommentMutation();
   const [uploadStory] = useUploadStoryMutation();
   const [deleteStory] = useDeleteStoryMutation();
+
+  const [getCommunityUploadUrl] = useLazyGetCommunityUploadUrlQuery();
+  const [confirmCommunityPost] = useConfirmCommunityPostMutation();
+  const [getStoryUploadUrl] = useLazyGetStoryUploadUrlQuery();
+  const [confirmStoryUpload] = useConfirmStoryUploadMutation();
 
   const { socket } = useSocket();
 
@@ -146,16 +157,47 @@ const Community = () => {
       );
     };
 
+    const handleMediaProgress = ({ mediaId, progress, status }) => {
+      dispatch(
+        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
+          const post = draft.posts.find(p => p._id === mediaId);
+          if (post) {
+            post.status = 'pending';
+            post.processingProgress = progress;
+          }
+        })
+      );
+    };
+
+    const handleMediaComplete = ({ mediaId, hlsUrl, thumbnailUrl }) => {
+      dispatch(
+        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
+          const post = draft.posts.find(p => p._id === mediaId);
+          if (post) {
+            post.status = 'ready';
+            post.mediaUrl = hlsUrl;
+            post.image = thumbnailUrl;
+            post.processingProgress = 100;
+          }
+        })
+      );
+      dispatch(communityApi.util.invalidateTags(['Community', 'Stories']));
+    };
+
     socket.on('new_community_post', handleNewPost);
     socket.on('community_post_liked', handlePostLiked);
     socket.on('community_post_commented', handlePostCommented);
     socket.on('community_post_deleted', handlePostDeleted);
+    socket.on('MEDIA_PROCESSING_PROGRESS', handleMediaProgress);
+    socket.on('MEDIA_PROCESSING_COMPLETE', handleMediaComplete);
 
     return () => {
       socket.off('new_community_post', handleNewPost);
       socket.off('community_post_liked', handlePostLiked);
       socket.off('community_post_commented', handlePostCommented);
       socket.off('community_post_deleted', handlePostDeleted);
+      socket.off('MEDIA_PROCESSING_PROGRESS', handleMediaProgress);
+      socket.off('MEDIA_PROCESSING_COMPLETE', handleMediaComplete);
     };
   }, [socket, dispatch]);
 
@@ -213,24 +255,39 @@ const Community = () => {
     e.preventDefault();
     if (!newPost.content && !newPost.image) return toast.error("Content or image is required");
 
-    const formData = new FormData();
-    if (newPost.title) formData.append('title', newPost.title);
-    if (newPost.content) formData.append('content', newPost.content);
-    if (newPost.image) formData.append('image', newPost.image);
-
     setIsPublishing(true);
     try {
       if (editingPost) {
+        // We'll keep update post as is or refactor later if needed, 
+        // usually it's just updating text.
+        const formData = new FormData();
+        if (newPost.title) formData.append('title', newPost.title);
+        if (newPost.content) formData.append('content', newPost.content);
         await updatePost({ id: editingPost._id, data: formData }).unwrap();
-        toast.success("Post updated successfully!");
+        toast.success("Post updated!");
         closePostModal();
       } else {
-        await createPost(formData).unwrap();
-        toast.success("Post created successfully!");
+        if (newPost.image) {
+          // Use Flash Upload (Backgrounding)
+          dispatch(startUpload({
+            id: Date.now().toString(),
+            file: newPost.image,
+            previewUrl: URL.createObjectURL(newPost.image),
+            metadata: {
+              type: 'community',
+              title: newPost.title,
+              content: newPost.content || ''
+            }
+          }));
+        } else {
+          // Plain text post (unlikely with current UI but handled)
+          await createPost({ title: newPost.title, content: newPost.content }).unwrap();
+          toast.success("Post created!");
+        }
         closePostModal();
       }
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to save post");
+      toast.error(error?.data?.message || error.message || "Failed to save post");
     } finally {
       setIsPublishing(false);
     }
@@ -258,20 +315,56 @@ const Community = () => {
     e.preventDefault();
     if (!newStory.content && newStory.mediaFiles.length === 0) return toast.error("Story must have content or media");
 
-    const formData = new FormData();
-    formData.append('content', newStory.content);
-    formData.append('durationDays', newStory.durationDays);
-    newStory.mediaFiles.forEach((file) => formData.append('media', file));
+    // If exactly one media file, use Flash Upload (Backgrounding)
+    if (newStory.mediaFiles.length === 1 && !newStory.content) {
+      const file = newStory.mediaFiles[0];
+      dispatch(startUpload({
+        id: Date.now().toString(),
+        file,
+        previewUrl: URL.createObjectURL(file),
+        metadata: {
+          type: 'story',
+          content: ''
+        }
+      }));
+      setNewStory({ content: '', mediaFiles: [], durationDays: 1 });
+      setStoryMediaPreviews([]);
+      setShowStoryModal(false);
+      return;
+    }
 
     setIsPublishing(true);
     try {
-      await uploadStory(formData).unwrap();
+      const mediaItems = [];
+      
+      // 1. Upload each media file (Fallback for multi-file/text stories)
+      for (const file of newStory.mediaFiles) {
+        const { data: uploadData } = await getStoryUploadUrl({
+          contentType: file.type,
+          fileName: file.name
+        }).unwrap();
+
+        await uploadFileToR2(uploadData.uploadUrl, file);
+        
+        mediaItems.push({
+          key: uploadData.key,
+          mediaType: file.type.startsWith('video') ? 'video' : 'image'
+        });
+      }
+
+      // 2. Confirm Story
+      await confirmStoryUpload({
+        content: newStory.content,
+        durationDays: newStory.durationDays,
+        mediaItems
+      }).unwrap();
+
       toast.success("Story uploaded!");
       setNewStory({ content: '', mediaFiles: [], durationDays: 1 });
       setStoryMediaPreviews([]);
       setShowStoryModal(false);
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to upload story");
+      toast.error(error?.data?.message || error.message || "Failed to upload story");
     } finally {
       setIsPublishing(false);
     }
@@ -366,9 +459,9 @@ const Community = () => {
               <div 
                 onClick={() => setActiveFilter("All")}
                 title="Home"
-                className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activeFilter !== 'Reels' ? 'bg-[#84CC16]/5 border-l-[3px] border-[#84CC16]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
+                className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activeFilter !== 'Reels' ? 'bg-[#55DEE8]/5 border-l-[3px] border-[#55DEE8]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
               >
-                <Home size={24} className={activeFilter !== 'Reels' ? "text-[#84CC16]" : "text-white/70 group-hover:text-white"} fill={activeFilter !== 'Reels' ? "currentColor" : "none"} />
+                <Home size={24} className={activeFilter !== 'Reels' ? "text-[#55DEE8]" : "text-white/70 group-hover:text-white"} fill={activeFilter !== 'Reels' ? "currentColor" : "none"} />
               </div>
               {/* Search */}
               <div 
@@ -382,30 +475,30 @@ const Community = () => {
               <div 
                 onClick={() => setActiveFilter(activeFilter === "Reels" ? "All" : "Reels")}
                 title="Reels"
-                className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activeFilter === 'Reels' ? 'bg-[#84CC16]/5 border-l-[3px] border-[#84CC16]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
+                className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activeFilter === 'Reels' ? 'bg-[#55DEE8]/5 border-l-[3px] border-[#55DEE8]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
               >
-                <PlaySquare size={24} className={activeFilter === 'Reels' ? 'text-[#84CC16]' : 'text-white/70 group-hover:text-white'} />
+                <PlaySquare size={24} className={activeFilter === 'Reels' ? 'text-[#55DEE8]' : 'text-white/70 group-hover:text-white'} />
               </div>
               {/* Notifications */}
               <div 
                 onClick={() => togglePanel('notifications')}
                 title="Notifications"
-                className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activePanel === 'notifications' ? 'bg-[#84CC16]/5 border-l-[3px] border-[#84CC16]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
+                className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activePanel === 'notifications' ? 'bg-[#55DEE8]/5 border-l-[3px] border-[#55DEE8]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
               >
                 <div className="relative">
                   <Bell size={24} className="text-white/70 group-hover:text-white" />
-                  <div className="absolute -top-1.5 -right-1.5 w-[14px] h-[14px] bg-[#84CC16] rounded-full flex items-center justify-center text-[9px] font-black text-black border-2 border-[#050505]">3</div>
+                  <div className="absolute -top-1.5 -right-1.5 w-[14px] h-[14px] bg-[#55DEE8] rounded-full flex items-center justify-center text-[9px] font-black text-black border-2 border-[#050505]">3</div>
                 </div>
               </div>
               {/* Messages */}
               <div 
                 onClick={() => togglePanel('messages')}
                 title="Messages"
-                className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activePanel === 'messages' ? 'bg-[#84CC16]/5 border-l-[3px] border-[#84CC16]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
+                className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activePanel === 'messages' ? 'bg-[#55DEE8]/5 border-l-[3px] border-[#55DEE8]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
               >
                 <div className="relative">
                   <Send size={24} className="text-white/70 group-hover:text-white" />
-                  <div className="absolute -top-1.5 -right-1.5 w-[14px] h-[14px] bg-[#84CC16] rounded-full flex items-center justify-center text-[9px] font-black text-black border-2 border-[#050505]">5</div>
+                  <div className="absolute -top-1.5 -right-1.5 w-[14px] h-[14px] bg-[#55DEE8] rounded-full flex items-center justify-center text-[9px] font-black text-black border-2 border-[#050505]">5</div>
                 </div>
               </div>
       </div>
@@ -429,7 +522,7 @@ const Community = () => {
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 p-5 border-b border-white/5 bg-[#111]">
-                <Search size={20} className="text-[#84CC16]" />
+                <Search size={20} className="text-[#55DEE8]" />
                 <input 
                   type="text" 
                   autoFocus
@@ -446,7 +539,7 @@ const Community = () => {
               <div className="max-h-[50vh] overflow-y-auto no-scrollbar">
                 {isSearching ? (
                   <div className="flex justify-center p-12">
-                    <Loader2 size={32} className="text-[#84CC16] animate-spin" />
+                    <Loader2 size={32} className="text-[#55DEE8] animate-spin" />
                   </div>
                 ) : searchResults.length > 0 ? (
                   <div className="p-2 space-y-1">
@@ -466,10 +559,10 @@ const Community = () => {
                            />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-[14px] font-bold text-white group-hover:text-[#84CC16] transition-colors truncate">{player.name}</div>
+                          <div className="text-[14px] font-bold text-white group-hover:text-[#55DEE8] transition-colors truncate">{player.name}</div>
                           <div className="text-[12px] font-medium text-white/40 truncate">@{player.username || player.name.toLowerCase().replace(/\s+/g, '')}</div>
                         </div>
-                        <div className="px-3 py-1.5 rounded-full border border-white/10 text-[10px] font-bold text-white/50 group-hover:border-[#84CC16] group-hover:text-[#84CC16] transition-all">
+                        <div className="px-3 py-1.5 rounded-full border border-white/10 text-[10px] font-bold text-white/50 group-hover:border-[#55DEE8] group-hover:text-[#55DEE8] transition-all">
                           View Profile
                         </div>
                       </div>
@@ -507,10 +600,10 @@ const Community = () => {
                   {[
                     { icon: Heart, color: "text-red-500", text: "simran.s liked your post", time: "2m", img: "simran.s" },
                     { icon: MessageCircle, color: "text-blue-400", text: "rohit45 commented: 'Great game!'" , time: "10m", img: "rohit45" },
-                    { icon: Users, color: "text-[#84CC16]", text: "deepak_29 started following you", time: "30m", img: "deepak_29" },
+                    { icon: Users, color: "text-[#55DEE8]", text: "deepak_29 started following you", time: "30m", img: "deepak_29" },
                     { icon: Heart, color: "text-red-500", text: "vikash07 liked your story", time: "1h", img: "vikash07" },
                     { icon: MessageCircle, color: "text-blue-400", text: "team_kridaz replied to your comment", time: "2h", img: "team_kridaz" },
-                    { icon: Users, color: "text-[#84CC16]", text: "aman.singh started following you", time: "3h", img: "aman.singh" },
+                    { icon: Users, color: "text-[#55DEE8]", text: "aman.singh started following you", time: "3h", img: "aman.singh" },
                     { icon: Trophy, color: "text-yellow-400", text: "You earned the 'Match Winner' badge!", time: "5h", img: "kridaz_bot" }
                   ].map((notif, i) => (
                     <div key={i} className="flex items-start gap-3 p-2.5 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group">
@@ -526,13 +619,13 @@ const Community = () => {
                         <div className="text-[11px] font-medium text-white/80 group-hover:text-white transition-colors leading-snug">{notif.text}</div>
                         <div className="text-[9px] font-bold text-white/30 mt-1">{notif.time} ago</div>
                       </div>
-                      {i < 2 && <div className="w-2 h-2 rounded-full bg-[#84CC16] shrink-0 mt-1.5" />}
+                      {i < 2 && <div className="w-2 h-2 rounded-full bg-[#55DEE8] shrink-0 mt-1.5" />}
                     </div>
                   ))}
                 </div>
 
                 <div className="pt-4 mt-2 border-t border-white/5 flex justify-center">
-                  <button className="text-[#84CC16] text-[10px] font-bold hover:underline tracking-widest uppercase">View all notifications</button>
+                  <button className="text-[#55DEE8] text-[10px] font-bold hover:underline tracking-widest uppercase">View all notifications</button>
                 </div>
 
               </div>
@@ -546,7 +639,7 @@ const Community = () => {
               
               <div className="flex items-center justify-between mb-5">
                 <h3 className="text-[14px] font-black uppercase tracking-widest" style={HEADING_STYLE}>MESSAGES</h3>
-                <button className="text-[#84CC16] hover:brightness-110 p-1 bg-white/5 rounded-lg">
+                <button className="text-[#55DEE8] hover:brightness-110 p-1 bg-white/5 rounded-lg">
                   <Edit3 size={16} />
                 </button>
               </div>
@@ -561,30 +654,30 @@ const Community = () => {
               </div>
 
               <div className="flex items-center gap-6 border-b border-white/10 mb-3 px-1">
-                <button className="pb-2.5 text-[10px] font-black text-white border-b-2 border-[#84CC16] tracking-widest uppercase">PRIMARY</button>
+                <button className="pb-2.5 text-[10px] font-black text-white border-b-2 border-[#55DEE8] tracking-widest uppercase">PRIMARY</button>
                 <button className="pb-2.5 text-[10px] font-black text-white/40 hover:text-white transition-colors tracking-widest uppercase">REQUESTS</button>
               </div>
 
               <div className="flex-1 overflow-y-auto no-scrollbar space-y-1 mt-1 pr-1">
                 {[
-                  { name: "simran.s", msg: "Great game! ðŸ”¥ðŸ”¥", time: "2m", unread: 2 },
+                  { name: "simran.s", msg: "Great game! =ƒöÑ=ƒöÑ", time: "2m", unread: 2 },
                   { name: "rohit45", msg: "See you at the next match!", time: "10m", unread: 1 },
-                  { name: "deepak_29", msg: "That was insane! ðŸ’ª", time: "30m", unread: 0 },
+                  { name: "deepak_29", msg: "That was insane! =ƒÆ¬", time: "30m", unread: 0 },
                   { name: "vikash07", msg: "Let's train tomorrow", time: "45m", unread: 0 },
-                  { name: "katta_18", msg: "Keep pushing! ðŸ’š", time: "1h", unread: 0 },
+                  { name: "katta_18", msg: "Keep pushing! =ƒÆÜ", time: "1h", unread: 0 },
                   { name: "aman.singh", msg: "Photo", time: "1h", unread: 0 },
                   { name: "team_kridaz", msg: "New announcement!", time: "2h", unread: 3 },
-                  { name: "arjun_11", msg: "Thanks bro! ðŸ™Œ", time: "3h", unread: 0 }
+                  { name: "arjun_11", msg: "Thanks bro! =ƒÖî", time: "3h", unread: 0 }
                 ].map((msg, i) => (
                   <div key={i} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group">
                     <div className="relative shrink-0">
                       <div className="w-[36px] h-[36px] rounded-full bg-[#111] border border-white/5 flex items-center justify-center overflow-hidden">
                         <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.name}`} className="w-full h-full object-cover" />
                       </div>
-                      {msg.unread > 0 && <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#84CC16] rounded-full border-2 border-[#0A0A0A]" />}
+                      {msg.unread > 0 && <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#55DEE8] rounded-full border-2 border-[#0A0A0A]" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[11px] font-bold truncate group-hover:text-[#84CC16] transition-colors">{msg.name}</div>
+                      <div className="text-[11px] font-bold truncate group-hover:text-[#55DEE8] transition-colors">{msg.name}</div>
                       <div className={`text-[10px] truncate mt-0.5 ${msg.unread > 0 ? 'font-bold text-white' : 'font-medium text-white/40'}`}>
                         {msg.msg}
                       </div>
@@ -592,7 +685,7 @@ const Community = () => {
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       <span className="text-[9px] font-bold text-white/30">{msg.time}</span>
                       {msg.unread > 0 && (
-                        <div className="w-[16px] h-[16px] bg-[#84CC16] text-black rounded-full flex items-center justify-center text-[9px] font-black">
+                        <div className="w-[16px] h-[16px] bg-[#55DEE8] text-black rounded-full flex items-center justify-center text-[9px] font-black">
                           {msg.unread}
                         </div>
                       )}
@@ -602,7 +695,7 @@ const Community = () => {
               </div>
 
               <div className="pt-4 mt-2 border-t border-white/5 flex justify-center">
-                <button className="text-[#84CC16] text-[10px] font-bold hover:underline tracking-widest uppercase">
+                <button className="text-[#55DEE8] text-[10px] font-bold hover:underline tracking-widest uppercase">
                   View all messages
                 </button>
               </div>
@@ -620,9 +713,9 @@ const Community = () => {
                 <div className="relative overflow-hidden flex justify-between items-start pb-4">
               <div className="relative z-10 space-y-1">
                 <h1 className="text-3xl md:text-[42px] font-black uppercase tracking-tighter flex items-center gap-2" style={HEADING_STYLE}>
-                  COMMUNITY <span className="text-[#84CC16]">HUB</span>
+                  COMMUNITY <span className="text-[#55DEE8]">HUB</span>
                 </h1>
-                <p className="text-[#84CC16] text-[20px] md:text-[20px] font-bold uppercase tracking-[0.2em]" style={SUBHEADING_STYLE}>
+                <p className="text-[#55DEE8] text-[20px] md:text-[20px] font-bold uppercase tracking-[0.2em]" style={SUBHEADING_STYLE}>
                   CONNECT, SHARE, AND PLAY
                 </p>
               </div>
@@ -637,11 +730,11 @@ const Community = () => {
                   onClick={() => gateInteraction(() => setShowStoryModal(true))}
                   className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
                 >
-                  <div className="w-[68px] h-[68px] rounded-full border border-dashed border-white/30 flex items-center justify-center group-hover:border-[#84CC16]/50 transition-all relative p-0.5">
+                  <div className="w-[68px] h-[68px] rounded-full border border-dashed border-white/30 flex items-center justify-center group-hover:border-[#55DEE8]/50 transition-all relative p-0.5">
                     <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center overflow-hidden border border-white/10">
                       <img src={user?.profilePicture || "/default-avatar.png"} className="w-full h-full object-cover opacity-60" />
                     </div>
-                    <div className="absolute bottom-0 right-0 w-[22px] h-[22px] bg-[#84CC16] rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
+                    <div className="absolute bottom-0 right-0 w-[22px] h-[22px] bg-[#55DEE8] rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
                       <Plus size={12} strokeWidth={4} className="text-black" />
                     </div>
                   </div>
@@ -655,13 +748,17 @@ const Community = () => {
                     onClick={() => { setSelectedStoryGroup(group); setCurrentStoryIndex(0); }}
                     className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
                   >
-                    <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${idx === 0 ? 'bg-[#84CC16]' : 'bg-white/20'}`}>
+                    <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${idx === 0 ? 'bg-[#55DEE8]' : 'bg-white/20'}`}>
                       <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
                         <div className="w-full h-full rounded-full overflow-hidden bg-[#111]">
                           {group.stories[0].mediaUrl ? (
-                            <img src={group.stories[0].mediaUrl} alt="" className="w-full h-full object-cover" />
+                            <img 
+                              src={group.stories[0].thumbnailUrl || group.stories[0].mediaUrl} 
+                              alt="" 
+                              className={`w-full h-full object-cover ${(group.stories.some(s => s.status === 'pending' || s.status === 'processing')) ? 'blur-sm opacity-50' : ''}`} 
+                            />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#84CC16] font-bold bg-[#111]">
+                            <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#55DEE8] font-bold bg-[#111]">
                                {group.stories[0].content?.slice(0, 15)}
                             </div>
                           )}
@@ -673,7 +770,7 @@ const Community = () => {
                         </div>
                       )}
                     </div>
-                    <span className="text-[10px] font-bold text-white/80 group-hover:text-[#84CC16] transition-colors truncate max-w-[68px]">
+                    <span className="text-[10px] font-bold text-white/80 group-hover:text-[#55DEE8] transition-colors truncate max-w-[68px]">
                       {group.user?.name?.split(' ')[0] || "Player"}
                     </span>
                   </div>
@@ -688,7 +785,7 @@ const Community = () => {
                   { name: 'aman.singh', live: false }
                 ].map((dummy, idx) => (
                   <div key={idx} className="flex flex-col items-center gap-2.5 shrink-0 cursor-default opacity-40">
-                    <div className="w-[68px] h-[68px] rounded-full p-[2px] bg-[#84CC16]">
+                    <div className="w-[68px] h-[68px] rounded-full p-[2px] bg-[#55DEE8]">
                       <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
                         <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center">
                           <UserIcon size={24} className="text-white/20" />
@@ -709,7 +806,7 @@ const Community = () => {
                    onClick={() => setActiveFilter(filter)}
                    className={`px-4 py-2 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border ${
                      activeFilter === filter 
-                     ? 'bg-[#84CC16] text-black border-[#84CC16] hover:brightness-110' 
+                     ? 'bg-[#55DEE8] text-black border-[#55DEE8] hover:brightness-110' 
                      : 'bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white'
                    }`}
                  >
@@ -741,7 +838,7 @@ const Community = () => {
                 >
                   {reelsLoading ? (
                     <div className="h-full flex items-center justify-center bg-black">
-                      <Loader2 size={36} className="text-[#84CC16] animate-spin" />
+                      <Loader2 size={36} className="text-[#55DEE8] animate-spin" />
                     </div>
                   ) : reels.length > 0 ? reels.map((reel, index) => (
                     <div key={reel._id} className="w-full h-full snap-start snap-always relative bg-black overflow-hidden flex-shrink-0">
@@ -759,14 +856,14 @@ const Community = () => {
                   )}
                   {reelsFetching && (
                     <div className="h-20 flex items-center justify-center snap-start">
-                      <Loader2 size={24} className="text-[#84CC16] animate-spin" />
+                      <Loader2 size={24} className="text-[#55DEE8] animate-spin" />
                     </div>
                   )}
                 </div>
               </div>
             ) : loading ? (
               <div className="py-20 flex flex-col items-center justify-center gap-4">
-                <Loader2 size={32} className="text-[#84CC16] animate-spin" />
+                <Loader2 size={32} className="text-[#55DEE8] animate-spin" />
               </div>
             ) : posts.length === 0 ? (
               <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-16 text-center text-white/30 font-bold uppercase tracking-widest text-sm">
@@ -786,7 +883,7 @@ const Community = () => {
                         <div>
                           <div className="flex items-center gap-1.5">
                             <span className="text-[13px] font-bold">{post.adminId?.name || "Player"}</span>
-                            <ShieldCheck size={14} className="text-[#84CC16]" />
+                            <ShieldCheck size={14} className="text-[#55DEE8]" />
                           </div>
                           <div className="text-[11px] font-bold text-white/40 mt-0.5">
                              2h ago
@@ -800,21 +897,63 @@ const Community = () => {
                       </div>
                     </div>
 
-                    {/* Post Media */}
-                    {(post.image || post.imageUrl) && (
+                    {(post.image || post.imageUrl || post.mediaUrl) && (
                       <div className="relative rounded-[16px] overflow-hidden group border border-white/5 bg-[#111]">
                         <img 
-                          src={post.image || post.imageUrl} 
-                          className="w-full object-cover max-h-[500px]" 
+                          src={post.image || post.imageUrl || post.thumbnailUrl} 
+                          className={`w-full object-cover max-h-[500px] transition-all duration-500 ${(post.status === 'pending' || post.status === 'processing') ? 'blur-xl scale-110 opacity-50' : ''}`} 
                         />
-                        {/* Decorative Overlays (for parity with image) */}
-                        <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-2.5 py-1.5 rounded flex items-center gap-1.5">
-                           <Play size={10} className="fill-white text-white" />
-                           <span className="text-[10px] font-bold">Reels</span>
-                        </div>
-                        <div className="absolute top-4 right-4 p-1.5 bg-black/60 backdrop-blur-md rounded">
-                           <Video size={14} className="text-white" />
-                        </div>
+                        
+                        {/* Progress Overlay for Pending/Processing Posts */}
+                        {(post.status === 'pending' || post.status === 'processing') && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm z-10">
+                            <div className="w-24 h-24 relative flex items-center justify-center">
+                              {/* Circular Progress (SVG) */}
+                              <svg className="w-full h-full transform -rotate-90">
+                                <circle
+                                  cx="48"
+                                  cy="48"
+                                  r="40"
+                                  stroke="currentColor"
+                                  strokeWidth="6"
+                                  fill="transparent"
+                                  className="text-white/10"
+                                />
+                                <circle
+                                  cx="48"
+                                  cy="48"
+                                  r="40"
+                                  stroke="#55DEE8"
+                                  strokeWidth="6"
+                                  fill="transparent"
+                                  strokeDasharray={2 * Math.PI * 40}
+                                  strokeDashoffset={2 * Math.PI * 40 * (1 - (post.processingProgress || 0) / 100)}
+                                  className="transition-all duration-300"
+                                />
+                              </svg>
+                              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <span className="text-[14px] font-black text-white">{post.processingProgress || 0}%</span>
+                              </div>
+                            </div>
+                            <div className="mt-4 flex flex-col items-center gap-1">
+                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#55DEE8] animate-pulse">
+                                {post.status === 'processing' ? 'Optimizing Media' : 'Preparing Upload'}
+                              </span>
+                              <div className="flex gap-1">
+                                <span className="w-1 h-1 bg-[#55DEE8] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                <span className="w-1 h-1 bg-[#55DEE8] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                <span className="w-1 h-1 bg-[#55DEE8] rounded-full animate-bounce"></span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Video Icon for processed videos */}
+                        {post.mediaType === 'video' && post.status === 'ready' && (
+                          <div className="absolute top-4 right-4 p-1.5 bg-black/60 backdrop-blur-md rounded">
+                             <Video size={14} className="text-white" />
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -822,7 +961,7 @@ const Community = () => {
                     <div className="flex items-center justify-between pt-1">
                       <div className="flex items-center gap-5">
                          <button onClick={() => handleLike(post._id)} className="flex items-center gap-2 group">
-                            <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l._id || l) === user?._id) ? 'fill-[#84CC16] text-[#84CC16]' : 'text-white/70 group-hover:text-red-500'}`} />
+                            <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l._id || l) === user?._id) ? 'fill-[#55DEE8] text-[#55DEE8]' : 'text-white/70 group-hover:text-red-500'}`} />
                             <span className="text-[12px] font-bold text-white">{post.likes?.length || 0}</span>
                          </button>
                          <button className="flex items-center gap-2 group">
@@ -891,7 +1030,7 @@ const Community = () => {
             <div className="flex justify-end pt-1">
               <button 
                 onClick={() => gateInteraction(() => setShowPostModal(true))}
-                className="w-full md:w-auto px-6 py-3 bg-[#84CC16] text-black rounded-xl font-bold uppercase tracking-widest text-[11px] flex items-center justify-center gap-2 shadow-[0_5px_15px_rgba(132,204,22,0.15)] hover:brightness-110 transition-all"
+                className="w-full md:w-auto px-6 py-3 bg-[#55DEE8] text-black rounded-xl font-bold uppercase tracking-widest text-[11px] flex items-center justify-center gap-2 shadow-[0_5px_15px_rgba(85,222,232,0.15)] hover:brightness-110 transition-all"
               >
                 <Plus size={14} strokeWidth={3} /> NEW POST
               </button>
@@ -902,10 +1041,10 @@ const Community = () => {
               <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 space-y-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-white">
-                    <BarChart3 size={16} className="text-[#84CC16]" />
+                    <BarChart3 size={16} className="text-[#55DEE8]" />
                     <h3 className="text-[11px] font-black uppercase tracking-[0.1em]" style={HEADING_STYLE}>YOUR STATS</h3>
                   </div>
-                  <button className="text-[10px] font-bold text-[#84CC16] hover:underline">View all</button>
+                  <button className="text-[10px] font-bold text-[#55DEE8] hover:underline">View all</button>
                 </div>
 
                 <div className="grid grid-cols-3 gap-y-5 gap-x-2">
@@ -919,7 +1058,7 @@ const Community = () => {
                   ].map((s, i) => (
                     <div key={i} className="flex flex-col gap-1">
                       <div className="flex items-center gap-1.5 text-white/50">
-                        <s.icon size={10} className={s.fill ? "text-[#84CC16]" : ""} fill={s.fill ? "currentColor" : "none"} />
+                        <s.icon size={10} className={s.fill ? "text-[#55DEE8]" : ""} fill={s.fill ? "currentColor" : "none"} />
                         <span className="text-[9px] font-bold leading-none">{s.label}</span>
                       </div>
                       <div className="text-[14px] font-black">{s.value}</div>
@@ -932,10 +1071,10 @@ const Community = () => {
               <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 space-y-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-white">
-                    <MonitorPlay size={16} className="text-[#84CC16]" />
+                    <MonitorPlay size={16} className="text-[#55DEE8]" />
                     <h3 className="text-[11px] font-black uppercase tracking-[0.1em]" style={HEADING_STYLE}>TRENDING TOPICS</h3>
                   </div>
-                  <button className="text-[10px] font-bold text-[#84CC16] hover:underline">View all</button>
+                  <button className="text-[10px] font-bold text-[#55DEE8] hover:underline">View all</button>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -951,10 +1090,10 @@ const Community = () => {
               <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 space-y-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-white">
-                    <Zap size={16} className="text-[#84CC16]" fill="currentColor" />
+                    <Zap size={16} className="text-[#55DEE8]" fill="currentColor" />
                     <h3 className="text-[11px] font-black uppercase tracking-[0.1em]" style={HEADING_STYLE}>SUGGESTED FOR YOU</h3>
                   </div>
-                  <button className="text-[10px] font-bold text-[#84CC16] hover:underline">View all</button>
+                  <button className="text-[10px] font-bold text-[#55DEE8] hover:underline">View all</button>
                 </div>
 
                 <div className="space-y-5">
@@ -971,13 +1110,13 @@ const Community = () => {
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[11px] font-bold group-hover:text-[#84CC16] transition-colors">{u.name}</span>
-                            {u.verified && <ShieldCheck size={10} className="text-[#84CC16]" />}
+                            <span className="text-[11px] font-bold group-hover:text-[#55DEE8] transition-colors">{u.name}</span>
+                            {u.verified && <ShieldCheck size={10} className="text-[#55DEE8]" />}
                           </div>
                           <div className="text-[9px] font-bold text-white/40">{u.mutual}</div>
                         </div>
                       </div>
-                      <button className="px-3 py-1 bg-transparent border border-[#84CC16] text-[#84CC16] rounded-full text-[9px] font-bold hover:bg-[#84CC16] hover:text-black transition-all uppercase tracking-widest">
+                      <button className="px-3 py-1 bg-transparent border border-[#55DEE8] text-[#55DEE8] rounded-full text-[9px] font-bold hover:bg-[#55DEE8] hover:text-black transition-all uppercase tracking-widest">
                         Follow
                       </button>
                     </div>
@@ -1009,13 +1148,13 @@ const Community = () => {
                   value={newPost.title}
                   onChange={(e) => setNewPost({...newPost, title: e.target.value})}
                   placeholder="Title (Optional)"
-                  className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-12 px-4 text-white text-sm outline-none transition-all"
+                  className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-12 px-4 text-white text-sm outline-none transition-all"
                 />
                 <textarea 
                   value={newPost.content}
                   onChange={(e) => setNewPost({...newPost, content: e.target.value})}
                   placeholder="Share the update with the community..."
-                  className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl min-h-[120px] p-4 text-white text-sm outline-none transition-all resize-none"
+                  className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl min-h-[120px] p-4 text-white text-sm outline-none transition-all resize-none"
                 />
 
                 {postImagePreview && (
@@ -1033,7 +1172,7 @@ const Community = () => {
 
                 <div className="flex items-center justify-between pt-2">
                   <div className="relative">
-                    <button type="button" className="p-3 bg-white/[0.03] border border-white/5 rounded-xl text-white/40 hover:text-[#84CC16] hover:bg-[#84CC16]/5 transition-all flex items-center gap-2">
+                    <button type="button" className="p-3 bg-white/[0.03] border border-white/5 rounded-xl text-white/40 hover:text-[#55DEE8] hover:bg-[#55DEE8]/5 transition-all flex items-center gap-2">
                       <ImageIcon size={20} />
                       <span className="text-[10px] font-bold uppercase tracking-widest">{postImagePreview ? 'Change' : 'Add Image'}</span>
                     </button>
@@ -1043,7 +1182,7 @@ const Community = () => {
                   <button 
                     type="submit"
                     disabled={isPublishing}
-                    className="bg-[#84CC16] text-black px-8 h-12 rounded-xl font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                    className="bg-[#55DEE8] text-black px-8 h-12 rounded-xl font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs"
                   >
                     {isPublishing ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />} 
                     {isPublishing ? "Saving..." : (editingPost ? "Update" : "Publish")}
@@ -1070,7 +1209,7 @@ const Community = () => {
                   value={newStory.content}
                   onChange={(e) => setNewStory({...newStory, content: e.target.value})}
                   placeholder="What's happening? Feeling inspired? Working out?"
-                  className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-24 p-4 text-white text-sm outline-none transition-all resize-none"
+                  className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-24 p-4 text-white text-sm outline-none transition-all resize-none"
                 />
 
                 {storyMediaPreviews.length > 0 && (
@@ -1099,7 +1238,7 @@ const Community = () => {
 
                 <div className="flex flex-wrap items-center gap-4 pt-2">
                   <div className="relative flex-1 min-w-[140px]">
-                    <button type="button" className="w-full p-3 bg-white/[0.03] border border-white/5 rounded-xl text-white/40 hover:text-[#84CC16] hover:bg-[#84CC16]/5 transition-all flex items-center justify-center gap-2">
+                    <button type="button" className="w-full p-3 bg-white/[0.03] border border-white/5 rounded-xl text-white/40 hover:text-[#55DEE8] hover:bg-[#55DEE8]/5 transition-all flex items-center justify-center gap-2">
                       <ImageIcon size={20} />
                       <span className="text-[10px] font-bold uppercase tracking-widest">{storyMediaPreviews.length > 0 ? 'Add More' : 'Add Photo/Video'}</span>
                     </button>
@@ -1110,7 +1249,7 @@ const Community = () => {
                     <select 
                       value={newStory.durationDays}
                       onChange={(e) => setNewStory({...newStory, durationDays: parseInt(e.target.value)})}
-                      className="w-full bg-white/[0.03] border border-white/5 focus:border-[#84CC16]/50 rounded-xl h-12 px-4 text-white text-[10px] font-bold uppercase tracking-widest outline-none transition-all appearance-none text-center"
+                      className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-12 px-4 text-white text-[10px] font-bold uppercase tracking-widest outline-none transition-all appearance-none text-center"
                     >
                       <option value={1}>24 Hours</option>
                       <option value={2}>48 Hours</option>
@@ -1122,7 +1261,7 @@ const Community = () => {
                   <button 
                     type="submit"
                     disabled={isPublishing}
-                    className="w-full bg-[#84CC16] text-black h-14 rounded-xl font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                    className="w-full bg-[#55DEE8] text-black h-14 rounded-xl font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs"
                   >
                     {isPublishing ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />} 
                     {isPublishing ? "Posting..." : "Post Story"}

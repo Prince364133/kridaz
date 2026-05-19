@@ -25,7 +25,7 @@ export default function UmpireMatches() {
     specialization: "Cricket"
   });
 
-  // Global search effect â€” fires after typing KRZ- prefix (4+ chars)
+  // Global search effect GÇö fires after typing KRZ- prefix (4+ chars)
   React.useEffect(() => {
     if (searchId.length >= 4) {
       const fetchGlobal = async () => {
@@ -216,7 +216,7 @@ export default function UmpireMatches() {
                   <button 
                     type="submit"
                     disabled={requestingUpgrade}
-                    className="flex-[2] h-14 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-60"
+                    className="flex-[2] h-14 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(85,222,232,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-60"
                   >
                     {requestingUpgrade ? <Loader2 size={16} className="animate-spin" /> : "Submit Application"}
                   </button>
@@ -264,7 +264,7 @@ export default function UmpireMatches() {
         )}
 
         {!searching && globalMatch && !activeMatches.some(m => m._id === globalMatch._id) && (
-          <div className="bg-gradient-to-r from-primary/10 to-transparent border border-primary/20 rounded-[2rem] p-8 group shadow-[0_0_50px_rgba(132,204,22,0.05)] animate-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-gradient-to-r from-primary/10 to-transparent border border-primary/20 rounded-[2rem] p-8 group shadow-[0_0_50px_rgba(85,222,232,0.05)] animate-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col md:flex-row justify-between gap-8">
               <div 
                 className="space-y-4 cursor-pointer"
@@ -275,7 +275,7 @@ export default function UmpireMatches() {
                     FOUND MATCH: {globalMatch.shortId}
                   </span>
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                    {new Date(globalMatch.date).toLocaleDateString()} â€¢ {globalMatch.time}
+                    {new Date(globalMatch.date).toLocaleDateString()} GÇó {globalMatch.time}
                   </span>
                 </div>
                 <h3 className="text-2xl font-black text-white uppercase tracking-tight">
@@ -293,7 +293,7 @@ export default function UmpireMatches() {
               <div className="flex items-center gap-3">
                 {globalMatch.umpire ? (
                    <div className="flex flex-col md:flex-row items-center gap-3">
-                     <div className="flex items-center gap-2 px-6 py-4 bg-primary/10 rounded-2xl text-[10px] font-black text-primary uppercase tracking-widest border border-primary/20 shadow-[0_0_20px_rgba(132,204,22,0.1)]">
+                     <div className="flex items-center gap-2 px-6 py-4 bg-primary/10 rounded-2xl text-[10px] font-black text-primary uppercase tracking-widest border border-primary/20 shadow-[0_0_20px_rgba(85,222,232,0.1)]">
                        <Shield size={16} className="fill-primary/20" /> Umpire Hired
                      </div>
                      <button 
@@ -304,7 +304,7 @@ export default function UmpireMatches() {
                      </button>
                      <button 
                        onClick={() => window.open(`/scoring/${globalMatch._id}`, '_blank', 'noopener,noreferrer')}
-                       className="h-14 px-8 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3"
+                       className="h-14 px-8 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(85,222,232,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3"
                      >
                        Score Now <Zap size={16} fill="currentColor" />
                      </button>
@@ -316,7 +316,7 @@ export default function UmpireMatches() {
                 ) : (
                   <button 
                     onClick={() => handleRequestUmpire(globalMatch._id)}
-                    className="w-full md:w-auto h-14 px-10 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3"
+                    className="w-full md:w-auto h-14 px-10 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(85,222,232,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3"
                   >
                     Request to Umpire <Hand size={16} fill="currentColor" />
                   </button>
@@ -350,7 +350,7 @@ export default function UmpireMatches() {
                         <CheckCircle2 size={10} /> Umpire Hired
                       </span>
                       <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                        {new Date(match.date).toLocaleDateString()} â€¢ {match.time}
+                        {new Date(match.date).toLocaleDateString()} GÇó {match.time}
                       </span>
                     </div>
 
@@ -379,7 +379,7 @@ export default function UmpireMatches() {
                         e.stopPropagation();
                         window.open(`/scoring/${match._id}`, '_blank', 'noopener,noreferrer');
                       }}
-                      className="w-full sm:w-auto h-14 px-10 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(132,204,22,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 group-hover:scale-[1.02]"
+                      className="w-full sm:w-auto h-14 px-10 bg-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(85,222,232,0.2)] hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 group-hover:scale-[1.02]"
                     >
                       Score Game <Zap size={16} fill="currentColor" />
                     </button>
@@ -403,7 +403,7 @@ export default function UmpireMatches() {
             >
                <div className="space-y-1">
                  <h4 className="text-sm font-bold text-white uppercase">{match.name}</h4>
-                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{match.venue} â€¢ {new Date(match.date).toLocaleDateString()}</p>
+                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{match.venue} GÇó {new Date(match.date).toLocaleDateString()}</p>
                </div>
                <div className="text-right">
                   <p className="text-[10px] font-black text-primary uppercase tracking-widest">Completed</p>

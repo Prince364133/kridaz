@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Link } from "react-router-dom";
 import { 
   Facebook, 
@@ -28,7 +28,7 @@ const PartnerFooter = () => {
                 <img src="/logo.png" alt="Kridaz" className="h-10 lg:h-12 w-auto" />
               </div>
               <div className="border-l border-white/20 pl-4 h-10 flex flex-col justify-center">
-                <span className="block text-[10px] font-semibold text-[#84CC16] tracking-wider uppercase leading-none mb-1">Partner Portal</span>
+                <span className="block text-[10px] font-semibold text-[#55DEE8] tracking-wider uppercase leading-none mb-1">Partner Portal</span>
                 <span className="block text-xl font-bold text-white tracking-tight leading-none uppercase">Business</span>
               </div>
             </Link>
@@ -37,7 +37,7 @@ const PartnerFooter = () => {
             </p>
             <div className="flex gap-4">
               {[Facebook, Linkedin, Instagram].map((Icon, i) => (
-                <Link key={i} to="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-[#84CC16] hover:bg-white/10 transition-all">
+                <Link key={i} to="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-[#55DEE8] hover:bg-white/10 transition-all">
                   <Icon size={18} />
                 </Link>
               ))}
@@ -50,7 +50,7 @@ const PartnerFooter = () => {
               <ul className="space-y-3">
                 {["Venue Dashboard", "Booking Manager", "Revenue Reports", "Facility Setup"].map((link) => (
                   <li key={link}>
-                    <Link to="#" className="text-white/40 hover:text-[#84CC16] transition-colors text-sm">
+                    <Link to="#" className="text-white/40 hover:text-[#55DEE8] transition-colors text-sm">
                       {link}
                     </Link>
                   </li>
@@ -68,7 +68,7 @@ const PartnerFooter = () => {
                   { name: "Guidelines", path: "#" }
                 ].map((link) => (
                   <li key={link.name}>
-                    <Link to={link.path} className="text-white/40 hover:text-[#84CC16] transition-colors text-sm">
+                    <Link to={link.path} className="text-white/40 hover:text-[#55DEE8] transition-colors text-sm">
                       {link.name}
                     </Link>
                   </li>
@@ -81,7 +81,7 @@ const PartnerFooter = () => {
               <ul className="space-y-3">
                 {["Help Center", "Documentation", "Contact Support", "Terms of Service"].map((link) => (
                   <li key={link}>
-                    <Link to="#" className="text-white/40 hover:text-[#84CC16] transition-colors text-sm">
+                    <Link to="#" className="text-white/40 hover:text-[#55DEE8] transition-colors text-sm">
                       {link}
                     </Link>
                   </li>
@@ -95,7 +95,7 @@ const PartnerFooter = () => {
         <div className="border-t border-white/5 pt-12">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-[#84CC16]/10 flex items-center justify-center text-[#84CC16]">
+              <div className="w-10 h-10 rounded-full bg-[#55DEE8]/10 flex items-center justify-center text-[#55DEE8]">
                 <Mail size={18} />
               </div>
               <div>
@@ -105,7 +105,7 @@ const PartnerFooter = () => {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-[#84CC16]/10 flex items-center justify-center text-[#84CC16]">
+              <div className="w-10 h-10 rounded-full bg-[#55DEE8]/10 flex items-center justify-center text-[#55DEE8]">
                 <MapPin size={18} />
               </div>
               <div>

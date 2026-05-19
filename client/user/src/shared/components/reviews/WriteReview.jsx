@@ -36,7 +36,7 @@ const WriteReview = ({
  key={star}
  className={`w-8 h-8 cursor-pointer transition-all duration-200 hover:scale-110 ${
  star <= rating
- ? "text-[#CCFF00] fill-[#CCFF00]"
+ ? "text-[#55DEE8] fill-[#55DEE8]"
  : "text-zinc-800 hover:text-zinc-600"
  }`}
  onClick={() => onRatingChange(star)}
@@ -56,7 +56,7 @@ const WriteReview = ({
  <textarea
  id="review"
  rows="4"
- className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-4 text-white placeholder-zinc-600 focus:outline-none focus:border-[#CCFF00] transition-colors resize-none"
+ className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-4 text-white placeholder-zinc-600 focus:outline-none focus:border-[#55DEE8] transition-colors resize-none"
  value={review}
  onChange={onReviewChange}
  placeholder="Share your experience playing here..."
@@ -76,7 +76,7 @@ const WriteReview = ({
  </button>
  <button
  type="submit"
- className="px-6 py-3 rounded-[8px] bg-[#CCFF00] text-black font-black uppercase text-xs tracking-widest hover:bg-[#b3e600] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+ className="px-6 py-3 rounded-[8px] bg-[#55DEE8] text-black font-black uppercase text-xs tracking-widest hover:bg-[#b3e600] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
  disabled={isSubmitting}
  >
  {isSubmitting ? "Submitting..." : "Submit Review"}

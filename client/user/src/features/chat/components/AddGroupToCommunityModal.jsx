@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useGetChatsQuery, useCreateGroupChatMutation, useAddGroupsToCommunityMutation } from '@redux/api/chatApi';
+﻿import React, { useState } from 'react';
+import { useGetChatsQuery, useCreateGroupChatMutation, useAddGroupsToCommunityMutation } from '../../../redux/api/chatApi';
 import { 
   Plus, 
   X, 
@@ -64,8 +64,8 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
         {/* Header */}
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#84CC16]/10 flex items-center justify-center">
-              <Globe size={20} className="text-[#84CC16]" />
+            <div className="w-10 h-10 rounded-xl bg-[#55DEE8]/10 flex items-center justify-center">
+              <Globe size={20} className="text-[#55DEE8]" />
             </div>
             <div>
               <h2 className="text-lg font-black text-white italic uppercase tracking-tight">Add Group</h2>
@@ -82,7 +82,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
           <button 
             onClick={() => setActiveTab('new')}
             className={`flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
-              activeTab === 'new' ? 'text-[#84CC16] border-b-2 border-[#84CC16] bg-[#84CC16]/5' : 'text-white/30 hover:text-white/60'
+              activeTab === 'new' ? 'text-[#55DEE8] border-b-2 border-[#55DEE8] bg-[#55DEE8]/5' : 'text-white/30 hover:text-white/60'
             }`}
           >
             Create New
@@ -90,7 +90,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
           <button 
             onClick={() => setActiveTab('existing')}
             className={`flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
-              activeTab === 'existing' ? 'text-[#84CC16] border-b-2 border-[#84CC16] bg-[#84CC16]/5' : 'text-white/30 hover:text-white/60'
+              activeTab === 'existing' ? 'text-[#55DEE8] border-b-2 border-[#55DEE8] bg-[#55DEE8]/5' : 'text-white/30 hover:text-white/60'
             }`}
           >
             Add Existing
@@ -101,8 +101,8 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
           {activeTab === 'new' ? (
             <form onSubmit={handleCreateNew} className="space-y-6 animate-slide-in">
               <div className="space-y-4">
-                <div className="w-20 h-20 rounded-2xl bg-[#84CC16]/10 mx-auto flex items-center justify-center mb-6">
-                  <MessageSquare size={32} className="text-[#84CC16]" />
+                <div className="w-20 h-20 rounded-2xl bg-[#55DEE8]/10 mx-auto flex items-center justify-center mb-6">
+                  <MessageSquare size={32} className="text-[#55DEE8]" />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2 ml-1">Group Name</label>
@@ -111,7 +111,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
                     autoFocus
                     value={newGroupName}
                     onChange={(e) => setNewGroupName(e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-[#84CC16] outline-none transition-all font-bold placeholder:text-white/10"
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-[#55DEE8] outline-none transition-all font-bold placeholder:text-white/10"
                     placeholder="e.g. Announcements, Off-topic..."
                   />
                 </div>
@@ -119,7 +119,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
               <button
                 type="submit"
                 disabled={isCreating || !newGroupName.trim()}
-                className="w-full py-4 bg-[#84CC16] text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
               >
                 {isCreating ? 'Creating...' : 'Create Group'} <Plus size={18} />
               </button>
@@ -133,13 +133,13 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search your groups..."
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:border-[#84CC16]/40 outline-none transition-all placeholder:text-white/10"
+                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:border-[#55DEE8]/40 outline-none transition-all placeholder:text-white/10"
                 />
               </div>
 
               <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-2">
                 {isLoadingChats ? (
-                  <div className="py-10 flex justify-center"><div className="w-6 h-6 border-2 border-[#84CC16] border-t-transparent rounded-full animate-spin"></div></div>
+                  <div className="py-10 flex justify-center"><div className="w-6 h-6 border-2 border-[#55DEE8] border-t-transparent rounded-full animate-spin"></div></div>
                 ) : filteredGroups.length === 0 ? (
                   <p className="text-center py-6 text-white/20 text-xs italic font-medium">No available groups found.</p>
                 ) : (
@@ -155,7 +155,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
                       }}
                       className={`flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all border ${
                         selectedExistingGroups.includes(group._id)
-                          ? 'bg-[#84CC16]/10 border-[#84CC16]/30'
+                          ? 'bg-[#55DEE8]/10 border-[#55DEE8]/30'
                           : 'bg-white/[0.02] border-transparent hover:border-white/10'
                       }`}
                     >
@@ -166,7 +166,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
                         <span className="text-sm font-bold text-white/80">{group.chatName}</span>
                       </div>
                       {selectedExistingGroups.includes(group._id) && (
-                        <CheckCircle2 size={20} className="text-[#84CC16]" />
+                        <CheckCircle2 size={20} className="text-[#55DEE8]" />
                       )}
                     </div>
                   ))
@@ -176,7 +176,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
               <button
                 onClick={handleAddExisting}
                 disabled={selectedExistingGroups.length === 0 || isAddingGroups}
-                className="w-full py-4 bg-[#84CC16] text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
               >
                 {isAddingGroups ? 'Adding...' : `Add ${selectedExistingGroups.length} Group${selectedExistingGroups.length !== 1 ? 's' : ''}`}
               </button>

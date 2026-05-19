@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import {
   LifeBuoy, MessageSquare, ChevronRight, Clock, AlertCircle, Zap,
   HelpCircle, Landmark, Shield, X, Plus
@@ -11,7 +11,7 @@ import { useSelector } from "react-redux";
 const PartnerSupport = () => {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
   const portalTitle = isScorer ? "Scorer Help Center" : "Help & Support";
 
   const [tickets, setTickets] = useState([]);
@@ -386,7 +386,7 @@ const PartnerSupport = () => {
                         <span className="flex items-center gap-1"><MessageSquare size={12} /> {ticket.replies?.length || 0} Replies</span>
                         {ticket.images?.length > 0 && <span className="flex items-center gap-1"><Shield size={12} /> {ticket.images.length} Attachments</span>}
                       </div>
-                      <button className="text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors" style={{ color: themeColor }}>Enter Chat ↗</button>
+                      <button className="text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors" style={{ color: themeColor }}>Enter Chat Γåù</button>
                     </div>
                   </div>
                 ))

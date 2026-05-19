@@ -1,7 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { Users, UserPlus, Trophy, Calendar, Mail, Phone, Shield, ChevronRight, Check, X, Search, Copy } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useHandleOpponentRequestMutation } from '@redux/api/teamApi';
+import { useHandleOpponentRequestMutation } from '../../../redux/api/teamApi';
 import toast from 'react-hot-toast';
 
 const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
@@ -11,8 +11,8 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-[#0a0a0a] text-white/40 p-12">
         <div className="w-24 h-24 rounded-[32px] bg-white/[0.03] border border-white/5 flex items-center justify-center mb-8 shadow-2xl relative overflow-hidden group">
-          <div className="absolute inset-0 bg-[#CCFF00]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <Users className="text-white/20 text-4xl group-hover:text-[#CCFF00]/50 transition-colors duration-500 relative z-10" />
+          <div className="absolute inset-0 bg-[#55DEE8]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <Users className="text-white/20 text-4xl group-hover:text-[#55DEE8]/50 transition-colors duration-500 relative z-10" />
         </div>
         <h2 className="text-3xl font-black text-white mb-3 tracking-tight italic uppercase">Select a Team</h2>
         <p className="text-white/30 max-w-sm text-center text-sm font-medium leading-relaxed mb-10">
@@ -21,7 +21,7 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
         
         <button 
           onClick={onCreateClick}
-          className="group relative px-8 py-4 bg-[#CCFF00] hover:bg-[#b8e600] text-black font-black rounded-2xl flex items-center gap-3 shadow-[0_10px_30px_rgba(204,255,0,0.2)] transition-all hover:-translate-y-1 active:translate-y-0 overflow-hidden"
+          className="group relative px-8 py-4 bg-[#55DEE8] hover:bg-[#b8e600] text-black font-black rounded-2xl flex items-center gap-3 shadow-[0_10px_30px_rgba(204,255,0,0.2)] transition-all hover:-translate-y-1 active:translate-y-0 overflow-hidden"
         >
           <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-[30deg]" />
           <UserPlus className="text-lg" />
@@ -62,32 +62,32 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
 
       {/* Team Header Banner */}
       <div className="relative h-48 md:h-64 shrink-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#CCFF00]/20 to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#55DEE8]/20 to-[#0a0a0a]" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
         
-        <div className="absolute top-6 right-6 z-10 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl group cursor-pointer hover:border-[#CCFF00]/50 transition-all" onClick={copyToClipboard}>
+        <div className="absolute top-6 right-6 z-10 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl group cursor-pointer hover:border-[#55DEE8]/50 transition-all" onClick={copyToClipboard}>
           <div className="flex flex-col items-end">
             <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Unique Team ID</span>
-            <span className="text-sm font-black text-[#CCFF00] tracking-[0.2em]">{team.teamCode}</span>
+            <span className="text-sm font-black text-[#55DEE8] tracking-[0.2em]">{team.teamCode}</span>
           </div>
-          <Copy size={16} className="text-white/20 group-hover:text-[#CCFF00] transition-colors" />
+          <Copy size={16} className="text-white/20 group-hover:text-[#55DEE8] transition-colors" />
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col md:flex-row items-end gap-6">
-          <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-black border-4 border-[#0a0a0a] shadow-2xl flex items-center justify-center text-[#CCFF00] text-4xl font-bold overflow-hidden shrink-0">
+          <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-black border-4 border-[#0a0a0a] shadow-2xl flex items-center justify-center text-[#55DEE8] text-4xl font-bold overflow-hidden shrink-0">
             {team.image ? <img src={team.image} alt={team.name} className="w-full h-full object-cover" /> : team.name.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 pb-2">
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl md:text-4xl font-bold text-white uppercase tracking-tight italic">{team.name}</h1>
-              <span className="px-3 py-1 rounded-full bg-[#CCFF00]/20 text-[#CCFF00] text-[10px] font-black uppercase tracking-widest">{team.sportType}</span>
+              <span className="px-3 py-1 rounded-full bg-[#55DEE8]/20 text-[#55DEE8] text-[10px] font-black uppercase tracking-widest">{team.sportType}</span>
             </div>
             <p className="text-white/60 text-sm md:text-base max-w-2xl line-clamp-2">{team.description || "No description provided."}</p>
           </div>
           <div className="pb-2">
             <button 
               onClick={onInviteClick}
-              className="px-6 py-3 bg-[#CCFF00] hover:bg-[#b8e600] text-black font-black rounded-xl flex items-center gap-2 shadow-lg shadow-[#CCFF00]/20 transition-all whitespace-nowrap uppercase tracking-widest text-xs"
+              className="px-6 py-3 bg-[#55DEE8] hover:bg-[#b8e600] text-black font-black rounded-xl flex items-center gap-2 shadow-lg shadow-[#55DEE8]/20 transition-all whitespace-nowrap uppercase tracking-widest text-xs"
             >
               <UserPlus size={16} /> Add Members
             </button>
@@ -180,18 +180,18 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
             {/* Platform Members */}
             <div>
               <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                <span className="w-1 h-4 bg-[#CCFF00] rounded-full" />
+                <span className="w-1 h-4 bg-[#55DEE8] rounded-full" />
                 Platform Members ({members.length})
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {members.map((member) => (
-                  <div key={member._id} className="bg-white/[0.02] p-4 rounded-2xl border border-white/5 hover:border-[#CCFF00]/20 transition-all flex items-center gap-4 group">
+                  <div key={member._id} className="bg-white/[0.02] p-4 rounded-2xl border border-white/5 hover:border-[#55DEE8]/20 transition-all flex items-center gap-4 group">
                     <div className="w-12 h-12 rounded-xl bg-white/5 overflow-hidden border border-white/10">
                       <img src={member.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.username}`} alt={member.username} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-white font-black text-sm truncate uppercase tracking-tight">@{member.username}</h4>
-                      <p className="text-[#CCFF00] text-[9px] font-black uppercase tracking-widest mt-0.5">{member.role}</p>
+                      <p className="text-[#55DEE8] text-[9px] font-black uppercase tracking-widest mt-0.5">{member.role}</p>
                     </div>
                   </div>
                 ))}

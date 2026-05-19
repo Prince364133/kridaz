@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeft, Download, Loader2, ShieldCheck } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -29,7 +29,7 @@ const BookingInvoice = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#000] flex flex-col items-center justify-center gap-4">
-        <Loader2 size={40} className="text-[#CCFF00] animate-spin" />
+        <Loader2 size={40} className="text-[#55DEE8] animate-spin" />
         <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px]">Preparing your invoice...</p>
       </div>
     );
@@ -65,7 +65,7 @@ const BookingInvoice = () => {
             href={invoiceDownloadUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-[#CCFF00] hover:bg-[#b8e600] rounded-xl px-6 py-3 text-black text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(204,255,0,0.1)]"
+            className="flex items-center justify-center gap-2 bg-[#55DEE8] hover:bg-[#b8e600] rounded-xl px-6 py-3 text-black text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(204,255,0,0.1)]"
           >
             <Download size={16} />
             Download PDF

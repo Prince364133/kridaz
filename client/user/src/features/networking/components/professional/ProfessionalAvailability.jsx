@@ -7,7 +7,7 @@ import { format, addDays, startOfToday, parse } from "date-fns";
 import ClockPicker from "@components/common/ClockPicker";
 
 /**
- * ProfessionalAvailability — Role-aware schedule management.
+ * ProfessionalAvailability ΓÇö Role-aware schedule management.
  * Fully rebranded for Scorer users with Teal Green (#00C187) and Inter typography.
  */
 
@@ -15,7 +15,7 @@ export default function ProfessionalAvailability() {
   const { user, role } = useSelector((state) => state.auth);
   
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
@@ -174,7 +174,7 @@ export default function ProfessionalAvailability() {
                   {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
                 </p>
                 <p className="text-[10px] font-semibold uppercase tracking-widest opacity-80" style={{ color: themeColor }}>
-                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} •{" "}
+                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} ΓÇó{" "}
                   {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
                 </p>
               </div>
@@ -215,7 +215,7 @@ export default function ProfessionalAvailability() {
                       className={`relative flex flex-col items-center justify-center p-3 rounded-lg border transition-all duration-300 ${
                         isSelected 
                         ? "text-black shadow-lg" 
-                        : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#CCFF00]/30 hover:bg-[#2D2D2D]/50"
+                        : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/30 hover:bg-[#2D2D2D]/50"
                       }`}
                       style={{ 
                         backgroundColor: isSelected ? themeColor : undefined,
@@ -244,15 +244,15 @@ export default function ProfessionalAvailability() {
               </div>
               <ul className="space-y-3 text-[11px] font-medium text-[#878C9F] uppercase tracking-widest leading-relaxed font-inter relative z-10">
                 <li className="flex items-start gap-2">
-                  <span style={{ color: themeColor }}>•</span>
+                  <span style={{ color: themeColor }}>ΓÇó</span>
                   <span>Define specific slots for different session types</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span style={{ color: themeColor }}>•</span>
+                  <span style={{ color: themeColor }}>ΓÇó</span>
                   <span>System prevents removal of assigned slots</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span style={{ color: themeColor }}>•</span>
+                  <span style={{ color: themeColor }}>ΓÇó</span>
                   <span>Maintaining consistency improves booking rates</span>
                 </li>
               </ul>

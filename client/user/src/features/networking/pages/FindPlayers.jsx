@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Helmet } from "react-helmet-async";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { fetchStates, fetchCities } from "@utils/locationService";
 import { 
   Search, 
   MapPin, 
@@ -26,19 +24,18 @@ import {
   Eye,
   EyeOff,
   WifiOff,
-  AlertCircle,
-  Zap
+  AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import StoryViewer from "@features/networking/components/StoryViewer";
+import StoryViewer from "@components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import NearbyPlayersMap from "@components/map/NearbyPlayersMap";
 import { useSocket } from "@context/SocketContext";
-import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 import { haversineMeters } from "@utils/geoUtils";
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
+const GRAD = "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)";
 const HEADING_STYLE = { fontFamily: '"Outfit", sans-serif' };
 const SUBHEADING_STYLE = { fontFamily: '"Outfit", sans-serif' };
 const SNAP_STATES = { COLLAPSED: 0, HALF: 33, EXPANDED: 50 };
@@ -50,128 +47,83 @@ const MOCK_PLAYERS = [
   { _id: "m4", name: "Simulated Rahul", latOffset: -0.015, lngOffset: -0.015, sport: "Cricket" }
 ];
 
-const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, navigate, gateInteraction }) => {
+const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvatarClick, currentUser, navigate, gateInteraction }) => {
   const shapes = [
     "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
     "circle(50% at 50% 50%)",
+    "polygon(50% 0%, 100% 100%, 0% 100%)",
     "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)"
   ];
   const shape = shapes[rank % shapes.length];
-  const isFollowing = followingIds.includes(player._id);
-
-  // Stat helpers â€” real data when API provides it, "â€”" as placeholder otherwise
-  const followers    = player.followers?.length ?? player.followersCount ?? "â€”";
-  const totalMatches = player.stats?.totalMatches ?? player.matchesPlayed ?? "â€”";
-  const sport        = (player.sportTypes?.[0] || player.sportType || player.interests?.[0] || "Sport").toUpperCase();
-  const totalScore   = player.stats?.totalScore ?? player.totalScore ?? "â€”";
-  const kridazScore  = player.kridazRating ?? player.stats?.kridazScore ?? player.kridazScore ?? "â€”";
 
   return (
-    <motion.div
+    <motion.div 
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      onClick={() => navigate(`/profile/${player._id}`)}
-      className="relative bg-black rounded-[20px] border border-[#84CC16]/20 overflow-hidden flex flex-col cursor-pointer group hover:border-[#84CC16]/60 hover:shadow-[0_0_40px_rgba(132,204,22,0.12)] transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+      className="relative bg-black rounded-[16px] border border-[#55DEE8]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-[#55DEE8]/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
     >
-      {/* Top badges */}
-      <div className="flex justify-between items-center px-3 pt-3 absolute top-0 left-0 right-0 z-20">
-        <div className="px-2 py-1 bg-black/60 backdrop-blur-md rounded-full border border-[#84CC16]/30 flex items-center gap-1">
-          <Trophy size={9} className="text-[#84CC16]" />
-          <span className="text-[8px] font-black text-[#84CC16] uppercase tracking-widest">{sport}</span>
-        </div>
-        <div className="p-1.5 bg-[#84CC16]/10 rounded-lg border border-[#84CC16]/20">
-          <ShieldCheck size={13} className="text-[#84CC16]" />
+      <div className="flex justify-end items-start p-4 absolute top-0 left-0 right-0 z-20">
+        <div className="p-1.5 bg-[#55DEE8]/10 rounded-lg border border-[#55DEE8]/20">
+          <ShieldCheck size={14} className="text-[#55DEE8]" />
         </div>
       </div>
 
-      {/* Avatar Section */}
-      <div className="h-44 relative mt-0 flex items-center justify-center overflow-hidden">
-        <div className="absolute w-56 h-56 bg-[#84CC16]/8 border border-[#84CC16]/20 blur-sm opacity-40 group-hover:opacity-70 transition-opacity duration-700" style={{ clipPath: shape }} />
-        <div className="absolute w-52 h-52 border border-[#84CC16]/30 group-hover:border-[#84CC16]/60 transition-colors duration-500" style={{ clipPath: shape }} />
+      <div className="h-40 relative mt-2 flex items-center justify-center overflow-hidden">
+        <div 
+          className="absolute w-52 h-52 bg-[#55DEE8]/10 border border-[#55DEE8]/30 blur-sm opacity-50 group-hover:opacity-80 transition-opacity duration-700"
+          style={{ clipPath: shape }}
+        />
+        <div 
+          className="absolute w-48 h-48 border-2 border-[#55DEE8]/40"
+          style={{ clipPath: shape }}
+        />
         <div className="relative w-full h-full flex items-center justify-center z-10 pointer-events-none">
-          <img
-            src={player.profilePicture || "https://pngimg.com/d/cricket_PNG102.png"}
-            alt={player.name}
-            className="h-[90%] w-[85%] object-contain filter drop-shadow-[0_10px_30px_rgba(132,204,22,0.35)] group-hover:scale-105 transition-transform duration-700 select-none"
+          <img 
+            src={player.profilePicture || "https://pngimg.com/d/cricket_PNG102.png"} 
+            alt="" 
+            className="h-[95%] w-[90%] object-contain filter drop-shadow-[0_10px_30px_rgba(85,222,232,0.4)] group-hover:scale-110 transition-transform duration-700 select-none"
           />
         </div>
-        {/* Hexagon Initials Badge */}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20">
-          <div className="bg-black border-2 border-[#84CC16] w-10 h-12 flex items-center justify-center shadow-[0_0_10px_rgba(132,204,22,0.3)]" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
-            <span className="text-[#84CC16] font-black text-[10px] uppercase">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+          <div className="bg-black border-2 border-[#55DEE8] w-12 h-14 flex items-center justify-center" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
+            <span className="text-[#55DEE8] font-black text-sm uppercase">
               {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Name + Location */}
-      <div className="px-4 pt-2 text-center">
-        <h3 className="text-[13px] font-black text-white uppercase tracking-tight truncate w-full" style={HEADING_STYLE}>
+      <div className="flex-1 px-3 pt-4 pb-2 flex flex-col items-center text-center">
+        <h3 className="text-sm font-black text-white uppercase tracking-tight mb-1 truncate w-full" style={HEADING_STYLE}>
           {player.name}
         </h3>
-        <div className="flex items-center justify-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
-          <MapPin size={9} className="text-[#84CC16]" />
-          {player.city || "Athletic"}
+        <div className="flex items-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-4">
+          <MapPin size={10} className="text-[#55DEE8]" />
+          {player.city || 'Athletic'}
         </div>
-      </div>
-
-      {/* Followers + Kridaz Score row */}
-      <div className="mx-4 mt-2 flex items-center justify-between bg-white/[0.03] border border-white/5 rounded-xl px-3 py-2">
-        <div className="flex flex-col items-center gap-0.5">
-          <span className="text-[7px] font-black text-gray-500 uppercase tracking-widest">Followers</span>
-          <div className="flex items-center gap-1">
-            <Users size={9} className="text-[#84CC16]" />
-            <span className="text-white font-black text-[11px]">{followers}</span>
+        <div className="grid grid-cols-3 w-full border-t border-white/5 pt-2 mb-2">
+          <div className="flex flex-col items-center">
+            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Matches</span>
+            <span className="text-white font-black text-[10px]">GÇö</span>
+          </div>
+          <div className="flex flex-col items-center border-x border-white/5">
+            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Runs</span>
+            <span className="text-white font-black text-[10px]">GÇö</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Strike Rate</span>
+            <span className="text-white font-black text-[10px]">GÇö</span>
           </div>
         </div>
-        <div className="w-px h-8 bg-white/5" />
-        <div className="flex flex-col items-center gap-0.5">
-          <span className="text-[7px] font-black text-gray-500 uppercase tracking-widest">Kridaz Score</span>
-          <div className="flex items-center gap-1">
-            <Zap size={9} className="text-[#84CC16]" fill="currentColor" />
-            <span className="text-[#84CC16] font-black text-[11px]">{kridazScore}</span>
-          </div>
+        <div className="flex items-center gap-2 w-full mt-auto">
+          <button onClick={() => handleFollowToggle(player._id)} className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player._id) ? "bg-white/5 text-white/20 border border-white/10" : "text-black hover:scale-105 shadow-[0_0_15px_rgba(85,222,232,0.3)]"}`} style={!followingIds.includes(player._id) ? { background: GRAD } : {}}>
+            {followingIds.includes(player._id) ? "Following" : "Follow"}
+          </button>
+          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8] transition-all">
+            <MessageCircle size={18} />
+          </button>
         </div>
-      </div>
-
-      {/* Matches + Total Score grid */}
-      <div className="grid grid-cols-2 gap-2 mx-4">
-        <div className="flex flex-col items-center bg-white/[0.03] border border-white/5 rounded-xl py-2 gap-0.5">
-          <span className="text-[7px] font-black text-gray-500 uppercase tracking-widest">Matches</span>
-          <div className="flex items-center gap-1">
-            <Target size={9} className="text-[#84CC16]" />
-            <span className="text-white font-black text-[12px]">{totalMatches}</span>
-          </div>
-        </div>
-        <div className="flex flex-col items-center bg-white/[0.03] border border-white/5 rounded-xl py-2 gap-0.5">
-          <span className="text-[7px] font-black text-gray-500 uppercase tracking-widest">Total Score</span>
-          <div className="flex items-center gap-1">
-            <Star size={9} className="text-[#84CC16]" fill="currentColor" />
-            <span className="text-white font-black text-[12px]">{totalScore}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex items-center gap-2 mx-4 mb-4">
-        <button
-          onClick={(e) => { e.stopPropagation(); handleFollowToggle(player._id); }}
-          className={`flex-1 h-10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-            isFollowing
-              ? "bg-white/5 text-white/30 border border-white/10"
-              : "bg-[#84CC16] text-black hover:bg-[#a3e635] shadow-[0_4px_12px_rgba(132,204,22,0.25)]"
-          }`}
-        >
-          {isFollowing ? "Following" : "Follow"}
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); gateInteraction(() => navigate(`/messages?userId=${player._id}`)); }}
-          className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#84CC16] hover:border-[#84CC16]/40 transition-all"
-        >
-          <MessageCircle size={16} />
-        </button>
       </div>
     </motion.div>
   );
@@ -183,7 +135,7 @@ const TeamCard = ({ team, navigate }) => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-[#0A0A0A] rounded-[20px] border border-white/5 overflow-hidden flex flex-col h-[380px] group hover:border-[#84CC16]/30 transition-all duration-500 shadow-2xl"
+      className="relative bg-[#0A0A0A] rounded-[20px] border border-white/5 overflow-hidden flex flex-col h-[380px] group hover:border-[#55DEE8]/30 transition-all duration-500 shadow-2xl"
     >
       {/* Top Section: Banner */}
       <div className="h-32 relative">
@@ -196,7 +148,7 @@ const TeamCard = ({ team, navigate }) => {
         
         {/* Verified Badge */}
         <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10">
-          <div className="w-3.5 h-3.5 bg-[#84CC16] rounded-full flex items-center justify-center">
+          <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center" style={{ background: GRAD }}>
             <ShieldCheck size={10} className="text-black" />
           </div>
           <span className="text-[8px] font-black text-white uppercase tracking-widest">Verified</span>
@@ -205,21 +157,21 @@ const TeamCard = ({ team, navigate }) => {
         {/* Team Avatar Overlay */}
         <div className="absolute bottom-[-16px] left-4 z-10">
           <div className="w-14 h-14 rounded-full border-[2px] border-[#0A0A0A] bg-[#0A0A0A] relative overflow-hidden group/avatar">
-            <div className="absolute inset-0 border-2 border-[#84CC16] rounded-full z-20" />
+            <div className="absolute inset-0 border-2 border-[#55DEE8] rounded-full z-20" />
             <div className="w-full h-full flex items-center justify-center bg-[#111] relative z-10">
               {team.logo ? (
                 <img src={team.logo} alt="" className="w-full h-full object-cover" />
               ) : (
-                <div className="flex flex-col items-center text-[#84CC16]">
+                <div className="flex flex-col items-center text-[#55DEE8]">
                   <Crown size={24} className="mb-1" />
-                  <div className="w-10 h-10 border-2 border-[#84CC16] rounded-full flex items-center justify-center p-1">
+                  <div className="w-10 h-10 border-2 border-[#55DEE8] rounded-full flex items-center justify-center p-1">
                      {team.sportType === 'Cricket' ? <Trophy size={16} /> : <Activity size={16} />}
                   </div>
                 </div>
               )}
             </div>
             {/* Status Indicator */}
-            <div className="absolute bottom-2 right-2 w-4 h-4 bg-[#84CC16] rounded-full border-[3px] border-[#0A0A0A] z-30" />
+            <div className="absolute bottom-2 right-2 w-4 h-4 bg-[#55DEE8] rounded-full border-[3px] border-[#0A0A0A] z-30" />
           </div>
         </div>
       </div>
@@ -230,14 +182,14 @@ const TeamCard = ({ team, navigate }) => {
           <div>
             <h3 className="text-base font-black text-white uppercase tracking-tighter mb-0.5" style={HEADING_STYLE}>{team.name}</h3>
             <div className="flex items-center gap-2">
-              <span className="text-[#84CC16] font-black text-[8px] uppercase tracking-widest flex items-center gap-1.5">
+              <span className="text-[#55DEE8] font-black text-[8px] uppercase tracking-widest flex items-center gap-1.5">
                 {team.sportType === 'Cricket' ? <Trophy size={10} /> : <Activity size={10} />}
                 {team.sportType}
               </span>
             </div>
             <p className="text-gray-600 text-[8px] font-bold uppercase tracking-widest mt-0.5">@ {team.city || 'Global'}</p>
           </div>
-          <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-white/40 hover:text-[#84CC16] transition-colors">
+          <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-white/40 hover:text-[#55DEE8] transition-colors">
             <Star size={16} />
           </div>
         </div>
@@ -246,7 +198,7 @@ const TeamCard = ({ team, navigate }) => {
         <div className="grid grid-cols-2 gap-2 py-3 border-y border-white/5 mb-3">
           <div className="flex items-center gap-2">
              <div className="p-2 bg-white/5 rounded-lg border border-white/10">
-                <Users size={14} className="text-[#84CC16]" />
+                <Users size={14} className="text-[#55DEE8]" />
              </div>
              <div>
                 <p className="text-sm font-black text-white leading-none mb-0.5">{team.memberCount || 1}</p>
@@ -255,7 +207,7 @@ const TeamCard = ({ team, navigate }) => {
           </div>
           <div className="flex items-center gap-2">
              <div className="p-2 bg-white/5 rounded-lg border border-white/10">
-                <Target size={14} className="text-[#84CC16]" />
+                <Target size={14} className="text-[#55DEE8]" />
              </div>
              <div>
                 <p className="text-sm font-black text-white leading-none mb-0.5">{team.matchesPlayed || 0}</p>
@@ -268,7 +220,8 @@ const TeamCard = ({ team, navigate }) => {
         <div className="grid grid-cols-2 gap-3 mb-4">
            <Link 
               to={`/team/${team._id}`}
-              className="h-12 bg-[#84CC16] text-black rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_15px_rgba(132,204,22,0.2)]"
+              className="h-12 text-black rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.2)]"
+              style={{ background: GRAD }}
            >
               <UserPlus size={14} strokeWidth={3} />
               Join Team
@@ -284,7 +237,7 @@ const TeamCard = ({ team, navigate }) => {
 
         <Link 
           to={`/team-pass/${team._id}`}
-          className="mt-3 flex items-center justify-center gap-2 text-gray-600 hover:text-[#84CC16] text-[9px] font-black uppercase tracking-[0.2em] transition-all"
+          className="mt-3 flex items-center justify-center gap-2 text-gray-600 hover:text-[#55DEE8] text-[9px] font-black uppercase tracking-[0.2em] transition-all"
         >
           View Team Pass <ChevronRight size={12} />
         </Link>
@@ -305,48 +258,7 @@ const FindPlayers = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [followingIds, setFollowingIds] = useState([]);
-  const [filters, setFilters] = useState({ state: "", city: "", sport: "" });
-  const [states, setStates] = useState([]);
-  const [cities, setCities] = useState([]);
-  const [loadingStates, setLoadingStates] = useState(false);
-  const [loadingCities, setLoadingCities] = useState(false);
-
-  // Fetch states on mount
-  useEffect(() => {
-    const loadStates = async () => {
-      try {
-        setLoadingStates(true);
-        const fetchedStates = await fetchStates();
-        setStates(fetchedStates || []);
-      } catch (err) {
-        console.error("Failed to load states:", err);
-      } finally {
-        setLoadingStates(false);
-      }
-    };
-    loadStates();
-  }, []);
-
-  // Fetch cities when selected state changes
-  useEffect(() => {
-    const loadCities = async () => {
-      if (!filters.state) {
-        setCities([]);
-        return;
-      }
-      try {
-        setLoadingCities(true);
-        const fetchedCities = await fetchCities(filters.state);
-        setCities(fetchedCities || []);
-      } catch (err) {
-        console.error("Failed to load cities:", err);
-      } finally {
-        setLoadingCities(false);
-      }
-    };
-    loadCities();
-  }, [filters.state]);
-
+  const [filters, setFilters] = useState({ city: "", sport: "" });
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "players";
   
@@ -475,7 +387,7 @@ const FindPlayers = () => {
             (now - lastEmitTime.current) > HEARTBEAT_INTERVAL_MS;
 
           if (shouldEmit) {
-            socket.emit(SOCKET.LOCATION_UPDATE, newLocation);
+            socket.emit("location:update", newLocation);
             lastEmittedLocation.current = newLocation;
             lastEmitTime.current = now;
           }
@@ -537,7 +449,6 @@ const FindPlayers = () => {
     try {
       setLoading(true);
       const params = {
-        state: filters.state,
         city: filters.city,
         sportType: filters.sport,
         search: searchQuery,
@@ -546,7 +457,6 @@ const FindPlayers = () => {
       
       const response = await axiosInstance.get("/api/user/players", {
         params: {
-          state: filters.state,
           city: filters.city,
           sport: filters.sport,
           search: searchQuery,
@@ -558,7 +468,7 @@ const FindPlayers = () => {
         }
       });
       if (response.data.success) {
-        setPlayers((response.data.players || []).map(p => ({ ...p, _id: p.id || p._id })));
+        setPlayers(response.data.players || []);
         if (response.data.followingIds) setFollowingIds(response.data.followingIds);
       }
     } catch (error) {
@@ -581,11 +491,11 @@ const FindPlayers = () => {
       });
       if (res.data.success) {
         if (res.data.players.length > 100 && !hasShownLimitToast) {
-          toast("Showing top nearby players. Zoom in to see more.", { icon: "ðŸ“" });
+          toast("Showing top nearby players. Zoom in to see more.", { icon: "=ƒôì" });
           setHasShownLimitToast(true);
         }
         const mapPlayers = res.data.players.map(p => ({
-          _id: p.id || p._id,
+          _id: p._id,
           name: p.name,
           username: p.username,
           profilePicture: p.profilePicture,
@@ -664,7 +574,7 @@ const FindPlayers = () => {
   useEffect(() => {
     if (!socket || !userLocation || snapState === 'COLLAPSED' || !isLocationSharing) return;
     
-    socket.emit(SOCKET.LOCATION_START, {
+    socket.emit("location:start", {
       lat: userLocation.lat,
       lng: userLocation.lng,
       radiusKm: selectedRadius
@@ -684,10 +594,10 @@ const FindPlayers = () => {
       });
     };
 
-    socket.on(SOCKET.NEARBY_LOCATION_UPDATE, handleLocationUpdate);
+    socket.on("nearby:location:update", handleLocationUpdate);
     
     return () => {
-      socket.off(SOCKET.NEARBY_LOCATION_UPDATE, handleLocationUpdate);
+      socket.off("nearby:location:update", handleLocationUpdate);
     };
   }, [socket]);
 
@@ -729,13 +639,7 @@ const FindPlayers = () => {
   };
 
   const handleFilterChange = (name, value) => {
-    setFilters(prev => {
-      const updated = { ...prev, [name]: value };
-      if (name === "state") {
-        updated.city = "";
-      }
-      return updated;
-    });
+    setFilters(prev => ({ ...prev, [name]: value }));
   };
 
   const handleFollowToggle = async (targetUserId) => {
@@ -784,9 +688,9 @@ const FindPlayers = () => {
     const element = document.getElementById(`player-card-${id}`);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "center" });
-      element.classList.add("ring-2", "ring-[#84CC16]", "ring-offset-4", "ring-offset-black");
+      element.classList.add("ring-2", "ring-[#55DEE8]", "ring-offset-4", "ring-offset-black");
       setTimeout(() => {
-        element.classList.remove("ring-2", "ring-[#84CC16]", "ring-offset-4", "ring-offset-black");
+        element.classList.remove("ring-2", "ring-[#55DEE8]", "ring-offset-4", "ring-offset-black");
       }, 3000);
     }
   };
@@ -807,16 +711,13 @@ const FindPlayers = () => {
 
   return (
     <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 overflow-hidden" : "min-h-screen pt-20 overflow-y-auto no-scrollbar"}`}>
-      <Helmet>
-        <title>Find Players | Kridaz</title>
-      </Helmet>
       
       {activeTab === "players" && (
         <>
           <motion.div 
             animate={{ height: `${SNAP_STATES[snapState]}vh` }}
             transition={{ type: "spring", damping: 25, stiffness: 150 }}
-            className="relative w-full bg-[#0a0a0a] border-b border-[#84CC16]/30 overflow-hidden"
+            className="relative w-full bg-[#0a0a0a] border-b border-[#55DEE8]/30 overflow-hidden"
           >
             <AnimatePresence>
               {snapState !== "COLLAPSED" && (
@@ -838,12 +739,12 @@ const FindPlayers = () => {
                   <div className="absolute top-4 left-4 right-4 z-[1000] flex items-center justify-between pointer-events-none">
                     <div className="flex items-center gap-3 bg-black/60 backdrop-blur-xl border border-white/10 p-1.5 px-4 rounded-2xl shadow-2xl">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-[#84CC16] rounded-full animate-pulse shadow-[0_0_10px_#84CC16]" />
+                        <div className="w-2 h-2 bg-[#55DEE8] rounded-full animate-pulse shadow-[0_0_10px_#55DEE8]" />
                         <span className="text-white text-[11px] font-black uppercase tracking-widest">Live Map</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Users size={12} className="text-[#84CC16]" />
-                        <span className="text-[#84CC16] text-[11px] font-black">{allNearbyPlayers.length}</span>
+                        <Users size={12} className="text-[#55DEE8]" />
+                        <span className="text-[#55DEE8] text-[11px] font-black">{allNearbyPlayers.length}</span>
                         <span className="text-white/40 text-[9px] font-bold uppercase">Players</span>
                       </div>
 
@@ -865,7 +766,7 @@ const FindPlayers = () => {
                         onClick={toggleLocationSharing}
                         className={`flex items-center gap-2 px-4 py-2 rounded-2xl border transition-all duration-300 backdrop-blur-xl shadow-2xl ${
                           isLocationSharing 
-                            ? "bg-[#84CC16]/20 border-[#84CC16]/30 text-[#84CC16]" 
+                            ? "bg-[#55DEE8]/20 border-[#55DEE8]/30 text-[#55DEE8]" 
                             : "bg-red-500/10 border-red-500/20 text-red-500"
                         }`}
                       >
@@ -882,15 +783,15 @@ const FindPlayers = () => {
                     <div className="absolute inset-0 z-[2000] bg-[#0A0A0A] flex flex-col items-center justify-center">
                       <div className="w-full h-full relative opacity-20">
                         <div className="absolute inset-0" style={{ 
-                            backgroundImage: 'radial-gradient(#84CC16 1px, transparent 1px)', 
+                            backgroundImage: 'radial-gradient(#55DEE8 1px, transparent 1px)', 
                             backgroundSize: '40px 40px' 
                         }} />
                       </div>
                       <div className="absolute flex flex-col items-center gap-4">
                         <div className="relative">
-                          <div className="w-16 h-16 border-2 border-[#84CC16]/20 rounded-full animate-ping absolute inset-0" />
-                          <div className="w-16 h-16 border-2 border-[#84CC16] rounded-full flex items-center justify-center bg-black">
-                            <MapPin className="text-[#84CC16] animate-bounce" size={24} />
+                          <div className="w-16 h-16 border-2 border-[#55DEE8]/20 rounded-full animate-ping absolute inset-0" />
+                          <div className="w-16 h-16 border-2 border-[#55DEE8] rounded-full flex items-center justify-center bg-black">
+                            <MapPin className="text-[#55DEE8] animate-bounce" size={24} />
                           </div>
                         </div>
                         <div className="text-center">
@@ -928,13 +829,13 @@ const FindPlayers = () => {
                         exit={{ opacity: 0 }}
                         className="absolute inset-0 z-[1500] bg-black/40 backdrop-blur-sm flex items-center justify-center"
                       >
-                        <Loader2 className="text-[#84CC16] animate-spin" size={32} />
+                        <Loader2 className="text-[#55DEE8] animate-spin" size={32} />
                       </motion.div>
                     )}
                   </AnimatePresence>
 
                   <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-xs">
-                    <div className="bg-black/80 backdrop-blur-2xl border border-[#84CC16]/30 rounded-full p-1.5 px-6 flex items-center justify-between shadow-2xl">
+                    <div className="bg-black/80 backdrop-blur-2xl border border-[#55DEE8]/30 rounded-full p-1.5 px-6 flex items-center justify-between shadow-2xl">
                         <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Radius</span>
                         <div className="flex items-center gap-1">
                           {[1, 2, 5, 10].map(r => (
@@ -944,7 +845,7 @@ const FindPlayers = () => {
                                   e.stopPropagation();
                                   setSelectedRadius(r);
                                 }}
-                                className={`min-w-[44px] py-1.5 rounded-full text-[9px] font-black transition-all uppercase ${selectedRadius === r ? "bg-[#84CC16] text-black shadow-[0_0_15px_rgba(132,204,22,0.4)]" : "text-white/40 hover:text-white/70"}`}
+                                className={`min-w-[44px] py-1.5 rounded-full text-[9px] font-black transition-all uppercase ${selectedRadius === r ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" : "text-white/40 hover:text-white/70"}`}
                               >
                                 {r}KM
                               </button>
@@ -965,8 +866,8 @@ const FindPlayers = () => {
             onDragEnd={handleDragEnd}
             className="w-full h-10 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing bg-black z-50 group border-b border-white/5"
           >
-            <div className="w-12 h-1.5 bg-white/10 rounded-full group-hover:bg-[#84CC16]/40 transition-colors" />
-            <div className="text-[8px] font-bold text-white/10 uppercase tracking-[0.3em] mt-1 group-hover:text-[#84CC16]/40 transition-colors">
+            <div className="w-12 h-1.5 bg-white/10 rounded-full group-hover:bg-[#55DEE8]/40 transition-colors" />
+            <div className="text-[8px] font-bold text-white/10 uppercase tracking-[0.3em] mt-1 group-hover:text-[#55DEE8]/40 transition-colors">
                 Slide to Discover
             </div>
           </motion.div>
@@ -981,17 +882,17 @@ const FindPlayers = () => {
           <div className="flex items-center gap-4 border-b border-white/5 pb-1">
             <button 
               onClick={() => setActiveTab("players")}
-              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "players" ? "text-[#84CC16]" : "text-white/20 hover:text-white/40"}`}
+              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "players" ? "text-[#55DEE8]" : "text-white/20 hover:text-white/40"}`}
             >
               Players
-              {activeTab === "players" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#84CC16]" />}
+              {activeTab === "players" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#55DEE8]" />}
             </button>
             <button 
               onClick={() => setActiveTab("teams")}
-              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "teams" ? "text-[#84CC16]" : "text-white/20 hover:text-white/40"}`}
+              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "teams" ? "text-[#55DEE8]" : "text-white/20 hover:text-white/40"}`}
             >
               Teams
-              {activeTab === "teams" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#84CC16]" />}
+              {activeTab === "teams" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#55DEE8]" />}
             </button>
           </div>
 
@@ -1000,13 +901,13 @@ const FindPlayers = () => {
             <div className="flex items-center gap-4 flex-1">
               <h2 className="text-[10px] md:text-xs font-bold text-white/20 uppercase tracking-[0.2em] whitespace-nowrap hidden sm:block" style={SUBHEADING_STYLE}>{activeTab === "players" ? "Active Players" : "Verified Teams"}</h2>
               <div className="relative flex-1 max-w-md group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#84CC16] transition-colors" size={16} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors" size={16} />
                 <input 
                   type="text" 
                   value={searchQuery}
                   onChange={handleSearch}
                   placeholder="SEARCH..."
-                  className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#84CC16]/50 rounded-xl h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
+                  className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#55DEE8]/50 rounded-xl h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
                 />
               </div>
             </div>
@@ -1015,42 +916,28 @@ const FindPlayers = () => {
               <select 
                 value={filters.sport}
                 onChange={(e) => handleFilterChange("sport", e.target.value)}
-                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#84CC16] focus:border-[#84CC16]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
+                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
               >
                 <option value="">All Sports</option>
                 {sports.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
-              <select 
-                value={filters.state}
-                onChange={(e) => handleFilterChange("state", e.target.value)}
-                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#84CC16] focus:border-[#84CC16]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
-              >
-                <option value="" className="bg-[#0a0a0a]">All States</option>
-                {states.map(s => (
-                  <option key={s} value={s} className="bg-[#0a0a0a]">{s}</option>
-                ))}
-              </select>
-
-              <select 
-                value={filters.city}
-                onChange={(e) => handleFilterChange("city", e.target.value)}
-                disabled={!filters.state}
-                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#84CC16] focus:border-[#84CC16]/50 outline-none cursor-pointer hover:bg-white/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <option value="" className="bg-[#0a0a0a]">
-                  {loadingCities ? "Loading..." : !filters.state ? "Select State" : "All Cities"}
-                </option>
-                {cities.map(c => (
-                  <option key={c} value={c} className="bg-[#0a0a0a]">{c}</option>
-                ))}
-              </select>
+              <div className="relative group">
+                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
+                <input 
+                  type="text"
+                  placeholder="LOCATION..."
+                  value={filters.city}
+                  onChange={(e) => handleFilterChange("city", e.target.value)}
+                  className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 placeholder:text-white/20"
+                />
+              </div>
 
               {activeTab === "players" && (
                 <button 
                   onClick={() => setShowNearbyOnly(!showNearbyOnly)}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all text-[9px] font-black uppercase tracking-widest ${
                     showNearbyOnly 
-                    ? "bg-[#84CC16] border-[#84CC16] text-black shadow-[0_0_15px_rgba(132,204,22,0.4)]" 
+                    ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" 
                     : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
                   }`}
                 >

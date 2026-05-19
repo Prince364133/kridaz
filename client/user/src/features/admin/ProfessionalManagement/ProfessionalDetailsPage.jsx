@@ -5,7 +5,7 @@ import {
   IndianRupee, Star, Briefcase, Award, Clock, Activity, CreditCard, Trash2 
 } from "lucide-react";
 import useProfessionals from "@hooks/admin/useProfessionals";
-import ConfirmationModal from "../../shared/ConfirmationModal";
+import ConfirmationModal from "@components/shared/ConfirmationModal";
 
 import axiosInstance from "@hooks/useAxiosInstance";
 
