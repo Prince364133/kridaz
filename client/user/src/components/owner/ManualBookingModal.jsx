@@ -115,7 +115,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
           <div className="flex items-center gap-3">
              <div className="w-1 h-6 bg-[#55DEE8] rounded-full" />
              <div>
-               <h2 className="text-[20px] font-bold uppercase tracking-tight text-white font-open-sans">Manual <span className="text-[#55DEE8]">Booking</span></h2>
+               <h2 className="text-[20px] font-bold uppercase tracking-tight text-white font-open-sans">Manual <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Booking</span></h2>
                <p className="text-[10px] font-medium text-[#878C9F] uppercase tracking-[0.2em] mt-0.5 font-inter">Console Step {step} of 3</p>
              </div>
           </div>
@@ -132,7 +132,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                 <button 
                   key={turf._id}
                   onClick={() => { setSelectedTurf(turf); setStep(2); }}
-                  className={`flex items-start gap-4 p-4 rounded-[6px] border transition-all text-left group ${selectedTurf?._id === turf._id ? 'bg-[#55DEE8]/5 border-[#55DEE8]' : 'bg-[#000000] border-[#2D2D2D] hover:border-[#55DEE8]/30'}`}
+                  className={`flex items-start gap-4 p-4 rounded-[6px] border transition-all text-left group ${selectedTurf?._id === turf._id ? 'bg-[#55DEE8]/5 border-[#55DEE8]' : 'bg-[#000000] border-[#2D2D2D] hover:border-white/30/30'}`}
                 >
                   <div className="w-14 h-14 rounded-[4px] bg-[#1A1A1A] overflow-hidden flex-shrink-0 border border-[#2D2D2D]">
                     <img src={turf.images[0]} alt={turf.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -188,7 +188,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                               ? 'bg-[#55DEE8] text-black border-[#55DEE8]' 
                               : slot.isBooked 
                               ? 'bg-red-500/10 border-red-500/20 text-red-500 cursor-not-allowed opacity-50' 
-                              : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#55DEE8]/50 text-[#878C9F] hover:text-white'
+                              : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-white/30/50 text-[#878C9F] hover:text-white'
                             }`}
                           >
                              {slot.startTime}
@@ -249,7 +249,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                   <div className="grid grid-cols-2 gap-3">
                      <button 
                        onClick={() => setCustomerData({...customerData, paymentMethod: "CASH"})}
-                       className={`flex items-center gap-3 p-3 rounded-[6px] border transition-all ${customerData.paymentMethod === "CASH" ? 'bg-[#55DEE8]/5 border-[#55DEE8]' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#55DEE8]/30'}`}
+                       className={`flex items-center gap-3 p-3 rounded-[6px] border transition-all ${customerData.paymentMethod === "CASH" ? 'bg-[#55DEE8]/5 border-[#55DEE8]' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-white/30/30'}`}
                      >
                         <Banknote size={18} className={customerData.paymentMethod === "CASH" ? 'text-[#55DEE8]' : 'text-[#878C9F]'} />
                         <div className="text-left">
@@ -258,7 +258,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                      </button>
                      <button 
                        onClick={() => setCustomerData({...customerData, paymentMethod: "ONLINE"})}
-                       className={`flex items-center gap-3 p-3 rounded-[6px] border transition-all ${customerData.paymentMethod === "ONLINE" ? 'bg-[#55DEE8]/5 border-[#55DEE8]' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#55DEE8]/30'}`}
+                       className={`flex items-center gap-3 p-3 rounded-[6px] border transition-all ${customerData.paymentMethod === "ONLINE" ? 'bg-[#55DEE8]/5 border-[#55DEE8]' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-white/30/30'}`}
                      >
                         <CreditCard size={18} className={customerData.paymentMethod === "ONLINE" ? 'text-[#55DEE8]' : 'text-[#878C9F]'} />
                         <div className="text-left">
@@ -295,7 +295,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                  <button 
                    disabled={!selectedTurf || (step === 2 && !selectedSlot)}
                    onClick={() => setStep(step + 1)}
-                   className="flex-1 sm:flex-none px-6 py-2.5 rounded-[6px] bg-white text-black font-bold uppercase tracking-widest text-[11px] hover:bg-[#55DEE8] transition-all disabled:opacity-20 font-inter"
+                   className="flex-1 sm:flex-none px-6 py-2.5 rounded-[6px] bg-white text-black font-bold uppercase tracking-widest text-[11px] hover:bg-white/10 transition-all disabled:opacity-20 font-inter"
                  >
                     Continue
                  </button>

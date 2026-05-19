@@ -105,7 +105,7 @@ const AddTurf = () => {
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-8 bg-[#55DEE8] rounded-full" />
               <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
-                ADD NEW <span className="text-[#55DEE8]">{watchedFacilityCategory.toUpperCase()}</span>
+                ADD NEW <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{watchedFacilityCategory.toUpperCase()}</span>
               </h1>
             </div>
             <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
@@ -256,7 +256,7 @@ const AddTurf = () => {
                 <button
                   type="button"
                   onClick={getMyLocation}
-                  className={`shrink-0 px-6 rounded-[8px] bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 hover:bg-[#55DEE8] hover:text-black transition-all flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest ${isLocating ? 'animate-pulse' : ''}`}
+                  className={`shrink-0 px-6 rounded-[8px] bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 hover:bg-white/10 hover:text-black transition-all flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest ${isLocating ? 'animate-pulse' : ''}`}
                   title="Capture Current Location"
                 >
                   {isLocating ? "Locating…" : "📡 GPS"}
@@ -287,7 +287,7 @@ const AddTurf = () => {
                         href={`https://www.google.com/maps?q=${watchedLat},${watchedLng}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[10px] font-bold text-[#878C9F] hover:text-[#55DEE8] uppercase tracking-widest transition-colors"
+                        className="text-[10px] font-bold text-[#878C9F] hover:text-white/70 uppercase tracking-widest transition-colors"
                       >
                         Open in Maps ↗
                       </a>
@@ -402,7 +402,7 @@ const AddTurf = () => {
                     <button
                       type="button"
                       onClick={() => removeGroundType(type)}
-                      className="hover:text-[#55DEE8] transition-colors"
+                      className="hover:text-white/70 transition-colors"
                     >
                       <Plus size={12} className="rotate-45" />
                     </button>
@@ -476,7 +476,7 @@ const AddTurf = () => {
                 <button
                   type="button"
                   onClick={addManagerContact}
-                  className="shrink-0 px-8 rounded-[8px] bg-white text-black hover:bg-[#55DEE8] transition-all text-[11px] font-bold uppercase tracking-widest"
+                  className="shrink-0 px-8 rounded-[8px] bg-white text-black hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-widest"
                 >
                   Add
                 </button>
@@ -484,7 +484,7 @@ const AddTurf = () => {
 
               <div className="space-y-3 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
                 {managerContacts.map((manager, index) => (
-                  <div key={index} className="flex items-center justify-between bg-[#111111] p-4 rounded-[8px] border border-[#2D2D2D] group hover:border-[#55DEE8]/30 transition-all">
+                  <div key={index} className="flex items-center justify-between bg-[#111111] p-4 rounded-[8px] border border-[#2D2D2D] group hover:border-white/30/30 transition-all">
                     <div className="flex flex-col">
                       <span className="text-white text-[13px] font-bold uppercase tracking-tight">{manager.name}</span>
                       <span className="text-[#878C9F] text-[11px] font-mono mt-0.5">{manager.phone}</span>
@@ -492,7 +492,7 @@ const AddTurf = () => {
                     <button
                       type="button"
                       onClick={() => removeManagerContact(index)}
-                      className="text-[#444] hover:text-[#55DEE8] transition-colors uppercase text-[10px] font-bold tracking-widest"
+                      className="text-[#444] hover:text-white/70 transition-colors uppercase text-[10px] font-bold tracking-widest"
                     >
                       Remove
                     </button>
@@ -601,7 +601,7 @@ const AddTurf = () => {
                           className={`px-5 py-3 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all border ${
                             isActive 
                             ? "bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_5px_15px_rgba(204,255,0,0.2)]" 
-                            : "bg-[#111111] text-[#444] border-[#2D2D2D] hover:border-[#55DEE8]/40"
+                            : "bg-[#111111] text-[#444] border-[#2D2D2D] hover:border-white/30/40"
                           }`}
                         >
                           {day.substring(0, 3)}
@@ -681,7 +681,7 @@ const AddTurf = () => {
                         key={index}
                         className={`flex items-center gap-4 p-3 rounded-[8px] border transition-all ${
                           slot.isActive
-                          ? "bg-[#111111] border-[#2D2D2D] group hover:border-[#55DEE8]/30"
+                          ? "bg-[#111111] border-[#2D2D2D] group hover:border-white/30/30"
                           : "bg-black/50 border-[#1A1A1A] opacity-40 grayscale"
                         }`}
                       >

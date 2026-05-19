@@ -63,7 +63,7 @@ const TurfBookingHistory = () => {
         </div>
         <h2 className="text-xl font-black text-white uppercase tracking-tight">No Bookings Yet</h2>
         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-2">Explore local arenas and book your first game!</p>
-        <Link to="/" className="mt-6 px-6 py-3 rounded-full bg-[#55DEE8] text-black text-[10px] font-black uppercase tracking-widest hover:bg-[#b3ff00] transition-colors">
+        <Link to="/" className="mt-6 px-6 py-3 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black uppercase tracking-widest hover:bg-[#b3ff00] transition-colors">
           Explore Venues
         </Link>
       </div>
@@ -74,7 +74,7 @@ const TurfBookingHistory = () => {
         const slotOver = new Date() > new Date(booking.playEndTime);
 
         return (
-          <div key={booking._id} className="bg-[#111111] border border-white/5 rounded-[24px] p-4 flex flex-col md:flex-row gap-6 hover:border-[#55DEE8]/30 transition-colors group relative overflow-hidden">
+          <div key={booking._id} className="bg-[#111111] border border-white/5 rounded-[24px] p-4 flex flex-col md:flex-row gap-6 hover:border-white/30/30 transition-colors group relative overflow-hidden">
             
             {/* Left Image */}
             <div className="w-full md:w-64 h-40 shrink-0 rounded-2xl overflow-hidden bg-[#222]">
@@ -101,7 +101,7 @@ const TurfBookingHistory = () => {
 
               {/* Actions Row */}
               <div className="flex flex-wrap items-center gap-2 mt-4 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <Link to={`/booking-pass/${booking._id}`} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-[#55DEE8] hover:text-black hover:border-[#55DEE8] text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                <Link to={`/booking-pass/${booking._id}`} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:text-black hover:border-white/30 text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                   <Ticket size={12} /> Pass
                 </Link>
                 <Link to={`/booking-invoice/${booking._id}`} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
@@ -118,7 +118,7 @@ const TurfBookingHistory = () => {
                   </button>
                 )}
                 {booking.status === "COMPLETED" && (
-                  <button onClick={() => openReviewModal(booking.turf._id)} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-[#55DEE8]/50 hover:text-[#55DEE8] text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                  <button onClick={() => openReviewModal(booking.turf._id)} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/30/50 hover:text-white/70 text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                     Review
                   </button>
                 )}

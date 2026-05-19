@@ -109,7 +109,7 @@ const VenueDetailsModal = ({ isOpen, onClose, turf, onApprove, onReject }) => {
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {turf.facilities?.map((facility, i) => (
-                        <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col items-center gap-3 text-center group hover:border-[#55DEE8]/30 transition-all">
+                        <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col items-center gap-3 text-center group hover:border-white/30/30 transition-all">
                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{facility}</span>
                         </div>
                       ))}
@@ -171,7 +171,7 @@ const VenueDetailsModal = ({ isOpen, onClose, turf, onApprove, onReject }) => {
                   </button>
                   <button 
                     onClick={() => onApprove(turf._id)}
-                    className="flex-1 py-5 bg-[#55DEE8] text-black font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-[#55DEE8]/80 transition-all flex items-center justify-center gap-3 shadow-xl shadow-[#55DEE8]/20"
+                    className="flex-1 py-5 bg-[#55DEE8] text-black font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-white/10/80 transition-all flex items-center justify-center gap-3 shadow-xl shadow-[#55DEE8]/20"
                   >
                     <Check size={16} />
                     Verify & Approve

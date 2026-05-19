@@ -130,7 +130,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all group"
  >
  <Eye size={12} className="text-[#55DEE8]" />
- <span className="text-[10px] font-black text-white group-hover:text-[#55DEE8]">
+ <span className="text-[10px] font-black text-white group-hover:text-white/70">
  {currentStory.viewers?.length || 0} Views
  </span>
  </button>
@@ -186,7 +186,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
  >
  <div className="relative">
- <div className="w-12 h-12 rounded-full border-2 border-[#2D2D2D] group-hover:border-[#55DEE8] overflow-hidden transition-colors">
+ <div className="w-12 h-12 rounded-full border-2 border-[#2D2D2D] group-hover:border-white/30 overflow-hidden transition-colors">
  <img 
  src={viewer.profilePicture || "/default-avatar.png"} 
  alt="" 
@@ -198,10 +198,10 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  </div>
  </div>
  <div className="flex-1 min-w-0">
- <p className="text-sm font-bold text-white truncate group-hover:text-[#55DEE8] transition-colors">{viewer.name}</p>
+ <p className="text-sm font-bold text-white truncate group-hover:text-white/70 transition-colors">{viewer.name}</p>
  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest truncate">@{viewer.username}</p>
  </div>
- <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#55DEE8]/20 transition-all opacity-0 group-hover:opacity-100">
+ <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10/20 transition-all opacity-0 group-hover:opacity-100">
  <Eye size={14} className="text-[#55DEE8]" />
  </div>
  </Link>

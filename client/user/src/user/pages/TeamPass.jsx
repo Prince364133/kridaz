@@ -226,7 +226,7 @@ const TeamPass = () => {
               <button
                 onClick={handleJoinTeam}
                 disabled={isJoining}
-                className="w-full flex items-center justify-center gap-4 py-6 rounded-[24px] bg-[#55DEE8] text-black font-black uppercase text-[14px] tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.99] shadow-[0_15px_40px_rgba(85,222,232,0.4)] relative group overflow-hidden"
+                className="w-full flex items-center justify-center gap-4 py-6 rounded-[24px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase text-[14px] tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.99] shadow-[0_15px_40px_rgba(85,222,232,0.4)] relative group overflow-hidden"
               >
                 <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 skew-x-12" />
                 {isJoining ? <Loader2 size={24} className="animate-spin" /> : (

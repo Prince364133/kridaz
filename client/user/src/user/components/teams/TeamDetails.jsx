@@ -12,7 +12,7 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
       <div className="flex-1 flex flex-col items-center justify-center bg-[#0a0a0a] text-white/40 p-12">
         <div className="w-24 h-24 rounded-[32px] bg-white/[0.03] border border-white/5 flex items-center justify-center mb-8 shadow-2xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-[#55DEE8]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <Users className="text-white/20 text-4xl group-hover:text-[#55DEE8]/50 transition-colors duration-500 relative z-10" />
+          <Users className="text-white/20 text-4xl group-hover:text-white/70/50 transition-colors duration-500 relative z-10" />
         </div>
         <h2 className="text-3xl font-black text-white mb-3 tracking-tight italic uppercase">Select a Team</h2>
         <p className="text-white/30 max-w-sm text-center text-sm font-medium leading-relaxed mb-10">
@@ -65,12 +65,12 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
         <div className="absolute inset-0 bg-gradient-to-b from-[#55DEE8]/20 to-[#0a0a0a]" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
         
-        <div className="absolute top-6 right-6 z-10 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl group cursor-pointer hover:border-[#55DEE8]/50 transition-all" onClick={copyToClipboard}>
+        <div className="absolute top-6 right-6 z-10 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl group cursor-pointer hover:border-white/30/50 transition-all" onClick={copyToClipboard}>
           <div className="flex flex-col items-end">
             <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Unique Team ID</span>
             <span className="text-sm font-black text-[#55DEE8] tracking-[0.2em]">{team.teamCode}</span>
           </div>
-          <Copy size={16} className="text-white/20 group-hover:text-[#55DEE8] transition-colors" />
+          <Copy size={16} className="text-white/20 group-hover:text-white/70 transition-colors" />
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col md:flex-row items-end gap-6">
@@ -185,7 +185,7 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {members.map((member) => (
-                  <div key={member._id} className="bg-white/[0.02] p-4 rounded-2xl border border-white/5 hover:border-[#55DEE8]/20 transition-all flex items-center gap-4 group">
+                  <div key={member._id} className="bg-white/[0.02] p-4 rounded-2xl border border-white/5 hover:border-white/30/20 transition-all flex items-center gap-4 group">
                     <div className="w-12 h-12 rounded-xl bg-white/5 overflow-hidden border border-white/10">
                       <img src={member.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.username}`} alt={member.username} className="w-full h-full object-cover" />
                     </div>

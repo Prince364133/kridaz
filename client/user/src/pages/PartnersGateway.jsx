@@ -90,7 +90,7 @@ export default function PartnersGateway() {
             <div className="space-y-6">
               <h1 className="text-6xl lg:text-[7rem] font-bold leading-[0.9] tracking-tight uppercase">
                 JOIN US AS A <br />
-                <span className="text-[#55DEE8]">PARTNER.</span>
+                <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>PARTNER.</span>
               </h1>
               <p className="text-lg text-white/40 max-w-2xl border-l-2 border-[#55DEE8] pl-8 leading-relaxed">
                 Connect with Kridaz to access a unified sports ecosystem. Whether you are a Venue Owner, Professional Coach, or Certified Official, we provide the ultimate platform to scale your impact.

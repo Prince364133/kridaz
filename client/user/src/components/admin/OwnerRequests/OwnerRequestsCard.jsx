@@ -14,7 +14,7 @@ const OwnerRequestsCard = ({ request, onAccept, onReject, onReconsider, onViewDe
   const location = request.businessDetails?.city ? `${request.businessDetails.city}, ${request.businessDetails.state}` : "Unknown Origin";
 
   return (
-    <div className={`bg-[#000000] border ${isRejected ? 'border-red-500/20' : 'border-[#2D2D2D]'} rounded-[8px] p-6 flex flex-col relative overflow-hidden group hover:border-[#55DEE8]/30 transition-all duration-500 shadow-[var(--shadow-2)] h-full`}>
+    <div className={`bg-[#000000] border ${isRejected ? 'border-red-500/20' : 'border-[#2D2D2D]'} rounded-[8px] p-6 flex flex-col relative overflow-hidden group hover:border-white/30/30 transition-all duration-500 shadow-[var(--shadow-2)] h-full`}>
       {/* Background Icon Watermark */}
       <Fingerprint className="absolute -right-6 -top-6 w-32 h-32 text-white/[0.02] group-hover:text-white/[0.04] transition-colors rotate-12" />
 
@@ -93,7 +93,7 @@ const OwnerRequestsCard = ({ request, onAccept, onReject, onReconsider, onViewDe
           <button
             onClick={() => onReconsider(request._id)}
             disabled={isProcessing}
-            className="w-full py-3 bg-white/5 border border-white/10 hover:border-[#55DEE8]/50 hover:bg-[#55DEE8]/5 text-white hover:text-[#55DEE8] text-[11px] font-bold uppercase tracking-[0.2em] rounded-[6px] transition-all flex items-center justify-center gap-2 group/btn disabled:opacity-50"
+            className="w-full py-3 bg-white/5 border border-white/10 hover:border-white/30/50 hover:bg-white/10/5 text-white hover:text-white/70 text-[11px] font-bold uppercase tracking-[0.2em] rounded-[6px] transition-all flex items-center justify-center gap-2 group/btn disabled:opacity-50"
           >
             {isProcessing ? "..." : "Reconsider Request"}
             {!isProcessing && <RotateCcw size={14} className="group-hover/btn:rotate-180 transition-transform duration-500" />}
@@ -121,7 +121,7 @@ const OwnerRequestsCard = ({ request, onAccept, onReject, onReconsider, onViewDe
         {/* View Detailed Button */}
         <button
           onClick={() => onViewDetail(request)}
-          className="w-full mt-3 py-3 bg-[#1A1A1A] border border-[#2D2D2D] hover:border-[#55DEE8]/50 text-gray-400 hover:text-[#55DEE8] text-[9px] font-black uppercase tracking-[0.3em] rounded-[6px] transition-all flex items-center justify-center gap-2 group/dossier"
+          className="w-full mt-3 py-3 bg-[#1A1A1A] border border-[#2D2D2D] hover:border-white/30/50 text-gray-400 hover:text-white/70 text-[9px] font-black uppercase tracking-[0.3em] rounded-[6px] transition-all flex items-center justify-center gap-2 group/dossier"
         >
           <Fingerprint size={12} className="group-hover/dossier:scale-110 transition-transform" />
           Scan Full Dossier
@@ -136,7 +136,7 @@ const OwnerRequestsCard = ({ request, onAccept, onReject, onReconsider, onViewDe
 };
 
 const InfoRow = ({ icon: Icon, label, value }) => (
-  <div className="bg-[#151617] p-3 rounded-[6px] border border-[#2D2D2D]/50 flex items-center gap-3 hover:border-[#55DEE8]/10 transition-colors">
+  <div className="bg-[#151617] p-3 rounded-[6px] border border-[#2D2D2D]/50 flex items-center gap-3 hover:border-white/30/10 transition-colors">
     <div className="p-1.5 bg-[#55DEE8]/5 rounded-[4px] text-[#55DEE8]">
       <Icon size={12} />
     </div>

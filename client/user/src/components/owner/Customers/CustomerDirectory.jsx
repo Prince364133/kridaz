@@ -59,28 +59,28 @@ export default function CustomerDirectory() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
-          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
             <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-3">Total Players</p>
             <div className="flex items-end justify-between">
               <h3 className="text-2xl font-semibold text-white tracking-tight">{stats.totalPlayers.toLocaleString()}</h3>
               <span className="px-2 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] text-[10px] font-medium uppercase tracking-wider rounded-full">Active</span>
             </div>
           </div>
-          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
             <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-3">Active Users</p>
             <div className="flex items-end justify-between">
               <h3 className="text-2xl font-semibold text-white tracking-tight">{stats.activeUsers.toLocaleString()}</h3>
               <span className="px-2 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] text-[10px] font-medium uppercase tracking-wider rounded-full">30D</span>
             </div>
           </div>
-          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
             <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-3">Avg. LTV</p>
             <div className="flex items-end justify-between">
               <h3 className="text-2xl font-semibold text-white tracking-tight">Rs {stats.avgLtv.toLocaleString()}</h3>
               <span className="px-2 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] text-[10px] font-medium uppercase tracking-wider rounded-full">Per Player</span>
             </div>
           </div>
-          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
             <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-3">Retention</p>
             <div className="flex items-end justify-between">
               <h3 className="text-2xl font-semibold text-white tracking-tight">{stats.retentionRate}%</h3>
@@ -131,7 +131,7 @@ export default function CustomerDirectory() {
                             <User size={16} className={customer.isRegistered ? "text-[#55DEE8]" : "text-white/40"} />
                           </div>
                           <div>
-                            <p className="text-[14px] font-semibold text-white tracking-tight group-hover:text-[#55DEE8] transition-colors font-inter">{customer.name}</p>
+                            <p className="text-[14px] font-semibold text-white tracking-tight group-hover:text-white/70 transition-colors font-inter">{customer.name}</p>
                             <p className="text-[11px] font-normal text-[#878C9F] uppercase tracking-widest mt-0.5 font-inter">{customer.joinedFormatted}</p>
                           </div>
                         </div>

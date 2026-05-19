@@ -21,7 +21,7 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete }) => {
   return (
     <div 
       onClick={() => navigate(`/admin/turfs/${turf._id}`)}
-      className="bms-card group flex flex-col relative cursor-pointer hover:border-[#55DEE8]/40 transition-all duration-500 overflow-hidden"
+      className="bms-card group flex flex-col relative cursor-pointer hover:border-white/30/40 transition-all duration-500 overflow-hidden"
     >
       {/* ── Image ─────────────────────────────────────────────────── */}
       <div className="relative overflow-hidden" style={{ height: "220px" }}>
@@ -58,7 +58,7 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete }) => {
         </div>
 
         <div className="space-y-1">
-          <h3 className="font-display text-xl uppercase tracking-tighter text-white group-hover:text-[#55DEE8] transition-colors leading-none line-clamp-2">
+          <h3 className="font-display text-xl uppercase tracking-tighter text-white group-hover:text-white/70 transition-colors leading-none line-clamp-2">
             {turf.name}
           </h3>
           <div className="flex items-center gap-1.5 text-gray-500 text-[10px] font-bold uppercase tracking-widest">

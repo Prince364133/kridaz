@@ -1019,9 +1019,9 @@ const HostGame = () => {
                         {/* Upload button */}
                         <label
                           htmlFor={`img-upload-${teamKey}`}
-                          className="flex-1 flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-[#55DEE8]/30 rounded-2xl cursor-pointer hover:border-[#55DEE8]/60 hover:bg-[#55DEE8]/5 transition-all group"
+                          className="flex-1 flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-[#55DEE8]/30 rounded-2xl cursor-pointer hover:border-white/30/60 hover:bg-white/10/5 transition-all group"
                         >
-                          <div className="w-8 h-8 rounded-full bg-[#55DEE8]/10 border border-[#55DEE8]/20 flex items-center justify-center group-hover:bg-[#55DEE8]/20 transition-all">
+                          <div className="w-8 h-8 rounded-full bg-[#55DEE8]/10 border border-[#55DEE8]/20 flex items-center justify-center group-hover:bg-white/10/20 transition-all">
                             <ImageIcon size={16} className="text-[#55DEE8]" />
                           </div>
                           <span className="text-[10px] font-black text-[#55DEE8]/70 uppercase tracking-widest">
@@ -1071,7 +1071,7 @@ const HostGame = () => {
                     <div className="space-y-3">
                       {gameData[teamKey].slots.map((slot, idx) => (
                         <div key={idx} className="flex items-center gap-3 group">
-                          <div className="flex-1 flex items-center gap-4 bg-neutral-900 border border-neutral-800 p-4 rounded-2xl group-hover:border-[#55DEE8]/30 transition-all">
+                          <div className="flex-1 flex items-center gap-4 bg-neutral-900 border border-neutral-800 p-4 rounded-2xl group-hover:border-white/30/30 transition-all">
                             <input 
                               className="bg-transparent text-xs font-black uppercase tracking-widest outline-none w-full"
                               value={slot.role}
@@ -1091,7 +1091,7 @@ const HostGame = () => {
 
                     <button
                       onClick={() => addSlot(teamKey)}
-                      className="w-full py-4 border-2 border-dashed border-neutral-800 rounded-2xl text-neutral-500 text-xs font-black uppercase tracking-widest hover:border-[#55DEE8]/30 hover:text-[#55DEE8] transition-all flex items-center justify-center gap-2 bg-neutral-900/30"
+                      className="w-full py-4 border-2 border-dashed border-neutral-800 rounded-2xl text-neutral-500 text-xs font-black uppercase tracking-widest hover:border-white/30/30 hover:text-white/70 transition-all flex items-center justify-center gap-2 bg-neutral-900/30"
                     >
                       <Plus size={16} /> Add More Slots
                     </button>

@@ -107,6 +107,14 @@ const Turf = () => {
 
   return (
     <div className="min-h-screen bg-black text-white pb-20 overflow-x-hidden">
+      <svg className="absolute w-0 h-0" width="0" height="0">
+        <defs>
+          <linearGradient id="primary-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#55DEE8" />
+            <stop offset="100%" stopColor="#BFF367" />
+          </linearGradient>
+        </defs>
+      </svg>
       <div className="max-w-screen-2xl mx-auto px-6 pt-0 relative z-10">
 
         {/* ── Sticky Search Bar ────────────────────────────────────── */}
@@ -118,16 +126,20 @@ const Turf = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 border-b border-white/5 pb-6 gap-4">
           <div className="flex flex-col gap-1">
             <h2 className="text-base md:text-lg font-bold uppercase tracking-[0.05em] text-white flex items-center gap-3 font-sans">
-              <MapPin size={18} className="text-[#55DEE8]" />
+              <MapPin size={18} stroke="url(#primary-gradient)" className="" />
               {locationStatus === "detecting" ? (
                 <span className="flex items-center gap-2">
-                  <Loader2 size={16} className="animate-spin text-[#55DEE8]" />
-                  DETECTING LOCATION...
+                  <Loader2 size={16} className="animate-spin" stroke="url(#primary-gradient)" />
+                  <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent">DETECTING LOCATION...</span>
                 </span>
               ) : locationStatus === "granted" ? (
-                `NEAREST TO YOU — ${turfs.length} VENUE${turfs.length !== 1 ? "S" : ""}`
+                <span>
+                  NEAREST TO YOU — <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent font-black">{turfs.length} VENUE{turfs.length !== 1 ? "S" : ""}</span>
+                </span>
               ) : (
-                `AVAILABLE VENUES — ${turfs.length}`
+                <span>
+                  AVAILABLE VENUES — <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent font-black">{turfs.length}</span>
+                </span>
               )}
             </h2>
           </div>

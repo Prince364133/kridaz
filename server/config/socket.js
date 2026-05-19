@@ -23,8 +23,10 @@ const socketConfig = (server) => {
     },
   });
 
-  // ── Redis Adapter (Enables horizontal scaling) ───────────────────────────────
-  io.adapter(createAdapter(pubClient, subClient));
+  // ── Redis Adapter (Enables horizontal scaling in production) ──────────────────
+  if (process.env.NODE_ENV === "production") {
+    io.adapter(createAdapter(pubClient, subClient));
+  }
 
   const onlineUsers = new Map(); // Local fallback — kept for within-process lookups
 

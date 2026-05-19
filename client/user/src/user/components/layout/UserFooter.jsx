@@ -60,7 +60,7 @@ const UserFooter = () => {
             
             <div className="flex gap-4 pt-4">
               {[Facebook, Linkedin, Instagram].map((Icon, i) => (
-                <Link key={i} to="#" className="w-10 h-10 rounded-sm border border-white/10 flex items-center justify-center text-white/30 hover:text-[#55DEE8] hover:border-[#55DEE8]/30 transition-all hover:-translate-y-1">
+                <Link key={i} to="#" className="w-10 h-10 rounded-sm border border-white/10 flex items-center justify-center text-white/30 hover:text-white/70 hover:border-white/30/30 transition-all hover:-translate-y-1">
                   <Icon size={18} />
                 </Link>
               ))}
@@ -136,9 +136,9 @@ const UserFooter = () => {
             {/* Partner CTA */}
             <Link
               to="/partners"
-              className="flex items-center gap-2 text-sm font-bold text-white hover:text-[#55DEE8] transition-colors group"
+              className="flex items-center gap-2 text-sm font-bold text-white hover:text-white/70 transition-colors group"
             >
-              <Building2 size={15} className="group-hover:text-[#55DEE8] transition-colors" />
+              <Building2 size={15} className="group-hover:text-white/70 transition-colors" />
               Partner With Us
               <ArrowUpRight size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </Link>

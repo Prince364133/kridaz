@@ -217,7 +217,7 @@ const TurfDetails = () => {
  <p className="text-zinc-400 mb-6">The venue you're looking for might have been moved or removed.</p>
  <Link 
  to="/turfs" 
- className="inline-flex items-center gap-2 bg-[#55DEE8] text-black px-6 py-3 rounded-full font-bold hover:scale-105 transition-transform"
+ className="inline-flex items-center gap-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-6 py-3 rounded-full font-bold hover:scale-105 transition-transform"
  >
  <ChevronLeft className="w-5 h-5" />
  Back to Discovery
@@ -243,7 +243,7 @@ const TurfDetails = () => {
  <div className="container mx-auto px-4 mb-4">
  <Link 
  to="/turfs" 
- className="inline-flex items-center gap-2 text-zinc-400 hover:text-[#55DEE8] transition-colors mb-4 group uppercase text-xs tracking-normal font-bold"
+ className="inline-flex items-center gap-2 text-zinc-400 hover:text-white/70 transition-colors mb-4 group uppercase text-xs tracking-normal font-bold"
  >
  <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
  Back to Search
@@ -274,7 +274,7 @@ const TurfDetails = () => {
  <Info className="w-5 h-5 text-[#55DEE8]" />
  <button 
  onClick={() => setIsPolicyModalOpen(true)}
- className="text-zinc-300 hover:text-[#55DEE8] transition-colors"
+ className="text-zinc-300 hover:text-white/70 transition-colors"
  >
  View Policies
  </button>
@@ -288,14 +288,14 @@ const TurfDetails = () => {
  className={`p-4 rounded-full border transition-all duration-300 active:scale-90 ${
  isFavorite 
  ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-lg shadow-[#55DEE8]/20" 
- : "bg-zinc-900/50 border-zinc-800 text-white hover:border-[#55DEE8] hover:bg-zinc-900"
+ : "bg-zinc-900/50 border-zinc-800 text-white hover:border-white/30 hover:bg-zinc-900"
  }`}
  >
  <Heart className={`w-6 h-6 ${isFavorite ? "fill-current" : ""}`} />
  </button>
  <button 
  onClick={handleShare}
- className="p-4 rounded-full bg-zinc-900/50 border border-zinc-800 text-white hover:border-[#55DEE8] hover:bg-zinc-900 transition-all duration-300 active:scale-90"
+ className="p-4 rounded-full bg-zinc-900/50 border border-zinc-800 text-white hover:border-white/30 hover:bg-zinc-900 transition-all duration-300 active:scale-90"
  >
  <Share2 className="w-6 h-6" />
  </button>
@@ -334,7 +334,7 @@ const TurfDetails = () => {
  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
  allowFullScreen
  ></iframe>
- <div className="absolute top-6 left-6 px-4 py-2 bg-[#55DEE8] text-black rounded-xl text-[10px] font-bold uppercase shadow-lg flex items-center gap-2">
+ <div className="absolute top-6 left-6 px-4 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-xl text-[10px] font-bold uppercase shadow-lg flex items-center gap-2">
  <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
  Live Feed
  </div>
@@ -419,7 +419,7 @@ const TurfDetails = () => {
  isSelected
  ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_5px_15px_rgba(204,255,0,0.3)]"
  : isAvailable
- ? "bg-zinc-900/50 border-zinc-800 text-white hover:border-[#55DEE8]/50"
+ ? "bg-zinc-900/50 border-zinc-800 text-white hover:border-white/30/50"
  : "bg-zinc-900/20 border-zinc-900 text-zinc-700 cursor-not-allowed opacity-50"
  }`}
  >
@@ -455,7 +455,7 @@ const TurfDetails = () => {
  <button 
  onClick={handleBookingClick}
  disabled={bookingLoading || !selectedStartTime}
- className="w-full bg-[#55DEE8] text-black h-16 rounded-2xl font-bold uppercase tracking-normal flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed shadow-lg shadow-[#55DEE8]/20"
+ className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black h-16 rounded-2xl font-bold uppercase tracking-normal flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed shadow-lg shadow-[#55DEE8]/20"
  >
  {bookingLoading ? (
  <div className="flex items-center gap-3">
@@ -576,7 +576,7 @@ const TurfDetails = () => {
  <div className="bg-zinc-900/30 border border-zinc-800 rounded-[1.5rem] p-5 space-y-3">
  {/* Owner Record */}
  {turf.owner && (
- <div className="flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl hover:border-[#55DEE8]/40 transition-all group relative overflow-hidden">
+ <div className="flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl hover:border-white/30/40 transition-all group relative overflow-hidden">
  <div className="absolute top-0 left-0 w-1 h-full bg-[#55DEE8]" />
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-[#111] border border-zinc-700 flex items-center justify-center shrink-0 overflow-hidden">
@@ -594,11 +594,11 @@ const TurfDetails = () => {
  </div>
  <div className="flex items-center gap-2">
  {turf.owner.phone && (
- <a href={`tel:${turf.owner.phone}`} className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 hover:bg-[#55DEE8] hover:text-black transition-all shrink-0">
+ <a href={`tel:${turf.owner.phone}`} className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 hover:bg-white/10 hover:text-black transition-all shrink-0">
  <Phone className="w-4 h-4" />
  </a>
  )}
- <a href={`mailto:${turf.owner.email}`} className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 hover:bg-[#55DEE8] hover:text-black transition-all shrink-0">
+ <a href={`mailto:${turf.owner.email}`} className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 hover:bg-white/10 hover:text-black transition-all shrink-0">
  <Mail className="w-4 h-4" />
  </a>
  </div>
@@ -610,13 +610,13 @@ const TurfDetails = () => {
  <a
  key={i}
  href={`tel:${contact.phone}`}
- className="flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl hover:border-[#55DEE8]/40 hover:bg-zinc-900 transition-all group pl-5"
+ className="flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl hover:border-white/30/40 hover:bg-zinc-900 transition-all group pl-5"
  >
  <div className="flex flex-col gap-0.5">
  <span className="text-white text-sm font-bold uppercase tracking-tight">{contact.name}</span>
  <span className="text-zinc-500 text-[10px] font-bold">Venue Manager • {contact.phone}</span>
  </div>
- <div className="w-9 h-9 rounded-xl bg-[#55DEE8]/10 border border-[#55DEE8]/20 flex items-center justify-center text-[#55DEE8] group-hover:bg-[#55DEE8] group-hover:text-black transition-all shrink-0">
+ <div className="w-9 h-9 rounded-xl bg-[#55DEE8]/10 border border-[#55DEE8]/20 flex items-center justify-center text-[#55DEE8] group-hover:bg-white/10 group-hover:text-black transition-all shrink-0">
  <Phone className="w-4 h-4" />
  </div>
  </a>
@@ -686,7 +686,7 @@ const TurfDetails = () => {
  <div className="pt-6 border-t border-zinc-800 flex justify-end">
  <button 
  onClick={() => setIsPolicyModalOpen(false)}
- className="bg-[#55DEE8] text-black px-10 py-4 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:scale-105 transition-transform"
+ className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-10 py-4 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:scale-105 transition-transform"
  >
  I Understand
  </button>
@@ -753,7 +753,7 @@ const VenueMap = ({ turf }) => {
 };
 
 const AmenityItem = ({ icon, text }) => (
- <div className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900/30 border border-zinc-800 hover:border-[#55DEE8]/50 transition-colors group">
+ <div className="flex items-center gap-3 p-3 rounded-2xl bg-zinc-900/30 border border-zinc-800 hover:border-white/30/50 transition-colors group">
  <div className="text-[#55DEE8] shrink-0 group-hover:scale-110 transition-transform">
  {React.cloneElement(icon, { className: "w-4 h-4" })}
  </div>

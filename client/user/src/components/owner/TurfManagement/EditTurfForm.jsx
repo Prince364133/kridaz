@@ -198,7 +198,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                         watch('groundTypes').map((ground) => (
                           <span key={ground} className="px-3 py-1 bg-white/5 text-white border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
                             {ground}
-                            <button type="button" onClick={() => setValue('groundTypes', watch('groundTypes').filter(g => g !== ground))} className="hover:text-[#55DEE8] transition-colors">
+                            <button type="button" onClick={() => setValue('groundTypes', watch('groundTypes').filter(g => g !== ground))} className="hover:text-white/70 transition-colors">
                               <X size={10} />
                             </button>
                           </span>

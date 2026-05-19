@@ -41,7 +41,7 @@ const OwnerBookings = () => {
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-8 bg-[#55DEE8] rounded-full" />
               <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
-                Bookings <span className="text-[#55DEE8]">Overview</span>
+                Bookings <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Overview</span>
               </h1>
             </div>
             <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
@@ -64,7 +64,7 @@ const OwnerBookings = () => {
                 </div>
               </div>
             </div>
-            <button className="p-3 bg-[#2D2D2D] hover:bg-[#55DEE8] hover:text-[#000] rounded-[6px] transition-all text-[#999999] group shadow-[var(--shadow-2)]">
+            <button className="p-3 bg-[#2D2D2D] hover:bg-white/10 hover:text-[#000] rounded-[6px] transition-all text-[#999999] group shadow-[var(--shadow-2)]">
               <Download size={18} className="group-hover:scale-110 transition-transform" />
             </button>
           </div>
@@ -106,7 +106,7 @@ const OwnerBookings = () => {
                   <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Athlete</th>
                   <th
                     onClick={() => requestSort("startTime")}
-                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-[#55DEE8] transition-colors"
+                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-white/70 transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       Start <ArrowUpDown size={12} className={getSortDirection("startTime") ? "text-[#55DEE8]" : "opacity-30"} />
@@ -114,7 +114,7 @@ const OwnerBookings = () => {
                   </th>
                   <th
                     onClick={() => requestSort("endTime")}
-                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-[#55DEE8] transition-colors"
+                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-white/70 transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       End <ArrowUpDown size={12} className={getSortDirection("endTime") ? "text-[#55DEE8]" : "opacity-30"} />
@@ -122,7 +122,7 @@ const OwnerBookings = () => {
                   </th>
                   <th
                     onClick={() => requestSort("bookingDate")}
-                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-[#55DEE8] transition-colors"
+                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-white/70 transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       Date <ArrowUpDown size={12} className={getSortDirection("bookingDate") ? "text-[#55DEE8]" : "opacity-30"} />
@@ -131,7 +131,7 @@ const OwnerBookings = () => {
                   <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Dur.</th>
                   <th
                     onClick={() => requestSort("totalPrice")}
-                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-[#55DEE8] transition-colors text-right"
+                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-white/70 transition-colors text-right"
                   >
                     <div className="flex items-center justify-end gap-2">
                       Price <ArrowUpDown size={12} className={getSortDirection("totalPrice") ? "text-[#55DEE8]" : "opacity-30"} />
@@ -145,7 +145,7 @@ const OwnerBookings = () => {
                   <tr key={booking.id} className="group hover:bg-[#2D2D2D]/20 transition-colors">
                     <td className="px-6 py-4">
                       <div>
-                        <p className="text-[14px] font-semibold text-white uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors">{booking.turfName}</p>
+                        <p className="text-[14px] font-semibold text-white uppercase tracking-tight group-hover:text-white/70 transition-colors">{booking.turfName}</p>
                         <p className="text-[11px] font-normal text-[#878C9F] uppercase tracking-widest mt-0.5">Ground ID: {booking.id.slice(-6)}</p>
                       </div>
                     </td>
@@ -201,7 +201,7 @@ const OwnerBookings = () => {
                           to={`/booking-pass/${booking.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2 bg-[#2D2D2D] hover:bg-[#55DEE8] hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
+                          className="p-2 bg-[#2D2D2D] hover:bg-white/10 hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
                           title="Open Ticket"
                         >
                           <Ticket size={14} className="group-hover/btn:scale-110 transition-transform" />
@@ -210,7 +210,7 @@ const OwnerBookings = () => {
                           to={`/booking-invoice/${booking.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2 bg-[#2D2D2D] hover:bg-[#55DEE8] hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
+                          className="p-2 bg-[#2D2D2D] hover:bg-white/10 hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
                           title="See Invoice"
                         >
                           <FileText size={14} className="group-hover/btn:scale-110 transition-transform" />

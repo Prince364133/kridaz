@@ -17,7 +17,7 @@ const OwnerCard = ({ owner, isSelected, onSelect, onDelete, onToggleStatus }) =>
     <div 
       onClick={handleRowClick}
       className={`group relative bg-[#000000] border transition-all duration-500 rounded-[12px] p-4 lg:px-8 lg:py-5 shadow-xl overflow-hidden cursor-pointer ${
-        isSelected ? "border-[#55DEE8] bg-[#55DEE8]/5" : "border-[#2D2D2D] hover:border-[#55DEE8]/40"
+        isSelected ? "border-[#55DEE8] bg-[#55DEE8]/5" : "border-[#2D2D2D] hover:border-white/30/40"
       }`}
     >
       {/* Interaction Highlight */}
@@ -48,7 +48,7 @@ const OwnerCard = ({ owner, isSelected, onSelect, onDelete, onToggleStatus }) =>
             </div>
           </div>
           <div className="min-w-0">
-            <h3 className="text-[15px] font-black text-white uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors truncate">
+            <h3 className="text-[15px] font-black text-white uppercase tracking-tight group-hover:text-white/70 transition-colors truncate">
               {owner.name}
             </h3>
             <p className="text-[9px] font-black text-[#878C9F] uppercase tracking-[0.2em] mt-0.5">
@@ -113,7 +113,7 @@ const OwnerCard = ({ owner, isSelected, onSelect, onDelete, onToggleStatus }) =>
               e.stopPropagation();
               navigate(`/admin/owners/${owner._id}/turf`);
             }}
-            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:bg-[#55DEE8] hover:text-black transition-all"
+            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:bg-white/10 hover:text-black transition-all"
           >
             <ExternalLink size={16} />
           </button>

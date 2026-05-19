@@ -35,7 +35,7 @@ const UserCard = ({ user, onToggleStatus, onDelete, isSelected, onSelect }) => {
     <div 
       onClick={handleRowClick}
       className={`group relative bg-[#000000] border transition-all duration-500 rounded-[12px] p-4 lg:px-8 lg:py-5 shadow-xl overflow-hidden cursor-pointer ${
-        isSelected ? "border-[#55DEE8] bg-[#55DEE8]/5" : "border-[#2D2D2D] hover:border-[#55DEE8]/40"
+        isSelected ? "border-[#55DEE8] bg-[#55DEE8]/5" : "border-[#2D2D2D] hover:border-white/30/40"
       }`}
     >
       {/* Interaction Highlight */}
@@ -59,7 +59,7 @@ const UserCard = ({ user, onToggleStatus, onDelete, isSelected, onSelect }) => {
         <div className="lg:col-span-3 flex items-center gap-5">
           <div className="relative shrink-0">
             <div className="absolute inset-0 bg-[#55DEE8]/5 blur-lg rounded-full scale-150 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative border border-white/10 rounded-full p-0.5 group-hover:border-[#55DEE8]/30 transition-colors bg-[#0d0d0d]">
+            <div className="relative border border-white/10 rounded-full p-0.5 group-hover:border-white/30/30 transition-colors bg-[#0d0d0d]">
               <Avatar 
                 name={user.name} 
                 size={42} 
@@ -71,7 +71,7 @@ const UserCard = ({ user, onToggleStatus, onDelete, isSelected, onSelect }) => {
             </div>
           </div>
           <div className="min-w-0">
-            <h3 className="text-[15px] font-black text-white uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors truncate font-open-sans">
+            <h3 className="text-[15px] font-black text-white uppercase tracking-tight group-hover:text-white/70 transition-colors truncate font-open-sans">
               {user.name}
             </h3>
             <p className="text-[9px] font-black text-[#878C9F] uppercase tracking-[0.2em] mt-0.5">
@@ -91,7 +91,7 @@ const UserCard = ({ user, onToggleStatus, onDelete, isSelected, onSelect }) => {
 
         {/* Contact Email */}
         <div className="lg:col-span-2 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/20 group-hover:text-[#55DEE8] transition-colors border border-white/5 group-hover:border-[#55DEE8]/20">
+          <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/20 group-hover:text-white/70 transition-colors border border-white/5 group-hover:border-white/30/20">
             <Mail size={14} />
           </div>
           <span className="text-[11px] font-bold text-white/60 truncate group-hover:text-white transition-colors">
@@ -101,7 +101,7 @@ const UserCard = ({ user, onToggleStatus, onDelete, isSelected, onSelect }) => {
 
         {/* Registration Date */}
         <div className="lg:col-span-2 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/20 group-hover:text-[#55DEE8] transition-colors border border-white/5 group-hover:border-[#55DEE8]/20">
+          <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/20 group-hover:text-white/70 transition-colors border border-white/5 group-hover:border-white/30/20">
             <Calendar size={14} />
           </div>
           <span className="text-[11px] font-bold text-white/60 group-hover:text-white transition-colors uppercase tracking-tight">
@@ -150,7 +150,7 @@ const UserCard = ({ user, onToggleStatus, onDelete, isSelected, onSelect }) => {
           <button 
             onClick={() => navigate(`/profile/${user._id}`)}
             title="View Full Profile"
-            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:bg-[#55DEE8] hover:text-black hover:border-[#55DEE8] transition-all"
+            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:bg-white/10 hover:text-black hover:border-white/30 transition-all"
           >
             <ExternalLink size={16} />
           </button>

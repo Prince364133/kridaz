@@ -100,7 +100,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
               placeholder="SEARCH..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[6px] py-2.5 pl-10 pr-4 text-xs text-white placeholder:text-white/20 outline-none focus:border-[#55DEE8]/50 transition-all uppercase tracking-widest"
+              className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[6px] py-2.5 pl-10 pr-4 text-xs text-white placeholder:text-white/20 outline-none focus:border-white/30/50 transition-all uppercase tracking-widest"
             />
           </div>
         </div>
@@ -141,7 +141,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                         </div>
                       </Link>
                       <div className="overflow-hidden">
-                        <Link to={`/profile/${user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#55DEE8] transition-colors truncate">
+                        <Link to={`/profile/${user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-white/70 transition-colors truncate">
                           {user.name}
                         </Link>
                         <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase tracking-widest truncate">
@@ -162,7 +162,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                         className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
                           isFollowing
                             ? "bg-[#000000] text-white/40 border border-[#2D2D2D] hover:bg-white/10"
-                            : "bg-[#55DEE8] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(85,222,232,0.15)]"
+                            : "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(85,222,232,0.15)]"
                         }`}
                       >
                         {isFollowing ? "Following" : "Follow"}

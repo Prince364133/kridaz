@@ -84,7 +84,7 @@ const VerificationCenter = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic text-white">
-                PARTNER <span className="text-[#55DEE8]">MISSION CONTROL</span>
+                PARTNER <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>MISSION CONTROL</span>
               </h1>
               <p className="text-gray-500 font-medium tracking-wider uppercase text-[10px] mt-2">
                 Unified Governance • Compliance Oversight • Role Verification
@@ -143,7 +143,7 @@ const VerificationCenter = () => {
                   <div className="relative">
                     <button 
                       onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-                      className="h-9 px-4 bg-[#0F0F0F] border border-[#2D2D2D] text-white rounded-[6px] flex items-center gap-3 hover:border-[#55DEE8]/50 transition-all min-w-[160px] justify-between group"
+                      className="h-9 px-4 bg-[#0F0F0F] border border-[#2D2D2D] text-white rounded-[6px] flex items-center gap-3 hover:border-white/30/50 transition-all min-w-[160px] justify-between group"
                     >
                       <div className="flex items-center gap-2">
                         <Users size={14} className="text-[#55DEE8]" />
@@ -237,7 +237,7 @@ const VerificationCenter = () => {
                 <div className="space-y-2">
                   <h3 className="text-xl font-display uppercase tracking-tight text-white">Partner Authorization</h3>
                   <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                    Confirming credentials for <span className="text-[#55DEE8]">{selectedRequest?.name}</span>
+                    Confirming credentials for <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{selectedRequest?.name}</span>
                   </p>
                 </div>
 

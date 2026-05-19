@@ -208,7 +208,7 @@ const ScorerSignUp = () => {
               { icon: Zap, title: "Live Sync", desc: "Real-time updates across all digital platforms" }
             ].map((item, i) => (
               <div key={i} className="flex gap-4 group cursor-default">
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 group-hover:bg-[#55DEE8]/10 group-hover:border-[#55DEE8]/30 transition-all duration-500">
+                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 group-hover:bg-white/10/10 group-hover:border-white/30/30 transition-all duration-500">
                   <item.icon size={20} className="text-[#55DEE8]" />
                 </div>
                 <div>

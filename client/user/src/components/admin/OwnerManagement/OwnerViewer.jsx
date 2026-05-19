@@ -113,7 +113,7 @@ const OwnerViewer = () => {
             <div className="relative">
               <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-14 bg-[#55DEE8] rounded-full shadow-[0_0_25px_rgba(204,255,0,0.5)]"></div>
               <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none mb-4">
-                Partner <span className="text-[#55DEE8]">Directory</span>
+                Partner <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Directory</span>
               </h1>
               <p className="admin-subheading text-[#999999]">
                 Verified Venue Proprietors • Enterprise Roster
@@ -242,14 +242,14 @@ const OwnerViewer = () => {
 };
 
 const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend }) => (
-  <div className="bg-[#000000] border border-[#2D2D2D] rounded-[12px] p-6 flex flex-col relative overflow-hidden group hover:border-[#55DEE8]/30 transition-all duration-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
+  <div className="bg-[#000000] border border-[#2D2D2D] rounded-[12px] p-6 flex flex-col relative overflow-hidden group hover:border-white/30/30 transition-all duration-500 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)]">
     <Icon className="absolute -right-4 -bottom-4 w-24 h-24 text-white/[0.02] group-hover:text-white/[0.05] transition-all duration-700 rotate-12 pointer-events-none" />
     
     <div className="flex items-center justify-between mb-6 relative z-10">
       <div className="w-12 h-12 bg-[#55DEE8]/10 rounded-[10px] text-[#55DEE8] flex items-center justify-center border border-[#55DEE8]/20 shadow-[0_0_15px_rgba(204,255,0,0.1)] transition-transform group-hover:scale-110">
         <Icon size={22} />
       </div>
-      <div className="px-3 py-1 rounded-full bg-white/5 text-white/40 text-[9px] font-black uppercase tracking-widest border border-white/5 group-hover:border-[#55DEE8]/20 group-hover:text-[#55DEE8] transition-all">
+      <div className="px-3 py-1 rounded-full bg-white/5 text-white/40 text-[9px] font-black uppercase tracking-widest border border-white/5 group-hover:border-white/30/20 group-hover:text-white/70 transition-all">
         {trend}
       </div>
     </div>

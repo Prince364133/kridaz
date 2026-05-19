@@ -215,7 +215,7 @@ const SignUp = () => {
                         type="text" 
                         placeholder="Email OTP"
                         maxLength={6}
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
                       />
                     </div>
                     {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
@@ -229,7 +229,7 @@ const SignUp = () => {
                         type="text" 
                         placeholder="WhatsApp OTP"
                         maxLength={6}
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
                       />
                     </div>
                     {errors.phoneOtp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.phoneOtp.message}</p>}
@@ -274,7 +274,7 @@ const SignUp = () => {
                             {...register("name")}
                             type="text" 
                             placeholder="John Doe"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
                         {errors.name && <p className="text-xs text-red-500 mt-1 ml-1">{errors.name.message}</p>}
@@ -293,7 +293,7 @@ const SignUp = () => {
                             className={`w-full bg-white/[0.03] border rounded-xl h-14 pl-12 pr-12 text-white text-sm placeholder:text-white/20 outline-none transition-all ${
                               usernameStatus === 'available' ? 'border-green-500/50' : 
                               usernameStatus === 'unavailable' ? 'border-red-500/50' : 
-                              'border-white/5 focus:border-[#55DEE8]/50'
+                              'border-white/5 focus:border-white/30/50'
                             }`}
                           />
                           
@@ -318,7 +318,7 @@ const SignUp = () => {
                             {...register("email")}
                             type="email" 
                             placeholder="name@example.com"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
                         {errors.email && <p className="text-xs text-red-500 mt-1 ml-1">{errors.email.message}</p>}
@@ -333,7 +333,7 @@ const SignUp = () => {
                             {...register("phone")}
                             type="text" 
                             placeholder="+91 00000 00000"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
                         {errors.phone && <p className="text-xs text-red-500 mt-1 ml-1">{errors.phone.message}</p>}
@@ -348,7 +348,7 @@ const SignUp = () => {
                             <UserSquare2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors z-10 pointer-events-none" />
                             <select 
                               {...register("gender")}
-                              className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm appearance-none outline-none transition-all cursor-pointer hover:bg-white/[0.05]"
+                              className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm appearance-none outline-none transition-all cursor-pointer hover:bg-white/[0.05]"
                               defaultValue=""
                             >
                               <option value="" disabled className="bg-black text-white/40">Select Gender</option>
@@ -368,13 +368,13 @@ const SignUp = () => {
                           <div className="relative">
                             <Trophy size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors z-10 pointer-events-none" />
                             <div 
-                              className={`w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 py-3 flex items-center gap-2 cursor-pointer transition-all overflow-hidden hover:bg-white/[0.05] ${showSportsDropdown ? 'border-[#55DEE8]/50 ring-1 ring-[#55DEE8]/20' : ''}`}
+                              className={`w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 py-3 flex items-center gap-2 cursor-pointer transition-all overflow-hidden hover:bg-white/[0.05] ${showSportsDropdown ? 'border-[#55DEE8]/50 ring-1 ring-[#55DEE8]/20' : ''}`}
                               onClick={() => setShowSportsDropdown(!showSportsDropdown)}
                             >
                               {selectedSports.length > 0 ? (
                                 <div className="flex gap-1 overflow-x-auto no-scrollbar">
                                   {selectedSports.map(sport => (
-                                    <span key={sport} className="bg-[#55DEE8] text-black text-[9px] font-black px-1.5 py-0.5 rounded flex-shrink-0 uppercase tracking-tighter">
+                                    <span key={sport} className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[9px] font-black px-1.5 py-0.5 rounded flex-shrink-0 uppercase tracking-tighter">
                                       {sport}
                                     </span>
                                   ))}
@@ -428,7 +428,7 @@ const SignUp = () => {
                               type="text" 
                               autoComplete="off"
                               placeholder="City, State"
-                              className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                              className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                             />
                             
                             {/* Suggestions Dropdown */}
@@ -451,7 +451,7 @@ const SignUp = () => {
                                         className="w-full flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 text-left transition-all group/item"
                                       >
                                         <div className="p-2 bg-white/5 rounded-lg group-hover/item:bg-[#55DEE8]/10 transition-colors mt-0.5">
-                                          <Navigation size={14} className="text-gray-500 group-hover/item:text-[#55DEE8]" />
+                                          <Navigation size={14} className="text-gray-500 group-hover/item:text-white/80" />
                                         </div>
                                         <div className="flex flex-col min-w-0">
                                           <span className="text-[11px] font-bold text-white uppercase tracking-wider truncate">
@@ -496,7 +496,7 @@ const SignUp = () => {
                             {...register("password")}
                             type="password" 
                             placeholder="••••••••"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
                         {errors.password && <p className="text-xs text-red-500 mt-1 ml-1">{errors.password.message}</p>}
@@ -511,7 +511,7 @@ const SignUp = () => {
                             {...register("confirmPassword")}
                             type="password" 
                             placeholder="••••••••"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
                         {errors.confirmPassword && <p className="text-xs text-red-500 mt-1 ml-1">{errors.confirmPassword.message}</p>}

@@ -112,7 +112,7 @@ export default function VenueIntelligence() {
 
       {/* Top Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#55DEE8] transition-colors border border-[#55DEE8]/20">
              <TrendingUp size={20} />
           </div>
@@ -120,7 +120,7 @@ export default function VenueIntelligence() {
           <h3 className="text-2xl font-semibold text-white tracking-tight">₹{(grossRevenue).toLocaleString()}</h3>
         </div>
 
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#55DEE8] transition-colors border border-[#55DEE8]/20">
              <Zap size={20} />
           </div>
@@ -128,7 +128,7 @@ export default function VenueIntelligence() {
           <h3 className="text-2xl font-semibold text-white tracking-tight">{totalBookings}</h3>
         </div>
 
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#55DEE8] transition-colors border border-[#55DEE8]/20">
              <Target size={20} />
           </div>
@@ -136,7 +136,7 @@ export default function VenueIntelligence() {
           <h3 className="text-2xl font-semibold text-white tracking-tight">{avgSessionTime} min</h3>
         </div>
 
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#55DEE8] transition-colors border border-[#55DEE8]/20">
              <Percent size={20} />
           </div>
@@ -149,7 +149,7 @@ export default function VenueIntelligence() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mt-8">
         
         {/* Revenue & Demand Forecasting */}
-        <div className="lg:col-span-2 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+        <div className="lg:col-span-2 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
            <div className="flex justify-between items-start mb-6">
               <div>
                  <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Revenue & Demand Forecasting</h2>
@@ -187,7 +187,7 @@ export default function VenueIntelligence() {
         </div>
 
         {/* Venue DNA */}
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col items-center relative shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col items-center relative shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
            <h2 className="text-xl font-bold font-['Open_Sans'] text-white text-center uppercase tracking-tight">Venue DNA</h2>
            <p className="text-[#878C9F] font-inter text-[20px] text-center mb-4 mt-1">Strategic balance across 5 vectors</p>
            
@@ -222,7 +222,7 @@ export default function VenueIntelligence() {
       <div className="grid grid-cols-1 gap-6 lg:gap-8 mt-8">
         
         {/* Venue Comparison & Sport Distribution */}
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
            <div className="flex justify-between items-center mb-1">
               <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Revenue Comparison</h2>
            </div>
@@ -237,7 +237,7 @@ export default function VenueIntelligence() {
                     <div key={venue.name} className="space-y-1">
                       <div className="flex justify-between text-[11px] font-bold text-white">
                         <span>{venue.name}</span>
-                        <span className="text-[#55DEE8]">Rs {venue.value.toLocaleString()}</span>
+                        <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Rs {venue.value.toLocaleString()}</span>
                       </div>
                       <div className="w-full bg-[#1A1A1A] rounded-[4px] h-6 overflow-hidden relative">
                         <div 

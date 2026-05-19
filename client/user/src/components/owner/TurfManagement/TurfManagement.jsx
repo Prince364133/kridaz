@@ -77,7 +77,7 @@ const TurfManagement = () => {
              <Plus size={32} />
           </div>
           <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px]">No active arenas found in your roster.</p>
-          <Link to="/partner/add-turf" className="mt-6 text-[#55DEE8] text-[11px] font-bold uppercase tracking-widest border-b border-[#55DEE8]/40 hover:border-[#55DEE8] transition-all pb-1">Initialize First Venue</Link>
+          <Link to="/partner/add-turf" className="mt-6 text-[#55DEE8] text-[11px] font-bold uppercase tracking-widest border-b border-[#55DEE8]/40 hover:border-white/30 transition-all pb-1">Initialize First Venue</Link>
         </div>
       )}
       </div>

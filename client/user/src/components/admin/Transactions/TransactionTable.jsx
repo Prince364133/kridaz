@@ -16,7 +16,7 @@ const TransactionTable = ({
             <th className="p-4 text-xs font-bold uppercase tracking-widest text-gray-500 border-b border-white/5">User</th>
             <th className="p-4 text-xs font-bold uppercase tracking-widest text-gray-500 border-b border-white/5">
               <button
-                className="flex items-center group transition-colors hover:text-[#55DEE8]"
+                className="flex items-center group transition-colors hover:text-white/70"
                 onClick={() => onSort("createdAt")}
               >
                 Date
@@ -33,7 +33,7 @@ const TransactionTable = ({
             <th className="p-4 text-xs font-bold uppercase tracking-widest text-gray-500 border-b border-white/5">Payment ID</th>
             <th className="p-4 text-xs font-bold uppercase tracking-widest text-gray-500 border-b border-white/5 text-right">
               <button
-                className="flex items-center justify-end w-full group transition-colors hover:text-[#55DEE8]"
+                className="flex items-center justify-end w-full group transition-colors hover:text-white/70"
                 onClick={() => onSort("totalPrice")}
               >
                 Amount
@@ -52,7 +52,7 @@ const TransactionTable = ({
             <tr key={transaction._id} className="group hover:bg-white/[0.02] transition-colors">
               <td className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-1 rounded-full bg-white/5 group-hover:bg-[#55DEE8]/20 transition-colors">
+                  <div className="p-1 rounded-full bg-white/5 group-hover:bg-white/10/20 transition-colors">
                      <Avatar name={transaction.user.name} size="32" round={true} />
                   </div>
                   <span className="font-bold text-sm tracking-tight">{transaction.user.name}</span>

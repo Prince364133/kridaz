@@ -63,7 +63,7 @@ const OccupancyHeatmap = () => {
           <select 
             value={selectedTurf} 
             onChange={(e) => setSelectedTurf(e.target.value)}
-            className="bg-[#151617] border border-[#2D2D2D] text-white text-[10px] font-bold uppercase tracking-widest rounded-[6px] px-3 py-1.5 focus:outline-none focus:border-[#55DEE8]/50 transition-all cursor-pointer hover:border-[#55DEE8]/30"
+            className="bg-[#151617] border border-[#2D2D2D] text-white text-[10px] font-bold uppercase tracking-widest rounded-[6px] px-3 py-1.5 focus:outline-none focus:border-[#55DEE8]/50 transition-all cursor-pointer hover:border-white/30/30"
           >
             <option value="" disabled>Select Facility</option>
             {turfs.map(turf => (
@@ -146,14 +146,14 @@ const OccupancyHeatmap = () => {
             <div className="max-h-[60vh] overflow-y-auto p-6 space-y-4 no-scrollbar">
               {selectedSlot.details.length > 0 ? (
                 selectedSlot.details.map((b, idx) => (
-                  <div key={idx} className="bg-[#000000] p-5 rounded-[8px] border border-[#2D2D2D] hover:border-[#55DEE8]/30 transition-all group">
+                  <div key={idx} className="bg-[#000000] p-5 rounded-[8px] border border-[#2D2D2D] hover:border-white/30/30 transition-all group">
                     <div className="flex items-center justify-between mb-4">
                        <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-[6px] bg-[#55DEE8] flex items-center justify-center text-black font-black text-lg">
                              {b.user[0]}
                           </div>
                           <div>
-                             <h4 className="text-white font-bold uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors">{b.user}</h4>
+                             <h4 className="text-white font-bold uppercase tracking-tight group-hover:text-white/70 transition-colors">{b.user}</h4>
                              <p className="text-[10px] text-[#999999] uppercase tracking-widest">{b.turf}</p>
                           </div>
                        </div>

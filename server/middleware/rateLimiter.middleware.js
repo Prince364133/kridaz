@@ -2,6 +2,13 @@ import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 import { redisClient as redis } from '../config/redis.js';
 
+// Use RedisStore only in production to prevent local Redis connection hangs blocking APIs
+const useRedisStore = process.env.NODE_ENV === 'production';
+
+const store = useRedisStore 
+  ? new RedisStore({ sendCommand: (...args) => redis.call(...args) })
+  : undefined;
+
 /**
  * Auth limiter — login, register, Google auth, password reset.
  * 10 attempts per 15 minutes per IP.
@@ -12,7 +19,7 @@ export const authLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
+  store,
   message: { success: false, message: 'Too many attempts. Please try again in 15 minutes.' },
   skipSuccessfulRequests: true, // Counter only increments on failed attempts
 });
@@ -26,7 +33,7 @@ export const otpLimiter = rateLimit({
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
-  store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
+  store,
   message: { success: false, message: 'Too many OTP requests. Please wait 1 minute.' },
 });
 
@@ -40,7 +47,7 @@ export const paymentLimiter = rateLimit({
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
-  store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
+  store,
   message: { success: false, message: 'Too many payment requests. Please slow down.' },
 });
 
@@ -53,7 +60,7 @@ export const globalLimiter = rateLimit({
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
-  store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
+  store,
   message: { success: false, message: 'Too many requests. Please slow down.' },
   skip: (req) => req.path === '/health', // Only skip the health check endpoint
 });

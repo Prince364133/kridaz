@@ -40,7 +40,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
           </div>
           <button 
             onClick={activeTab === 'myTeams' ? onCreateTeam : () => setIsAddOpponentOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#55DEE8] text-black text-xs font-black rounded-xl shadow-lg shadow-[#55DEE8]/20 hover:bg-[#b8e600] transition-all hover:-translate-y-0.5"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-xs font-black rounded-xl shadow-lg shadow-[#55DEE8]/20 hover:bg-[#b8e600] transition-all hover:-translate-y-0.5"
           >
             <Plus size={16} />
             <span className="uppercase tracking-widest">{activeTab === 'myTeams' ? 'Create' : 'Add'}</span>
@@ -53,7 +53,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
           <input 
             type="text" 
             placeholder="Search teams or ID..." 
-            className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-[#55DEE8]/50 transition-colors uppercase font-bold tracking-widest"
+            className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-white/30/50 transition-colors uppercase font-bold tracking-widest"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -64,7 +64,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
           <button 
             onClick={() => setActiveTab('myTeams')}
             className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-              activeTab === 'myTeams' ? 'bg-[#55DEE8] text-black shadow-lg' : 'text-white/40 hover:text-white'
+              activeTab === 'myTeams' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'
             }`}
           >
             My Teams
@@ -72,7 +72,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
           <button 
             onClick={() => setActiveTab('opponentTeams')}
             className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-              activeTab === 'opponentTeams' ? 'bg-[#55DEE8] text-black shadow-lg' : 'text-white/40 hover:text-white'
+              activeTab === 'opponentTeams' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'
             }`}
           >
             Opponents
@@ -104,7 +104,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                 }`}
               >
                 <div className="relative shrink-0">
-                  <div className={`w-12 h-12 rounded-2xl bg-black border-2 flex items-center justify-center text-[#55DEE8] font-bold overflow-hidden transition-colors ${isSelected ? 'border-[#55DEE8]' : 'border-white/10 group-hover:border-[#55DEE8]/50'}`}>
+                  <div className={`w-12 h-12 rounded-2xl bg-black border-2 flex items-center justify-center text-[#55DEE8] font-bold overflow-hidden transition-colors ${isSelected ? 'border-[#55DEE8]' : 'border-white/10 group-hover:border-white/30/50'}`}>
                     {team.image ? (
                       <img src={team.image} alt={team.name} className="w-full h-full object-cover" />
                     ) : (

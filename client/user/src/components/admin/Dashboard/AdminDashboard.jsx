@@ -151,7 +151,7 @@ export default function AdminDashboard() {
             </div>
             <button 
               onClick={() => navigate("/admin/marketing")}
-              className="w-full mt-6 py-3 bg-white/5 border border-white/10 hover:border-[#55DEE8]/50 hover:bg-[#55DEE8]/5 text-white hover:text-[#55DEE8] rounded-xl transition-all font-bold uppercase text-[10px] tracking-widest group"
+              className="w-full mt-6 py-3 bg-white/5 border border-white/10 hover:border-white/30/50 hover:bg-white/10/5 text-white hover:text-white/70 rounded-xl transition-all font-bold uppercase text-[10px] tracking-widest group"
             >
               Open CMS Hub <ChevronRight className="w-3 h-3 inline ml-2 group-hover:translate-x-1 transition-transform" />
             </button>
@@ -192,7 +192,7 @@ export default function AdminDashboard() {
 const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend, trendNegative, onClick }) => (
   <div 
     onClick={onClick}
-    className={`bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#55DEE8]/30 transition-all duration-500 min-h-[140px] shadow-2xl ${onClick ? 'cursor-pointer' : ''}`}
+    className={`bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-white/30/30 transition-all duration-500 min-h-[140px] shadow-2xl ${onClick ? 'cursor-pointer' : ''}`}
   >
     <Icon className="absolute -right-4 -bottom-4 w-20 h-20 text-white/[0.02] group-hover:text-white/[0.04] transition-colors" />
     <div className="flex items-center justify-between mb-5 relative z-10">
@@ -219,7 +219,7 @@ const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend, 
 
 const ChartCard = ({ title, subtitle, children, action }) => (
   <div className="bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-2xl relative overflow-hidden group flex flex-col h-full">
-    <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/5 blur-[60px] group-hover:bg-[#55DEE8]/10 transition-colors pointer-events-none"></div>
+    <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/5 blur-[60px] group-hover:bg-white/10/10 transition-colors pointer-events-none"></div>
     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 relative z-10 shrink-0">
       <div>
         <h2 className="text-[14px] font-bold text-white uppercase tracking-wider leading-none mb-2">{title}</h2>
@@ -234,7 +234,7 @@ const ChartCard = ({ title, subtitle, children, action }) => (
 const ModerationItem = ({ icon: Icon, label, count, color = "text-white", onClick }) => (
   <div 
     onClick={onClick}
-    className={`flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:border-[#55DEE8]/30 transition-all ${onClick ? 'cursor-pointer hover:bg-[#55DEE8]/5' : ''}`}
+    className={`flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:border-white/30/30 transition-all ${onClick ? 'cursor-pointer hover:bg-white/10/5' : ''}`}
   >
     <div className="flex items-center gap-3">
       <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">

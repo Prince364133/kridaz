@@ -291,7 +291,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
         <div className="relative" ref={addMenuRef}>
           <button 
             onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
-            className={`w-10 h-10 ${isAddMenuOpen ? 'bg-[#55DEE8] text-black' : 'bg-[#55DEE8]/10 text-[#55DEE8]'} hover:bg-[#55DEE8] hover:text-black rounded-xl transition-all flex items-center justify-center group`}
+            className={`w-10 h-10 ${isAddMenuOpen ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black' : 'bg-[#55DEE8]/10 text-[#55DEE8]'} hover:bg-white/10 hover:text-black rounded-xl transition-all flex items-center justify-center group`}
             title="Add New"
           >
             <Plus size={20} className={`${isAddMenuOpen ? 'rotate-45' : ''} transition-transform duration-300`} />
@@ -304,7 +304,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                   setIsAddMenuOpen(false);
                   onCreateGroup();
                 }}
-                className="w-full px-4 py-3 text-left text-sm text-white/80 hover:bg-[#55DEE8] hover:text-black flex items-center gap-3 transition-colors"
+                className="w-full px-4 py-3 text-left text-sm text-white/80 hover:bg-white/10 hover:text-black flex items-center gap-3 transition-colors"
               >
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-black/10">
                   <Users size={16} />
@@ -321,7 +321,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                   // Trigger community creation
                   if (typeof onCreateCommunity === 'function') onCreateCommunity();
                 }}
-                className="w-full px-4 py-3 text-left text-sm text-white/80 hover:bg-[#55DEE8] hover:text-black flex items-center gap-3 transition-colors"
+                className="w-full px-4 py-3 text-left text-sm text-white/80 hover:bg-white/10 hover:text-black flex items-center gap-3 transition-colors"
               >
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-black/10">
                   <MessageSquare size={16} />
@@ -340,7 +340,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
           className="relative group cursor-pointer shrink-0"
           onClick={onEditProfile}
         >
-          <div className="w-10 h-10 rounded-full border border-white/10 bg-[#55DEE8]/10 flex items-center justify-center overflow-hidden hover:border-[#55DEE8]/50 transition-all shadow-lg active:scale-95 group-hover:shadow-[#55DEE8]/10">
+          <div className="w-10 h-10 rounded-full border border-white/10 bg-[#55DEE8]/10 flex items-center justify-center overflow-hidden hover:border-white/30/50 transition-all shadow-lg active:scale-95 group-hover:shadow-white/10">
             {(user?.profilePicture || user?.profileImage) ? (
               <img 
                 src={user.profilePicture || user.profileImage} 
@@ -393,7 +393,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                 <div className="flex gap-2">
                   <button 
                     onClick={() => handleRespond(chat._id, 'accepted')}
-                    className="flex-1 h-9 bg-[#55DEE8] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    className="flex-1 h-9 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
                   >
                     Accept
                   </button>
@@ -442,9 +442,9 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                   <div className="relative shrink-0">
                     {renderAvatar(chat)}
                     {chat.isCommunity ? (
-                      <div className="absolute -bottom-1 -right-1 bg-[#55DEE8] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Com</div>
+                      <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Com</div>
                     ) : chat.isGroupChat ? (
-                      <div className="absolute -bottom-1 -right-1 bg-[#55DEE8] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Grp</div>
+                      <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Grp</div>
                     ) : null}
                   </div>
                   <div className="flex-1 text-left overflow-hidden min-w-0">
@@ -484,7 +484,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                       </p>
                     </div>
                     {unreadCount > 0 && (
-                      <div className="shrink-0 min-w-[20px] h-5 bg-[#55DEE8] text-black text-[10px] font-black rounded-full flex items-center justify-center px-1.5">
+                      <div className="shrink-0 min-w-[20px] h-5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black rounded-full flex items-center justify-center px-1.5">
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </div>
                     )}

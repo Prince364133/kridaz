@@ -33,7 +33,7 @@ const DiscoveryMapShell = ({ children, isExpanded, onToggle, height = "35vh" }) 
         
         {/* The Handle Tab */}
         <div className="relative flex flex-col items-center gap-0.5 pb-2 transition-transform duration-300 group-hover:scale-110">
-          <div className="w-12 h-1 bg-white/20 rounded-full mb-1 group-hover:bg-[#55DEE8]/40 transition-colors" />
+          <div className="w-12 h-1 bg-white/20 rounded-full mb-1 group-hover:bg-white/10/40 transition-colors" />
           <div className="flex items-center gap-1.5 px-4 py-1 bg-black/80 backdrop-blur-md rounded-full border border-white/10 shadow-lg">
              {isExpanded ? (
                <>
@@ -52,7 +52,7 @@ const DiscoveryMapShell = ({ children, isExpanded, onToggle, height = "35vh" }) 
 
       {/* Corner Action - Layer Toggle Placeholder */}
       <div className="absolute top-4 right-4 z-[1000]">
-        <button className="w-10 h-10 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-center text-white hover:text-[#55DEE8] transition-colors shadow-2xl">
+        <button className="w-10 h-10 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-center text-white hover:text-white/70 transition-colors shadow-2xl">
           <MapIcon className="w-5 h-5" />
         </button>
       </div>

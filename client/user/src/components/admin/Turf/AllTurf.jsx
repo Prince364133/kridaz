@@ -101,7 +101,7 @@ export const AllTurf = () => {
             </div>
             <div className="relative">
               <h1 className="text-4xl md:text-5xl font-black tracking-tight uppercase text-white leading-none">
-                Platform <span className="text-[#55DEE8]">Venues</span>
+                Platform <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Venues</span>
               </h1>
               <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-3">Manage and monitor all platform venues</p>
             </div>

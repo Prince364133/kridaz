@@ -43,8 +43,7 @@ app.use(
 );
 
 // ── Rate Limiters ─────────────────────────────────────────────────────────────
-// Global — all /api routes (health check excluded via skip in the middleware)
-app.use('/api', globalLimiter);
+// app.use('/api', globalLimiter);
 
 import { validateTurnstile } from "./middleware/turnstile.middleware.js";
 

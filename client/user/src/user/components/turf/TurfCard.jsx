@@ -39,7 +39,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
  return (
  <div
  onClick={() => navigate(to)}
- className="group relative h-[280px] md:h-[360px] w-full rounded-[1.25rem] md:rounded-[2rem] overflow-hidden cursor-pointer bg-[#0d0d0d] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 hover:border-[#55DEE8]/30"
+ className="group relative h-[280px] md:h-[360px] w-full rounded-[1.25rem] md:rounded-[2rem] overflow-hidden cursor-pointer bg-[#0d0d0d] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 hover:border-white/30/30"
  >
  {/* ── Background Image ── */}
  <div className="absolute inset-0">
@@ -56,7 +56,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
  <div className="absolute top-3 md:top-5 left-3 md:left-5 z-20 flex flex-col gap-2 md:gap-2.5 items-start">
  <div className="flex items-center gap-1.5 md:gap-2.5">
  {/* Sport Tag */}
- <span className="bg-[#55DEE8] text-black text-[8px] md:text-[10px] font-black px-2 md:px-3 py-1 md:py-1.5 rounded-lg md:rounded-xl uppercase tracking-widest shadow-2xl">
+ <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[8px] md:text-[10px] font-black px-2 md:px-3 py-1 md:py-1.5 rounded-lg md:rounded-xl uppercase tracking-widest shadow-2xl">
  {turf.sportTypes?.[0] || "SPORT"}
  </span>
 
@@ -79,7 +79,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
  <div className="absolute top-3 md:top-5 right-3 md:right-5 z-20">
  <button 
  onClick={toggleWishlist}
- className="p-2 md:p-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-[#55DEE8] transition-all duration-300 group/heart"
+ className="p-2 md:p-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all duration-300 group/heart"
  >
  <Heart 
  size={14} md:size={18} 
@@ -93,10 +93,10 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
  {/* ── Carousel Controls ── */}
  {images.length > 1 && (
  <div className="absolute inset-y-0 inset-x-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30">
- <button onClick={prevImage} className="p-1.5 md:p-2 bg-black/40 hover:bg-[#55DEE8] hover:text-black backdrop-blur-sm rounded-full text-white transition-all border border-white/10">
+ <button onClick={prevImage} className="p-1.5 md:p-2 bg-black/40 hover:bg-white/10 hover:text-black backdrop-blur-sm rounded-full text-white transition-all border border-white/10">
  <ChevronLeft size={14} md:size={16} />
  </button>
- <button onClick={nextImage} className="p-1.5 md:p-2 bg-black/40 hover:bg-[#55DEE8] hover:text-black backdrop-blur-sm rounded-full text-white transition-all border border-white/10">
+ <button onClick={nextImage} className="p-1.5 md:p-2 bg-black/40 hover:bg-white/10 hover:text-black backdrop-blur-sm rounded-full text-white transition-all border border-white/10">
  <ChevronRight size={14} md:size={16} />
  </button>
  </div>
@@ -111,7 +111,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
  <div className="space-y-3 md:space-y-4">
  {/* Name & Location */}
  <div className="space-y-1 md:space-y-1.5">
- <h3 className="text-base md:text-xl font-bold text-white tracking-tight leading-tight group-hover:text-[#55DEE8] transition-colors line-clamp-1">
+ <h3 className="text-base md:text-xl font-bold text-white tracking-tight leading-tight group-hover:text-white/70 transition-colors line-clamp-1">
  {turf.name}
  </h3>
  <div className="flex items-center justify-between gap-2">

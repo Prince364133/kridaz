@@ -215,7 +215,7 @@ export default function ProfessionalAvailability() {
                       className={`relative flex flex-col items-center justify-center p-3 rounded-lg border transition-all duration-300 ${
                         isSelected 
                         ? "text-black shadow-lg" 
-                        : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/30 hover:bg-[#2D2D2D]/50"
+                        : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-white/30/30 hover:bg-[#2D2D2D]/50"
                       }`}
                       style={{ 
                         backgroundColor: isSelected ? themeColor : undefined,

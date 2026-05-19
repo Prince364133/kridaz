@@ -8,7 +8,7 @@ const StatCard = ({ title, value, icon: Icon, className, prefix = "", trend, tre
     
     <div className="relative z-10 flex justify-between items-start mb-4">
       <div className="space-y-1">
-        <p className="text-[8px] md:text-xs font-bold text-gray-500 uppercase tracking-widest group-hover:text-[#55DEE8] transition-colors">{title}</p>
+        <p className="text-[8px] md:text-xs font-bold text-gray-500 uppercase tracking-widest group-hover:text-white/70 transition-colors">{title}</p>
         <div className="flex items-baseline gap-1">
           {prefix && <span className="text-xl font-bold text-[#55DEE8]">{prefix}</span>}
           <div className="text-lg md:text-4xl font-bold tracking-tight text-white leading-none">
@@ -18,7 +18,7 @@ const StatCard = ({ title, value, icon: Icon, className, prefix = "", trend, tre
       </div>
       
       {Icon && (
-        <div className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-white/5 rounded-lg md:rounded-xl border border-white/5 group-hover:border-[#55DEE8]/30 transition-all">
+        <div className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-white/5 rounded-lg md:rounded-xl border border-white/5 group-hover:border-white/30/30 transition-all">
           <Icon className="text-[#55DEE8] group-hover:scale-110 transition-transform" size={16} md:size={20} />
         </div>
       )}

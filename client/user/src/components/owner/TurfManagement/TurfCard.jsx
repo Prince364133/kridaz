@@ -3,7 +3,7 @@ import { Edit2, Trash2, Clock, MapPin, Tag, Star, LayoutDashboard, Eye, EyeOff }
 
 const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
   return (
-    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-[#55DEE8]/30 transition-all duration-500 h-full flex flex-col shadow-[var(--shadow-2)] relative">
+    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-white/30/30 transition-all duration-500 h-full flex flex-col shadow-[var(--shadow-2)] relative">
       <Link to={`/partner/turf/${turf._id}`} className="block h-40 relative overflow-hidden">
         <img
           src={turf.image}
@@ -77,7 +77,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
             <div className="flex items-center gap-1.5">
               <button
                 onClick={onEdit}
-                className="w-8 h-8 bg-[#111] border border-[#2D2D2D] hover:border-[#55DEE8]/40 text-[#878C9F] hover:text-[#55DEE8] rounded-[6px] transition-all flex items-center justify-center group/btn"
+                className="w-8 h-8 bg-[#111] border border-[#2D2D2D] hover:border-white/30/40 text-[#878C9F] hover:text-white/70 rounded-[6px] transition-all flex items-center justify-center group/btn"
               >
                 <Edit2 size={12} />
               </button>
@@ -86,7 +86,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
                 onClick={onToggleVisibility}
                 className={`w-8 h-8 rounded-[6px] transition-all flex items-center justify-center border ${
                   turf.isActive 
-                  ? "bg-[#55DEE8]/5 border-[#55DEE8]/20 text-[#55DEE8] hover:bg-[#55DEE8]/10" 
+                  ? "bg-[#55DEE8]/5 border-[#55DEE8]/20 text-[#55DEE8] hover:bg-white/10/10" 
                   : "bg-black border-[#2D2D2D] text-[#444] hover:text-white"
                 }`}
               >

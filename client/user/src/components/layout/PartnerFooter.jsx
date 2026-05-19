@@ -37,7 +37,7 @@ const PartnerFooter = () => {
             </p>
             <div className="flex gap-4">
               {[Facebook, Linkedin, Instagram].map((Icon, i) => (
-                <Link key={i} to="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-[#55DEE8] hover:bg-white/10 transition-all">
+                <Link key={i} to="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/10 transition-all">
                   <Icon size={18} />
                 </Link>
               ))}
@@ -50,7 +50,7 @@ const PartnerFooter = () => {
               <ul className="space-y-3">
                 {["Venue Dashboard", "Booking Manager", "Revenue Reports", "Facility Setup"].map((link) => (
                   <li key={link}>
-                    <Link to="#" className="text-white/40 hover:text-[#55DEE8] transition-colors text-sm">
+                    <Link to="#" className="text-white/40 hover:text-white/70 transition-colors text-sm">
                       {link}
                     </Link>
                   </li>
@@ -68,7 +68,7 @@ const PartnerFooter = () => {
                   { name: "Guidelines", path: "#" }
                 ].map((link) => (
                   <li key={link.name}>
-                    <Link to={link.path} className="text-white/40 hover:text-[#55DEE8] transition-colors text-sm">
+                    <Link to={link.path} className="text-white/40 hover:text-white/70 transition-colors text-sm">
                       {link.name}
                     </Link>
                   </li>
@@ -81,7 +81,7 @@ const PartnerFooter = () => {
               <ul className="space-y-3">
                 {["Help Center", "Documentation", "Contact Support", "Terms of Service"].map((link) => (
                   <li key={link}>
-                    <Link to="#" className="text-white/40 hover:text-[#55DEE8] transition-colors text-sm">
+                    <Link to="#" className="text-white/40 hover:text-white/70 transition-colors text-sm">
                       {link}
                     </Link>
                   </li>

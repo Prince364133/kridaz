@@ -41,7 +41,7 @@ const TurfList = () => {
       {/* ── Navigation ───────────────────────────────────────────── */}
       <button 
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] hover:text-[#55DEE8] transition-colors group w-fit"
+        className="flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] hover:text-white/70 transition-colors group w-fit"
       >
         <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
         Back to Directory

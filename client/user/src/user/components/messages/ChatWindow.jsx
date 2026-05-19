@@ -365,7 +365,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {chat.isCommunity && !isSelectionMode && (
  <button 
  onClick={() => setIsAddGroupToCommunityOpen(true)}
- className="flex items-center gap-2 px-3 py-1.5 bg-[#55DEE8]/10 text-[#55DEE8] hover:bg-[#55DEE8] hover:text-black rounded-lg transition-all text-[11px] font-black uppercase tracking-wider shadow-sm"
+ className="flex items-center gap-2 px-3 py-1.5 bg-[#55DEE8]/10 text-[#55DEE8] hover:bg-white/10 hover:text-black rounded-lg transition-all text-[11px] font-black uppercase tracking-wider shadow-sm"
  >
  <Plus size={14} />
  <span>Add Group</span>
@@ -637,9 +637,9 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {/* Add Group Action */}
  <button 
  onClick={() => setIsAddGroupToCommunityOpen(true)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-[#55DEE8]/10 hover:border-[#55DEE8]/30 transition-all group"
+ className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-white/10/10 hover:border-white/30/30 transition-all group"
  >
- <div className="w-12 h-12 rounded-xl bg-[#55DEE8] text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+ <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
  <Plus size={24} />
  </div>
  <div className="text-left">
@@ -934,7 +934,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
           <button
             type="submit"
             disabled={!message.trim()}
-            className="p-2 bg-[#55DEE8] text-black rounded-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:bg-white/10 disabled:text-white/30"
+            className="p-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:bg-white/10 disabled:text-white/30"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -989,7 +989,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  console.error(err);
  }
  }}
- className="w-full py-3 bg-[#55DEE8] text-black font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+ className="w-full py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
  >
  Delete for everyone
  </button>

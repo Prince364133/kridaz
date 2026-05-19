@@ -57,13 +57,13 @@ const GuestNavbar = () => {
             <div 
               tabIndex={0} 
               className={`flex items-center gap-1 text-sm font-medium transition-all cursor-pointer ${
-                location.pathname.startsWith("/business") || location.pathname === "/partners" ? "text-[#55DEE8]" : "text-white/60 hover:text-white"
+                location.pathname.startsWith("/business") || location.pathname === "/partners" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent" : "text-white/60 hover:text-white"
               }`}
             >
               Business <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-300" />
-              <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#55DEE8] transition-all duration-300 ${
+              <span className={`absolute -bottom-1 left-0 h-[2px] transition-all duration-300 ${
                 location.pathname.startsWith("/business") || location.pathname === "/partners" ? "w-full" : "w-0 group-hover:w-full"
-              }`} />
+              }`} style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)' }} />
             </div>
             <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-2xl bg-[#0d0d0d] border border-white/5 rounded-xl w-52 mt-0">
               <li>
@@ -103,25 +103,25 @@ const GuestNavbar = () => {
           <Link
             to="/community"
             className={`text-sm font-medium transition-all relative group ${
-              location.pathname === "/community" ? "text-[#55DEE8]" : "text-white/60 hover:text-white"
+              location.pathname === "/community" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent" : "text-white/60 hover:text-white"
             }`}
           >
             Community
-            <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#55DEE8] transition-all duration-300 ${
+            <span className={`absolute -bottom-1 left-0 h-[2px] transition-all duration-300 ${
               location.pathname === "/community" ? "w-full" : "w-0 group-hover:w-full"
-            }`} />
+            }`} style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)' }} />
           </Link>
 
           <Link
             to="/players"
             className={`text-sm font-medium transition-all relative group ${
-              location.pathname === "/players" ? "text-[#55DEE8]" : "text-white/60 hover:text-white"
+              location.pathname === "/players" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent" : "text-white/60 hover:text-white"
             }`}
           >
             Find Players
-            <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#55DEE8] transition-all duration-300 ${
+            <span className={`absolute -bottom-1 left-0 h-[2px] transition-all duration-300 ${
               location.pathname === "/players" ? "w-full" : "w-0 group-hover:w-full"
-            }`} />
+            }`} style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)' }} />
           </Link>
         </div>
 
@@ -131,7 +131,7 @@ const GuestNavbar = () => {
             <>
               <Link 
                 to="/login" 
-                className="hidden sm:flex items-center gap-2 text-sm font-medium text-white/60 hover:text-[#55DEE8] transition-all"
+                className="hidden sm:flex items-center gap-2 text-sm font-medium text-white/60 hover:text-white/70 transition-all"
               >
                 <ShieldCheck size={16} className="opacity-50" />
                 Login
@@ -148,8 +148,8 @@ const GuestNavbar = () => {
                 <span className="text-sm font-bold text-[#55DEE8]">{role?.charAt(0).toUpperCase() + role?.slice(1) || "Partner"}</span>
               </div>
               <div className="dropdown dropdown-end">
-                <label tabIndex={0} className="w-10 h-10 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#55DEE8]/50 rounded-full transition-all cursor-pointer group">
-                  <User size={20} className="text-white/60 group-hover:text-[#55DEE8] transition-colors" />
+                <label tabIndex={0} className="w-10 h-10 border border-white/10 flex items-center justify-center bg-white/5 hover:border-white/30/50 rounded-full transition-all cursor-pointer group">
+                  <User size={20} className="text-white/60 group-hover:text-white/70 transition-colors" />
                 </label>
                 <ul tabIndex={0} className="dropdown-content mt-4 p-2 shadow-2xl bg-[#121212] border border-white/10 rounded-xl w-56 overflow-hidden backdrop-blur-xl">
                   <li>
@@ -187,7 +187,7 @@ const GuestNavbar = () => {
               <a
                 key={link.name}
                 href={link.path}
-                className="text-4xl font-bold text-white/30 hover:text-[#55DEE8] transition-colors"
+                className="text-4xl font-bold text-white/30 hover:text-white/70 transition-colors"
               >
                 {link.name}
               </a>
@@ -196,7 +196,7 @@ const GuestNavbar = () => {
                 key={link.name}
                 to={link.path}
                 onClick={() => setIsOpen(false)}
-                className="text-4xl font-bold text-white/30 hover:text-[#55DEE8] transition-colors"
+                className="text-4xl font-bold text-white/30 hover:text-white/70 transition-colors"
               >
                 {link.name}
               </Link>

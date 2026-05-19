@@ -34,7 +34,7 @@ const TransactionSection = () => {
         <div className="relative">
           <div className="absolute -left-4 top-0 w-1 h-12 bg-[#55DEE8] rounded-full shadow-[0_0_15px_rgba(85,222,232,0.5)]" />
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight uppercase">
-            Financial <span className="text-[#55DEE8]">Ledger</span>
+            Financial <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Ledger</span>
           </h1>
           <p className="text-gray-400 text-sm mt-2">Platform Transaction & Revenue Flow</p>
         </div>

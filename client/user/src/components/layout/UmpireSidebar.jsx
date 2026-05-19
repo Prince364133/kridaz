@@ -120,7 +120,7 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
                 ? "text-white/20 group-hover:text-red-500" 
                 : isActive 
                   ? "text-black" 
-                  : "text-white/20 group-hover:text-[#55DEE8]"
+                  : "text-white/20 group-hover:text-white/70"
             }`} 
           />
         </div>
@@ -150,7 +150,7 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       >
         <div className="flex flex-col p-4 border-b border-white/5 bg-black/20 gap-4 lg:hidden">
           <div className="flex items-center justify-end">
-            <button onClick={toggleSidebar} className="text-white hover:text-[#55DEE8] transition-colors">
+            <button onClick={toggleSidebar} className="text-white hover:text-white/70 transition-colors">
               <X size={20} />
             </button>
           </div>

@@ -76,7 +76,7 @@ const Navbar = () => {
             </Link>
 
             <div className="lg:hidden flex items-center gap-1 mt-0.5 ml-1 text-white/50">
-              <MapPin size={10} className="text-[#55DEE8]" />
+              <MapPin size={10} className="text-[#BFF367]" />
               <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest truncate max-w-[100px]">
                 Set Location
               </span>
@@ -91,36 +91,36 @@ const Navbar = () => {
                   <div key={link.name} className="dropdown dropdown-hover group/link">
                     <label 
                       tabIndex={0} 
-                      className={`text-sm font-semibold transition-all hover:text-primary relative flex items-center gap-1 cursor-pointer ${
-                        location.pathname.startsWith("/partners") ? "text-primary" : "text-white/60"
+                      className={`text-sm font-semibold transition-all relative flex items-center gap-1 cursor-pointer ${
+                        location.pathname.startsWith("/partners") ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent" : "text-white/60 hover:text-primary"
                       }`}
                     >
                       {link.name}
-                      <span className={`absolute -bottom-2 left-0 h-[2px] bg-primary transition-all duration-300 ${location.pathname.startsWith("/partners") ? "w-full" : "w-0 group-hover/link:w-full"}`} />
+                      <span className={`absolute -bottom-2 left-0 h-[2px] transition-all duration-300 ${location.pathname.startsWith("/partners") ? "w-full" : "w-0 group-hover/link:w-full"}`} style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)' }} />
                     </label>
                     <ul tabIndex={0} className="dropdown-content z-[100] mt-4 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-xl w-48 overflow-hidden backdrop-blur-xl">
                       <li>
-                        <Link to="/business/venue" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#55DEE8] hover:bg-white/5 transition-all">
+                        <Link to="/business/venue" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-white/70 hover:bg-white/5 transition-all">
                           Venue Owner
                         </Link>
                       </li>
                       <li>
-                        <Link to="/business/coach" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#55DEE8] hover:bg-white/5 transition-all">
+                        <Link to="/business/coach" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-white/70 hover:bg-white/5 transition-all">
                           Coaches
                         </Link>
                       </li>
                       <li>
-                        <Link to="/business/official" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#55DEE8] hover:bg-white/5 transition-all">
+                        <Link to="/business/official" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-white/70 hover:bg-white/5 transition-all">
                           Umpire
                         </Link>
                       </li>
                       <li>
-                        <Link to="/business/scorer" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#55DEE8] hover:bg-white/5 transition-all">
+                        <Link to="/business/scorer" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-white/70 hover:bg-white/5 transition-all">
                           Scorer
                         </Link>
                       </li>
                       <li>
-                        <Link to="/business/streamer" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#55DEE8] hover:bg-white/5 transition-all">
+                        <Link to="/business/streamer" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-white/70 hover:bg-white/5 transition-all">
                           YouTube Streamer
                         </Link>
                       </li>
@@ -137,12 +137,12 @@ const Navbar = () => {
                       dispatch(reelsApi.util.prefetch("getReelsFeed", undefined, { force: true }));
                     }
                   }}
-                  className={`text-sm font-semibold transition-all hover:text-primary relative group/link ${
-                    location.pathname === link.path ? "text-primary" : "text-white/60"
+                  className={`text-sm font-semibold transition-all relative group/link ${
+                    location.pathname === link.path ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent" : "text-white/60 hover:text-primary"
                   }`}
                 >
                   {link.name}
-                  <span className={`absolute -bottom-2 left-0 h-[2px] bg-primary transition-all duration-300 ${location.pathname === link.path ? "w-full" : "w-0 group-hover/link:w-full"}`} />
+                  <span className={`absolute -bottom-2 left-0 h-[2px] transition-all duration-300 ${location.pathname === link.path ? "w-full" : "w-0 group-hover/link:w-full"}`} style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)' }} />
                 </Link>
               );
             })}
@@ -177,8 +177,8 @@ const Navbar = () => {
 
                   {/* PROFILE DROPDOWN */}
                   <div className="dropdown dropdown-end group/profile">
-                    <div tabIndex={0} role="button" className="relative w-10 sm:w-12 h-10 sm:h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#55DEE8]/50 transition-all cursor-pointer rounded-full group overflow-hidden">
-                      <User size={22} className="text-white/40 group-hover:text-[#55DEE8] transition-colors absolute inset-0 m-auto" />
+                    <div tabIndex={0} role="button" className="relative w-10 sm:w-12 h-10 sm:h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-white/30/50 transition-all cursor-pointer rounded-full group overflow-hidden">
+                      <User size={22} className="text-white/40 group-hover:text-white/70 transition-colors absolute inset-0 m-auto" />
                       {(user?.profilePicture || user?.profileImage) ? (
                         <img 
                           src={user.profilePicture || user.profileImage} 
@@ -195,11 +195,11 @@ const Navbar = () => {
                         className="w-full h-full flex items-center justify-center relative z-10"
                         style={{ display: (user?.profilePicture || user?.profileImage) ? 'none' : 'flex' }}
                       >
-                        <span className="text-[#55DEE8] font-bold text-sm">
+                        <span className="text-[#BFF367] font-bold text-sm">
                           {user?.name ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2) : <User size={22} />}
                         </span>
                       </div>
-                      <div className="absolute inset-0 bg-[#55DEE8]/10 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
+                      <div className="absolute inset-0 bg-[#BFF367]/10 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
                     </div>
                     
                     <div tabIndex={0} className="dropdown-content mt-2 w-64 bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] overflow-hidden backdrop-blur-3xl animate-in fade-in slide-in-from-top-2 duration-300 z-[100]">
@@ -214,7 +214,7 @@ const Navbar = () => {
                             {(user?.profilePicture || user?.profileImage) ? (
                               <img src={user.profilePicture || user.profileImage} alt="" className="w-full h-full object-cover rounded-full" />
                             ) : (
-                              <User size={16} className="text-[#55DEE8]" />
+                              <User size={16} className="text-[#BFF367]" />
                             )}
                           </div>
                           <div className="flex-1 min-w-0">

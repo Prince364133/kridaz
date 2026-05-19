@@ -67,7 +67,7 @@ export default function CoachBookings() {
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-8 bg-[#55DEE8] rounded-full" />
               <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
-                Booking <span className="text-[#55DEE8]">Roster</span>
+                Booking <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Roster</span>
               </h1>
             </div>
             <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
@@ -104,7 +104,7 @@ export default function CoachBookings() {
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {bookings.map((booking) => (
-            <div key={booking._id} className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-[#55DEE8]/30 transition-all shadow-[var(--shadow-2)]">
+            <div key={booking._id} className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-white/30/30 transition-all shadow-[var(--shadow-2)]">
               <div className="p-6 lg:p-8">
                 <div className="flex flex-col md:flex-row justify-between gap-8">
                   {/* User Info */}

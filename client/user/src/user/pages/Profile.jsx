@@ -238,11 +238,11 @@ export default function Profile() {
 
               <div className="flex flex-wrap items-center gap-4 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
                 <span className="flex items-center gap-1.5">
-                  <span className="text-[#55DEE8]">{profileUser?.followers?.length || 0}</span> Followers
+                  <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{profileUser?.followers?.length || 0}</span> Followers
                 </span>
                 <span className="w-1 h-1 bg-zinc-700 rounded-full" />
                 <span className="flex items-center gap-1.5">
-                  <span className="text-[#55DEE8]">{profileUser?.following?.length || 0}</span> Following
+                  <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{profileUser?.following?.length || 0}</span> Following
                 </span>
                 <span className="w-1 h-1 bg-zinc-700 rounded-full" />
                 <span className="flex items-center gap-1.5">
@@ -257,7 +257,7 @@ export default function Profile() {
               <div className="flex flex-wrap gap-2 pt-2">
                 {isOwnProfile ? (
                   <>
-                    <button className="px-5 py-2.5 bg-[#55DEE8] text-black rounded-xl font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.2)] flex items-center gap-2">
+                    <button className="px-5 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-xl font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.2)] flex items-center gap-2">
                       <UserPlus size={14} strokeWidth={3} />
                       Invite Player
                     </button>
@@ -267,35 +267,35 @@ export default function Profile() {
                     </button>
                     <button 
                       onClick={() => setActiveTab('overview')}
-                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'overview' ? 'bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'overview' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
                     >
                       <LayoutGrid size={14} />
                       Overview
                     </button>
                     <button 
                       onClick={() => setActiveTab('posts')}
-                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'posts' ? 'bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'posts' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
                     >
                       <Plus size={14} />
                       Post
                     </button>
                     <button 
                       onClick={() => setActiveTab('stories')}
-                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'stories' ? 'bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'stories' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
                     >
                       <Camera size={14} />
                       Stories
                     </button>
                     <button 
                       onClick={() => setActiveTab('activity')}
-                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'activity' ? 'bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'activity' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
                     >
                       <Activity size={14} />
                       Activity
                     </button>
                     <button 
                       onClick={() => setActiveTab('bookings')}
-                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'bookings' ? 'bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+                      className={`px-4 py-2.5 rounded-xl font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'bookings' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
                     >
                       <Calendar size={14} />
                       Bookings
@@ -303,7 +303,7 @@ export default function Profile() {
                   </>
                 ) : (
                   <>
-                    <button className="px-5 py-2.5 bg-[#55DEE8] text-black rounded-xl font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.2)] flex items-center gap-2">
+                    <button className="px-5 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-xl font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.2)] flex items-center gap-2">
                       <UserPlus size={14} strokeWidth={3} />
                       Invite Player
                     </button>
@@ -351,7 +351,7 @@ export default function Profile() {
                 User Posts
               </h2>
               {isOwnProfile && (
-                <button className="px-4 py-2 bg-[#55DEE8]/10 text-[#55DEE8] rounded-lg border border-[#55DEE8]/20 text-[10px] font-black uppercase tracking-widest hover:bg-[#55DEE8]/20 transition-all">
+                <button className="px-4 py-2 bg-[#55DEE8]/10 text-[#55DEE8] rounded-lg border border-[#55DEE8]/20 text-[10px] font-black uppercase tracking-widest hover:bg-white/10/20 transition-all">
                   Create New Post
                 </button>
               )}
@@ -364,7 +364,7 @@ export default function Profile() {
                 { title: 'New Gear!', desc: 'Finally got the new Predator boots. The grip is insane.', img: 'https://images.unsplash.com/photo-1431324155629-1a6eda1eed2d?q=80&w=2070', likes: 42, comments: 12, date: '3d ago' },
                 { title: 'Game Day', desc: 'Pre-match ritual. feeling focused and ready to win.', img: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=2070', likes: 56, comments: 8, date: '4d ago' },
               ].map((post, idx) => (
-                <div key={idx} className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden hover:border-[#55DEE8]/30 transition-all group">
+                <div key={idx} className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden hover:border-white/30/30 transition-all group">
                   <div className="h-40 relative overflow-hidden">
                     <img src={post.img} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                     <div className="absolute top-3 right-3 px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded-md text-[8px] font-black text-white uppercase tracking-widest border border-white/10">
@@ -381,11 +381,11 @@ export default function Profile() {
                     <p className="text-[10px] text-gray-500 mb-3 line-clamp-2 leading-relaxed">{post.desc}</p>
                     <div className="flex items-center justify-between pt-3 border-t border-white/5">
                       <div className="flex items-center gap-3">
-                        <button className="flex items-center gap-1 text-gray-500 hover:text-[#55DEE8] transition-colors">
+                        <button className="flex items-center gap-1 text-gray-500 hover:text-white/70 transition-colors">
                           <Heart size={12} />
                           <span className="text-[9px] font-bold">{post.likes}</span>
                         </button>
-                        <button className="flex items-center gap-1 text-gray-500 hover:text-[#55DEE8] transition-colors">
+                        <button className="flex items-center gap-1 text-gray-500 hover:text-white/70 transition-colors">
                           <MessageSquare size={12} />
                           <span className="text-[9px] font-bold">{post.comments}</span>
                         </button>
@@ -415,7 +415,7 @@ export default function Profile() {
                 { title: 'Training Day', time: '5h ago', img: 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?q=80&w=2070' },
                 { title: 'Game Ready', time: '12h ago', img: 'https://images.unsplash.com/photo-1431324155629-1a6eda1eed2d?q=80&w=2070' },
               ].map((story, idx) => (
-                <div key={idx} className="aspect-[9/16] relative rounded-2xl overflow-hidden border border-white/10 group cursor-pointer hover:border-[#55DEE8]/50 transition-all">
+                <div key={idx} className="aspect-[9/16] relative rounded-2xl overflow-hidden border border-white/10 group cursor-pointer hover:border-white/30/50 transition-all">
                   <img src={story.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
                   <div className="absolute bottom-3 left-3">
@@ -425,7 +425,7 @@ export default function Profile() {
                 </div>
               ))}
               {isOwnProfile && (
-                <div className="aspect-[9/16] relative rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-3 group cursor-pointer hover:border-[#55DEE8]/30 transition-all bg-white/5">
+                <div className="aspect-[9/16] relative rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-3 group cursor-pointer hover:border-white/30/30 transition-all bg-white/5">
                   <div className="w-10 h-10 rounded-full bg-[#55DEE8]/10 flex items-center justify-center text-[#55DEE8] group-hover:scale-110 transition-transform">
                     <Plus size={20} />
                   </div>
@@ -449,7 +449,7 @@ export default function Profile() {
                 { icon: MessageSquare, title: 'New Review', desc: 'Received a 5-star review for sportsmanship', time: '3 days ago' },
                 { icon: Users, title: 'Team Collaboration', desc: 'Joined a new training session with Elite Athletes', time: '1 week ago' },
               ].map((activity, index) => (
-                <div key={index} className="flex items-start gap-4 p-5 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-[#55DEE8]/20 transition-all group">
+                <div key={index} className="flex items-start gap-4 p-5 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/30/20 transition-all group">
                   <div className="w-12 h-12 rounded-xl bg-[#55DEE8]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
                     <activity.icon className="w-5 h-5 text-[#55DEE8]" />
                   </div>
@@ -484,7 +484,7 @@ export default function Profile() {
                     { name: 'Elite Football Arena', date: '24 May 2024', time: '18:00 - 19:30', price: '₹1,200', status: 'Confirmed', sport: 'Football', img: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2070' },
                     { name: 'Thunder Cricket Ground', date: '20 May 2024', time: '09:00 - 12:00', price: '₹2,500', status: 'Completed', sport: 'Cricket', img: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2070' },
                   ].map((mock, idx) => (
-                    <div key={idx} className="bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row gap-6 hover:border-[#55DEE8]/30 transition-all group overflow-hidden">
+                    <div key={idx} className="bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row gap-6 hover:border-white/30/30 transition-all group overflow-hidden">
                       <div className="w-full md:w-48 h-32 shrink-0 rounded-xl overflow-hidden bg-white/5">
                         <img src={mock.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
                       </div>
@@ -502,7 +502,7 @@ export default function Profile() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 mt-4">
-                          <button className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-[8px] font-black uppercase tracking-widest hover:bg-[#55DEE8] hover:text-black transition-all">View Pass</button>
+                          <button className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-[8px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-black transition-all">View Pass</button>
                           <button className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-[8px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">Invoice</button>
                         </div>
                       </div>
@@ -547,7 +547,7 @@ export default function Profile() {
                     { icon: MapPin, label: 'Position', value: 'Striker / Forward' },
                     { icon: ShieldCheck, label: 'Current Team', value: 'Manchester United' },
                   ].map((item, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3.5 rounded-xl bg-black/40 border border-white/5 hover:border-[#55DEE8]/20 transition-all group">
+                    <div key={index} className="flex items-start gap-3 p-3.5 rounded-xl bg-black/40 border border-white/5 hover:border-white/30/20 transition-all group">
                       <div className="w-9 h-9 rounded-lg bg-[#55DEE8]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
                         <item.icon className="w-4 h-4 text-[#55DEE8]" />
                       </div>
@@ -572,7 +572,7 @@ export default function Profile() {
                     { icon: Upload, title: 'Training Session Uploaded', desc: 'HIIT training completed', time: '1 day ago' },
                     { icon: Users, title: 'Joined Tournament', desc: 'UEFA Champions League', time: '2 days ago' },
                   ].map((activity, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3.5 bg-black/40 rounded-xl border border-white/10 hover:border-[#55DEE8]/30 transition-all group">
+                    <div key={index} className="flex items-start gap-3 p-3.5 bg-black/40 rounded-xl border border-white/10 hover:border-white/30/30 transition-all group">
                       <div className="w-9 h-9 rounded-lg bg-[#55DEE8]/10 flex items-center justify-center flex-shrink-0 group-hover:shadow-[0_0_10px_rgba(85,222,232,0.1)] transition-all">
                         <activity.icon className="w-4 h-4 text-[#55DEE8]" />
                       </div>
@@ -639,7 +639,7 @@ export default function Profile() {
                   { title: 'Sports Science', org: 'ISA', date: 'Jan 2024', img: 'https://images.unsplash.com/photo-1755039466834-3322b29dc45e?q=80&w=2070' },
                   { title: 'Elite Training', org: 'PL Academy', date: 'Nov 2023', img: 'https://images.unsplash.com/photo-1658504140972-7af3e80d35f1?q=80&w=2070' },
                 ].map((cert, idx) => (
-                  <div key={idx} className="group bg-black/40 rounded-xl overflow-hidden border border-white/10 hover:border-[#55DEE8]/30 transition-all">
+                  <div key={idx} className="group bg-black/40 rounded-xl overflow-hidden border border-white/10 hover:border-white/30/30 transition-all">
                     <div className="h-32 overflow-hidden">
                       <img src={cert.img} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                     </div>
@@ -689,7 +689,7 @@ export default function Profile() {
                     { icon: Target, label: 'Pass Accuracy', value: '87%', color: '#55DEE8' },
                     { icon: BarChart3, label: 'Season Goals', value: '28', color: '#55DEE8' },
                   ].map((stat, idx) => (
-                    <div key={idx} className="bg-black/40 rounded-xl p-4 border border-white/5 hover:border-[#55DEE8]/30 transition-all group">
+                    <div key={idx} className="bg-black/40 rounded-xl p-4 border border-white/5 hover:border-white/30/30 transition-all group">
                       <div className="w-9 h-9 rounded-lg bg-[#55DEE8]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
                         <stat.icon className="w-4 h-4 text-[#55DEE8]" />
                       </div>
@@ -713,7 +713,7 @@ export default function Profile() {
                       { name: 'Liverpool FC', years: '2016-2019', logo: '🔴' },
                       { name: 'Arsenal Youth', years: '2012-2016', logo: '🔴' },
                     ].map((club, idx) => (
-                      <div key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-black/40 border border-white/5 hover:border-[#55DEE8]/30 transition-all">
+                      <div key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-black/40 border border-white/5 hover:border-white/30/30 transition-all">
                         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#55DEE8]/10 to-transparent flex items-center justify-center text-lg border border-white/5">
                           {club.logo}
                         </div>
@@ -780,7 +780,7 @@ export default function Profile() {
                       </div>
                     ))}
                   </div>
-                  <button className="w-full bg-[#55DEE8] text-black py-3 rounded-xl font-black uppercase tracking-wider text-[10px] hover:scale-[1.02] transition-all shadow-[0_5px_15px_rgba(85,222,232,0.1)]">
+                  <button className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black py-3 rounded-xl font-black uppercase tracking-wider text-[10px] hover:scale-[1.02] transition-all shadow-[0_5px_15px_rgba(85,222,232,0.1)]">
                     Watch Match Live
                   </button>
                 </div>
@@ -797,7 +797,7 @@ export default function Profile() {
                     { name: 'David Silva', pos: 'Forward', rat: 89, img: 'https://images.unsplash.com/photo-1663576748367-4ff6bec25639?q=80&w=2070' },
                     { name: 'Chris Johnson', pos: 'Defender', rat: 85, img: 'https://images.unsplash.com/photo-1776416817016-f4b64cc132b1?q=80&w=2070' },
                   ].map((player, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-3.5 bg-black/40 rounded-xl border border-white/10 hover:border-[#55DEE8]/30 transition-all group">
+                    <div key={idx} className="flex items-center gap-3 p-3.5 bg-black/40 rounded-xl border border-white/10 hover:border-white/30/30 transition-all group">
                       <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
                         <img src={player.img} alt="" className="w-full h-full object-cover" />
                       </div>
@@ -809,7 +809,7 @@ export default function Profile() {
                         <Star size={10} className="text-[#55DEE8]" fill="currentColor" />
                         <span className="text-[#55DEE8] font-black text-[9px]">{player.rat}</span>
                       </div>
-                      <button className="p-2 bg-[#55DEE8]/10 text-[#55DEE8] rounded-lg hover:bg-[#55DEE8]/20 transition-all border border-[#55DEE8]/20">
+                      <button className="p-2 bg-[#55DEE8]/10 text-[#55DEE8] rounded-lg hover:bg-white/10/20 transition-all border border-[#55DEE8]/20">
                         <UserPlus size={14} />
                       </button>
                     </div>

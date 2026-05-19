@@ -46,7 +46,7 @@ const ImageUploadZone = ({ value, onChange, onFileSelect }) => {
           ${dragging
             ? "border-[#55DEE8] bg-[#55DEE8]/10 scale-[1.01]"
             : value
-              ? "border-[#55DEE8]/40 bg-[#55DEE8]/5 hover:border-[#55DEE8]/60"
+              ? "border-[#55DEE8]/40 bg-[#55DEE8]/5 hover:border-white/30/60"
               : "border-white/10 bg-white/2 hover:bg-white/5 hover:border-white/20"
           }
         `}

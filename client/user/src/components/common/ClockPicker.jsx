@@ -146,7 +146,7 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
         type="button"
         onClick={open}
         disabled={disabled}
-        className={`w-full bg-[#111111] border ${isOpen ? "border-[#55DEE8]/60" : "border-[#2D2D2D]"} text-white text-sm h-12 rounded-[8px] px-4 transition-all flex items-center justify-between ${disabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer hover:border-[#55DEE8]/40"}`}
+        className={`w-full bg-[#111111] border ${isOpen ? "border-[#55DEE8]/60" : "border-[#2D2D2D]"} text-white text-sm h-12 rounded-[8px] px-4 transition-all flex items-center justify-between ${disabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer hover:border-white/30/40"}`}
       >
         <span className={value instanceof Date && !isNaN(value) ? "text-white font-medium" : "text-[#555]"}>{fmt()}</span>
         <Clock size={14} className="text-[#55DEE8] opacity-60 shrink-0" />
@@ -235,7 +235,7 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
           <div className="px-5 pb-4 flex gap-3">
             {mode === "hours" && (
               <button onClick={() => setMode("minutes")}
-                className="flex-1 py-2.5 bg-[#55DEE8]/10 border border-[#55DEE8]/20 text-[#55DEE8] text-[9px] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#55DEE8]/20 transition-all">
+                className="flex-1 py-2.5 bg-[#55DEE8]/10 border border-[#55DEE8]/20 text-[#55DEE8] text-[9px] font-black uppercase tracking-widest rounded-[8px] hover:bg-white/10/20 transition-all">
                 Next →
               </button>
             )}

@@ -71,7 +71,7 @@ const OwnerCalendar = () => {
                  <button onClick={handleNextDay} className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] hover:bg-[#252525] rounded-[8px] border border-[#2D2D2D] transition-all">
                     <ChevronRight size={20} className="text-[#888]" />
                  </button>
-                 <button onClick={handleToday} className="ml-4 px-6 py-2 bg-[#1A1A1A] border border-[#2D2D2D] rounded-[8px] text-[12px] font-black uppercase tracking-[3px] hover:text-[#55DEE8] transition-all">
+                 <button onClick={handleToday} className="ml-4 px-6 py-2 bg-[#1A1A1A] border border-[#2D2D2D] rounded-[8px] text-[12px] font-black uppercase tracking-[3px] hover:text-white/70 transition-all">
                     Today
                  </button>
               </div>
@@ -165,14 +165,14 @@ const OwnerCalendar = () => {
                                       {source === 'PARTNER_MANUAL' ? 'Direct Entry' : 'Premium Member'}
                                    </p>
                                 </div>
-                                <div className="flex items-center gap-2 text-[#555] group-hover:text-[#55DEE8] transition-colors">
+                                <div className="flex items-center gap-2 text-[#555] group-hover:text-white/70 transition-colors">
                                    <Clock size={12} />
                                    <span className="text-[10px] font-black uppercase tracking-widest">1 hr</span>
                                 </div>
                              </div>
                            ) : (
-                             <div className="w-full h-full rounded-[12px] border border-dashed border-[#2D2D2D]/50 flex items-center justify-center group cursor-pointer hover:border-[#55DEE8]/30 transition-all">
-                                <div className="w-2 h-2 rounded-full bg-[#1A1A1A] group-hover:bg-[#55DEE8]/20" />
+                             <div className="w-full h-full rounded-[12px] border border-dashed border-[#2D2D2D]/50 flex items-center justify-center group cursor-pointer hover:border-white/30/30 transition-all">
+                                <div className="w-2 h-2 rounded-full bg-[#1A1A1A] group-hover:bg-white/10/20" />
                              </div>
                            )}
                         </div>
@@ -198,7 +198,7 @@ const OwnerCalendar = () => {
              { label: 'Utilized Revenue', value: `Rs ${(data?.stats?.totalRevenue || 0).toLocaleString()}`, trend: '+Rs 1.2k', icon: Zap, color: '#3B82F6' },
              { label: 'Average Load', value: `${data?.stats?.averageLoad || 0}%`, trend: 'Stable', icon: Clock, color: '#55DEE8' },
            ].map((stat, i) => (
-             <div key={i} className="bg-[#111] border border-[#2D2D2D] p-8 rounded-[12px] flex flex-col justify-between relative overflow-hidden group hover:border-[#55DEE8]/30 transition-all">
+             <div key={i} className="bg-[#111] border border-[#2D2D2D] p-8 rounded-[12px] flex flex-col justify-between relative overflow-hidden group hover:border-white/30/30 transition-all">
                 <div className="relative z-10">
                    <p className="text-[11px] font-black text-[#555] uppercase tracking-[3px] mb-4">{stat.label}</p>
                    <h3 className="text-4xl font-black text-white tracking-tighter">{stat.value}</h3>
@@ -207,7 +207,7 @@ const OwnerCalendar = () => {
                    <div className={`px-3 py-1 bg-white/[0.03] border border-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-[${stat.color}]`}>
                       {stat.trend}
                    </div>
-                   <stat.icon className="text-[#222] group-hover:text-[#55DEE8]/20 transition-colors" size={32} />
+                   <stat.icon className="text-[#222] group-hover:text-white/70/20 transition-colors" size={32} />
                 </div>
              </div>
            ))}

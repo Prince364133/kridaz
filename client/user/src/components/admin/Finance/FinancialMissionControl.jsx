@@ -92,7 +92,7 @@ const FinancialMissionControl = () => {
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-8 bg-[#55DEE8] rounded-full shadow-[0_0_15px_rgba(204,255,0,0.5)]" />
               <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic">
-                FINANCIAL <span className="text-[#55DEE8]">MISSION CONTROL</span>
+                FINANCIAL <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>MISSION CONTROL</span>
               </h1>
             </div>
             <p className="text-gray-400 font-medium tracking-wider uppercase text-xs ml-4">
@@ -281,7 +281,7 @@ const FinancialMissionControl = () => {
                                       const tid = prompt("Enter Transfer Transaction ID:");
                                       if(tid) handleApprove(req._id, tid);
                                     }}
-                                    className="p-2 bg-[#55DEE8]/10 text-[#55DEE8] hover:bg-[#55DEE8] hover:text-black rounded-[6px] transition-all border border-[#55DEE8]/20"
+                                    className="p-2 bg-[#55DEE8]/10 text-[#55DEE8] hover:bg-white/10 hover:text-black rounded-[6px] transition-all border border-[#55DEE8]/20"
                                   >
                                     <CheckCircle size={16} />
                                   </button>
@@ -315,7 +315,7 @@ const FinancialMissionControl = () => {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
               <div className="bg-[#0A0A0A] p-8 rounded-[8px] border border-[#2D2D2D]">
                 <div className="mb-8">
-                  <h3 className="text-xl font-black uppercase tracking-tighter italic mb-1">Pending <span className="text-[#55DEE8]">KYC Verifications</span></h3>
+                  <h3 className="text-xl font-black uppercase tracking-tighter italic mb-1">Pending <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>KYC Verifications</span></h3>
                   <p className="text-[#878C9F] text-[11px] font-medium uppercase tracking-widest">Partner bank accounts awaiting treasury clearance</p>
                 </div>
 
@@ -327,7 +327,7 @@ const FinancialMissionControl = () => {
                     </div>
                   ) : (
                     kycQueue.map((owner) => (
-                      <div key={owner._id} className="bg-[#1A1A1A] border border-[#2D2D2D] p-6 rounded-[8px] hover:border-[#55DEE8]/30 transition-all group relative overflow-hidden flex flex-col">
+                      <div key={owner._id} className="bg-[#1A1A1A] border border-[#2D2D2D] p-6 rounded-[8px] hover:border-white/30/30 transition-all group relative overflow-hidden flex flex-col">
                         <div className="absolute top-0 right-0 p-4 opacity-20">
                            <ShieldCheck size={20} className="text-[#55DEE8]" />
                         </div>
@@ -395,7 +395,7 @@ const FinancialMissionControl = () => {
                     <Settings size={24} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black uppercase tracking-tighter italic">Settlement <span className="text-[#55DEE8]">Logistics</span></h3>
+                    <h3 className="text-xl font-black uppercase tracking-tighter italic">Settlement <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Logistics</span></h3>
                     <p className="text-[#878C9F] text-[11px] font-medium uppercase tracking-widest mt-1">Global Payout Orchestration & Thresholds</p>
                   </div>
                 </div>
@@ -411,7 +411,7 @@ const FinancialMissionControl = () => {
                           className={`py-3.5 rounded-[6px] text-[11px] font-black uppercase tracking-widest transition-all border ${
                             payoutSettings?.payoutDay === day 
                               ? "bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_0_15px_rgba(204,255,0,0.15)]" 
-                              : "bg-[#1A1A1A] text-gray-500 border-[#2D2D2D] hover:border-[#55DEE8]/30"
+                              : "bg-[#1A1A1A] text-gray-500 border-[#2D2D2D] hover:border-white/30/30"
                           }`}
                         >
                           {day}
@@ -422,7 +422,7 @@ const FinancialMissionControl = () => {
                   </div>
 
                   <div className="pt-8 border-t border-[#2D2D2D] space-y-4">
-                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#55DEE8]/20 transition-all">
+                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-white/30/20 transition-all">
                       <div className="flex items-center gap-4">
                         <div className="p-2 bg-[#55DEE8]/10 rounded-[6px] text-[#55DEE8] group-hover:scale-110 transition-transform">
                            <IndianRupee size={18} />
@@ -435,7 +435,7 @@ const FinancialMissionControl = () => {
                       <p className="font-mono text-[#55DEE8] text-xl font-black italic">Rs 5,000</p>
                     </div>
 
-                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#55DEE8]/20 transition-all">
+                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-white/30/20 transition-all">
                       <div className="flex items-center gap-4">
                         <div className="p-2 bg-[#55DEE8]/10 rounded-[6px] text-[#55DEE8] group-hover:scale-110 transition-transform">
                            <Zap size={18} />
@@ -456,7 +456,7 @@ const FinancialMissionControl = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#55DEE8]/20 transition-all">
+                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-white/30/20 transition-all">
                       <div className="flex items-center gap-4">
                         <div className="p-2 bg-[#55DEE8]/10 rounded-[6px] text-[#55DEE8] group-hover:scale-110 transition-transform">
                            <ShieldCheck size={18} />
@@ -477,7 +477,7 @@ const FinancialMissionControl = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-[#55DEE8]/20 transition-all">
+                    <div className="flex items-center justify-between p-5 bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] group hover:border-white/30/20 transition-all">
                       <div className="flex items-center gap-4">
                         <div className="p-2 bg-[#55DEE8]/10 rounded-[6px] text-[#55DEE8] group-hover:scale-110 transition-transform">
                            <ExternalLink size={18} />
@@ -510,7 +510,7 @@ const FinancialMissionControl = () => {
 
 const FinanceStatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend, trendColor = "text-[#55DEE8]" }) => {
   return (
-    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#55DEE8]/30 transition-all duration-500 min-h-[140px] shadow-2xl">
+    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-white/30/30 transition-all duration-500 min-h-[140px] shadow-2xl">
       <Icon className="absolute -right-4 -bottom-4 w-20 h-20 text-white/[0.02] group-hover:text-white/[0.04] transition-colors" />
       <div className="flex items-center justify-between mb-5 relative z-10">
         <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[6px] text-[#55DEE8] flex items-center justify-center border border-[#55DEE8]/20 shadow-sm transition-all">

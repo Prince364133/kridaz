@@ -108,8 +108,8 @@ export default function CoachLanding() {
               { icon: Target, title: "Manage Attendance", desc: "Digital attendance, progress reports, and parent communication tools." },
               { icon: CheckCircle, title: "Automate Billing", desc: "Automatic invoices and payment reminders so you can focus on coaching." }
             ].map((step, i) => (
-              <div key={i} className="p-6 md:p-8 bg-white/5 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-white/10 hover:border-[#55DEE8]/30 transition-all group">
-                <div className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 md:mb-6 rounded-xl md:rounded-2xl bg-white/10 group-hover:bg-[#55DEE8]/20 transition-colors">
+              <div key={i} className="p-6 md:p-8 bg-white/5 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-white/10 hover:border-white/30/30 transition-all group">
+                <div className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 md:mb-6 rounded-xl md:rounded-2xl bg-white/10 group-hover:bg-white/10/20 transition-colors">
                   <step.icon className="w-6 h-6 md:w-7 md:h-7 text-white transition-colors" stroke="currentColor" />
                 </div>
                 <h3 className="text-lg md:text-xl font-bold text-white mb-2 md:mb-3 uppercase tracking-wider" style={{ fontFamily: "'Open Sans'" }}>{step.title}</h3>

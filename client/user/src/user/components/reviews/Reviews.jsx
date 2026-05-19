@@ -27,7 +27,7 @@ const Reviews = ({ turfId }) => {
  >
  <div className="absolute -inset-0.5 bg-gradient-to-r from-[#55DEE8]/20 to-lime-600/0 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
  <div 
- className="relative h-full bg-zinc-900/40 border border-zinc-800 group-hover:border-[#55DEE8]/50 rounded-2xl p-6 transition-all duration-300 animate-fade-in flex flex-col justify-between gap-6"
+ className="relative h-full bg-zinc-900/40 border border-zinc-800 group-hover:border-white/30/50 rounded-2xl p-6 transition-all duration-300 animate-fade-in flex flex-col justify-between gap-6"
  style={{ animationDelay: `${idx * 100}ms` }}
  >
  <div className="space-y-4">
@@ -55,7 +55,7 @@ const Reviews = ({ turfId }) => {
  <div className="flex items-center gap-4 pt-4 border-t border-zinc-800/50">
  <Link 
  to={`/profile/${review.user?._id}`}
- className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[#55DEE8] font-black text-sm uppercase group-hover:bg-[#55DEE8] group-hover:text-black transition-all duration-300 overflow-hidden relative z-10"
+ className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[#55DEE8] font-black text-sm uppercase group-hover:bg-white/10 group-hover:text-black transition-all duration-300 overflow-hidden relative z-10"
  >
  {review.user?.profilePicture ? (
  <img 
@@ -70,7 +70,7 @@ const Reviews = ({ turfId }) => {
  <div>
  <Link 
  to={`/profile/${review.user?._id}`}
- className="font-black uppercase text-[10px] tracking-widest text-white mb-0.5 hover:text-[#55DEE8] transition-colors relative z-10"
+ className="font-black uppercase text-[10px] tracking-widest text-white mb-0.5 hover:text-white/70 transition-colors relative z-10"
  >
  {review.user?.name || "Anonymous Player"}
  </Link>

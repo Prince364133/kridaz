@@ -40,7 +40,7 @@ const VenueOwnerSignUp = () => {
             </div>
             <h1 className="text-7xl xl:text-8xl font-bold text-white leading-[0.9] tracking-tight uppercase">
               OWN YOUR <br />
-              <span className="text-[#55DEE8]">VENUE.</span>
+              <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>VENUE.</span>
             </h1>
             <p className="text-sm text-white/40 uppercase tracking-widest max-w-sm leading-relaxed">
               List your sports facility, manage bookings in real-time, and grow your revenue with Kridaz.
@@ -94,7 +94,7 @@ const VenueOwnerSignUp = () => {
                         {...register("name")}
                         type="text"
                         placeholder="Your Name"
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
                       />
                     </div>
                     {errors.name && <p className="text-red-400 text-xs ml-1">{errors.name.message}</p>}
@@ -108,7 +108,7 @@ const VenueOwnerSignUp = () => {
                         {...register("email")}
                         type="email"
                         placeholder="name@business.com"
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
                       />
                     </div>
                     {errors.email && <p className="text-red-400 text-xs ml-1">{errors.email.message}</p>}
@@ -122,7 +122,7 @@ const VenueOwnerSignUp = () => {
                         {...register("phone")}
                         type="text"
                         placeholder="+91 00000 00000"
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
                       />
                     </div>
                     {errors.phone && <p className="text-red-400 text-xs ml-1">{errors.phone.message}</p>}
@@ -136,7 +136,7 @@ const VenueOwnerSignUp = () => {
                         {...register("password")}
                         type="password"
                         placeholder="••••••••"
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
                       />
                     </div>
                     {errors.password && <p className="text-red-400 text-xs ml-1">{errors.password.message}</p>}
@@ -150,7 +150,7 @@ const VenueOwnerSignUp = () => {
                         {...register("confirmPassword")}
                         type="password"
                         placeholder="••••••••"
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all"
                       />
                     </div>
                     {errors.confirmPassword && <p className="text-red-400 text-xs ml-1">{errors.confirmPassword.message}</p>}

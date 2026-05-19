@@ -360,7 +360,7 @@ const ProfessionalDetailsPage = () => {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {matches?.map(match => (
-                      <div key={match._id} className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 hover:border-[#55DEE8]/50 hover:bg-white/5 transition-all duration-300 relative group">
+                      <div key={match._id} className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 hover:border-white/30/50 hover:bg-white/5 transition-all duration-300 relative group">
                         {/* Status Indicator */}
                         <div className={`absolute top-0 right-0 w-16 h-16 rounded-bl-3xl rounded-tr-xl opacity-20 transition-opacity group-hover:opacity-40 ${
                            match.status === "COMPLETED" ? "bg-green-500" :

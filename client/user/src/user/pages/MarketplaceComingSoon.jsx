@@ -15,7 +15,7 @@ const MarketplaceComingSoon = () => {
         {/* Animated Icon Container */}
         <div className="flex justify-center mb-4">
           <div className="relative group">
-            <div className="absolute -inset-4 bg-[#55DEE8]/20 rounded-full blur-xl group-hover:bg-[#55DEE8]/30 transition-all duration-500 animate-pulse" />
+            <div className="absolute -inset-4 bg-[#55DEE8]/20 rounded-full blur-xl group-hover:bg-white/10/30 transition-all duration-500 animate-pulse" />
             <div className="relative w-24 h-24 bg-zinc-900 border border-[#55DEE8]/30 rounded-[2rem] flex items-center justify-center shadow-2xl">
               <ShoppingBag size={42} className="text-[#55DEE8]" />
             </div>
@@ -62,7 +62,7 @@ const MarketplaceComingSoon = () => {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
           <Link 
             to="/" 
-            className="w-full sm:w-auto bg-[#55DEE8] text-black px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 transition-all shadow-[0_20px_40px_rgba(85,222,232,0.2)]"
+            className="w-full sm:w-auto bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 transition-all shadow-[0_20px_40px_rgba(85,222,232,0.2)]"
           >
             Back to Arena
           </Link>

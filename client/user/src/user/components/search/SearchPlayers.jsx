@@ -110,7 +110,7 @@ const SearchPlayers = ({ onSearch, userLocation }) => {
   return (
     <div className="w-full animate-fade-in">
       <div className="relative group">
-        <div className="relative flex flex-row items-center bg-black/80 backdrop-blur-3xl border border-white/10 rounded-full p-2 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] transition-all duration-500 hover:border-[#55DEE8]/40 min-h-[60px] md:min-h-[70px]">
+        <div className="relative flex flex-row items-center bg-black/80 backdrop-blur-3xl border border-white/10 rounded-full p-2 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] transition-all duration-500 hover:border-white/30/40 min-h-[60px] md:min-h-[70px]">
           
           {/* Sport Selection */}
           <div className="flex-1 min-w-[80px] relative z-[100] border-r border-white/5" ref={sportDropdownRef}>
@@ -130,7 +130,7 @@ const SearchPlayers = ({ onSearch, userLocation }) => {
                 <div className="p-2 max-h-[250px] overflow-y-auto grid grid-cols-1 gap-1">
                   <button onClick={() => { setSport(""); setShowSportDropdown(false); }} className="w-full text-left px-4 py-2 text-[10px] font-bold text-gray-400 hover:bg-white/5 rounded-xl uppercase">All Sports</button>
                   {SPORTS_LIST.map((s) => (
-                    <button key={s} onClick={() => { setSport(s); setShowSportDropdown(false); }} className={`w-full text-left px-4 py-2 text-[10px] font-bold rounded-xl uppercase transition-colors ${sport === s ? "bg-[#55DEE8] text-black" : "text-gray-400 hover:bg-white/5"}`}>{s}</button>
+                    <button key={s} onClick={() => { setSport(s); setShowSportDropdown(false); }} className={`w-full text-left px-4 py-2 text-[10px] font-bold rounded-xl uppercase transition-colors ${sport === s ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black" : "text-gray-400 hover:bg-white/5"}`}>{s}</button>
                   ))}
                 </div>
               </div>
@@ -178,8 +178,8 @@ const SearchPlayers = ({ onSearch, userLocation }) => {
                       onClick={() => handleSelectLocation(suggestion)}
                       className="w-full flex items-start gap-4 px-4 py-3 text-left hover:bg-white/5 rounded-xl transition-all group/item"
                     >
-                      <div className="mt-0.5 p-2 rounded-lg bg-white/5 group-hover/item:bg-[#55DEE8]/20 transition-colors">
-                        <Navigation className="w-3.5 h-3.5 text-gray-500 group-hover/item:text-[#55DEE8]" />
+                      <div className="mt-0.5 p-2 rounded-lg bg-white/5 group-hover/item:bg-white/10 transition-colors">
+                        <Navigation className="w-3.5 h-3.5 text-gray-500 group-hover/item:text-white/80" />
                       </div>
                       <div className="flex flex-col">
                         <span className="text-[11px] font-black text-white uppercase tracking-wider mb-0.5">{suggestion.city}</span>
@@ -195,7 +195,7 @@ const SearchPlayers = ({ onSearch, userLocation }) => {
           {/* Reset Filter */}
           <button
             onClick={resetFilters}
-            className="flex items-center justify-center p-2 md:p-3 text-gray-500 hover:text-[#55DEE8] transition-colors shrink-0 group/reset"
+            className="flex items-center justify-center p-2 md:p-3 text-gray-500 hover:text-white/70 transition-colors shrink-0 group/reset"
           >
             <RotateCcw className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform duration-500 group-hover/reset:rotate-[-180deg]" />
           </button>

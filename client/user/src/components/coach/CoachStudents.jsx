@@ -35,7 +35,7 @@ export default function CoachStudents() {
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-8 bg-[#55DEE8] rounded-full" />
               <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
-                Student <span className="text-[#55DEE8]">Roster</span>
+                Student <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Roster</span>
               </h1>
             </div>
             <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
@@ -74,7 +74,7 @@ export default function CoachStudents() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {trainees.map((student) => (
-            <div key={student._id} className="group relative bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 hover:border-[#55DEE8]/30 transition-all duration-500 shadow-[var(--shadow-2)]">
+            <div key={student._id} className="group relative bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 hover:border-white/30/30 transition-all duration-500 shadow-[var(--shadow-2)]">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-16 h-16 rounded-[6px] bg-[#55DEE8]/10 border border-[#55DEE8]/20 flex items-center justify-center overflow-hidden">
                   {student.avatar ? (
@@ -84,7 +84,7 @@ export default function CoachStudents() {
                   )}
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-[#55DEE8] transition-colors font-inter tracking-tight">{student.name}</h3>
+                  <h3 className="text-lg font-bold text-white group-hover:text-white/70 transition-colors font-inter tracking-tight">{student.name}</h3>
                   <div className="flex items-center gap-1 text-[#878C9F] text-[10px] uppercase tracking-wider font-medium font-inter">
                     <ShieldCheck size={12} className="text-[#55DEE8]" />
                     Verified Athlete
@@ -108,7 +108,7 @@ export default function CoachStudents() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <button className="py-2.5 bg-[#55DEE8]/10 hover:bg-[#55DEE8]/20 text-[#55DEE8] text-[10px] font-bold uppercase tracking-wider rounded-[6px] transition-all font-inter border border-[#55DEE8]/20">
+                <button className="py-2.5 bg-[#55DEE8]/10 hover:bg-white/10/20 text-[#55DEE8] text-[10px] font-bold uppercase tracking-wider rounded-[6px] transition-all font-inter border border-[#55DEE8]/20">
                   View Profile
                 </button>
                 <button className="py-2.5 bg-transparent hover:bg-white/5 text-[#999999] hover:text-white text-[10px] font-bold uppercase tracking-wider rounded-[6px] transition-all border border-[#2D2D2D] font-inter">

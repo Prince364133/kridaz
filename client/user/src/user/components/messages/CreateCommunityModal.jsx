@@ -69,7 +69,7 @@ const CreateCommunityModal = ({ isOpen, onClose, onSuccess }) => {
 
       <button 
         onClick={() => setStep(1)}
-        className="w-full py-5 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] rounded-3xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+        className="w-full py-5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-[0.2em] rounded-3xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
       >
         Get Started <ChevronRight size={20} />
       </button>
@@ -87,14 +87,14 @@ const CreateCommunityModal = ({ isOpen, onClose, onSuccess }) => {
               autoFocus
               value={communityName}
               onChange={(e) => setCommunityName(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-5 text-white focus:border-[#55DEE8] outline-none transition-all font-bold text-lg placeholder:text-white/10"
+              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-5 text-white focus:border-white/30 outline-none transition-all font-bold text-lg placeholder:text-white/10"
               placeholder="Community Name"
             />
             <textarea
               value={communityDescription}
               onChange={(e) => setCommunityDescription(e.target.value)}
               rows={4}
-              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-5 text-white focus:border-[#55DEE8] outline-none transition-all font-medium placeholder:text-white/10 resize-none text-base"
+              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-5 text-white focus:border-white/30 outline-none transition-all font-medium placeholder:text-white/10 resize-none text-base"
               placeholder="Community Description"
             />
           </div>
@@ -118,7 +118,7 @@ const CreateCommunityModal = ({ isOpen, onClose, onSuccess }) => {
         <button
           onClick={handleSubmit}
           disabled={isCreating || !communityName.trim()}
-          className="flex-1 py-5 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] rounded-3xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30"
+          className="flex-1 py-5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-[0.2em] rounded-3xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30"
         >
           {isCreating ? 'Creating...' : 'Create Community'}
         </button>

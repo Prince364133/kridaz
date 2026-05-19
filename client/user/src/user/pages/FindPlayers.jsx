@@ -61,21 +61,21 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-black rounded-[16px] border border-[#55DEE8]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-[#55DEE8]/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+      className="relative bg-black rounded-[16px] border border-[#BFF367]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-white/30/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
     >
       <div className="flex justify-end items-start p-4 absolute top-0 left-0 right-0 z-20">
-        <div className="p-1.5 bg-[#55DEE8]/10 rounded-lg border border-[#55DEE8]/20">
-          <ShieldCheck size={14} className="text-[#55DEE8]" />
+        <div className="p-1.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367]/10 rounded-lg border border-[#BFF367]/20">
+          <ShieldCheck size={14} className="text-[#BFF367]" />
         </div>
       </div>
 
       <div className="h-40 relative mt-2 flex items-center justify-center overflow-hidden">
         <div 
-          className="absolute w-52 h-52 bg-[#55DEE8]/10 border border-[#55DEE8]/30 blur-sm opacity-50 group-hover:opacity-80 transition-opacity duration-700"
+          className="absolute w-52 h-52 bg-gradient-to-r from-[#55DEE8] to-[#BFF367]/10 border border-[#BFF367]/30 blur-sm opacity-50 group-hover:opacity-80 transition-opacity duration-700"
           style={{ clipPath: shape }}
         />
         <div 
-          className="absolute w-48 h-48 border-2 border-[#55DEE8]/40"
+          className="absolute w-48 h-48 border-2 border-[#BFF367]/40"
           style={{ clipPath: shape }}
         />
         <div className="relative w-full h-full flex items-center justify-center z-10 pointer-events-none">
@@ -86,8 +86,8 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
           />
         </div>
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-          <div className="bg-black border-2 border-[#55DEE8] w-12 h-14 flex items-center justify-center" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
-            <span className="text-[#55DEE8] font-black text-sm uppercase">
+          <div className="bg-black border-2 border-[#BFF367] w-12 h-14 flex items-center justify-center" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
+            <span className="text-[#BFF367] font-black text-sm uppercase">
               {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
             </span>
           </div>
@@ -99,20 +99,20 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
           {player.name}
         </h3>
         <div className="flex items-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-4">
-          <MapPin size={10} className="text-[#55DEE8]" />
+          <MapPin size={10} className="text-[#BFF367]" />
           {player.city || 'Athletic'}
         </div>
         <div className="grid grid-cols-3 w-full border-t border-white/5 pt-2 mb-2">
           <div className="flex flex-col items-center">
-            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Matches</span>
+            <span className="text-[#BFF367] text-[6px] font-black uppercase tracking-widest mb-1">Matches</span>
             <span className="text-white font-black text-[10px]">—</span>
           </div>
           <div className="flex flex-col items-center border-x border-white/5">
-            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Runs</span>
+            <span className="text-[#BFF367] text-[6px] font-black uppercase tracking-widest mb-1">Runs</span>
             <span className="text-white font-black text-[10px]">—</span>
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Strike Rate</span>
+            <span className="text-[#BFF367] text-[6px] font-black uppercase tracking-widest mb-1">Strike Rate</span>
             <span className="text-white font-black text-[10px]">—</span>
           </div>
         </div>
@@ -120,7 +120,7 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
           <button onClick={() => handleFollowToggle(player._id)} className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player._id) ? "bg-white/5 text-white/20 border border-white/10" : "text-black hover:scale-105 shadow-[0_0_15px_rgba(85,222,232,0.3)]"}`} style={!followingIds.includes(player._id) ? { background: GRAD } : {}}>
             {followingIds.includes(player._id) ? "Following" : "Follow"}
           </button>
-          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8] transition-all">
+          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white/70 transition-all">
             <MessageCircle size={18} />
           </button>
         </div>
@@ -135,7 +135,7 @@ const TeamCard = ({ team, navigate }) => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-[#0A0A0A] rounded-[20px] border border-white/5 overflow-hidden flex flex-col h-[380px] group hover:border-[#55DEE8]/30 transition-all duration-500 shadow-2xl"
+      className="relative bg-[#0A0A0A] rounded-[20px] border border-white/5 overflow-hidden flex flex-col h-[380px] group hover:border-white/30/30 transition-all duration-500 shadow-2xl"
     >
       {/* Top Section: Banner */}
       <div className="h-32 relative">
@@ -157,21 +157,21 @@ const TeamCard = ({ team, navigate }) => {
         {/* Team Avatar Overlay */}
         <div className="absolute bottom-[-16px] left-4 z-10">
           <div className="w-14 h-14 rounded-full border-[2px] border-[#0A0A0A] bg-[#0A0A0A] relative overflow-hidden group/avatar">
-            <div className="absolute inset-0 border-2 border-[#55DEE8] rounded-full z-20" />
+            <div className="absolute inset-0 border-2 border-[#BFF367] rounded-full z-20" />
             <div className="w-full h-full flex items-center justify-center bg-[#111] relative z-10">
               {team.logo ? (
                 <img src={team.logo} alt="" className="w-full h-full object-cover" />
               ) : (
-                <div className="flex flex-col items-center text-[#55DEE8]">
+                <div className="flex flex-col items-center text-[#BFF367]">
                   <Crown size={24} className="mb-1" />
-                  <div className="w-10 h-10 border-2 border-[#55DEE8] rounded-full flex items-center justify-center p-1">
+                  <div className="w-10 h-10 border-2 border-[#BFF367] rounded-full flex items-center justify-center p-1">
                      {team.sportType === 'Cricket' ? <Trophy size={16} /> : <Activity size={16} />}
                   </div>
                 </div>
               )}
             </div>
             {/* Status Indicator */}
-            <div className="absolute bottom-2 right-2 w-4 h-4 bg-[#55DEE8] rounded-full border-[3px] border-[#0A0A0A] z-30" />
+            <div className="absolute bottom-2 right-2 w-4 h-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full border-[3px] border-[#0A0A0A] z-30" />
           </div>
         </div>
       </div>
@@ -182,14 +182,14 @@ const TeamCard = ({ team, navigate }) => {
           <div>
             <h3 className="text-base font-black text-white uppercase tracking-tighter mb-0.5" style={HEADING_STYLE}>{team.name}</h3>
             <div className="flex items-center gap-2">
-              <span className="text-[#55DEE8] font-black text-[8px] uppercase tracking-widest flex items-center gap-1.5">
+              <span className="text-[#BFF367] font-black text-[8px] uppercase tracking-widest flex items-center gap-1.5">
                 {team.sportType === 'Cricket' ? <Trophy size={10} /> : <Activity size={10} />}
                 {team.sportType}
               </span>
             </div>
             <p className="text-gray-600 text-[8px] font-bold uppercase tracking-widest mt-0.5">@ {team.city || 'Global'}</p>
           </div>
-          <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-white/40 hover:text-[#55DEE8] transition-colors">
+          <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-white/40 hover:text-white/70 transition-colors">
             <Star size={16} />
           </div>
         </div>
@@ -198,7 +198,7 @@ const TeamCard = ({ team, navigate }) => {
         <div className="grid grid-cols-2 gap-2 py-3 border-y border-white/5 mb-3">
           <div className="flex items-center gap-2">
              <div className="p-2 bg-white/5 rounded-lg border border-white/10">
-                <Users size={14} className="text-[#55DEE8]" />
+                <Users size={14} className="text-[#BFF367]" />
              </div>
              <div>
                 <p className="text-sm font-black text-white leading-none mb-0.5">{team.memberCount || 1}</p>
@@ -207,7 +207,7 @@ const TeamCard = ({ team, navigate }) => {
           </div>
           <div className="flex items-center gap-2">
              <div className="p-2 bg-white/5 rounded-lg border border-white/10">
-                <Target size={14} className="text-[#55DEE8]" />
+                <Target size={14} className="text-[#BFF367]" />
              </div>
              <div>
                 <p className="text-sm font-black text-white leading-none mb-0.5">{team.matchesPlayed || 0}</p>
@@ -237,7 +237,7 @@ const TeamCard = ({ team, navigate }) => {
 
         <Link 
           to={`/team-pass/${team._id}`}
-          className="mt-3 flex items-center justify-center gap-2 text-gray-600 hover:text-[#55DEE8] text-[9px] font-black uppercase tracking-[0.2em] transition-all"
+          className="mt-3 flex items-center justify-center gap-2 text-gray-600 hover:text-white/70 text-[9px] font-black uppercase tracking-[0.2em] transition-all"
         >
           View Team Pass <ChevronRight size={12} />
         </Link>
@@ -688,9 +688,9 @@ const FindPlayers = () => {
     const element = document.getElementById(`player-card-${id}`);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "center" });
-      element.classList.add("ring-2", "ring-[#55DEE8]", "ring-offset-4", "ring-offset-black");
+      element.classList.add("ring-2", "ring-[#BFF367]", "ring-offset-4", "ring-offset-black");
       setTimeout(() => {
-        element.classList.remove("ring-2", "ring-[#55DEE8]", "ring-offset-4", "ring-offset-black");
+        element.classList.remove("ring-2", "ring-[#BFF367]", "ring-offset-4", "ring-offset-black");
       }, 3000);
     }
   };
@@ -717,7 +717,7 @@ const FindPlayers = () => {
           <motion.div 
             animate={{ height: `${SNAP_STATES[snapState]}vh` }}
             transition={{ type: "spring", damping: 25, stiffness: 150 }}
-            className="relative w-full bg-[#0a0a0a] border-b border-[#55DEE8]/30 overflow-hidden"
+            className="relative w-full bg-[#0a0a0a] border-b border-[#BFF367]/30 overflow-hidden"
           >
             <AnimatePresence>
               {snapState !== "COLLAPSED" && (
@@ -739,12 +739,12 @@ const FindPlayers = () => {
                   <div className="absolute top-4 left-4 right-4 z-[1000] flex items-center justify-between pointer-events-none">
                     <div className="flex items-center gap-3 bg-black/60 backdrop-blur-xl border border-white/10 p-1.5 px-4 rounded-2xl shadow-2xl">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-[#55DEE8] rounded-full animate-pulse shadow-[0_0_10px_#55DEE8]" />
+                        <div className="w-2 h-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full animate-pulse shadow-[0_0_10px_#BFF367]" />
                         <span className="text-white text-[11px] font-black uppercase tracking-widest">Live Map</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Users size={12} className="text-[#55DEE8]" />
-                        <span className="text-[#55DEE8] text-[11px] font-black">{allNearbyPlayers.length}</span>
+                        <Users size={12} className="text-[#BFF367]" />
+                        <span className="text-[#BFF367] text-[11px] font-black">{allNearbyPlayers.length}</span>
                         <span className="text-white/40 text-[9px] font-bold uppercase">Players</span>
                       </div>
 
@@ -766,7 +766,7 @@ const FindPlayers = () => {
                         onClick={toggleLocationSharing}
                         className={`flex items-center gap-2 px-4 py-2 rounded-2xl border transition-all duration-300 backdrop-blur-xl shadow-2xl ${
                           isLocationSharing 
-                            ? "bg-[#55DEE8]/20 border-[#55DEE8]/30 text-[#55DEE8]" 
+                            ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367]/20 border-[#BFF367]/30 text-[#BFF367]" 
                             : "bg-red-500/10 border-red-500/20 text-red-500"
                         }`}
                       >
@@ -783,15 +783,15 @@ const FindPlayers = () => {
                     <div className="absolute inset-0 z-[2000] bg-[#0A0A0A] flex flex-col items-center justify-center">
                       <div className="w-full h-full relative opacity-20">
                         <div className="absolute inset-0" style={{ 
-                            backgroundImage: 'radial-gradient(#55DEE8 1px, transparent 1px)', 
+                            backgroundImage: 'radial-gradient(#BFF367 1px, transparent 1px)', 
                             backgroundSize: '40px 40px' 
                         }} />
                       </div>
                       <div className="absolute flex flex-col items-center gap-4">
                         <div className="relative">
-                          <div className="w-16 h-16 border-2 border-[#55DEE8]/20 rounded-full animate-ping absolute inset-0" />
-                          <div className="w-16 h-16 border-2 border-[#55DEE8] rounded-full flex items-center justify-center bg-black">
-                            <MapPin className="text-[#55DEE8] animate-bounce" size={24} />
+                          <div className="w-16 h-16 border-2 border-[#BFF367]/20 rounded-full animate-ping absolute inset-0" />
+                          <div className="w-16 h-16 border-2 border-[#BFF367] rounded-full flex items-center justify-center bg-black">
+                            <MapPin className="text-[#BFF367] animate-bounce" size={24} />
                           </div>
                         </div>
                         <div className="text-center">
@@ -829,13 +829,13 @@ const FindPlayers = () => {
                         exit={{ opacity: 0 }}
                         className="absolute inset-0 z-[1500] bg-black/40 backdrop-blur-sm flex items-center justify-center"
                       >
-                        <Loader2 className="text-[#55DEE8] animate-spin" size={32} />
+                        <Loader2 className="text-[#BFF367] animate-spin" size={32} />
                       </motion.div>
                     )}
                   </AnimatePresence>
 
                   <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-xs">
-                    <div className="bg-black/80 backdrop-blur-2xl border border-[#55DEE8]/30 rounded-full p-1.5 px-6 flex items-center justify-between shadow-2xl">
+                    <div className="bg-black/80 backdrop-blur-2xl border border-[#BFF367]/30 rounded-full p-1.5 px-6 flex items-center justify-between shadow-2xl">
                         <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Radius</span>
                         <div className="flex items-center gap-1">
                           {[1, 2, 5, 10].map(r => (
@@ -845,7 +845,7 @@ const FindPlayers = () => {
                                   e.stopPropagation();
                                   setSelectedRadius(r);
                                 }}
-                                className={`min-w-[44px] py-1.5 rounded-full text-[9px] font-black transition-all uppercase ${selectedRadius === r ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" : "text-white/40 hover:text-white/70"}`}
+                                className={`min-w-[44px] py-1.5 rounded-full text-[9px] font-black transition-all uppercase ${selectedRadius === r ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" : "text-white/40 hover:text-white/70"}`}
                               >
                                 {r}KM
                               </button>
@@ -866,8 +866,8 @@ const FindPlayers = () => {
             onDragEnd={handleDragEnd}
             className="w-full h-10 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing bg-black z-50 group border-b border-white/5"
           >
-            <div className="w-12 h-1.5 bg-white/10 rounded-full group-hover:bg-[#55DEE8]/40 transition-colors" />
-            <div className="text-[8px] font-bold text-white/10 uppercase tracking-[0.3em] mt-1 group-hover:text-[#55DEE8]/40 transition-colors">
+            <div className="w-12 h-1.5 bg-white/10 rounded-full group-hover:bg-white/10/40 transition-colors" />
+            <div className="text-[8px] font-bold text-white/10 uppercase tracking-[0.3em] mt-1 group-hover:text-white/70/40 transition-colors">
                 Slide to Discover
             </div>
           </motion.div>
@@ -882,17 +882,19 @@ const FindPlayers = () => {
           <div className="flex items-center gap-4 border-b border-white/5 pb-1">
             <button 
               onClick={() => setActiveTab("players")}
-              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "players" ? "text-[#55DEE8]" : "text-white/20 hover:text-white/40"}`}
+              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "players" ? "" : "text-white/20 hover:text-white/40"}`}
+              style={activeTab === "players" ? { background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } : {}}
             >
               Players
-              {activeTab === "players" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#55DEE8]" />}
+              {activeTab === "players" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />}
             </button>
             <button 
               onClick={() => setActiveTab("teams")}
-              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "teams" ? "text-[#55DEE8]" : "text-white/20 hover:text-white/40"}`}
+              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "teams" ? "" : "text-white/20 hover:text-white/40"}`}
+              style={activeTab === "teams" ? { background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } : {}}
             >
               Teams
-              {activeTab === "teams" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#55DEE8]" />}
+              {activeTab === "teams" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />}
             </button>
           </div>
 
@@ -901,13 +903,13 @@ const FindPlayers = () => {
             <div className="flex items-center gap-4 flex-1">
               <h2 className="text-[10px] md:text-xs font-bold text-white/20 uppercase tracking-[0.2em] whitespace-nowrap hidden sm:block" style={SUBHEADING_STYLE}>{activeTab === "players" ? "Active Players" : "Verified Teams"}</h2>
               <div className="relative flex-1 max-w-md group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors" size={16} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors" size={16} />
                 <input 
                   type="text" 
                   value={searchQuery}
                   onChange={handleSearch}
                   placeholder="SEARCH..."
-                  className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#55DEE8]/50 rounded-xl h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
+                  className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-white/30/50 rounded-xl h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
                 />
               </div>
             </div>
@@ -916,19 +918,19 @@ const FindPlayers = () => {
               <select 
                 value={filters.sport}
                 onChange={(e) => handleFilterChange("sport", e.target.value)}
-                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
+                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] focus:border-white/30/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
               >
                 <option value="">All Sports</option>
                 {sports.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
               <div className="relative group">
-                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
+                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367]" size={10} />
                 <input 
                   type="text"
                   placeholder="LOCATION..."
                   value={filters.city}
                   onChange={(e) => handleFilterChange("city", e.target.value)}
-                  className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 placeholder:text-white/20"
+                  className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] focus:border-white/30/50 outline-none w-24 md:w-28 placeholder:text-white/20"
                 />
               </div>
 
@@ -937,7 +939,7 @@ const FindPlayers = () => {
                   onClick={() => setShowNearbyOnly(!showNearbyOnly)}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all text-[9px] font-black uppercase tracking-widest ${
                     showNearbyOnly 
-                    ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" 
+                    ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-[0_0_15px_rgba(85,222,232,0.4)]" 
                     : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
                   }`}
                 >

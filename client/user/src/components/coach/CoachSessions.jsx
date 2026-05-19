@@ -35,7 +35,7 @@ export default function CoachSessions() {
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-8 bg-[#55DEE8] rounded-full" />
               <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
-                Training <span className="text-[#55DEE8]">Sessions</span>
+                Training <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Sessions</span>
               </h1>
             </div>
             <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
@@ -59,7 +59,7 @@ export default function CoachSessions() {
               </div>
             </div>
 
-            <button className="px-6 py-4 bg-[#55DEE8] hover:bg-[#55DEE8]/90 text-black rounded-2xl font-bold uppercase text-[11px] tracking-widest flex items-center gap-2 hover:scale-[0.98] transition-all font-inter shadow-2xl active:scale-95">
+            <button className="px-6 py-4 bg-[#55DEE8] hover:bg-white/10/90 text-black rounded-2xl font-bold uppercase text-[11px] tracking-widest flex items-center gap-2 hover:scale-[0.98] transition-all font-inter shadow-2xl active:scale-95">
               <Plus size={16} /> New Session
             </button>
           </div>
@@ -78,7 +78,7 @@ export default function CoachSessions() {
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {sessions.map((session) => (
-            <div key={session._id} className="group relative bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 hover:border-[#55DEE8]/30 transition-all duration-500 shadow-[var(--shadow-2)]">
+            <div key={session._id} className="group relative bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 hover:border-white/30/30 transition-all duration-500 shadow-[var(--shadow-2)]">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div className="flex gap-6 flex-1">
                   <div className="flex flex-col items-center justify-center w-20 h-20 bg-[#2D2D2D]/30 rounded-[6px] border border-[#2D2D2D] text-center">
@@ -101,7 +101,7 @@ export default function CoachSessions() {
                       </div>
                     </div>
                     
-                    <h3 className="text-lg font-bold text-white group-hover:text-[#55DEE8] transition-colors font-inter tracking-tight">{session.name}</h3>
+                    <h3 className="text-lg font-bold text-white group-hover:text-white/70 transition-colors font-inter tracking-tight">{session.name}</h3>
                     
                     <div className="flex flex-wrap gap-6 text-[13px] text-[#878C9F] font-inter">
                       <div className="flex items-center gap-2">
@@ -117,7 +117,7 @@ export default function CoachSessions() {
                 </div>
 
                 <div className="w-full md:w-auto flex flex-col items-stretch gap-3">
-                  <button className="px-6 py-2.5 bg-transparent hover:bg-[#55DEE8]/10 text-[#999999] hover:text-[#55DEE8] text-xs font-bold uppercase tracking-widest rounded-[6px] border border-[#2D2D2D] hover:border-[#55DEE8]/30 transition-all flex items-center justify-center gap-2 font-inter">
+                  <button className="px-6 py-2.5 bg-transparent hover:bg-white/10/10 text-[#999999] hover:text-white/70 text-xs font-bold uppercase tracking-widest rounded-[6px] border border-[#2D2D2D] hover:border-white/30/30 transition-all flex items-center justify-center gap-2 font-inter">
                     Manage Session <ArrowRight size={14} />
                   </button>
                 </div>

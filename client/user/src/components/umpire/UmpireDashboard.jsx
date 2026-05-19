@@ -105,7 +105,7 @@ export default function UmpireDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Match Volume Chart */}
-          <div className="lg:col-span-2 p-6 md:p-10 bg-[#0A0A0A] rounded-[2.5rem] border border-white/5 relative transition-all hover:border-[#55DEE8]/20 group">
+          <div className="lg:col-span-2 p-6 md:p-10 bg-[#0A0A0A] rounded-[2.5rem] border border-white/5 relative transition-all hover:border-white/30/20 group">
             <div className="flex justify-between items-center mb-8 md:mb-12">
               <div>
                 <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white">
@@ -115,7 +115,7 @@ export default function UmpireDashboard() {
                   Monthly Assignment Analytics
                 </p>
               </div>
-              <div className="p-3 bg-white/5 rounded-2xl border border-white/5 group-hover:border-[#55DEE8]/30 transition-colors">
+              <div className="p-3 bg-white/5 rounded-2xl border border-white/5 group-hover:border-white/30/30 transition-colors">
                 <BarChartIcon size={20} className="text-[#55DEE8]" />
               </div>
             </div>
@@ -161,7 +161,7 @@ export default function UmpireDashboard() {
           </div>
 
           {/* Upcoming Assignments */}
-          <div className="p-8 md:p-10 bg-[#0A0A0A] rounded-[2.5rem] border border-white/5 flex flex-col transition-all hover:border-[#55DEE8]/20 group">
+          <div className="p-8 md:p-10 bg-[#0A0A0A] rounded-[2.5rem] border border-white/5 flex flex-col transition-all hover:border-white/30/20 group">
             <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-8">
               Upcoming Assignments
             </h2>
@@ -206,7 +206,7 @@ export default function UmpireDashboard() {
                 </div>
               )}
             </div>
-            <button className="mt-10 w-full h-14 border border-white/10 hover:border-[#55DEE8]/50 hover:bg-[#55DEE8]/5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all text-gray-400 hover:text-white">
+            <button className="mt-10 w-full h-14 border border-white/10 hover:border-white/30/50 hover:bg-white/10/5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all text-gray-400 hover:text-white">
               Review Protocols
             </button>
           </div>

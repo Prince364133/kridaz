@@ -89,7 +89,7 @@ const UploadReel = () => {
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               placeholder="Write a catchy caption..."
-              className="w-full bg-white/5 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-[#55DEE8] transition-colors resize-none h-24"
+              className="w-full bg-white/5 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-white/30 transition-colors resize-none h-24"
             />
           </div>
 
@@ -100,7 +100,7 @@ const UploadReel = () => {
               value={hashtags}
               onChange={(e) => setHashtags(e.target.value)}
               placeholder="#sports #kridaz #goals"
-              className="w-full bg-white/5 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-[#55DEE8] transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-white/30 transition-colors"
             />
           </div>
 
@@ -114,7 +114,7 @@ const UploadReel = () => {
           <button 
             onClick={handleUpload}
             disabled={!file || isPreparing}
-            className="w-full py-4 bg-[#55DEE8] text-black font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#74b314] transition-colors mt-4"
+            className="w-full py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#74b314] transition-colors mt-4"
           >
             {isPreparing ? 'Preparing...' : 'Share Reel'}
           </button>

@@ -336,7 +336,7 @@ export default function ProfessionalDetails() {
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Special Request (Optional)</label>
                   <textarea 
                     placeholder="E.g. Focus on batting drills..."
-                    className="w-full bg-black border border-neutral-800 rounded-2xl p-4 text-xs font-medium focus:border-[#55DEE8] outline-none transition-colors h-24 resize-none"
+                    className="w-full bg-black border border-neutral-800 rounded-2xl p-4 text-xs font-medium focus:border-white/30 outline-none transition-colors h-24 resize-none"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                   />
@@ -355,7 +355,7 @@ export default function ProfessionalDetails() {
                   <button 
                     onClick={handleBooking}
                     disabled={bookingLoading || selectedSlots.length === 0}
-                    className="w-full bg-[#55DEE8] text-black py-4 rounded-[20px] font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
+                    className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black py-4 rounded-[20px] font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
                   >
                     {bookingLoading ? <Loader2 className="animate-spin mx-auto" size={20} /> : "Send Booking Request"}
                   </button>

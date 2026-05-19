@@ -225,7 +225,7 @@ const ReelsFeed = () => {
             <p className="text-gray-400 text-center">Be the first one to post a reel!</p>
             <button 
               onClick={() => navigate('/reels/upload')}
-              className="mt-6 px-6 py-2 bg-[#55DEE8] text-black font-bold rounded-full hover:scale-105 active:scale-95 transition-transform"
+              className="mt-6 px-6 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-bold rounded-full hover:scale-105 active:scale-95 transition-transform"
             >
               Create Short
             </button>

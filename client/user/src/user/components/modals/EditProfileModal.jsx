@@ -200,7 +200,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
  {/* Profile Picture Upload */}
  <div className="flex flex-col items-center justify-center mb-8">
  <div className="relative group">
- <div className="w-24 h-24 rounded-3xl bg-[#55DEE8]/5 border border-[#2D2D2D] overflow-hidden flex items-center justify-center group-hover:border-[#55DEE8]/30 transition-all">
+ <div className="w-24 h-24 rounded-3xl bg-[#55DEE8]/5 border border-[#2D2D2D] overflow-hidden flex items-center justify-center group-hover:border-white/30/30 transition-all">
  {user?.profilePicture ? (
  <img 
  src={user.profilePicture} 
@@ -249,7 +249,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
  name="name"
  value={formData.name}
  onChange={handleChange}
- className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-[#55DEE8] focus:ring-4 focus:ring-[#55DEE8]/10 transition-all"
+ className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-white/30 focus:ring-4 focus:ring-white/20/10 transition-all"
  placeholder="Enter your name"
  required
  />
@@ -284,9 +284,9 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
  value={formData.username}
  onChange={handleChange}
  className={`w-full bg-[#000000] border rounded-[8px] py-4 pl-10 pr-12 text-sm text-white focus:outline-none focus:ring-4 transition-all ${
- usernameStatus === 'available' ? 'border-[#55DEE8]/50 focus:border-[#55DEE8] focus:ring-[#55DEE8]/10' :
+ usernameStatus === 'available' ? 'border-[#55DEE8]/50 focus:border-white/30 focus:ring-white/20/10' :
  usernameStatus === 'taken' ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/10' :
- 'border-[#2D2D2D] focus:border-[#55DEE8] focus:ring-[#55DEE8]/10'
+ 'border-[#2D2D2D] focus:border-white/30 focus:ring-white/20/10'
  }`}
  placeholder="username"
  required
@@ -316,7 +316,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
  name="phone"
  value={formData.phone}
  onChange={handleChange}
- className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-[#55DEE8] focus:ring-4 focus:ring-[#55DEE8]/10 transition-all"
+ className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-white/30 focus:ring-4 focus:ring-white/20/10 transition-all"
  placeholder="Phone number"
  />
  </div>
@@ -329,7 +329,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
  name="gender"
  value={formData.gender}
  onChange={handleChange}
- className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] py-4 px-4 text-sm text-white focus:outline-none focus:border-[#55DEE8] focus:ring-4 focus:ring-[#55DEE8]/10 transition-all appearance-none"
+ className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] py-4 px-4 text-sm text-white focus:outline-none focus:border-white/30 focus:ring-4 focus:ring-white/20/10 transition-all appearance-none"
  >
  <option value="" className="bg-[#000000]">Select Gender</option>
  <option value="Male" className="bg-[#000000]">Male</option>
@@ -349,7 +349,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
  name="bio"
  value={formData.bio}
  onChange={handleChange}
- className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-[#55DEE8] focus:ring-4 focus:ring-[#55DEE8]/10 transition-all min-h-[100px] resize-none"
+ className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-white/30 focus:ring-4 focus:ring-white/20/10 transition-all min-h-[100px] resize-none"
  placeholder="Tell us about yourself..."
  />
  </div>
@@ -370,7 +370,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
  }}
  onFocus={() => setShowSuggestions(locationSuggestions.length > 0)}
  placeholder="e.g. Mumbai, Maharashtra"
- className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-12 text-sm text-white focus:outline-none focus:border-[#55DEE8] focus:ring-4 focus:ring-[#55DEE8]/10 transition-all"
+ className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-12 text-sm text-white focus:outline-none focus:border-white/30 focus:ring-4 focus:ring-white/20/10 transition-all"
  />
  {isSearchingLocation && (
  <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -386,7 +386,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
  type="button"
  key={idx}
  onClick={() => handleSelectLocation(suggestion)}
- className="w-full px-5 py-3 text-left hover:bg-[#55DEE8]/10 text-white/80 hover:text-white border-b border-[#2D2D2D] last:border-0 transition-colors flex flex-col gap-0.5"
+ className="w-full px-5 py-3 text-left hover:bg-white/10/10 text-white/80 hover:text-white border-b border-[#2D2D2D] last:border-0 transition-colors flex flex-col gap-0.5"
  >
  <span className="text-xs font-bold uppercase tracking-wider">{suggestion.city || suggestion.display_name.split(',')[0]}</span>
  <span className="text-[9px] text-white/40 truncate">{suggestion.display_name}</span>
@@ -431,7 +431,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
  }
  e.target.value = "";
  }}
- className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] py-4 px-4 text-sm text-white focus:outline-none focus:border-[#55DEE8] focus:ring-4 focus:ring-[#55DEE8]/10 transition-all appearance-none"
+ className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] py-4 px-4 text-sm text-white focus:outline-none focus:border-white/30 focus:ring-4 focus:ring-white/20/10 transition-all appearance-none"
  >
  <option value="">Add Interest...</option>
  {["Cricket", "Football", "Badminton", "Tennis", "Basketball", "Volleyball", "Table Tennis", "Swimming", "Gym", "Yoga"].filter(s => !formData.interests.includes(s)).map((sport, idx) => (
@@ -453,7 +453,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
  <button
  type="submit"
  disabled={loading || isCheckingUsername || usernameStatus === 'taken' || usernameStatus === 'short'}
- className="flex-[2] px-8 py-4 rounded-[8px] bg-[#55DEE8] text-black text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-lg shadow-[#55DEE8]/20 disabled:opacity-50 disabled:grayscale disabled:hover:scale-100"
+ className="flex-[2] px-8 py-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-lg shadow-[#55DEE8]/20 disabled:opacity-50 disabled:grayscale disabled:hover:scale-100"
  >
  {loading ? (
  <>

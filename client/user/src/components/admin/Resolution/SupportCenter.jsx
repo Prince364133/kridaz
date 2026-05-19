@@ -47,7 +47,7 @@ const SupportCenter = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight uppercase">
-              Support <span className="text-[#55DEE8]">Center</span>
+              Support <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Center</span>
             </h1>
             <p className="text-gray-400 text-sm mt-2 font-medium tracking-wide">Manage customer inquiries and partner issues</p>
           </div>
@@ -128,7 +128,7 @@ const SupportCenter = () => {
                         {selectedTicket.status !== 'RESOLVED' && (
                           <button 
                             onClick={() => handleUpdateStatus(selectedTicket._id, 'RESOLVED')}
-                            className="bg-[#55DEE8]/10 text-[#55DEE8] hover:bg-[#55DEE8] hover:text-black px-4 py-2 rounded-lg text-xs font-bold transition-all"
+                            className="bg-[#55DEE8]/10 text-[#55DEE8] hover:bg-white/10 hover:text-black px-4 py-2 rounded-lg text-xs font-bold transition-all"
                           >
                              Resolve
                           </button>
@@ -168,7 +168,7 @@ const SupportCenter = () => {
                            {selectedTicket.images && selectedTicket.images.length > 0 && (
                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
                                {selectedTicket.images.map((img, i) => (
-                                 <a key={i} href={img} target="_blank" rel="noreferrer" className="block relative aspect-video rounded-lg overflow-hidden border border-white/10 hover:border-[#55DEE8]/50 transition-colors">
+                                 <a key={i} href={img} target="_blank" rel="noreferrer" className="block relative aspect-video rounded-lg overflow-hidden border border-white/10 hover:border-white/30/50 transition-colors">
                                    <img src={img} alt={`attachment-${i}`} className="w-full h-full object-cover" />
                                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
                                       <span className="text-[8px] font-black uppercase text-white bg-black/60 px-2 py-1 rounded">View Full</span>

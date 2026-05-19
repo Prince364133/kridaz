@@ -195,7 +195,7 @@ const PlayerMap = ({ items = [], itemType = 'players', userLocation, onItemClick
       <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
          <button 
            onClick={handleRecenter}
-           className="w-10 h-10 bg-black/80 backdrop-blur-md border border-[#55DEE8]/30 rounded-xl flex items-center justify-center text-[#55DEE8] hover:bg-[#55DEE8] hover:text-black transition-all shadow-2xl"
+           className="w-10 h-10 bg-black/80 backdrop-blur-md border border-[#55DEE8]/30 rounded-xl flex items-center justify-center text-[#55DEE8] hover:bg-white/10 hover:text-black transition-all shadow-2xl"
            title="Recenter Map"
          >
            <Navigation size={18} />

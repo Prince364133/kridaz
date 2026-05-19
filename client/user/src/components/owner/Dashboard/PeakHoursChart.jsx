@@ -89,7 +89,7 @@ const PeakHoursChart = () => {
           <select 
             value={selectedTurf} 
             onChange={(e) => setSelectedTurf(e.target.value)}
-            className="bg-[#151617] border border-[#2D2D2D] text-white text-[10px] font-bold uppercase tracking-widest rounded-[6px] px-3 py-1.5 focus:outline-none focus:border-[#55DEE8]/50 transition-all cursor-pointer hover:border-[#55DEE8]/30"
+            className="bg-[#151617] border border-[#2D2D2D] text-white text-[10px] font-bold uppercase tracking-widest rounded-[6px] px-3 py-1.5 focus:outline-none focus:border-[#55DEE8]/50 transition-all cursor-pointer hover:border-white/30/30"
           >
             <option value="" disabled>Select Facility</option>
             {turfs.map(turf => (
@@ -152,7 +152,7 @@ const PeakHoursChart = () => {
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-4">
-         <div className="bg-[#151617] p-4 rounded-[8px] border border-[#2D2D2D] flex items-center gap-4 group hover:border-[#55DEE8]/30 transition-all">
+         <div className="bg-[#151617] p-4 rounded-[8px] border border-[#2D2D2D] flex items-center gap-4 group hover:border-white/30/30 transition-all">
             <div className="p-2.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded-[6px] group-hover:scale-110 transition-transform">
                <TrendingUp size={18} />
             </div>
@@ -161,7 +161,7 @@ const PeakHoursChart = () => {
                <p className="text-white font-black text-lg uppercase tracking-tight">{summary.peakTime}</p>
             </div>
          </div>
-         <div className="bg-[#151617] p-4 rounded-[8px] border border-[#2D2D2D] flex items-center gap-4 group hover:border-[#55DEE8]/30 transition-all">
+         <div className="bg-[#151617] p-4 rounded-[8px] border border-[#2D2D2D] flex items-center gap-4 group hover:border-white/30/30 transition-all">
             <div className="p-2.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded-[6px] group-hover:scale-110 transition-transform">
                <Calendar size={18} />
             </div>

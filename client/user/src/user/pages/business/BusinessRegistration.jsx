@@ -318,7 +318,7 @@ export default function BusinessRegistration() {
             <Clock size={40} className="text-[#55DEE8] animate-pulse" />
           </div>
           <h2 className="text-4xl font-black uppercase tracking-tight">
-            Application <span className="text-[#55DEE8]">Pending</span>
+            Application <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Pending</span>
           </h2>
           <p className="text-gray-400 leading-relaxed">
             Thank you for applying to be a{" "}
@@ -341,7 +341,7 @@ export default function BusinessRegistration() {
           </div>
           <button
             onClick={() => navigate("/")}
-            className="w-full py-4 rounded-[8px] border border-[#2D2D2D] hover:border-[#55DEE8]/30 hover:text-[#55DEE8] transition-all font-normal uppercase tracking-widest text-[12px]"
+            className="w-full py-4 rounded-[8px] border border-[#2D2D2D] hover:border-white/30/30 hover:text-white/70 transition-all font-normal uppercase tracking-widest text-[12px]"
           >
             Back to Home
           </button>
@@ -410,7 +410,7 @@ export default function BusinessRegistration() {
                           value={formData.businessDetails.businessName}
                           onChange={handleChange}
                           placeholder="e.g. Dream Sports Arena"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-white/30/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                       <div className="space-y-2 group">
@@ -422,7 +422,7 @@ export default function BusinessRegistration() {
                           value={formData.businessDetails.registrationNumber}
                           onChange={handleChange}
                           placeholder="GSTIN or License No."
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-white/30/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                       <div className="space-y-2 group">
@@ -434,7 +434,7 @@ export default function BusinessRegistration() {
                           value={formData.phone}
                           onChange={handleChange}
                           placeholder="+91 00000 00000"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-white/30/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                     </>
@@ -449,7 +449,7 @@ export default function BusinessRegistration() {
                           value={formData.businessDetails.specialization}
                           onChange={handleChange}
                           placeholder="e.g. Advanced Cricket Coaching"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-white/30/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                       <div className="space-y-2 group">
@@ -461,7 +461,7 @@ export default function BusinessRegistration() {
                           value={formData.businessDetails.experience}
                           onChange={handleChange}
                           placeholder="e.g. 5+ Years"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-white/30/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                       <div className="space-y-2 group">
@@ -473,7 +473,7 @@ export default function BusinessRegistration() {
                           value={formData.phone}
                           onChange={handleChange}
                           placeholder="+91 00000 00000"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-white/30/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                     </>
@@ -492,7 +492,7 @@ export default function BusinessRegistration() {
                       onChange={handleChange}
                       autoComplete="off"
                       placeholder="Street name, Landmark"
-                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-12 text-white outline-none transition-all"
+                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-white/30/50 rounded-[8px] h-14 pl-12 pr-12 text-white outline-none transition-all"
                     />
                     
                     {isSearching && (
@@ -512,10 +512,10 @@ export default function BusinessRegistration() {
                                   key={index}
                                   type="button"
                                   onClick={() => handleSuggestionSelect(suggestion)}
-                                  className="w-full flex items-start gap-3 p-3 rounded-[6px] hover:bg-[#55DEE8]/5 text-left transition-all group/item"
+                                  className="w-full flex items-start gap-3 p-3 rounded-[6px] hover:bg-white/10/5 text-left transition-all group/item"
                                 >
                                   <div className="p-2 bg-[#55DEE8]/10 rounded-[6px] transition-colors mt-0.5">
-                                    <Navigation size={14} className="text-gray-500 group-hover/item:text-[#55DEE8]" />
+                                    <Navigation size={14} className="text-gray-500 group-hover/item:text-white/80" />
                                   </div>
                                   <div className="flex flex-col min-w-0">
                                     <span className="text-[11px] font-bold text-white uppercase tracking-wider truncate">
@@ -541,7 +541,7 @@ export default function BusinessRegistration() {
                       value={formData.businessDetails.city}
                       onChange={handleChange}
                       placeholder="City"
-                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-white/30/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-2">
@@ -550,7 +550,7 @@ export default function BusinessRegistration() {
                       value={formData.businessDetails.state}
                       onChange={handleChange}
                       placeholder="State"
-                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-white/30/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-2">
@@ -559,7 +559,7 @@ export default function BusinessRegistration() {
                       value={formData.businessDetails.zipCode}
                       onChange={handleChange}
                       placeholder="Zip Code"
-                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-white/30/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -622,7 +622,7 @@ export default function BusinessRegistration() {
                      value={formData.portfolioUrl || ''}
                      onChange={handleChange}
                      placeholder="e.g. Behance, Personal Website, or Instagram"
-                     className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all text-sm"
+                     className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-white/30/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all text-sm"
                    />
                  </div>
               </div>
@@ -722,7 +722,7 @@ function DocumentUpload({ label, id, onFileSelect, selectedFile }) {
         className={`flex flex-col items-center justify-center p-6 border border-dashed transition-all cursor-pointer h-32 text-center rounded-[8px]
           ${selectedFile 
             ? 'border-[#55DEE8] bg-[#55DEE8]/5' 
-            : 'border-[#2D2D2D] bg-[#000000] hover:border-[#55DEE8]/50 hover:bg-[#55DEE8]/5'
+            : 'border-[#2D2D2D] bg-[#000000] hover:border-white/30/50 hover:bg-white/10/5'
           }`}
       >
         {selectedFile ? (
@@ -737,7 +737,7 @@ function DocumentUpload({ label, id, onFileSelect, selectedFile }) {
             <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[6px] flex items-center justify-center mx-auto mb-1 transition-transform">
                <FileText size={18} className="text-gray-500" />
             </div>
-            <span className="text-[10px] font-normal text-[#878C9F] uppercase tracking-wider group-hover:text-[#55DEE8] transition-colors">
+            <span className="text-[10px] font-normal text-[#878C9F] uppercase tracking-wider group-hover:text-white/70 transition-colors">
               {label}
             </span>
           </div>

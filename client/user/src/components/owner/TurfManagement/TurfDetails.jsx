@@ -63,7 +63,7 @@ const BookingModal = ({ slot, onClose }) => {
                 <div className="grid grid-cols-1 gap-2">
                   <a href={(bookingDetails.user?.email || bookingDetails.guestDetails?.email) ? `mailto:${bookingDetails.user?.email || bookingDetails.guestDetails?.email}` : "#"} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-[#2D2D2D] rounded-[4px] flex items-center justify-center text-[#878C9F] group-hover:text-[#55DEE8]">
+                      <div className="w-8 h-8 bg-[#2D2D2D] rounded-[4px] flex items-center justify-center text-[#878C9F] group-hover:text-white/70">
                         <Mail size={12} />
                       </div>
                       <span className="text-xs text-[#878C9F] font-medium">{bookingDetails.user?.email || bookingDetails.guestDetails?.email || "No Email Provided"}</span>
@@ -72,7 +72,7 @@ const BookingModal = ({ slot, onClose }) => {
                   </a>
                   <a href={(bookingDetails.user?.phoneNumber || bookingDetails.guestDetails?.phone) ? `tel:${bookingDetails.user?.phoneNumber || bookingDetails.guestDetails?.phone}` : "#"} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-[#2D2D2D] rounded-[4px] flex items-center justify-center text-[#878C9F] group-hover:text-[#55DEE8]">
+                      <div className="w-8 h-8 bg-[#2D2D2D] rounded-[4px] flex items-center justify-center text-[#878C9F] group-hover:text-white/70">
                         <Phone size={12} />
                       </div>
                       <span className="text-xs text-[#878C9F] font-medium">{bookingDetails.user?.phoneNumber || bookingDetails.guestDetails?.phone || "No Phone Provided"}</span>
@@ -223,7 +223,7 @@ export default function TurfDetails() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate(-1)}
-            className="w-10 h-10 flex items-center justify-center bg-[#111] border border-[#2D2D2D] text-[#878C9F] hover:text-[#55DEE8] hover:border-[#55DEE8]/40 rounded-full transition-all group"
+            className="w-10 h-10 flex items-center justify-center bg-[#111] border border-[#2D2D2D] text-[#878C9F] hover:text-white/70 hover:border-white/30/40 rounded-full transition-all group"
             title="Back to Roster"
           >
             <ArrowLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
@@ -323,7 +323,7 @@ export default function TurfDetails() {
                 onClick={handleToggleVisibility}
                 className={`px-6 py-2.5 border rounded-[8px] font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${
                   turf.isActive 
-                  ? "bg-[#55DEE8]/5 border-[#55DEE8]/20 text-[#55DEE8] hover:bg-[#55DEE8]/10" 
+                  ? "bg-[#55DEE8]/5 border-[#55DEE8]/20 text-[#55DEE8] hover:bg-white/10/10" 
                   : "bg-black border-[#2D2D2D] text-[#444] hover:text-white"
                 }`}
              >
@@ -367,7 +367,7 @@ export default function TurfDetails() {
                       const el = document.getElementById('gallery-scroll');
                       el.scrollBy({ left: -300, behavior: 'smooth' });
                     }}
-                    className="w-8 h-8 flex items-center justify-center bg-[#111] border border-[#2D2D2D] rounded-full text-[#878C9F] hover:text-[#55DEE8] hover:border-[#55DEE8]/40 transition-all"
+                    className="w-8 h-8 flex items-center justify-center bg-[#111] border border-[#2D2D2D] rounded-full text-[#878C9F] hover:text-white/70 hover:border-white/30/40 transition-all"
                   >
                     <ChevronLeft size={16} />
                   </button>
@@ -376,7 +376,7 @@ export default function TurfDetails() {
                       const el = document.getElementById('gallery-scroll');
                       el.scrollBy({ left: 300, behavior: 'smooth' });
                     }}
-                    className="w-8 h-8 flex items-center justify-center bg-[#111] border border-[#2D2D2D] rounded-full text-[#878C9F] hover:text-[#55DEE8] hover:border-[#55DEE8]/40 transition-all"
+                    className="w-8 h-8 flex items-center justify-center bg-[#111] border border-[#2D2D2D] rounded-full text-[#878C9F] hover:text-white/70 hover:border-white/30/40 transition-all"
                   >
                     <ChevronRight size={16} />
                   </button>
@@ -524,7 +524,7 @@ export default function TurfDetails() {
                  <div className="flex flex-wrap gap-2">
                     {(pending.sportTypes || turf.sportTypes || []).map((sport, i) => (
                        <div key={i} className={`flex items-center gap-3 border p-3 rounded-[6px] w-full group/sport transition-colors ${
-                          pending.sportTypes ? 'bg-amber-500/5 border-amber-500/20' : 'bg-[#111] border-[#2D2D2D] hover:border-[#55DEE8]/40'
+                          pending.sportTypes ? 'bg-amber-500/5 border-amber-500/20' : 'bg-[#111] border-[#2D2D2D] hover:border-white/30/40'
                        }`}>
                           <div className={`w-2 h-2 rounded-full transition-colors ${
                              pending.sportTypes ? 'bg-amber-500 animate-pulse' : 'bg-[#55DEE8]/20 group-hover/sport:bg-[#55DEE8]'
@@ -615,7 +615,7 @@ export default function TurfDetails() {
                           href={turf.mapUrl} 
                           target="_blank" 
                           rel="noreferrer"
-                          className="flex items-center justify-center gap-2 w-full py-3 bg-[#111111] hover:bg-[#55DEE8]/10 text-[#55DEE8] border border-[#2D2D2D] hover:border-[#55DEE8]/30 rounded-[8px] text-[10px] font-bold uppercase tracking-widest transition-all"
+                          className="flex items-center justify-center gap-2 w-full py-3 bg-[#111111] hover:bg-white/10/10 text-[#55DEE8] border border-[#2D2D2D] hover:border-white/30/30 rounded-[8px] text-[10px] font-bold uppercase tracking-widest transition-all"
                         >
                            <Navigation size={14} /> Get Directions
                         </a>
@@ -654,12 +654,12 @@ export default function TurfDetails() {
                         <div className="space-y-2">
                            <h4 className="text-[9px] font-bold text-[#444] uppercase tracking-widest mb-2 pl-1">Venue Managers</h4>
                            {turf.managerContacts.map((manager, i) => (
-                              <div key={i} className="flex items-center justify-between p-2 pl-3 rounded-[4px] border border-dashed border-[#2D2D2D] hover:border-[#55DEE8]/30 transition-colors">
+                              <div key={i} className="flex items-center justify-between p-2 pl-3 rounded-[4px] border border-dashed border-[#2D2D2D] hover:border-white/30/30 transition-colors">
                                  <div className="flex flex-col">
                                     <span className="text-[11px] font-bold text-white uppercase">{manager.name}</span>
                                     <span className="text-[10px] text-[#878C9F] font-mono">{manager.phone}</span>
                                  </div>
-                                 <a href={`tel:${manager.phone}`} className="p-2 bg-[#55DEE8]/10 text-[#55DEE8] rounded-[4px] hover:bg-[#55DEE8] hover:text-black transition-all">
+                                 <a href={`tel:${manager.phone}`} className="p-2 bg-[#55DEE8]/10 text-[#55DEE8] rounded-[4px] hover:bg-white/10 hover:text-black transition-all">
                                     <Phone size={12} />
                                  </a>
                               </div>
@@ -689,7 +689,7 @@ export default function TurfDetails() {
                     className={`w-full p-5 rounded-[8px] border text-left transition-all duration-300 flex justify-between items-center ${
                       selectedDate === date 
                       ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_10px_20px_rgba(204,255,0,0.15)]" 
-                      : "bg-[#000000] border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/40"
+                      : "bg-[#000000] border-[#2D2D2D] text-[#878C9F] hover:border-white/30/40"
                     }`}
                   >
                     <div className="flex flex-col">
@@ -745,8 +745,8 @@ export default function TurfDetails() {
                       !slot.isActive
                       ? "bg-[#050505] border-[#1A1A1A] opacity-40 cursor-not-allowed"
                       : slot.isBooked 
-                      ? "bg-[#55DEE8]/5 border-[#55DEE8]/30 shadow-[0_0_20px_rgba(204,255,0,0.05)] cursor-pointer hover:border-[#55DEE8]/60" 
-                      : "bg-[#000000] border-[#2D2D2D] hover:border-[#55DEE8]/40 cursor-default"
+                      ? "bg-[#55DEE8]/5 border-[#55DEE8]/30 shadow-[0_0_20px_rgba(204,255,0,0.05)] cursor-pointer hover:border-white/30/60" 
+                      : "bg-[#000000] border-[#2D2D2D] hover:border-white/30/40 cursor-default"
                     }`}
                   >
                     <div className="flex justify-between items-start">

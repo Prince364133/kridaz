@@ -114,22 +114,22 @@ export default function StreamerLanding() {
         <div className="mt-32 text-center">
           <h2 className="text-3xl md:text-5xl font-black text-white mb-10 md:mb-12 uppercase tracking-tight" style={{ fontFamily: "'Open Sans'" }}>Your Streaming Career</h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="p-8 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-[#55DEE8]/30 transition-colors group">
-              <div className="flex items-center justify-center w-14 h-14 mx-auto mb-6 rounded-2xl bg-white/10 group-hover:bg-[#55DEE8]/20 transition-colors">
+            <div className="p-8 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-white/30/30 transition-colors group">
+              <div className="flex items-center justify-center w-14 h-14 mx-auto mb-6 rounded-2xl bg-white/10 group-hover:bg-white/10/20 transition-colors">
                 <Video className="w-7 h-7 text-white transition-colors" stroke="currentColor" />
               </div>
               <h3 className="text-lg md:text-xl font-bold text-white mb-2 md:mb-3 uppercase tracking-wider" style={{ fontFamily: "'Open Sans'" }}>Setup & Quality</h3>
               <p className="text-gray-400 text-sm md:text-base leading-relaxed" style={{ fontFamily: "'Inter'" }}>List your equipment, streaming platforms, and broadcast quality capabilities.</p>
             </div>
-            <div className="p-8 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-[#55DEE8]/30 transition-colors group">
-              <div className="flex items-center justify-center w-14 h-14 mx-auto mb-6 rounded-2xl bg-white/10 group-hover:bg-[#55DEE8]/20 transition-colors">
+            <div className="p-8 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-white/30/30 transition-colors group">
+              <div className="flex items-center justify-center w-14 h-14 mx-auto mb-6 rounded-2xl bg-white/10 group-hover:bg-white/10/20 transition-colors">
                 <CheckCircle className="w-7 h-7 text-white transition-colors" stroke="currentColor" />
               </div>
               <h3 className="text-lg md:text-xl font-bold text-white mb-2 md:mb-3 uppercase tracking-wider" style={{ fontFamily: "'Open Sans'" }}>Get Booked</h3>
               <p className="text-gray-400 text-sm md:text-base leading-relaxed" style={{ fontFamily: "'Inter'" }}>Organizers will book you for their tournaments. Manage your schedule in one place.</p>
             </div>
-            <div className="p-8 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-[#55DEE8]/30 transition-colors group">
-              <div className="flex items-center justify-center w-14 h-14 mx-auto mb-6 rounded-2xl bg-white/10 group-hover:bg-[#55DEE8]/20 transition-colors">
+            <div className="p-8 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 hover:border-white/30/30 transition-colors group">
+              <div className="flex items-center justify-center w-14 h-14 mx-auto mb-6 rounded-2xl bg-white/10 group-hover:bg-white/10/20 transition-colors">
                 <Globe className="w-7 h-7 text-white transition-colors" stroke="currentColor" />
               </div>
               <h3 className="text-lg md:text-xl font-bold text-white mb-2 md:mb-3 uppercase tracking-wider" style={{ fontFamily: "'Open Sans'" }}>Go Live</h3>

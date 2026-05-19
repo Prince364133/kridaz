@@ -38,7 +38,7 @@ const ConfirmationPopup = ({
       color: "text-[#55DEE8]",
       bg: "bg-[#55DEE8]/10",
       border: "border-[#55DEE8]/20",
-      btn: "bg-[#55DEE8] hover:bg-[#55DEE8]/80 text-black",
+      btn: "bg-[#55DEE8] hover:bg-white/10/80 text-black",
     },
   };
 

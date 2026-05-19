@@ -120,7 +120,7 @@ export default function OwnerPromotions() {
 
       {/* Top Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-5">
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
              <CheckCircle2 size={20} />
           </div>
@@ -129,7 +129,7 @@ export default function OwnerPromotions() {
              {isLoading ? "..." : activeCount}
           </h3>
         </div>
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
              <Tag size={20} />
           </div>
@@ -138,7 +138,7 @@ export default function OwnerPromotions() {
              {isLoading ? "..." : promotions.length}
           </h3>
         </div>
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-white/30/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
              <Clock size={20} />
           </div>
@@ -262,7 +262,7 @@ export default function OwnerPromotions() {
               </h2>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="text-[#878C9F] hover:text-[#55DEE8] transition-colors"
+                className="text-[#878C9F] hover:text-white/70 transition-colors"
               >
                 <XCircle size={20} />
               </button>

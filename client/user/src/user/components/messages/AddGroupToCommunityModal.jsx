@@ -111,7 +111,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
                     autoFocus
                     value={newGroupName}
                     onChange={(e) => setNewGroupName(e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-[#55DEE8] outline-none transition-all font-bold placeholder:text-white/10"
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-white/30 outline-none transition-all font-bold placeholder:text-white/10"
                     placeholder="e.g. Announcements, Off-topic..."
                   />
                 </div>
@@ -119,7 +119,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
               <button
                 type="submit"
                 disabled={isCreating || !newGroupName.trim()}
-                className="w-full py-4 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
               >
                 {isCreating ? 'Creating...' : 'Create Group'} <Plus size={18} />
               </button>
@@ -133,7 +133,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search your groups..."
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:border-[#55DEE8]/40 outline-none transition-all placeholder:text-white/10"
+                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:border-white/30/40 outline-none transition-all placeholder:text-white/10"
                 />
               </div>
 
@@ -176,7 +176,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
               <button
                 onClick={handleAddExisting}
                 disabled={selectedExistingGroups.length === 0 || isAddingGroups}
-                className="w-full py-4 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
               >
                 {isAddingGroups ? 'Adding...' : `Add ${selectedExistingGroups.length} Group${selectedExistingGroups.length !== 1 ? 's' : ''}`}
               </button>

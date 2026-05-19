@@ -93,7 +93,7 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
                 <input 
                   type="text"
                   placeholder="EX: KRIDAZ1234"
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-white text-sm font-black tracking-[0.2em] focus:outline-none focus:border-[#55DEE8]/50 uppercase transition-all"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-white text-sm font-black tracking-[0.2em] focus:outline-none focus:border-white/30/50 uppercase transition-all"
                   value={teamCode}
                   onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
                   maxLength={10}
@@ -134,7 +134,7 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
                       <span className="text-[10px] text-white/40 font-bold">{foundTeam.city}</span>
                     </div>
                   </div>
-                  <div className="bg-[#55DEE8] text-black p-1.5 rounded-lg">
+                  <div className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black p-1.5 rounded-lg">
                     <CheckCircle2 size={16} />
                   </div>
                 </div>
@@ -143,7 +143,7 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Challenge With Your Team</label>
                   <select 
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 px-4 text-white text-sm font-bold focus:outline-none focus:border-[#55DEE8]/50 outline-none appearance-none"
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 px-4 text-white text-sm font-bold focus:outline-none focus:border-white/30/50 outline-none appearance-none"
                     value={selectedMyTeam}
                     onChange={(e) => setSelectedMyTeam(e.target.value)}
                   >

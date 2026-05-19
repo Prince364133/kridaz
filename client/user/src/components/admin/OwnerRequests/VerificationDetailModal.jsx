@@ -262,15 +262,15 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
 const IdentityItem = ({ label, value, icon: Icon }) => (
   <div className="group">
     <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest mb-1.5">{label}</p>
-    <div className="flex items-center gap-3 bg-white/[0.03] p-3 rounded-[6px] border border-[#2D2D2D] group-hover:border-[#55DEE8]/30 transition-colors">
-       <Icon size={14} className="text-[#55DEE8]/60 group-hover:text-[#55DEE8]" />
+    <div className="flex items-center gap-3 bg-white/[0.03] p-3 rounded-[6px] border border-[#2D2D2D] group-hover:border-white/30/30 transition-colors">
+       <Icon size={14} className="text-[#55DEE8]/60 group-hover:text-white/70" />
        <span className="text-[13px] font-semibold text-white tracking-tight break-all uppercase">{value || "NOT PROVIDED"}</span>
     </div>
   </div>
 );
 
 const DocumentSlot = ({ label, doc }) => (
-  <div className={`group relative p-4 rounded-[8px] border transition-all ${doc ? 'bg-[#111111] border-[#2D2D2D] hover:border-[#55DEE8]/40' : 'bg-black/40 border-[#2D2D2D] border-dashed opacity-60'}`}>
+  <div className={`group relative p-4 rounded-[8px] border transition-all ${doc ? 'bg-[#111111] border-[#2D2D2D] hover:border-white/30/40' : 'bg-black/40 border-[#2D2D2D] border-dashed opacity-60'}`}>
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className={`w-8 h-8 rounded-[4px] flex items-center justify-center ${doc ? 'bg-[#55DEE8]/10 text-[#55DEE8]' : 'bg-gray-800 text-gray-500'}`}>
@@ -288,7 +288,7 @@ const DocumentSlot = ({ label, doc }) => (
           href={doc.url} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="p-2 hover:bg-[#55DEE8]/10 rounded-full text-[#55DEE8] transition-colors"
+          className="p-2 hover:bg-white/10/10 rounded-full text-[#55DEE8] transition-colors"
         >
           <ExternalLink size={14} />
         </a>
@@ -304,10 +304,10 @@ const DocumentCard = ({ doc }) => (
     href={doc.url} 
     target="_blank" 
     rel="noopener noreferrer"
-    className="group bg-[#111111] border border-[#2D2D2D] rounded-[8px] p-4 flex items-center justify-between hover:border-[#55DEE8]/40 transition-all hover:bg-[#55DEE8]/5"
+    className="group bg-[#111111] border border-[#2D2D2D] rounded-[8px] p-4 flex items-center justify-between hover:border-white/30/40 transition-all hover:bg-white/10/5"
   >
     <div className="flex items-center gap-4">
-       <div className="w-10 h-10 rounded-[4px] bg-[#1A1A1A] border border-[#2D2D2D] flex items-center justify-center text-gray-400 group-hover:text-[#55DEE8] group-hover:border-[#55DEE8]/30 transition-all">
+       <div className="w-10 h-10 rounded-[4px] bg-[#1A1A1A] border border-[#2D2D2D] flex items-center justify-center text-gray-400 group-hover:text-white/70 group-hover:border-white/30/30 transition-all">
           <FileText size={20} />
        </div>
        <div>
@@ -315,12 +315,12 @@ const DocumentCard = ({ doc }) => (
          <p className="text-[9px] font-medium text-gray-500 uppercase tracking-widest">Verified Artifact</p>
        </div>
     </div>
-    <ExternalLink size={14} className="text-gray-600 group-hover:text-[#55DEE8] transition-colors" />
+    <ExternalLink size={14} className="text-gray-600 group-hover:text-white/70 transition-colors" />
   </a>
 );
 
 const GroundCard = ({ ground }) => (
-  <div className="group bg-[#111111] border border-[#2D2D2D] rounded-[8px] overflow-hidden hover:border-[#55DEE8]/40 transition-all">
+  <div className="group bg-[#111111] border border-[#2D2D2D] rounded-[8px] overflow-hidden hover:border-white/30/40 transition-all">
     <div className="h-32 bg-[#1A1A1A] relative overflow-hidden">
       <img src={ground.image} alt={ground.name} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
       <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-[2px] bg-black/60 backdrop-blur-md border border-white/10 text-[8px] font-black text-[#55DEE8] uppercase tracking-widest">

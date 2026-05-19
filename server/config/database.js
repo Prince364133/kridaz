@@ -3,12 +3,11 @@ import dns from 'node:dns/promises';
 
 export default async function connectDB() {
   const host = process.env.MONGO_URI.split("@")[1].split(":")[0];
-  try {
-    const lookup = await dns.lookup(host);
+  dns.lookup(host).then((lookup) => {
     console.log(`[DATABASE] Host ${host} resolved to ${lookup.address}`);
-  } catch (dnsErr) {
+  }).catch((dnsErr) => {
     console.error(`[DATABASE] DNS Resolution failed for ${host}:`, dnsErr.message);
-  }
+  });
 
   console.log("[DATABASE] Attempting to connect to URI:", process.env.MONGO_URI.split("@")[1]); 
   try {

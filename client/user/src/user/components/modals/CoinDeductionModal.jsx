@@ -271,7 +271,7 @@ const CoinDeductionModal = ({
                       )}
                       <div className="flex justify-between text-base font-black pt-2">
                         <span className="text-white uppercase tracking-tighter">Total Payable</span>
-                        <span className="text-[#55DEE8]">â‚¹{total}</span>
+                        <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>â‚¹{total}</span>
                       </div>
                     </div>
                   </div>
@@ -355,7 +355,7 @@ const CoinDeductionModal = ({
                         className={`group relative flex items-center justify-between p-4 rounded-[8px] border transition-all ${paymentMode === "WALLET" ? "bg-[#55DEE8]/10 border-[#55DEE8]" : "bg-[#000000] border-[#2D2D2D] hover:border-white/20"}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-[6px] ${paymentMode === "WALLET" ? "bg-[#55DEE8] text-black" : "bg-[#000000] text-zinc-500"}`}>
+                          <div className={`p-3 rounded-[6px] ${paymentMode === "WALLET" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black" : "bg-[#000000] text-zinc-500"}`}>
                             <Wallet size={20} />
                           </div>
                           <div className="text-left">
@@ -372,7 +372,7 @@ const CoinDeductionModal = ({
                         className={`flex items-center justify-between p-4 rounded-[8px] border transition-all ${paymentMode === "UPI" ? "bg-[#55DEE8]/10 border-[#55DEE8]" : "bg-[#000000] border-[#2D2D2D] hover:border-white/20"}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-[6px] ${paymentMode === "UPI" ? "bg-[#55DEE8] text-black" : "bg-[#000000] text-zinc-500"}`}>
+                          <div className={`p-3 rounded-[6px] ${paymentMode === "UPI" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black" : "bg-[#000000] text-zinc-500"}`}>
                             <Smartphone size={20} />
                           </div>
                           <div className="text-left">
@@ -389,7 +389,7 @@ const CoinDeductionModal = ({
                         className={`flex items-center justify-between p-4 rounded-[8px] border transition-all ${paymentMode === "CARD" ? "bg-[#55DEE8]/10 border-[#55DEE8]" : "bg-[#000000] border-[#2D2D2D] hover:border-white/20"}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-[6px] ${paymentMode === "CARD" ? "bg-[#55DEE8] text-black" : "bg-[#000000] text-zinc-500"}`}>
+                          <div className={`p-3 rounded-[6px] ${paymentMode === "CARD" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black" : "bg-[#000000] text-zinc-500"}`}>
                             <CreditCard size={20} />
                           </div>
                           <div className="text-left">
@@ -405,7 +405,7 @@ const CoinDeductionModal = ({
                         className={`flex items-center justify-between p-4 rounded-[8px] border transition-all ${paymentMode === "UPI" ? "bg-[#55DEE8]/10 border-[#55DEE8]" : "bg-[#000000] border-[#2D2D2D] hover:border-white/20"}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-[6px] ${paymentMode === "UPI" ? "bg-[#55DEE8] text-black" : "bg-[#000000] text-zinc-500"}`}>
+                          <div className={`p-3 rounded-[6px] ${paymentMode === "UPI" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black" : "bg-[#000000] text-zinc-500"}`}>
                             <Smartphone size={20} />
                           </div>
                           <div className="text-left">
@@ -427,7 +427,7 @@ const CoinDeductionModal = ({
                         </div>
                         <button
                             onClick={() => setStep(2)}
-                            className="w-full bg-[#55DEE8] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
                         >
                             <PlusCircle size={18} />
                             Instant Recharge Wallet
@@ -438,7 +438,7 @@ const CoinDeductionModal = ({
                       <button
                         onClick={handleConfirm}
                         disabled={isProcessing}
-                        className="w-full bg-[#55DEE8] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                        className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                       >
                         {isProcessing ? <Loader2 className="animate-spin" /> : (
                           <>
@@ -455,7 +455,7 @@ const CoinDeductionModal = ({
               {step === 2 && (
                 <div className="p-8 pt-0 space-y-6">
                   <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-[8px] p-6 text-center">
-                    <div className="w-12 h-12 bg-[#55DEE8] text-black rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-full flex items-center justify-center mx-auto mb-4">
                         <Wallet size={24} />
                     </div>
                     <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest mb-1">Instant Recharge</p>
@@ -466,7 +466,7 @@ const CoinDeductionModal = ({
                         <button
                           key={amt}
                           onClick={() => setRechargeAmount(amt)}
-                          className={`py-3 rounded-[6px] border text-xs font-black transition-all ${rechargeAmount === amt ? "bg-[#55DEE8] text-black border-[#55DEE8]" : "bg-[#000000] border-[#2D2D2D] text-zinc-400 hover:border-white/20"}`}
+                          className={`py-3 rounded-[6px] border text-xs font-black transition-all ${rechargeAmount === amt ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-[#55DEE8]" : "bg-[#000000] border-[#2D2D2D] text-zinc-400 hover:border-white/20"}`}
                         >
                           â‚¹{amt}
                         </button>
@@ -480,7 +480,7 @@ const CoinDeductionModal = ({
                         placeholder="Custom amount"
                         value={rechargeAmount}
                         onChange={(e) => setRechargeAmount(parseInt(e.target.value) || 0)}
-                        className="w-full bg-black border border-[#2D2D2D] rounded-[6px] py-4 pl-10 pr-4 text-white text-sm font-bold focus:border-[#55DEE8]/50 outline-none transition-colors"
+                        className="w-full bg-black border border-[#2D2D2D] rounded-[6px] py-4 pl-10 pr-4 text-white text-sm font-bold focus:border-white/30/50 outline-none transition-colors"
                       />
                     </div>
 
@@ -496,7 +496,7 @@ const CoinDeductionModal = ({
                       <button
                         onClick={handleInstantRecharge}
                         disabled={isRecharging || rechargeAmount < 100}
-                        className="w-full bg-[#55DEE8] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                        className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                       >
                         {isRecharging ? <Loader2 className="animate-spin" /> : "Confirm Recharge"}
                       </button>
@@ -542,7 +542,7 @@ const CoinDeductionModal = ({
               <div className="space-y-3">
                 <Link 
                   to={`/booking-pass/${bookingId}`}
-                  className="w-full bg-[#55DEE8] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
+                  className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
                 >
                   Download Digital Pass
                 </Link>

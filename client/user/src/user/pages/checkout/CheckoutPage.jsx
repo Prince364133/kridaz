@@ -212,7 +212,7 @@ const CheckoutPage = () => {
  <div className="grid grid-cols-1 gap-4">
  <Link 
  to={`/booking-pass/${bookingId}`}
- className="bg-[#55DEE8] text-black h-16 rounded-2xl font-black uppercase text-sm tracking-widest flex items-center justify-center gap-3 hover:scale-[1.02] transition-all"
+ className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black h-16 rounded-2xl font-black uppercase text-sm tracking-widest flex items-center justify-center gap-3 hover:scale-[1.02] transition-all"
  >
  Download Digital Pass
  <ArrowRight size={20} />
@@ -318,7 +318,7 @@ const CheckoutPage = () => {
  placeholder="COUPON CODE"
  value={couponCode}
  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
- className="w-full bg-black border border-zinc-800 rounded-xl py-4 pl-12 pr-4 text-xs font-bold uppercase tracking-widest focus:border-[#55DEE8]/50 outline-none transition-all placeholder:text-zinc-700"
+ className="w-full bg-black border border-zinc-800 rounded-xl py-4 pl-12 pr-4 text-xs font-bold uppercase tracking-widest focus:border-white/30/50 outline-none transition-all placeholder:text-zinc-700"
  />
  </div>
  <button 
@@ -408,7 +408,7 @@ const CheckoutPage = () => {
  }`}
  >
  <div className="flex items-center gap-5">
- <div className={`p-4 rounded-2xl ${paymentMode === "WALLET" ? "bg-[#55DEE8] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]" : "bg-zinc-800 text-zinc-500"}`}>
+ <div className={`p-4 rounded-2xl ${paymentMode === "WALLET" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]" : "bg-zinc-800 text-zinc-500"}`}>
  <Wallet size={24} />
  </div>
  <div className="text-left">
@@ -430,7 +430,7 @@ const CheckoutPage = () => {
  }`}
  >
  <div className="flex items-center gap-5">
- <div className={`p-4 rounded-2xl ${paymentMode === "UPI" ? "bg-[#55DEE8] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]" : "bg-zinc-800 text-zinc-500"}`}>
+ <div className={`p-4 rounded-2xl ${paymentMode === "UPI" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]" : "bg-zinc-800 text-zinc-500"}`}>
  <Smartphone size={24} />
  </div>
  <div className="text-left">
@@ -449,7 +449,7 @@ const CheckoutPage = () => {
  }`}
  >
  <div className="flex items-center gap-5">
- <div className={`p-4 rounded-2xl ${paymentMode === "CARD" ? "bg-[#55DEE8] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]" : "bg-zinc-800 text-zinc-500"}`}>
+ <div className={`p-4 rounded-2xl ${paymentMode === "CARD" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]" : "bg-zinc-800 text-zinc-500"}`}>
  <CardIcon size={24} />
  </div>
  <div className="text-left">
@@ -473,7 +473,7 @@ const CheckoutPage = () => {
  </div>
  <button
  onClick={() => navigate("/wallet")}
- className="w-full bg-[#55DEE8] text-black h-16 rounded-[1.5rem] font-black uppercase text-sm tracking-[0.2em] flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(204,255,0,0.2)]"
+ className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black h-16 rounded-[1.5rem] font-black uppercase text-sm tracking-[0.2em] flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(204,255,0,0.2)]"
  >
  <PlusCircle size={20} />
  Recharge Wallet Now
@@ -483,7 +483,7 @@ const CheckoutPage = () => {
  <button
  onClick={handleConfirmPayment}
  disabled={isProcessing}
- className="w-full bg-[#55DEE8] text-black h-20 rounded-[1.5rem] font-black uppercase text-base tracking-[0.2em] flex items-center justify-center gap-4 shadow-[0_15px_40px_rgba(204,255,0,0.25)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+ className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black h-20 rounded-[1.5rem] font-black uppercase text-base tracking-[0.2em] flex items-center justify-center gap-4 shadow-[0_15px_40px_rgba(204,255,0,0.25)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
  >
  {isProcessing ? (
  <div className="flex items-center gap-4">

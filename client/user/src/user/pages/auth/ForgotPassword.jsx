@@ -127,13 +127,13 @@ const ForgotPassword = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter registered email"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-white/30/50 transition-all text-sm font-bold"
                   />
                 </div>
               </div>
               <button
                 type="submit" disabled={loading}
-                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
+                className="w-full h-14 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
               >
                 {loading ? <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" /> : <>Send Code <ArrowRight size={16} /></>}
               </button>
@@ -155,13 +155,13 @@ const ForgotPassword = () => {
                     onChange={(e) => setOtp(e.target.value)}
                     placeholder="••••••"
                     maxLength={6}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-center text-xl font-black tracking-[0.5em]"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-white/30/50 transition-all text-center text-xl font-black tracking-[0.5em]"
                   />
                 </div>
               </div>
               <button
                 type="submit"
-                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
+                className="w-full h-14 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
               >
                 Verify Code <CheckCircle2 size={16} />
               </button>
@@ -184,7 +184,7 @@ const ForgotPassword = () => {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Min 8 characters"
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-white/30/50 transition-all text-sm font-bold"
                     />
                   </div>
                 </div>
@@ -199,14 +199,14 @@ const ForgotPassword = () => {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Repeat new password"
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-white/30/50 transition-all text-sm font-bold"
                     />
                   </div>
                 </div>
               </div>
               <button
                 type="submit" disabled={loading}
-                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
+                className="w-full h-14 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
               >
                 {loading ? <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" /> : "Update Password"}
               </button>

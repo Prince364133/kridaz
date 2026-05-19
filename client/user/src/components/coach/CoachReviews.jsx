@@ -54,7 +54,7 @@ export default function CoachReviews() {
     <div className="space-y-8 animate-fade-in font-open-sans">
       <div className="pb-6 border-b border-white/5">
         <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-white font-inter">
-          User <span className="text-[#55DEE8]">Reviews</span>
+          User <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Reviews</span>
         </h1>
         <p className="text-[#999999] text-xs font-semibold uppercase tracking-wider font-inter mt-1">Engage with your students and players</p>
       </div>
@@ -68,7 +68,7 @@ export default function CoachReviews() {
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {reviews.map((review) => (
-            <div key={review._id} className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-[#55DEE8]/30 transition-all shadow-[var(--shadow-2)]">
+            <div key={review._id} className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-white/30/30 transition-all shadow-[var(--shadow-2)]">
               <div className="p-6 lg:p-8">
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex gap-4">

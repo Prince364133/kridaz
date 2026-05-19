@@ -84,7 +84,7 @@ const UserPage = () => {
             <div className="relative">
               <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-14 bg-[#55DEE8] rounded-full shadow-[0_0_25px_rgba(204,255,0,0.5)]"></div>
               <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none mb-4">
-                Platform <span className="text-[#55DEE8]">Users</span>
+                Platform <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Users</span>
               </h1>
               <p className="admin-subheading text-[#999999]">
                 Global Identity Directory • User Telemetry

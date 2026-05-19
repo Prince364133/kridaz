@@ -43,7 +43,7 @@ const BookingPass = () => {
           <p className="text-zinc-400 mb-8 text-sm">We couldn't find the booking pass you're looking for. It might have expired or doesn't exist.</p>
           <Link 
             to="/booking-history" 
-            className="inline-flex items-center gap-2 bg-[#55DEE8] text-black px-8 py-4 rounded-2xl font-bold uppercase text-xs hover:scale-105 transition-transform"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-8 py-4 rounded-2xl font-bold uppercase text-xs hover:scale-105 transition-transform"
           >
             <ChevronLeft className="w-4 h-4" />
             My Bookings
@@ -68,10 +68,10 @@ const BookingPass = () => {
             Back
           </Link>
           <div className="flex gap-3">
-            <button className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-[#55DEE8] transition-all">
+            <button className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-white/70 transition-all">
               <Download size={18} />
             </button>
-            <button className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-[#55DEE8] transition-all">
+            <button className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-white/70 transition-all">
               <Share2 size={18} />
             </button>
           </div>
@@ -195,7 +195,7 @@ const BookingPass = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {turf.managerContacts && turf.managerContacts.length > 0 ? (
                     turf.managerContacts.map((manager, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl group hover:border-[#55DEE8]/30 transition-all">
+                      <div key={idx} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl group hover:border-white/30/30 transition-all">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-[#55DEE8]">
                             <UserIcon size={14} />
@@ -205,7 +205,7 @@ const BookingPass = () => {
                             <p className="text-xs font-bold text-white">{manager.phone}</p>
                           </div>
                         </div>
-                        <a href={`tel:${manager.phone}`} className="p-2 bg-[#55DEE8] text-black rounded-lg hover:scale-110 transition-transform">
+                        <a href={`tel:${manager.phone}`} className="p-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-lg hover:scale-110 transition-transform">
                           <Phone size={14} fill="currentColor" />
                         </a>
                       </div>
@@ -262,7 +262,7 @@ const BookingPass = () => {
             </div>
 
             {/* Bottom Footer Accent */}
-            <div className="p-6 bg-[#55DEE8] text-black flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="p-6 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black flex flex-col sm:flex-row justify-between items-center gap-4">
                <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
                     <Zap size={16} fill="currentColor" />

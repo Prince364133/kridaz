@@ -82,7 +82,7 @@ const ProfessionalManagement = ({ role }) => {
           <div className="relative">
             <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#55DEE8] rounded-full shadow-[0_0_20px_rgba(204,255,0,0.4)]"></div>
             <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none">
-              Manage <span className="text-[#55DEE8]">{role}s</span>
+              Manage <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{role}s</span>
             </h1>
             <p className="admin-subheading mt-4 ml-1">
               Active Professional Roster • System Telemetry
@@ -187,7 +187,7 @@ const ProfessionalManagement = ({ role }) => {
                   <div 
                     key={prof._id} 
                     className={`group relative bg-[#000000] border transition-all duration-500 rounded-[12px] p-4 lg:px-8 lg:py-5 shadow-xl overflow-hidden cursor-pointer ${
-                      selectedIds.includes(prof._id) ? "border-[#55DEE8] bg-[#55DEE8]/5" : "border-[#2D2D2D] hover:border-[#55DEE8]/40"
+                      selectedIds.includes(prof._id) ? "border-[#55DEE8] bg-[#55DEE8]/5" : "border-[#2D2D2D] hover:border-white/30/40"
                     }`}
                     onClick={(e) => {
                       if (e.target.closest('button') || e.target.closest('input[type="checkbox"]')) return;
@@ -222,7 +222,7 @@ const ProfessionalManagement = ({ role }) => {
                           )}
                         </div>
                         <div className="min-w-0">
-                          <h3 className="text-[15px] font-black text-white uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors truncate">
+                          <h3 className="text-[15px] font-black text-white uppercase tracking-tight group-hover:text-white/70 transition-colors truncate">
                             {prof.name}
                           </h3>
                         </div>
@@ -286,7 +286,7 @@ const ProfessionalManagement = ({ role }) => {
                             e.stopPropagation();
                             navigate(`/admin/professionals/${prof._id}`);
                           }}
-                          className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:bg-[#55DEE8] hover:text-black transition-all"
+                          className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:bg-white/10 hover:text-black transition-all"
                         >
                           <ExternalLink size={16} />
                         </button>

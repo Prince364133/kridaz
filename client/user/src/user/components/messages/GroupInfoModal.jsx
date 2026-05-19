@@ -161,7 +161,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  </div>
  <div className="flex justify-end gap-3 mt-2">
  <button onClick={() => setIsEditingName(false)} className="text-white/40 hover:text-white/80 text-sm font-medium">Cancel</button>
- <button onClick={handleRename} className="bg-[#55DEE8] text-black px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">Save</button>
+ <button onClick={handleRename} className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">Save</button>
  </div>
  </div>
  ) : (
@@ -258,7 +258,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  </div>
  <button 
  onClick={() => handleAddUser(user._id)}
- className="text-[#55DEE8] opacity-0 group-hover:opacity-100 p-1.5 rounded-full hover:bg-[#55DEE8]/10 transition-all"
+ className="text-[#55DEE8] opacity-0 group-hover:opacity-100 p-1.5 rounded-full hover:bg-white/10/10 transition-all"
  title="Add"
  >
  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -315,7 +315,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
                   <div className="flex items-center gap-1 opacity-0 group-hover/member:opacity-100 transition-opacity">
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleMakeAdmin(uid); }}
-                      className="text-[#55DEE8] hover:bg-[#55DEE8]/10 p-1.5 rounded-full transition-all"
+                      className="text-[#55DEE8] hover:bg-white/10/10 p-1.5 rounded-full transition-all"
                       title="Make Admin"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

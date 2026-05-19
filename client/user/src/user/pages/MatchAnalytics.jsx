@@ -276,7 +276,7 @@ const MatchAnalytics = () => {
           <button 
             onClick={handleShare}
             disabled={isCapturing}
-            className="p-3 bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 rounded-2xl hover:bg-[#55DEE8] hover:text-black transition-all disabled:opacity-50 flex items-center gap-2"
+            className="p-3 bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 rounded-2xl hover:bg-white/10 hover:text-black transition-all disabled:opacity-50 flex items-center gap-2"
           >
             <Share2 size={18} />
             <span className="text-[10px] font-black uppercase tracking-widest hidden md:block">Share Card</span>
@@ -337,22 +337,22 @@ const MatchAnalytics = () => {
 
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
+          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-white/30/30 transition-colors">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Runs</span>
             <div className="flex items-baseline gap-2">
               <span className="text-4xl font-black text-white">{scoring?.innings[0]?.totalRuns || 0}</span>
               <span className="text-sm font-bold text-gray-500">/ {scoring?.innings[0]?.totalWickets || 0}</span>
             </div>
           </div>
-          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
+          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-white/30/30 transition-colors">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Run Rate</span>
             <span className="text-4xl font-black text-[#55DEE8]">{stats?.runRate || '0.00'}</span>
           </div>
-          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
+          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-white/30/30 transition-colors">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Fours</span>
             <span className="text-4xl font-black text-white">{stats?.totalFours || 0}</span>
           </div>
-          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
+          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-white/30/30 transition-colors">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Sixes</span>
             <span className="text-4xl font-black text-white">{stats?.totalSixes || 0}</span>
           </div>

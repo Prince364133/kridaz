@@ -57,7 +57,7 @@ const VenueApprovalDetail = () => {
       <div className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-[#2D2D2D] px-6 py-4 flex items-center justify-between">
         <button 
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-400 hover:text-[#55DEE8] transition-colors font-bold uppercase text-[10px] tracking-widest"
+          className="flex items-center gap-2 text-gray-400 hover:text-white/70 transition-colors font-bold uppercase text-[10px] tracking-widest"
         >
           <ArrowLeft size={16} />
           Return to Queue
@@ -113,7 +113,7 @@ const VenueApprovalDetail = () => {
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#55DEE8]/10 border border-[#55DEE8]/30 text-[#55DEE8] text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-[#55DEE8]/20 transition-all"
+                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#55DEE8]/10 border border-[#55DEE8]/30 text-[#55DEE8] text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-white/10/20 transition-all"
               >
                 <Navigation size={10} />
                 Get Directions
@@ -162,7 +162,7 @@ const VenueApprovalDetail = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                   {turf.images.map((img, i) => (
-                    <div key={i} className="group relative aspect-video rounded-3xl overflow-hidden border border-[#2D2D2D] hover:border-[#55DEE8]/50 transition-all cursor-zoom-in">
+                    <div key={i} className="group relative aspect-video rounded-3xl overflow-hidden border border-[#2D2D2D] hover:border-white/30/50 transition-all cursor-zoom-in">
                       <img src={img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={`Gallery ${i}`} />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <span className="text-[10px] font-black uppercase tracking-widest px-4 py-2 bg-[#55DEE8] text-black rounded-full">Expand Intelligence</span>
@@ -183,7 +183,7 @@ const VenueApprovalDetail = () => {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {turf.facilities?.map((facility, i) => (
-                  <div key={i} className="p-6 bg-white/[0.02] border border-white/5 rounded-[24px] flex flex-col items-center gap-4 text-center group hover:bg-[#55DEE8]/5 hover:border-[#55DEE8]/30 transition-all">
+                  <div key={i} className="p-6 bg-white/[0.02] border border-white/5 rounded-[24px] flex flex-col items-center gap-4 text-center group hover:bg-white/10/5 hover:border-white/30/30 transition-all">
                      <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-[#55DEE8] group-hover:scale-110 transition-transform">
                         <Activity size={20} />
                      </div>
@@ -237,7 +237,7 @@ const VenueApprovalDetail = () => {
                   {turf.generatedSlots.map((slot, i) => (
                     <div key={i} className={`p-4 rounded-[20px] border flex flex-col gap-1 ${
                       slot.isActive !== false
-                        ? "bg-white/[0.02] border-white/5 hover:border-[#55DEE8]/20"
+                        ? "bg-white/[0.02] border-white/5 hover:border-white/30/20"
                         : "bg-transparent border-dashed border-white/5 opacity-40"
                     } transition-colors`}>
                       <span className="text-white text-[10px] font-black">{slot.startTime}</span>
@@ -265,7 +265,7 @@ const VenueApprovalDetail = () => {
                   <div className="flex flex-col gap-4">
                     <button 
                       onClick={() => setConfirmModal({ isOpen: true, type: "approve" })}
-                      className="w-full py-5 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-xs rounded-2xl hover:bg-[#55DEE8]/80 transition-all flex items-center justify-center gap-3 shadow-xl shadow-[#55DEE8]/20"
+                      className="w-full py-5 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-xs rounded-2xl hover:bg-white/10/80 transition-all flex items-center justify-center gap-3 shadow-xl shadow-[#55DEE8]/20"
                     >
                       <Check size={18} />
                       Authorize Venue
@@ -311,7 +311,7 @@ const VenueApprovalDetail = () => {
                     }
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-3 bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-2xl text-[#55DEE8] text-[10px] font-black uppercase tracking-widest hover:bg-[#55DEE8]/20 transition-all group"
+                    className="flex items-center gap-2 px-4 py-3 bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-2xl text-[#55DEE8] text-[10px] font-black uppercase tracking-widest hover:bg-white/10/20 transition-all group"
                   >
                     <Navigation size={12} className="group-hover:translate-x-0.5 transition-transform" />
                     Open in Google Maps
@@ -348,7 +348,7 @@ const VenueApprovalDetail = () => {
                         <span className="text-white font-black text-sm uppercase tracking-tight">{contact.name}</span>
                         <span className="text-gray-500 text-xs font-bold">{contact.phone}</span>
                       </div>
-                      <a href={`tel:${contact.phone}`} className="p-3 bg-[#55DEE8]/10 text-[#55DEE8] rounded-xl group-hover:bg-[#55DEE8] group-hover:text-black transition-all">
+                      <a href={`tel:${contact.phone}`} className="p-3 bg-[#55DEE8]/10 text-[#55DEE8] rounded-xl group-hover:bg-white/10 group-hover:text-black transition-all">
                         <Phone size={16} />
                       </a>
                     </div>
@@ -389,7 +389,7 @@ const VenueApprovalDetail = () => {
                 {/* Email */}
                 {turf.owner?.email && (
                   <a href={`mailto:${turf.owner.email}`}
-                    className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-2xl border border-white/5 hover:border-[#55DEE8]/30 hover:bg-[#55DEE8]/5 transition-all group">
+                    className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-2xl border border-white/5 hover:border-white/30/30 hover:bg-white/10/5 transition-all group">
                     <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
                       <Mail size={14} className="text-[#55DEE8]" />
                     </div>
@@ -397,14 +397,14 @@ const VenueApprovalDetail = () => {
                       <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Email</p>
                       <p className="text-white text-xs font-bold truncate">{turf.owner.email}</p>
                     </div>
-                    <ExternalLink size={12} className="text-gray-600 group-hover:text-[#55DEE8] shrink-0" />
+                    <ExternalLink size={12} className="text-gray-600 group-hover:text-white/70 shrink-0" />
                   </a>
                 )}
 
                 {/* Phone */}
                 {turf.owner?.phoneNumber && (
                   <a href={`tel:${turf.owner.phoneNumber}`}
-                    className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-2xl border border-white/5 hover:border-[#55DEE8]/30 hover:bg-[#55DEE8]/5 transition-all group">
+                    className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-2xl border border-white/5 hover:border-white/30/30 hover:bg-white/10/5 transition-all group">
                     <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
                       <Phone size={14} className="text-[#55DEE8]" />
                     </div>
@@ -412,7 +412,7 @@ const VenueApprovalDetail = () => {
                       <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Phone</p>
                       <p className="text-white text-xs font-bold">{turf.owner.phoneNumber}</p>
                     </div>
-                    <ExternalLink size={12} className="text-gray-600 group-hover:text-[#55DEE8] shrink-0" />
+                    <ExternalLink size={12} className="text-gray-600 group-hover:text-white/70 shrink-0" />
                   </a>
                 )}
 

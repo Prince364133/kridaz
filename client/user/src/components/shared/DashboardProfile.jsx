@@ -232,7 +232,7 @@ const InfoField = ({ label, value, icon: Icon, prefix, disabled }) => (
 );
 
 const DashboardMiniCard = ({ title, value, icon: Icon, desc }) => (
-  <div className="bg-[#000000] border border-[#2D2D2D] p-6 rounded-[8px] flex items-center justify-between group hover:border-[#55DEE8]/20 transition-all shadow-[var(--shadow-2)]">
+  <div className="bg-[#000000] border border-[#2D2D2D] p-6 rounded-[8px] flex items-center justify-between group hover:border-white/30/20 transition-all shadow-[var(--shadow-2)]">
     <div className="space-y-1">
       <h4 className="text-[12px] font-normal text-[#878C9F] uppercase tracking-wider">{title}</h4>
       <p className="text-2xl font-semibold text-white tracking-tight">{value}</p>
@@ -245,12 +245,12 @@ const DashboardMiniCard = ({ title, value, icon: Icon, desc }) => (
 );
 
 const QuickSettingAction = ({ icon: Icon, title, desc }) => (
-  <div className="bg-[#000000] border border-[#2D2D2D] p-6 rounded-[8px] flex items-center gap-5 hover:border-[#55DEE8]/20 transition-all cursor-pointer group shadow-[var(--shadow-2)]">
-    <div className="p-4 bg-[#2D2D2D] rounded-[8px] text-[#999999] group-hover:bg-[#55DEE8]/10 group-hover:text-[#55DEE8] transition-all border border-[#404040] shadow-inner">
+  <div className="bg-[#000000] border border-[#2D2D2D] p-6 rounded-[8px] flex items-center gap-5 hover:border-white/30/20 transition-all cursor-pointer group shadow-[var(--shadow-2)]">
+    <div className="p-4 bg-[#2D2D2D] rounded-[8px] text-[#999999] group-hover:bg-white/10/10 group-hover:text-white/70 transition-all border border-[#404040] shadow-inner">
       <Icon size={22} />
     </div>
     <div>
-      <h4 className="text-[14px] font-semibold text-white uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors">{title}</h4>
+      <h4 className="text-[14px] font-semibold text-white uppercase tracking-tight group-hover:text-white/70 transition-colors">{title}</h4>
       <p className="text-[11px] font-normal text-[#999999] uppercase tracking-widest">{desc}</p>
     </div>
   </div>

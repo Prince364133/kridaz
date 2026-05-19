@@ -130,7 +130,7 @@ const HostedGamesPage = () => {
           <div>
             <h1 className="text-4xl font-black text-white uppercase tracking-tight flex items-center gap-4">
               <Trophy className="text-[#55DEE8]" size={36} />
-              Hosted Games <span className="text-[#55DEE8]">Management</span>
+              Hosted Games <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Management</span>
             </h1>
             <p className="text-gray-500 mt-2 font-medium tracking-wide uppercase text-xs">
               Monitor, moderate and manage all community-organized match records
@@ -140,7 +140,7 @@ const HostedGamesPage = () => {
           <div className="flex items-center gap-4">
             <button 
               onClick={fetchGames}
-              className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-[#55DEE8] hover:border-[#55DEE8]/40 transition-all"
+              className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-white/70 hover:border-white/30/40 transition-all"
             >
               <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
             </button>
@@ -257,7 +257,7 @@ const HostedGamesPage = () => {
                 key={game._id}
                 onClick={() => handleSelect(game._id)}
                 className={`group relative bg-[#0d0d0d] border transition-all duration-500 rounded-2xl p-6 overflow-hidden cursor-pointer ${
-                  selectedIds.includes(game._id) ? "border-[#55DEE8] bg-[#55DEE8]/5" : "border-white/5 hover:border-[#55DEE8]/40"
+                  selectedIds.includes(game._id) ? "border-[#55DEE8] bg-[#55DEE8]/5" : "border-white/5 hover:border-white/30/40"
                 }`}
               >
                 <div className={`absolute inset-y-0 left-0 w-1 bg-[#55DEE8] transition-transform duration-500 ${
@@ -285,7 +285,7 @@ const HostedGamesPage = () => {
                       <Activity size={24} />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-[15px] font-black text-white uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors truncate">
+                      <h3 className="text-[15px] font-black text-white uppercase tracking-tight group-hover:text-white/70 transition-colors truncate">
                         {game.gameType}
                       </h3>
                       <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mt-1">
@@ -342,7 +342,7 @@ const HostedGamesPage = () => {
                         e.stopPropagation();
                         navigate(`/match/${game._id}`);
                       }}
-                      className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:bg-[#55DEE8] hover:text-black hover:border-[#55DEE8] transition-all"
+                      className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:bg-white/10 hover:text-black hover:border-white/30 transition-all"
                     >
                       <Eye size={18} />
                     </button>

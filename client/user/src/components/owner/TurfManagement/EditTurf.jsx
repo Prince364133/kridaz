@@ -92,7 +92,7 @@ const EditTurf = () => {
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => navigate(-1)}
-                className="w-10 h-10 flex items-center justify-center bg-[#111] border border-[#2D2D2D] text-[#878C9F] hover:text-[#55DEE8] hover:border-[#55DEE8]/40 rounded-full transition-all group"
+                className="w-10 h-10 flex items-center justify-center bg-[#111] border border-[#2D2D2D] text-[#878C9F] hover:text-white/70 hover:border-white/30/40 rounded-full transition-all group"
                 title="Cancel Changes"
               >
                 <ArrowLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
@@ -100,7 +100,7 @@ const EditTurf = () => {
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-8 bg-[#55DEE8] rounded-full" />
                 <h1 className="text-[28px] lg:text-[32px] font-bold font-open-sans text-white tracking-tight leading-none uppercase">
-                  EDIT <span className="text-[#55DEE8]">FACILITY</span>
+                  EDIT <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>FACILITY</span>
                 </h1>
               </div>
             </div>
@@ -235,7 +235,7 @@ const EditTurf = () => {
                 <button
                   type="button"
                   onClick={getMyLocation}
-                  className={`shrink-0 px-6 rounded-[8px] bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 hover:bg-[#55DEE8] hover:text-black transition-all flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest ${isLocating ? 'animate-pulse' : ''}`}
+                  className={`shrink-0 px-6 rounded-[8px] bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 hover:bg-white/10 hover:text-black transition-all flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest ${isLocating ? 'animate-pulse' : ''}`}
                 >
                   {isLocating ? "Locating…" : "📡 GPS"}
                 </button>
@@ -351,7 +351,7 @@ const EditTurf = () => {
                 {groundTypes.map((type, index) => (
                   <span key={index} className="px-3 py-1.5 bg-[#1A1A1A] border border-[#2D2D2D] text-white font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
                     {type}
-                    <button type="button" onClick={() => removeGroundType(type)} className="hover:text-[#55DEE8] transition-colors">
+                    <button type="button" onClick={() => removeGroundType(type)} className="hover:text-white/70 transition-colors">
                       <X size={12} />
                     </button>
                   </span>
@@ -422,7 +422,7 @@ const EditTurf = () => {
                 <button
                   type="button"
                   onClick={addManagerContact}
-                  className="shrink-0 px-8 rounded-[8px] bg-white text-black hover:bg-[#55DEE8] transition-all text-[11px] font-bold uppercase tracking-widest"
+                  className="shrink-0 px-8 rounded-[8px] bg-white text-black hover:bg-white/10 transition-all text-[11px] font-bold uppercase tracking-widest"
                 >
                   Add
                 </button>
@@ -430,12 +430,12 @@ const EditTurf = () => {
 
               <div className="space-y-3 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
                 {managerContacts.map((manager, index) => (
-                  <div key={index} className="flex items-center justify-between bg-[#111111] p-4 rounded-[8px] border border-[#2D2D2D] hover:border-[#55DEE8]/30 transition-all">
+                  <div key={index} className="flex items-center justify-between bg-[#111111] p-4 rounded-[8px] border border-[#2D2D2D] hover:border-white/30/30 transition-all">
                     <div className="flex flex-col">
                       <span className="text-white text-[13px] font-bold uppercase tracking-tight">{manager.name}</span>
                       <span className="text-[#878C9F] text-[11px] font-mono mt-0.5">{manager.phone}</span>
                     </div>
-                    <button type="button" onClick={() => removeManagerContact(index)} className="text-[#444] hover:text-[#55DEE8] transition-colors uppercase text-[10px] font-bold tracking-widest">
+                    <button type="button" onClick={() => removeManagerContact(index)} className="text-[#444] hover:text-white/70 transition-colors uppercase text-[10px] font-bold tracking-widest">
                       Remove
                     </button>
                   </div>
@@ -536,7 +536,7 @@ const EditTurf = () => {
                           className={`px-5 py-3 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all border ${
                             isActive 
                             ? "bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_5px_15px_rgba(204,255,0,0.2)]" 
-                            : "bg-[#111111] text-[#444] border-[#2D2D2D] hover:border-[#55DEE8]/40"
+                            : "bg-[#111111] text-[#444] border-[#2D2D2D] hover:border-white/30/40"
                           }`}
                         >
                           {day.substring(0, 3)}
@@ -629,7 +629,7 @@ const EditTurf = () => {
                           key={index}
                           className={`p-4 rounded-[8px] border transition-all flex flex-col gap-4 ${
                             slot.isActive
-                            ? "bg-[#111111] border-[#2D2D2D] hover:border-[#55DEE8]/20"
+                            ? "bg-[#111111] border-[#2D2D2D] hover:border-white/30/20"
                             : "bg-black/50 border-[#1A1A1A] opacity-40"
                           }`}
                         >

@@ -79,7 +79,7 @@ const ForwardModal = ({ isOpen, onClose, messageId }) => {
               placeholder="Search followers..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#55DEE8]/50 transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/30/50 transition-colors"
             />
           </div>
         </div>
@@ -147,7 +147,7 @@ const ForwardModal = ({ isOpen, onClose, messageId }) => {
             <button
               onClick={handleForward}
               disabled={isForwarding}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-[#55DEE8] text-black font-black uppercase tracking-wider text-sm rounded-xl hover:bg-[#95e61a] transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-wider text-sm rounded-xl hover:bg-[#95e61a] transition-colors disabled:opacity-50"
             >
               <Send size={16} />
               {isForwarding ? "Forwarding..." : `Forward to ${selectedUsers.length} user${selectedUsers.length > 1 ? 's' : ''}`}

@@ -121,7 +121,7 @@ const CoachSignUp = () => {
               </div>
               <h1 className="text-5xl xl:text-6xl font-bold font-inter leading-[1.1] tracking-tight">
                 JOIN THE <br />
-                <span className="text-[#55DEE8]">ELITE COACH</span> <br />
+                <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>ELITE COACH</span> <br />
                 NETWORK.
               </h1>
               <p className="text-[#999999] text-sm leading-relaxed font-open-sans max-w-sm">
@@ -136,7 +136,7 @@ const CoachSignUp = () => {
                 { icon: Zap, title: "Instant Bookings", desc: "Seamless availability and payment settlement." }
               ].map((item, i) => (
                 <div key={i} className="flex gap-4 group">
-                  <div className="w-12 h-12 flex-shrink-0 rounded-[8px] bg-[#111111] border border-[#2D2D2D] flex items-center justify-center group-hover:border-[#55DEE8]/50 transition-all">
+                  <div className="w-12 h-12 flex-shrink-0 rounded-[8px] bg-[#111111] border border-[#2D2D2D] flex items-center justify-center group-hover:border-white/30/50 transition-all">
                     <item.icon size={20} className="text-[#55DEE8]" />
                   </div>
                   <div>
@@ -413,7 +413,7 @@ const CoachSignUp = () => {
               </form>
 
               <div className="mt-10 pt-10 border-t border-[#2D2D2D] flex flex-col sm:flex-row items-center justify-between gap-6">
-                <Link to="/login" className="text-[10px] text-[#666666] hover:text-[#55DEE8] uppercase font-bold tracking-widest transition-colors font-inter">Already a partner? Login</Link>
+                <Link to="/login" className="text-[10px] text-[#666666] hover:text-white/70 uppercase font-bold tracking-widest transition-colors font-inter">Already a partner? Login</Link>
                 <div className="flex items-center gap-2 text-[#444]">
                   <Globe size={14} />
                   <span className="text-[10px] uppercase font-bold tracking-widest font-inter">Global Talent Network</span>

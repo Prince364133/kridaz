@@ -65,7 +65,7 @@ const CommunityManagement = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-black text-white uppercase tracking-tight">Community <span className="text-[#55DEE8]">Moderation</span></h1>
+          <h1 className="text-3xl font-black text-white uppercase tracking-tight">Community <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Moderation</span></h1>
           <p className="text-white/20 text-xs font-bold uppercase tracking-[0.2em] mt-1">Manage posts and stories across the platform</p>
         </div>
         <div className="flex items-center gap-3">
@@ -164,7 +164,7 @@ const CommunityManagement = () => {
                       <UserIcon size={14} className="text-[#55DEE8]" />
                     </div>
                     <div>
-                      <p className="text-[11px] font-bold text-white uppercase tracking-widest hover:text-[#55DEE8] transition-colors">{item.user?.name || "System"}</p>
+                      <p className="text-[11px] font-bold text-white uppercase tracking-widest hover:text-white/70 transition-colors">{item.user?.name || "System"}</p>
                       <p className="text-[9px] text-[#55DEE8] font-bold uppercase tracking-widest">@{item.user?.username || "admin"}</p>
                     </div>
                   </Link>

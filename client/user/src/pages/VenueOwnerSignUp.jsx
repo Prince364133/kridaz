@@ -163,7 +163,7 @@ const VenueOwnerSignUp = () => {
             <h1 className="text-7xl xl:text-8xl font-bold text-white leading-[0.9] tracking-tight uppercase">
               SCALE <br />
               YOUR <br />
-              <span className="text-[#55DEE8]">VENUE.</span>
+              <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>VENUE.</span>
             </h1>
             <p className="text-sm text-white/40 uppercase tracking-widest max-w-sm leading-relaxed">
               Complete your business profile to start listing your sports facility on Kridaz.

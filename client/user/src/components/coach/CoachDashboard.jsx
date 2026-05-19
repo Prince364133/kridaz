@@ -77,7 +77,7 @@ const CoachDashboard = () => {
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-8 bg-[#55DEE8] rounded-full" />
                 <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
-                  Coach <span className="text-[#55DEE8]">Dashboard</span>
+                  Coach <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Dashboard</span>
                 </h1>
               </div>
               <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
@@ -103,9 +103,9 @@ const CoachDashboard = () => {
 
           {/* Coach Profile Section (styled similarly to Venue design cards) */}
           {coach && (
-            <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 flex flex-col md:flex-row items-center gap-8 group hover:border-[#55DEE8]/30 transition-all duration-500 shadow-[var(--shadow-2)]">
+            <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 flex flex-col md:flex-row items-center gap-8 group hover:border-white/30/30 transition-all duration-500 shadow-[var(--shadow-2)]">
               <div className="relative">
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-[8px] overflow-hidden border border-[#2D2D2D] group-hover:border-[#55DEE8]/50 transition-all shadow-sm">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-[8px] overflow-hidden border border-[#2D2D2D] group-hover:border-white/30/50 transition-all shadow-sm">
                   <img 
                     src={coach.profilePicture || "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=300&h=300&fit=crop"} 
                     alt="Coach" 
@@ -224,7 +224,7 @@ const CoachDashboard = () => {
 
             {/* Upcoming Sessions Roster */}
             <div className="lg:col-span-4">
-              <div className="bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] h-full flex flex-col group transition-all hover:border-[#55DEE8]/20">
+              <div className="bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] h-full flex flex-col group transition-all hover:border-white/30/20">
                 <div className="flex items-center justify-between mb-8">
                   <div>
                     <h2 className="text-xl font-bold text-white tracking-tight font-inter">
@@ -263,7 +263,7 @@ const CoachDashboard = () => {
                     <EmptyState height={200} icon={Calendar} message="No upcoming sessions" sub="Schedule a session to see it here" />
                   )}
                 </div>
-                <button className="mt-6 w-full py-3 bg-transparent border border-[#2D2D2D] hover:bg-[#55DEE8]/10 hover:text-[#55DEE8] hover:border-[#55DEE8]/30 text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter">
+                <button className="mt-6 w-full py-3 bg-transparent border border-[#2D2D2D] hover:bg-white/10/10 hover:text-white/70 hover:border-white/30/30 text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter">
                   New Assignment
                 </button>
               </div>
@@ -290,7 +290,7 @@ const EmptyState = ({ height, icon: Icon, message, sub }) => (
 // ── Stats Card ──
 const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon }) => {
   return (
-    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#55DEE8]/30 transition-all duration-500 min-h-[140px] shadow-[var(--shadow-2)]">
+    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-white/30/30 transition-all duration-500 min-h-[140px] shadow-[var(--shadow-2)]">
       <Icon className="absolute -right-4 -bottom-4 w-20 h-20 text-white/[0.02] group-hover:text-white/[0.04] transition-colors" />
       <div className="flex items-center justify-between mb-5">
         <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[6px] text-[#55DEE8] flex items-center justify-center transition-all shadow-sm">
@@ -311,7 +311,7 @@ const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon }) => {
 
 const ChartCard = ({ title, subtitle, children, action, className = "h-full" }) => (
   <div className={`bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] relative overflow-hidden group flex flex-col ${className}`}>
-    <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/5 blur-[60px] group-hover:bg-[#55DEE8]/10 transition-colors"></div>
+    <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/5 blur-[60px] group-hover:bg-white/10/10 transition-colors"></div>
     <div className="flex flex-col gap-2 mb-6 relative z-10 shrink-0">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
         <div>

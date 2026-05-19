@@ -35,7 +35,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
             className={`flex-1 py-3 text-sm font-bold transition-colors ${
               isDestructive 
                 ? 'text-red-500 hover:bg-red-500/10 hover:text-red-400' 
-                : 'text-[#55DEE8] hover:bg-[#55DEE8]/10 hover:text-[#a3f01b]'
+                : 'text-[#55DEE8] hover:bg-white/10/10 hover:text-[#a3f01b]'
             }`}
           >
             {confirmText}

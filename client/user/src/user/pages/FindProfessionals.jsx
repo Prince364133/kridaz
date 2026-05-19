@@ -96,7 +96,7 @@ export default function FindProfessionals() {
       <div className="max-w-7xl mx-auto mb-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="relative">
-            <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#55DEE8] rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block"></div>
+            <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block" style={{ background: 'linear-gradient(180deg, #55DEE8 0%, #BFF367 100%)' }}></div>
             <h1 className="font-display text-4xl md:text-7xl lg:text-8xl uppercase leading-none tracking-tighter">
               FIND <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>PROFESSIONALS</span>
             </h1>
@@ -200,7 +200,7 @@ export default function FindProfessionals() {
                 className="group cursor-pointer"
                 onClick={() => navigate(`/professionals/${pro._id}`)}
               >
-                <div className="relative bg-[#121212] rounded-[20px] p-1.5 border border-white/5 transition-all duration-500 hover:border-[#55DEE8]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
+                <div className="relative bg-[#121212] rounded-[20px] p-1.5 border border-white/5 transition-all duration-500 hover:border-white/30/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
                   
                   {/* Compact Profile Image Section */}
                   <div className="relative aspect-[1/1.2] rounded-[15px] overflow-hidden block mb-2.5">
@@ -240,7 +240,7 @@ export default function FindProfessionals() {
                          pro.role === 'streamer' ? <Video size={8} className="text-[#55DEE8]" /> : 
                          pro.role === 'scorer' ? <Activity size={8} className="text-[#55DEE8]" /> : 
                          <Trophy size={8} className="text-[#55DEE8]" />}
-                        <span className="text-[#55DEE8]">{pro.role?.toUpperCase()}</span>
+                        <span style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{pro.role?.toUpperCase()}</span>
                       </div>
                     </div>
                   </div>
@@ -248,7 +248,7 @@ export default function FindProfessionals() {
                   {/* Content Section */}
                   <div className="px-1.5 pb-1">
                     <div className="flex items-center gap-1 mb-0.5">
-                      <h3 className="text-white font-bold text-[13px] tracking-tight group-hover:text-[#55DEE8] transition-colors line-clamp-1 font-open-sans capitalize">
+                      <h3 className="text-white font-bold text-[13px] tracking-tight group-hover:text-white/70 transition-colors line-clamp-1 font-open-sans capitalize">
                         {pro.name?.toLowerCase()}
                       </h3>
                       <div className="flex items-center justify-center w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] shrink-0">

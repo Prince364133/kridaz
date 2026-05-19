@@ -100,7 +100,7 @@ const Login = () => {
                         type="text" 
                         placeholder="000000"
                         maxLength={6}
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
                       />
                     </div>
                     {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
@@ -148,7 +148,7 @@ const Login = () => {
                             {...register("email")}
                             type="email"
                             placeholder="name@example.com"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
                           />
                           {errors.email && <p className="text-xs text-red-500 mt-1 ml-1">{errors.email.message}</p>}
                         </div>
@@ -158,7 +158,7 @@ const Login = () => {
                       <div className="space-y-2">
                         <div className="flex justify-between px-1">
                           <label className="text-sm font-medium text-white/60 group-focus-within/input:text-[#55DEE8] transition-colors">Password</label>
-                          <Link to="/forgot-password" size="sm" className="text-xs text-white/40 hover:text-[#55DEE8] transition-colors">Forgot Password?</Link>
+                          <Link to="/forgot-password" size="sm" className="text-xs text-white/40 hover:text-white/70 transition-colors">Forgot Password?</Link>
                         </div>
                         <div className="relative group/input">
                           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-[#55DEE8] transition-colors">
@@ -168,7 +168,7 @@ const Login = () => {
                             {...register("password")}
                             type="password"
                             placeholder="••••••••"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-white/30/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
                           />
                           {errors.password && <p className="text-xs text-red-500 mt-1 ml-1">{errors.password.message}</p>}
                         </div>
