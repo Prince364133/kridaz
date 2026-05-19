@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
@@ -44,6 +44,7 @@ const MOCK_SQUAD = [
 const TeamProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  // @ts-ignore
   const { user: currentUser, isLoggedIn } = useSelector((state) => state.auth);
   const { gateInteraction } = useLoginOnDemand();
 

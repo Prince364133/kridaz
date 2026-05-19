@@ -47,6 +47,19 @@ const redactFormat = winston.format((info) => {
   return redactedInfo;
 });
 
+const safeStringify = (obj) => {
+  const cache = new Set();
+  return JSON.stringify(obj, (key, value) => {
+    if (typeof value === 'object' && value !== null) {
+      if (cache.has(value)) {
+        return '[Circular]';
+      }
+      cache.add(value);
+    }
+    return value;
+  });
+};
+
 /**
  * Development format: Human-readable, colorized, with RequestID prefix.
  */
@@ -56,7 +69,7 @@ const devFormat = winston.format.combine(
   winston.format.errors({ stack: true }),
   winston.format.printf(({ timestamp, level, message, stack, requestId, ...meta }) => {
     const reqIdStr = requestId ? `\x1b[36m[${requestId}]\x1b[0m ` : '';
-    const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
+    const metaStr = Object.keys(meta).length ? ` ${safeStringify(meta)}` : '';
     return `${timestamp} ${level}: ${reqIdStr}${message}${stack ? `\n${stack}` : ''}${metaStr}`;
   })
 );

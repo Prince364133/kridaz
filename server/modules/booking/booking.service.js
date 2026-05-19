@@ -316,7 +316,7 @@ export const verifyBookingPayment = async (userId, paymentData) => {
     title: "New Booking Received",
     message: `A new booking has been confirmed for ${turf.name} on ${formattedDate}.`,
     type: "BOOKING",
-    link: "/partner/bookings"
+    link: "/venue-owner/bookings"
   });
 
   // Generate & send invoice
@@ -558,7 +558,7 @@ export const processWalletBooking = async (userId, bookingData) => {
     title: "New Wallet Booking",
     message: `A new booking has been confirmed for ${turf.name} via Wallet on ${formattedDate}.`,
     type: "BOOKING",
-    link: "/partner/bookings"
+    link: "/venue-owner/bookings"
   });
 
   return updatedBooking;
@@ -785,6 +785,7 @@ export const processManualBooking = async (ownerId, manualData) => {
 
     return await tx.booking.create({
       data: {
+        userId: ownerId,
         turfId,
         timeSlotId: timeSlot.id,
         playStartTime: adjustedStartTime,
@@ -853,7 +854,7 @@ export const processBookingCancellation = async (userId, bookingId) => {
       throw error;
     }
 
-    const refundAmount = Math.round(booking.totalPrice * 0.3);
+    const refundAmount = Math.round(booking.paidAmount * 0.3);
 
     // 1. Update Booking
     const updatedBooking = await tx.booking.update({
@@ -957,3 +958,4 @@ export const findAdminBookings = async (filters) => {
 
   return { bookings, total };
 };
+

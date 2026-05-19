@@ -26,7 +26,7 @@ export const generatePlaceholder = async (sourceUrlOrBuffer) => {
 
     return `data:image/webp;base64,${placeholder.toString('base64')}`;
   } catch (error) {
-    logger.error('[IMAGE_WORKER] Placeholder failed', error);
+    logger.error('[IMAGE_WORKER] Placeholder failed', { message: error.message, status: error.response?.status, data: error.response?.data });
     return null;
   }
 };

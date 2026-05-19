@@ -2,7 +2,7 @@ import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 import { redisClient as redis } from '../config/redis.js';
 
-const isTest = process.env.NODE_ENV === 'test';
+const isTestOrDev = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
 const defaultWindow = parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000;
 
 /**
@@ -15,10 +15,10 @@ export const authLimiter = rateLimit({
   max: parseInt(process.env.RATE_LIMIT_AUTH_MAX) || 10,
   standardHeaders: true,
   legacyHeaders: false,
-  store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
+  store: isTestOrDev ? undefined : new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
   message: { success: false, message: 'Too many attempts. Please try again in 15 minutes.' },
   skipSuccessfulRequests: true,
-  skip: (req) => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
+  skip: (req) => isTestOrDev,
 });
 
 /**
@@ -30,9 +30,9 @@ export const otpLimiter = rateLimit({
   max: parseInt(process.env.RATE_LIMIT_OTP_MAX) || 5,
   standardHeaders: true,
   legacyHeaders: false,
-  store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
+  store: isTestOrDev ? undefined : new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
   message: { success: false, message: 'Too many OTP requests. Please wait a while.' },
-  skip: (req) => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
+  skip: (req) => isTestOrDev,
 });
 
 /**
@@ -43,9 +43,9 @@ export const paymentLimiter = rateLimit({
   max: parseInt(process.env.RATE_LIMIT_PAYMENT_MAX) || 10,
   standardHeaders: true,
   legacyHeaders: false,
-  store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
+  store: isTestOrDev ? undefined : new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
   message: { success: false, message: 'Too many payment requests. Please slow down.' },
-  skip: (req) => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
+  skip: (req) => isTestOrDev,
 });
 
 /**
@@ -57,7 +57,7 @@ export const globalLimiter = rateLimit({
   max: parseInt(process.env.RATE_LIMIT_GLOBAL_MAX) || 200,
   standardHeaders: true,
   legacyHeaders: false,
-  store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
+  store: isTestOrDev ? undefined : new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
   message: { success: false, message: 'Too many requests. Please slow down.' },
-  skip: (req) => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development' || req.path === '/health' || req.path === '/api/health',
+  skip: (req) => isTestOrDev || req.path === '/health' || req.path === '/api/health',
 });

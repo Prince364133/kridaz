@@ -263,6 +263,7 @@ model Turf {
   mapUrl              String?
   policies            String?      @default("")
   managerContacts     Json?
+  generatedSlots      Json?
   verificationData    Json?
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @default(now()) @updatedAt

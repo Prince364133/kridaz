@@ -13,6 +13,7 @@ import { toast } from 'react-hot-toast';
 const MatchDetails = () => {
  const { matchId } = useParams();
  const navigate = useNavigate();
+ // @ts-ignore
  const { user } = useSelector((state) => state.auth);
  const [game, setGame] = useState(null);
  const [loading, setLoading] = useState(true);

@@ -195,9 +195,11 @@ export const searchPlayers = async (req, res) => {
 
       return {
         id: u.id,
+        _id: u.id,
         name: u.name,
         username: u.username,
         profilePicture: u.profilePicture,
+        profilePic: u.profilePicture,
         location: u.city ? `${u.city}, ${u.state}` : null,
         followersCount: stats.followerIds.length,
         followingCount: stats.followingIds.length,

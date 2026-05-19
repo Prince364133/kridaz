@@ -112,8 +112,11 @@ const ForwardModal = ({ isOpen, onClose, messageId }) => {
                           alt={user.name} 
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextElementSibling.style.display = 'flex';
+                            e.currentTarget.style.display = 'none';
+                            const next = e.currentTarget.nextElementSibling;
+                            if (next) {
+                              next.style.display = 'flex';
+                            }
                           }}
                         />
                       ) : null}

@@ -43,6 +43,7 @@ const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
 
 const Community = () => {
+  // @ts-ignore
   const { user, role, isLoggedIn, followingIds } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const { gateInteraction } = useLoginOnDemand();
@@ -103,6 +104,7 @@ const Community = () => {
     if (!socket) return;
 
     const handleNewPost = (newPost) => {
+      // @ts-ignore
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
           if (!draft.posts.find(p => p._id === newPost._id)) {
@@ -110,6 +112,7 @@ const Community = () => {
           }
         })
       );
+      // @ts-ignore
       dispatch(
         communityApi.util.updateQueryData('getCommunityStats', undefined, (draft) => {
           if (draft.stats) draft.stats.posts = (parseInt(draft.stats.posts) + 1).toString();
@@ -118,6 +121,7 @@ const Community = () => {
     };
 
     const handlePostLiked = ({ postId, likes, likesCount }) => {
+      // @ts-ignore
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
           const post = draft.posts.find(p => p._id === postId);
@@ -129,6 +133,7 @@ const Community = () => {
     };
 
     const handlePostCommented = ({ postId, comments }) => {
+      // @ts-ignore
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
           const post = draft.posts.find(p => p._id === postId);
@@ -137,6 +142,7 @@ const Community = () => {
           }
         })
       );
+      // @ts-ignore
       dispatch(
         communityApi.util.updateQueryData('getCommunityStats', undefined, (draft) => {
           if (draft.stats) draft.stats.comments = (parseInt(draft.stats.comments) + 1).toString();
@@ -145,11 +151,13 @@ const Community = () => {
     };
 
     const handlePostDeleted = (postId) => {
+      // @ts-ignore
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
           draft.posts = draft.posts.filter(p => p._id !== postId);
         })
       );
+      // @ts-ignore
       dispatch(
         communityApi.util.updateQueryData('getCommunityStats', undefined, (draft) => {
           if (draft.stats) draft.stats.posts = Math.max(0, parseInt(draft.stats.posts) - 1).toString();
@@ -158,6 +166,7 @@ const Community = () => {
     };
 
     const handleMediaProgress = ({ mediaId, progress, status }) => {
+      // @ts-ignore
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
           const post = draft.posts.find(p => p._id === mediaId);
@@ -170,6 +179,7 @@ const Community = () => {
     };
 
     const handleMediaComplete = ({ mediaId, hlsUrl, thumbnailUrl }) => {
+      // @ts-ignore
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
           const post = draft.posts.find(p => p._id === mediaId);
@@ -181,6 +191,7 @@ const Community = () => {
           }
         })
       );
+      // @ts-ignore
       dispatch(communityApi.util.invalidateTags(['Community', 'Stories']));
     };
 
@@ -339,7 +350,8 @@ const Community = () => {
       
       // 1. Upload each media file (Fallback for multi-file/text stories)
       for (const file of newStory.mediaFiles) {
-        const { data: uploadData } = await getStoryUploadUrl({
+        // @ts-ignore
+      const { data: uploadData } = await getStoryUploadUrl({
           contentType: file.type,
           fileName: file.name
         }).unwrap();
@@ -660,14 +672,14 @@ const Community = () => {
 
               <div className="flex-1 overflow-y-auto no-scrollbar space-y-1 mt-1 pr-1">
                 {[
-                  { name: "simran.s", msg: "Great game! =ƒöÑ=ƒöÑ", time: "2m", unread: 2 },
+                  { name: "simran.s", msg: "Great game! =ï¿½ï¿½ï¿½=ï¿½ï¿½ï¿½", time: "2m", unread: 2 },
                   { name: "rohit45", msg: "See you at the next match!", time: "10m", unread: 1 },
-                  { name: "deepak_29", msg: "That was insane! =ƒÆ¬", time: "30m", unread: 0 },
+                  { name: "deepak_29", msg: "That was insane! =ï¿½Æ¬", time: "30m", unread: 0 },
                   { name: "vikash07", msg: "Let's train tomorrow", time: "45m", unread: 0 },
-                  { name: "katta_18", msg: "Keep pushing! =ƒÆÜ", time: "1h", unread: 0 },
+                  { name: "katta_18", msg: "Keep pushing! =ï¿½ï¿½ï¿½", time: "1h", unread: 0 },
                   { name: "aman.singh", msg: "Photo", time: "1h", unread: 0 },
                   { name: "team_kridaz", msg: "New announcement!", time: "2h", unread: 3 },
-                  { name: "arjun_11", msg: "Thanks bro! =ƒÖî", time: "3h", unread: 0 }
+                  { name: "arjun_11", msg: "Thanks bro! =ï¿½ï¿½ï¿½", time: "3h", unread: 0 }
                 ].map((msg, i) => (
                   <div key={i} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group">
                     <div className="relative shrink-0">

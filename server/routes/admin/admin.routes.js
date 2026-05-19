@@ -25,7 +25,7 @@ const adminRouter = Router()
 adminRouter.use("/blogs", verifyAdminToken, blogRouter);
 adminRouter.use("/marketing", verifyAdminToken, marketingRouter);
 adminRouter.use("/features", verifyAdminToken, featureFlagRouter);
-adminRouter.use("/partner-requests", verifyAdminToken, ownerRequestRouter);
+adminRouter.use("/venue-owner-requests", verifyAdminToken, ownerRequestRouter);
 adminRouter.use("/professionals", verifyAdminToken, professionalRouter);
 adminRouter.use("/withdrawals", verifyAdminToken, withdrawalRouter);
 adminRouter.use("/support", verifyAdminToken, supportRouter);
@@ -42,4 +42,5 @@ adminRouter.use("/notifications", verifyAdminToken, adminNotificationRouter);
 adminRouter.use("/games", verifyAdminToken, gameRouter);
 
 export default adminRouter;
+
 

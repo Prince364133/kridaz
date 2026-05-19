@@ -102,6 +102,7 @@ function HistoryTab({ matchData }) {
 const ScoringApp = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
+  // @ts-ignore
   const { role } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState('scoring');
   const [showSettings, setShowSettings] = useState(false);

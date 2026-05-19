@@ -93,6 +93,7 @@ export const confirmStory = async (req, res) => {
 
     res.status(201).json({ success: true, story: populatedStory });
   } catch (error) {
+    logger.error('CONFIRM STORY ERROR:', { message: error.message, stack: error.stack });
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -170,6 +171,7 @@ export const getStories = async (req, res) => {
     if (all !== 'true' && userId) {
       const networkIds = await SocialService.getNetworkIds(userId);
       userIds = [...new Set([...userIds, ...networkIds])];
+      console.log('Story Feed Query Debug:', { userId, networkIds, userIds });
     } else if (all !== 'true' && !userId) {
       // If unauthenticated and asking for network feed, return empty or treat as all=true?
       // Let's treat as global public feed for unauthenticated users viewing the community.

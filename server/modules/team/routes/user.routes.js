@@ -15,6 +15,7 @@ import {
   deleteTeam
 } from "../team.controller.js";
 import { authenticate } from "../../../middleware/auth.middleware.js";
+import upload from "../../../middleware/uploads/upload.middleware.js";
 
 const router = Router();
 
@@ -89,7 +90,7 @@ router.use(authenticate);
  *       201:
  *         description: Team created
  */
-router.post("/", createTeam);
+router.post("/", upload.single("image"), createTeam);
 
 /**
  * @swagger
@@ -200,7 +201,7 @@ router.post("/join-request/:id", requestToJoin);
  *       200:
  *         description: Team updated
  */
-router.put("/:id", updateTeam);
+router.put("/:id", upload.single("image"), updateTeam);
 
 /**
  * @swagger

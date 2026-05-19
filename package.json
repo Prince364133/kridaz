@@ -21,5 +21,18 @@
     "eslint-plugin-react": "^7.34.1",
     "prettier": "^3.2.5",
     "turbo": "^2.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@prisma/engines",
+      "@sentry-internal/node-cpu-profiler",
+      "argon2",
+      "esbuild",
+      "ffmpeg-static",
+      "msgpackr-extract",
+      "prisma",
+      "sharp"
+    ]
   }
 }

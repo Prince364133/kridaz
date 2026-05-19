@@ -191,6 +191,7 @@ h1, h2, h3, .font-display {
 
 .badge-distance {
   background-color: rgba(0,0,0,0.75);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   color: #fff;
   font-family: "Space Mono", monospace;

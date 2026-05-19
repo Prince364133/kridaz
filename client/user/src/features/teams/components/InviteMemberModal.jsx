@@ -4,7 +4,7 @@ import { X, Search, UserPlus, Phone, Loader2, Sparkles } from 'lucide-react';
 import { useSearchPlayersQuery, useInviteMemberMutation, useAddCustomMemberMutation } from '@redux/api/teamApi';
 import toast from 'react-hot-toast';
 
-const InviteMemberModal = ({ isOpen, onClose, teamId }) => {
+const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
   const [activeTab, setActiveTab] = useState('search'); // 'search' or 'custom'
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -59,7 +59,7 @@ const InviteMemberModal = ({ isOpen, onClose, teamId }) => {
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
       
       <motion.div 
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         className="relative w-full max-w-md bg-[#0d0d0d] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl"
@@ -68,7 +68,7 @@ const InviteMemberModal = ({ isOpen, onClose, teamId }) => {
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-black text-white italic uppercase tracking-tight">Add Roster</h2>
-            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">Grow your team squad</p>
+            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">Grow {teamName || 'your'} team squad</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl transition-colors">
             <X size={20} className="text-white/40" />

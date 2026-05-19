@@ -54,7 +54,7 @@ export const updateTicketStatus = async (req, res) => {
         title: "Ticket Status Updated",
         message: `Your ticket "${ticket.subject}" is now ${status}.`,
         type: "SUPPORT",
-        link: "/partner/docs-support"
+        link: "/venue-owner/docs-support"
       });
     }
 
@@ -116,7 +116,7 @@ export const replyToTicket = async (req, res) => {
         title: "New Support Reply",
         message: `Admin replied to your ticket: "${message.substring(0, 50)}..."`,
         type: "SUPPORT",
-        link: "/partner/docs-support"
+        link: "/venue-owner/docs-support"
       });
     }
 
@@ -214,3 +214,4 @@ export const resolveDispute = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+

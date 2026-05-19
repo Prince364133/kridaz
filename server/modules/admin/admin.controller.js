@@ -556,6 +556,9 @@ export const approveOwnerRequest = async (req, res) => {
 
     const result = await prisma.$transaction(async (tx) => {
       let targetUserId = ownerRequest.userId;
+      
+      let roleToSet = ownerRequest.role.toUpperCase();
+      if (roleToSet === "VENU_OWNERS") roleToSet = "VENUE_OWNER";
 
       if (!targetUserId) {
         let existingUser = await tx.user.findUnique({
@@ -570,7 +573,7 @@ export const approveOwnerRequest = async (req, res) => {
               name: ownerRequest.name,
               phone: ownerRequest.phone,
               password: 'defaultHashedPassword', // Placeholder since password can be updated later/via recovery
-              role: ownerRequest.role.toUpperCase(),
+              role: roleToSet,
               isVerified: true
             }
           });
@@ -606,7 +609,7 @@ export const approveOwnerRequest = async (req, res) => {
       // Sync role back to User
       await tx.user.update({
         where: { id: targetUserId },
-        data: { role: ownerRequest.role.toUpperCase() }
+        data: { role: roleToSet }
       });
 
       // Update request status

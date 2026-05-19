@@ -521,7 +521,7 @@ export const loginStep1 = async (req, res) => {
     }
 
     const isSuperAdmin = user.role?.toUpperCase() === "ADMIN";
-    const role = isSuperAdmin ? user.role : (user.ownerProfile ? user.ownerProfile.role : user.role);
+    const role = user.role;
     const ownerProfileId = user.ownerProfile ? user.ownerProfile.id : null;
     const token = isSuperAdmin
       ? generateUserToken(user.id, role, ownerProfileId)
@@ -608,7 +608,7 @@ export const login = async (req, res) => {
     }
 
     const isSuperAdmin = user.role?.toUpperCase() === "ADMIN";
-    const role = isSuperAdmin ? user.role : (user.ownerProfile ? user.ownerProfile.role : user.role);
+    const role = user.role;
     const ownerProfileId = user.ownerProfile ? user.ownerProfile.id : null;
     const token = isSuperAdmin
       ? generateUserToken(user.id, role, ownerProfileId)
@@ -798,7 +798,7 @@ export const googleAuth = async (req, res) => {
     let isNewAccountCreated = false;
 
     if (user) {
-      roleToReturn = user.ownerProfile ? user.ownerProfile.role : user.role;
+      roleToReturn = user.role;
       const ownerProfileId = user.ownerProfile ? user.ownerProfile.id : null;
       token = user.ownerProfile 
         ? generateOwnerToken(user.id, roleToReturn, ownerProfileId)
@@ -1057,7 +1057,7 @@ export const refreshToken = async (req, res) => {
           newToken = generateUserToken(user.id, role, user.ownerProfile?.id || null);
           if (user.ownerProfile) account = { ...user, ...user.ownerProfile };
       } else if (user.ownerProfile) {
-          role = user.ownerProfile.role;
+          role = user.role;
           newToken = generateOwnerToken(user.id, role, user.ownerProfile.id);
           account = { ...user, ...user.ownerProfile };
       } else {
@@ -1104,7 +1104,7 @@ export const ownerRequest = async (req, res) => {
         name,
         email: email.toLowerCase(),
         phone,
-        role: role || "venu_owners",
+        role: role === "venu_owners" ? "venue_owner" : (role || "venue_owner"),
         businessDetails: businessDetails || {},
         documents: documents || []
       }
@@ -1147,9 +1147,11 @@ export const upgradeRequest = async (req, res) => {
 
     // 2. Check if user already has a professional role
     if (email) {
-      const ownerAccount = await prisma.ownerProfile.findUnique({
-        where: { email: email.toLowerCase() }
+      const userWithProfile = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+        include: { ownerProfile: true }
       });
+      const ownerAccount = userWithProfile?.ownerProfile;
 
       if (ownerAccount) {
         return res.status(400).json({ 
@@ -1210,7 +1212,7 @@ export const upgradeRequest = async (req, res) => {
         name,
         email: email.toLowerCase(),
         phone,
-        role: role || "venu_owners",
+        role: role === "venu_owners" ? "venue_owner" : (role || "venue_owner"),
         businessDetails: businessDetails || {},
         documents: documents || [],
         portfolioUrl,
@@ -1300,7 +1302,7 @@ export const getMe = async (req, res) => {
           ownerId: user.ownerProfile.id,
           businessName: user.ownerProfile.businessName,
           businessType: user.ownerProfile.businessType,
-          ownerRole: user.ownerProfile.role,
+          ownerRole: user.role,
           ownerVerified: user.ownerProfile.isVerified,
         }
       : {};
