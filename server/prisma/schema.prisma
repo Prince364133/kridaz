@@ -86,6 +86,8 @@ model User {
   likedPosts              Post[]                @relation("PostLikes")
   studentSessions         ProfessionalSession[] @relation("SessionStudents")
   viewedStories           Story[]               @relation("StoryViewers")
+  turfLikes               TurfLike[]
+  turfInteractions        TurfInteraction[]
 
   @@index([role])
 }
@@ -271,6 +273,8 @@ model Turf {
   hostedGames         HostedGame[]
   reviews             Review[]
   timeSlots           TimeSlot[]
+  turfLikes           TurfLike[]
+  turfInteractions    TurfInteraction[]
   owner               OwnerProfile @relation(fields: [ownerId], references: [id])
 
   @@index([ownerId])
@@ -1117,4 +1121,34 @@ enum RevenueStatus {
   SETTLED
   FROZEN
   REFUNDED
+}
+
+model TurfLike {
+  id        String   @id @default(uuid())
+  userId    String
+  turfId    String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  turf      Turf     @relation(fields: [turfId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, turfId])
+  @@index([userId])
+  @@index([turfId])
+}
+
+model TurfInteraction {
+  id              String   @id @default(uuid())
+  userId          String?
+  turfId          String
+  interactionType String   // 'VIEW', 'SHARE', 'CLICK', 'SEARCH'
+  duration        Int      @default(0) // Dwell time in seconds (for views)
+  createdAt       DateTime @default(now())
+
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  turf            Turf     @relation(fields: [turfId], references: [id], onDelete: Cascade)
+
+  @@index([userId, interactionType])
+  @@index([turfId, interactionType])
+  @@index([createdAt])
 }
