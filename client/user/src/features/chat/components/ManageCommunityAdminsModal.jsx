@@ -91,8 +91,8 @@ const ManageCommunityAdminsModal = ({ isOpen, onClose, community, allChats }) =>
         {/* Header */}
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#84CC16]/10 flex items-center justify-center">
-              <Crown size={20} className="text-[#84CC16]" />
+            <div className="w-10 h-10 rounded-xl bg-[#55DEE8]/10 flex items-center justify-center">
+              <Crown size={20} className="text-[#55DEE8]" />
             </div>
             <div>
               <h2 className="text-lg font-black text-white italic uppercase tracking-tight">Manage Admins</h2>
@@ -105,15 +105,15 @@ const ManageCommunityAdminsModal = ({ isOpen, onClose, community, allChats }) =>
         </div>
 
         {/* Info Banner */}
-        <div className="mx-6 mt-4 p-3 bg-[#84CC16]/5 border border-[#84CC16]/20 rounded-xl shrink-0">
-          <p className="text-[11px] text-[#84CC16]/80 font-medium leading-relaxed">
+        <div className="mx-6 mt-4 p-3 bg-[#55DEE8]/5 border border-[#55DEE8]/20 rounded-xl shrink-0">
+          <p className="text-[11px] text-[#55DEE8]/80 font-medium leading-relaxed">
             Admins can post in Announcements, add groups, and manage community settings.
           </p>
         </div>
 
         {/* Search */}
         <div className="px-6 pt-4 shrink-0">
-          <div className="flex items-center gap-2 bg-white/[0.03] border border-white/10 rounded-xl px-4 py-2.5 focus-within:border-[#84CC16]/40 transition-all">
+          <div className="flex items-center gap-2 bg-white/[0.03] border border-white/10 rounded-xl px-4 py-2.5 focus-within:border-[#55DEE8]/40 transition-all">
             <Search size={14} className="text-white/30 shrink-0" />
             <input
               type="text"
@@ -143,7 +143,7 @@ const ManageCommunityAdminsModal = ({ isOpen, onClose, community, allChats }) =>
                   key={memberId}
                   className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${
                     isAdmin
-                      ? 'bg-[#84CC16]/5 border-[#84CC16]/20'
+                      ? 'bg-[#55DEE8]/5 border-[#55DEE8]/20'
                       : 'bg-white/[0.02] border-transparent hover:border-white/10'
                   }`}
                 >
@@ -156,7 +156,7 @@ const ManageCommunityAdminsModal = ({ isOpen, onClose, community, allChats }) =>
                     <div className="flex items-center gap-2">
                       <p className="text-white font-bold text-sm truncate">{member?.name}</p>
                       {isAdmin && (
-                        <span className="shrink-0 text-[8px] bg-[#84CC16]/20 text-[#84CC16] px-1.5 py-0.5 rounded font-black uppercase tracking-wider">
+                        <span className="shrink-0 text-[8px] bg-[#55DEE8]/20 text-[#55DEE8] px-1.5 py-0.5 rounded font-black uppercase tracking-wider">
                           Admin
                         </span>
                       )}
@@ -171,7 +171,7 @@ const ManageCommunityAdminsModal = ({ isOpen, onClose, community, allChats }) =>
                     className={`shrink-0 p-2 rounded-xl transition-all flex items-center gap-1.5 text-[11px] font-black uppercase ${
                       isAdmin
                         ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300'
-                        : 'bg-[#84CC16]/10 text-[#84CC16] hover:bg-[#84CC16] hover:text-black'
+                        : 'bg-[#55DEE8]/10 text-[#55DEE8] hover:bg-[#55DEE8] hover:text-black'
                     } disabled:opacity-40`}
                   >
                     {isLoading ? (

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { X, Search, Check, Send } from 'lucide-react';
 import { useGetFollowersFollowingQuery, useForwardMessageMutation } from '@redux/api/chatApi';
 

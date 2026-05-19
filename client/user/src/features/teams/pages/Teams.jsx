@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import TeamSidebar from '@features/teams/components/TeamSidebar';
 import TeamDetails from '@features/teams/components/TeamDetails';
 import CreateTeamModal from '@features/teams/components/CreateTeamModal';

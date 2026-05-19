@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { followUser, unfollowUser } from "@redux/slices/authSlice";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { 
-  Heart, MessageCircle, Share2, Plus, Image as ImageIcon, X, MoreVertical, Send,
-  Loader2, Trash2, Clock, User as UserIcon, Trophy, Edit, Edit3, Twitter, Facebook,
-  Link as LinkIcon, Eye, ChevronDown, TrendingUp, Target, BarChart3, Users, Zap,
-  ChevronRight, ShieldCheck, Calendar, Mail, ArrowRight, MonitorPlay, FileText,
-  Circle, Bookmark, Smile, Search, Play, Video, Home, Bell, PlaySquare
+  Heart, MessageCircle, Plus, Image as ImageIcon, X, MoreVertical, Send,
+  Loader2, Trash2, User as UserIcon, Trophy, Edit3,
+  ChevronDown, BarChart3, Users, Zap,
+  ShieldCheck, MonitorPlay, FileText,
+  Circle, Bookmark, Smile, Search, Video, Home, Bell, PlaySquare
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
@@ -24,11 +23,7 @@ import {
   useDeletePostMutation,
   useLikePostMutation,
   useAddCommentMutation,
-  useDeleteCommentMutation,
-  useUploadStoryMutation,
   useDeleteStoryMutation,
-  useLazyGetCommunityUploadUrlQuery,
-  useConfirmCommunityPostMutation,
   useLazyGetStoryUploadUrlQuery,
   useConfirmStoryUploadMutation
 } from "@redux/api/communityApi";
@@ -38,13 +33,12 @@ import ReelItem from "@features/reels/components/ReelItem";
 import { useSocket } from "@context/SocketContext";
 import { uploadFileToR2 } from "@utils/mediaUpload";
 
-const PRI = "#55DEE8";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
 
 const Community = () => {
   // @ts-ignore
-  const { user, role, isLoggedIn, followingIds } = useSelector((state) => state.auth);
+  const { user, role, followingIds } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const { gateInteraction } = useLoginOnDemand();
   const navigate = useNavigate();
@@ -60,12 +54,8 @@ const Community = () => {
   const [deletePost] = useDeletePostMutation();
   const [likePost] = useLikePostMutation();
   const [addComment] = useAddCommentMutation();
-  const [deleteComment] = useDeleteCommentMutation();
-  const [uploadStory] = useUploadStoryMutation();
   const [deleteStory] = useDeleteStoryMutation();
 
-  const [getCommunityUploadUrl] = useLazyGetCommunityUploadUrlQuery();
-  const [confirmCommunityPost] = useConfirmCommunityPostMutation();
   const [getStoryUploadUrl] = useLazyGetStoryUploadUrlQuery();
   const [confirmStoryUpload] = useConfirmStoryUploadMutation();
 
@@ -78,7 +68,7 @@ const Community = () => {
   // Reels feed data
   const [reelCursor, setReelCursor] = useState(null);
   const [activeReelIndex, setActiveReelIndex] = useState(0);
-  const reelFeedRef = useState(null);
+
   const { data: reelsData, isLoading: reelsLoading, isFetching: reelsFetching } = useGetReelsFeedQuery(
     { cursor: reelCursor },
     { skip: activeFilter !== "Reels" }
@@ -120,7 +110,7 @@ const Community = () => {
       );
     };
 
-    const handlePostLiked = ({ postId, likes, likesCount }) => {
+    const handlePostLiked = ({ postId, likes }) => {
       // @ts-ignore
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
@@ -165,7 +155,7 @@ const Community = () => {
       );
     };
 
-    const handleMediaProgress = ({ mediaId, progress, status }) => {
+    const handleMediaProgress = ({ mediaId, progress }) => {
       // @ts-ignore
       dispatch(
         communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
@@ -223,7 +213,7 @@ const Community = () => {
   const [storyMediaPreviews, setStoryMediaPreviews] = useState([]);
   
   const [selectedStoryGroup, setSelectedStoryGroup] = useState(null);
-  const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
+
 
   const [commentInputs, setCommentInputs] = useState({});
 
@@ -430,29 +420,7 @@ const Community = () => {
     });
   };
 
-  const handleFollowToggle = async (targetUserId) => {
-    gateInteraction(async () => {
-      const isFollowing = followingIds.includes(targetUserId);
-      try {
-        const endpoint = isFollowing 
-          ? `/api/user/players/${targetUserId}/unfollow` 
-          : `/api/user/players/${targetUserId}/follow`;
-          
-        const response = await axiosInstance.post(endpoint);
-        if (response.data.success) {
-          if (isFollowing) {
-            dispatch(unfollowUser(targetUserId));
-            toast.success("Unfollowed player");
-          } else {
-            dispatch(followUser(targetUserId));
-            toast.success("Following player");
-          }
-        }
-      } catch (error) {
-        toast.error("Failed to update follow status");
-      }
-    });
-  };
+
 
   const handleShareToPlatform = (platform, postId) => {
     const url = `${window.location.origin}${window.location.pathname}?post=${postId}`;
@@ -757,7 +725,7 @@ const Community = () => {
                 {stories.map((group, idx) => (
                   <div 
                     key={group._id} 
-                    onClick={() => { setSelectedStoryGroup(group); setCurrentStoryIndex(0); }}
+                    onClick={() => { setSelectedStoryGroup(group); }}
                     className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
                   >
                     <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${idx === 0 ? 'bg-[#55DEE8]' : 'bg-white/20'}`}>
@@ -903,6 +871,15 @@ const Community = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
+                         {(isAdmin || (user?._id && (post.adminId?._id === user._id || post.user?._id === user._id || post.userId?._id === user._id || post.adminId === user._id || post.user === user._id || post.userId === user._id))) && (
+                           <button 
+                             onClick={() => handleDeletePost(post._id)}
+                             className="text-white/40 hover:text-red-500 transition-colors"
+                             title="Delete Post"
+                           >
+                             <Trash2 size={18} />
+                           </button>
+                         )}
                          <button className="text-white/40 hover:text-white transition-colors">
                            <MoreVertical size={18} />
                          </button>

@@ -23,7 +23,7 @@ import toast from "react-hot-toast";
 import StoryViewer from "@features/networking/components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif", fontSize: "20px" };
 
@@ -41,33 +41,33 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-black rounded-[16px] border border-[#84CC16]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-[#84CC16]/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+      className="relative bg-black rounded-[16px] border border-[#55DEE8]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-[#55DEE8]/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
     >
       <div className="flex justify-end items-start p-4 absolute top-0 left-0 right-0 z-20">
-        <div className="p-1.5 bg-[#84CC16]/10 rounded-lg border border-[#84CC16]/20">
-          <ShieldCheck size={14} className="text-[#84CC16]" />
+        <div className="p-1.5 bg-[#55DEE8]/10 rounded-lg border border-[#55DEE8]/20">
+          <ShieldCheck size={14} className="text-[#55DEE8]" />
         </div>
       </div>
 
       <div className="h-40 relative mt-2 flex items-center justify-center overflow-hidden">
         <div 
-          className="absolute w-52 h-52 bg-[#84CC16]/10 border border-[#84CC16]/30 blur-sm opacity-50 group-hover:opacity-80 transition-opacity duration-700"
+          className="absolute w-52 h-52 bg-[#55DEE8]/10 border border-[#55DEE8]/30 blur-sm opacity-50 group-hover:opacity-80 transition-opacity duration-700"
           style={{ clipPath: shape }}
         />
         <div 
-          className="absolute w-48 h-48 border-2 border-[#84CC16]/40"
+          className="absolute w-48 h-48 border-2 border-[#55DEE8]/40"
           style={{ clipPath: shape }}
         />
         <div className="relative w-full h-full flex items-center justify-center z-10 pointer-events-none">
           <img 
             src={player.profilePicture || "https://pngimg.com/d/cricket_PNG102.png"} 
             alt="" 
-            className="h-[95%] w-[90%] object-contain filter drop-shadow-[0_10px_30px_rgba(132,204,22,0.4)] group-hover:scale-110 transition-transform duration-700 select-none"
+            className="h-[95%] w-[90%] object-contain filter drop-shadow-[0_10px_30px_rgba(85, 222, 232,0.4)] group-hover:scale-110 transition-transform duration-700 select-none"
           />
         </div>
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-          <div className="bg-black border-2 border-[#84CC16] w-12 h-14 flex items-center justify-center" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
-            <span className="text-[#84CC16] font-black text-sm uppercase">
+          <div className="bg-black border-2 border-[#55DEE8] w-12 h-14 flex items-center justify-center" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
+            <span className="text-[#55DEE8] font-black text-sm uppercase">
               {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
             </span>
           </div>
@@ -79,28 +79,28 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
           {player.name}
         </h3>
         <div className="flex items-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-4">
-          <MapPin size={10} className="text-[#84CC16]" />
+          <MapPin size={10} className="text-[#55DEE8]" />
           {player.city || 'Athletic'}
         </div>
         <div className="grid grid-cols-3 w-full border-t border-white/5 pt-2 mb-2">
           <div className="flex flex-col items-center">
-            <span className="text-[#84CC16] text-[6px] font-black uppercase tracking-widest mb-1">Matches</span>
+            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Matches</span>
             <span className="text-white font-black text-[10px]">—</span>
           </div>
           <div className="flex flex-col items-center border-x border-white/5">
-            <span className="text-[#84CC16] text-[6px] font-black uppercase tracking-widest mb-1">Runs</span>
+            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Runs</span>
             <span className="text-white font-black text-[10px]">—</span>
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-[#84CC16] text-[6px] font-black uppercase tracking-widest mb-1">Strike Rate</span>
+            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Strike Rate</span>
             <span className="text-white font-black text-[10px]">—</span>
           </div>
         </div>
         <div className="flex items-center gap-2 w-full mt-auto">
-          <button onClick={() => handleFollowToggle(player._id)} className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player._id) ? "bg-white/5 text-white/20 border border-white/10" : "bg-[#84CC16] text-black hover:bg-[#a3e635]"}`}>
+          <button onClick={() => handleFollowToggle(player._id)} className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player._id) ? "bg-white/5 text-white/20 border border-white/10" : "bg-[#55DEE8] text-black hover:bg-[#88EEF6]"}`}>
             {followingIds.includes(player._id) ? "Following" : "Follow"}
           </button>
-          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#84CC16] transition-all">
+          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8] transition-all">
             <MessageCircle size={18} />
           </button>
         </div>
@@ -115,7 +115,7 @@ const TeamCard = ({ team, navigate }) => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-[#0A0A0A] rounded-[20px] border border-white/5 overflow-hidden flex flex-col h-[380px] group hover:border-[#84CC16]/30 transition-all duration-500 shadow-2xl"
+      className="relative bg-[#0A0A0A] rounded-[20px] border border-white/5 overflow-hidden flex flex-col h-[380px] group hover:border-[#55DEE8]/30 transition-all duration-500 shadow-2xl"
     >
       {/* Top Section: Banner */}
       <div className="h-32 relative">
@@ -128,7 +128,7 @@ const TeamCard = ({ team, navigate }) => {
         
         {/* Verified Badge */}
         <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10">
-          <div className="w-3.5 h-3.5 bg-[#84CC16] rounded-full flex items-center justify-center">
+          <div className="w-3.5 h-3.5 bg-[#55DEE8] rounded-full flex items-center justify-center">
             <ShieldCheck size={10} className="text-black" />
           </div>
           <span className="text-[8px] font-black text-white uppercase tracking-widest">Verified</span>
@@ -137,21 +137,21 @@ const TeamCard = ({ team, navigate }) => {
         {/* Team Avatar Overlay */}
         <div className="absolute bottom-[-16px] left-4 z-10">
           <div className="w-14 h-14 rounded-full border-[2px] border-[#0A0A0A] bg-[#0A0A0A] relative overflow-hidden group/avatar">
-            <div className="absolute inset-0 border-2 border-[#84CC16] rounded-full z-20" />
+            <div className="absolute inset-0 border-2 border-[#55DEE8] rounded-full z-20" />
             <div className="w-full h-full flex items-center justify-center bg-[#111] relative z-10">
               {team.logo ? (
                 <img src={team.logo} alt="" className="w-full h-full object-cover" />
               ) : (
-                <div className="flex flex-col items-center text-[#84CC16]">
+                <div className="flex flex-col items-center text-[#55DEE8]">
                   <Crown size={24} className="mb-1" />
-                  <div className="w-10 h-10 border-2 border-[#84CC16] rounded-full flex items-center justify-center p-1">
+                  <div className="w-10 h-10 border-2 border-[#55DEE8] rounded-full flex items-center justify-center p-1">
                      {team.sportType === 'Cricket' ? <Trophy size={16} /> : <Activity size={16} />}
                   </div>
                 </div>
               )}
             </div>
             {/* Status Indicator */}
-            <div className="absolute bottom-2 right-2 w-4 h-4 bg-[#84CC16] rounded-full border-[3px] border-[#0A0A0A] z-30" />
+            <div className="absolute bottom-2 right-2 w-4 h-4 bg-[#55DEE8] rounded-full border-[3px] border-[#0A0A0A] z-30" />
           </div>
         </div>
       </div>
@@ -162,14 +162,14 @@ const TeamCard = ({ team, navigate }) => {
           <div>
             <h3 className="text-base font-black text-white uppercase tracking-tighter mb-0.5" style={HEADING_STYLE}>{team.name}</h3>
             <div className="flex items-center gap-2">
-              <span className="text-[#84CC16] font-black text-[8px] uppercase tracking-widest flex items-center gap-1.5">
+              <span className="text-[#55DEE8] font-black text-[8px] uppercase tracking-widest flex items-center gap-1.5">
                 {team.sportType === 'Cricket' ? <Trophy size={10} /> : <Activity size={10} />}
                 {team.sportType}
               </span>
             </div>
             <p className="text-gray-600 text-[8px] font-bold uppercase tracking-widest mt-0.5">@ {team.city || 'Global'}</p>
           </div>
-          <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-white/40 hover:text-[#84CC16] transition-colors">
+          <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-white/40 hover:text-[#55DEE8] transition-colors">
             <Star size={16} />
           </div>
         </div>
@@ -178,7 +178,7 @@ const TeamCard = ({ team, navigate }) => {
         <div className="grid grid-cols-2 gap-2 py-3 border-y border-white/5 mb-3">
           <div className="flex items-center gap-2">
              <div className="p-2 bg-white/5 rounded-lg border border-white/10">
-                <Users size={14} className="text-[#84CC16]" />
+                <Users size={14} className="text-[#55DEE8]" />
              </div>
              <div>
                 <p className="text-sm font-black text-white leading-none mb-0.5">{team.memberCount || 1}</p>
@@ -187,7 +187,7 @@ const TeamCard = ({ team, navigate }) => {
           </div>
           <div className="flex items-center gap-2">
              <div className="p-2 bg-white/5 rounded-lg border border-white/10">
-                <Target size={14} className="text-[#84CC16]" />
+                <Target size={14} className="text-[#55DEE8]" />
              </div>
              <div>
                 <p className="text-sm font-black text-white leading-none mb-0.5">{team.matchesPlayed || 0}</p>
@@ -200,7 +200,7 @@ const TeamCard = ({ team, navigate }) => {
         <div className="grid grid-cols-2 gap-3 mb-4">
            <Link 
               to={`/team/${team._id}`}
-              className="h-12 bg-[#84CC16] text-black rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_15px_rgba(132,204,22,0.2)]"
+              className="h-12 bg-[#55DEE8] text-black rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_15px_rgba(85, 222, 232,0.2)]"
            >
               <UserPlus size={14} strokeWidth={3} />
               Join Team
@@ -216,7 +216,7 @@ const TeamCard = ({ team, navigate }) => {
 
         <Link 
           to={`/team-pass/${team._id}`}
-          className="mt-3 flex items-center justify-center gap-2 text-gray-600 hover:text-[#84CC16] text-[9px] font-black uppercase tracking-[0.2em] transition-all"
+          className="mt-3 flex items-center justify-center gap-2 text-gray-600 hover:text-[#55DEE8] text-[9px] font-black uppercase tracking-[0.2em] transition-all"
         >
           View Team Pass <ChevronRight size={12} />
         </Link>
@@ -348,17 +348,17 @@ const FindPlayers = () => {
         <div className="flex items-center gap-4 border-b border-white/5 pb-1">
           <button 
             onClick={() => setActiveTab("players")}
-            className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "players" ? "text-[#84CC16]" : "text-white/20 hover:text-white/40"}`}
+            className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "players" ? "text-[#55DEE8]" : "text-white/20 hover:text-white/40"}`}
           >
             Players
-            {activeTab === "players" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#84CC16]" />}
+            {activeTab === "players" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#55DEE8]" />}
           </button>
           <button 
             onClick={() => setActiveTab("teams")}
-            className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "teams" ? "text-[#84CC16]" : "text-white/20 hover:text-white/40"}`}
+            className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "teams" ? "text-[#55DEE8]" : "text-white/20 hover:text-white/40"}`}
           >
             Teams
-            {activeTab === "teams" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#84CC16]" />}
+            {activeTab === "teams" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#55DEE8]" />}
           </button>
         </div>
 
@@ -367,13 +367,13 @@ const FindPlayers = () => {
           <div className="flex items-center gap-4 flex-1">
             <h2 className="text-[10px] md:text-xs font-bold text-white/20 uppercase tracking-[0.2em] whitespace-nowrap hidden sm:block" style={SUBHEADING_STYLE}>{activeTab === "players" ? "Active Players" : "Verified Teams"}</h2>
             <div className="relative flex-1 max-w-md group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#84CC16] transition-colors" size={16} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors" size={16} />
               <input 
                 type="text" 
                 value={searchQuery}
                 onChange={handleSearch}
                 placeholder="SEARCH..."
-                className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#84CC16]/50 rounded-xl h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
+                className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#55DEE8]/50 rounded-xl h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
               />
             </div>
           </div>
@@ -382,19 +382,19 @@ const FindPlayers = () => {
             <select 
               value={filters.sport}
               onChange={(e) => handleFilterChange("sport", e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#84CC16] focus:border-[#84CC16]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
+              className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
             >
               <option value="">All Sports</option>
               {sports.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
             <div className="relative group">
-              <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#84CC16]" size={10} />
+              <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
               <input 
                 type="text"
                 placeholder="LOCATION..."
                 value={filters.city}
                 onChange={(e) => handleFilterChange("city", e.target.value)}
-                className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#84CC16] focus:border-[#84CC16]/50 outline-none w-28 md:w-32 placeholder:text-white/20"
+                className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-28 md:w-32 placeholder:text-white/20"
               />
             </div>
           </div>

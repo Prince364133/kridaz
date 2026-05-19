@@ -10,7 +10,7 @@ import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
 import useAxiosInstance from '@hooks/useAxiosInstance';
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
 
@@ -75,7 +75,7 @@ const TeamPass = () => {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 text-[#84CC16] animate-spin" />
+          <Loader2 className="w-10 h-10 text-[#55DEE8] animate-spin" />
           <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">Generating Ticket...</p>
         </div>
       </div>
@@ -87,7 +87,7 @@ const TeamPass = () => {
       
       {/* Background Ambience */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#84CC16]/5 blur-[120px] rounded-full" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#55DEE8]/5 blur-[120px] rounded-full" />
       </div>
 
       {/* Floating Action Header */}
@@ -110,7 +110,7 @@ const TeamPass = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-black border border-white/10 p-1 flex items-center justify-center">
-                <Trophy size={14} className="text-[#84CC16]" />
+                <Trophy size={14} className="text-[#55DEE8]" />
               </div>
               <div>
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-white leading-none">Kridaz</h4>
@@ -118,8 +118,8 @@ const TeamPass = () => {
               </div>
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
-              <span className="w-1.5 h-1.5 bg-[#84CC16] rounded-full animate-pulse" />
-              <span className="text-[7px] font-black text-[#84CC16] uppercase tracking-wider">Active</span>
+              <span className="w-1.5 h-1.5 bg-[#55DEE8] rounded-full animate-pulse" />
+              <span className="text-[7px] font-black text-[#55DEE8] uppercase tracking-wider">Active</span>
             </div>
           </div>
 
@@ -134,11 +134,11 @@ const TeamPass = () => {
             
             {/* Logo Centerpiece */}
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-              <div className="w-18 h-18 rounded-[20px] bg-black border-2 border-[#84CC16] p-1 flex items-center justify-center shadow-[0_0_20px_rgba(132,204,22,0.15)]">
+              <div className="w-18 h-18 rounded-[20px] bg-black border-2 border-[#55DEE8] p-1 flex items-center justify-center shadow-[0_0_20px_rgba(85, 222, 232,0.15)]">
                 {team?.logo ? (
                   <img src={team.logo} className="w-full h-full object-cover rounded-[14px]" alt="Logo" />
                 ) : (
-                  <Trophy size={28} className="text-[#84CC16]/20" />
+                  <Trophy size={28} className="text-[#55DEE8]/20" />
                 )}
               </div>
               <div className="text-center">
@@ -181,10 +181,10 @@ const TeamPass = () => {
             <div className="flex-1 space-y-2">
               <div>
                 <p className="text-[6px] font-black text-gray-500 uppercase tracking-widest">Entry ID</p>
-                <p className="text-[10px] font-black text-[#84CC16] uppercase mt-0.5">{team?.teamCode || 'KR-0000'}</p>
+                <p className="text-[10px] font-black text-[#55DEE8] uppercase mt-0.5">{team?.teamCode || 'KR-0000'}</p>
               </div>
-              <div className="bg-[#84CC16]/10 px-3 py-1.5 rounded-lg border border-[#84CC16]/20 inline-flex items-center gap-1.5">
-                <Sparkles size={8} className="text-[#84CC16]" />
+              <div className="bg-[#55DEE8]/10 px-3 py-1.5 rounded-lg border border-[#55DEE8]/20 inline-flex items-center gap-1.5">
+                <Sparkles size={8} className="text-[#55DEE8]" />
                 <span className="text-[7px] font-black text-white uppercase tracking-wider">Digital Verification</span>
               </div>
             </div>
@@ -205,7 +205,7 @@ const TeamPass = () => {
         <button 
           onClick={handleDownload}
           disabled={isDownloading}
-          className="py-3.5 bg-[#84CC16] text-black rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:brightness-110 shadow-[0_5px_20px_rgba(132,204,22,0.25)] transition-all"
+          className="py-3.5 bg-[#55DEE8] text-black rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:brightness-110 shadow-[0_5px_20px_rgba(85, 222, 232,0.25)] transition-all"
         >
           {isDownloading ? <Loader2 className="animate-spin w-4 h-4" /> : <Download size={14} />}
           Save Pass

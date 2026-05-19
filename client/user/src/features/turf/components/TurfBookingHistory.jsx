@@ -4,21 +4,21 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import useBookingHistory from "@hooks/useBookingHistory";
-import useWriteReview from "@hooks/useWriteReview";
-import TurfBookingHistorySkeleton from "@components/ui/TurfBookingHistorySkeleton";
-import WriteReview from "@components/reviews/WriteReview";
-import RaiseDisputeModal from "@components/dispute/RaiseDisputeModal";
+import useBookingHistory from "../../hooks/useBookingHistory";
+import useWriteReview from "../../hooks/useWriteReview";
+import TurfBookingHistorySkeleton from "../../components/ui/TurfBookingHistorySkeleton";
+import WriteReview from "../../components/reviews/WriteReview";
+import RaiseDisputeModal from "../../components/dispute/RaiseDisputeModal";
 
-// GöÇGöÇ Design tokens (exact match to OwnerDashboard) GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€ Design tokens (exact match to OwnerDashboard) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const BG = "#000000";
 const CARD = "#000000";
 const BORDER = "#2D2D2D";
-const ACCENT = "#55DEE8";
+const ACCENT = "#CCFF00";
 const MUTED = "#878C9F";
 const MUTED2 = "#999999";
 
-// GöÇGöÇ Status badge config GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€ Status badge config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const STATUS_META = {
  CONFIRMED: { label: "Confirmed", color: ACCENT, bg: `${ACCENT}15`, border: `${ACCENT}30` },
  CANCELLED: { label: "Cancelled", color: "#EF4444", bg: "#EF444415", border: "#EF444430" },
@@ -27,7 +27,7 @@ const STATUS_META = {
  PLAYING: { label: "In Progress", color: "#3B82F6", bg: "#3B82F615", border: "#3B82F630" },
 };
 
-// GöÇGöÇ Helper: hours until slot GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€ Helper: hours until slot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const hoursUntil = (dateStr) =>
  (new Date(dateStr) - new Date()) / (1000 * 60 * 60);
 
@@ -54,7 +54,7 @@ const TurfBookingHistory = () => {
 
  <div>
  
- {/* GöÇGöÇ Bookings Feed GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ */}
+ {/* â”€â”€ Bookings Feed â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
   <div className="space-y-4">
     {bookings.length === 0 ? (
       <div className="bg-[#111111] p-20 rounded-[24px] border border-white/5 text-center flex flex-col items-center justify-center">
@@ -63,7 +63,7 @@ const TurfBookingHistory = () => {
         </div>
         <h2 className="text-xl font-black text-white uppercase tracking-tight">No Bookings Yet</h2>
         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-2">Explore local arenas and book your first game!</p>
-        <Link to="/" className="mt-6 px-6 py-3 rounded-full bg-[#55DEE8] text-black text-[10px] font-black uppercase tracking-widest hover:bg-[#b3ff00] transition-colors">
+        <Link to="/" className="mt-6 px-6 py-3 rounded-full bg-[#CCFF00] text-black text-[10px] font-black uppercase tracking-widest hover:bg-[#b3ff00] transition-colors">
           Explore Venues
         </Link>
       </div>
@@ -74,7 +74,7 @@ const TurfBookingHistory = () => {
         const slotOver = new Date() > new Date(booking.playEndTime);
 
         return (
-          <div key={booking._id} className="bg-[#111111] border border-white/5 rounded-[24px] p-4 flex flex-col md:flex-row gap-6 hover:border-[#55DEE8]/30 transition-colors group relative overflow-hidden">
+          <div key={booking._id} className="bg-[#111111] border border-white/5 rounded-[24px] p-4 flex flex-col md:flex-row gap-6 hover:border-[#CCFF00]/30 transition-colors group relative overflow-hidden">
             
             {/* Left Image */}
             <div className="w-full md:w-64 h-40 shrink-0 rounded-2xl overflow-hidden bg-[#222]">
@@ -85,7 +85,7 @@ const TurfBookingHistory = () => {
             <div className="flex-1 flex flex-col justify-between py-2">
               <div>
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="px-2 py-1 bg-[#55DEE8]/10 text-[#55DEE8] rounded text-[9px] font-black uppercase tracking-widest">{booking.turf?.sportType || 'FOOTBALL'}</span>
+                  <span className="px-2 py-1 bg-[#CCFF00]/10 text-[#CCFF00] rounded text-[9px] font-black uppercase tracking-widest">{booking.turf?.sportType || 'FOOTBALL'}</span>
                   <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">BOOKING ID: #{booking._id?.slice(-5).toUpperCase() || 'B7402'}</span>
                 </div>
                 <h2 className="text-xl font-black text-white uppercase tracking-tight mb-4">{booking.turf?.name || 'Decathlon Sports Arena'}</h2>
@@ -101,7 +101,7 @@ const TurfBookingHistory = () => {
 
               {/* Actions Row */}
               <div className="flex flex-wrap items-center gap-2 mt-4 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <Link to={`/booking-pass/${booking._id}`} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-[#55DEE8] hover:text-black hover:border-[#55DEE8] text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                <Link to={`/booking-pass/${booking._id}`} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-[#CCFF00] hover:text-black hover:border-[#CCFF00] text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                   <Ticket size={12} /> Pass
                 </Link>
                 <Link to={`/booking-invoice/${booking._id}`} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
@@ -118,7 +118,7 @@ const TurfBookingHistory = () => {
                   </button>
                 )}
                 {booking.status === "COMPLETED" && (
-                  <button onClick={() => openReviewModal(booking.turf._id)} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-[#55DEE8]/50 hover:text-[#55DEE8] text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                  <button onClick={() => openReviewModal(booking.turf._id)} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:text-[#CCFF00] text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                     Review
                   </button>
                 )}
@@ -129,9 +129,9 @@ const TurfBookingHistory = () => {
             <div className="flex flex-col justify-between items-end py-2 shrink-0 mt-4 md:mt-0 border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6">
               <div className="flex flex-col items-end">
                 <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Paid</span>
-                <div className="text-2xl font-black text-white">Gé¦{booking.advanceAmount || booking.totalPrice || '1,500'}</div>
+                <div className="text-2xl font-black text-white">â‚¹{booking.advanceAmount || booking.totalPrice || '1,500'}</div>
                 {booking.paymentType === "PARTIAL" && (
-                  <div className="text-[9px] font-bold text-yellow-500 uppercase tracking-widest mt-1">Bal: Gé¦{booking.balanceAmount}</div>
+                  <div className="text-[9px] font-bold text-yellow-500 uppercase tracking-widest mt-1">Bal: â‚¹{booking.balanceAmount}</div>
                 )}
               </div>
               
@@ -147,7 +147,7 @@ const TurfBookingHistory = () => {
     )}
   </div>
 
-  {/* GöÇGöÇ Modals GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ */}
+  {/* â”€â”€ Modals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
   {isReviewModalOpen && (
     <WriteReview
       rating={rating}

@@ -2,7 +2,7 @@ import React from "react";
 import { ArrowRight, Store, Award, Shield, Globe, Building2, Layout, BarChart3, Users, Tv } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
 
 const partners = [
   {
@@ -13,7 +13,7 @@ const partners = [
     icon: Store,
     stat: "Business Growth",
     id: "PARTNER-01",
-    accent: "#84CC16",
+    accent: "#55DEE8",
     status: "Live",
   },
   {
@@ -64,7 +64,7 @@ const partners = [
 
 export default function PartnersGateway() {
   return (
-    <div className="min-h-screen bg-[#000] text-white selection:bg-[#84CC16] selection:text-black font-sans pt-16 lg:pt-20">
+    <div className="min-h-screen bg-[#000] text-white selection:bg-[#55DEE8] selection:text-black font-sans pt-16 lg:pt-20">
 
       {/* ── HERO SECTION ── */}
       <section className="relative flex items-center py-4 overflow-hidden border-b border-white/5">
@@ -83,22 +83,22 @@ export default function PartnersGateway() {
           <div className="max-w-4xl space-y-10">
             {/* Status Tag */}
             <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-white/10 bg-white/5">
-              <Globe className="w-4 h-4 text-[#84CC16]" />
+              <Globe className="w-4 h-4 text-[#55DEE8]" />
               <span className="text-[10px] font-bold tracking-[0.2em] text-white/60 uppercase">Join Our Global Network</span>
             </div>
 
             <div className="space-y-6">
               <h1 className="text-6xl lg:text-[7rem] font-bold leading-[0.9] tracking-tight uppercase">
                 JOIN US AS A <br />
-                <span className="text-[#84CC16]">PARTNER.</span>
+                <span className="text-[#55DEE8]">PARTNER.</span>
               </h1>
-              <p className="text-lg text-white/40 max-w-2xl border-l-2 border-[#84CC16] pl-8 leading-relaxed">
+              <p className="text-lg text-white/40 max-w-2xl border-l-2 border-[#55DEE8] pl-8 leading-relaxed">
                 Connect with Kridaz to access a unified sports ecosystem. Whether you are a Venue Owner, Professional Coach, or Certified Official, we provide the ultimate platform to scale your impact.
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-4 pt-4">
-              <Link to="/signup/venue" className="bg-[#84CC16] hover:bg-[#a3e635] text-black h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all shadow-[0_10px_30px_rgba(132,204,22,0.2)] active:scale-[0.98]">
+              <Link to="/signup/venue" className="bg-[#55DEE8] hover:bg-[#88EEF6] text-black h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all shadow-[0_10px_30px_rgba(85, 222, 232,0.2)] active:scale-[0.98]">
                 <Store className="w-4 h-4" /> Venue Owner
               </Link>
               <Link to="/signup/coach" className="bg-blue-500 hover:bg-blue-400 text-white h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
@@ -116,11 +116,11 @@ export default function PartnersGateway() {
               <div className="hidden sm:flex items-center gap-10 border-l border-white/10 pl-10">
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Active Partners</p>
-                  <p className="text-2xl font-bold text-[#84CC16]">1,200+</p>
+                  <p className="text-2xl font-bold text-[#55DEE8]">1,200+</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Growth Rate</p>
-                  <p className="text-2xl font-bold text-[#84CC16]">85% YoY</p>
+                  <p className="text-2xl font-bold text-[#55DEE8]">85% YoY</p>
                 </div>
               </div>
             </div>
@@ -188,7 +188,7 @@ export default function PartnersGateway() {
 
         {/* Call to Action */}
         <div className="mt-40 p-20 bg-gradient-to-b from-[#0A0A0A] to-black border border-white/5 rounded-[64px] text-center relative overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-[#84CC16]/20 to-transparent" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-[#55DEE8]/20 to-transparent" />
 
           <div className="relative z-10 space-y-10">
             <div className="space-y-4">

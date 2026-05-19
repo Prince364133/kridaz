@@ -56,7 +56,7 @@ export const handlePayment = async (order, user) => {
         contact: user?.phone || "",
       },
       theme: {
-        color: "#84CC16",
+        color: "#55DEE8",
       },
     };
     const rzp1 = new window.Razorpay(options);

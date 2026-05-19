@@ -1,4 +1,4 @@
-﻿// Business Registration Page for Professional Upgrades
+// Business Registration Page for Professional Upgrades
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -21,7 +21,7 @@ import {
 import toast from "react-hot-toast";
 import { searchLocations } from "@user/utils/locationService";
 
-const PRI = "#55DEE8";
+const PRI = "#CCFF00";
 
 export default function BusinessRegistration() {
   const navigate = useNavigate();
@@ -272,7 +272,7 @@ export default function BusinessRegistration() {
     }
   };
 
-  // ΓöÇΓöÇΓöÇ Role Conflict ΓöÇΓöÇΓöÇ
+  // ─── Role Conflict ───
   if (hasRoleConflict && existingRole) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
@@ -307,18 +307,18 @@ export default function BusinessRegistration() {
     );
   }
 
-  // ΓöÇΓöÇΓöÇ Application pending review ΓöÇΓöÇΓöÇ
+  // ─── Application pending review ───
   if (isPending || submitted) {
     const displayRole = submitted ? formData.role : pendingRole;
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center space-y-8 p-12 rounded-[8px] border border-[#2D2D2D] bg-[#000000] relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-[#55DEE8]" />
-          <div className="w-16 h-16 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center mx-auto mb-6">
-            <Clock size={40} className="text-[#55DEE8] animate-pulse" />
+          <div className="absolute top-0 left-0 w-full h-1 bg-[#CCFF00]" />
+          <div className="w-16 h-16 bg-[#CCFF00]/10 rounded-[8px] flex items-center justify-center mx-auto mb-6">
+            <Clock size={40} className="text-[#CCFF00] animate-pulse" />
           </div>
           <h2 className="text-4xl font-black uppercase tracking-tight">
-            Application <span className="text-[#55DEE8]">Pending</span>
+            Application <span className="text-[#CCFF00]">Pending</span>
           </h2>
           <p className="text-gray-400 leading-relaxed">
             Thank you for applying to be a{" "}
@@ -327,11 +327,11 @@ export default function BusinessRegistration() {
           </p>
           <div className="bg-[#000000] rounded-[8px] p-5 text-[12px] text-left space-y-4 border border-[#2D2D2D]">
             <div className="flex items-center gap-3 text-gray-300">
-              <CheckCircle2 size={18} className="text-[#55DEE8]" />
+              <CheckCircle2 size={18} className="text-[#CCFF00]" />
               <span>Application Received</span>
             </div>
             <div className="flex items-center gap-3 text-gray-300">
-              <div className="w-[18px] h-[18px] border-2 border-[#55DEE8]/30 border-t-[#55DEE8] rounded-full animate-spin" />
+              <div className="w-[18px] h-[18px] border-2 border-[#CCFF00]/30 border-t-[#CCFF00] rounded-full animate-spin" />
               <span>Document Verification In-Progress</span>
             </div>
             <div className="flex items-center gap-3 text-white/20">
@@ -341,7 +341,7 @@ export default function BusinessRegistration() {
           </div>
           <button
             onClick={() => navigate("/")}
-            className="w-full py-4 rounded-[8px] border border-[#2D2D2D] hover:border-[#55DEE8]/30 hover:text-[#55DEE8] transition-all font-normal uppercase tracking-widest text-[12px]"
+            className="w-full py-4 rounded-[8px] border border-[#2D2D2D] hover:border-[#CCFF00]/30 hover:text-[#CCFF00] transition-all font-normal uppercase tracking-widest text-[12px]"
           >
             Back to Home
           </button>
@@ -351,7 +351,7 @@ export default function BusinessRegistration() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-4 pb-20 font-sans selection:bg-[#55DEE8] selection:text-black">
+    <div className="min-h-screen bg-black text-white pt-4 pb-20 font-sans selection:bg-[#CCFF00] selection:text-black">
       <div className="w-full px-6">
         
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-8 group">
@@ -375,14 +375,14 @@ export default function BusinessRegistration() {
               
               <div className="grid grid-cols-2 gap-6">
                  <div className="space-y-2 group">
-                   <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#55DEE8] transition-colors">Full Name</label>
+                   <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">Full Name</label>
                    <input 
                      type="text" value={formData.name} disabled
                      className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] h-14 px-5 text-[#878C9F] outline-none cursor-not-allowed"
                    />
                  </div>
                  <div className="space-y-2 group">
-                   <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#55DEE8] transition-colors">Email Address</label>
+                   <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">Email Address</label>
                    <input 
                      type="email" value={formData.email} disabled
                      className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] h-14 px-5 text-[#878C9F] outline-none cursor-not-allowed"
@@ -391,10 +391,10 @@ export default function BusinessRegistration() {
               </div>
 
               <div className="p-8 rounded-[8px] border border-[#2D2D2D] bg-[#000000] space-y-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/5 blur-[60px] pointer-events-none" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px] pointer-events-none" />
                 
                 <h3 className="text-lg font-semibold uppercase tracking-tight flex items-center gap-3">
-                  {formData.role === 'venu_owners' ? <Building2 className="text-[#55DEE8]" /> : <Award className="text-[#55DEE8]" />}
+                  {formData.role === 'venu_owners' ? <Building2 className="text-[#CCFF00]" /> : <Award className="text-[#CCFF00]" />}
                   {formData.role === 'venu_owners' ? 'Business Details' : 'Professional Profile'}
                 </h3>
 
@@ -402,7 +402,7 @@ export default function BusinessRegistration() {
                   {formData.role === 'venu_owners' || formData.role === 'venue' ? (
                     <>
                       <div className="space-y-2 group col-span-2">
-                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#55DEE8] transition-colors">
+                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                           Business Name <span className="text-red-500">*</span>
                         </label>
                         <input 
@@ -410,11 +410,11 @@ export default function BusinessRegistration() {
                           value={formData.businessDetails.businessName}
                           onChange={handleChange}
                           placeholder="e.g. Dream Sports Arena"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                       <div className="space-y-2 group">
-                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#55DEE8] transition-colors">
+                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                           Registration Number <span className="text-red-500">*</span>
                         </label>
                         <input 
@@ -422,11 +422,11 @@ export default function BusinessRegistration() {
                           value={formData.businessDetails.registrationNumber}
                           onChange={handleChange}
                           placeholder="GSTIN or License No."
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                       <div className="space-y-2 group">
-                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#55DEE8] transition-colors">
+                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                           Business Phone <span className="text-red-500">*</span>
                         </label>
                         <input 
@@ -434,14 +434,14 @@ export default function BusinessRegistration() {
                           value={formData.phone}
                           onChange={handleChange}
                           placeholder="+91 00000 00000"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                     </>
                   ) : (
                     <>
                       <div className="space-y-2 group col-span-2">
-                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#55DEE8] transition-colors">
+                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                           Specialization <span className="text-red-500">*</span>
                         </label>
                         <input 
@@ -449,11 +449,11 @@ export default function BusinessRegistration() {
                           value={formData.businessDetails.specialization}
                           onChange={handleChange}
                           placeholder="e.g. Advanced Cricket Coaching"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                       <div className="space-y-2 group">
-                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#55DEE8] transition-colors">
+                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                           Years of Experience <span className="text-red-500">*</span>
                         </label>
                         <input 
@@ -461,11 +461,11 @@ export default function BusinessRegistration() {
                           value={formData.businessDetails.experience}
                           onChange={handleChange}
                           placeholder="e.g. 5+ Years"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                       <div className="space-y-2 group">
-                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#55DEE8] transition-colors">
+                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                           Contact Phone <span className="text-red-500">*</span>
                         </label>
                         <input 
@@ -473,7 +473,7 @@ export default function BusinessRegistration() {
                           value={formData.phone}
                           onChange={handleChange}
                           placeholder="+91 00000 00000"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                         />
                       </div>
                     </>
@@ -481,23 +481,23 @@ export default function BusinessRegistration() {
                 </div>
 
                 <div className="space-y-2 group">
-                  <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#55DEE8] transition-colors">
+                  <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
                     Full Address <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <MapPin size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" />
+                    <MapPin size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00]" />
                     <input 
                       type="text" name="businessDetails.address"
                       value={formData.businessDetails.address}
                       onChange={handleChange}
                       autoComplete="off"
                       placeholder="Street name, Landmark"
-                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-12 text-white outline-none transition-all"
+                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 pl-12 pr-12 text-white outline-none transition-all"
                     />
                     
                     {isSearching && (
                       <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                        <Loader2 className="w-4 h-4 text-[#55DEE8] animate-spin" />
+                        <Loader2 className="w-4 h-4 text-[#CCFF00] animate-spin" />
                       </div>
                     )}
 
@@ -512,10 +512,10 @@ export default function BusinessRegistration() {
                                   key={index}
                                   type="button"
                                   onClick={() => handleSuggestionSelect(suggestion)}
-                                  className="w-full flex items-start gap-3 p-3 rounded-[6px] hover:bg-[#55DEE8]/5 text-left transition-all group/item"
+                                  className="w-full flex items-start gap-3 p-3 rounded-[6px] hover:bg-[#CCFF00]/5 text-left transition-all group/item"
                                 >
-                                  <div className="p-2 bg-[#55DEE8]/10 rounded-[6px] transition-colors mt-0.5">
-                                    <Navigation size={14} className="text-gray-500 group-hover/item:text-[#55DEE8]" />
+                                  <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] transition-colors mt-0.5">
+                                    <Navigation size={14} className="text-gray-500 group-hover/item:text-[#CCFF00]" />
                                   </div>
                                   <div className="flex flex-col min-w-0">
                                     <span className="text-[11px] font-bold text-white uppercase tracking-wider truncate">
@@ -541,7 +541,7 @@ export default function BusinessRegistration() {
                       value={formData.businessDetails.city}
                       onChange={handleChange}
                       placeholder="City"
-                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-2">
@@ -550,7 +550,7 @@ export default function BusinessRegistration() {
                       value={formData.businessDetails.state}
                       onChange={handleChange}
                       placeholder="State"
-                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-2">
@@ -559,7 +559,7 @@ export default function BusinessRegistration() {
                       value={formData.businessDetails.zipCode}
                       onChange={handleChange}
                       placeholder="Zip Code"
-                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
+                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -567,10 +567,10 @@ export default function BusinessRegistration() {
 
               {/* Enhanced Document Section */}
               <div className="p-8 rounded-[8px] border border-[#2D2D2D] bg-[#000000] space-y-8 relative overflow-hidden">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/5 blur-3xl pointer-events-none" />
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-3xl pointer-events-none" />
                  
                  <h3 className="text-lg font-semibold uppercase tracking-tight flex items-center gap-3">
-                   <FileText className="text-[#55DEE8]" /> Compliance Documents
+                   <FileText className="text-[#CCFF00]" /> Compliance Documents
                  </h3>
 
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -622,7 +622,7 @@ export default function BusinessRegistration() {
                      value={formData.portfolioUrl || ''}
                      onChange={handleChange}
                      placeholder="e.g. Behance, Personal Website, or Instagram"
-                     className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all text-sm"
+                     className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all text-sm"
                    />
                  </div>
               </div>
@@ -633,7 +633,7 @@ export default function BusinessRegistration() {
                 className={`w-full py-6 rounded-[8px] font-normal text-[13px] uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 ${
                   hasRoleConflict 
                     ? 'bg-[#2D2D2D] text-[#878C9F] cursor-not-allowed'
-                    : 'bg-[#55DEE8] hover:opacity-90 text-black '
+                    : 'bg-[#CCFF00] hover:opacity-90 text-black '
                 }`}
               >
                 {loading ? (
@@ -659,9 +659,9 @@ export default function BusinessRegistration() {
           <aside className="space-y-6">
              <div className="p-8 rounded-[8px] border border-[#2D2D2D] bg-[#000000] relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
-                   <ShieldCheckIcon size={80} className="text-[#55DEE8]" />
+                   <ShieldCheckIcon size={80} className="text-[#CCFF00]" />
                 </div>
-                <h4 className="text-[13px] font-semibold text-[#55DEE8] uppercase tracking-[0.3em] mb-4">Verification Policy</h4>
+                <h4 className="text-[13px] font-semibold text-[#CCFF00] uppercase tracking-[0.3em] mb-4">Verification Policy</h4>
                 <ul className="space-y-4">
                   {[
                     "Reviews take 24-48 hours",
@@ -671,7 +671,7 @@ export default function BusinessRegistration() {
                     "Dedicated support access"
                   ].map((text, i) => (
                     <li key={i} className="flex gap-3 text-[12px] text-[#999999]">
-                      <CheckCircle2 size={16} className="text-[#55DEE8] shrink-0" />
+                      <CheckCircle2 size={16} className="text-[#CCFF00] shrink-0" />
                       {text}
                     </li>
                   ))}
@@ -680,8 +680,8 @@ export default function BusinessRegistration() {
 
              <div className="p-8 rounded-[8px] border border-[#2D2D2D] bg-[#000000]">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-[6px] bg-[#55DEE8]/10">
-                    <Briefcase size={20} className="text-[#55DEE8]" />
+                  <div className="p-2 rounded-[6px] bg-[#CCFF00]/10">
+                    <Briefcase size={20} className="text-[#CCFF00]" />
                   </div>
                   <h4 className="text-[13px] font-semibold text-white uppercase tracking-[0.3em]">Partner Perks</h4>
                 </div>
@@ -689,11 +689,11 @@ export default function BusinessRegistration() {
                   <p>Join India's fastest growing sports ecosystem. Get access to:</p>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-4 bg-[#000000] rounded-[8px] border border-[#2D2D2D]">
-                      <span className="text-[#55DEE8] block font-semibold text-xl mb-1">0%</span>
+                      <span className="text-[#CCFF00] block font-semibold text-xl mb-1">0%</span>
                       <span className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F]">Initial Fee</span>
                     </div>
                     <div className="p-4 bg-[#000000] rounded-[8px] border border-[#2D2D2D]">
-                      <span className="text-[#55DEE8] block font-semibold text-xl mb-1">24/7</span>
+                      <span className="text-[#CCFF00] block font-semibold text-xl mb-1">24/7</span>
                       <span className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F]">Support</span>
                     </div>
                   </div>
@@ -721,23 +721,23 @@ function DocumentUpload({ label, id, onFileSelect, selectedFile }) {
         htmlFor={id}
         className={`flex flex-col items-center justify-center p-6 border border-dashed transition-all cursor-pointer h-32 text-center rounded-[8px]
           ${selectedFile 
-            ? 'border-[#55DEE8] bg-[#55DEE8]/5' 
-            : 'border-[#2D2D2D] bg-[#000000] hover:border-[#55DEE8]/50 hover:bg-[#55DEE8]/5'
+            ? 'border-[#CCFF00] bg-[#CCFF00]/5' 
+            : 'border-[#2D2D2D] bg-[#000000] hover:border-[#CCFF00]/50 hover:bg-[#CCFF00]/5'
           }`}
       >
         {selectedFile ? (
           <div className="space-y-1">
-            <CheckCircle2 className="text-[#55DEE8] mx-auto mb-1" size={24} />
-            <span className="text-[10px] font-bold text-[#55DEE8] uppercase truncate max-w-[140px] block">
+            <CheckCircle2 className="text-[#CCFF00] mx-auto mb-1" size={24} />
+            <span className="text-[10px] font-bold text-[#CCFF00] uppercase truncate max-w-[140px] block">
               {selectedFile.name}
             </span>
           </div>
         ) : (
           <div className="space-y-1">
-            <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[6px] flex items-center justify-center mx-auto mb-1 transition-transform">
+            <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] flex items-center justify-center mx-auto mb-1 transition-transform">
                <FileText size={18} className="text-gray-500" />
             </div>
-            <span className="text-[10px] font-normal text-[#878C9F] uppercase tracking-wider group-hover:text-[#55DEE8] transition-colors">
+            <span className="text-[10px] font-normal text-[#878C9F] uppercase tracking-wider group-hover:text-[#CCFF00] transition-colors">
               {label}
             </span>
           </div>
