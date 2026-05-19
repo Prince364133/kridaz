@@ -10,7 +10,7 @@ import {
   Users, UserCheck, ChevronRight, Search,
   ArrowLeft, Coins, CheckCircle2, AlertCircle,
   ShieldCheck, Zap, Trash2, Plus, Minus, ImageIcon, ChevronUp, ChevronDown,
-  Gift, Mail, Info, ShieldAlert
+  Gift, Mail, Info, ShieldAlert, Video, Award
 } from 'lucide-react';
 import { useGetMyTeamsQuery } from '@redux/api/teamApi';
 import CoinAnimation from '../components/CoinAnimation';
@@ -716,8 +716,7 @@ const HostGame = () => {
                   )) : (
                     <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
                       <p className="text-neutral-500 text-sm italic font-medium">
-                        <span className="sm:hidden">No {gameData.gameType} grounds found.</span>
-                        <span className="hidden sm:inline">No {gameData.gameType} grounds found in {gameData.city}, {gameData.state}.</span>
+                        <span>No {gameData.gameType} grounds found.</span>
                       </p>
                     </div>
                   )}
@@ -802,8 +801,7 @@ const HostGame = () => {
                   )) : (
                     <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
                       <p className="text-neutral-500 text-sm italic font-medium">
-                        <span className="sm:hidden">No {gameData.gameType} experts available.</span>
-                        <span className="hidden sm:inline">No {gameData.gameType} experts available in {gameData.city}, {gameData.state}.</span>
+                        <span>No {gameData.gameType} experts available.</span>
                       </p>
                     </div>
                   )}
@@ -856,8 +854,7 @@ const HostGame = () => {
                   )) : (
                     <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
                       <p className="text-neutral-500 text-sm italic font-medium">
-                        <span className="sm:hidden">No {gameData.gameType} streamers available.</span>
-                        <span className="hidden sm:inline">No {gameData.gameType} streamers available in {gameData.city}, {gameData.state}.</span>
+                        <span>No {gameData.gameType} streamers available.</span>
                       </p>
                     </div>
                   )}
@@ -910,8 +907,7 @@ const HostGame = () => {
                   )) : (
                     <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
                       <p className="text-neutral-500 text-sm italic font-medium">
-                        <span className="sm:hidden">No {gameData.gameType} scorers available.</span>
-                        <span className="hidden sm:inline">No {gameData.gameType} scorers available in {gameData.city}, {gameData.state}.</span>
+                        <span>No {gameData.gameType} scorers available.</span>
                       </p>
                     </div>
                   )}
@@ -1025,7 +1021,7 @@ const HostGame = () => {
                 }}
                 className="flex items-center gap-2 px-6 py-3 bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-2xl text-[#55DEE8] font-black text-xs uppercase tracking-widest hover:bg-gradient-to-r hover:from-[#55DEE8] hover:to-[#BFF367] hover:text-black transition-all"
               >
-                <ShieldCheck size={16} /> Fill from My Team
+                <ShieldCheck size={16} /> Fill <span className="hidden sm:inline">from My </span>Team
               </button>
             </div>
 
@@ -1267,92 +1263,114 @@ const HostGame = () => {
         {/* Step 5: Preview & Finalize */}
         {step === 5 && (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-10">
-            <div className="bg-[#55DEE8]/10 border-2 border-[#55DEE8]/20 p-10 rounded-[15px] relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-[#55DEE8]/5 blur-[100px] -mr-32 -mt-32" />
-              <div className="relative z-10">
-                <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-10">
-                  <div className="space-y-3">
-                    <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest font-open-sans">
-                      {gameData.gameMode === 'QUICK' ? 'Quick Game' : 'Professional Match'}
-                    </span>
-                    <h2 className="text-5xl font-black tracking-tight font-open-sans uppercase">{gameData.gameType} Battle</h2>
-                    <div className="flex flex-wrap items-center gap-4 text-[#55DEE8] font-black text-sm uppercase tracking-widest font-inter">
-                      <span className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-xl border border-[#55DEE8]/20"><Calendar size={16} /> {gameData.date}</span>
-                      <span className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-xl border border-[#55DEE8]/20"><Clock size={16} /> {gameData.time}</span>
-                    </div>
-                  </div>
-                  <div className="bg-black/40 border border-white/5 p-6 rounded-3xl backdrop-blur-xl text-center min-w-[180px]">
-                    <p className="text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1 font-inter">Total Reservation</p>
-                    <p className="text-4xl font-black text-[#BFF367] flex items-center justify-center gap-2 font-open-sans">
-                      <Coins size={32} className="text-[#55DEE8]" /> {totalCost}
-                    </p>
-                  </div>
+            <div className="flex items-center justify-between gap-4">
+              <div className="text-left space-y-2">
+                <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest font-open-sans inline-block">
+                  {gameData.gameMode === 'QUICK' ? 'Quick Game' : 'Professional Match'}
+                </span>
+                <h2 className="text-4xl font-black tracking-tight font-open-sans uppercase">{gameData.gameType} Battle</h2>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[#55DEE8] font-black text-xs sm:text-sm uppercase tracking-widest font-inter">
+                  <span className="flex items-center gap-1.5 sm:gap-2 bg-neutral-900/50 px-2.5 py-1.5 rounded-xl border border-neutral-800"><Calendar size={14} className="sm:w-4 sm:h-4" /> {gameData.date}</span>
+                  <span className="flex items-center gap-1.5 sm:gap-2 bg-neutral-900/50 px-2.5 py-1.5 rounded-xl border border-neutral-800"><Clock size={14} className="sm:w-4 sm:h-4" /> {gameData.time}</span>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                  <div className="bg-black/20 border border-white/5 p-6 rounded-3xl flex items-center gap-5">
-                    <div className="w-16 h-16 bg-neutral-800 rounded-2xl flex items-center justify-center">
-                      <MapPin className="text-[#55DEE8]" size={32} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1 font-inter">Venue</p>
-                      <p className="font-black text-lg truncate leading-none font-open-sans">{selectedGround?.name || 'Self-Arranged'}</p>
-                      <p className="hidden sm:block text-xs text-neutral-500 mt-1 font-medium italic font-inter">{selectedGround?.location}</p>
-                    </div>
-                  </div>
-                  <div className="bg-black/20 border border-white/5 p-6 rounded-3xl flex items-center gap-5">
-                    <div className="w-16 h-16 bg-neutral-800 rounded-2xl flex items-center justify-center">
-                      <UserCheck className="text-[#BFF367]" size={32} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1 font-inter">Expert</p>
-                      <p className="font-black text-lg truncate leading-none font-open-sans">{selectedUmpire?.name || 'No Umpire'}</p>
-                      <p className="text-xs text-neutral-500 mt-1 font-medium italic font-inter">{selectedUmpire?.role || 'Professional'}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {gameData.gameMode === 'QUICK' ? (
-                  <div className="p-8 bg-black/40 border border-white/5 rounded-[15px] text-center space-y-4">
-                    <div className="flex items-center justify-center -space-x-4">
-                      {Array.from({ length: Math.min(gameData.quickPlayerCount, 8) }).map((_, i) => (
-                        <div key={i} className="w-14 h-14 rounded-full border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[#55DEE8]">
-                          <Users size={20} />
-                        </div>
-                      ))}
-                      {gameData.quickPlayerCount > 8 && (
-                        <div className="w-14 h-14 rounded-full border-4 border-neutral-900 bg-neutral-700 flex items-center justify-center text-[10px] font-black font-inter">
-                          +{gameData.quickPlayerCount - 8}
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-sm font-black uppercase tracking-[0.2em] text-neutral-400 font-inter">
-                      Single Pool: <span className="text-[#BFF367]">{gameData.quickPlayerCount} Player Slots</span>
-                    </p>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between p-6 bg-black/40 border border-white/5 rounded-[15px]">
-                    <div className="flex -space-x-3">
-                      {gameData.teamA.slots.slice(0, 5).map((_, i) => (
-                        <div key={i} className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-blue-500/20 text-blue-500 flex items-center justify-center text-xs font-black font-open-sans">
-                          A
-                        </div>
-                      ))}
-                      {gameData.teamA.slots.length > 5 && <div className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[10px] font-black font-open-sans">+{gameData.teamA.slots.length - 5}</div>}
-                    </div>
-                    <div className="px-6 py-2 bg-neutral-800 rounded-2xl border border-neutral-700 text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em] italic font-inter">VS</div>
-                    <div className="flex -space-x-3">
-                      {gameData.teamB.slots.slice(0, 5).map((_, i) => (
-                        <div key={i} className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-red-500/20 text-red-500 flex items-center justify-center text-xs font-black font-open-sans">
-                          B
-                        </div>
-                      ))}
-                      {gameData.teamB.slots.length > 5 && <div className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[10px] font-black font-open-sans">+{gameData.teamB.slots.length - 5}</div>}
-                    </div>
-                  </div>
-                )}
+              </div>
+              <div className="bg-neutral-900/50 border border-neutral-800 p-4 sm:p-6 rounded-[20px] sm:rounded-3xl text-center min-w-[120px] sm:min-w-[180px] shrink-0">
+                <p className="text-[8px] sm:text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1 font-inter">Total Reservation</p>
+                <p className="text-2xl sm:text-4xl font-black text-[#BFF367] flex items-center justify-center gap-1 sm:gap-2 font-open-sans">
+                  <Coins size={20} className="text-[#55DEE8] sm:w-8 sm:h-8" /> {totalCost}
+                </p>
               </div>
             </div>
+
+            <div className="grid grid-cols-4 gap-2 sm:gap-6 mb-10">
+              {/* Venue */}
+              <div className="bg-neutral-900/50 border border-neutral-800 p-2.5 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center gap-2 sm:gap-3">
+                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-neutral-800 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
+                  <MapPin className="text-[#55DEE8] w-5 h-5 sm:w-8 sm:h-8" />
+                </div>
+                <div className="min-w-0 w-full">
+                  <p className="text-[7px] sm:text-[10px] text-neutral-500 uppercase font-black tracking-wider sm:tracking-widest mb-0.5 sm:mb-1 font-inter">Venue</p>
+                  <p className="font-black text-[10px] sm:text-lg truncate leading-none font-open-sans">{selectedGround?.name || 'Self-Arranged'}</p>
+                  <p className="hidden sm:block text-xs text-neutral-500 mt-1 font-medium italic font-inter">{selectedGround?.location}</p>
+                </div>
+              </div>
+
+              {/* Expert */}
+              <div className="bg-neutral-900/50 border border-neutral-800 p-2.5 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center gap-2 sm:gap-3">
+                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-neutral-800 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
+                  <UserCheck className="text-[#BFF367] w-5 h-5 sm:w-8 sm:h-8" />
+                </div>
+                <div className="min-w-0 w-full">
+                  <p className="text-[7px] sm:text-[10px] text-neutral-500 uppercase font-black tracking-wider sm:tracking-widest mb-0.5 sm:mb-1 font-inter">Expert</p>
+                  <p className="font-black text-[10px] sm:text-lg truncate leading-none font-open-sans">{selectedUmpire?.name || 'No Umpire'}</p>
+                  <p className="text-[9px] sm:text-xs text-neutral-500 mt-0.5 sm:mt-1 font-medium italic font-inter truncate w-full">{selectedUmpire?.role || 'Professional'}</p>
+                </div>
+              </div>
+
+              {/* Streamer */}
+              <div className="bg-neutral-900/50 border border-neutral-800 p-2.5 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center gap-2 sm:gap-3">
+                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-neutral-800 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
+                  <Video className="text-[#55DEE8] w-5 h-5 sm:w-8 sm:h-8" />
+                </div>
+                <div className="min-w-0 w-full">
+                  <p className="text-[7px] sm:text-[10px] text-neutral-500 uppercase font-black tracking-wider sm:tracking-widest mb-0.5 sm:mb-1 font-inter">Streamer</p>
+                  <p className="font-black text-[10px] sm:text-lg truncate leading-none font-open-sans">{selectedStreamer?.name || 'No Streamer'}</p>
+                  <p className="text-[9px] sm:text-xs text-neutral-500 mt-0.5 sm:mt-1 font-medium italic font-inter truncate w-full">{selectedStreamer?.role || 'Live Streamer'}</p>
+                </div>
+              </div>
+
+              {/* Scorer */}
+              <div className="bg-neutral-900/50 border border-neutral-800 p-2.5 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center gap-2 sm:gap-3">
+                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-neutral-800 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
+                  <Award className="text-[#BFF367] w-5 h-5 sm:w-8 sm:h-8" />
+                </div>
+                <div className="min-w-0 w-full">
+                  <p className="text-[7px] sm:text-[10px] text-neutral-500 uppercase font-black tracking-wider sm:tracking-widest mb-0.5 sm:mb-1 font-inter">Scorer</p>
+                  <p className="font-black text-[10px] sm:text-lg truncate leading-none font-open-sans">{selectedScorer?.name || 'No Scorer'}</p>
+                  <p className="text-[9px] sm:text-xs text-neutral-500 mt-0.5 sm:mt-1 font-medium italic font-inter truncate w-full">{selectedScorer?.role || 'Scorer'}</p>
+                </div>
+              </div>
+            </div>
+
+            {gameData.gameMode === 'QUICK' ? (
+              <div className="p-8 bg-neutral-900/50 border border-neutral-800 rounded-[15px] text-center space-y-4">
+                <div className="flex items-center justify-center -space-x-4">
+                  {Array.from({ length: Math.min(gameData.quickPlayerCount, 8) }).map((_, i) => (
+                    <div key={i} className="w-14 h-14 rounded-full border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[#55DEE8]">
+                      <Users size={20} />
+                    </div>
+                  ))}
+                  {gameData.quickPlayerCount > 8 && (
+                    <div className="w-14 h-14 rounded-full border-4 border-neutral-900 bg-neutral-700 flex items-center justify-center text-[10px] font-black font-inter">
+                      +{gameData.quickPlayerCount - 8}
+                    </div>
+                  )}
+                </div>
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-neutral-400 font-inter">
+                  Single Pool: <span className="text-[#BFF367]">{gameData.quickPlayerCount} Player Slots</span>
+                </p>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-6 bg-neutral-900/50 border border-neutral-800 rounded-[15px]">
+                <div className="flex -space-x-3">
+                  {gameData.teamA.slots.slice(0, 5).map((_, i) => (
+                    <div key={i} className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-blue-500/20 text-blue-500 flex items-center justify-center text-xs font-black font-open-sans">
+                      A
+                    </div>
+                  ))}
+                  {gameData.teamA.slots.length > 5 && <div className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[10px] font-black font-open-sans">+{gameData.teamA.slots.length - 5}</div>}
+                </div>
+                <div className="px-6 py-2 bg-neutral-800 rounded-2xl border border-neutral-700 text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em] italic font-inter">VS</div>
+                <div className="flex -space-x-3">
+                  {gameData.teamB.slots.slice(0, 5).map((_, i) => (
+                    <div key={i} className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-red-500/20 text-red-500 flex items-center justify-center text-xs font-black font-open-sans">
+                      B
+                    </div>
+                  ))}
+                  {gameData.teamB.slots.length > 5 && <div className="w-12 h-12 rounded-2xl border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[10px] font-black font-open-sans">+{gameData.teamB.slots.length - 5}</div>}
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-4">
               <button onClick={() => setStep(gameData.gameMode === 'QUICK' ? 4.5 : 4)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-[15px] border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest font-open-sans">Back</button>
@@ -1360,7 +1378,7 @@ const HostGame = () => {
                 onClick={() => setShowConfirm(true)}
                 className="flex-[2] py-5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[15px] hover:scale-[1.01] active:scale-[0.99] transition-all text-xl shadow-[0_20px_40px_rgba(85,222,232,0.25)] font-open-sans uppercase tracking-wider"
               >
-                CONFIRM & HOST GAME
+                CONFIRM GAME
               </button>
             </div>
           </motion.div>
