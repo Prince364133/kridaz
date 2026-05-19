@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useTurfData from "@hooks/useTurfData";
 import useReviews from "@hooks/useReviews";
-import Reviews from "../reviews/Reviews";
+import Reviews from "@components/reviews/Reviews";
 import TurfDetailsSkeleton from "../ui/TurfDetailsSkeleton";
 import useReservation from "@hooks/useReservation";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
