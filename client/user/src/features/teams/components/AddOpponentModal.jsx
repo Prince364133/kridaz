@@ -70,15 +70,15 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="relative w-full max-w-md bg-[#1a1a1a] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl"
+        className="relative w-full max-w-md bg-[#1a1a1a] border border-white/10 rounded-[15px] overflow-hidden shadow-2xl"
       >
         {/* Header */}
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-black text-white italic uppercase tracking-tight">Add Opponent</h2>
-            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">Search by Team ID</p>
+            <h2 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Open Sans', sans-serif" }}>Add Opponent</h2>
+            <p className="text-[10px] text-white/40 font-bold tracking-widest mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>Search by Team ID</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-[15px] transition-colors">
             <X size={20} className="text-white/40" />
           </button>
         </div>
@@ -86,14 +86,15 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
         <div className="p-6 space-y-6">
           {/* Step 1: Search by Code */}
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Unique Team ID</label>
+            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1" style={{ fontFamily: "'Inter', sans-serif" }}>Unique Team ID</label>
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
                 <input 
                   type="text"
                   placeholder="EX: KRIDAZ1234"
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-white text-sm font-black tracking-[0.2em] focus:outline-none focus:border-[#55DEE8]/50 uppercase transition-all"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-[15px] py-3.5 pl-12 pr-4 text-white text-sm font-black tracking-[0.2em] focus:outline-none focus:border-[#55DEE8]/30 uppercase transition-all"
                   value={teamCode}
                   onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
                   maxLength={10}
@@ -102,7 +103,7 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
               <button 
                 onClick={handleSearch}
                 disabled={isFinding}
-                className="px-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all flex items-center justify-center"
+                className="px-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[15px] transition-all flex items-center justify-center"
               >
                 {isFinding ? <Loader2 size={18} className="animate-spin text-[#55DEE8]" /> : <Search size={18} className="text-[#55DEE8]" />}
               </button>
@@ -118,32 +119,33 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
                 className="space-y-6"
               >
                 {/* Team Found Card */}
-                <div className="bg-[#55DEE8]/5 border border-[#55DEE8]/20 rounded-2xl p-4 flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-black border border-white/10 flex items-center justify-center shrink-0">
+                <div className="bg-[#55DEE8]/5 border border-[#55DEE8]/20 rounded-[15px] p-4 flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-[15px] bg-black border border-white/10 flex items-center justify-center shrink-0">
                     {foundTeam.logo ? (
-                      <img src={foundTeam.logo} alt="" className="w-full h-full object-cover rounded-xl" />
+                      <img src={foundTeam.logo} alt="" className="w-full h-full object-cover rounded-[15px]" />
                     ) : (
                       <Users className="text-[#55DEE8]" size={24} />
                     )}
                   </div>
                   <div className="flex-1 overflow-hidden">
-                    <h3 className="text-white font-black uppercase tracking-tight truncate">{foundTeam.name}</h3>
+                    <h3 className="text-white font-bold uppercase tracking-tight truncate" style={{ fontFamily: "'Inter', sans-serif" }}>{foundTeam.name}</h3>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] text-[#55DEE8] font-black uppercase tracking-widest">{foundTeam.sportType}</span>
+                      <span className="text-[10px] text-[#55DEE8] font-black uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>{foundTeam.sportType}</span>
                       <span className="w-1 h-1 rounded-full bg-white/10" />
-                      <span className="text-[10px] text-white/40 font-bold">{foundTeam.city}</span>
+                      <span className="text-[10px] text-white/40 font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>{foundTeam.city}</span>
                     </div>
                   </div>
-                  <div className="bg-[#55DEE8] text-black p-1.5 rounded-lg">
+                  <div className="bg-[#55DEE8] text-black p-1.5 rounded-[15px]">
                     <CheckCircle2 size={16} />
                   </div>
                 </div>
 
                 {/* Select My Team */}
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Challenge With Your Team</label>
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1" style={{ fontFamily: "'Inter', sans-serif" }}>Challenge With Your Team</label>
                   <select 
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 px-4 text-white text-sm font-bold focus:outline-none focus:border-[#55DEE8]/50 outline-none appearance-none"
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-[15px] py-3.5 px-4 text-white text-sm font-bold focus:outline-none focus:border-[#55DEE8]/30 outline-none appearance-none"
                     value={selectedMyTeam}
                     onChange={(e) => setSelectedMyTeam(e.target.value)}
                   >
@@ -157,7 +159,8 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
                 <button 
                   onClick={handleSendRequest}
                   disabled={isRequesting}
-                  className="w-full py-4 bg-[#55DEE8] hover:bg-[#b8e600] disabled:bg-white/10 disabled:text-white/20 text-black font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-[#55DEE8]/10 transition-all flex items-center justify-center gap-3"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
+                  className="w-full py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:brightness-[1.04] disabled:bg-white/10 disabled:text-white/20 text-black font-black uppercase tracking-[0.2em] rounded-[15px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 transition-all flex items-center justify-center gap-3 duration-300"
                 >
                   {isRequesting ? (
                     <Loader2 size={20} className="animate-spin" />
@@ -175,10 +178,10 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
                 animate={{ opacity: 1 }}
                 className="py-10 text-center space-y-3"
               >
-                <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 bg-white/5 rounded-[15px] flex items-center justify-center mx-auto">
                   <AlertCircle size={20} className="text-white/20" />
                 </div>
-                <p className="text-white/40 text-xs font-medium tracking-wide">Enter the Team ID and click search</p>
+                <p className="text-white/40 text-xs font-medium tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>Enter the Team ID and click search</p>
               </motion.div>
             )}
           </AnimatePresence>

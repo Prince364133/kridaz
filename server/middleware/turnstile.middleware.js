@@ -5,7 +5,7 @@ import logger from '../utils/logger.js';
  * Middleware to validate Cloudflare Turnstile token.
  * Prevents automated bot submissions on sensitive endpoints (Login, Register).
  */
-export const validateTurnstile = async (req, res, next) => {
+export const verifyTurnstile = async (req, res, next) => {
   // Skip Turnstile in non-production or if secret key is missing (for local dev)
   if (process.env.NODE_ENV !== 'production' || !process.env.TURNSTILE_SECRET_KEY) {
     return next();

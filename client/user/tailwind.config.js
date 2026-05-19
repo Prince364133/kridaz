@@ -5,6 +5,10 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        heading: ['"Open Sans"', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
+      },
       colors: {
         primary: "#55DEE8",
         "primary-focus": "#00b4c2",
