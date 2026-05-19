@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { AdBannerSection } from "@components/Marketing/AdBannerSection";
 import { VideoSection } from "@components/Marketing/VideoSection";
 import BlogSection from "@components/Blogs/BlogSection";
-import TurfCard from "@components/turf/TurfCard";
+import TurfCard from "@features/turf/components/TurfCard";
 import SearchPlayers from "@components/search/SearchPlayers";
 import SearchTurf from "@components/search/SearchTurf";
 import InterestsModal from "@components/modals/InterestsModal";
