@@ -12,7 +12,7 @@ import {
   Share2,
   Download
 } from 'lucide-react';
-import useCricketScoring from '@hooks/shared/useCricketScoring';
+import useCricketScoring from '@features/scoring/hooks/useCricketScoring';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import BallByBallHistory from '@features/scoring/components/BallByBallHistory';

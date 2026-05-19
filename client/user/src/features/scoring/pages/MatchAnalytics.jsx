@@ -12,10 +12,10 @@ import {
   Share2,
   Download
 } from 'lucide-react';
-import useCricketScoring from '@hooks/shared/useCricketScoring';
+import useCricketScoring from '../hooks/useCricketScoring';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import BallByBallHistory from '@components/shared/BallByBallHistory';
+import BallByBallHistory from '../components/BallByBallHistory';
 
 const MatchAnalytics = () => {
   const { matchId } = useParams();

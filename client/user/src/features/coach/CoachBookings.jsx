@@ -1,10 +1,10 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { Check, X, Clock, User, Phone, Mail, MessageSquare, Loader2, Calendar, Shield, IndianRupee } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
-import useCoachDashboard from "@hooks/useCoachDashboard";
-import DashboardSkeleton from "@components/DashboardSkeleton";
+import useCoachDashboard from "@hooks/owner/useCoachDashboard";
+import DashboardSkeleton from "@features/venue-owner/Dashboard/DashboardSkeleton";
 
 export default function CoachBookings() {
   const { dashboardData, loading } = useCoachDashboard();
@@ -61,7 +61,7 @@ export default function CoachBookings() {
     <div className="h-full custom-scrollbar bg-[#000000]">
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative font-['Open_Sans']">
         
-        {/* Header Section ΓÇö Exact Copy of Dashboard Design */}
+        {/* Header Section G�� Exact Copy of Dashboard Design */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 pb-2 border-b border-white/5">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
@@ -85,7 +85,7 @@ export default function CoachBookings() {
                   {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
                 </p>
                 <p className="text-[#55DEE8] text-[10px] font-semibold uppercase tracking-widest opacity-80">
-                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} ΓÇó{" "}
+                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} G��{" "}
                   {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
                 </p>
               </div>
@@ -136,7 +136,7 @@ export default function CoachBookings() {
                     }`}>
                       {booking.status}
                     </div>
-                    <p className="text-2xl font-bold text-white mt-2 font-inter tracking-tight">Γé╣{booking.totalAmount}</p>
+                    <p className="text-2xl font-bold text-white mt-2 font-inter tracking-tight">G�{booking.totalAmount}</p>
                     <p className="text-[10px] font-medium text-[#878C9F] uppercase tracking-wider font-inter">Reserved in wallet</p>
                   </div>
                 </div>

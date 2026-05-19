@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
-import useCricketScoring from '@hooks/shared/useCricketScoring';
+import useCricketScoring from '../hooks/useCricketScoring';
 import BallByBallHistory from '@features/scoring/components/BallByBallHistory';
 import InningsSetupModal from '@features/scoring/components/InningsSetupModal';
 import WicketModal from '@features/scoring/components/WicketModal';

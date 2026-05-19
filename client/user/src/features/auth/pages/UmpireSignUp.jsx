@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import usePartnerSignUpForm from "@hooks/usePartnerSignUpForm";
+import usePartnerSignUpForm from "../hooks/usePartnerSignUpForm";
 import {
   ArrowRight,
   ShieldCheck,

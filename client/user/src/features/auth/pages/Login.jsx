@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import useLoginForm from "@hooks/useLoginForm";
+import useLoginForm from "../hooks/useLoginForm";
 import GoogleAuthButton from "@user/components/auth/GoogleAuthButton";
 import Turnstile from "react-turnstile";
 import OnboardingModal from "@components/modals/OnboardingModal";
