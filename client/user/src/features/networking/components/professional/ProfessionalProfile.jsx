@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { User, Mail, Phone, MapPin, Award, BookOpen, Camera, Save, Loader2, Plus, Trash2, CheckCircle2, ChevronLeft, ChevronRight, FileText, Image as ImageIcon, Video, Play, Layout, X, ChevronDown, Zap, ShieldCheck, Target, Globe } from "lucide-react";
 import toast from "react-hot-toast";
 
 /**
- * ProfessionalProfile — The definitive dossier for professionals.
+ * ProfessionalProfile ΓÇö The definitive dossier for professionals.
  * Compact for the Console design language (Inter font, 8px radii).
  * Fully custom-styled dropdowns for premium dark theme parity.
  */
@@ -31,7 +31,7 @@ export default function ProfessionalProfile() {
   const { user, role } = useSelector((state) => state.auth);
   
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
   const portalName = isScorer ? "SCORER" : "COACH";
 
   const [loading, setLoading] = useState(false);
@@ -623,7 +623,7 @@ export default function ProfessionalProfile() {
               </div>
             </div>
 
-            {/* Career Milestones — Full Width */}
+            {/* Career Milestones ΓÇö Full Width */}
             <div className="bg-white/[0.03] border border-white/5 rounded-lg p-6 backdrop-blur-xl relative overflow-hidden">
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
                 <div className="space-y-1">

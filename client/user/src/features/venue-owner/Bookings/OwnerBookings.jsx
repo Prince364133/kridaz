@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import useOwnerBookings from "@hooks/owner/useOwnerBookings";
 import BookingsSkeleton from "./BookingsSkeleton";
 import { format } from "date-fns";
@@ -27,7 +27,7 @@ const OwnerBookings = () => {
   };
 
   const formatTime = (dateString) => {
-    if (!dateString) return "—";
+    if (!dateString) return "ΓÇö";
     return format(new Date(dateString), "h:mm aa");
   };
 
@@ -39,9 +39,9 @@ const OwnerBookings = () => {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <div className="w-1.5 h-8 bg-[#CCFF00] rounded-full" />
+              <div className="w-1.5 h-8 bg-[#55DEE8] rounded-full" />
               <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
-                Bookings <span className="text-[#CCFF00]">Overview</span>
+                Bookings <span className="text-[#55DEE8]">Overview</span>
               </h1>
             </div>
             <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
@@ -53,18 +53,18 @@ const OwnerBookings = () => {
             <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-4 flex items-center gap-4 shadow-[var(--shadow-2)]">
               <div>
                 <p className="text-[10px] font-medium text-[#999999] uppercase tracking-widest">Total Active</p>
-                <p className="text-[24px] font-semibold text-[#CCFF00] leading-none mt-1">{bookings.length}</p>
+                <p className="text-[24px] font-semibold text-[#55DEE8] leading-none mt-1">{bookings.length}</p>
               </div>
               <div className="h-10 w-[1px] bg-[#2D2D2D]" />
               <div className="text-right">
                 <p className="text-[10px] font-medium text-[#999999] uppercase tracking-widest">System Status</p>
                 <div className="flex items-center justify-end gap-1.5 mt-1">
-                  <span className="w-1.5 h-1.5 bg-[#CCFF00] rounded-full animate-pulse" />
+                  <span className="w-1.5 h-1.5 bg-[#55DEE8] rounded-full animate-pulse" />
                   <p className="text-[12px] font-semibold text-white uppercase tracking-tighter">Live</p>
                 </div>
               </div>
             </div>
-            <button className="p-3 bg-[#2D2D2D] hover:bg-[#CCFF00] hover:text-[#000] rounded-[6px] transition-all text-[#999999] group shadow-[var(--shadow-2)]">
+            <button className="p-3 bg-[#2D2D2D] hover:bg-[#55DEE8] hover:text-[#000] rounded-[6px] transition-all text-[#999999] group shadow-[var(--shadow-2)]">
               <Download size={18} className="group-hover:scale-110 transition-transform" />
             </button>
           </div>
@@ -74,12 +74,12 @@ const OwnerBookings = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#000000] p-4 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-1)]">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-[#CCFF00]/10 text-[#CCFF00] rounded-[6px]">
+              <div className="p-2 bg-[#55DEE8]/10 text-[#55DEE8] rounded-[6px]">
                 <Filter size={14} />
               </div>
               <span className="text-[12px] font-medium text-[#999999] uppercase tracking-widest">Timeframe:</span>
               <select
-                className="bg-[#2D2D2D] border border-[#404040] text-white text-[13px] font-normal rounded-[6px] px-4 py-1.5 focus:outline-none focus:border-[#CCFF00] transition-all font-inter uppercase tracking-wider"
+                className="bg-[#2D2D2D] border border-[#404040] text-white text-[13px] font-normal rounded-[6px] px-4 py-1.5 focus:outline-none focus:border-[#55DEE8] transition-all font-inter uppercase tracking-wider"
                 value={filterDays}
                 onChange={(e) => setFilterDays(Number(e.target.value))}
               >
@@ -91,7 +91,7 @@ const OwnerBookings = () => {
           </div>
 
           <div className="text-[11px] font-normal text-[#878C9F] uppercase tracking-widest flex items-center gap-2">
-            <Clock size={12} className="text-[#CCFF00]" />
+            <Clock size={12} className="text-[#55DEE8]" />
             Last Synced: Just Now
           </div>
         </div>
@@ -106,35 +106,35 @@ const OwnerBookings = () => {
                   <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Athlete</th>
                   <th
                     onClick={() => requestSort("startTime")}
-                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-[#CCFF00] transition-colors"
+                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-[#55DEE8] transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      Start <ArrowUpDown size={12} className={getSortDirection("startTime") ? "text-[#CCFF00]" : "opacity-30"} />
+                      Start <ArrowUpDown size={12} className={getSortDirection("startTime") ? "text-[#55DEE8]" : "opacity-30"} />
                     </div>
                   </th>
                   <th
                     onClick={() => requestSort("endTime")}
-                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-[#CCFF00] transition-colors"
+                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-[#55DEE8] transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      End <ArrowUpDown size={12} className={getSortDirection("endTime") ? "text-[#CCFF00]" : "opacity-30"} />
+                      End <ArrowUpDown size={12} className={getSortDirection("endTime") ? "text-[#55DEE8]" : "opacity-30"} />
                     </div>
                   </th>
                   <th
                     onClick={() => requestSort("bookingDate")}
-                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-[#CCFF00] transition-colors"
+                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-[#55DEE8] transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      Date <ArrowUpDown size={12} className={getSortDirection("bookingDate") ? "text-[#CCFF00]" : "opacity-30"} />
+                      Date <ArrowUpDown size={12} className={getSortDirection("bookingDate") ? "text-[#55DEE8]" : "opacity-30"} />
                     </div>
                   </th>
                   <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider">Dur.</th>
                   <th
                     onClick={() => requestSort("totalPrice")}
-                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-[#CCFF00] transition-colors text-right"
+                    className="px-6 py-5 cursor-pointer text-[12px] font-medium text-[#999999] uppercase tracking-wider hover:text-[#55DEE8] transition-colors text-right"
                   >
                     <div className="flex items-center justify-end gap-2">
-                      Price <ArrowUpDown size={12} className={getSortDirection("totalPrice") ? "text-[#CCFF00]" : "opacity-30"} />
+                      Price <ArrowUpDown size={12} className={getSortDirection("totalPrice") ? "text-[#55DEE8]" : "opacity-30"} />
                     </div>
                   </th>
                   <th className="px-6 py-5 text-[12px] font-medium text-[#999999] uppercase tracking-wider text-right">Actions</th>
@@ -145,7 +145,7 @@ const OwnerBookings = () => {
                   <tr key={booking.id} className="group hover:bg-[#2D2D2D]/20 transition-colors">
                     <td className="px-6 py-4">
                       <div>
-                        <p className="text-[14px] font-semibold text-white uppercase tracking-tight group-hover:text-[#CCFF00] transition-colors">{booking.turfName}</p>
+                        <p className="text-[14px] font-semibold text-white uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors">{booking.turfName}</p>
                         <p className="text-[11px] font-normal text-[#878C9F] uppercase tracking-widest mt-0.5">Ground ID: {booking.id.slice(-6)}</p>
                       </div>
                     </td>
@@ -158,7 +158,7 @@ const OwnerBookings = () => {
                            <div className="flex items-center gap-2">
                              <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{booking.userName}</p>
                              {booking.bookingSource === "PARTNER_MANUAL" && (
-                               <span className="px-1.5 py-0.5 bg-[#CCFF00]/10 border border-[#CCFF00]/20 text-[#CCFF00] text-[8px] font-bold uppercase tracking-widest rounded-[2px]">
+                               <span className="px-1.5 py-0.5 bg-[#55DEE8]/10 border border-[#55DEE8]/20 text-[#55DEE8] text-[8px] font-bold uppercase tracking-widest rounded-[2px]">
                                  Manual
                                </span>
                              )}
@@ -171,19 +171,19 @@ const OwnerBookings = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2 text-[14px] font-medium text-white tracking-tight">
-                        <Clock size={14} className="text-[#CCFF00]" />
+                        <Clock size={14} className="text-[#55DEE8]" />
                         {formatTime(booking.startTime)}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2 text-[14px] font-medium text-white tracking-tight">
-                        <Clock size={14} className="text-[#CCFF00]/50" />
+                        <Clock size={14} className="text-[#55DEE8]/50" />
                         {formatTime(booking.endTime)}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2 text-[14px] font-medium text-white tracking-tight">
-                        <Calendar size={14} className="text-[#CCFF00]" />
+                        <Calendar size={14} className="text-[#55DEE8]" />
                         {format(new Date(booking.bookingDate), "dd MMM yyyy")}
                       </div>
                     </td>
@@ -201,7 +201,7 @@ const OwnerBookings = () => {
                           to={`/booking-pass/${booking.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2 bg-[#2D2D2D] hover:bg-[#CCFF00] hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
+                          className="p-2 bg-[#2D2D2D] hover:bg-[#55DEE8] hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
                           title="Open Ticket"
                         >
                           <Ticket size={14} className="group-hover/btn:scale-110 transition-transform" />
@@ -210,7 +210,7 @@ const OwnerBookings = () => {
                           to={`/booking-invoice/${booking.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2 bg-[#2D2D2D] hover:bg-[#CCFF00] hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
+                          className="p-2 bg-[#2D2D2D] hover:bg-[#55DEE8] hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
                           title="See Invoice"
                         >
                           <FileText size={14} className="group-hover/btn:scale-110 transition-transform" />

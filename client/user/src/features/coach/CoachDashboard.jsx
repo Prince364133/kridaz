@@ -72,44 +72,47 @@ const CoachDashboard = () => {
         <div className="space-y-8 lg:space-y-10 relative z-10">
 
           {/* Dashboard Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-white/5">
+          <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 pb-2 border-b border-white/5">
             <div className="space-y-1">
-              <h1 className="text-3xl lg:text-4xl font-bold text-white tracking-tight font-inter">
-                Coach <span className="text-[#CCFF00]">Dashboard</span>
-              </h1>
-              <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider font-inter">
-                {getTimeGreeting()}, {user?.name || "Coach"} â€¢ Your training hub
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-8 bg-[#55DEE8] rounded-full" />
+                <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
+                  Coach <span className="text-[#55DEE8]">Dashboard</span>
+                </h1>
+              </div>
+              <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
+                {getTimeGreeting()}, {user?.name || "Coach"} | Training Intelligence Feed
               </p>
             </div>
 
             <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-2xl backdrop-blur-xl">
-              <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-xl flex items-center justify-center text-[#CCFF00]">
+              <div className="w-12 h-12 bg-[#55DEE8]/10 rounded-xl flex items-center justify-center text-[#55DEE8]">
                 <Calendar size={24} />
               </div>
               <div className="space-y-0.5">
                 <p className="text-white text-lg font-bold leading-none font-inter">
                   {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
                 </p>
-                <p className="text-[#CCFF00] text-[10px] font-semibold uppercase tracking-widest opacity-80">
-                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} â€¢{" "}
+                <p className="text-[#55DEE8] text-[10px] font-semibold uppercase tracking-widest opacity-80">
+                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} GÇó{" "}
                   {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
                 </p>
               </div>
             </div>
-          </div>
+          </header>
 
           {/* Coach Profile Section (styled similarly to Venue design cards) */}
           {coach && (
-            <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 flex flex-col md:flex-row items-center gap-8 group hover:border-[#CCFF00]/30 transition-all duration-500 shadow-[var(--shadow-2)]">
+            <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 flex flex-col md:flex-row items-center gap-8 group hover:border-[#55DEE8]/30 transition-all duration-500 shadow-[var(--shadow-2)]">
               <div className="relative">
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-[8px] overflow-hidden border border-[#2D2D2D] group-hover:border-[#CCFF00]/50 transition-all shadow-sm">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-[8px] overflow-hidden border border-[#2D2D2D] group-hover:border-[#55DEE8]/50 transition-all shadow-sm">
                   <img 
                     src={coach.profilePicture || "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=300&h=300&fit=crop"} 
                     alt="Coach" 
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="absolute -bottom-3 -right-3 w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] border border-[#CCFF00]/20 flex items-center justify-center text-[#CCFF00] shadow-sm">
+                <div className="absolute -bottom-3 -right-3 w-10 h-10 bg-[#55DEE8]/10 rounded-[6px] border border-[#55DEE8]/20 flex items-center justify-center text-[#55DEE8] shadow-sm">
                   <Zap size={20} />
                 </div>
               </div>
@@ -119,13 +122,13 @@ const CoachDashboard = () => {
                   <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-inter">
                     {coach.name}
                   </h2>
-                  <span className="px-3 py-1 bg-[#CCFF00]/10 text-[#CCFF00] text-xs font-semibold uppercase tracking-wider rounded-[6px] self-center md:self-start border border-[#CCFF00]/20 font-inter">
+                  <span className="px-3 py-1 bg-[#55DEE8]/10 text-[#55DEE8] text-xs font-semibold uppercase tracking-wider rounded-[6px] self-center md:self-start border border-[#55DEE8]/20 font-inter">
                     Pro Coach
                   </span>
                 </div>
                 
                 <p className="text-[#999999] text-[13px] font-medium max-w-2xl">
-                  {coach.businessDetails?.specialization || "Expert Sports Consultant"} â€¢ {coach.businessDetails?.experience || "N/A"} Experience
+                  {coach.businessDetails?.specialization || "Expert Sports Consultant"} GÇó {coach.businessDetails?.experience || "N/A"} Experience
                 </p>
                 
                 <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
@@ -145,7 +148,7 @@ const CoachDashboard = () => {
                 <div className="text-center">
                   <p className="text-xs font-medium text-[#878C9F] uppercase tracking-wider mb-1 font-inter">Rating</p>
                   <div className="flex items-center gap-1 text-white font-bold text-2xl tracking-tight font-inter">
-                    {coach.rating || "4.9"} <span className="text-[#CCFF00] text-xl">â˜…</span>
+                    {coach.rating || "4.9"} <span className="text-[#55DEE8] text-xl">Gÿà</span>
                   </div>
                 </div>
                 <div className="text-center">
@@ -172,7 +175,7 @@ const CoachDashboard = () => {
                 subtitle="Aggregate Achievement Metrics"
                 action={
                   <div className="p-2 bg-[#2D2D2D] rounded-[6px] border border-[#404040]">
-                    <TrendingUp className="text-[#CCFF00]" size={16} />
+                    <TrendingUp className="text-[#55DEE8]" size={16} />
                   </div>
                 }
               >
@@ -181,8 +184,8 @@ const CoachDashboard = () => {
                     <AreaChart data={studentProgress} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorPerfCoach" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.2} />
-                          <stop offset="95%" stopColor="#CCFF00" stopOpacity={0} />
+                          <stop offset="5%" stopColor="#55DEE8" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="#55DEE8" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" vertical={false} />
@@ -201,12 +204,12 @@ const CoachDashboard = () => {
                       />
                       <Tooltip
                         contentStyle={{ backgroundColor: "#151617", border: "1px solid #2D2D2D", borderRadius: "8px", padding: "12px" }}
-                        itemStyle={{ color: "#CCFF00", fontSize: "12px", textTransform: "uppercase", fontFamily: "Inter" }}
+                        itemStyle={{ color: "#55DEE8", fontSize: "12px", textTransform: "uppercase", fontFamily: "Inter" }}
                       />
                       <Area
                         type="monotone"
                         dataKey="value"
-                        stroke="#CCFF00"
+                        stroke="#55DEE8"
                         strokeWidth={2}
                         fill="url(#colorPerfCoach)"
                         fillOpacity={1}
@@ -221,7 +224,7 @@ const CoachDashboard = () => {
 
             {/* Upcoming Sessions Roster */}
             <div className="lg:col-span-4">
-              <div className="bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] h-full flex flex-col group transition-all hover:border-[#CCFF00]/20">
+              <div className="bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] h-full flex flex-col group transition-all hover:border-[#55DEE8]/20">
                 <div className="flex items-center justify-between mb-8">
                   <div>
                     <h2 className="text-xl font-bold text-white tracking-tight font-inter">
@@ -238,13 +241,13 @@ const CoachDashboard = () => {
                     upcomingSessions.map((op, i) => (
                       <div
                         key={i}
-                        className="p-4 bg-[#2D2D2D]/30 border-l-2 border-[#CCFF00] hover:bg-[#2D2D2D]/60 transition-all rounded-r-[6px]"
+                        className="p-4 bg-[#2D2D2D]/30 border-l-2 border-[#55DEE8] hover:bg-[#2D2D2D]/60 transition-all rounded-r-[6px]"
                       >
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-[11px] font-semibold text-[#878C9F] uppercase tracking-wider">
                             {op.time}
                           </span>
-                          <span className="px-2 py-0.5 bg-[#CCFF00]/10 text-[#CCFF00] text-[9px] font-bold uppercase tracking-widest rounded-[4px]">
+                          <span className="px-2 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] text-[9px] font-bold uppercase tracking-widest rounded-[4px]">
                             {op.type}
                           </span>
                         </div>
@@ -260,7 +263,7 @@ const CoachDashboard = () => {
                     <EmptyState height={200} icon={Calendar} message="No upcoming sessions" sub="Schedule a session to see it here" />
                   )}
                 </div>
-                <button className="mt-6 w-full py-3 bg-transparent border border-[#2D2D2D] hover:bg-[#CCFF00]/10 hover:text-[#CCFF00] hover:border-[#CCFF00]/30 text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter">
+                <button className="mt-6 w-full py-3 bg-transparent border border-[#2D2D2D] hover:bg-[#55DEE8]/10 hover:text-[#55DEE8] hover:border-[#55DEE8]/30 text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter">
                   New Assignment
                 </button>
               </div>
@@ -272,7 +275,7 @@ const CoachDashboard = () => {
   );
 };
 
-// â”€â”€ Empty State Helper â”€â”€
+// GöÇGöÇ Empty State Helper GöÇGöÇ
 const EmptyState = ({ height, icon: Icon, message, sub }) => (
   <div
     className="flex flex-col items-center justify-center gap-3 text-center rounded-[8px] border border-dashed border-[#2D2D2D]"
@@ -284,13 +287,13 @@ const EmptyState = ({ height, icon: Icon, message, sub }) => (
   </div>
 );
 
-// â”€â”€ Stats Card â”€â”€
+// GöÇGöÇ Stats Card GöÇGöÇ
 const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon }) => {
   return (
-    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#CCFF00]/30 transition-all duration-500 min-h-[140px] shadow-[var(--shadow-2)]">
+    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#55DEE8]/30 transition-all duration-500 min-h-[140px] shadow-[var(--shadow-2)]">
       <Icon className="absolute -right-4 -bottom-4 w-20 h-20 text-white/[0.02] group-hover:text-white/[0.04] transition-colors" />
       <div className="flex items-center justify-between mb-5">
-        <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] flex items-center justify-center transition-all shadow-sm">
+        <div className="w-10 h-10 bg-[#55DEE8]/10 rounded-[6px] text-[#55DEE8] flex items-center justify-center transition-all shadow-sm">
           <Icon size={20} />
         </div>
       </div>
@@ -308,7 +311,7 @@ const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon }) => {
 
 const ChartCard = ({ title, subtitle, children, action, className = "h-full" }) => (
   <div className={`bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] relative overflow-hidden group flex flex-col ${className}`}>
-    <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px] group-hover:bg-[#CCFF00]/10 transition-colors"></div>
+    <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/5 blur-[60px] group-hover:bg-[#55DEE8]/10 transition-colors"></div>
     <div className="flex flex-col gap-2 mb-6 relative z-10 shrink-0">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
         <div>

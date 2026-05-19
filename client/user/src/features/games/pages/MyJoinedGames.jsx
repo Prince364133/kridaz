@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
@@ -120,7 +120,7 @@ const MyJoinedGames = () => {
 
               <div className="p-4 bg-neutral-900/50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                   <div className="w-8 h-8 bg-[#84CC16]/10 rounded-full flex items-center justify-center border border-white/10 overflow-hidden shrink-0">
+                   <div className="w-8 h-8 bg-[#55DEE8]/10 rounded-full flex items-center justify-center border border-white/10 overflow-hidden shrink-0">
                       {game.host?.profilePicture ? (
                         <img 
                           src={game.host.profilePicture} 
@@ -135,7 +135,7 @@ const MyJoinedGames = () => {
                         className="w-full h-full flex items-center justify-center"
                         style={{ display: game.host?.profilePicture ? 'none' : 'flex' }}
                       >
-                        <User size={16} className="text-[#84CC16]" />
+                        <User size={16} className="text-[#55DEE8]" />
                       </div>
                    </div>
                    <div className="text-[10px]">

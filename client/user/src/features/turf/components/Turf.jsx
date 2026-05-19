@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import TurfCard from "./TurfCard.jsx";
 import TurfCardSkeleton from "../ui/TurfCardSkeleton.jsx";
-import useTurfData from "@hooks/useTurfData";
+import useTurfData from "@hooks/useTurfData.jsx";
 import SearchTurf from "../search/SearchTurf.jsx";
 import { Trophy, MapPin, Loader2 } from "lucide-react";
 
 /**
- * Turf â€” Venue discovery page.
+ * Turf GÇö Venue discovery page.
  *
  * Behaviour:
  * 1. On mount, silently requests browser geolocation.
- * 2. If granted â†’ backend receives lat/lng â†’ MongoDB $geoNear sorts by proximity
- *    â†’ nearest venues appear at the top.
- * 3. If denied  â†’ falls back to normal listing (no distance data).
+ * 2. If granted GåÆ backend receives lat/lng GåÆ MongoDB $geoNear sorts by proximity
+ *    GåÆ nearest venues appear at the top.
+ * 3. If denied  GåÆ falls back to normal listing (no distance data).
  * 4. All search filter changes (sport / state / city) always include the
  *    latest userLocation so proximity sort is preserved while filtering.
  */
@@ -23,7 +23,7 @@ const Turf = () => {
 
   const { turfs, loading } = useTurfData(searchFilters);
 
-  // â”€â”€ Auto-detect location â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // GöÇGöÇ Auto-detect location GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
   const detectLocation = () => {
     setLocationStatus("detecting");
     
@@ -96,7 +96,7 @@ const Turf = () => {
     // detectLocation(); // DISABLED for privacy (manual entry only)
   }, []);
 
-  // â”€â”€ Handle search filters from the SearchTurf bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // GöÇGöÇ Handle search filters from the SearchTurf bar GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
   const handleSearch = (filters) => {
     setSearchFilters({
       ...filters,
@@ -109,27 +109,32 @@ const Turf = () => {
     <div className="min-h-screen bg-black text-white pb-20 overflow-x-hidden">
       <div className="max-w-screen-2xl mx-auto px-6 pt-0 relative z-10">
 
-        {/* â”€â”€ Sticky Search Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* GöÇGöÇ Sticky Search Bar GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ */}
         <div className="sticky top-0 z-40 bg-black/95 backdrop-blur-md pt-2 pb-2 -mx-6 px-6 mb-10 border-b border-white/5">
           <SearchTurf onSearch={handleSearch} userLocation={userLocation} />
         </div>
 
-        {/* â”€â”€ Section Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* GöÇGöÇ Section Header GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 border-b border-white/5 pb-6 gap-4">
           <div className="flex flex-col gap-1">
             <h2 className="text-base md:text-lg font-bold uppercase tracking-[0.05em] text-white flex items-center gap-3 font-sans">
-              <MapPin size={18} className="text-[#BFF367]" />
-              {locationStatus === "granted" ? (
-                `NEAREST TO YOU â€” ${turfs.length} VENUE${turfs.length !== 1 ? "S" : ""}`
+              <MapPin size={18} className="text-[#55DEE8]" />
+              {locationStatus === "detecting" ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin text-[#55DEE8]" />
+                  DETECTING LOCATION...
+                </span>
+              ) : locationStatus === "granted" ? (
+                `NEAREST TO YOU GÇö ${turfs.length} VENUE${turfs.length !== 1 ? "S" : ""}`
               ) : (
-                `AVAILABLE VENUES â€” ${turfs.length}`
+                `AVAILABLE VENUES GÇö ${turfs.length}`
               )}
             </h2>
           </div>
 
         </div>
 
-        {/* â”€â”€ Cards Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* GöÇGöÇ Cards Grid GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ */}
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
             {Array.from({ length: 6 }).map((_, i) => (

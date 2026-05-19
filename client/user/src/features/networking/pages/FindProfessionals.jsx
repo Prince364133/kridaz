@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -6,7 +6,8 @@ import { Search, MapPin, Star, ChevronRight, Users, User, Calendar, Shield, Trop
 import toast from "react-hot-toast";
 import { fetchStates, fetchCities } from "@user/utils/locationService";
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
+const GRAD = "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)";
 const BDR = "#2A2A2A";
 
 const sports = ["ALL SPORTS", "CRICKET", "BADMINTON", "FOOTBALL", "TENNIS", "PICKLEBALL"];
@@ -95,17 +96,17 @@ export default function FindProfessionals() {
       <div className="max-w-7xl mx-auto mb-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="relative">
-            <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#84CC16] rounded-full shadow-[0_0_25px_rgba(132,204,22,0.5)] hidden md:block"></div>
+            <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#55DEE8] rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block"></div>
             <h1 className="font-display text-4xl md:text-7xl lg:text-8xl uppercase leading-none tracking-tighter">
-              FIND <span style={{ color: PRI }}>PROFESSIONALS</span>
+              FIND <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>PROFESSIONALS</span>
             </h1>
             <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.4em] mt-4 font-inter">
-              Elite Coaching • Certified Officiating • Expert Training
+              Elite Coaching ΓÇó Certified Officiating ΓÇó Expert Training
             </p>
           </div>
           
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="flex items-center bg-[#121212] border border-white/5 rounded-full px-6 py-4 w-full md:w-[400px] focus-within:border-[#84CC16]/30 transition-all">
+          <form onSubmit={handleSearch} className="flex items-center bg-[#121212] border border-white/5 rounded-full px-6 py-4 w-full md:w-[400px] focus-within:border-[#55DEE8]/30 transition-all">
             <Search size={18} className="text-gray-500 mr-3" />
             <input 
               type="text" 
@@ -126,11 +127,8 @@ export default function FindProfessionals() {
             <button 
               key={sport}
               onClick={() => setSelectedSport(sport)}
-              className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${
-                selectedSport === sport 
-                ? "bg-[#84CC16] text-black border-[#84CC16] shadow-[0_0_15px_rgba(132,204,22,0.3)]" 
-                : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"
-              }`}
+              className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${selectedSport === sport ? "text-black border-transparent shadow-[0_0_15px_rgba(85,222,232,0.3)] hover:opacity-90" : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"}`}
+              style={selectedSport === sport ? { background: GRAD } : {}}
             >
               {sport}
             </button>
@@ -152,7 +150,7 @@ export default function FindProfessionals() {
             </select>
           </div>
           <div className="flex items-center bg-[#121212] border border-white/5 rounded-full px-4 py-2.5">
-            <MapPin size={14} className="text-[#84CC16] mr-2" />
+            <MapPin size={14} className="text-[#55DEE8] mr-2" />
             <select 
               className="bg-transparent border-none outline-none text-[10px] font-black uppercase tracking-widest text-white/60 pr-4 cursor-pointer"
               value={stateFilter}
@@ -165,7 +163,7 @@ export default function FindProfessionals() {
             </select>
           </div>
           <div className="flex items-center bg-[#121212] border border-white/5 rounded-full px-4 py-2.5">
-            <MapPin size={14} className="text-[#84CC16] mr-2" />
+            <MapPin size={14} className="text-[#55DEE8] mr-2" />
             <select 
               className="bg-transparent border-none outline-none text-[10px] font-black uppercase tracking-widest text-white/60 pr-4 cursor-pointer"
               value={cityFilter}
@@ -202,7 +200,7 @@ export default function FindProfessionals() {
                 className="group cursor-pointer"
                 onClick={() => navigate(`/professionals/${pro._id}`)}
               >
-                <div className="relative bg-[#121212] rounded-[20px] p-1.5 border border-white/5 transition-all duration-500 hover:border-[#84CC16]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
+                <div className="relative bg-[#121212] rounded-[20px] p-1.5 border border-white/5 transition-all duration-500 hover:border-[#55DEE8]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
                   
                   {/* Compact Profile Image Section */}
                   <div className="relative aspect-[1/1.2] rounded-[15px] overflow-hidden block mb-2.5">
@@ -222,7 +220,7 @@ export default function FindProfessionals() {
                         className="relative z-10 flex items-center justify-center w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a]"
                         style={{ display: pro.profilePicture ? 'none' : 'flex' }}
                       >
-                        <span className="text-[#84CC16] font-black text-3xl tracking-tighter opacity-20 group-hover:opacity-40 transition-opacity duration-500">
+                        <span className="text-[#55DEE8] font-black text-3xl tracking-tighter opacity-20 group-hover:opacity-40 transition-opacity duration-500">
                           {getInitials(pro.name)}
                         </span>
                       </div>
@@ -230,19 +228,19 @@ export default function FindProfessionals() {
                     
                     {/* Price Badge */}
                     <div className="absolute top-2 right-2 z-20">
-                      <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#84CC16] text-[8px] font-bold shadow-lg">
-                        ₹{pro.price || "500"}/{pro.role === "coach" ? "hr" : "match"}
+                      <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#55DEE8] text-[8px] font-bold shadow-lg">
+                        Γé╣{pro.price || "500"}/{pro.role === "coach" ? "hr" : "match"}
                       </div>
                     </div>
 
                     {/* Role Badge */}
                     <div className="absolute top-2 left-2 z-20">
                       <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white text-[8px] font-black tracking-widest gap-1 shadow-lg">
-                        {pro.role === 'umpire' ? <Shield size={8} className="text-[#84CC16]" /> : 
-                         pro.role === 'streamer' ? <Video size={8} className="text-[#84CC16]" /> : 
-                         pro.role === 'scorer' ? <Activity size={8} className="text-[#84CC16]" /> : 
-                         <Trophy size={8} className="text-[#84CC16]" />}
-                        <span className="text-[#84CC16]">{pro.role?.toUpperCase()}</span>
+                        {pro.role === 'umpire' ? <Shield size={8} className="text-[#55DEE8]" /> : 
+                         pro.role === 'streamer' ? <Video size={8} className="text-[#55DEE8]" /> : 
+                         pro.role === 'scorer' ? <Activity size={8} className="text-[#55DEE8]" /> : 
+                         <Trophy size={8} className="text-[#55DEE8]" />}
+                        <span className="text-[#55DEE8]">{pro.role?.toUpperCase()}</span>
                       </div>
                     </div>
                   </div>
@@ -250,7 +248,7 @@ export default function FindProfessionals() {
                   {/* Content Section */}
                   <div className="px-1.5 pb-1">
                     <div className="flex items-center gap-1 mb-0.5">
-                      <h3 className="text-white font-bold text-[13px] tracking-tight group-hover:text-[#84CC16] transition-colors line-clamp-1 font-open-sans capitalize">
+                      <h3 className="text-white font-bold text-[13px] tracking-tight group-hover:text-[#55DEE8] transition-colors line-clamp-1 font-open-sans capitalize">
                         {pro.name?.toLowerCase()}
                       </h3>
                       <div className="flex items-center justify-center w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] shrink-0">
@@ -259,14 +257,14 @@ export default function FindProfessionals() {
                     </div>
                     
                     <p className="text-white/40 text-[9px] font-medium leading-tight mb-3 line-clamp-1">
-                      <span className="capitalize">{pro.businessDetails?.specialization?.toLowerCase() || "expert coach"}</span> • {pro.businessDetails?.experience?.toLowerCase() || "5+ years"}
+                      <span className="capitalize">{pro.businessDetails?.specialization?.toLowerCase() || "expert coach"}</span> ΓÇó {pro.businessDetails?.experience?.toLowerCase() || "5+ years"}
                     </p>
 
                     {/* Bottom Bar */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1 text-white/80">
-                          <Star size={12} className="text-[#84CC16] fill-[#84CC16]" />
+                          <Star size={12} className="text-[#55DEE8] fill-[#55DEE8]" />
                           <span className="text-[10px] font-bold">{pro.rating?.toFixed(1) || "5.0"}</span>
                         </div>
                         <div className="flex items-center text-white/30">
@@ -281,7 +279,8 @@ export default function FindProfessionals() {
                           e.stopPropagation();
                           navigate(`/professionals/${pro._id}`);
                         }}
-                        className="px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-wider transition-all duration-300 bg-[#222] border border-white/5 text-white hover:bg-white hover:text-black shadow-lg"
+                        className="px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-wider transition-all duration-300 text-black hover:scale-105 shadow-[0_0_15px_rgba(85,222,232,0.3)]"
+                        style={{ background: GRAD }}
                       >
                         BOOK
                       </button>

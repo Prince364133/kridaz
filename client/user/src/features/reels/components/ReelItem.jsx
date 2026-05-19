@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import ReelPlayer from './ReelPlayer';
 import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Music } from 'lucide-react';
-import { useInteractWithReelMutation, useDeleteReelMutation, useAddCommentMutation } from '@redux/api/reelsApi';
+import { useInteractWithReelMutation, useDeleteReelMutation, useAddCommentMutation } from '../../redux/api/reelsApi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
@@ -81,15 +81,48 @@ const ReelItem = ({ reel, isVisible }) => {
     }
   };
 
+  const isProcessing = reel.status === 'pending' && !reel.temp;
+
   return (
     <div className="relative w-full h-full bg-black overflow-hidden flex items-center justify-center">
-      <div className="h-full w-full" onDoubleClick={handleDoubleTap}>
-        <ReelPlayer 
-          reelId={reel._id}
-          hlsUrl={reel.hlsUrl || reel.rawVideoUrl} 
-          isVisible={isVisible} 
-          poster={reel.thumbnailUrl}
-        />
+      <div className="h-full w-full" onDoubleClick={!isProcessing ? handleDoubleTap : undefined}>
+        {isProcessing ? (
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* Blurred Placeholder */}
+            {reel.thumbnailUrl ? (
+              <img 
+                src={reel.thumbnailUrl} 
+                className="w-full h-full object-cover blur-2xl scale-110 opacity-50"
+                alt="Processing..."
+              />
+            ) : (
+              <div className="w-full h-full bg-zinc-900" />
+            )}
+            
+            {/* Processing Overlay */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm">
+              <div className="w-16 h-16 border-4 border-[#55DEE8] border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-[#55DEE8] font-bold text-lg">Optimizing Reel...</p>
+              <p className="text-white/60 text-sm mt-2">{reel.processingProgress || 0}% Complete</p>
+              
+              {/* Progress Bar */}
+              <div className="w-48 h-1 bg-white/10 rounded-full mt-6 overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${reel.processingProgress || 0}%` }}
+                  className="h-full bg-[#55DEE8]"
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <ReelPlayer 
+            reelId={reel._id}
+            hlsUrl={reel.hlsUrl || reel.rawVideoUrl} 
+            isVisible={isVisible} 
+            poster={reel.thumbnailUrl}
+          />
+        )}
       </div>
 
       {/* Double Tap Heart Animation */}
@@ -202,7 +235,7 @@ const ReelItem = ({ reel, isVisible }) => {
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <h3 className="text-white font-bold text-[15px]">@{reel.creatorId?.username || 'kridaz_user'}</h3>
-              <span className="text-white/40 text-xs">•</span>
+              <span className="text-white/40 text-xs">ΓÇó</span>
               <button className="text-white border border-white/40 px-3 py-0.5 rounded-md text-[11px] font-bold hover:bg-white/10 transition-colors">
                 Follow
               </button>
@@ -221,7 +254,7 @@ const ReelItem = ({ reel, isVisible }) => {
           <Music size={12} className="text-white animate-spin-slow" />
           <div className="overflow-hidden w-32">
             <p className="text-white text-[11px] font-semibold whitespace-nowrap animate-marquee">
-              Original Audio • {reel.creatorId?.name || 'Kridaz Audio'}
+              Original Audio ΓÇó {reel.creatorId?.name || 'Kridaz Audio'}
             </p>
           </div>
         </div>
@@ -265,12 +298,12 @@ const ReelItem = ({ reel, isVisible }) => {
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Add a comment..."
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#84CC16] transition-colors pr-14"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#55DEE8] transition-colors pr-14"
                 />
                 <button 
                   type="submit"
                   disabled={!commentText.trim()}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#84CC16] font-bold text-sm px-3 py-2 disabled:opacity-30 transition-opacity"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#55DEE8] font-bold text-sm px-3 py-2 disabled:opacity-30 transition-opacity"
                 >
                   Post
                 </button>

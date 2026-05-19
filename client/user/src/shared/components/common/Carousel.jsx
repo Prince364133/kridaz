@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
  
 
 const Carousel = ({slides}) => {
@@ -30,10 +30,10 @@ const Carousel = ({slides}) => {
       ))}
       <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
         <button onClick={prevSlide} className="btn btn-circle">
-          ❮
+          Γ¥«
         </button>
         <button onClick={nextSlide} className="btn btn-circle">
-          ❯
+          Γ¥»
         </button>
       </div>
     </div>

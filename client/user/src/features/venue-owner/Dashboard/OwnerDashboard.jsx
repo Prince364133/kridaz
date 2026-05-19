@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import {
   AreaChart,
   Area,
@@ -40,7 +40,7 @@ const OwnerDashboard = () => {
   const { dashboardData, loading, error } = useOwnerDashboard();
   const { role, user } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
   const dashboardTitle = isScorer ? "SCORER Dashboard" : "Dashboard Overview";
 
   const [timeFilter, setTimeFilter] = useState("Month");
@@ -88,7 +88,7 @@ const OwnerDashboard = () => {
     activeUsers = 0,
   } = dashboardData;
 
-  // Only use real data – no hardcoded fallbacks
+  // Only use real data ΓÇô no hardcoded fallbacks
   const pieDataMap = {
     Day: bookingsPerTurfDay,
     Week: bookingsPerTurfWeek,
@@ -134,7 +134,7 @@ const OwnerDashboard = () => {
                 {dashboardTitle.split(' ')[0]} <span style={{ color: themeColor }}>{dashboardTitle.split(' ').slice(1).join(' ')}</span>
               </h1>
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em]">
-                {getTimeGreeting()}, {user?.name || "Partner"} • Your venue's heartbeat
+                {getTimeGreeting()}, {user?.name || "Partner"} ΓÇó Your venue's heartbeat
               </p>
             </div>
 
@@ -147,14 +147,14 @@ const OwnerDashboard = () => {
                   {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
                 </p>
                 <p className="text-[10px] font-black uppercase tracking-widest opacity-80 font-inter" style={{ color: themeColor }}>
-                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} •{" "}
+                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} ΓÇó{" "}
                   {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Stats Grid – 6 Cards (all real data, no hardcoded fallbacks) */}
+          {/* Stats Grid ΓÇô 6 Cards (all real data, no hardcoded fallbacks) */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-5">
             <StatsCard title="Total Bookings" value={totalBookings} icon={Calendar} themeColor={themeColor} />
             <StatsCard title="Total Revenue" value={totalRevenue} prefix="Rs " icon={TrendingUp} themeColor={themeColor} />
@@ -181,7 +181,7 @@ const OwnerDashboard = () => {
                         className={`px-4 py-1.5 rounded-[4px] text-[11px] font-normal uppercase tracking-wider transition-all font-inter ${
                           (revenueFilter === "Week" && filter === "Weekly") ||
                           (revenueFilter === "Month" && filter === "Monthly")
-                            ? "bg-[#CCFF00] text-black"
+                            ? "bg-[#55DEE8] text-black"
                             : "text-[#999999] hover:text-[#FFFFFF]"
                         }`}
                       >
@@ -316,8 +316,8 @@ const OwnerDashboard = () => {
                               </td>
                               <td className="py-4">
                                 <div>
-                                  <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{booking?.turf?.category || "—"}</p>
-                                  <p className="text-[12px] font-normal text-[#999999] uppercase">{booking?.turf?.name || "—"}</p>
+                                  <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{booking?.turf?.category || "ΓÇö"}</p>
+                                  <p className="text-[12px] font-normal text-[#999999] uppercase">{booking?.turf?.name || "ΓÇö"}</p>
                                 </div>
                               </td>
                               <td className="py-4">
@@ -414,7 +414,7 @@ const OwnerDashboard = () => {
   );
 };
 
-// ── Empty State Helper ──
+// ΓöÇΓöÇ Empty State Helper ΓöÇΓöÇ
 const EmptyState = ({ height, icon: Icon, message, sub }) => (
   <div
     className="flex flex-col items-center justify-center gap-3 text-center rounded-[8px] border border-dashed border-[#2D2D2D]"
@@ -426,7 +426,7 @@ const EmptyState = ({ height, icon: Icon, message, sub }) => (
   </div>
 );
 
-// ── Stats Card (no hardcoded trend badges) ──
+// ΓöÇΓöÇ Stats Card (no hardcoded trend badges) ΓöÇΓöÇ
 const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, themeColor }) => {
   return (
     <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group transition-all duration-500 min-h-[140px] shadow-[var(--shadow-2)]"
@@ -452,7 +452,7 @@ const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, themeCo
 
 const ChartCard = ({ title, subtitle, children, action, className = "h-full" }) => (
   <div className={`bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] relative overflow-hidden group flex flex-col ${className}`}>
-    <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px] group-hover:bg-[#CCFF00]/10 transition-colors"></div>
+    <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/5 blur-[60px] group-hover:bg-[#55DEE8]/10 transition-colors"></div>
     <div className="flex flex-col gap-2 mb-6 relative z-10 shrink-0">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
         <div>

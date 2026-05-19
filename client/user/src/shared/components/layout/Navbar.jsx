@@ -76,7 +76,7 @@ const Navbar = () => {
             </Link>
 
             <div className="lg:hidden flex items-center gap-1 mt-0.5 ml-1 text-white/50">
-              <MapPin size={10} className="text-[#84CC16]" />
+              <MapPin size={10} className="text-[#55DEE8]" />
               <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest truncate max-w-[100px]">
                 Set Location
               </span>
@@ -100,27 +100,27 @@ const Navbar = () => {
                     </label>
                     <ul tabIndex={0} className="dropdown-content z-[100] mt-4 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-xl w-48 overflow-hidden backdrop-blur-xl">
                       <li>
-                        <Link to="/business/venue" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                        <Link to="/business/venue" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#55DEE8] hover:bg-white/5 transition-all">
                           Venue Owner
                         </Link>
                       </li>
                       <li>
-                        <Link to="/business/coach" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                        <Link to="/business/coach" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#55DEE8] hover:bg-white/5 transition-all">
                           Coaches
                         </Link>
                       </li>
                       <li>
-                        <Link to="/business/official" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                        <Link to="/business/official" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#55DEE8] hover:bg-white/5 transition-all">
                           Umpire
                         </Link>
                       </li>
                       <li>
-                        <Link to="/business/scorer" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                        <Link to="/business/scorer" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#55DEE8] hover:bg-white/5 transition-all">
                           Scorer
                         </Link>
                       </li>
                       <li>
-                        <Link to="/business/streamer" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                        <Link to="/business/streamer" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#55DEE8] hover:bg-white/5 transition-all">
                           YouTube Streamer
                         </Link>
                       </li>
@@ -160,7 +160,7 @@ const Navbar = () => {
                   Login
                 </Link>
                 
-                <Link to="/signup" className="bg-[#84CC16] hover:bg-[#a3e635] text-black h-9 sm:h-11 px-4 sm:px-8 text-xs sm:text-sm font-bold flex items-center gap-2 sm:gap-3 rounded-xl transition-all shadow-[0_0_20px_rgba(132,204,22,0.2)]">
+                <Link to="/signup" className="text-black h-9 sm:h-11 px-4 sm:px-8 text-xs sm:text-sm font-bold flex items-center gap-2 sm:gap-3 rounded-xl transition-all shadow-[0_0_20px_rgba(85,222,232,0.4)] hover:scale-105" style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}>
                   Join Now <ArrowRight size={16} />
                 </Link>
               </>
@@ -177,8 +177,8 @@ const Navbar = () => {
 
                   {/* PROFILE DROPDOWN */}
                   <div className="dropdown dropdown-end group/profile">
-                    <div tabIndex={0} role="button" className="relative w-10 sm:w-12 h-10 sm:h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group overflow-hidden">
-                      <User size={22} className="text-white/40 group-hover:text-[#84CC16] transition-colors absolute inset-0 m-auto" />
+                    <div tabIndex={0} role="button" className="relative w-10 sm:w-12 h-10 sm:h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#55DEE8]/50 transition-all cursor-pointer rounded-full group overflow-hidden">
+                      <User size={22} className="text-white/40 group-hover:text-[#55DEE8] transition-colors absolute inset-0 m-auto" />
                       {(user?.profilePicture || user?.profileImage) ? (
                         <img 
                           src={user.profilePicture || user.profileImage} 
@@ -195,11 +195,11 @@ const Navbar = () => {
                         className="w-full h-full flex items-center justify-center relative z-10"
                         style={{ display: (user?.profilePicture || user?.profileImage) ? 'none' : 'flex' }}
                       >
-                        <span className="text-[#84CC16] font-bold text-sm">
+                        <span className="text-[#55DEE8] font-bold text-sm">
                           {user?.name ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2) : <User size={22} />}
                         </span>
                       </div>
-                      <div className="absolute inset-0 bg-[#84CC16]/10 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
+                      <div className="absolute inset-0 bg-[#55DEE8]/10 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
                     </div>
                     
                     <div tabIndex={0} className="dropdown-content mt-2 w-64 bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] overflow-hidden backdrop-blur-3xl animate-in fade-in slide-in-from-top-2 duration-300 z-[100]">
@@ -214,7 +214,7 @@ const Navbar = () => {
                             {(user?.profilePicture || user?.profileImage) ? (
                               <img src={user.profilePicture || user.profileImage} alt="" className="w-full h-full object-cover rounded-full" />
                             ) : (
-                              <User size={16} className="text-[#84CC16]" />
+                              <User size={16} className="text-[#55DEE8]" />
                             )}
                           </div>
                           <div className="flex-1 min-w-0">

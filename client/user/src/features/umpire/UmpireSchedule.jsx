@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, MapPin, Users, Clock, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, ArrowRight, Trophy } from "lucide-react";
 import useUmpireDashboard from "@hooks/owner/useUmpireDashboard";
 import DashboardSkeleton from "@features/venue-owner/Dashboard/DashboardSkeleton";
 
@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 export default function UmpireSchedule() {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
   const portalName = isScorer ? "SCORER" : "OFFICIAL";
 
   const { dashboardData, loading, error } = useUmpireDashboard();
@@ -29,23 +29,28 @@ export default function UmpireSchedule() {
       </div>
 
       {upcomingMatches.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#0A0A0A] rounded-[32px] border border-white/5 border-dashed p-12 text-center">
-          <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
-            <Calendar size={32} className="text-white/20" />
+        <div className="flex flex-col items-center justify-center min-h-[450px] bg-white/[0.03] backdrop-blur-xl rounded-lg border border-white/5 border-dashed p-12 text-center shadow-2xl relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
+          <div className="w-20 h-20 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-8 relative z-10 shadow-inner">
+            <Calendar size={40} className="text-neutral-600" />
           </div>
-          <h3 className="text-xl font-bold text-white uppercase tracking-tight mb-2">Schedule Clear</h3>
-          <p className="text-gray-500 text-sm max-w-xs mx-auto">No upcoming matches found in your roster. Please check back later for new assignments.</p>
+          <h3 className="text-[24px] font-black text-white uppercase tracking-[0.1em] font-inter mb-3 relative z-10">
+            Schedule <span style={{ color: themeColor }}>Clear</span>
+          </h3>
+          <p className="text-[10px] text-neutral-500 font-black uppercase tracking-[0.2em] font-inter max-w-sm leading-relaxed relative z-10">
+            No upcoming matches found in your roster.<br/>Please check back later for new assignments.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {upcomingMatches.map((match) => (
-            <div key={match._id} className="group relative bg-[#000000] border border-white/5 rounded-[24px] p-8 transition-all duration-500"
+            <div key={match._id} className="group relative bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-8 transition-all duration-500"
                  style={{ borderColor: "rgba(255,255,255,0.05)" }}
                  onMouseEnter={(e) => e.currentTarget.style.borderColor = `${themeColor}40`}
                  onMouseLeave={(e) => e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)"}>
               <div className="flex flex-col md:flex-row justify-between items-start gap-8">
                 <div className="flex gap-6 flex-1">
-                  <div className="flex flex-col items-center justify-center w-24 h-24 bg-white/5 rounded-2xl border border-white/10 text-center">
+                  <div className="flex flex-col items-center justify-center w-24 h-24 bg-[#2D2D2D]/30 rounded-[6px] border border-[#2D2D2D] text-center">
                     <span className="text-primary text-[10px] font-black uppercase tracking-widest mb-1">
                       {new Date(match.date).toLocaleString('default', { month: 'short' })}
                     </span>
@@ -81,11 +86,11 @@ export default function UmpireSchedule() {
                 </div>
 
                 <div className="w-full md:w-auto flex flex-col items-stretch gap-3 font-inter">
-                  <button className="px-8 py-3 text-black text-[11px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg"
+                  <button className="px-8 py-3 text-black text-[11px] font-bold uppercase tracking-widest rounded-[6px] transition-all shadow-lg"
                           style={{ backgroundColor: themeColor, boxShadow: `0 10px 20px ${themeColor}20` }}>
                     Confirm Availability
                   </button>
-                  <button className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white text-[11px] font-bold uppercase tracking-widest rounded-xl border border-white/10 transition-all">
+                  <button className="px-8 py-3 bg-transparent hover:bg-white/5 text-[#999999] hover:text-white text-[11px] font-bold uppercase tracking-widest rounded-[6px] border border-[#2D2D2D] transition-all">
                     Match Details
                   </button>
                 </div>

@@ -27,7 +27,7 @@ const BookingPass = () => {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-[#84CC16] border-t-transparent rounded-full animate-spin" />
+          <div className="w-12 h-12 border-4 border-[#55DEE8] border-t-transparent rounded-full animate-spin" />
           <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px]">Verifying Entry Pass...</p>
         </div>
       </div>
@@ -43,7 +43,7 @@ const BookingPass = () => {
           <p className="text-zinc-400 mb-8 text-sm">We couldn't find the booking pass you're looking for. It might have expired or doesn't exist.</p>
           <Link 
             to="/booking-history" 
-            className="inline-flex items-center gap-2 bg-[#84CC16] text-black px-8 py-4 rounded-2xl font-bold uppercase text-xs hover:scale-105 transition-transform"
+            className="inline-flex items-center gap-2 bg-[#55DEE8] text-black px-8 py-4 rounded-2xl font-bold uppercase text-xs hover:scale-105 transition-transform"
           >
             <ChevronLeft className="w-4 h-4" />
             My Bookings
@@ -68,10 +68,10 @@ const BookingPass = () => {
             Back
           </Link>
           <div className="flex gap-3">
-            <button className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-[#84CC16] transition-all">
+            <button className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-[#55DEE8] transition-all">
               <Download size={18} />
             </button>
-            <button className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-[#84CC16] transition-all">
+            <button className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-[#55DEE8] transition-all">
               <Share2 size={18} />
             </button>
           </div>
@@ -84,7 +84,7 @@ const BookingPass = () => {
           className="relative"
         >
           {/* Background Glow */}
-          <div className="absolute -inset-4 bg-[#84CC16]/10 blur-3xl rounded-[40px] pointer-events-none" />
+          <div className="absolute -inset-4 bg-[#55DEE8]/10 blur-3xl rounded-[40px] pointer-events-none" />
 
           {/* Pass Body */}
           <div className="relative bg-[#0A0A0A] border border-white/10 rounded-[40px] overflow-hidden shadow-2xl">
@@ -97,7 +97,7 @@ const BookingPass = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-transparent" />
               <div className="absolute bottom-6 left-8 right-8">
-                <div className="flex items-center gap-2 text-[#84CC16] font-bold text-[10px] uppercase tracking-widest mb-2">
+                <div className="flex items-center gap-2 text-[#55DEE8] font-bold text-[10px] uppercase tracking-widest mb-2">
                   <ShieldCheck size={14} />
                   <span>Verified Entry Pass</span>
                 </div>
@@ -114,14 +114,14 @@ const BookingPass = () => {
                 <div className="space-y-1.5">
                   <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Scheduled For</p>
                   <div className="flex items-center gap-2 text-white font-bold">
-                    <Calendar size={16} className="text-[#84CC16]" />
+                    <Calendar size={16} className="text-[#55DEE8]" />
                     <span className="text-sm">{timeSlot.date}</span>
                   </div>
                 </div>
                 <div className="space-y-1.5">
                   <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Time Window</p>
                   <div className="flex items-center gap-2 text-white font-bold">
-                    <Clock size={16} className="text-[#84CC16]" />
+                    <Clock size={16} className="text-[#55DEE8]" />
                     <span className="text-sm">{timeSlot.formattedStartTime} - {timeSlot.formattedEndTime}</span>
                   </div>
                 </div>
@@ -131,7 +131,7 @@ const BookingPass = () => {
               <div className="space-y-3">
                 <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Venue Location</p>
                 <div className="flex items-start gap-3 bg-white/5 p-4 rounded-2xl border border-white/5">
-                  <div className="p-2 bg-[#84CC16]/10 text-[#84CC16] rounded-xl shrink-0">
+                  <div className="p-2 bg-[#55DEE8]/10 text-[#55DEE8] rounded-xl shrink-0">
                     <MapPin size={18} />
                   </div>
                   <div className="flex-1">
@@ -140,7 +140,7 @@ const BookingPass = () => {
                       href={turf.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(turf.location)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-[#84CC16] text-[10px] font-black uppercase tracking-wider hover:underline"
+                      className="inline-flex items-center gap-1.5 text-[#55DEE8] text-[10px] font-black uppercase tracking-wider hover:underline"
                     >
                       <Navigation size={10} />
                       Start Navigation
@@ -154,11 +154,11 @@ const BookingPass = () => {
                 <div className="flex justify-between items-center">
                   <div className="space-y-0.5">
                     <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-tight">Total Value</p>
-                    <p className="text-sm font-black text-white">â‚¹{totalPrice}</p>
+                    <p className="text-sm font-black text-white">Gé¦{totalPrice}</p>
                   </div>
                   <div className="text-right space-y-0.5">
                     <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-tight">Status</p>
-                    <p className={`text-[10px] font-black uppercase ${booking.paymentType === "PARTIAL" ? "text-orange-400" : "text-[#84CC16]"}`}>
+                    <p className={`text-[10px] font-black uppercase ${booking.paymentType === "PARTIAL" ? "text-orange-400" : "text-[#55DEE8]"}`}>
                         {booking.paymentType === "PARTIAL" ? "Partial Paid" : "Fully Paid"}
                     </p>
                   </div>
@@ -166,18 +166,18 @@ const BookingPass = () => {
 
                 <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-[#84CC16] uppercase tracking-tighter">
+                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-[#55DEE8] uppercase tracking-tighter">
                       <ShieldCheck size={10} />
                       <span>Advance Paid</span>
                     </div>
-                    <p className="text-lg font-black text-white leading-none">â‚¹{booking.advanceAmount || totalPrice}</p>
+                    <p className="text-lg font-black text-white leading-none">Gé¦{booking.advanceAmount || totalPrice}</p>
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5 text-[9px] font-bold text-orange-400 uppercase tracking-tighter">
                       <Clock size={10} />
                       <span>Balance at Venue</span>
                     </div>
-                    <p className="text-lg font-black text-white leading-none">â‚¹{booking.balanceAmount || 0}</p>
+                    <p className="text-lg font-black text-white leading-none">Gé¦{booking.balanceAmount || 0}</p>
                   </div>
                 </div>
 
@@ -195,9 +195,9 @@ const BookingPass = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {turf.managerContacts && turf.managerContacts.length > 0 ? (
                     turf.managerContacts.map((manager, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl group hover:border-[#84CC16]/30 transition-all">
+                      <div key={idx} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl group hover:border-[#55DEE8]/30 transition-all">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-[#84CC16]">
+                          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-[#55DEE8]">
                             <UserIcon size={14} />
                           </div>
                           <div className="space-y-0.5">
@@ -205,7 +205,7 @@ const BookingPass = () => {
                             <p className="text-xs font-bold text-white">{manager.phone}</p>
                           </div>
                         </div>
-                        <a href={`tel:${manager.phone}`} className="p-2 bg-[#84CC16] text-black rounded-lg hover:scale-110 transition-transform">
+                        <a href={`tel:${manager.phone}`} className="p-2 bg-[#55DEE8] text-black rounded-lg hover:scale-110 transition-transform">
                           <Phone size={14} fill="currentColor" />
                         </a>
                       </div>
@@ -224,13 +224,13 @@ const BookingPass = () => {
                  <div className="flex flex-col gap-2">
                     {turf.owner?.email && (
                       <div className="flex items-center gap-3 text-xs">
-                        <Mail size={14} className="text-[#84CC16]" />
+                        <Mail size={14} className="text-[#55DEE8]" />
                         <span className="text-zinc-400 font-bold uppercase text-[10px]">Venue:</span>
                         <span className="text-white font-medium">{turf.owner.email}</span>
                       </div>
                     )}
                     <div className="flex items-center gap-3 text-xs">
-                        <Mail size={14} className="text-[#84CC16]" />
+                        <Mail size={14} className="text-[#55DEE8]" />
                         <span className="text-zinc-400 font-bold uppercase text-[10px]">Support:</span>
                         <span className="text-white font-medium">contact@kridaz.com</span>
                     </div>
@@ -240,7 +240,7 @@ const BookingPass = () => {
               {/* QR Code Divider */}
               <div className="flex items-center gap-4 py-4">
                 <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-white/10" />
-                <div className="w-2 h-2 rounded-full bg-[#84CC16]/20" />
+                <div className="w-2 h-2 rounded-full bg-[#55DEE8]/20" />
                 <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-white/10" />
               </div>
 
@@ -262,7 +262,7 @@ const BookingPass = () => {
             </div>
 
             {/* Bottom Footer Accent */}
-            <div className="p-6 bg-[#84CC16] text-black flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="p-6 bg-[#55DEE8] text-black flex flex-col sm:flex-row justify-between items-center gap-4">
                <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
                     <Zap size={16} fill="currentColor" />
@@ -273,7 +273,7 @@ const BookingPass = () => {
                     {booking.cashback > 0 && (
                         <>
                             <span className="w-1 h-1 bg-black rounded-full" />
-                            <span>â‚¹{booking.cashback} Cashback</span>
+                            <span>Gé¦{booking.cashback} Cashback</span>
                         </>
                     )}
                   </div>
@@ -282,7 +282,7 @@ const BookingPass = () => {
                   <span className="text-[10px] font-black uppercase">
                     {booking.paymentType === "PARTIAL" ? "Booking Value:" : "Total Paid:"}
                   </span>
-                  <span className="text-lg font-black italic">â‚¹{totalPrice}</span>
+                  <span className="text-lg font-black italic">Gé¦{totalPrice}</span>
                </div>
             </div>
           </div>

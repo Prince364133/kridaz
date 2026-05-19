@@ -1,19 +1,19 @@
-import React from "react";
+﻿import React from "react";
 import { Link } from "react-router-dom";
 
 const DataDeletionInstructions = () => {
   return (
-    <div className="min-h-screen bg-[#050505] text-white pt-24 pb-12 font-sans selection:bg-[#84CC16]/30">
+    <div className="min-h-screen bg-[#050505] text-white pt-24 pb-12 font-sans selection:bg-[#55DEE8]/30">
       <div className="container mx-auto px-6 max-w-4xl">
-        <h1 className="text-4xl font-black mb-8 uppercase tracking-tight text-[#84CC16]">Data Deletion Instructions</h1>
+        <h1 className="text-4xl font-black mb-8 uppercase tracking-tight text-[#55DEE8]">Data Deletion Instructions</h1>
         
         <div className="space-y-8 text-white/70 leading-relaxed text-sm md:text-base">
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">1. Deleting Your Account on Kridaz</h2>
             <p>At Kridaz, we respect your privacy. If you wish to delete your account and remove your personal data from our active databases, you can do so by:</p>
             <ul className="list-disc pl-6 mt-4 space-y-2">
-              <li>Logging in to your account, navigating to the <Link to="/profile" className="text-[#84CC16] hover:underline">Profile Settings</Link> section, and selecting "Delete Account".</li>
-              <li>Or, sending an email to <a href="mailto:privacy@kridaz.com" className="text-[#84CC16] hover:underline">privacy@kridaz.com</a> with the subject line "Data Deletion Request".</li>
+              <li>Logging in to your account, navigating to the <Link to="/profile" className="text-[#55DEE8] hover:underline">Profile Settings</Link> section, and selecting "Delete Account".</li>
+              <li>Or, sending an email to <a href="mailto:privacy@kridaz.com" className="text-[#55DEE8] hover:underline">privacy@kridaz.com</a> with the subject line "Data Deletion Request".</li>
             </ul>
           </section>
 
@@ -36,13 +36,13 @@ const DataDeletionInstructions = () => {
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">4. Contact Us</h2>
-            <p>If you need assistance with the data deletion process, please contact us at <a href="mailto:privacy@kridaz.com" className="text-[#84CC16] hover:underline">privacy@kridaz.com</a>.</p>
+            <p>If you need assistance with the data deletion process, please contact us at <a href="mailto:privacy@kridaz.com" className="text-[#55DEE8] hover:underline">privacy@kridaz.com</a>.</p>
           </section>
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/10">
-          <Link to="/" className="text-[#84CC16] hover:underline font-bold uppercase tracking-wider text-sm">
-            ← Back to Home
+          <Link to="/" className="text-[#55DEE8] hover:underline font-bold uppercase tracking-wider text-sm">
+            ΓåÉ Back to Home
           </Link>
         </div>
       </div>

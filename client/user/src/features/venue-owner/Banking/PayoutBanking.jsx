@@ -3,7 +3,7 @@ import {
   Coins, Landmark, CreditCard, ArrowUpRight, TrendingUp, 
   History, Calendar, ShieldCheck, Download, Plus, 
   FileText, Upload, CheckCircle, AlertCircle, Lock,
-  ArrowDownLeft, IndianRupee, Wallet, CalendarDays, Zap, X
+  ArrowDownLeft, IndianRupee, Wallet, CalendarDays, Zap
 } from "lucide-react";
 import useBanking from "@hooks/owner/useBanking";
 import useOwnerDashboard from "@hooks/owner/useOwnerDashboard";
@@ -12,14 +12,14 @@ import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
 /**
- * PayoutBanking ‚Äî Secure banking, KYC, and settlement management.
+ * PayoutBanking G«ˆ Secure banking, KYC, and settlement management.
  * Fully standardized for the Console design language (Inter font, 8px radii, glassmorphism).
  */
 
 const PayoutBanking = () => {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
   const vaultTitle = isScorer ? "Payout & Settlement" : "Marketplace Vault";
 
   const { bankingDetails, walletBalance, payoutSettings, loading: bankingLoading, isPayoutDay, updateBanking, requestPayout, verifyPassword } = useBanking();
@@ -233,7 +233,7 @@ const PayoutBanking = () => {
                                         </div>
                                         <div>
                                            <p className="text-sm font-black uppercase tracking-tight text-white">{tx.description || `Log #${tx._id?.slice(-6).toUpperCase()}`}</p>
-                                           <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest mt-1">{tx.type} ‚Ä¢ {tx.status}</p>
+                                           <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest mt-1">{tx.type} G«Û {tx.status}</p>
                                         </div>
                                      </div>
                                   </td>
@@ -347,7 +347,7 @@ const PayoutBanking = () => {
                           </div>
                           <div>
                              <p className="text-[15px] font-black text-white uppercase tracking-tight">{bankingDetails?.bankName || "HDFC Bank"}</p>
-                             <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mt-1">Ending in ‚Ä¢‚Ä¢‚Ä¢‚Ä¢ {bankingDetails?.accountNumber?.slice(-4) || "4920"}</p>
+                             <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mt-1">Ending in G«ÛG«ÛG«ÛG«Û {bankingDetails?.accountNumber?.slice(-4) || "4920"}</p>
                           </div>
                        </div>
 
@@ -462,7 +462,7 @@ const PayoutBanking = () => {
                           <input 
                             type="password"
                             className="w-full bg-black border border-white/5 rounded-lg px-6 py-5 text-lg focus:outline-none focus:border-[#00C187]/30 text-white font-black"
-                            placeholder="‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢‚Ä¢"
+                            placeholder="G«ÛG«ÛG«ÛG«ÛG«ÛG«ÛG«ÛG«Û"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                           />

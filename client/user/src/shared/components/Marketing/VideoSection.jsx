@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
+﻿import { useEffect, useRef } from "react";
 import { Play, Youtube } from "lucide-react";
 import { gsap } from "gsap";
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
 
 export const VideoSection = ({ videos = [] }) => {
  const scrollRef = useRef(null);
@@ -80,7 +80,7 @@ export const VideoSection = ({ videos = [] }) => {
  />
  
  <div className="absolute inset-0 flex items-center justify-center">
- <div className="w-16 h-16 rounded-full bg-primary/20 backdrop-blur-md border border-primary/40 flex items-center justify-center text-primary scale-90 group-hover:scale-110 transition-all duration-500 shadow-[0_0_30px_rgba(132,204,22,0.3)]">
+ <div className="w-16 h-16 rounded-full bg-primary/20 backdrop-blur-md border border-primary/40 flex items-center justify-center text-primary scale-90 group-hover:scale-110 transition-all duration-500 shadow-[0_0_30px_rgba(85,222,232,0.3)]">
  <Play size={28} fill={PRI} />
  </div>
  </div>

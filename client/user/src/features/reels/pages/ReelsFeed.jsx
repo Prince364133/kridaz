@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useGetReelsFeedQuery, reelsApi } from '@redux/api/reelsApi';
-import ReelItem from '@features/reels/components/ReelItem';
+import ReelItem from '@components/common/ReelItem';
 import { ChevronLeft, Camera } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSocket } from '@context/SocketContext';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const ReelsFeed = () => {
   const navigate = useNavigate();
@@ -13,9 +13,19 @@ const ReelsFeed = () => {
   const { id: initialId } = useParams();
   const [cursor, setCursor] = useState(null);
   const { data, isLoading, isFetching } = useGetReelsFeedQuery({ cursor, initialId });
+  
+  // Optimistic UI state
+  const { isUploading, activeUpload } = useSelector(state => state.mediaUpload);
+  const { user } = useSelector(state => state.auth);
+
   const [activeIndex, setActiveIndex] = useState(0);
   const feedRef = useRef(null);
   const isInitialScrollDone = useRef(false);
+
+  // Combine real reels with optimistic one
+  const reels = React.useMemo(() => {
+    return data?.reels || [];
+  }, [data?.reels]);
 
   // Socket listeners for real-time updates
   useEffect(() => {
@@ -23,7 +33,7 @@ const ReelsFeed = () => {
 
     socket.on('reel_liked', ({ reelId, likes }) => {
       dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', { cursor, initialId }, (draft) => {
+        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
           const reel = draft.reels.find((r) => r._id === reelId);
           if (reel) {
             reel.stats.likes = likes;
@@ -34,7 +44,7 @@ const ReelsFeed = () => {
 
     socket.on('reel_commented', ({ reelId }) => {
       dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', { cursor, initialId }, (draft) => {
+        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
           const reel = draft.reels.find((r) => r._id === reelId);
           if (reel) {
             reel.stats.comments += 1;
@@ -45,58 +55,107 @@ const ReelsFeed = () => {
 
     socket.on('reel_deleted', ({ reelId }) => {
       dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', { cursor, initialId }, (draft) => {
+        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
+          if (!draft || !draft.reels) return;
           draft.reels = draft.reels.filter((r) => r._id !== reelId);
         })
       );
+    });
+    
+    socket.on('MEDIA_PROCESSING_PROGRESS', ({ mediaId, mediaType, progress, status }) => {
+      if (mediaType === 'reel') {
+        dispatch(
+          reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
+            if (!draft || !draft.reels) return;
+            const reel = draft.reels.find((r) => r._id === mediaId);
+            if (reel) {
+              reel.status = 'pending';
+              reel.processingProgress = progress;
+              reel.processingStatus = status;
+            }
+          })
+        );
+      }
+    });
+
+    socket.on('MEDIA_PROCESSING_COMPLETE', ({ mediaId, mediaType, hlsUrl, thumbnailUrl }) => {
+      if (mediaType === 'reel') {
+        dispatch(
+          reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
+            if (!draft || !draft.reels) return;
+            const reel = draft.reels.find((r) => r._id === mediaId);
+            if (reel) {
+              reel.status = 'ready';
+              reel.hlsUrl = hlsUrl;
+              reel.thumbnailUrl = thumbnailUrl;
+            }
+          })
+        );
+      }
     });
 
     return () => {
       socket.off('reel_liked');
       socket.off('reel_commented');
       socket.off('reel_deleted');
+      socket.off('MEDIA_PROCESSING_PROGRESS');
+      socket.off('MEDIA_PROCESSING_COMPLETE');
     };
   }, [socket, dispatch, cursor, initialId]);
 
-  const handleScroll = () => {
-    if (!feedRef.current) return;
-    const scrollPos = feedRef.current.scrollTop;
-    const itemHeight = feedRef.current.clientHeight;
-    const index = Math.round(scrollPos / itemHeight);
-    
-    if (index !== activeIndex) {
-      setActiveIndex(index);
-      
-      // Mask URL like YouTube Shorts
-      const currentReel = data?.reels[index];
-      if (currentReel) {
-        window.history.replaceState(null, '', `/shorts/${currentReel._id}`);
-      }
-    }
+  // IntersectionObserver for active reel tracking
+  useEffect(() => {
+    if (!reels || reels.length === 0) return;
 
-    // Load more when reaching near the end
-    if (data?.reels && index >= data.reels.length - 2 && !isFetching && data.nextCursor) {
-      setCursor(data.nextCursor);
-    }
-  };
+    const observerOptions = {
+      root: feedRef.current,
+      threshold: 0.5, // Reel is active when 50% visible
+    };
+
+    const observerCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const index = parseInt(entry.target.getAttribute('data-index'));
+          if (index !== activeIndex) {
+            setActiveIndex(index);
+            
+            // Mask URL (only for non-temp reels)
+            const currentReel = reels[index];
+            if (currentReel && !currentReel.temp) {
+              window.history.replaceState(null, '', `/shorts/${currentReel._id}`);
+            }
+
+            // Load more trigger
+            if (index >= reels.length - 3 && !isFetching && data?.nextCursor) {
+              setCursor(data.nextCursor);
+            }
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    const elements = feedRef.current.querySelectorAll('.reels-item-wrapper');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [reels, activeIndex, isFetching, data?.nextCursor]);
 
   // Ensure we are at the top if initialId is provided
   useEffect(() => {
-    if (data?.reels && !isInitialScrollDone.current) {
+    if (reels.length > 0 && !isInitialScrollDone.current) {
       isInitialScrollDone.current = true;
-      // If we are on /shorts/:id, the backend already put it at index 0
-      // so we just need to ensure URL is correct and active index is 0
       if (initialId) {
         setActiveIndex(0);
         window.history.replaceState(null, '', `/shorts/${initialId}`);
       }
     }
-  }, [data, initialId]);
+  }, [reels, initialId]);
 
   if (isLoading && !data) {
     return (
       <div className="h-screen w-full bg-black flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#84CC16] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-[#55DEE8] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -123,21 +182,32 @@ const ReelsFeed = () => {
       {/* Vertical Feed Container */}
       <div 
         ref={feedRef}
-        onScroll={handleScroll}
-        className="reels-feed-container scrollbar-hide"
+        className="reels-feed-container scrollbar-hide snap-y snap-mandatory overflow-y-auto h-full w-full max-w-[500px]"
       >
-        {data?.reels.map((reel, index) => {
+        {reels.map((reel, index) => {
+          // Preload: render actual component if within 2 items of active
           const isNear = Math.abs(index - activeIndex) <= 2;
+          const isActive = index === activeIndex;
           
           return (
-            <div key={reel._id} className="reels-item">
+            <div 
+              key={reel._id} 
+              data-index={index}
+              className="reels-item-wrapper w-full h-full snap-start snap-always"
+            >
               {isNear ? (
                 <ReelItem 
                   reel={reel} 
-                  isVisible={index === activeIndex} 
+                  isVisible={isActive}
+                  isNext={index === activeIndex + 1}
                 />
               ) : (
-                <div className="w-full h-full bg-black" />
+                <div className="w-full h-full bg-black flex items-center justify-center">
+                   {/* Show thumbnail placeholder for far-away items if available */}
+                   {reel.thumbnailUrl && (
+                     <img src={reel.thumbnailUrl} alt="" className="w-full h-full object-cover opacity-20 blur-sm" />
+                   )}
+                </div>
               )}
             </div>
           );
@@ -145,17 +215,17 @@ const ReelsFeed = () => {
         
         {isFetching && (
           <div className="h-full w-full flex items-center justify-center snap-start">
-            <div className="w-8 h-8 border-3 border-[#84CC16] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-3 border-[#55DEE8] border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}
 
-        {data?.reels.length === 0 && !isLoading && (
+        {reels.length === 0 && !isLoading && (
           <div className="h-full w-full flex flex-col items-center justify-center text-white p-8">
             <p className="text-lg font-semibold mb-2">No reels yet</p>
             <p className="text-gray-400 text-center">Be the first one to post a reel!</p>
             <button 
               onClick={() => navigate('/reels/upload')}
-              className="mt-6 px-6 py-2 bg-[#84CC16] text-black font-bold rounded-full hover:scale-105 active:scale-95 transition-transform"
+              className="mt-6 px-6 py-2 bg-[#55DEE8] text-black font-bold rounded-full hover:scale-105 active:scale-95 transition-transform"
             >
               Create Short
             </button>

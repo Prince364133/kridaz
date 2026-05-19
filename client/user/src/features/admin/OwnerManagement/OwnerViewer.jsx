@@ -6,7 +6,7 @@ import SearchBar from "./SearchBar";
 import OwnersSkeleton from "./OwnersSkeleton";
 import { Users, Building, Activity, ShieldCheck, Search, Filter, Trash2, Ban, CheckCircle, X } from "lucide-react";
 import CountUp from "react-countup";
-import ConfirmationModal from "../../shared/ConfirmationModal";
+import ConfirmationModal from "@components/shared/ConfirmationModal";
 
 const OwnerViewer = () => {
   const { 

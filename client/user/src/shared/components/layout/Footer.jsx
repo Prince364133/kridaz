@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -12,10 +12,10 @@ const Footer = () => {
         </p>
         <div className="w-full h-px bg-white/5 mb-10"></div>
         <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-10">
-            <Link to="/privacy-policy" className="text-xs text-white/50 hover:text-[#84CC16] transition-colors cursor-pointer">Privacy Policy</Link>
-            <Link to="/terms-of-service" className="text-xs text-white/50 hover:text-[#84CC16] transition-colors cursor-pointer">Terms of Service</Link>
-            <Link to="/data-deletion-instructions" className="text-xs text-white/50 hover:text-[#84CC16] transition-colors cursor-pointer">Data Deletion Instructions</Link>
-            <span className="text-xs text-white/50 hover:text-[#84CC16] transition-colors cursor-pointer">Support Center</span>
+            <Link to="/privacy-policy" className="text-xs text-white/50 hover:text-[#55DEE8] transition-colors cursor-pointer">Privacy Policy</Link>
+            <Link to="/terms-of-service" className="text-xs text-white/50 hover:text-[#55DEE8] transition-colors cursor-pointer">Terms of Service</Link>
+            <Link to="/data-deletion-instructions" className="text-xs text-white/50 hover:text-[#55DEE8] transition-colors cursor-pointer">Data Deletion Instructions</Link>
+            <span className="text-xs text-white/50 hover:text-[#55DEE8] transition-colors cursor-pointer">Support Center</span>
         </div>
         <p className="text-white/20 text-[10px] uppercase tracking-widest">
           &copy; {new Date().getFullYear()} Kridaz. All rights reserved.

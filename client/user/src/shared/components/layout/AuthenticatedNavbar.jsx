@@ -26,7 +26,7 @@ import useNotifications from "@hooks/shared/useNotifications";
 import { formatDistanceToNow } from 'date-fns';
 
 /**
- * AuthenticatedNavbar â€” Role-aware top navigation.
+ * AuthenticatedNavbar GÇö Role-aware top navigation.
  * Fully rebranded for Scorer users with Teal Green (#00C187) and Inter typography.
  */
 
@@ -42,7 +42,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const user = useSelector((state) => state?.auth?.user);
   const role = useSelector((state) => state?.auth?.role);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
 
   const { notifications, loading, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
 
