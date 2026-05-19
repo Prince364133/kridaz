@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import StoryViewer from "@components/StoryViewer";
+import StoryViewer from "@features/networking/components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import NearbyPlayersMap from "@components/map/NearbyPlayersMap";
 import { useSocket } from "@context/SocketContext";

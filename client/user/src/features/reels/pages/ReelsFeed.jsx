@@ -1,6 +1,6 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGetReelsFeedQuery, reelsApi } from '@redux/api/reelsApi';
-import ReelItem from '@components/common/ReelItem';
+import ReelItem from '@features/reels/components/ReelItem';
 import { ChevronLeft, Camera } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSocket } from '@context/SocketContext';

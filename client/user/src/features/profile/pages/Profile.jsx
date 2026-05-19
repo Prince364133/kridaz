@@ -16,9 +16,9 @@ import { login, logout, updateUser, followUser, unfollowUser } from "@redux/slic
 import useBookingHistory from "@hooks/useBookingHistory";
 import useWriteReview from "@hooks/useWriteReview";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
-import TurfBookingHistory from "@components/turf/TurfBookingHistory";
+import TurfBookingHistory from "@features/turf/components/TurfBookingHistory";
 import TurfBookingHistorySkeleton from "@components/ui/TurfBookingHistorySkeleton";
-import StoryViewer from "@components/StoryViewer";
+import StoryViewer from "@features/networking/components/StoryViewer";
 import EditProfileModal from "@components/modals/EditProfileModal";
 
 const PRI = "#55DEE8";

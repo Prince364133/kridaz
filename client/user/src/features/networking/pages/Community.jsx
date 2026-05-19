@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import StoryViewer from "@components/StoryViewer";
+import StoryViewer from "@features/networking/components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import {
   communityApi,
@@ -34,7 +34,7 @@ import {
 } from "@redux/api/communityApi";
 import { useGetReelsFeedQuery } from "@redux/api/reelsApi";
 import { startUpload } from "@redux/slices/mediaUploadSlice";
-import ReelItem from "@components/common/ReelItem";
+import ReelItem from "@features/reels/components/ReelItem";
 import { useSocket } from "@context/SocketContext";
 import { uploadFileToR2 } from "@utils/mediaUpload";
 
