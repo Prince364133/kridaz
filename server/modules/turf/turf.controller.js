@@ -7,6 +7,7 @@ import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { findNearby, updateGeoPoint } from "../../utils/geo.util.js";
 import { getOrSetCache, generateCacheKey, invalidateCache } from "../../utils/cache.js";
 import logger from "../../utils/logger.js";
+import { getGroundRecommendations } from "../../services/recommendation.service.js";
 
 // --- USER OPERATIONS ---
 
@@ -1041,3 +1042,111 @@ export const deleteTurf = async (req, res) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+
+// Toggle turf like/wishlist
+export const toggleTurfLike = async (req, res) => {
+  const { turfId } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const existing = await prisma.turfLike.findUnique({
+      where: { userId_turfId: { userId, turfId } }
+    });
+
+    if (existing) {
+      await prisma.turfLike.delete({ where: { id: existing.id } });
+      return res.status(200).json({ success: true, message: "Unliked successfully", liked: false });
+    }
+
+    await prisma.turfLike.create({ data: { userId, turfId } });
+    return res.status(200).json({ success: true, message: "Liked successfully", liked: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Record turf share interaction
+export const recordTurfShare = async (req, res) => {
+  const { turfId } = req.body;
+  const userId = req.user?.id || null;
+
+  try {
+    await prisma.turfInteraction.create({
+      data: { userId, turfId, interactionType: "SHARE" }
+    });
+    return res.status(200).json({ success: true, message: "Share recorded successfully" });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Record general turf interaction (VIEW, CLICK, etc.)
+export const recordTurfInteraction = async (req, res) => {
+  const { turfId, type, duration } = req.body;
+  const userId = req.user?.id || null;
+
+  try {
+    await prisma.turfInteraction.create({
+      data: { 
+        userId, 
+        turfId, 
+        interactionType: type || "VIEW", 
+        duration: duration || 0 
+      }
+    });
+    return res.status(200).json({ success: true, message: "Interaction recorded successfully" });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Fetch personalized turf recommendations feed
+export const getTurfRecommendations = async (req, res) => {
+  const userId = req.user?.id || null;
+  const { lat, lng, limit } = req.query;
+
+  try {
+    const data = await getGroundRecommendations(userId, lat, lng, limit || 15);
+    return res.status(200).json({ success: true, count: data.length, data });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Fetch similar turf recommendations based on turf details and location proximity
+export const getSimilarTurfs = async (req, res) => {
+  const { id } = req.params;
+  const { limit = 4 } = req.query;
+  const userId = req.user?.id || null;
+
+  try {
+    const currentTurf = await prisma.turf.findUnique({
+      where: { id }
+    });
+
+    if (!currentTurf) {
+      return res.status(404).json({ success: false, message: "Turf not found" });
+    }
+
+    // Call recommendation service with current turf coordinates as baseline
+    const recommendations = await getGroundRecommendations(
+      userId,
+      currentTurf.latitude,
+      currentTurf.longitude,
+      parseInt(limit) + 1
+    );
+
+    // Filter out the current turf itself from recommendation results
+    const filteredRecs = recommendations.filter(t => t.id !== id).slice(0, parseInt(limit));
+
+    return res.status(200).json({
+      success: true,
+      count: filteredRecs.length,
+      data: filteredRecs
+    });
+  } catch (err) {
+    logger.error("[RECS] Failed to fetch similar recommendations:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+

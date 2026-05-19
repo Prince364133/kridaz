@@ -9,6 +9,9 @@ import useWriteReview from "@hooks/useWriteReview";
 import TurfBookingHistorySkeleton from "@components/ui/TurfBookingHistorySkeleton";
 import WriteReview from "@components/reviews/WriteReview";
 import RaiseDisputeModal from "@components/dispute/RaiseDisputeModal";
+import useSimilarRecommendations from "@hooks/useSimilarRecommendations";
+import useRecommendations from "@hooks/useRecommendations";
+import { TurfCard } from "@features/turf";
 
 // ── Design tokens (exact match to OwnerDashboard) ──────────────────────────
 const BG = "#000000";
@@ -40,6 +43,13 @@ const TurfBookingHistory = () => {
  } = useWriteReview();
 
  const [selectedDisputeBooking, setSelectedDisputeBooking] = useState(null);
+
+ // Proximity recommendations near user's latest booked turf
+ const latestTurfId = bookings?.[0]?.turf?.id || bookings?.[0]?.turf?._id;
+ const { similarTurfs, loading: similarLoading } = useSimilarRecommendations(latestTurfId, { limit: 4 });
+
+ // General proximity recommendations for empty booking states
+ const { recommendations, loading: recsLoading } = useRecommendations({ limit: 4 });
 
  const fetchBookingsRefresh = () => window.location.reload();
 
@@ -146,6 +156,88 @@ const TurfBookingHistory = () => {
       })
     )}
   </div>
+
+  {/* Case A: Bookings exist -> Render Proximity Recommendations near latest venue */}
+  {bookings.length > 0 && (similarLoading || (similarTurfs && similarTurfs.length > 0)) && (
+    <div className="mt-16 pt-10 border-t border-white/5 space-y-6">
+      <div className="space-y-1">
+        <h3 className="text-lg font-black uppercase text-[#CCFF00] tracking-tight flex items-center gap-2">
+          Recommended Arenas Near You
+        </h3>
+        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest font-inter">
+          Handpicked grounds matching your recent game history
+        </p>
+      </div>
+
+      {similarLoading ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          {[...Array(4)].map((_, i) => (
+            <div 
+              key={i} 
+              className="h-[280px] rounded-[24px] bg-[#111] border border-white/5 animate-pulse relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent h-[50%]" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 space-y-2">
+                <div className="h-4 bg-white/10 rounded w-[80%]" />
+                <div className="h-3 bg-white/5 rounded w-[50%]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          {similarTurfs.map((t) => (
+            <TurfCard 
+              key={t.id || t._id} 
+              turf={t} 
+              distance={t.distance ? `${(t.distance / 1000).toFixed(1)} km Away` : "Nearby"}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )}
+
+  {/* Case B: Bookings is empty -> Render general trending proximity feeds */}
+  {bookings.length === 0 && (recsLoading || (recommendations && recommendations.length > 0)) && (
+    <div className="mt-16 pt-10 border-t border-white/5 space-y-6">
+      <div className="space-y-1 text-center md:text-left">
+        <h3 className="text-lg font-black uppercase text-[#CCFF00] tracking-tight flex items-center gap-2 justify-center md:justify-start">
+          Trending Arenas Near You
+        </h3>
+        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest font-inter">
+          Highly frequented grounds & elite hubs active in your city
+        </p>
+      </div>
+
+      {recsLoading ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          {[...Array(4)].map((_, i) => (
+            <div 
+              key={i} 
+              className="h-[280px] rounded-[24px] bg-[#111] border border-white/5 animate-pulse relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent h-[50%]" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 space-y-2">
+                <div className="h-4 bg-white/10 rounded w-[80%]" />
+                <div className="h-3 bg-white/5 rounded w-[50%]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          {recommendations.map((t) => (
+            <TurfCard 
+              key={t.id || t._id} 
+              turf={t} 
+              distance={t.distance ? `${(t.distance / 1000).toFixed(1)} km Away` : "Nearby"}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )}
 
   {/* ── Modals ──────────────────────────────────────────────────────── */}
   {isReviewModalOpen && (

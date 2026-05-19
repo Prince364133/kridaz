@@ -13,6 +13,25 @@ const sidebars: SidebarsConfig = {
         'backend/architecture',
         'backend/module-guide',
         'backend/security',
+        'backend/recommendation-engine',
+        'backend/ground-recommendation-postgres-plan',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Upcoming Features',
+      items: [
+        'backend/ads-platform',
+        'backend/tournament-stage-builder',
+        {
+          type: 'category',
+          label: 'Tournament Stage Builder (Postgres)',
+          items: [
+            'backend/tournament/architecture',
+            'backend/tournament/prompts',
+          ],
+        },
+        'backend/voice-rooms',
       ],
     },
     {

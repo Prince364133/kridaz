@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import useTurfData from "@hooks/useTurfData";
+import useRecommendations from "@hooks/useRecommendations";
 import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, MessageSquare, MessageSquareShare, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus, Loader2, LayoutGrid, Video } from "lucide-react";
 import toast from "react-hot-toast";
 import { AdBannerSection } from "@components/Marketing/AdBannerSection";
@@ -84,6 +85,11 @@ export default function Home() {
  const [playerFilters, setPlayerFilters] = useState({});
  const [userLocation, setUserLocation] = useState(null);
  const { turfs, loading: turfLoading, error } = useTurfData(turfFilters);
+  const { recommendations, loading: recsLoading } = useRecommendations({
+    lat: userLocation?.lat,
+    lng: userLocation?.lng,
+    limit: 4
+  });
  const [locationStatus, setLocationStatus] = useState("detecting");
  const [marketing, setMarketing] = useState({ banners: [], videos: [] });
  const [loading, setLoading] = useState(true);
@@ -155,9 +161,9 @@ export default function Home() {
  }
  };
 
- // useEffect(() => {
- // detectLocation();
- // }, []);
+  useEffect(() => {
+    detectLocation();
+  }, []);
 
  useEffect(() => {
  const fetchData = async () => {
@@ -444,6 +450,34 @@ export default function Home() {
  Players
  </Link>
  </div>
+  
+  {/* ── RECOMMENDED FOR YOU (Personalized Feed) ── */}
+  {recommendations && recommendations.length > 0 && (
+    <section className="py-6 lg:py-12 px-4 lg:px-12 w-full animate-fade-in" style={{ backgroundColor: "#0A0A0A" }}>
+      <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10 border-b border-white/5 pb-8">
+        <div className="relative">
+          <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#84CC16] rounded-full shadow-[0_0_20px_rgba(132,204,22,0.4)] hidden md:block"></div>
+          <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none font-open-sans flex items-center gap-3">
+            🎯 Curated <span className="text-[#84CC16]">For You</span>
+          </h2>
+          <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-3 font-inter">
+            ML Personalisation Feed • Based on Your Behavior & Location
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+        {recommendations.map((t) => (
+          <TurfCard 
+            key={t.id || t._id} 
+            turf={t} 
+            distance={t.distance ? `${(t.distance / 1000).toFixed(1)} km Away` : "Nearby"}
+            featured={true}
+          />
+        ))}
+      </div>
+    </section>
+  )}
 
 
  {/* ── FIND YOUR ARENA ── */}

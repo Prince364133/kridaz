@@ -9,6 +9,8 @@ import TurfDetailsSkeleton from "../ui/TurfDetailsSkeleton";
 import useReservation from "../hooks/useReservation";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import axiosInstance from "@hooks/useAxiosInstance";
+import useSimilarRecommendations from "@hooks/useSimilarRecommendations";
+import TurfCard from "./TurfCard.jsx";
 import toast from "react-hot-toast";
 import { 
   MapPin, 
@@ -66,6 +68,35 @@ const TurfDetails = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isPoliciesModalOpen, setIsPoliciesModalOpen] = useState(false);
+  
+  // Similar Recommendations
+  const { similarTurfs, loading: similarLoading } = useSimilarRecommendations(id, { limit: 4 });
+
+  // ── Telemetry View & Dwell Time Tracking ──
+  useEffect(() => {
+    if (!id) return;
+
+    // Log the initial view page mount
+    axiosInstance.post("/api/user/turf/user/interaction", {
+      turfId: id,
+      type: "VIEW",
+      duration: 0
+    }).catch(err => console.error("[TELEMETRY] Failed to log page view:", err));
+
+    const entryTime = Date.now();
+
+    return () => {
+      // Calculate dwell time on unmount
+      const dwellSeconds = Math.round((Date.now() - entryTime) / 1000);
+      if (dwellSeconds > 0) {
+        axiosInstance.post("/api/user/turf/user/interaction", {
+          turfId: id,
+          type: "VIEW",
+          duration: dwellSeconds
+        }).catch(err => console.error("[TELEMETRY] Failed to log dwell time:", err));
+      }
+    };
+  }, [id]);
 
   const images = turf?.images?.length > 0 ? turf.images : [turf?.image || "/banner-1.png"];
   const video = turf?.video;
@@ -565,6 +596,55 @@ const TurfDetails = () => {
           </div>
 
         </main>
+
+        {/* Similar Arenas Nearby Section */}
+        {(similarLoading || (similarTurfs && similarTurfs.length > 0)) && (
+          <section className="mt-20 pt-16 border-t border-zinc-900 max-w-7xl mx-auto px-6 sm:px-12 w-full animate-fade-in">
+            <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+              <div className="relative">
+                <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#84CC16] rounded-full shadow-[0_0_20px_rgba(132,204,22,0.4)] hidden md:block"></div>
+                <h3 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
+                  SIMILAR <span className="text-[#84CC16]">ARENAS NEARBY</span>
+                </h3>
+                <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-3 font-inter">
+                  ML Proximity Recommendations • Similar Surface & Sports Facilities Nearby
+                </p>
+              </div>
+            </div>
+
+            {similarLoading ? (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+                {[...Array(4)].map((_, i) => (
+                  <div 
+                    key={i} 
+                    className="rounded-[2rem] border border-white/5 bg-[#0d0d0d] animate-pulse h-[360px] relative overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent h-[60%]" />
+                    <div className="absolute bottom-0 left-0 right-0 p-6 space-y-3">
+                      <div className="h-6 bg-white/10 rounded-lg w-[70%]" />
+                      <div className="h-4 bg-white/5 rounded-lg w-[40%]" />
+                      <div className="pt-3 border-t border-white/5 flex justify-between">
+                        <div className="h-8 bg-white/10 rounded-lg w-[40%]" />
+                        <div className="h-8 bg-white/10 rounded-lg w-[30%]" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+                {similarTurfs.map((t) => (
+                  <TurfCard 
+                    key={t.id || t._id} 
+                    turf={t} 
+                    distance={t.distance ? `${(t.distance / 1000).toFixed(1)} km Away` : "Nearby"}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
       </div>
     </div>
   );

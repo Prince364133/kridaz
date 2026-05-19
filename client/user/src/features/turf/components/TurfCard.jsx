@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Star, ChevronLeft, ChevronRight, Zap, Heart, Timer, Activity, MessageSquareShare } from "lucide-react";
+import { MapPin, Star, ChevronLeft, ChevronRight, Zap, Heart, Timer, MessageSquareShare } from "lucide-react";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const navigate = useNavigate();
 
-  const to = `/turf/${turf._id}`;
+  const to = `/turf/${turf.id || turf._id}`;
   const images = turf.images?.length > 0 ? turf.images : [turf.image];
   const rating = turf.avgRating ?? 4.8;
   const price = turf.pricePerHour ?? 800;
@@ -30,10 +31,34 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
     setCurrentImageIndex((p) => (p - 1 + images.length) % images.length); 
   };
 
-  const toggleWishlist = (e) => {
+  const toggleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
+    const targetId = turf.id || turf._id;
+    try {
+      setIsWishlisted(!isWishlisted);
+      await axiosInstance.post("/api/user/turf/user/like", { turfId: targetId });
+    } catch (err) {
+      setIsWishlisted(isWishlisted); // Revert state on failure
+      console.error("[TELEMETRY] Failed to toggle wishlist like:", err);
+    }
+  };
+
+  const handleShare = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const targetId = turf.id || turf._id;
+    try {
+      const shareUrl = `${window.location.origin}/turf/${targetId}`;
+      await navigator.clipboard.writeText(shareUrl);
+      
+      // Try using Toast or standard fallback alert
+      alert("Ground detail link copied to clipboard!");
+      
+      await axiosInstance.post("/api/user/turf/user/share", { turfId: targetId });
+    } catch (err) {
+      console.error("[TELEMETRY] Failed to record turf share:", err);
+    }
   };
 
   return (
@@ -121,7 +146,12 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
                     {turf.city || turf.location || "Nearby Venue"}
                   </p>
                 </div>
-                <MessageSquareShare size={12} md:size={14} className="text-[#BFF367] hover:scale-110 transition-transform cursor-pointer shrink-0" />
+                <button
+                  onClick={handleShare}
+                  className="p-1 hover:bg-white/10 rounded-full transition-all duration-300"
+                >
+                  <MessageSquareShare size={14} className="text-[#84CC16] hover:scale-110 transition-transform cursor-pointer shrink-0" />
+                </button>
               </div>
             </div>
 

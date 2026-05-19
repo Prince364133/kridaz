@@ -18,10 +18,15 @@ import {
 } from "lucide-react";
 import useBookingPass from "../hooks/useBookingPass";
 import { motion } from "framer-motion";
+import useSimilarRecommendations from "@hooks/useSimilarRecommendations";
+import { TurfCard } from "@features/turf";
 
 const BookingPass = () => {
   const { id } = useParams();
   const { booking, loading } = useBookingPass(id);
+  
+  const turfId = booking?.turf?.id || booking?.turf?._id;
+  const { similarTurfs, loading: similarLoading } = useSimilarRecommendations(turfId, { limit: 3 });
 
   if (loading) {
     return (
@@ -302,6 +307,47 @@ const BookingPass = () => {
               Print Pass
            </button>
         </div>
+
+        {/* Recommendation Section: Keep Playing Next Week */}
+        {(similarLoading || (similarTurfs && similarTurfs.length > 0)) && (
+          <div className="mt-16 pt-10 border-t border-white/5 space-y-6">
+            <div className="space-y-1">
+              <h3 className="text-sm font-black uppercase text-[#84CC16] tracking-[0.25em] flex items-center gap-2">
+                <Zap size={14} className="fill-current animate-pulse" /> Keep Playing Next Week
+              </h3>
+              <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
+                Exclusively recommended sports hubs near {turf?.name || "this venue"}
+              </p>
+            </div>
+
+            {similarLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[...Array(3)].map((_, i) => (
+                  <div 
+                    key={i} 
+                    className="h-[280px] rounded-3xl bg-zinc-900/40 border border-white/5 animate-pulse relative overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent h-[50%]" />
+                    <div className="absolute bottom-0 left-0 right-0 p-6 space-y-2">
+                      <div className="h-4 bg-white/10 rounded w-[80%]" />
+                      <div className="h-3 bg-white/5 rounded w-[50%]" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {similarTurfs.map((t) => (
+                  <TurfCard 
+                    key={t.id || t._id} 
+                    turf={t} 
+                    distance={t.distance ? `${(t.distance / 1000).toFixed(1)} km Away` : "Nearby"}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
