@@ -145,7 +145,7 @@ export default function VenueOwnerLanding() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 sm:gap-8">
             <Link
               to="/business/register?role=venu_owners"
-              className="inline-flex items-center justify-center gap-3 font-black text-black rounded-full px-8 py-4.5 hover:brightness-110 hover:shadow-[0_0_20px_rgba(85,222,232,0.3)] transition-all bg-gradient-to-r from-[#55DEE8] to-[#BFF367] uppercase tracking-widest text-xs md:text-sm"
+              className="inline-flex items-center justify-center gap-3 font-black text-black rounded-full px-10 py-5 hover:brightness-110 hover:shadow-[0_0_20px_rgba(85,222,232,0.4)] transition-all bg-gradient-to-r from-[#55DEE8] to-[#BFF367] uppercase tracking-widest text-xs md:text-sm"
             >
               Register Your Venue <ArrowRight size={18} />
             </Link>
