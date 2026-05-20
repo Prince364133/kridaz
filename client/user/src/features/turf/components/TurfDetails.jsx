@@ -448,8 +448,56 @@ const TurfDetails = () => {
 
             </div>
 
+            {/* Similar Arenas Nearby Section */}
+            {(similarLoading || (similarTurfs && similarTurfs.length > 0)) && (
+              <div className="pt-8 border-t border-zinc-900 animate-fade-in">
+                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                  <div className="relative">
+                    <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-[#84CC16] rounded-full shadow-[0_0_20px_rgba(132,204,22,0.4)] hidden md:block"></div>
+                    <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
+                      SIMILAR <span className="text-[#84CC16]">ARENAS NEARBY</span>
+                    </h3>
+                    <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-2 font-inter">
+                      ML Proximity Recommendations • Similar Surface & Sports
+                    </p>
+                  </div>
+                </div>
+
+                {similarLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+                    {[...Array(2)].map((_, i) => (
+                      <div 
+                        key={i} 
+                        className="rounded-[1.5rem] border border-white/5 bg-[#0d0d0d] animate-pulse h-[300px] relative overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent h-[60%]" />
+                        <div className="absolute bottom-0 left-0 right-0 p-6 space-y-3">
+                          <div className="h-6 bg-white/10 rounded-lg w-[70%]" />
+                          <div className="h-4 bg-white/5 rounded-lg w-[40%]" />
+                          <div className="pt-3 border-t border-white/5 flex justify-between">
+                            <div className="h-8 bg-white/10 rounded-lg w-[40%]" />
+                            <div className="h-8 bg-white/10 rounded-lg w-[30%]" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+                    {similarTurfs.slice(0, 4).map((t) => (
+                      <TurfCard 
+                        key={t.id || t._id} 
+                        turf={t} 
+                        distance={t.distance ? `${(t.distance / 1000).toFixed(1)} km Away` : "Nearby"}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Reviews Section */}
-            <div className="pt-8 border-t border-zinc-900">
+            <div className="pt-8 border-t border-zinc-900 mt-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter">Athlete Reviews</h2>
                 <div className="flex items-center gap-2 font-black">
@@ -596,54 +644,6 @@ const TurfDetails = () => {
           </div>
 
         </main>
-
-        {/* Similar Arenas Nearby Section */}
-        {(similarLoading || (similarTurfs && similarTurfs.length > 0)) && (
-          <section className="mt-20 pt-16 border-t border-zinc-900 max-w-7xl mx-auto px-6 sm:px-12 w-full animate-fade-in">
-            <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-              <div className="relative">
-                <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#84CC16] rounded-full shadow-[0_0_20px_rgba(132,204,22,0.4)] hidden md:block"></div>
-                <h3 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
-                  SIMILAR <span className="text-[#84CC16]">ARENAS NEARBY</span>
-                </h3>
-                <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-3 font-inter">
-                  ML Proximity Recommendations • Similar Surface & Sports Facilities Nearby
-                </p>
-              </div>
-            </div>
-
-            {similarLoading ? (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-                {[...Array(4)].map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="rounded-[2rem] border border-white/5 bg-[#0d0d0d] animate-pulse h-[360px] relative overflow-hidden"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent h-[60%]" />
-                    <div className="absolute bottom-0 left-0 right-0 p-6 space-y-3">
-                      <div className="h-6 bg-white/10 rounded-lg w-[70%]" />
-                      <div className="h-4 bg-white/5 rounded-lg w-[40%]" />
-                      <div className="pt-3 border-t border-white/5 flex justify-between">
-                        <div className="h-8 bg-white/10 rounded-lg w-[40%]" />
-                        <div className="h-8 bg-white/10 rounded-lg w-[30%]" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-                {similarTurfs.map((t) => (
-                  <TurfCard 
-                    key={t.id || t._id} 
-                    turf={t} 
-                    distance={t.distance ? `${(t.distance / 1000).toFixed(1)} km Away` : "Nearby"}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
 
       </div>
     </div>
