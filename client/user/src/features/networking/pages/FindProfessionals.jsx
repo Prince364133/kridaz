@@ -102,135 +102,98 @@ export default function FindProfessionals() {
         </p>
       </div>
 
-      {/* Integrated Search & Filters Bar */}
-      <div className="max-w-7xl mx-auto mb-8 px-4">
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-6">
+      {/* Unified Search & Filters Card */}
+      <div className="max-w-5xl mx-auto mb-12 px-4">
+        <div className="w-full bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-1.5 shadow-2xl flex flex-col xl:flex-row items-stretch xl:items-center min-h-[56px] md:min-h-[64px] transition-all duration-500 hover:border-[#55DEE8]/30">
           
-          {/* Integrated / Separate Search & Filters Bar */}
-          <div className="flex flex-col lg:flex-row items-center w-full lg:w-auto gap-4">
-            
-            {/* MOBILE ONLY: Unified Compact Bar */}
-            <div className="flex lg:hidden items-center bg-[#1a1a1a] border border-white/10 rounded-2xl p-1 w-full shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
-              {/* Search Field */}
-              <div className="flex items-center px-4 py-2 flex-grow border-r border-white/5">
-                <Search size={16} className="text-[#55DEE8] mr-2 flex-shrink-0" />
-                <input 
-                  type="text" 
-                  placeholder="Search..." 
-                  className="bg-transparent border-none outline-none w-full text-sm font-medium placeholder:text-gray-600 font-sans text-white py-1"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              
-              {/* Icon-only Sport Selector - MAX SEARCH SPACE */}
-              <div className="flex items-center px-2 py-2 border-r border-white/5 relative group">
-                <Dribbble size={14} className="text-[#BFF367] mr-1 flex-shrink-0" />
-                <div className="relative flex items-center">
-                  <select 
-                    className="bg-transparent border-none outline-none text-[0px] cursor-pointer font-heading appearance-none w-4"
-                    value={selectedSport}
-                    onChange={(e) => setSelectedSport(e.target.value)}
-                  >
-                    {sports.map(sport => (
-                      <option key={sport} value={sport} className="bg-black text-white text-[11px] uppercase">{sport}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={10} className="text-white/30 absolute right-[-2px] pointer-events-none" />
-                </div>
-              </div>
+          {/* Search Input */}
+          <div className="flex-[2] relative xl:border-r border-white/5 flex items-center px-4 py-3 md:py-0 min-h-[56px] md:min-h-full">
+            <Search className="text-gray-500 mr-3" size={16} />
+            <form onSubmit={handleSearch} className="w-full h-full flex items-center">
+              <input 
+                className="w-full h-full bg-transparent text-white outline-none text-xs font-bold placeholder-gray-500 tracking-wide" 
+                placeholder="Search by name or specialty..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </form>
+          </div>
 
-              {/* Icon-only Role Selector - MAX SEARCH SPACE */}
-              <div className="flex items-center px-2 py-2 relative group">
-                <Filter size={14} className="text-[#55DEE8] mr-1 flex-shrink-0" />
-                <div className="relative flex items-center">
-                  <select 
-                    className="bg-transparent border-none outline-none text-[0px] cursor-pointer font-heading appearance-none w-4"
-                    value={selectedRole}
-                    onChange={(e) => setSelectedRole(e.target.value)}
-                  >
-                    {roles.map(role => (
-                      <option key={role} value={role} className="bg-black text-white text-[11px] uppercase">{role}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={10} className="text-white/30 absolute right-[-2px] pointer-events-none" />
-                </div>
+          <div className="flex flex-col sm:flex-row flex-[3] xl:flex-[2.4]">
+            {/* Sport Filter */}
+            <div className="flex-1 relative sm:border-r border-t sm:border-t-0 border-white/5 flex items-center group">
+              <div className="absolute left-3 p-1.5 bg-white/5 rounded-lg group-hover:bg-[#55DEE8]/10 transition-colors pointer-events-none hidden sm:block">
+                <Dribbble size={14} className="text-gray-500 group-focus-within:text-[#55DEE8]" />
               </div>
+              <select 
+                className="w-full h-full bg-transparent appearance-none text-[11px] font-bold text-white uppercase tracking-tight pl-4 sm:pl-11 pr-8 py-4 outline-none cursor-pointer"
+                value={selectedSport}
+                onChange={(e) => setSelectedSport(e.target.value)}
+              >
+                {sports.map(sport => (
+                  <option className="bg-[#0a0a0a] text-white" key={sport} value={sport}>{sport}</option>
+                ))}
+              </select>
+              <ChevronDown size={12} className="absolute right-4 text-gray-500 pointer-events-none group-focus-within:text-[#55DEE8]" />
             </div>
 
-            {/* DESKTOP ONLY: Separate High-Impact Fields */}
-            <div className="hidden lg:flex items-center gap-4">
-              {/* Sport Selector */}
-              <div className="flex items-center px-4 py-3.5 bg-[#1a1a1a] border border-white/10 rounded-xl hover:bg-white/5 transition-colors cursor-pointer min-w-[150px]">
-                <Dribbble size={14} className="text-[#BFF367] mr-2 flex-shrink-0" />
-                <select 
-                  className="bg-transparent border-none outline-none text-[11px] font-bold uppercase tracking-wider text-white/90 cursor-pointer font-heading w-full"
-                  value={selectedSport}
-                  onChange={(e) => setSelectedSport(e.target.value)}
-                >
-                  {sports.map(sport => (
-                    <option key={sport} value={sport} className="bg-black text-white uppercase">{sport}</option>
-                  ))}
-                </select>
+            {/* Role Filter */}
+            <div className="flex-1 relative border-t sm:border-t-0 border-white/5 flex items-center group xl:border-r">
+              <div className="absolute left-3 p-1.5 bg-white/5 rounded-lg group-hover:bg-[#55DEE8]/10 transition-colors pointer-events-none hidden sm:block">
+                <Filter size={14} className="text-gray-500 group-focus-within:text-[#55DEE8]" />
               </div>
-
-              {/* Role Selector */}
-              <div className="flex items-center px-4 py-3.5 bg-[#1a1a1a] border border-white/10 rounded-xl hover:bg-white/5 transition-colors cursor-pointer min-w-[130px]">
-                <Filter size={14} className="text-[#55DEE8] mr-2 flex-shrink-0" />
-                <select 
-                  className="bg-transparent border-none outline-none text-[11px] font-bold uppercase tracking-wider text-white/90 cursor-pointer font-heading w-full"
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
-                >
-                  {roles.map(role => (
-                    <option key={role} value={role} className="bg-black text-white">{role}s</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Search Bar */}
-              <div className="flex items-center px-5 py-2 w-[450px] bg-[#1a1a1a] border border-white/10 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
-                <Search size={18} className="text-[#55DEE8] mr-3 flex-shrink-0" />
-                <input 
-                  type="text" 
-                  placeholder="Search by name or specialty..." 
-                  className="bg-transparent border-none outline-none w-full text-sm font-medium placeholder:text-gray-600 font-sans text-white py-1.5"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+              <select 
+                className="w-full h-full bg-transparent appearance-none text-[11px] font-bold text-white uppercase tracking-tight pl-4 sm:pl-11 pr-8 py-4 outline-none cursor-pointer"
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
+              >
+                {roles.map(role => (
+                  <option className="bg-[#0a0a0a] text-white" key={role} value={role}>{role === "All" ? "All Roles" : role + "s"}</option>
+                ))}
+              </select>
+              <ChevronDown size={12} className="absolute right-4 text-gray-500 pointer-events-none group-focus-within:text-[#55DEE8]" />
             </div>
           </div>
 
-          {/* Location Group */}
-          <div className="grid grid-cols-2 gap-3 w-full lg:w-auto">
-            <div className="flex items-center bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3.5">
-              <MapPin size={14} className="text-[#55DEE8] mr-2 flex-shrink-0" />
-              <select 
-                className="bg-transparent border-none outline-none text-[11px] font-bold uppercase tracking-wider text-white/80 pr-4 cursor-pointer font-heading w-full"
+          <div className="flex flex-col sm:flex-row flex-[3] xl:flex-[2.4]">
+            {/* State Filter */}
+            <div className="flex-1 relative sm:border-r border-t xl:border-t-0 border-white/5 flex items-center group">
+              <div className="absolute left-3 p-1.5 bg-white/5 rounded-lg group-hover:bg-[#55DEE8]/10 transition-colors pointer-events-none hidden sm:block">
+                <MapPin size={14} className="text-gray-500 group-focus-within:text-[#55DEE8]" />
+              </div>
+              <select
+                className="w-full h-full bg-transparent appearance-none text-[11px] font-bold text-white uppercase tracking-tight pl-4 sm:pl-11 pr-8 py-4 outline-none cursor-pointer"
                 value={stateFilter}
                 onChange={(e) => setStateFilter(e.target.value)}
               >
-                <option value="All" className="bg-black text-white">ALL STATES</option>
+                <option className="bg-[#0a0a0a] text-white" value="All">All States</option>
                 {availableStates.map(state => (
-                  <option key={state} value={state} className="bg-black text-white uppercase">{state}</option>
+                  <option className="bg-[#0a0a0a] text-white" key={state} value={state}>{state}</option>
                 ))}
               </select>
+              <ChevronDown size={12} className="absolute right-4 text-gray-500 pointer-events-none group-focus-within:text-[#55DEE8]" />
             </div>
-            <div className="flex items-center bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-3.5">
-              <MapPin size={14} className="text-[#BFF367] mr-2 flex-shrink-0" />
-              <select 
-                className="bg-transparent border-none outline-none text-[11px] font-bold uppercase tracking-wider text-white/80 pr-4 cursor-pointer font-heading w-full"
+
+            {/* City Filter */}
+            <div className="flex-1 relative border-t xl:border-t-0 sm:border-t-0 border-white/5 flex items-center group">
+              <div className="absolute left-3 p-1.5 bg-white/5 rounded-lg group-hover:bg-[#55DEE8]/10 transition-colors pointer-events-none hidden sm:block">
+                <MapPin size={14} className="text-gray-500 group-focus-within:text-[#55DEE8]" />
+              </div>
+              <select
+                className="w-full h-full bg-transparent appearance-none text-[11px] font-bold text-white uppercase tracking-tight pl-4 sm:pl-11 pr-8 py-4 outline-none cursor-pointer disabled:opacity-40"
                 value={cityFilter}
                 onChange={(e) => setCityFilter(e.target.value)}
+                disabled={stateFilter === "All" || availableCities.length === 0}
               >
-                <option value="All" className="bg-black text-white">ALL CITIES</option>
+                <option className="bg-[#0a0a0a] text-white" value="All">All Cities</option>
                 {availableCities.map(city => (
-                  <option key={city} value={city} className="bg-black text-white uppercase">{city}</option>
+                  <option className="bg-[#0a0a0a] text-white" key={city} value={city}>{city}</option>
                 ))}
               </select>
+              <ChevronDown size={12} className="absolute right-4 text-gray-500 pointer-events-none group-focus-within:text-[#55DEE8]" />
             </div>
           </div>
+
         </div>
       </div>
 
@@ -245,8 +208,8 @@ export default function FindProfessionals() {
         ) : professionals.length === 0 ? (
           <div className="text-center py-20 border-2 border-dashed border-neutral-800 rounded-xl">
             <Users size={48} className="mx-auto text-neutral-800 mb-4" />
-            <h3 className="text-xl font-heading font-bold text-gray-500 uppercase tracking-widest">No professionals found</h3>
-            <p className="text-gray-400 mt-2 font-sans">Try adjusting your filters or location</p>
+            <h3 className="text-3xl md:text-4xl font-open-sans font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mb-2">No professionals found</h3>
+            <p className="text-[#999999] mt-2 font-inter text-[20px]">Try adjusting your filters or location</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
