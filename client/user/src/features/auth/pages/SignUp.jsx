@@ -1,77 +1,32 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import useSignUpForm from "../hooks/useSignUpForm";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 import Turnstile from "react-turnstile";
 import OnboardingModal from "@components/modals/OnboardingModal";
-import { 
-  ArrowRight, 
-  ShieldCheck, 
-  Zap, 
-  Activity, 
-  Target, 
-  UserPlus, 
-  Globe, 
-  Lock, 
-  User, 
-  Mail, 
-  Phone,
-  ChevronRight,
-  ChevronLeft,
-  ChevronDown,
-  Server,
-  Database,
-  Cpu,
-  MapPin,
-  Locate,
-  UserSquare2,
-  Search,
-  CheckCircle2,
-  XCircle,
-  Loader2,
-  Navigation
-} from "lucide-react";
+import { ArrowRight, ChevronLeft, Mail, Phone, Lock, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
-import { Trophy } from "lucide-react";
-import { searchLocations } from "@utils/locationService";
 import axiosInstance from "@hooks/useAxiosInstance";
-
-const SPORTS = [
-  "Cricket", "Football", "Badminton", "Tennis", "Basketball", 
-  "Table Tennis", "Volleyball", "Hockey", "Swimming", "Pickleball"
-];
+import { useDispatch } from "react-redux";
+import { login } from "@redux/slices/authSlice";
 
 const SignUp = () => {
-  const { 
-    register, 
-    handleSubmit, 
-    errors, 
-    onSubmit, 
-    loading, 
-    setValue,
-    watch,
-    showOtpInput,
-    handleGoogleSuccess,
-    handleGoogleError,
-    usernameStatus,
-    setTurnstileToken,
-    showOnboarding,
-    setShowOnboarding,
-    onboardingUser
-  } = useSignUpForm();
-  
   const [mounted, setMounted] = useState(false);
-  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
-  const [selectedSports, setSelectedSports] = useState([]);
-  const [showSportsDropdown, setShowSportsDropdown] = useState(false);
+  const [authMode, setAuthMode] = useState('initial'); // 'initial', 'email', 'phone'
+  const [step, setStep] = useState(1); // 1: Input, 2: OTP, 3: Password
+  
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingData, setOnboardingData] = useState(null);
   
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  
-  const locationValue = watch("location");
 
   useEffect(() => {
     setMounted(true);
@@ -81,117 +36,103 @@ const SignUp = () => {
     if (inviteToken) {
       localStorage.setItem("pendingInvite", inviteToken);
       const emailParam = searchParams.get("email");
-      if (emailParam) {
-        const decodedEmail = decodeURIComponent(emailParam);
-        setValue("email", decodedEmail);
-        console.log("Auto-filled player email from URL:", decodedEmail);
-      }
-      toast.success("Joining via invitation link!");
+      if (emailParam) setEmail(decodeURIComponent(emailParam));
     }
-
     if (umpireToken) {
       localStorage.setItem("umpireInvite", umpireToken);
       const emailParam = searchParams.get("email");
-      if (emailParam) {
-        const decodedEmail = decodeURIComponent(emailParam);
-        setValue("email", decodedEmail);
-        console.log("Auto-filled umpire email from URL:", decodedEmail);
-      }
-      
-      const fetchInviteDetails = async () => {
-        try {
-          const res = await axiosInstance.get(`/api/hosted-game/verify-invite?token=${umpireToken}`);
-          if (res.data.success) {
-            const { name, email, phone } = res.data;
-            if (name) setValue("name", name);
-            if (email) setValue("email", email);
-            if (phone) setValue("phone", phone);
-            toast.success(`Welcome ${name || 'Umpire'}! Please complete your signup.`);
-          }
-        } catch (err) {
-          console.error("Invite fetch error:", err);
-        }
-      };
-      fetchInviteDetails();
+      if (emailParam) setEmail(decodeURIComponent(emailParam));
     }
-  }, [searchParams, setValue]);
+  }, [searchParams]);
 
-  // Debounced search for location suggestions
-  useEffect(() => {
-    const timer = setTimeout(async () => {
-      // Only search if user typed something and it's not a selection
-      if (locationValue && locationValue.length >= 3 && !isFetchingLocation) {
-        setIsSearching(true);
-        const results = await searchLocations(locationValue);
-        setSuggestions(results);
-        setShowSuggestions(results.length > 0);
-        setIsSearching(false);
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    if (authMode === 'email' && !email) return toast.error("Email required");
+    if (authMode === 'phone' && (!phone || phone.length < 10)) return toast.error("Valid phone number required");
+    
+    setLoading(true);
+    try {
+      const payload = authMode === 'email' ? { email } : { phone };
+      const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
+      toast.success(res.data.message);
+      if (res.data.testOtp) {
+         toast(authMode === 'email' ? `Test OTP: ${res.data.testOtp.email}` : `Test OTP: ${res.data.testOtp.phone}`, { icon: 'ðŸ§‘â€ðŸ’»', duration: 10000 });
       }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [locationValue, isFetchingLocation]);
-
-  const fetchLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser");
-      return;
+      setStep(2);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setLoading(false);
     }
-
-    setIsFetchingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-          const data = await response.json();
-          if (data && data.address) {
-            const city = data.address.city || data.address.town || data.address.village || "";
-            const state = data.address.state || "";
-            const locationString = [city, state].filter(Boolean).join(", ");
-            setValue("location", locationString, { shouldValidate: true });
-            toast.success("Location fetched successfully");
-          } else {
-            toast.error("Could not determine location");
-          }
-        } catch (error) {
-          toast.error("Error fetching location details");
-        } finally {
-          setIsFetchingLocation(false);
-        }
-      },
-      (error) => {
-        setIsFetchingLocation(false);
-        toast.error("Location access denied or unavailable");
-      }
-    );
   };
 
-  const toggleSport = (sport) => {
-    const newSports = selectedSports.includes(sport)
-      ? selectedSports.filter(s => s !== sport)
-      : [...selectedSports, sport];
-    setSelectedSports(newSports);
-    setValue("sportTypes", newSports, { shouldValidate: true });
+  const handleVerifyOtp = (e) => {
+    e.preventDefault();
+    if (!otp || otp.length < 6) return toast.error("Valid 6-digit OTP required");
+    setStep(3);
+  };
+
+  const handlePasswordSubmit = (e) => {
+    e.preventDefault();
+    if (password.length < 6) return toast.error("Password must be at least 6 characters");
+    
+    setOnboardingData({
+      authMethod: authMode,
+      email: authMode === 'email' ? email : '',
+      phone: authMode === 'phone' ? phone : '',
+      otp,
+      password
+    });
+    setShowOnboarding(true);
+  };
+
+  const handleGoogleSuccess = async (googleResponse) => {
+      setLoading(true);
+      try {
+        const inviteToken = localStorage.getItem("pendingInvite");
+        const umpireInvite = localStorage.getItem("umpireInvite");
+        const payload = { role: "user", inviteToken, umpireInvite };
+        if (googleResponse.credential) {
+          payload.credential = googleResponse.credential;
+        } else if (googleResponse.access_token) {
+          payload.accessToken = googleResponse.access_token;
+        }
+  
+        const response = await axiosInstance.post(`/api/user/auth/google-auth`, payload);
+        const result = response.data;
+        
+        dispatch(login({ token: result.token, role: result.role, user: result.user }));
+        toast.success("Successfully logged in with Google!");
+  
+        const user = result.user;
+        const isMissingDetails = !user.phone || !user.gender || !user.location || !user.sportTypes?.length;
+  
+        if (isMissingDetails) {
+          setOnboardingData({
+            authMethod: 'google',
+            user
+          });
+          setShowOnboarding(true);
+        } else {
+          const role = result.role?.toLowerCase() || "";
+          if (role.includes("umpire")) navigate("/umpire");
+          else navigate("/");
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Google sign-in failed");
+      } finally {
+        setLoading(false);
+      }
   };
 
   return (
     <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-start pt-4 lg:pt-10 pb-12 font-sans">
-      {/* GöÇGöÇ BACKGROUND LAYER GöÇGöÇ */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-black" />
-      </div>
+      <div className="absolute inset-0 z-0 bg-black" />
 
-      {/* GöÇGöÇ MAIN CONTENT GöÇGöÇ */}
-      <div className={`relative z-10 w-full max-w-2xl mx-auto px-6 transition-all duration-1000 transform ${mounted ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
-        
-        <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
+      <div className={`relative z-10 w-full max-w-md mx-auto px-6 transition-all duration-1000 transform ${mounted ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
+        <div className="flex flex-col items-center w-full mx-auto">
           <div className="w-full relative">
             
-            {/* Header */}
             <div className="flex flex-col items-center justify-center text-center mb-10">
                <div className="space-y-2">
                  <h2 className="text-3xl font-bold text-white">Create Account</h2>
@@ -199,329 +140,120 @@ const SignUp = () => {
                </div>
             </div>
 
-            {/* Body */}
-            <div className="space-y-10 w-full">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                  {/* OTP Step */}
-                <div className={showOtpInput ? "space-y-6 block animate-fade-in" : "hidden"}>
-                  <div className="text-center mb-8">
-                    <h3 className="text-xl font-semibold text-white">Enter Verification Code</h3>
-                  </div>
-                  <div className="space-y-4 group/field">
-                    <div className="relative">
-                      <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
-                      <input 
-                        {...register("otp")}
-                        type="text" 
-                        placeholder="Email OTP"
-                        maxLength={6}
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
-                      />
-                    </div>
-                    {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
-                  </div>
+            <div className="w-full relative z-20">
+              <div className="space-y-6">
+                
+                {authMode === 'initial' && (
+                  <>
+                    <GoogleAuthButton 
+                      mode="signup"
+                      onSuccess={handleGoogleSuccess}
+                      onError={() => toast.error("Google sign-in failed")}
+                      isLoading={loading}
+                    />
 
-                  <div className="space-y-4 group/field">
-                    <div className="relative">
-                      <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
-                      <input 
-                        {...register("phoneOtp")}
-                        type="text" 
-                        placeholder="WhatsApp OTP"
-                        maxLength={6}
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
-                      />
-                    </div>
-                    {errors.phoneOtp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.phoneOtp.message}</p>}
-                    <p className="text-[10px] text-white/40 text-center uppercase tracking-widest">Default test OTP: 123456</p>
-                  </div>
-                  
-                  <button 
-                    type="submit" 
-                    disabled={loading}
-                    className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
-                  >
-                    {loading ? "Verifying..." : "Verify & Create Account"}
-                    {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
-                  </button>
-                </div>
-
-                {/* Form Fields Step */}
-                <div className={!showOtpInput ? "space-y-8 block animate-fade-in" : "hidden"}>
-                    {/* Google Login Button */}
-                    <div className="w-full mb-8">
-                      <GoogleAuthButton 
-                        onSuccess={handleGoogleSuccess}
-                        onError={handleGoogleError}
-                        isLoading={loading}
-                        mode="signup"
-                      />
-                    </div>
-                    
-                    <div className="flex items-center gap-4 w-full mb-8">
-                      <div className="h-px bg-white/10 flex-1"></div>
-                      <span className="text-white/40 text-sm font-medium whitespace-nowrap">OR CONTINUE WITH EMAIL</span>
-                      <div className="h-px bg-white/10 flex-1"></div>
+                    <div className="flex items-center gap-4 my-6">
+                      <div className="h-px bg-white/10 flex-1" />
+                      <span className="text-xs text-white/40 font-medium uppercase tracking-wider">or</span>
+                      <div className="h-px bg-white/10 flex-1" />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                      {/* Full Name */}
-                      <div className="space-y-2 group/field">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Full Name</label>
-                        <div className="relative">
-                          <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
+                    <div className="space-y-4">
+                      <button 
+                        onClick={() => setAuthMode('email')}
+                        className="group relative w-full flex items-center justify-center h-14 px-6 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-[#55DEE8]/40 rounded-2xl transition-all duration-500 shadow-xl"
+                      >
+                        <Mail className="w-5 h-5 text-white/60 mr-3 group-hover:text-[#55DEE8] transition-colors" />
+                        <span className="text-sm font-bold text-white tracking-wide uppercase">Sign up with Email</span>
+                      </button>
+
+                      <button 
+                        onClick={() => setAuthMode('phone')}
+                        className="group relative w-full flex items-center justify-center h-14 px-6 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-[#55DEE8]/40 rounded-2xl transition-all duration-500 shadow-xl"
+                      >
+                        <Phone className="w-5 h-5 text-white/60 mr-3 group-hover:text-[#55DEE8] transition-colors" />
+                        <span className="text-sm font-bold text-white tracking-wide uppercase">Switch to Phone Sign up</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {authMode !== 'initial' && (
+                  <form onSubmit={step === 1 ? handleSendOtp : step === 2 ? handleVerifyOtp : handlePasswordSubmit} className="space-y-6">
+                    <button
+                      type="button"
+                      onClick={() => { setAuthMode('initial'); setStep(1); }}
+                      className="text-[#55DEE8] flex items-center text-sm font-medium hover:underline mb-4"
+                    >
+                      <ChevronLeft size={16} className="mr-1" />
+                      Back to options
+                    </button>
+
+                    {step === 1 && (
+                      <div className="space-y-4">
+                        <label className="text-sm font-medium text-white/60 ml-1">
+                          {authMode === 'email' ? 'Email Address' : 'Phone Number'}
+                        </label>
+                        <div className="relative group/field">
+                          {authMode === 'email' ? (
+                            <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
+                          ) : (
+                            <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
+                          )}
                           <input 
-                            {...register("name")}
-                            type="text" 
-                            placeholder="John Doe"
+                            type={authMode === 'email' ? 'email' : 'tel'}
+                            required
+                            value={authMode === 'email' ? email : phone}
+                            onChange={(e) => authMode === 'email' ? setEmail(e.target.value) : setPhone(e.target.value)}
+                            placeholder={authMode === 'email' ? 'name@example.com' : '+91 00000 00000'}
                             className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
-                        {errors.name && <p className="text-xs text-red-500 mt-1 ml-1">{errors.name.message}</p>}
                       </div>
+                    )}
 
-                      {/* Username */}
-                      <div className="space-y-2 group/field relative">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Username</label>
-                        <div className="relative">
-                          <UserSquare2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
+                    {step === 2 && (
+                      <div className="space-y-4">
+                        <label className="text-sm font-medium text-white/60 ml-1">
+                          Enter OTP sent to {authMode === 'email' ? email : phone}
+                        </label>
+                        <div className="relative group/field">
+                          <CheckCircle2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                           <input 
-                            {...register("username")}
-                            onInput={(e) => { e.target.value = e.target.value.toLowerCase(); }}
-                            type="text" 
-                            placeholder="johndoe_123"
-                            className={`w-full bg-white/[0.03] border rounded-xl h-14 pl-12 pr-12 text-white text-sm placeholder:text-white/20 outline-none transition-all ${
-                              usernameStatus === 'available' ? 'border-green-500/50' : 
-                              usernameStatus === 'unavailable' ? 'border-red-500/50' : 
-                              'border-white/5 focus:border-[#55DEE8]/50'
-                            }`}
-                          />
-                          
-                          {/* Availability Indicator */}
-                          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
-                            {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-white/20 animate-spin" />}
-                            {usernameStatus === 'available' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
-                            {usernameStatus === 'unavailable' && <XCircle className="w-4 h-4 text-red-500" />}
-                          </div>
-                        </div>
-                        {errors.username && <p className="text-xs text-red-500 mt-1 ml-1">{errors.username.message}</p>}
-                        {usernameStatus === 'available' && <p className="text-[10px] text-green-500 mt-1 ml-1 font-bold uppercase tracking-wider">Username Available</p>}
-                        {usernameStatus === 'unavailable' && <p className="text-[10px] text-red-500 mt-1 ml-1 font-bold uppercase tracking-wider">Username Taken</p>}
-                      </div>
-
-                      {/* Email */}
-                      <div className="space-y-2 group/field">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Email Address</label>
-                        <div className="relative">
-                          <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
-                          <input 
-                            {...register("email")}
-                            type="email" 
-                            placeholder="name@example.com"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            type="text"
+                            required
+                            maxLength={6}
+                            value={otp}
+                            onChange={(e) => setOtp(e.target.value)}
+                            placeholder="6-digit OTP"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all tracking-[0.5em] font-mono"
                           />
                         </div>
-                        {errors.email && <p className="text-xs text-red-500 mt-1 ml-1">{errors.email.message}</p>}
                       </div>
+                    )}
 
-                      {/* Phone */}
-                      <div className="space-y-2 group/field">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Phone Number</label>
-                        <div className="relative">
-                          <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
-                          <input 
-                            {...register("phone")}
-                            type="text" 
-                            placeholder="+91 00000 00000"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
-                          />
-                        </div>
-                        {errors.phone && <p className="text-xs text-red-500 mt-1 ml-1">{errors.phone.message}</p>}
-                      </div>
-
-                      {/* Gender and Sports (Side by Side) */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:col-span-2">
-                        {/* Gender */}
-                        <div className="space-y-2 group/field">
-                          <label className="text-[11px] font-black text-white/40 uppercase tracking-widest ml-1 group-focus-within/field:text-[#55DEE8] transition-colors">Gender</label>
-                          <div className="relative">
-                            <UserSquare2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors z-10 pointer-events-none" />
-                            <select 
-                              {...register("gender")}
-                              className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm appearance-none outline-none transition-all cursor-pointer hover:bg-white/[0.05]"
-                              defaultValue=""
-                            >
-                              <option value="" disabled className="bg-black text-white/40">Select Gender</option>
-                              <option value="Male" className="bg-black text-white">Male</option>
-                              <option value="Female" className="bg-black text-white">Female</option>
-                              <option value="Other" className="bg-black text-white">Other</option>
-                              <option value="Prefer not to say" className="bg-black text-white">Prefer not to say</option>
-                            </select>
-                            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
-                          </div>
-                          {errors.gender && <p className="text-xs text-red-500 mt-1 ml-1">{errors.gender.message}</p>}
-                        </div>
-
-                        {/* Favorite Sports */}
-                        <div className="space-y-2 group/field">
-                          <label className="text-[11px] font-black text-white/40 uppercase tracking-widest ml-1 group-focus-within/field:text-[#55DEE8] transition-colors">Favorite Sports</label>
-                          <div className="relative">
-                            <Trophy size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors z-10 pointer-events-none" />
-                            <div 
-                              className={`w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 py-3 flex items-center gap-2 cursor-pointer transition-all overflow-hidden hover:bg-white/[0.05] ${showSportsDropdown ? 'border-[#55DEE8]/50 ring-1 ring-[#55DEE8]/20' : ''}`}
-                              onClick={() => setShowSportsDropdown(!showSportsDropdown)}
-                            >
-                              {selectedSports.length > 0 ? (
-                                <div className="flex gap-1 overflow-x-auto no-scrollbar">
-                                  {selectedSports.map(sport => (
-                                    <span key={sport} className="bg-[#55DEE8] text-black text-[9px] font-black px-1.5 py-0.5 rounded flex-shrink-0 uppercase tracking-tighter">
-                                      {sport}
-                                    </span>
-                                  ))}
-                                </div>
-                              ) : (
-                                <span className="text-white/20 text-sm whitespace-nowrap italic">Pick Sports</span>
-                              )}
-                            </div>
-                            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
-                            
-                            {showSportsDropdown && (
-                              <>
-                                <div className="fixed inset-0 z-40" onClick={() => setShowSportsDropdown(false)} />
-                                <div className="absolute top-[calc(100%+8px)] right-0 w-[280px] md:w-[400px] bg-[#0A0A0A] border border-white/10 rounded-xl p-4 z-50 grid grid-cols-2 gap-2 shadow-2xl animate-in fade-in slide-in-from-top-2 backdrop-blur-xl">
-                                  {SPORTS.map(sport => {
-                                    const isSelected = selectedSports.includes(sport);
-                                    return (
-                                      <button
-                                        key={sport}
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          toggleSport(sport);
-                                        }}
-                                        className={`flex items-center justify-between p-2 rounded-lg border transition-all text-[10px] font-bold uppercase tracking-wider ${
-                                          isSelected 
-                                            ? "bg-[#55DEE8] border-[#55DEE8] text-black" 
-                                            : "bg-white/5 border-white/10 text-white/40 hover:border-white/20 hover:text-white"
-                                        }`}
-                                      >
-                                        {sport}
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              </>
-                            )}
-                          </div>
-                          {errors.sportTypes && <p className="text-xs text-red-500 mt-1 ml-1">{errors.sportTypes.message}</p>}
-                        </div>
-                      </div>
-
-                      {/* Location */}
-                      <div className="space-y-2 group/field md:col-span-2">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Location</label>
-                        <div className="relative flex gap-2">
-                          <div className="relative flex-1">
-                            <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
-                            <input 
-                              {...register("location")}
-                              type="text" 
-                              autoComplete="off"
-                              placeholder="City, State"
-                              className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
-                            />
-                            
-                            {/* Suggestions Dropdown */}
-                            {showSuggestions && (
-                              <>
-                                <div className="fixed inset-0 z-40" onClick={() => setShowSuggestions(false)} />
-                                <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-[#0A0A0A] border border-white/10 rounded-xl overflow-hidden z-50 shadow-2xl animate-in fade-in slide-in-from-top-2">
-                                  <div className="p-1 max-h-[240px] overflow-y-auto custom-scrollbar">
-                                    {suggestions.map((suggestion, index) => (
-                                      <button
-                                        key={index}
-                                        type="button"
-                                        onClick={() => {
-                                          const city = suggestion.city || suggestion.display_name.split(',')[0];
-                                          const state = suggestion.state || "";
-                                          const display = [city, state].filter(Boolean).join(', ');
-                                          setValue("location", display, { shouldValidate: true });
-                                          setShowSuggestions(false);
-                                        }}
-                                        className="w-full flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 text-left transition-all group/item"
-                                      >
-                                        <div className="p-2 bg-white/5 rounded-lg group-hover/item:bg-[#55DEE8]/10 transition-colors mt-0.5">
-                                          <Navigation size={14} className="text-gray-500 group-hover/item:text-[#55DEE8]" />
-                                        </div>
-                                        <div className="flex flex-col min-w-0">
-                                          <span className="text-[11px] font-bold text-white uppercase tracking-wider truncate">
-                                            {suggestion.city || suggestion.display_name.split(',')[0]}
-                                          </span>
-                                          <span className="text-[9px] text-white/40 truncate">
-                                            {suggestion.display_name}
-                                          </span>
-                                        </div>
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-                              </>
-                            )}
-
-                            {isSearching && (
-                              <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                <div className="w-4 h-4 border-2 border-[#55DEE8]/30 border-t-[#55DEE8] rounded-full animate-spin" />
-                              </div>
-                            )}
-                          </div>
-                          <button 
-                            type="button" 
-                            onClick={fetchLocation}
-                            disabled={isFetchingLocation}
-                            className="bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl h-14 px-4 flex items-center justify-center gap-2 text-white/80 transition-colors disabled:opacity-50 min-w-[120px]"
-                          >
-                            <Locate size={18} className={isFetchingLocation ? "animate-pulse text-[#55DEE8]" : ""} />
-                            <span className="text-sm whitespace-nowrap">{isFetchingLocation ? "Fetching..." : "Locate"}</span>
-                          </button>
-                        </div>
-                        {errors.location && <p className="text-xs text-red-500 mt-1 ml-1">{errors.location.message}</p>}
-                      </div>
-
-                      {/* Password */}
-                      <div className="space-y-2 group/field">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Password</label>
-                        <div className="relative">
+                    {step === 3 && (
+                      <div className="space-y-4">
+                        <label className="text-sm font-medium text-white/60 ml-1">
+                          Create Password
+                        </label>
+                        <div className="relative group/field">
                           <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                           <input 
-                            {...register("password")}
-                            type="password" 
-                            placeholder="GÇóGÇóGÇóGÇóGÇóGÇóGÇóGÇó"
+                            type="password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                             className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
-                        {errors.password && <p className="text-xs text-red-500 mt-1 ml-1">{errors.password.message}</p>}
                       </div>
+                    )}
 
-                      {/* Confirm Password */}
-                      <div className="space-y-2 group/field">
-                        <label className="text-sm font-medium text-white/60 group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Confirm Password</label>
-                        <div className="relative">
-                          <ShieldCheck size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
-                          <input 
-                            {...register("confirmPassword")}
-                            type="password" 
-                            placeholder="GÇóGÇóGÇóGÇóGÇóGÇóGÇóGÇó"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
-                          />
-                        </div>
-                        {errors.confirmPassword && <p className="text-xs text-red-500 mt-1 ml-1">{errors.confirmPassword.message}</p>}
-                      </div>
-                    </div>
-
-                    {/* Turnstile Bot Protection */}
                     <div className="flex justify-center my-4">
                       <Turnstile
-                        sitekey="0x4AAAAAAA7f_T_9-vI7yP6U" // Dummy test key, should be replaced with real key in production
+                        sitekey="0x4AAAAAAA7f_T_9-vI7yP6U"
                         onVerify={(token) => setTurnstileToken(token)}
                         theme="dark"
                       />
@@ -529,53 +261,50 @@ const SignUp = () => {
 
                     <button 
                       type="submit" 
-                      disabled={loading}
+                      disabled={loading || !turnstileToken}
                       className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
                     >
-                      {loading ? "Sending OTP..." : "Continue"}
+                      {loading ? "Processing..." : step === 3 ? "Complete Profile" : "Continue"}
                       {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
                     </button>
-                    </div>
-              </form>
-            </div>
-
-              {/* Back to Login */}
-              <div className="pt-8 mt-10 border-t border-white/5 flex flex-col items-center justify-center text-center">
-                <p className="text-sm text-white/60">
-                  Already have an account? <Link to="/login" className="text-[#55DEE8] hover:underline ml-2 font-semibold">Login</Link>
-                </p>
+                  </form>
+                )}
               </div>
             </div>
-          </div>
-          
-          {/* Back */}
-          <div className="mt-8 text-center">
-            <Link to="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm group">
-              <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-              Back to Home
-            </Link>
+
+            <div className="pt-8 mt-10 border-t border-white/5 flex flex-col items-center justify-center text-center">
+              <p className="text-sm text-white/60">
+                Already have an account? <Link to="/login" className="text-[#55DEE8] hover:underline ml-2 font-semibold">Login</Link>
+              </p>
+            </div>
           </div>
         </div>
+        
+        <div className="mt-8 text-center">
+          <Link to="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm group">
+            <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+            Back to Home
+          </Link>
+        </div>
+      </div>
       
-      {/* AMBIENT LIGHTING */}
       <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-white/[0.01] pointer-events-none rounded-full" />
       <div className="absolute bottom-1/4 left-0 w-[600px] h-[600px] bg-white/[0.01] pointer-events-none rounded-full" />
-      {/* ONBOARDING MODAL */}
-      <OnboardingModal 
-        isOpen={showOnboarding} 
-        onClose={() => setShowOnboarding(false)} 
-        onComplete={() => {
-          const inviteToken = localStorage.getItem("pendingInvite");
-          if (inviteToken) {
-            navigate(`/join-games?invite=${inviteToken}`);
-          } else {
-            navigate("/");
-          }
-        }}
-      />
+      
+      {showOnboarding && (
+        <OnboardingModal 
+          isOpen={showOnboarding} 
+          onClose={() => setShowOnboarding(false)}
+          initialData={onboardingData}
+          onComplete={() => {
+            const inviteToken = localStorage.getItem("pendingInvite");
+            if (inviteToken) navigate(`/join-games?invite=${inviteToken}`);
+            else navigate("/");
+          }}
+        />
+      )}
     </div>
   );
 };
 
 export default SignUp;
-

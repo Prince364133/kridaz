@@ -12,7 +12,9 @@ import {
   checkUsername,
   generateRecoveryTokens,
   loginWithRecoveryToken,
-  upgradeRequest
+  upgradeRequest,
+  sendPhoneVerificationOtp,
+  verifyPhoneOtp
 } from "../auth.controller.js";
 import { 
   userRegisterSchema, 
@@ -144,6 +146,8 @@ router.post("/logout", logout);
  *       - BearerAuth: []
  */
 router.put("/updateProfile", userAuth, updateProfile);
+router.post("/send-phone-verification-otp", userAuth, sendPhoneVerificationOtp);
+router.post("/verify-phone-otp", userAuth, verifyPhoneOtp);
 
 /**
  * @swagger

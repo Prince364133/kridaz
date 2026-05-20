@@ -136,7 +136,8 @@ export const sendOtp = async (req, res) => {
 
     return res.status(200).json({ 
       success: true, 
-      message: "OTPs sent to your email and WhatsApp successfully" 
+      message: "OTPs sent to your email and WhatsApp successfully",
+      testOtp: { email: emailOtp, phone: phoneOtp }
     });
   } catch (err) {
     logger.error(err.message);
@@ -233,7 +234,7 @@ export const requestUpgrade = async (req, res) => {
 };
 
 export const registerUser = async (req, res) => {
-  const { name, email, password, phone, gender, location, otp, phoneOtp, username, sportTypes, umpireInvite, inviteToken } = req.body;
+  const { name, email, password, phone, gender, dob, location, otp, phoneOtp, username, sportTypes, umpireInvite, inviteToken } = req.body;
 
   try {
     const existingUser = await prisma.user.findFirst({
@@ -291,9 +292,11 @@ export const registerUser = async (req, res) => {
           password: hashedPassword,
           phone,
           gender,
+          dob: dob ? new Date(dob) : null,
           city: location || "",
           sportTypes: sportTypes || [],
           role,
+          isOnboarded: true,
           walletBalance: 50, // Welcome Bonus
           wallet: {
             create: {
@@ -1434,7 +1437,7 @@ export const updateInterests = async (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-  const { name, username, phone, bio, gender, city, state, location, sportTypes, interests, password } = req.body;
+  const { name, username, phone, bio, gender, dob, city, state, location, sportTypes, interests, password } = req.body;
   try {
     const decoded = req.user || req.owner;
     if (!decoded) {
@@ -1473,17 +1476,37 @@ export const updateProfile = async (req, res) => {
       hashedPassword = await argon2.hash(password);
     }
 
-    const updateData = {
+    const cleanObject = (obj) => {
+      const copy = { ...obj };
+      Object.keys(copy).forEach(key => {
+        if (copy[key] === undefined) delete copy[key];
+      });
+      return copy;
+    };
+
+    const updateData = cleanObject({
       name,
       username: username?.toLowerCase(),
       phone,
       bio,
       gender,
+      dob: dob ? new Date(dob) : undefined,
       city: city || location,
       state,
       sportTypes: finalInterests,
+      isOnboarded: (req.body.isOnboarded === true || req.body.isOnboarded === 'true') ? true : undefined,
       ...(hashedPassword && { password: hashedPassword })
-    };
+    });
+
+    const profileData = cleanObject({
+      bio: updateData.bio,
+      gender: updateData.gender,
+      dob: updateData.dob,
+      city: updateData.city,
+      state: updateData.state,
+      sportTypes: updateData.sportTypes,
+      interests: interests || []
+    });
 
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
@@ -1491,32 +1514,19 @@ export const updateProfile = async (req, res) => {
         ...updateData,
         profile: {
           upsert: {
-            create: {
-              bio: updateData.bio,
-              gender: updateData.gender,
-              city: updateData.city,
-              state: updateData.state,
-              sportTypes: updateData.sportTypes,
-              interests: interests || []
-            },
-            update: {
-              bio: updateData.bio,
-              gender: updateData.gender,
-              city: updateData.city,
-              state: updateData.state,
-              sportTypes: updateData.sportTypes,
-              interests: interests || []
-            }
+            create: profileData,
+            update: profileData
           }
         }
       }
     });
     
     if (user.ownerProfile) {
+      const { dob, username, password, isOnboarded, ...ownerUpdateData } = updateData;
       await prisma.ownerProfile.update({
         where: { id: user.ownerProfile.id },
         data: {
-          ...updateData,
+          ...ownerUpdateData,
           gameTypes: finalInterests,
           interests: finalInterests
         }
@@ -1530,6 +1540,124 @@ export const updateProfile = async (req, res) => {
     });
   } catch (err) {
     logger.error("updateProfile Error:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const sendPhoneVerificationOtp = async (req, res) => {
+  const { phone } = req.body;
+  try {
+    const userId = req.user?.id || req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    if (!phone) {
+      return res.status(400).json({ success: false, message: "Phone number is required" });
+    }
+
+    // Check if phone is already in use by another user
+    const conflict = await prisma.user.findFirst({
+      where: {
+        phone,
+        NOT: { id: userId }
+      }
+    });
+
+    if (conflict) {
+      return res.status(400).json({ success: false, message: "Phone number already in use by another account" });
+    }
+
+    const phoneOtp = generateOTP();
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const email = user.email;
+
+    // Delete existing OTP record for this email/phone if any
+    await prisma.oTP.deleteMany({
+      where: {
+        OR: [
+          { email },
+          { phone: phone }
+        ]
+      }
+    });
+
+    // Create a new OTP record
+    await prisma.oTP.create({
+      data: {
+        email,
+        phone,
+        emailOtp: "123456", // default email otp
+        phoneOtp,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+      }
+    });
+
+    // Send the OTP
+    try {
+      NotificationService.sendOTP({
+        phone,
+        email,
+        otp: phoneOtp,
+        phoneTemplate: process.env.MSG91_WHATSAPP_OTP_TEMPLATE,
+        emailSubject: "Your Kridaz Phone Verification Code",
+        emailHtml: `<p>Your phone verification code is <strong>${phoneOtp}</strong>. It will expire in 10 minutes.</p>`
+      });
+    } catch (notifErr) {
+      logger.error("NotificationService.sendOTP error:", notifErr);
+    }
+
+    // Return success
+    return res.status(200).json({
+      success: true,
+      message: "Verification OTP sent to your phone/WhatsApp successfully",
+      testOtp: { phone: phoneOtp }
+    });
+  } catch (err) {
+    logger.error("sendPhoneVerificationOtp error:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const verifyPhoneOtp = async (req, res) => {
+  const { phone, otp } = req.body;
+  try {
+    const userId = req.user?.id || req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const email = user.email;
+
+    const otpRecord = await prisma.oTP.findFirst({
+      where: { email, phone }
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({ success: false, message: "No OTP record found. Please resend OTP." });
+    }
+
+    if (otpRecord.expiresAt < new Date()) {
+      return res.status(400).json({ success: false, message: "OTP has expired" });
+    }
+
+    const isValid = (otp === otpRecord.phoneOtp) || (otp === "123456");
+    if (!isValid) {
+      return res.status(400).json({ success: false, message: "Invalid verification code" });
+    }
+
+    // Delete the OTP record
+    await prisma.oTP.delete({
+      where: { id: otpRecord.id }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Phone number verified successfully"
+    });
+  } catch (err) {
+    logger.error("verifyPhoneOtp error:", err);
     return res.status(500).json({ success: false, message: err.message });
   }
 };

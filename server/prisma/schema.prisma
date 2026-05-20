@@ -21,7 +21,9 @@ model User {
   latitude                Decimal?              @db.Decimal(10, 8)
   longitude               Decimal?              @db.Decimal(11, 8)
   isVerified              Boolean               @default(false)
+  isOnboarded             Boolean               @default(false)
   gender                  String?
+  dob                     DateTime?
   bio                     String?
   interests               String[]
   sportTypes              String[]
@@ -97,6 +99,7 @@ model UserProfile {
   userId     String   @unique
   bio        String?
   gender     String?
+  dob        DateTime?
   interests  String[] @default([])
   sportTypes String[] @default([])
   city       String?

@@ -19,15 +19,9 @@ const Root = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    // Show onboarding for regular users who have an incomplete profile
+    // Show onboarding for regular users who have not completed onboarding
     if (isAuthenticated && user?.role?.toLowerCase() === "user") {
-      const isDismissed = localStorage.getItem("kridaz_onboarding_dismissed") === "true" || sessionStorage.getItem("kridaz_onboarding_dismissed") === "true";
-      if (isDismissed) {
-        setShowOnboarding(false);
-        return;
-      }
-      const isIncomplete = !user.phone || !user.gender || (!user.location && !user.city) || !user.sportTypes || user.sportTypes.length === 0;
-      if (isIncomplete) {
+      if (user.isOnboarded === false || !user.isOnboarded) {
         setShowOnboarding(true);
       } else {
         setShowOnboarding(false);
@@ -55,12 +49,11 @@ const Root = () => {
         isOpen={showOnboarding} 
         onClose={() => {
           setShowOnboarding(false);
-          sessionStorage.setItem("kridaz_onboarding_dismissed", "true");
         }} 
         onComplete={() => {
           setShowOnboarding(false);
-          localStorage.setItem("kridaz_onboarding_dismissed", "true");
         }}
+        initialData={{ authMethod: 'google', user: user || {} }}
       />
       <ScrollToTop />
       {!isReelsPage && <Navbar />}

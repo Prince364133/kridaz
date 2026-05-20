@@ -19,6 +19,7 @@ export const userRegisterSchema = z.object({
     confirmPassword: z.string().min(1, "Confirm Password is required"),
     otp: z.string().min(6, "OTP must be 6 characters"),
     phoneOtp: z.string().min(6, "WhatsApp OTP must be 6 characters"),
+    dob: z.string().optional(),
     sportTypes: z.array(z.string()).optional(),
   }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",

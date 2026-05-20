@@ -1,24 +1,46 @@
-import { useState } from "react";
-import { Check, Trophy, Activity, Zap, Target, MapPin, Phone, User as UserIcon, ChevronRight, ChevronLeft, Loader2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Check, Trophy, Activity, Zap, Target, MapPin, Phone, Mail, User as UserIcon, Calendar, ChevronRight, ChevronLeft, Loader2 } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
-import { updateUser } from "@redux/slices/authSlice";
+import { updateUser, login } from "@redux/slices/authSlice";
 import { searchLocations } from "@utils/locationService";
-import { useRef, useEffect } from "react";
 
-const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
+const getNameFromEmail = (email) => {
+  if (!email) return "";
+  const prefix = email.split("@")[0];
+  const clean = prefix.replace(/[0-9]/g, "").replace(/[\._\-]/g, " ").trim();
+  return clean
+    .split(/\s+/)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+};
+
+const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
   const dispatch = useDispatch();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
+  // Phone verification state
+  const [phoneOtpSent, setPhoneOtpSent] = useState(false);
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  const [phoneOtp, setPhoneOtp] = useState("");
+  const [sendingPhoneOtp, setSendingPhoneOtp] = useState(false);
+  const [verifyingPhoneOtp, setVerifyingPhoneOtp] = useState(false);
+
+  // Initialize from initialData depending on authMethod (google vs email/phone)
+  const isGoogle = initialData?.authMethod === 'google';
+  
   const [formData, setFormData] = useState({
+    name: "",
+    email: "",
     phone: "",
     gender: "",
+    dob: "",
     location: "",
     sportTypes: [],
     password: "",
-    confirmPassword: ""
+    otp: "",
   });
 
   const [locationSuggestions, setLocationSuggestions] = useState([]);
@@ -46,34 +68,84 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
     }));
   };
 
+  // Sync initialData to formData
+  useEffect(() => {
+    if (isOpen && initialData) {
+      const isGoogle = initialData.authMethod === 'google';
+      const userObj = isGoogle ? (initialData.user || {}) : {};
+      
+      const emailVal = isGoogle ? (userObj.email || "") : (initialData?.email || "");
+      const derivedName = isGoogle 
+        ? (userObj.name || getNameFromEmail(emailVal)) 
+        : (initialData?.name || getNameFromEmail(emailVal));
+
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || derivedName || "",
+        email: prev.email || emailVal || "",
+        phone: prev.phone || (isGoogle ? (userObj.phone || "") : (initialData?.phone || "")),
+        gender: prev.gender || (isGoogle ? (userObj.gender || "") : ""),
+        dob: prev.dob || (isGoogle ? (userObj.dob ? new Date(userObj.dob).toISOString().split('T')[0] : "") : ""),
+        location: prev.location || (isGoogle ? (userObj.city || userObj.location || "") : ""),
+        sportTypes: prev.sportTypes?.length ? prev.sportTypes : (isGoogle ? (userObj.sportTypes || []) : []),
+      }));
+    }
+  }, [isOpen, initialData]);
+
+  const handleSendPhoneOtp = async () => {
+    if (!formData.phone || formData.phone.length < 10) {
+      return toast.error("Please enter a valid 10-digit phone number");
+    }
+    setSendingPhoneOtp(true);
+    try {
+      const res = await axiosInstance.post("/api/user/auth/send-phone-verification-otp", {
+        phone: formData.phone
+      });
+      if (res.data.success) {
+        setPhoneOtpSent(true);
+        toast.success("Verification OTP sent successfully!");
+        if (res.data.testOtp) {
+          toast(`Test OTP: ${res.data.testOtp.phone}`, { icon: '🧑‍💻', duration: 10000 });
+        }
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to send verification OTP");
+    } finally {
+      setSendingPhoneOtp(false);
+    }
+  };
+
+  const handleVerifyPhoneOtp = async () => {
+    if (!phoneOtp || phoneOtp.length < 6) {
+      return toast.error("Please enter the 6-digit OTP");
+    }
+    setVerifyingPhoneOtp(true);
+    try {
+      const res = await axiosInstance.post("/api/user/auth/verify-phone-otp", {
+        phone: formData.phone,
+        otp: phoneOtp
+      });
+      if (res.data.success) {
+        setIsPhoneVerified(true);
+        toast.success("Phone number verified successfully!");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Invalid OTP");
+    } finally {
+      setVerifyingPhoneOtp(false);
+    }
+  };
+
   const handleNext = () => {
     if (step === 1) {
-      if (!formData.password || !formData.confirmPassword) {
-        toast.error("Please create a password for your account");
-        return;
-      }
-      if (formData.password.length < 6) {
-        toast.error("Password must be at least 6 characters");
-        return;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        toast.error("Passwords do not match");
-        return;
-      }
+      if (!formData.name) return toast.error("Please enter your name");
+      if (!formData.dob) return toast.error("Please select your date of birth");
+      if (!formData.gender) return toast.error("Please select your gender");
+      if (!formData.phone || formData.phone.length < 10) return toast.error("Valid phone number required");
+      if (!formData.email) return toast.error("Valid email required");
+      if (isGoogle && !isPhoneVerified) return toast.error("Please verify your phone number via OTP");
     } else if (step === 2) {
-      if (!formData.phone || !formData.gender) {
-        toast.error("Please fill in all details");
-        return;
-      }
-      if (!/^[0-9]{10}$/.test(formData.phone)) {
-        toast.error("Please enter a valid 10-digit phone number");
-        return;
-      }
-    } else if (step === 3) {
-      if (!formData.location) {
-        toast.error("Please enter your location");
-        return;
-      }
+      if (!formData.location) return toast.error("Please enter your location");
     }
     setStep(prev => prev + 1);
   };
@@ -130,10 +202,38 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
 
     setLoading(true);
     try {
-      const res = await axiosInstance.put("/api/user/auth/updateProfile", formData);
-      if (res.data.success) {
-        dispatch(updateUser(res.data.user));
-        toast.success("Profile completed! Welcome to the arena.");
+      if (isGoogle) {
+        const res = await axiosInstance.put("/api/user/auth/updateProfile", {
+          ...formData,
+          isOnboarded: true
+        });
+        if (res.data.success) {
+          dispatch(updateUser(res.data.user));
+          toast.success("Profile completed! Welcome to the arena.");
+          onComplete();
+          onClose();
+        }
+      } else {
+        const inviteToken = localStorage.getItem("pendingInvite");
+        const umpireInvite = localStorage.getItem("umpireInvite");
+        
+        // Register newly created user via email/phone flow
+        const payload = {
+          ...formData,
+          username: formData.email.split('@')[0] + Math.floor(Math.random()*1000), // temp username
+          role: 'user',
+          inviteToken,
+          umpireInvite
+        };
+        
+        // Pass either otp or phoneOtp depending on method
+        if (initialData.authMethod === 'phone') payload.phoneOtp = formData.otp;
+        else payload.otp = formData.otp;
+
+        const res = await axiosInstance.post("/api/user/auth/register", payload);
+        const result = res.data;
+        dispatch(login({ token: result.token, role: result.role, user: result.user }));
+        toast.success("Registration complete! Welcome to the arena.");
         onComplete();
         onClose();
       }
@@ -147,121 +247,169 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl">
-      <div className="bg-[#000000] border border-[#2D2D2D] w-full max-w-xl rounded-[2.5rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in duration-500">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl overflow-y-auto custom-scrollbar">
+      <div className="bg-[#000000] border border-[#2D2D2D] w-full max-w-xl rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in duration-500 max-h-[90vh] flex flex-col my-auto">
         
         {/* Progress Bar */}
         <div className="flex h-1.5 bg-[#000000]">
           <div 
             className="bg-[#55DEE8] transition-all duration-500 shadow-[0_0_10px_#55DEE8]" 
-            style={{ width: `${(step / 4) * 100}%` }}
+            style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
 
-        <div className="p-8 md:p-10 space-y-8">
+        <div className="p-8 md:p-10 space-y-8 overflow-y-auto custom-scrollbar">
           {/* Header */}
           <div className="space-y-2 text-center">
             <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight uppercase italic">
-              {step === 1 && "Secure Account"}
-              {step === 2 && "Final Touches"}
-              {step === 3 && "Where's the Arena?"}
-              {step === 4 && "Pick Your Game"}
+              {step === 1 && "About You"}
+              {step === 2 && "Where's the Arena?"}
+              {step === 3 && "Pick Your Game"}
             </h2>
             <p className="text-white/40 text-sm font-medium uppercase tracking-[0.2em]">
-              {step === 1 && "Step 1 of 4: Create Password"}
-              {step === 2 && "Step 2 of 4: Basic Profile"}
-              {step === 3 && "Step 3 of 4: Your Location"}
-              {step === 4 && "Step 4 of 4: Your Interests"}
+              {step === 1 && "Step 1 of 3: Personal Details"}
+              {step === 2 && "Step 2 of 3: Your Location"}
+              {step === 3 && "Step 3 of 3: Your Interests"}
             </p>
           </div>
 
           {/* Content */}
           <div className="min-h-[280px] flex flex-col justify-center">
             {step === 1 && (
-              <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                <div className="p-6 rounded-[8px] bg-[#55DEE8]/5 border border-[#55DEE8]/20 flex items-start gap-4 mb-4">
-                  <div className="p-3 rounded-[8px] bg-[#55DEE8]/10 text-[#55DEE8]">
-                    <Zap size={24} />
+              <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
+                <label className="block">
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Full Name</span>
+                  <div className="mt-2 relative">
+                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      placeholder="Your name"
+                      className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all"
+                    />
                   </div>
-                  <div className="space-y-1">
-                    <h4 className="text-white font-bold text-sm">One Last Thing!</h4>
-                    <p className="text-white/40 text-[10px]">Create a password so you can login directly next time.</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <label className="block">
-                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">New Password</span>
-                    <div className="mt-2 relative">
-                      <Zap className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-                      <input
-                        type="password"
-                        value={formData.password}
-                        onChange={(e) => setFormData({...formData, password: e.target.value})}
-                        placeholder="Min 6 characters"
-                        className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all"
-                      />
-                    </div>
-                  </label>
+                </label>
 
+                {!isGoogle && initialData?.authMethod === 'phone' && (
                   <label className="block">
-                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Confirm Password</span>
+                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Email Address</span>
                     <div className="mt-2 relative">
-                      <Zap className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
                       <input
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                        placeholder="Re-enter password"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        placeholder="your@email.com"
                         className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all"
                       />
                     </div>
                   </label>
+                )}
+
+                {(!isGoogle && initialData?.authMethod === 'email') || (isGoogle && !initialData?.user?.phone) ? (
+                  <label className="block">
+                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Phone Number</span>
+                    <div className="mt-2 relative flex gap-2">
+                      <div className="relative flex-1">
+                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                        <input
+                          type="tel"
+                          maxLength={10}
+                          value={formData.phone}
+                          disabled={isPhoneVerified}
+                          onChange={(e) => {
+                            setFormData({...formData, phone: e.target.value.replace(/\D/g, '')});
+                            if (phoneOtpSent) {
+                              setPhoneOtpSent(false);
+                              setIsPhoneVerified(false);
+                            }
+                          }}
+                          placeholder="10-digit mobile number"
+                          className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                        />
+                      </div>
+                      
+                      {isGoogle && !isPhoneVerified && (
+                        <button
+                          type="button"
+                          onClick={handleSendPhoneOtp}
+                          disabled={sendingPhoneOtp || !formData.phone || formData.phone.length < 10}
+                          className="px-4 bg-[#55DEE8]/10 hover:bg-[#55DEE8]/20 border border-[#55DEE8]/30 rounded-[8px] font-bold text-xs uppercase tracking-wider text-[#55DEE8] transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap animate-pulse"
+                        >
+                          {sendingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4" /> : (phoneOtpSent ? "Resend" : "Get OTP")}
+                        </button>
+                      )}
+
+                      {isGoogle && isPhoneVerified && (
+                        <div className="px-4 bg-green-500/10 border border-green-500/30 rounded-[8px] font-bold text-xs uppercase tracking-wider text-green-400 flex items-center gap-1.5 whitespace-nowrap animate-bounce">
+                          <Check size={14} strokeWidth={3} />
+                          Verified
+                        </div>
+                      )}
+                    </div>
+
+                    {isGoogle && phoneOtpSent && !isPhoneVerified && (
+                      <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Phone Verification OTP</span>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            maxLength={6}
+                            value={phoneOtp}
+                            onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, ''))}
+                            placeholder="Enter 6-digit OTP"
+                            className="flex-1 bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-3 px-4 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all text-center tracking-widest font-black"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleVerifyPhoneOtp}
+                            disabled={verifyingPhoneOtp || phoneOtp.length < 6}
+                            className="px-6 bg-[#55DEE8] hover:scale-[1.02] active:scale-[0.98] rounded-[8px] font-black text-xs uppercase tracking-wider text-black transition-all disabled:opacity-40 disabled:scale-100"
+                          >
+                            {verifyingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4" /> : "Verify"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </label>
+                ) : null}
+
+                <label className="block">
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Date of Birth</span>
+                  <div className="mt-2 relative">
+                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+                    <input
+                      type="date"
+                      value={formData.dob}
+                      onChange={(e) => setFormData({...formData, dob: e.target.value})}
+                      className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all [color-scheme:dark]"
+                    />
+                  </div>
+                </label>
+
+                <div className="space-y-2 pt-2">
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Select Gender</span>
+                  <div className="grid grid-cols-2 gap-3 mt-2">
+                    {["Male", "Female", "Other", "Prefer not to say"].map((g) => (
+                      <button
+                        key={g}
+                        onClick={() => setFormData({...formData, gender: g})}
+                        className={`py-3 rounded-[8px] border font-bold text-xs uppercase tracking-wider transition-all duration-300 ${
+                          formData.gender === g
+                            ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_0_20px_rgba(85,222,232,0.2)]"
+                            : "bg-white/[0.03] border-[#2D2D2D] text-white/40 hover:border-[#2D2D2D]"
+                        }`}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
 
             {step === 2 && (
-              <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                <div className="space-y-4">
-                  <label className="block">
-                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Phone Number</span>
-                    <div className="mt-2 relative">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-                      <input
-                        type="tel"
-                        maxLength={10}
-                        value={formData.phone}
-                        onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '')})}
-                        placeholder="10-digit mobile number"
-                        className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all"
-                      />
-                    </div>
-                  </label>
-
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Select Gender</span>
-                    <div className="grid grid-cols-2 gap-3 mt-2">
-                      {["Male", "Female", "Other", "Prefer not to say"].map((g) => (
-                        <button
-                          key={g}
-                          onClick={() => setFormData({...formData, gender: g})}
-                          className={`py-4 rounded-[8px] border font-bold text-xs uppercase tracking-wider transition-all duration-300 ${
-                            formData.gender === g
-                              ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_0_20px_rgba(85,222,232,0.2)]"
-                              : "bg-white/[0.03] border-[#2D2D2D] text-white/40 hover:border-[#2D2D2D]"
-                          }`}
-                        >
-                          {g}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {step === 3 && (
               <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                 <div className="p-6 rounded-[8px] bg-[#55DEE8]/5 border border-[#55DEE8]/20 flex items-start gap-4">
                   <div className="p-3 rounded-[8px] bg-[#55DEE8]/10 text-[#55DEE8]">
@@ -314,7 +462,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
               </div>
             )}
 
-            {step === 4 && (
+            {step === 3 && (
               <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-right-4 duration-300">
                 {sports.map((sport) => (
                   <button
@@ -351,7 +499,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
               </button>
             )}
             
-            {step < 4 ? (
+            {step < 3 ? (
               <button
                 onClick={handleNext}
                 className="flex-[2] bg-white text-black h-16 rounded-[8px] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl"
@@ -383,4 +531,3 @@ const OnboardingModal = ({ isOpen, onClose, onComplete }) => {
 };
 
 export default OnboardingModal;
-
