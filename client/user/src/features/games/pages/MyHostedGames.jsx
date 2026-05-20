@@ -104,8 +104,8 @@ const MyHostedGames = () => {
   return (
     <div className="min-h-screen bg-neutral-900 text-white p-4 pb-24">
       <div className="max-w-4xl mx-auto mb-8">
-        <h1 className="text-3xl font-black italic tracking-tighter">MY HOSTED GAMES</h1>
-        <p className="text-neutral-400">Manage your matches and approve players</p>
+        <h1 className="text-3xl font-black tracking-tighter font-open-sans text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mb-2 uppercase">MY HOSTED GAMES</h1>
+        <p className="text-neutral-400 font-inter text-[20px]">Manage your matches and approve players</p>
       </div>
 
       <div className="max-w-4xl mx-auto space-y-6">
@@ -114,9 +114,9 @@ const MyHostedGames = () => {
         ) : myGames.length === 0 ? (
           <div className="py-20 text-center bg-neutral-800/20 rounded-3xl border-2 border-dashed border-neutral-800">
             <Trophy size={48} className="mx-auto mb-4 text-neutral-700" />
-            <h3 className="text-xl font-bold">No games hosted yet</h3>
-            <p className="text-neutral-500 mb-6">Start hosting and build your community!</p>
-            <button onClick={() => window.location.href='/host-game'} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-xl">
+            <h3 className="text-2xl md:text-3xl font-black tracking-tighter font-open-sans text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mb-2 uppercase">No games hosted yet</h3>
+            <p className="text-neutral-500 mb-6 font-inter text-[20px]">Start hosting and build your community!</p>
+            <button onClick={() => window.location.href='/host-game'} className="px-8 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-bold rounded-xl uppercase tracking-wider shadow-lg hover:scale-105 transition-all">
               Host Now
             </button>
           </div>

@@ -456,7 +456,7 @@ export default function Home() {
 
  {/* Search & Tabs Combined Row */}
  <div className="flex flex-col gap-8 mb-16 w-full">
- <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+ <div className="flex flex-col md:flex-row items-center justify-start gap-6">
  <div className="flex gap-2 p-1 rounded-full bg-[#1A1A1A] border border-white/5 overflow-x-auto no-scrollbar">
  {[{ key: "venues", label: "🏟 VENUES" }, { key: "marketplace", label: "🛒 MARKETPLACE" }].map(tab => (
  <button
@@ -469,12 +469,6 @@ export default function Home() {
  </button>
  ))}
  </div>
- <button 
- onClick={() => document.getElementById('search-section')?.scrollIntoView({ behavior: 'smooth' })}
- className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-[0.2em] hover:text-[#55DEE8] transition-colors"
- >
- {userLocation?.city ? `${userLocation.city}, ${userLocation.state}` : "SELECT LOCATION"}
- </button>
  </div>
 
  <div className="w-full animate-fade-in relative z-20">

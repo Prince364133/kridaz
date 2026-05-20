@@ -16,7 +16,8 @@ import {
   Briefcase,
   ShieldAlert,
   Loader2,
-  Navigation
+  Navigation,
+  Upload
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { searchLocations } from "@user/utils/locationService";
@@ -35,32 +36,26 @@ export default function BusinessRegistration() {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [showAgreementModal, setShowAgreementModal] = useState(false);
+  const [isAgreed, setIsAgreed] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
     role: roleFromUrl,
-    portfolioUrl: "",
     businessDetails: {
       businessName: "",
-      registrationNumber: "",
-      address: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      experience: "",
-      specialization: "",
     },
   });
 
   const [files, setFiles] = useState({
+    BUSINESS: null,
+    GST: null,
+    OWNERSHIP: null,
+    SALE_DEED: null,
+    PROPERTY_TAX: null,
+    ELECTRICITY: null,
+    GOOGLE: null,
     PAN: null,
     AADHAR: null,
-    BUSINESS: null,
-    GOOGLE: null,
-    GST: null,
-    VENUE: null
   });
 
   const isOwner = formData.role === 'venu_owners' || formData.role === 'venue_owners' || formData.role === 'venue';
@@ -171,88 +166,73 @@ export default function BusinessRegistration() {
     setShowSuggestions(false);
   };
 
-  const handleSubmit = async (e) => {
+  const requiredDocs = [
+    { key: 'BUSINESS', label: 'Business Registration' },
+    { key: 'GST', label: 'GST Registration' },
+    { key: 'OWNERSHIP', label: 'Ownership Proof / Rental Agreement' },
+    { key: 'SALE_DEED', label: 'Sale Deed' },
+    { key: 'PROPERTY_TAX', label: 'Property Tax Receipt' },
+    { key: 'ELECTRICITY', label: 'Electricity Bill' },
+    { key: 'GOOGLE', label: 'Google Business Profile' },
+    { key: 'PAN', label: 'PAN Card' },
+    { key: 'AADHAR', label: 'Aadhaar Card' },
+  ];
+
+  const handleFormSubmit = (e) => {
     e.preventDefault();
-    console.log("Submitting registration bundle...", { formData, files });
 
     if (hasRoleConflict) {
       toast.error("Role conflict detected. Please contact support.");
       return;
     }
-    
     if (isPending) {
       toast.error("You already have a pending application.");
       return;
     }
+    if (!formData.businessDetails.businessName) {
+      toast.error("Please fill in Business Name");
+      return;
+    }
 
+    // Check all required documents are uploaded
+    for (const doc of requiredDocs) {
+      const file = files[doc.key];
+      const isEmpty = !file || (Array.isArray(file) && file.length === 0);
+      if (isEmpty) {
+        toast.error(`Please upload: ${doc.label}`);
+        return;
+      }
+    }
+
+    setShowAgreementModal(true);
+    setIsAgreed(false);
+  };
+
+  const processSubmission = async () => {
+    setShowAgreementModal(false);
     setLoading(true);
 
     try {
-      // Consolidated Document validation
-      const requiredDocs = isOwner 
-        ? ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST', 'VENUE']
-        : ['PAN', 'AADHAR', 'BUSINESS', 'GOOGLE', 'GST'];
-
-      const missingDocs = requiredDocs.filter(doc => !files[doc]);
-      if (missingDocs.length > 0) {
-        toast.error(`Please upload all required documents: ${missingDocs.join(", ")}`);
-        setLoading(false);
-        return;
-      }
-
-      // Mandatory field check
-      const { businessName, registrationNumber, address, city, state, zipCode, specialization, experience } = formData.businessDetails;
-      const { portfolioUrl, phone } = formData;
-
-      if (!portfolioUrl) {
-        toast.error("Portfolio link is mandatory");
-        setLoading(false);
-        return;
-      }
-
-      if (!phone) {
-        toast.error("Contact phone number is mandatory");
-        setLoading(false);
-        return;
-      }
-
-      // Address validation for everyone
-      if (!address || !city || !state || !zipCode) {
-        toast.error("Please provide your full address details");
-        setLoading(false);
-        return;
-      }
-
-      if (isOwner) {
-        if (!businessName || !registrationNumber) {
-          toast.error("Please fill in all business details");
-          setLoading(false);
-          return;
-        }
-      } else {
-        if (!specialization || !experience) {
-          toast.error("Please fill in your specialization and experience");
-          setLoading(false);
-          return;
-        }
-      }
-
       const data = new FormData();
-      data.append("name", formData.name);
-      data.append("email", formData.email);
-      data.append("phone", phone);
+      data.append("name", user?.name || "");
+      data.append("email", user?.email || "");
+      data.append("phone", user?.phone || "");
       data.append("role", formData.role);
-      data.append("portfolioUrl", portfolioUrl);
       data.append("businessDetails", JSON.stringify(formData.businessDetails));
 
       // Append all selected documents
       Object.keys(files).forEach(key => {
         if (files[key]) {
-          data.append("documents", files[key], `${key}_${files[key].name}`);
+          if (Array.isArray(files[key])) {
+             files[key].forEach((file, index) => {
+               data.append("documents", file, `${key}_${index}_${file.name}`);
+             });
+          } else {
+             data.append("documents", files[key], `${key}_${files[key].name}`);
+          }
         }
       });
 
-      console.log("Sending request to backend...");
       const response = await axiosInstance.post("/api/user/auth/upgrade-request", data, {
         headers: { "Content-Type": "multipart/form-data" }
       });
@@ -310,28 +290,38 @@ export default function BusinessRegistration() {
   // ─── Application pending review ───
   if (isPending || submitted) {
     const displayRole = submitted ? formData.role : pendingRole;
+    
+    // Format the role for display
+    let formattedRole = displayRole;
+    if (displayRole === 'venu_owners' || displayRole === 'venue_owners' || displayRole === 'venue') {
+      formattedRole = 'Venue Partner';
+    } else {
+      // Capitalize first letter if it's something else
+      formattedRole = displayRole ? displayRole.charAt(0).toUpperCase() + displayRole.slice(1) : '';
+    }
+
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-        <div className="max-w-md w-full text-center space-y-8 p-12 rounded-[8px] border border-[#2D2D2D] bg-[#000000] relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-[#CCFF00]" />
-          <div className="w-16 h-16 bg-[#CCFF00]/10 rounded-[8px] flex items-center justify-center mx-auto mb-6">
-            <Clock size={40} className="text-[#CCFF00] animate-pulse" />
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 pt-20">
+        <div className="max-w-md w-full text-center space-y-6 p-8 md:p-10 rounded-[15px] border border-[#2D2D2D] bg-[#000000] relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />
+          <div className="w-14 h-14 bg-gradient-to-br from-[#55DEE8]/15 to-[#BFF367]/15 rounded-[12px] flex items-center justify-center mx-auto mb-4 border border-[#55DEE8]/20">
+            <Clock size={32} className="text-[#55DEE8] animate-pulse" />
           </div>
-          <h2 className="text-4xl font-black uppercase tracking-tight">
-            Application <span className="text-[#CCFF00]">Pending</span>
+          <h2 className="text-3xl font-black uppercase tracking-tight" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+            Application <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent">Pending</span>
           </h2>
-          <p className="text-gray-400 leading-relaxed">
+          <p className="text-gray-400 leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", fontSize: "16px" }}>
             Thank you for applying to be a{" "}
-            <span className="text-white capitalize font-semibold">{displayRole}</span>. Our admin
+            <span className="text-white font-semibold">{formattedRole}</span>. Our admin
             team is reviewing your registration details and documents.
           </p>
-          <div className="bg-[#000000] rounded-[8px] p-5 text-[12px] text-left space-y-4 border border-[#2D2D2D]">
+          <div className="bg-[#000000] rounded-[15px] p-4 text-[12px] text-left space-y-4 border border-[#2D2D2D]">
             <div className="flex items-center gap-3 text-gray-300">
-              <CheckCircle2 size={18} className="text-[#CCFF00]" />
+              <CheckCircle2 size={18} className="text-[#BFF367]" />
               <span>Application Received</span>
             </div>
             <div className="flex items-center gap-3 text-gray-300">
-              <div className="w-[18px] h-[18px] border-2 border-[#CCFF00]/30 border-t-[#CCFF00] rounded-full animate-spin" />
+              <div className="w-[18px] h-[18px] border-2 border-[#55DEE8]/30 border-t-[#55DEE8] rounded-full animate-spin" />
               <span>Document Verification In-Progress</span>
             </div>
             <div className="flex items-center gap-3 text-white/20">
@@ -341,7 +331,7 @@ export default function BusinessRegistration() {
           </div>
           <button
             onClick={() => navigate("/")}
-            className="w-full py-4 rounded-[8px] border border-[#2D2D2D] hover:border-[#CCFF00]/30 hover:text-[#CCFF00] transition-all font-normal uppercase tracking-widest text-[12px]"
+            className="w-full py-4 mt-2 rounded-[15px] border border-[#2D2D2D] hover:border-[#55DEE8]/30 hover:text-[#55DEE8] transition-all font-normal uppercase tracking-widest text-[12px]"
           >
             Back to Home
           </button>
@@ -351,318 +341,126 @@ export default function BusinessRegistration() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-4 pb-20 font-sans selection:bg-[#CCFF00] selection:text-black">
+    <div className="min-h-screen bg-black text-white pt-10 pb-20 font-sans selection:bg-[#55DEE8] selection:text-black">
       <div className="w-full px-6">
         
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-8 group">
-          <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-          <span>Go Back</span>
-        </button>
-
-        <div className="grid lg:grid-cols-[1fr_380px] gap-12">
+        <div className="grid lg:grid-cols-[1fr_380px] gap-12 relative">
           
           <div className="space-y-10">
             <div>
-              <h1 className="text-5xl md:text-6xl font-black uppercase leading-none mb-4">
-                Professional <br /> <span style={{ color: PRI }}>Registration.</span>
+              <h1 className="text-4xl md:text-5xl font-black uppercase leading-none mb-4 tracking-tight" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+                Professional <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-transparent bg-clip-text">Registration.</span>
               </h1>
-              <p className="text-gray-400 text-lg">Tell us about your business to get verified and access the Kridaz dashboard.</p>
+              <p className="text-gray-400 text-[20px]" style={{ fontFamily: "'Inter', sans-serif" }}>Submit your business documents for verification and access the Kridaz dashboard.</p>
             </div>
 
             {/* Role conflict banner removed as it's now handled by the early return view */}
 
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleFormSubmit} className="space-y-6">
               
-              <div className="grid grid-cols-2 gap-6">
-                 <div className="space-y-2 group">
-                   <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">Full Name</label>
-                   <input 
-                     type="text" value={formData.name} disabled
-                     className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] h-14 px-5 text-[#878C9F] outline-none cursor-not-allowed"
-                   />
-                 </div>
-                 <div className="space-y-2 group">
-                   <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">Email Address</label>
-                   <input 
-                     type="email" value={formData.email} disabled
-                     className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] h-14 px-5 text-[#878C9F] outline-none cursor-not-allowed"
-                   />
-                 </div>
-              </div>
-
-              <div className="p-8 rounded-[8px] border border-[#2D2D2D] bg-[#000000] space-y-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px] pointer-events-none" />
-                
-                <h3 className="text-lg font-semibold uppercase tracking-tight flex items-center gap-3">
-                  {formData.role === 'venu_owners' ? <Building2 className="text-[#CCFF00]" /> : <Award className="text-[#CCFF00]" />}
-                  {formData.role === 'venu_owners' ? 'Business Details' : 'Professional Profile'}
+              <div className="p-6 rounded-[8px] border border-[#2D2D2D] bg-[#000000] space-y-6 relative overflow-hidden">
+                <h3 className="text-lg font-black uppercase tracking-widest flex items-center gap-3" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+                  <Building2 className="text-[#55DEE8] w-5 h-5" /> <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-transparent bg-clip-text">Business Details</span>
                 </h3>
 
-                <div className="grid grid-cols-2 gap-6">
-                  {formData.role === 'venu_owners' || formData.role === 'venue' ? (
-                    <>
-                      <div className="space-y-2 group col-span-2">
-                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
-                          Business Name <span className="text-red-500">*</span>
-                        </label>
-                        <input 
-                          type="text" name="businessDetails.businessName"
-                          value={formData.businessDetails.businessName}
-                          onChange={handleChange}
-                          placeholder="e.g. Dream Sports Arena"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
-                        />
-                      </div>
-                      <div className="space-y-2 group">
-                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
-                          Registration Number <span className="text-red-500">*</span>
-                        </label>
-                        <input 
-                          type="text" name="businessDetails.registrationNumber"
-                          value={formData.businessDetails.registrationNumber}
-                          onChange={handleChange}
-                          placeholder="GSTIN or License No."
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
-                        />
-                      </div>
-                      <div className="space-y-2 group">
-                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
-                          Business Phone <span className="text-red-500">*</span>
-                        </label>
-                        <input 
-                          type="text" name="phone"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          placeholder="+91 00000 00000"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="space-y-2 group col-span-2">
-                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
-                          Specialization <span className="text-red-500">*</span>
-                        </label>
-                        <input 
-                          type="text" name="businessDetails.specialization"
-                          value={formData.businessDetails.specialization}
-                          onChange={handleChange}
-                          placeholder="e.g. Advanced Cricket Coaching"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
-                        />
-                      </div>
-                      <div className="space-y-2 group">
-                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
-                          Years of Experience <span className="text-red-500">*</span>
-                        </label>
-                        <input 
-                          type="text" name="businessDetails.experience"
-                          value={formData.businessDetails.experience}
-                          onChange={handleChange}
-                          placeholder="e.g. 5+ Years"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
-                        />
-                      </div>
-                      <div className="space-y-2 group">
-                        <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
-                          Contact Phone <span className="text-red-500">*</span>
-                        </label>
-                        <input 
-                          type="text" name="phone"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          placeholder="+91 00000 00000"
-                          className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-
                 <div className="space-y-2 group">
-                  <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] group-focus-within:text-[#CCFF00] transition-colors">
-                    Full Address <span className="text-red-500">*</span>
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#878C9F] group-focus-within:text-[#55DEE8] transition-colors">
+                    Business Name <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <MapPin size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#CCFF00]" />
-                    <input 
-                      type="text" name="businessDetails.address"
-                      value={formData.businessDetails.address}
-                      onChange={handleChange}
-                      autoComplete="off"
-                      placeholder="Street name, Landmark"
-                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 pl-12 pr-12 text-white outline-none transition-all"
-                    />
-                    
-                    {isSearching && (
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                        <Loader2 className="w-4 h-4 text-[#CCFF00] animate-spin" />
-                      </div>
-                    )}
-
-                    {/* Suggestions Dropdown */}
-                    {showSuggestions && (
-                      <>
-                        <div className="fixed inset-0 z-40" onClick={() => setShowSuggestions(false)} />
-                        <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden z-50 shadow-2xl animate-in fade-in slide-in-from-top-2">
-                          <div className="p-1 max-h-[240px] overflow-y-auto custom-scrollbar">
-                            {suggestions.map((suggestion, index) => (
-                                <button
-                                  key={index}
-                                  type="button"
-                                  onClick={() => handleSuggestionSelect(suggestion)}
-                                  className="w-full flex items-start gap-3 p-3 rounded-[6px] hover:bg-[#CCFF00]/5 text-left transition-all group/item"
-                                >
-                                  <div className="p-2 bg-[#CCFF00]/10 rounded-[6px] transition-colors mt-0.5">
-                                    <Navigation size={14} className="text-gray-500 group-hover/item:text-[#CCFF00]" />
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="text-[11px] font-bold text-white uppercase tracking-wider truncate">
-                                      {suggestion.city || suggestion.display_name.split(',')[0]}
-                                    </span>
-                                    <span className="text-[9px] text-white/40 truncate">
-                                      {suggestion.display_name}
-                                    </span>
-                                  </div>
-                                </button>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <input 
-                      type="text" name="businessDetails.city"
-                      value={formData.businessDetails.city}
-                      onChange={handleChange}
-                      placeholder="City"
-                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <input 
-                      type="text" name="businessDetails.state"
-                      value={formData.businessDetails.state}
-                      onChange={handleChange}
-                      placeholder="State"
-                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <input 
-                      type="text" name="businessDetails.zipCode"
-                      value={formData.businessDetails.zipCode}
-                      onChange={handleChange}
-                      placeholder="Zip Code"
-                      className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all"
-                    />
-                  </div>
+                  <input 
+                    type="text" name="businessDetails.businessName"
+                    value={formData.businessDetails.businessName}
+                    onChange={handleChange}
+                    placeholder="e.g. Dream Sports Arena"
+                    className="w-full bg-[#0a0a0c] border border-[#2D2D2D] focus:border-[#55DEE8]/50 rounded-[6px] h-12 px-4 text-white text-sm outline-none transition-all"
+                  />
                 </div>
               </div>
 
-              {/* Enhanced Document Section */}
-              <div className="p-8 rounded-[8px] border border-[#2D2D2D] bg-[#000000] space-y-8 relative overflow-hidden">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-3xl pointer-events-none" />
+              <div className="p-6 rounded-[8px] border border-[#2D2D2D] bg-[#000000] space-y-6 relative overflow-hidden">
                  
-                 <h3 className="text-lg font-semibold uppercase tracking-tight flex items-center gap-3">
-                   <FileText className="text-[#CCFF00]" /> Compliance Documents
-                 </h3>
-
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   <DocumentUpload 
-                     label="PAN Card" 
-                     id="pan"
-                     onFileSelect={(file) => handleFileChange("PAN", file)}
-                     selectedFile={files.PAN}
-                   />
-                   <DocumentUpload 
-                     label="Aadhar Card" 
-                     id="aadhar"
-                     onFileSelect={(file) => handleFileChange("AADHAR", file)}
-                     selectedFile={files.AADHAR}
-                   />
-                   <DocumentUpload 
-                     label="Business Registration" 
-                     id="business"
-                     onFileSelect={(file) => handleFileChange("BUSINESS", file)}
-                     selectedFile={files.BUSINESS}
-                   />
-                   <DocumentUpload 
-                     label="Google My Business" 
-                     id="google"
-                     onFileSelect={(file) => handleFileChange("GOOGLE", file)}
-                     selectedFile={files.GOOGLE}
-                   />
-                   <DocumentUpload 
-                     label="GST Certificate" 
-                     id="gst"
-                     onFileSelect={(file) => handleFileChange("GST", file)}
-                     selectedFile={files.GST}
-                   />
-                    {isOwner && (
-                      <DocumentUpload 
-                        label="Venue Ownership Doc" 
-                        id="venue"
-                        onFileSelect={(file) => handleFileChange("VENUE", file)}
-                        selectedFile={files.VENUE}
-                      />
-                    )}
+                 <div className="flex flex-col gap-1">
+                   <h3 className="text-lg font-black uppercase tracking-widest flex items-center gap-3" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+                     <FileText className="text-[#55DEE8] w-5 h-5" /> <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-transparent bg-clip-text">Document Uploads</span>
+                   </h3>
+                   <p className="text-[12px] text-gray-500 tracking-wide mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>Accepted formats: JPG, PNG, PDF &nbsp;&bull;&nbsp; <span className="text-[#BFF367]">Max file size: 10MB</span></p>
                  </div>
 
-                 <div className="pt-4 border-t border-[#2D2D2D]">
-                   <label className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F] mb-2 block">Mandatory Portfolio Link</label>
-                   <input 
-                     type="url"
-                     name="portfolioUrl"
-                     value={formData.portfolioUrl || ''}
-                     onChange={handleChange}
-                     placeholder="e.g. Behance, Personal Website, or Instagram"
-                     className="w-full bg-[#000000] border border-[#2D2D2D] focus:border-[#CCFF00]/50 rounded-[8px] h-14 px-5 text-white outline-none transition-all text-sm"
-                   />
+                 <div className="grid grid-cols-1 md:grid-cols-4 gap-x-4 gap-y-6">
+                   <DocumentSection title="Business Registration">
+                     <DocumentUploadBox id="BUSINESS" onFileSelect={(f) => handleFileChange('BUSINESS', f)} selectedFile={files.BUSINESS} />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="GST Registration">
+                     <DocumentUploadBox id="GST" onFileSelect={(f) => handleFileChange('GST', f)} selectedFile={files.GST} />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="Ownership Proof / Rental Agreement">
+                     <DocumentUploadBox id="OWNERSHIP" onFileSelect={(f) => handleFileChange('OWNERSHIP', f)} selectedFile={files.OWNERSHIP} />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="Sale Deed">
+                     <DocumentUploadBox id="SALE_DEED" onFileSelect={(f) => handleFileChange('SALE_DEED', f)} selectedFile={files.SALE_DEED} />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="Property Tax Receipt">
+                     <DocumentUploadBox id="PROPERTY_TAX" onFileSelect={(f) => handleFileChange('PROPERTY_TAX', f)} selectedFile={files.PROPERTY_TAX} />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="Electricity Bill">
+                     <DocumentUploadBox id="ELECTRICITY" onFileSelect={(f) => handleFileChange('ELECTRICITY', f)} selectedFile={files.ELECTRICITY} />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="Google Business Profile">
+                     <DocumentUploadBox id="GOOGLE" onFileSelect={(f) => handleFileChange('GOOGLE', f)} selectedFile={files.GOOGLE} />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="PAN Card" subtitle="Upload 2 photos front and back">
+                     <DocumentUploadBox id="PAN" onFileSelect={(f) => handleFileChange('PAN', f)} selectedFile={files.PAN} multiple />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="Aadhaar Card" subtitle="Upload 2 photos front and back">
+                     <DocumentUploadBox id="AADHAR" onFileSelect={(f) => handleFileChange('AADHAR', f)} selectedFile={files.AADHAR} multiple />
+                   </DocumentSection>
                  </div>
               </div>
 
               <button 
                 type="submit"
                 disabled={loading || hasRoleConflict}
-                className={`w-full py-6 rounded-[8px] font-normal text-[13px] uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 ${
+                className={`w-full py-4 rounded-[6px] font-bold text-xs uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 ${
                   hasRoleConflict 
                     ? 'bg-[#2D2D2D] text-[#878C9F] cursor-not-allowed'
-                    : 'bg-[#CCFF00] hover:opacity-90 text-black '
+                    : 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:opacity-90 text-black '
                 }`}
               >
                 {loading ? (
                   <>
-                    <Loader2 className="animate-spin" />
+                    <Loader2 className="animate-spin w-4 h-4" />
                     <span>Processing Application...</span>
                   </>
                 ) : hasRoleConflict ? (
                   <>
-                    <ShieldAlert size={20} />
+                    <ShieldAlert size={18} />
                     <span>Cannot Apply Again</span>
                   </>
                 ) : (
                   <>
                     <span>Submit Verification Bundle</span>
-                    <ArrowRight size={20} />
+                    <ArrowRight size={18} />
                   </>
                 )}
               </button>
             </form>
           </div>
 
-          <aside className="space-y-6">
+          <aside className="space-y-6 sticky top-24 self-start">
              <div className="p-8 rounded-[8px] border border-[#2D2D2D] bg-[#000000] relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
-                   <ShieldCheckIcon size={80} className="text-[#CCFF00]" />
+                   <ShieldCheckIcon size={80} className="text-[#55DEE8]" />
                 </div>
-                <h4 className="text-[13px] font-semibold text-[#CCFF00] uppercase tracking-[0.3em] mb-4">Verification Policy</h4>
-                <ul className="space-y-4">
+                <h4 className="text-[16px] font-black uppercase tracking-[0.2em] mb-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-transparent bg-clip-text" style={{ fontFamily: "'Open Sans', sans-serif" }}>Verification Policy</h4>
+                <ul className="space-y-4" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {[
                     "Reviews take 24-48 hours",
                     "Valid registration required",
@@ -670,8 +468,8 @@ export default function BusinessRegistration() {
                     "Email notification on status",
                     "Dedicated support access"
                   ].map((text, i) => (
-                    <li key={i} className="flex gap-3 text-[12px] text-[#999999]">
-                      <CheckCircle2 size={16} className="text-[#CCFF00] shrink-0" />
+                    <li key={i} className="flex gap-3 text-[13px] text-[#999999]">
+                      <CheckCircle2 size={16} className="text-[#BFF367] shrink-0" />
                       {text}
                     </li>
                   ))}
@@ -680,21 +478,21 @@ export default function BusinessRegistration() {
 
              <div className="p-8 rounded-[8px] border border-[#2D2D2D] bg-[#000000]">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-[6px] bg-[#CCFF00]/10">
-                    <Briefcase size={20} className="text-[#CCFF00]" />
+                  <div className="p-2 rounded-[6px] bg-[#55DEE8]/10">
+                    <Briefcase size={20} className="text-[#55DEE8]" />
                   </div>
-                  <h4 className="text-[13px] font-semibold text-white uppercase tracking-[0.3em]">Partner Perks</h4>
+                  <h4 className="text-[16px] font-black uppercase tracking-[0.2em] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-transparent bg-clip-text" style={{ fontFamily: "'Open Sans', sans-serif" }}>Partner Perks</h4>
                 </div>
-                <div className="space-y-4 text-gray-400 text-sm leading-relaxed">
+                <div className="space-y-4 text-gray-400 text-[13px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
                   <p>Join India's fastest growing sports ecosystem. Get access to:</p>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-4 bg-[#000000] rounded-[8px] border border-[#2D2D2D]">
-                      <span className="text-[#CCFF00] block font-semibold text-xl mb-1">0%</span>
-                      <span className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F]">Initial Fee</span>
+                    <div className="p-4 bg-[#0a0a0c] rounded-[8px] border border-[#2D2D2D]">
+                      <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-transparent bg-clip-text block font-black text-2xl mb-1">0%</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#878C9F]">Initial Fee</span>
                     </div>
-                    <div className="p-4 bg-[#000000] rounded-[8px] border border-[#2D2D2D]">
-                      <span className="text-[#CCFF00] block font-semibold text-xl mb-1">24/7</span>
-                      <span className="text-[10px] font-normal uppercase tracking-[0.3em] text-[#878C9F]">Support</span>
+                    <div className="p-4 bg-[#0a0a0c] rounded-[8px] border border-[#2D2D2D]">
+                      <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-transparent bg-clip-text block font-black text-2xl mb-1">24/7</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#878C9F]">Support</span>
                     </div>
                   </div>
                 </div>
@@ -703,45 +501,102 @@ export default function BusinessRegistration() {
 
         </div>
       </div>
+      
+      {/* Agreement Modal */}
+      {showAgreementModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#0a0a0c] border border-[#2D2D2D] rounded-[15px] p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />
+            <h3 className="text-xl font-black text-white uppercase tracking-wider mb-4" style={{ fontFamily: "'Open Sans', sans-serif" }}>Agreement & Confirmation</h3>
+            <p className="text-gray-400 text-sm leading-relaxed mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
+              By proceeding, you confirm that all documents uploaded are authentic and accurate. You take full responsibility for the provided information.
+            </p>
+            
+            <label className="flex items-start gap-3 cursor-pointer mb-8 group">
+              <div className="relative flex items-center justify-center mt-0.5">
+                <input 
+                  type="checkbox" 
+                  className="peer appearance-none w-5 h-5 border border-[#2D2D2D] bg-[#0a0a0c] rounded-[4px] flex-shrink-0 checked:bg-[#BFF367] checked:border-[#BFF367] transition-colors cursor-pointer"
+                  checked={isAgreed}
+                  onChange={(e) => setIsAgreed(e.target.checked)}
+                />
+                <CheckCircle2 size={14} className="absolute text-black opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" />
+              </div>
+              <span className="text-sm text-gray-300 group-hover:text-white transition-colors select-none" style={{ fontFamily: "'Inter', sans-serif" }}>
+                I agree and take full responsibility for the uploaded documents.
+              </span>
+            </label>
+            
+            <div className="flex gap-4">
+              <button 
+                type="button"
+                onClick={() => setShowAgreementModal(false)}
+                className="flex-1 py-3 rounded-[8px] font-bold text-xs uppercase tracking-widest border border-[#2D2D2D] hover:bg-[#2D2D2D]/50 transition-colors text-white"
+              >
+                Cancel
+              </button>
+              <button 
+                type="button"
+                onClick={processSubmission}
+                disabled={!isAgreed}
+                className="flex-1 py-3 rounded-[8px] font-bold text-xs uppercase tracking-widest bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+              >
+                Proceed
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function DocumentUpload({ label, id, onFileSelect, selectedFile }) {
+function DocumentSection({ title, subtitle, children }) {
   return (
-    <div className="relative group">
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-bold text-white tracking-wide">{title}</span>
+        {subtitle && <span className="text-[9px] text-gray-500">{subtitle}</span>}
+      </div>
+      <div className="flex gap-2 w-full h-full items-start">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function DocumentUploadBox({ id, onFileSelect, selectedFile, label, multiple }) {
+  return (
+    <div className="flex flex-col relative w-full h-full">
+      {label && <span className="text-[10px] font-medium text-gray-300 mb-2">{label}</span>}
       <input 
         type="file" 
         id={id} 
         className="hidden" 
-        onChange={(e) => onFileSelect(e.target.files[0])}
+        onChange={(e) => {
+          if (multiple) {
+            onFileSelect(Array.from(e.target.files));
+          } else {
+            onFileSelect(e.target.files[0]);
+          }
+        }}
         accept="image/*,.pdf"
+        multiple={multiple}
       />
       <label 
         htmlFor={id}
-        className={`flex flex-col items-center justify-center p-6 border border-dashed transition-all cursor-pointer h-32 text-center rounded-[8px]
+        className={`flex flex-row items-center justify-center gap-2 py-3 px-2 border border-dashed transition-all cursor-pointer rounded-[6px] flex-1
           ${selectedFile 
-            ? 'border-[#CCFF00] bg-[#CCFF00]/5' 
-            : 'border-[#2D2D2D] bg-[#000000] hover:border-[#CCFF00]/50 hover:bg-[#CCFF00]/5'
+            ? 'border-[#55DEE8] bg-[#55DEE8]/10 text-[#BFF367]' 
+            : 'border-[#2D2D2D] bg-[#0a0a0c] hover:border-[#55DEE8]/50 hover:bg-[#55DEE8]/5 text-[#55DEE8]'
           }`}
       >
-        {selectedFile ? (
-          <div className="space-y-1">
-            <CheckCircle2 className="text-[#CCFF00] mx-auto mb-1" size={24} />
-            <span className="text-[10px] font-bold text-[#CCFF00] uppercase truncate max-w-[140px] block">
-              {selectedFile.name}
-            </span>
-          </div>
-        ) : (
-          <div className="space-y-1">
-            <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] flex items-center justify-center mx-auto mb-1 transition-transform">
-               <FileText size={18} className="text-gray-500" />
-            </div>
-            <span className="text-[10px] font-normal text-[#878C9F] uppercase tracking-wider group-hover:text-[#CCFF00] transition-colors">
-              {label}
-            </span>
-          </div>
-        )}
+        <Upload size={14} />
+        <span className="text-[10px] font-bold truncate max-w-[80px]">
+          {selectedFile 
+            ? (Array.isArray(selectedFile) ? `${selectedFile.length} file(s)` : selectedFile.name) 
+            : 'Browse File'}
+        </span>
       </label>
     </div>
   );
