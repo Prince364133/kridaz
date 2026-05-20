@@ -32,9 +32,9 @@ const Root = () => {
   }, [isAuthenticated, user]);
 
   const searchParams = new URLSearchParams(location.search);
-  const isPlayersPage = location.pathname === '/players' && searchParams.get('tab') !== 'teams';
+  const isPlayersPage = location.pathname === '/players';
   const isReelsPage = location.pathname.startsWith('/reels') || location.pathname.startsWith('/shorts');
-  const hideNav = isReelsPage || isPlayersPage || location.pathname.startsWith('/messages') || location.pathname.startsWith('/my-teams');
+  const hideNav = isReelsPage || location.pathname.startsWith('/messages') || location.pathname.startsWith('/my-teams');
 
   return (
     <div className="flex flex-col min-h-screen">

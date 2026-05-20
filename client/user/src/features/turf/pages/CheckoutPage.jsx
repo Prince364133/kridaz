@@ -274,7 +274,6 @@ const CheckoutPage = () => {
           </button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight uppercase font-open-sans">Checkout</h1>
-            <p className="text-zinc-500 text-[20px] mt-1 uppercase tracking-wide font-bold font-inter">Review your booking details and complete your payment</p>
           </div>
         </div>
 
@@ -351,15 +350,6 @@ const CheckoutPage = () => {
                 >
                   {isValidating ? <Loader2 size={18} className="animate-spin" /> : "APPLY"}
                 </button>
-              </div>
-
-              {/* Secure box */}
-              <div className="bg-[#0a0a0a] border border-zinc-800 rounded-[15px] p-5 flex gap-4 items-center">
-                <ShieldCheck className="w-8 h-8 shrink-0" style={{ stroke: 'url(#theme-gradient)' }} />
-                <div>
-                  <p className="text-lg font-bold text-zinc-200 font-open-sans">Secure & Safe Payments</p>
-                  <p className="text-xs text-zinc-500 mt-1 font-medium font-inter">Your payment information is encrypted and secure.</p>
-                </div>
               </div>
             </div>
           </div>

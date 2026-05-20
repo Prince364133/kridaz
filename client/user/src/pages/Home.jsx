@@ -306,6 +306,20 @@ export default function Home() {
  setTurfFilters(filters);
  };
 
+ // Auto-apply user location to venue filters once detected
+ useEffect(() => {
+ if (locationStatus === "granted" && userLocation) {
+ setTurfFilters(prev => ({
+ ...prev,
+ state: userLocation.state || "",
+ city: userLocation.city || "",
+ }));
+ } else if (locationStatus === "denied") {
+ // Location denied — show all venues (clear location filters)
+ setTurfFilters(prev => ({ ...prev, state: "", city: "" }));
+ }
+ }, [locationStatus, userLocation]);
+
  const handlePlayerSearch = (filters) => {
  setPlayerFilters(filters);
  };
@@ -358,18 +372,18 @@ export default function Home() {
  </div>
 
  <div className="absolute inset-0 opacity-[0.03] z-1"
- style={{ backgroundImage: `radial-gradient(${PRI} 1px, transparent 1px)`, backgroundSize: "48px 48px" }} />
+ style={{ backgroundImage: `radial-gradient(#84CC16 1px, transparent 1px)`, backgroundSize: "48px 48px" }} />
 
  <div className="relative w-full px-4 lg:px-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center pt-4 md:pt-0">
  <div className="space-y-4 lg:space-y-6 relative z-10">
  <div>
- <h1 className="font-display leading-[0.9] lg:leading-[0.85] tracking-tighter uppercase" style={{ fontSize: "clamp(2.2rem, 7.5vw, 5rem)" }}>
- More Than <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Booking.</span><br />
+ <h1 className="uppercase" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700", fontSize: "clamp(40px, 6vw, 51.74px)", lineHeight: "1.14", letterSpacing: "0" }}>
+ More Than <span style={{ color: "#84CC16" }}>Booking.</span><br />
  Where Players<br />Belong.
  </h1>
- <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>where champions play</p>
+ <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ color: "#84CC16" }}>where champions play</p>
  </div>
- <p className="text-sm lg:text-xl opacity-70 max-w-xl leading-relaxed mb-4 lg:mb-10">
+ <p className="opacity-70 max-w-xl mb-4 lg:mb-10" style={{ fontFamily: "'Inter', sans-serif", fontWeight: "300", fontSize: "20.04px", lineHeight: "119%", letterSpacing: "1.5%" }}>
  Discover premium sports venues, book your slot instantly, and connect with players across India.
  </p>
 
@@ -377,7 +391,7 @@ export default function Home() {
  to={isLoggedIn ? "/turfs" : "/signup"}
  className="block w-fit group mb-4 lg:mb-12"
  >
- <div className="inline-flex items-center gap-2 text-black px-8 py-3.5 rounded-full font-bold group-hover:scale-105 transition-all text-sm lg:text-base shadow-[0_0_20px_rgba(85,222,232,0.4)]" style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}>
+ <div className="inline-flex items-center gap-2 bg-[#84CC16] text-black px-8 py-3.5 rounded-full font-bold group-hover:scale-105 transition-all text-sm lg:text-base shadow-[0_0_20px_rgba(132,204,22,0.4)]">
  Book Now <ArrowRight size={18} />
  </div>
  </Link>
@@ -406,26 +420,41 @@ export default function Home() {
 
  {/* 1M+ Bookings Card - Moved to Top Right Corner */}
  <div className="absolute top-12 right-12 rounded-2xl p-4 border z-20"
- style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", borderColor: "rgba(85,222,232,0.25)" }}>
- <p className="font-display text-2xl text-primary leading-none">1M+</p>
+ style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", borderColor: "rgba(132,204,22,0.25)" }}>
+ <p className="font-display text-2xl text-primary leading-none" style={{ color: "#84CC16" }}>1M+</p>
  <p className="text-[10px] uppercase tracking-wider mt-1 opacity-60" style={{ color: "#fff" }}>Bookings Made</p>
  </div>
  </div>
  </div>
  </section>
 
+ {/* ── QUICK LINKS ── */}
+ <section className="border-y border-white/5 bg-black py-3 md:py-8">
+ {/* Mobile: 2x2 grid | Desktop: single row */}
+ <div className="max-w-7xl mx-auto px-4 md:px-6 grid grid-cols-2 md:flex md:items-center md:justify-around gap-2 md:gap-6 w-full">
+ <Link to="/leaderboard" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-lg py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
+ <Activity size={16} className="text-[#60A5FA] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
+ <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-[#60A5FA] whitespace-nowrap font-inter">LIVE SCORE</span>
+ </Link>
 
- {/* ── STATS ── */}
- <section className="border-y" style={{ borderColor: "#1A1A1A", backgroundColor: "#0A0A0A" }}>
- <div className="w-full px-2 md:px-10 py-6 sm:py-8 grid grid-cols-4 divide-x divide-[#1A1A1A]">
- {stats.map((s) => (
- <div key={s.label} className="px-1 md:px-8 text-center flex flex-col justify-center overflow-hidden group">
- <p className="font-display text-[15px] min-[375px]:text-xl sm:text-3xl lg:text-5xl leading-none tracking-tighter group-hover:text-white transition-colors" style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{s.value}</p>
- <p className="font-mono text-[5px] min-[375px]:text-[6px] sm:text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.3em] mt-1 sm:mt-2 text-gray-500 group-hover:text-primary transition-colors truncate">{s.label}</p>
- </div>
- ))}
+ <Link to="/join-games" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-lg py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
+ <Trophy size={16} className="text-[#F59E0B] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
+ <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-[#F59E0B] whitespace-nowrap font-inter">JOIN TOURNAMENTS</span>
+ </Link>
+
+ <Link to="/players" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-lg py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
+ <Search size={16} className="text-[#84CC16] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
+ <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-[#84CC16] whitespace-nowrap font-inter">FIND PLAYERS</span>
+ </Link>
+
+ <Link to="/community" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-lg py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
+ <Users size={16} className="text-[#A855F7] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
+ <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-[#A855F7] whitespace-nowrap font-inter">COMMUNITY</span>
+ </Link>
  </div>
  </section>
+
+
 
 
 
@@ -444,49 +473,18 @@ export default function Home() {
  </div>
  </div>
 
- {/* Search & Tabs Combined Row */}
+ {/* Search Row */}
  <div className="flex flex-col gap-8 mb-16 w-full">
- <div className="flex flex-col md:flex-row items-center justify-start gap-6">
- <div className="flex gap-2 p-1 rounded-full bg-[#1A1A1A] border border-white/5 overflow-x-auto no-scrollbar">
- {[{ key: "venues", label: "🏟 VENUES" }, { key: "marketplace", label: "🛒 MARKETPLACE" }].map(tab => (
- <button
- key={tab.key}
- onClick={() => {
- setActiveTab(tab.key);
- }}
- className={`px-8 py-2.5 rounded-full font-bold text-xs transition-all duration-300 uppercase tracking-widest ${activeTab === tab.key ? "text-black shadow-[0_0_20px_rgba(85,222,232,0.3)]" : "text-gray-500 hover:text-white"}`} style={activeTab === tab.key ? { background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" } : {}}>
- {tab.label}
- </button>
- ))}
- </div>
- </div>
-
  <div className="w-full animate-fade-in relative z-20">
- {activeTab === "venues" ? (
  <SearchTurf onSearch={handleTurfSearch} userLocation={userLocation} />
- ) : (
- <div className="w-full py-20 px-6 md:px-10 rounded-[40px] border border-white/5 bg-[#0a0a0a] flex flex-col items-center justify-center text-center overflow-hidden relative group animate-fade-in">
- {/* Glow Effect */}
- <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#55DEE8]/10 blur-[120px] rounded-full pointer-events-none" />
-
- <ShoppingBag size={48} className="text-gray-600 mb-6 group-hover:text-[#55DEE8] transition-colors duration-500" />
- <h3 className="font-display text-4xl md:text-5xl lg:text-6xl text-white uppercase leading-tight">
- Marketplace <br />
- <span style={{ color: PRI }}>Coming Soon</span>
- </h3>
- <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gray-500 mt-6 max-w-md mx-auto">
- We're building the ultimate destination for sports gear, equipment, and exclusive Kridaz merchandise.
- </p>
- </div>
- )}
  </div>
  </div>
 
- {/* Venue grid */}
+ {/* Venue grid — 5 per row, 2 rows max, sorted by highest rating */}
  {loading || turfLoading ? (
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
- {[...Array(4)].map((_, i) => (
- <div key={i} className="rounded-2xl border animate-pulse" style={{ height: 320, backgroundColor: "#111", borderColor: BDR }} />
+ <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+ {[...Array(10)].map((_, i) => (
+ <div key={i} className="rounded-2xl border animate-pulse" style={{ height: 260, backgroundColor: "#111", borderColor: BDR }} />
  ))}
  </div>
  ) : (error || (turfs || []).length === 0) ? (
@@ -504,8 +502,11 @@ export default function Home() {
  </button>
  </div>
  ) : (
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
- {(turfs || []).slice(0, 8).map((t, i) => (
+ <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+ {[...(turfs || [])]
+ .sort((a, b) => (b.averageRating ?? b.rating ?? 0) - (a.averageRating ?? a.rating ?? 0))
+ .slice(0, 10)
+ .map((t) => (
  <TurfCard 
  key={t._id} 
  turf={t} 
@@ -540,11 +541,11 @@ export default function Home() {
  
  </div>
 
- {/* Player cards */}
+ {/* Player cards — 10 in one scrollable row */}
  {loading ? (
- <div className="flex gap-4 md:gap-6 overflow-x-auto pt-8 pb-8 mt-2 no-scrollbar scroll-smooth">
- {[...Array(5)].map((_, i) => (
- <div key={i} className="shrink-0 w-[180px] md:w-[220px] h-[300px] md:h-[360px] rounded-[32px] border border-white/5 animate-pulse bg-white/5" />
+ <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+ {[...Array(10)].map((_, i) => (
+ <div key={i} className="shrink-0 w-[160px] md:w-[190px] rounded-[28px] border border-white/5 animate-pulse bg-white/5" style={{ height: 260 }} />
  ))}
  </div>
  ) : players.length === 0 ? (
@@ -556,18 +557,15 @@ export default function Home() {
  style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}>Join Now</Link>
  </div>
  ) : (
- <div className="flex gap-4 md:gap-6 overflow-x-auto pt-8 pb-8 mt-2 no-scrollbar scroll-smooth px-0 md:px-2">
- {players.map(p => {
+ <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+ {players.slice(0, 10).map(p => {
  const initials = p.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "??";
  const isFollowing = followingIds.includes(p._id);
  
  return (
- <div
- key={p._id}
- className="shrink-0 w-[160px] md:w-[200px] group"
- >
+ <div key={p._id} className="shrink-0 w-[160px] md:w-[190px] group">
  <div className="relative bg-[#121212] rounded-[28px] p-2.5 border border-white/5 transition-all duration-500 hover:border-[#55DEE8]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
- {/* Compact Profile Image Section */}
+ {/* Profile Image */}
  <Link to={`/profile/${p._id}`} className="relative aspect-[1/1.1] rounded-[20px] overflow-hidden block mb-4">
  <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
  {(p.profilePicture || p.profileImage) ? (
@@ -590,13 +588,6 @@ export default function Home() {
  </span>
  </div>
  </div>
-
- {/* Dismiss Icon */}
- <div className="absolute top-2.5 right-2.5 z-20">
- <button className="w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors">
- <X size={12} />
- </button>
- </div>
  </Link>
 
  {/* Content Section */}
@@ -612,19 +603,19 @@ export default function Home() {
  </div>
  </div>
  
-  <p className="text-white/30 text-[10px] font-medium leading-tight mb-4 line-clamp-2 flex items-center gap-1.5">
-  <MapPin size={10} className="text-[#55DEE8]" /> {p.distance ? `${(p.distance/1000).toFixed(1)} km Away` : (p.city || "Nearby Player")}
-  </p>
+ <p className="text-white/30 text-[10px] font-medium leading-tight mb-4 line-clamp-2 flex items-center gap-1.5">
+ <MapPin size={10} className="text-[#55DEE8]" /> {p.distance ? `${(p.distance/1000).toFixed(1)} km Away` : (p.city || "Nearby Player")}
+ </p>
 
  {/* Bottom Bar */}
  <div className="flex items-center justify-between">
  <div className="px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black text-white/50 uppercase tracking-widest truncate max-w-[80px]">
-  {p.preferredSport || "ATHLETE"}
-  </div>
+ {p.preferredSport || "ATHLETE"}
+ </div>
 
  <button 
  onClick={(e) => handleFollowToggle(e, p)}
- className={`px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-wider transition-all duration-300
+ className={`px-2 py-1 rounded-lg font-black text-[8px] uppercase tracking-wider transition-all duration-300
  ${isFollowing 
  ? 'bg-white/5 border border-white/10 text-white/30 hover:bg-white/10' 
  : 'bg-[#222] border border-white/5 text-white hover:bg-white hover:text-black shadow-lg'}`}
@@ -639,6 +630,14 @@ export default function Home() {
  })}
  </div>
  )}
+
+ {/* View More Players btn */}
+ <div className="text-center mt-6 lg:mt-10">
+ <Link to="/players" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-full border transition-all hover:border-[#55DEE8] hover:text-[#55DEE8]"
+ style={{ borderColor: BDR, color: "#888" }}>
+ View More Players <ChevronRight size={16} />
+ </Link>
+ </div>
  </div>
  </section>
 
@@ -1096,64 +1095,37 @@ export default function Home() {
  </div>
  </div>
  </div>
- {/* Community Feed / Highlights */}
- <div className="rounded-3xl p-6 relative border flex flex-col justify-between min-h-[200px] overflow-hidden group" style={{ borderColor: BDR, backgroundColor: "#000" }}>
+ {/* Join Games Promo */}
+ <Link to="/join-games" className="rounded-3xl p-6 relative border flex flex-col justify-between min-h-[200px] overflow-hidden group transition-all hover:border-[#55DEE8]/50" style={{ borderColor: BDR, backgroundColor: "#000" }}>
+ {/* Background Image */}
+ <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&q=80')", opacity: 0.45 }} />
+ {/* Dark overlay */}
+ <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(0,0,0,0.85) 40%, rgba(85,222,232,0.08) 100%)" }} />
+ {/* Hover glow */}
+ <div className="absolute inset-0 bg-gradient-to-br from-[#55DEE8]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
  <div className="relative z-10 flex flex-col h-full">
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-2">
- <div className="w-8 h-8 rounded-lg flex items-center justify-center border" style={{ borderColor: "rgba(255,255,255,0.1)", backgroundColor: "rgba(255,255,255,0.05)" }}>
+ <div className="w-8 h-8 rounded-lg flex items-center justify-center border transition-colors group-hover:border-[#55DEE8]/30 group-hover:bg-[#55DEE8]/10" style={{ borderColor: "rgba(255,255,255,0.1)", backgroundColor: "rgba(255,255,255,0.05)" }}>
  <Users size={14} className="text-[#55DEE8]" />
  </div>
- <h3 className="font-display text-xl uppercase">COMMUNITY FEED</h3>
+ <h3 className="font-display text-xl uppercase group-hover:text-[#55DEE8] transition-colors">JOIN GAMES</h3>
  </div>
- 
+ <ChevronRight size={20} className="text-gray-500 group-hover:text-[#55DEE8] transition-all duration-300 group-hover:translate-x-1" />
  </div>
 
  <div className="flex-1 space-y-3">
- {realSocialPosts.length > 0 ? (
- realSocialPosts.slice(0, 2).map((post) => {
- const author = post.adminId || post.userId || post.ownerId;
- return (
- <div key={post._id} className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 group/post hover:border-[#55DEE8]/30 transition-all">
- <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-900 shrink-0 relative">
- {author?.profilePicture ? (
- <img 
- src={author.profilePicture} 
- alt="" 
- className="w-full h-full object-cover relative z-10"
- onError={(e) => {
- e.target.style.display = 'none';
- if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
- }}
- />
- ) : null}
- <div 
- className="w-full h-full flex items-center justify-center font-bold text-[10px] uppercase text-white absolute inset-0 z-0" 
- style={{ 
- backgroundColor: avatarColor(author?.name || "A"),
- display: author?.profilePicture ? 'none' : 'flex'
- }}
- >
- {(author?.name || "A")[0]}
- </div>
- </div>
- <div className="flex-1 min-w-0">
- <p className="text-[11px] font-bold text-white truncate">{author?.name || "Anonymous"}</p>
- <p className="text-[9px] text-gray-500 truncate">{post.content || post.title || "Shared a new post"}</p>
- </div>
- <ChevronRight size={14} className="text-gray-600 group-hover/post:text-[#55DEE8] transition-colors" />
- </div>
- );
- })
- ) : (
- <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
- <MessageCircle size={24} className="mb-2" />
- <p className="text-[10px] uppercase font-bold tracking-widest">No recent posts</p>
- </div>
- )}
+ <div className="h-full flex flex-col justify-center py-2">
+ <p className="text-lg font-bold mb-2 text-white">No Team? No Problem.</p>
+ <p className="text-xs text-gray-400 leading-relaxed max-w-[90%]">Find local pickup games, join open matches, and play your favorite sports today.</p>
+ <div className="mt-4 inline-flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-[#55DEE8]">
+ Find Games Near You
  </div>
  </div>
  </div>
+ </div>
+ </Link>
  </div>
 
  {/* Marketplace, Coaches, Umpires */}

@@ -12,15 +12,21 @@ const SearchTurf = ({ onSearch, userLocation }) => {
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
 
-  // Prefill from userLocation when it becomes available
+  /**
+   * Prefill state/city from userLocation — but ONLY ONCE on first detection.
+   * Using a ref flag prevents the effect from re-running when the user manually
+   * selects "All States" or "All Cities" (which clears the values), which was
+   * causing the location to be immediately re-applied after clearing.
+   */
+  const locationPrefilled = useRef(false);
   useEffect(() => {
-    if (userLocation?.state && !selectedState) {
-      setSelectedState(userLocation.state);
+    if (locationPrefilled.current) return; // Already prefilled — never override user's choice
+    if (userLocation?.state || userLocation?.city) {
+      if (userLocation.state) setSelectedState(userLocation.state);
+      if (userLocation.city) setSelectedCity(userLocation.city);
+      locationPrefilled.current = true; // Mark as done — won't run again
     }
-    if (userLocation?.city && !selectedCity) {
-      setSelectedCity(userLocation.city);
-    }
-  }, [userLocation, selectedState, selectedCity]);
+  }, [userLocation]);
 
   // Location data from API
   const [states, setStates] = useState([]);
@@ -116,22 +122,23 @@ const SearchTurf = ({ onSearch, userLocation }) => {
   return (
     <div className="w-full max-w-4xl animate-fade-in-up relative z-[50]">
       <div className="relative group">
-        <div className="relative flex flex-row items-center bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-1.5 shadow-2xl transition-all duration-500 hover:border-[#55DEE8]/30 min-h-[56px] md:min-h-[64px]">
+        <div className="relative flex flex-col md:flex-row items-center bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-1.5 shadow-2xl transition-all duration-500 hover:border-[#55DEE8]/30 min-h-[56px] md:min-h-[64px]">
           
           {/* Search Input */}
-          <div className="flex-[2] min-w-[150px] relative z-[100] border-r border-white/5 flex items-center px-4">
-            <Search size={16} className="text-gray-500 mr-2" />
+          <div className="w-full md:w-auto md:flex-[2] md:min-w-[150px] relative z-[100] border-b md:border-b-0 md:border-r border-white/5 flex items-center px-4 py-2 md:py-0">
+            <Search size={16} className="text-gray-500 mr-2 flex-shrink-0" />
             <input 
               type="text" 
               placeholder="Search arenas..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-full bg-transparent text-white py-3 outline-none text-xs font-bold placeholder-gray-500 tracking-wide"
+              className="w-full h-full bg-transparent text-white py-1 md:py-3 outline-none text-xs font-bold placeholder-gray-500 tracking-wide"
             />
           </div>
 
+          <div className="flex w-full md:w-auto flex-1 items-center">
           {/* Sport Selector */}
-          <div className="flex-[0.6] min-w-[100px] relative z-[100] border-r border-white/5" ref={sportDropdownRef}>
+          <div className="flex-1 md:flex-[0.6] min-w-0 md:min-w-[100px] relative z-[100] border-r border-white/5" ref={sportDropdownRef}>
             <button
               onClick={() => { setShowSportDropdown(!showSportDropdown); setShowStateDropdown(false); setShowCityDropdown(false); }}
               className="flex items-center gap-2 w-full h-full px-3 py-2 transition-all hover:bg-white/5 rounded-xl group/btn"
@@ -172,7 +179,7 @@ const SearchTurf = ({ onSearch, userLocation }) => {
           </div>
 
           {/* State Selector */}
-          <div className="flex-[0.6] min-w-[100px] relative z-[95] border-r border-white/5" ref={stateDropdownRef}>
+          <div className="flex-1 md:flex-[0.6] min-w-0 md:min-w-[100px] relative z-[95] border-r border-white/5" ref={stateDropdownRef}>
             <button
               onClick={() => { setShowStateDropdown(!showStateDropdown); setShowSportDropdown(false); setShowCityDropdown(false); }}
               className="flex items-center gap-2 w-full h-full px-3 py-2 transition-all hover:bg-white/5 rounded-xl group/btn"
@@ -223,7 +230,7 @@ const SearchTurf = ({ onSearch, userLocation }) => {
           </div>
 
           {/* City Selector */}
-          <div className="flex-[0.6] min-w-[100px] relative z-[90]" ref={cityDropdownRef}>
+          <div className="flex-1 md:flex-[0.6] min-w-0 md:min-w-[100px] relative z-[90]" ref={cityDropdownRef}>
             <button
               onClick={() => { setShowCityDropdown(!showCityDropdown); setShowSportDropdown(false); setShowStateDropdown(false); }}
               className="flex items-center gap-2 w-full h-full px-3 py-2 transition-all hover:bg-white/5 rounded-xl group/btn"
@@ -273,6 +280,7 @@ const SearchTurf = ({ onSearch, userLocation }) => {
                 </div>
               </div>
             )}
+          </div>
           </div>
         </div>
       </div>

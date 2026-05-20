@@ -711,7 +711,7 @@ const FindPlayers = () => {
   };
 
   return (
-    <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 overflow-hidden" : "min-h-screen pt-20 overflow-y-auto no-scrollbar"}`}>
+    <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 overflow-hidden pt-16" : "min-h-screen pt-20 overflow-y-auto no-scrollbar"}`}>
       
       {activeTab === "players" && (
         <>

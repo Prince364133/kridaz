@@ -19,6 +19,7 @@ import adjustTime from "../../utils/adjustTime.js";
 import { generateHTMLContent } from "../../utils/generateEmail.js";
 import { generateInvoice } from "../../utils/generateInvoice.js";
 import NotificationService from "../../services/notification.service.js";
+import WalletService from "../../services/wallet.service.js";
 import { format, parseISO, parse } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
 import logger from "../../utils/logger.js";
@@ -376,6 +377,7 @@ export const processWalletBooking = async (userId, bookingData) => {
     couponCode,
     balanceAmount: bodyBalanceAmount,
     paymentType: bodyPaymentType,
+    advanceAmount: bodyAdvanceAmount,
   } = bookingData;
 
   const turfId = bodyTurfId || id;
@@ -389,7 +391,7 @@ export const processWalletBooking = async (userId, bookingData) => {
   const [user, turf, settingsDoc] = await Promise.all([
     prisma.user.findUnique({ 
       where: { id: userId },
-      select: { id: true, name: true, email: true, phone: true, walletBalance: true }
+      select: { id: true, name: true, email: true, phone: true }
     }),
     prisma.turf.findUnique({ 
       where: { id: turfId },
@@ -419,7 +421,9 @@ export const processWalletBooking = async (userId, bookingData) => {
   const ownerRevenue = baseAmount - platformFee;
   const amountToDeduct = bodyPaymentType === "PARTIAL" && bodyAdvanceAmount ? bodyAdvanceAmount : finalPrice;
 
-  if (user.walletBalance < amountToDeduct) {
+  const wallet = await WalletService.getWallet(userId, "user");
+
+  if (wallet.usableBalance < amountToDeduct) {
     const error = new Error("Insufficient wallet balance");
     error.statusCode = 400;
     throw error;
@@ -445,10 +449,11 @@ export const processWalletBooking = async (userId, bookingData) => {
 
   const booking = await prisma.$transaction(async (tx) => {
     // Deduct from wallet
+    await WalletService.debit(userId, "user", amountToDeduct, tx);
+    
     await tx.user.update({
       where: { id: userId },
       data: { 
-        walletBalance: { decrement: amountToDeduct },
         bookingCount: { increment: 1 }
       }
     });
@@ -876,10 +881,7 @@ export const processBookingCancellation = async (userId, bookingId) => {
 
     // 2. Refund to User Wallet
     if (refundAmount > 0) {
-      await tx.user.update({
-        where: { id: userId },
-        data: { walletBalance: { increment: refundAmount } }
-      });
+      await WalletService.credit(userId, "user", refundAmount, tx);
 
       await tx.walletTransaction.create({
         data: {
