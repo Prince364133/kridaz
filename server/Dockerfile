@@ -33,7 +33,7 @@ FROM base AS runner
 ENV NODE_ENV=production
 
 # Copy node_modules, compiled packages, and application source code
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/server ./server
 
