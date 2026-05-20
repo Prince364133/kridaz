@@ -427,17 +427,7 @@ export default function Home() {
  </div>
  </section>
 
- {/* Mobile Sub-Nav (Hot Bars) */}
- <div className="lg:hidden flex items-center justify-between w-full border-b border-[#1A1A1A] bg-[#0A0A0A] py-3 px-4 gap-3">
- <Link to="/community" className="flex-1 flex items-center justify-center gap-2 py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-black rounded-xl hover:opacity-90 transition-all shadow-[0_0_15px_rgba(85,222,232,0.3)]" style={{ background: GRAD }}>
- <Users size={14} />
- Community
- </Link>
- <Link to="/players" className="flex-1 flex items-center justify-center gap-2 py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-white/70 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 hover:text-white transition-colors">
- <User size={14} />
- Players
- </Link>
- </div>
+
 
 
  {/* ── FIND YOUR ARENA ── */}

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import useLoginForm from "../hooks/useLoginForm";
@@ -138,7 +138,7 @@ const Login = () => {
                       {/* Email Input */}
                       <div className="space-y-2">
                         <div className="flex justify-between px-1">
-                          <label className="text-sm font-medium text-white/60 group-focus-within/input:text-[#55DEE8] transition-colors">Email Address</label>
+                          <label className="text-sm font-medium text-white/60 group-focus-within/input:text-[#55DEE8] transition-colors">Email Address or Phone Number</label>
                         </div>
                         <div className="relative group/input">
                           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-[#55DEE8] transition-colors">
@@ -146,8 +146,8 @@ const Login = () => {
                           </div>
                           <input
                             {...register("email")}
-                            type="email"
-                            placeholder="name@example.com"
+                            type="text"
+                            placeholder="name@example.com or 9876543210"
                             className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
                           />
                           {errors.email && <p className="text-xs text-red-500 mt-1 ml-1">{errors.email.message}</p>}

@@ -503,8 +503,13 @@ export const loginStep1 = async (req, res) => {
   let { email, password } = req.body;
   if (email) email = email.toLowerCase();
   try {
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email },
+          { phone: email }
+        ]
+      },
       include: { ownerProfile: true }
     });
 
@@ -564,8 +569,13 @@ export const login = async (req, res) => {
   if (email) email = email.toLowerCase();
   
   try {
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email },
+          { phone: email }
+        ]
+      },
       include: { ownerProfile: true }
     });
 
@@ -1659,8 +1669,14 @@ export const verifyPhoneOtp = async (req, res) => {
 export const forgotPasswordOtp = async (req, res) => {
   const { email } = req.body;
   try {
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
+    const searchIdentifier = email ? email.toLowerCase() : "";
+    const user = await prisma.user.findFirst({
+      where: { 
+        OR: [
+          { email: searchIdentifier },
+          { phone: searchIdentifier }
+        ]
+      }
     });
 
     if (!user) {
@@ -1668,26 +1684,38 @@ export const forgotPasswordOtp = async (req, res) => {
     }
 
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const isPhone = !searchIdentifier.includes('@');
 
     // Upsert OTP
-    await prisma.oTP.deleteMany({ where: { email: email.toLowerCase() } });
+    await prisma.oTP.deleteMany({ 
+      where: { 
+        OR: [
+          { email: user.email },
+          { phone: user.phone }
+        ]
+      } 
+    });
     await prisma.oTP.create({
       data: {
-        email: email.toLowerCase(),
+        email: user.email || 'no-email@test.com',
         emailOtp,
-        phone: '0000000000',
-        phoneOtp: '000000',
+        phone: user.phone || '0000000000',
+        phoneOtp: emailOtp,
         expiresAt: new Date(Date.now() + 10 * 60 * 1000)
       }
     });
 
-    NotificationService.sendEmail({
-      to: email,
-      subject: 'Your Password Reset Code',
-      html: `<p>Your password reset code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>`
-    });
-
-    return res.status(200).json({ success: true, message: 'OTP sent to your email' });
+    if (isPhone && user.phone) {
+      NotificationService.sendWhatsApp(user.phone, `Your password reset code is ${emailOtp}. It will expire in 10 minutes.`);
+      return res.status(200).json({ success: true, message: 'OTP sent to your phone number' });
+    } else {
+      NotificationService.sendEmail({
+        to: user.email,
+        subject: 'Your Password Reset Code',
+        html: `<p>Your password reset code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>`
+      });
+      return res.status(200).json({ success: true, message: 'OTP sent to your email' });
+    }
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -1695,9 +1723,29 @@ export const forgotPasswordOtp = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
+  const searchIdentifier = email ? email.toLowerCase() : "";
   try {
+    const user = await prisma.user.findFirst({
+      where: { 
+        OR: [
+          { email: searchIdentifier },
+          { phone: searchIdentifier }
+        ]
+      },
+      include: { ownerProfile: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Account not found' });
+    }
+
     const otpRecord = await prisma.oTP.findFirst({
-      where: { email: email.toLowerCase(), emailOtp: otp }
+      where: { 
+        OR: [
+          { email: user.email, emailOtp: otp },
+          { phone: user.phone, phoneOtp: otp }
+        ]
+      }
     });
     
     if (!otpRecord) {
@@ -1705,15 +1753,6 @@ export const resetPassword = async (req, res) => {
     }
 
     const hashedPassword = await argon2.hash(newPassword);
-
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-      include: { ownerProfile: true }
-    });
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'Account not found' });
-    }
 
     await prisma.user.update({
       where: { id: user.id },
@@ -1727,7 +1766,14 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    await prisma.oTP.deleteMany({ where: { email: email.toLowerCase() } });
+    await prisma.oTP.deleteMany({ 
+      where: { 
+        OR: [
+          { email: user.email },
+          { phone: user.phone }
+        ]
+      } 
+    });
 
     return res.status(200).json({ success: true, message: 'Password updated successfully' });
   } catch (err) {

@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Mail, KeyRound, ShieldCheck, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -16,7 +16,7 @@ const ForgotPassword = () => {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!email) {
-      toast.error("Please enter your email");
+      toast.error("Please enter your email or phone number");
       return;
     }
     
@@ -24,7 +24,7 @@ const ForgotPassword = () => {
     try {
       const res = await axiosInstance.post("/api/user/auth/forgot-password-otp", { email });
       if (res.data.success) {
-        toast.success("OTP sent to your email!");
+        toast.success(res.data.message || "OTP sent!");
         setStep(2);
       }
     } catch (err) {
@@ -107,7 +107,7 @@ const ForgotPassword = () => {
               {step === 3 && "New Password"}
             </h1>
             <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest">
-              {step === 1 && "Enter your email to receive a recovery code."}
+              {step === 1 && "Enter your email or phone number to receive a recovery code."}
               {step === 2 && `Enter the 6-digit code sent to ${email}`}
               {step === 3 && "Set a strong password for your account."}
             </p>
@@ -117,16 +117,16 @@ const ForgotPassword = () => {
           {step === 1 && (
             <form onSubmit={handleSendOtp} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Email Address</label>
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Email or Phone Number</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#55DEE8] transition-colors">
                     <Mail size={18} />
                   </div>
                   <input
-                    type="email" required
+                    type="text" required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter registered email"
+                    placeholder="Enter registered email or phone"
                     className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
                   />
                 </div>
@@ -165,7 +165,7 @@ const ForgotPassword = () => {
               >
                 Verify Code <CheckCircle2 size={16} />
               </button>
-              <button type="button" onClick={() => setStep(1)} className="w-full text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-white transition-colors">Change Email</button>
+              <button type="button" onClick={() => setStep(1)} className="w-full text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-white transition-colors">Change Details</button>
             </form>
           )}
 

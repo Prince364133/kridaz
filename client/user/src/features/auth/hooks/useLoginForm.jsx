@@ -1,4 +1,4 @@
-﻿import { useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useState } from "react";
@@ -11,11 +11,12 @@ import { useNavigate } from "react-router-dom";
 const loginSchema = yup.object().shape({
   email: yup
     .string()
-    .required("Enter your email")
-    .matches(
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-      "Enter a valid email"
-    ),
+    .required("Enter your email or phone number")
+    .test('is-email-or-phone', 'Enter a valid email or 10-digit phone number', (value) => {
+      const isEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value);
+      const isPhone = /^[0-9]{10}$/.test(value);
+      return isEmail || isPhone;
+    }),
   password: yup
     .string()
     .required("Enter your password")

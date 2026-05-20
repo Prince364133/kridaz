@@ -4,7 +4,7 @@ import { OWNER_ROLE } from "@kridaz/shared-constants/roles";
 
 export const sendOtpSchema = z.object({
   body: z.object({
-    email: z.string().email("Email is invalid"),
+    email: z.string().min(1, "Email or Phone is required"),
   }),
 });
 
@@ -29,14 +29,14 @@ export const userRegisterSchema = z.object({
 
 export const loginStep1Schema = z.object({
   body: z.object({
-    email: z.string().email("Email is invalid"),
+    email: z.string().min(1, "Email or Phone is required"),
     password: z.string().min(1, "Password is required"),
   }),
 });
 
 export const userLoginSchema = z.object({
   body: z.object({
-    email: z.string().email("Email is invalid"),
+    email: z.string().min(1, "Email or Phone is required"),
     password: z.string().min(1, "Password is required"),
     otp: z.string().min(6, "OTP must be 6 characters").optional(),
   }),
