@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   User, MapPin, Clock, IndianRupee, Calendar, Zap, Activity,
   ArrowRight, ShieldCheck, Trophy, Star, Camera, Edit2, MessageSquare, Heart, Edit3, Trash2, Loader2, Send, MessageCircle,
-  Wallet, CreditCard, Award, Target, LogOut, Plus, Eye, TrendingUp, Mail, Phone, Ruler, LayoutGrid, CheckCircle2, UserPlus, BarChart, ExternalLink, Crown, Shield, BarChart3, Building2, AlertTriangle, Upload, Search, Medal, Users
+  Wallet, CreditCard, Award, Target, LogOut, Plus, Eye, TrendingUp, Mail, Phone, Ruler, LayoutGrid, CheckCircle2, UserPlus, BarChart, ExternalLink, Crown, Shield, BarChart3, Building2, AlertTriangle, Upload, Search, Medal, Users, Share2
 } from "lucide-react";
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
@@ -16,6 +16,7 @@ import { login, logout, updateUser, followUser, unfollowUser } from "@redux/slic
 import useBookingHistory from "@hooks/useBookingHistory";
 import useWriteReview from "@hooks/useWriteReview";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import useUserRecommendations from "@hooks/useUserRecommendations";
 import { TurfBookingHistory } from "@features/turf";
 import TurfBookingHistorySkeleton from "@components/ui/TurfBookingHistorySkeleton";
 import { StoryViewer } from "@features/networking";
@@ -88,9 +89,25 @@ export default function Profile() {
   const [profileUser, setProfileUser] = useState(isOwnProfile ? currentUser : null);
   const [loadingProfile, setLoadingProfile] = useState(!isOwnProfile);
   const { loading, bookings } = useBookingHistory();
+  const { recommendations: userRecommendations, loading: loadingRecs } = useUserRecommendations({ limit: 3 });
 
   const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState("posts"); 
+
+  const handlePlayerFollowToggle = async (player) => {
+    const isFollowing = followingIds.includes(player.id);
+    try {
+      const endpoint = isFollowing ? "unfollow" : "follow";
+      const response = await axiosInstance.post(`/api/user/players/${player.id}/${endpoint}`);
+      if (response.data.success) {
+        dispatch(isFollowing ? unfollowUser(player.id) : followUser(player.id));
+        toast.success(`${isFollowing ? 'Unfollowed' : 'Following'} ${player.name}`);
+      }
+    } catch (error) {
+      toast.error("Action failed");
+    }
+  };
+
+  const [activeTab, setActiveTab] = useState("overview"); 
   const [userStories, setUserStories] = useState([]);
   const [viewingStoryGroup, setViewingStoryGroup] = useState(null);
   const [initialStoryIndex, setInitialStoryIndex] = useState(0);
@@ -216,6 +233,8 @@ export default function Profile() {
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-black"></div>
+          
+          {/* Share button relocated to tabs header */}
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative -mt-16 z-10">
@@ -280,45 +299,6 @@ export default function Profile() {
                       <UserPlus size={14} strokeWidth={3} />
                       Invite Player
                     </button>
-                    <button onClick={handleShare} className="px-4 py-2.5 bg-white/5 text-white rounded-[15px] font-black uppercase tracking-wider text-[11px] hover:bg-white/10 transition-all backdrop-blur-md border border-white/10 flex items-center gap-2">
-                      <ArrowRight size={14} />
-                      Share
-                    </button>
-                    <button 
-                      onClick={() => setActiveTab('overview')}
-                      className={`px-4 py-2.5 rounded-[15px] font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'overview' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
-                    >
-                      <LayoutGrid size={14} />
-                      Overview
-                    </button>
-                    <button 
-                      onClick={() => setActiveTab('posts')}
-                      className={`px-4 py-2.5 rounded-[15px] font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'posts' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
-                    >
-                      <Plus size={14} />
-                      Post
-                    </button>
-                    <button 
-                      onClick={() => setActiveTab('stories')}
-                      className={`px-4 py-2.5 rounded-[15px] font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'stories' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
-                    >
-                      <Camera size={14} />
-                      Stories
-                    </button>
-                    <button 
-                      onClick={() => setActiveTab('activity')}
-                      className={`px-4 py-2.5 rounded-[15px] font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'activity' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
-                    >
-                      <Activity size={14} />
-                      Activity
-                    </button>
-                    <button 
-                      onClick={() => setActiveTab('bookings')}
-                      className={`px-4 py-2.5 rounded-[15px] font-black uppercase tracking-wider text-[11px] transition-all backdrop-blur-md border flex items-center gap-2 ${activeTab === 'bookings' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-[0_0_15px_rgba(85,222,232,0.3)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
-                    >
-                      <Calendar size={14} />
-                      Bookings
-                    </button>
                   </>
                 ) : (
                   <>
@@ -329,10 +309,6 @@ export default function Profile() {
                     <button onClick={() => navigate(`/messages?userId=${targetUserId}`)} className="px-4 py-2.5 bg-white/5 text-white rounded-[15px] font-black uppercase tracking-wider text-[11px] hover:bg-white/10 transition-all backdrop-blur-md border border-white/10 flex items-center gap-2">
                       <MessageCircle size={14} />
                       Message
-                    </button>
-                    <button onClick={handleShare} className="px-4 py-2.5 bg-white/5 text-white rounded-[15px] font-black uppercase tracking-wider text-[11px] hover:bg-white/10 transition-all backdrop-blur-md border border-white/10 flex items-center gap-2">
-                      <ArrowRight size={14} />
-                      Share
                     </button>
                     <button onClick={() => gateInteraction(handleFollowToggle)} className={`px-4 py-2.5 rounded-[15px] font-black uppercase tracking-wider text-[11px] transition-all flex items-center gap-2 ${followingIds.includes(targetUserId) ? 'bg-white/10 text-white/40' : 'bg-white text-black hover:scale-105'}`}>
                       <Heart size={14} fill={followingIds.includes(targetUserId) ? "currentColor" : "none"} />
@@ -346,7 +322,57 @@ export default function Profile() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 mt-20">
+      <div className="max-w-7xl mx-auto px-6 mt-12">
+        {/* Profile Switching Tabs */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/10 mb-8 pb-4 gap-4">
+          <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
+            <button 
+              onClick={() => setActiveTab('overview')}
+              className={`px-5 py-3 rounded-t-[10px] font-black uppercase tracking-wider text-[12px] transition-all flex items-center gap-2 ${activeTab === 'overview' ? 'text-[#BFF367] border-b-2 border-[#BFF367] bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <LayoutGrid size={16} />
+              Overview
+            </button>
+            <button 
+              onClick={() => setActiveTab('posts')}
+              className={`px-5 py-3 rounded-t-[10px] font-black uppercase tracking-wider text-[12px] transition-all flex items-center gap-2 ${activeTab === 'posts' ? 'text-[#BFF367] border-b-2 border-[#BFF367] bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <Plus size={16} />
+              Post
+            </button>
+            <button 
+              onClick={() => setActiveTab('stories')}
+              className={`px-5 py-3 rounded-t-[10px] font-black uppercase tracking-wider text-[12px] transition-all flex items-center gap-2 ${activeTab === 'stories' ? 'text-[#BFF367] border-b-2 border-[#BFF367] bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <Camera size={16} />
+              Stories
+            </button>
+            <button 
+              onClick={() => setActiveTab('activity')}
+              className={`px-5 py-3 rounded-t-[10px] font-black uppercase tracking-wider text-[12px] transition-all flex items-center gap-2 ${activeTab === 'activity' ? 'text-[#BFF367] border-b-2 border-[#BFF367] bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <Activity size={16} />
+              Activity
+            </button>
+            {isOwnProfile && (
+              <button 
+                onClick={() => setActiveTab('bookings')}
+                className={`px-5 py-3 rounded-t-[10px] font-black uppercase tracking-wider text-[12px] transition-all flex items-center gap-2 ${activeTab === 'bookings' ? 'text-[#BFF367] border-b-2 border-[#BFF367] bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+              >
+                <Calendar size={16} />
+                Bookings
+              </button>
+            )}
+          </div>
+          <button 
+            onClick={handleShare}
+            className="px-4 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[15px] font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center gap-2 self-start sm:self-auto shrink-0"
+          >
+            <Share2 size={14} strokeWidth={2.5} />
+            Share
+          </button>
+        </div>
+
         <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] border border-white/10 mb-8 overflow-hidden">
           <div className="flex flex-wrap md:flex-nowrap divide-x divide-white/10">
             {[
@@ -564,8 +590,6 @@ export default function Profile() {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {[
-                    { icon: User, label: 'Full Name', value: profileUser?.name || 'Marcus James Anderson' },
-                    { icon: Mail, label: 'Email', value: profileUser?.email || 'marcus.anderson@elitepro.com' },
                     { icon: Calendar, label: 'Age', value: '26 Years' },
                     { icon: Activity, label: 'Main Sport', value: profileUser?.interests?.[0] || 'Football' },
                     { icon: Activity, label: 'Secondary Sport', value: 'Futsal' },
@@ -818,36 +842,54 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] p-6 border border-white/10">
-                <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                  <UserPlus className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
-                  Invite Players
-                </h2>
-                <div className="space-y-3">
-                  {[
-                    { name: 'James Rodriguez', pos: 'Midfielder', rat: 92, img: 'https://images.unsplash.com/photo-1663576748377-cafb47103042?q=80&w=2070' },
-                    { name: 'David Silva', pos: 'Forward', rat: 89, img: 'https://images.unsplash.com/photo-1663576748367-4ff6bec25639?q=80&w=2070' },
-                    { name: 'Chris Johnson', pos: 'Defender', rat: 85, img: 'https://images.unsplash.com/photo-1776416817016-f4b64cc132b1?q=80&w=2070' },
-                  ].map((player, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-3.5 bg-black/40 rounded-[15px] border border-white/10 hover:border-[#55DEE8]/40 transition-all group">
-                      <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
-                        <img src={player.img} alt="" className="w-full h-full object-cover" />
+              {!isOwnProfile && (
+                <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] p-6 border border-white/10">
+                  <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                    <UserPlus className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
+                    Suggested Players
+                  </h2>
+                  <div className="space-y-3">
+                    {loadingRecs ? (
+                      <div className="text-center py-6 text-gray-500 font-bold uppercase tracking-wider text-[10px] flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-[#55DEE8]" />
+                        Loading suggestions...
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-white font-bold tracking-tight truncate text-[11px]" style={HEADING_STYLE}>{player.name}</h3>
-                        <p className="text-[9px] text-gray-500 font-medium">{player.pos}</p>
+                    ) : userRecommendations && userRecommendations.length > 0 ? (
+                      userRecommendations.map((player) => {
+                        const isFollowing = followingIds.includes(player.id);
+                        return (
+                          <div key={player.id} className="flex items-center gap-3 p-3.5 bg-black/40 rounded-[15px] border border-white/10 hover:border-[#55DEE8]/40 transition-all group">
+                            <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
+                              <img 
+                                src={player.profilePicture || "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?q=80&w=150"} 
+                                alt="" 
+                                className="w-full h-full object-cover" 
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] text-white font-bold tracking-tight truncate">@{player.username || 'player'}</p>
+                            </div>
+                            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#55DEE8]/10 rounded-full border border-[#55DEE8]/20">
+                              <Star size={10} stroke="url(#cyan-lime-gradient)" fill="url(#cyan-lime-gradient)" />
+                              <span className="text-[#BFF367] font-black text-[9px]">{player.sportTypes?.[0] || 'Athlete'}</span>
+                            </div>
+                            <button 
+                              onClick={() => gateInteraction(() => handlePlayerFollowToggle(player))}
+                              className={`p-2 rounded-[15px] border transition-all ${isFollowing ? 'bg-white/10 text-white/40 border-white/10' : 'bg-[#55DEE8]/10 text-[#55DEE8] border-[#55DEE8]/20 hover:bg-[#55DEE8]/20'}`}
+                            >
+                              <UserPlus size={14} />
+                            </button>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="text-center py-6 text-gray-500 font-bold uppercase tracking-wider text-[10px]">
+                        No new player suggestions
                       </div>
-                      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#55DEE8]/10 rounded-full border border-[#55DEE8]/20">
-                        <Star size={10} stroke="url(#cyan-lime-gradient)" fill="url(#cyan-lime-gradient)" />
-                        <span className="text-[#BFF367] font-black text-[9px]">{player.rat}</span>
-                      </div>
-                      <button className="p-2 bg-[#55DEE8]/10 text-[#55DEE8] rounded-[15px] hover:bg-[#55DEE8]/20 transition-all border border-[#55DEE8]/20">
-                        <UserPlus size={14} />
-                      </button>
-                    </div>
-                  ))}
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </>
         )}

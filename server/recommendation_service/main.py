@@ -65,6 +65,7 @@ async def shutdown():
 
 # Importing recommendations engine
 from recommendation_engine import get_recommendations
+from user_recommendation_engine import get_user_recommendations
 
 @app.get("/health")
 async def health_check():
@@ -106,3 +107,34 @@ async def fetch_recommendation_feed(
     except Exception as e:
         logger.error(f"Failed to fetch recommendations for user {user_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/recommendations/users")
+async def fetch_user_recommendations(
+    user_id: str = Query(..., description="Target User UUID for follow recommendations"),
+    lat: Optional[float] = Query(None, description="User current Latitude for geo-proximity calculations"),
+    lng: Optional[float] = Query(None, description="User current Longitude for geo-proximity calculations"),
+    limit: int = Query(15, ge=1, le=50, description="Limit count of recommendations to return"),
+    include_scores: bool = Query(False, description="Whether to return individual parameter breakdown scores")
+):
+    if not pool:
+        raise HTTPException(status_code=500, detail="Database pool not initialized.")
+        
+    try:
+        logger.info(f"Generating follow recommendations for User ID: {user_id}...")
+        results = await get_user_recommendations(
+            pool=pool,
+            user_id=user_id,
+            user_lat=lat,
+            user_lng=lng,
+            limit=limit,
+            include_scores=include_scores
+        )
+        return {
+            "success": True,
+            "count": len(results),
+            "data": results
+        }
+    except Exception as e:
+        logger.error(f"Failed to fetch user recommendations for user {user_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+

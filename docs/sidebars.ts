@@ -13,8 +13,15 @@ const sidebars: SidebarsConfig = {
         'backend/architecture',
         'backend/module-guide',
         'backend/security',
-        'backend/recommendation-engine',
-        'backend/ground-recommendation-postgres-plan',
+        {
+          type: 'category',
+          label: 'Recommendation Engines',
+          items: [
+            'backend/recommendation-engines/overview',
+            'backend/recommendation-engines/ground-engine',
+            'backend/recommendation-engines/user-engine',
+          ],
+        },
       ],
     },
     {

@@ -69,4 +69,86 @@ export const getGroundRecommendations = async (userId, lat, lng, limit = 15) => 
     }
   }, 600); // 10 minutes cache TTL (600 seconds)
 };
-export default getGroundRecommendations;
+
+export const getUserRecommendations = async (userId, lat, lng, limit = 15) => {
+  const cacheKey = `rec:users:${userId}:${lat || 'none'}:${lng || 'none'}:${limit}`;
+
+  return getOrSetCache(cacheKey, async () => {
+    try {
+      logger.info(`[RECS] Requesting user follow recommendation feed for user ${userId} from ML Service...`);
+      
+      const response = await axios.get(`${RECOMMENDATION_SERVICE_URL}/api/recommendations/users`, {
+        params: {
+          user_id: userId,
+          lat: lat ? parseFloat(lat) : undefined,
+          lng: lng ? parseFloat(lng) : undefined,
+          limit: parseInt(limit),
+          include_scores: false
+        },
+        timeout: 200 // Enforcing strict 200ms SLA
+      });
+
+      if (response.data && response.data.success && response.data.data) {
+        logger.info(`[RECS] Successfully fetched ${response.data.data.length} ML-ranked user follow recommendations.`);
+        return response.data.data;
+      }
+    } catch (err) {
+      logger.warn(`[RECS] ML Service unavailable or timed out for users (SLA 200ms). Falling back to PostgreSQL native queries! Error: ${err.message}`);
+    }
+
+    // PostgreSQL-native Fallback
+    try {
+      logger.info(`[RECS] Executing PostgreSQL-native fallback user recommendations query...`);
+      const followingList = await prisma.userRelationship.findMany({
+        where: {
+          userId: userId,
+          type: 'FOLLOW'
+        },
+        select: {
+          targetId: true
+        }
+      });
+      const followedIds = followingList.map(r => r.targetId);
+      followedIds.push(userId); // Exclude self
+      
+      const fallbackUsers = await prisma.user.findMany({
+        where: {
+          id: {
+            notIn: followedIds
+          },
+          status: 'active'
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        take: parseInt(limit),
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          profilePicture: true,
+          sportTypes: true
+        }
+      });
+      
+      return fallbackUsers.map(u => ({
+        id: u.id,
+        name: u.name,
+        username: u.username,
+        profilePicture: u.profilePicture,
+        sportTypes: u.sportTypes || [],
+        followersCount: 0,
+        totalScore: 0.5
+      }));
+    } catch (fallbackErr) {
+      logger.error(`[RECS] PostgreSQL fallback query for users failed completely!`, fallbackErr);
+      return [];
+    }
+  }, 600);
+};
+
+export default {
+  getGroundRecommendations,
+  getUserRecommendations
+};
+
