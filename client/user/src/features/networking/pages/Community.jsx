@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { followUser, unfollowUser } from "@redux/slices/authSlice";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -802,14 +802,7 @@ const Community = () => {
                   </motion.button>
                 </div>
 
-                {/* Mobile-Only Raw Text Stats Section */}
-                <div className="block md:hidden text-center pb-1 text-[10px] text-white/50 font-bold uppercase tracking-wider" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  <span>{statsData?.stats?.members || "12.4K"} Members</span>
-                  <span className="mx-2 text-[#84CC16]">â€¢</span>
-                  <span>{statsData?.stats?.posts || "1.2K"} Posts</span>
-                  <span className="mx-2 text-[#84CC16]">â€¢</span>
-                  <span className="text-[#84CC16]">326 Online</span>
-                </div>
+
 
                 {/* Stories Section */}
                 {!debouncedSearchQuery.trim() && (
