@@ -2,25 +2,30 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
-import useTurfData from "@hooks/useTurfData";
-import useRecommendations from "@hooks/useRecommendations";
+import useTurfData from "../features/turf/hooks/useTurfData";
 import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, MessageSquare, MessageSquareShare, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus, Loader2, LayoutGrid, Video } from "lucide-react";
 import toast from "react-hot-toast";
-import { AdBannerSection } from "@components/Marketing/AdBannerSection";
-import { VideoSection } from "@components/Marketing/VideoSection";
-import BlogSection from "@components/Blogs/BlogSection";
-import { TurfCard } from "@features/turf";
-import SearchPlayers from "@components/search/SearchPlayers";
-import SearchTurf from "@components/search/SearchTurf";
-import InterestsModal from "@components/modals/InterestsModal";
+import { AdBannerSection } from "../shared/components/Marketing/AdBannerSection";
+import { VideoSection } from "../shared/components/Marketing/VideoSection";
+import BlogSection from "../shared/components/Blogs/BlogSection";
+import TurfCard from "../features/turf/components/TurfCard";
+import SearchPlayers from "../shared/components/search/SearchPlayers";
+import SearchTurf from "../shared/components/search/SearchTurf";
+import InterestsModal from "../shared/components/modals/InterestsModal";
 import { updateUser } from "@redux/slices/authSlice";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
+const GRAD = "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)";
 const S2 = "#1A1A1A";
 const BDR = "#2A2A2A";
 
-
+const stats = [
+ { value: "500+", label: "Venues" },
+ { value: "50K+", label: "Players" },
+ { value: "1M+", label: "Bookings" },
+ { value: "25+", label: "Cities" },
+];
 
 const socialPosts = [
  { image: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800&q=80", likes: "1.2k", comments: "84" },
@@ -75,7 +80,7 @@ const avatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.le
 export default function Home() {
  const dispatch = useDispatch();
  const navigate = useNavigate();
- const { isLoggedIn, role, user } = useSelector((/** @type {any} */ state) => state.auth);
+ const { isLoggedIn, role, user } = useSelector((state) => state.auth);
  const { gateInteraction } = useLoginOnDemand();
  const [showInterests, setShowInterests] = useState(false);
  const [activeTab, setActiveTab] = useState("venues");
@@ -85,11 +90,6 @@ export default function Home() {
  const [playerFilters, setPlayerFilters] = useState({});
  const [userLocation, setUserLocation] = useState(null);
  const { turfs, loading: turfLoading, error } = useTurfData(turfFilters);
-  const { recommendations, loading: recsLoading } = useRecommendations({
-    lat: userLocation?.lat,
-    lng: userLocation?.lng,
-    limit: 4
-  });
  const [locationStatus, setLocationStatus] = useState("detecting");
  const [marketing, setMarketing] = useState({ banners: [], videos: [] });
  const [loading, setLoading] = useState(true);
@@ -161,9 +161,9 @@ export default function Home() {
  }
  };
 
-  useEffect(() => {
-    detectLocation();
-  }, []);
+ // useEffect(() => {
+ // detectLocation();
+ // }, []);
 
  useEffect(() => {
  const fetchData = async () => {
@@ -363,13 +363,13 @@ export default function Home() {
  <div className="relative w-full px-4 lg:px-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center pt-4 md:pt-0">
  <div className="space-y-4 lg:space-y-6 relative z-10">
  <div>
- <h1 className="uppercase" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700", fontSize: "clamp(40px, 6vw, 51.74px)", lineHeight: "1.14", letterSpacing: "0" }}>
- More Than <span style={{ color: PRI }}>Booking.</span><br />
+ <h1 className="font-display leading-[0.9] lg:leading-[0.85] tracking-tighter uppercase" style={{ fontSize: "clamp(2.2rem, 7.5vw, 5rem)" }}>
+ More Than <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Booking.</span><br />
  Where Players<br />Belong.
  </h1>
- <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ color: PRI }}>where champions play</p>
+ <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>where champions play</p>
  </div>
- <p className="opacity-70 max-w-xl mb-4 lg:mb-10" style={{ fontFamily: "'Inter', sans-serif", fontWeight: "300", fontSize: "20.04px", lineHeight: "119%", letterSpacing: "1.5%" }}>
+ <p className="text-sm lg:text-xl opacity-70 max-w-xl leading-relaxed mb-4 lg:mb-10">
  Discover premium sports venues, book your slot instantly, and connect with players across India.
  </p>
 
@@ -377,7 +377,7 @@ export default function Home() {
  to={isLoggedIn ? "/turfs" : "/signup"}
  className="block w-fit group mb-4 lg:mb-12"
  >
- <div className="inline-flex items-center gap-2 bg-[#84CC16] text-black px-8 py-3.5 rounded-full font-bold group-hover:scale-105 transition-all text-sm lg:text-base shadow-[0_0_20px_rgba(132,204,22,0.4)]">
+ <div className="inline-flex items-center gap-2 text-black px-8 py-3.5 rounded-full font-bold group-hover:scale-105 transition-all text-sm lg:text-base shadow-[0_0_20px_rgba(85,222,232,0.4)]" style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}>
  Book Now <ArrowRight size={18} />
  </div>
  </Link>
@@ -406,7 +406,7 @@ export default function Home() {
 
  {/* 1M+ Bookings Card - Moved to Top Right Corner */}
  <div className="absolute top-12 right-12 rounded-2xl p-4 border z-20"
- style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", borderColor: "rgba(132,204,22,0.25)" }}>
+ style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", borderColor: "rgba(85,222,232,0.25)" }}>
  <p className="font-display text-2xl text-primary leading-none">1M+</p>
  <p className="text-[10px] uppercase tracking-wider mt-1 opacity-60" style={{ color: "#fff" }}>Bookings Made</p>
  </div>
@@ -414,34 +414,22 @@ export default function Home() {
  </div>
  </section>
 
- {/* ── QUICK LINKS ── */}
-  <section className="border-y border-white/5 bg-black py-10">
-    <div className="max-w-7xl mx-auto px-6 flex flex-wrap md:flex-nowrap items-center justify-around gap-8 overflow-x-auto no-scrollbar">
-      <Link to="/leaderboard" className="flex items-center gap-4 group shrink-0">
-        <Activity size={28} className="text-[#60A5FA] group-hover:scale-110 transition-transform" />
-        <span className="font-black text-sm tracking-[0.2em] uppercase text-[#60A5FA]">LIVE SCORE</span>
-      </Link>
-      
-      <Link to="/join-games" className="flex items-center gap-4 group shrink-0">
-        <Trophy size={28} className="text-[#F59E0B] group-hover:scale-110 transition-transform" />
-        <span className="font-black text-sm tracking-[0.2em] uppercase text-[#F59E0B]">JOIN TOURNAMENTS</span>
-      </Link>
 
-      <Link to="/players" className="flex items-center gap-4 group shrink-0">
-        <Search size={28} className="text-[#84CC16] group-hover:scale-110 transition-transform" />
-        <span className="font-black text-sm tracking-[0.2em] uppercase text-[#84CC16]">FIND PLAYERS</span>
-      </Link>
-
-      <Link to="#" className="flex items-center gap-4 group shrink-0">
-        <ShoppingBag size={28} className="text-[#A855F7] group-hover:scale-110 transition-transform" />
-        <span className="font-black text-sm tracking-[0.2em] uppercase text-[#A855F7]">MARKETPLACE</span>
-      </Link>
-    </div>
-  </section>
+ {/* ── STATS ── */}
+ <section className="border-y" style={{ borderColor: "#1A1A1A", backgroundColor: "#0A0A0A" }}>
+ <div className="w-full px-2 md:px-10 py-6 sm:py-8 grid grid-cols-4 divide-x divide-[#1A1A1A]">
+ {stats.map((s) => (
+ <div key={s.label} className="px-1 md:px-8 text-center flex flex-col justify-center overflow-hidden group">
+ <p className="font-display text-[15px] min-[375px]:text-xl sm:text-3xl lg:text-5xl leading-none tracking-tighter group-hover:text-white transition-colors" style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{s.value}</p>
+ <p className="font-mono text-[5px] min-[375px]:text-[6px] sm:text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.3em] mt-1 sm:mt-2 text-gray-500 group-hover:text-primary transition-colors truncate">{s.label}</p>
+ </div>
+ ))}
+ </div>
+ </section>
 
  {/* Mobile Sub-Nav (Hot Bars) */}
  <div className="lg:hidden flex items-center justify-between w-full border-b border-[#1A1A1A] bg-[#0A0A0A] py-3 px-4 gap-3">
- <Link to="/community" className="flex-1 flex items-center justify-center gap-2 py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#84CC16] bg-[#84CC16]/10 border border-[#84CC16]/20 rounded-xl hover:bg-[#84CC16]/20 transition-colors">
+ <Link to="/community" className="flex-1 flex items-center justify-center gap-2 py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-black rounded-xl hover:opacity-90 transition-all shadow-[0_0_15px_rgba(85,222,232,0.3)]" style={{ background: GRAD }}>
  <Users size={14} />
  Community
  </Link>
@@ -450,43 +438,15 @@ export default function Home() {
  Players
  </Link>
  </div>
-  
-  {/* ── RECOMMENDED FOR YOU (Personalized Feed) ── */}
-  {recommendations && recommendations.length > 0 && (
-    <section className="py-6 lg:py-12 px-4 lg:px-12 w-full animate-fade-in" style={{ backgroundColor: "#0A0A0A" }}>
-      <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10 border-b border-white/5 pb-8">
-        <div className="relative">
-          <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#84CC16] rounded-full shadow-[0_0_20px_rgba(132,204,22,0.4)] hidden md:block"></div>
-          <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none font-open-sans flex items-center gap-3">
-            🎯 Curated <span className="text-[#84CC16]">For You</span>
-          </h2>
-          <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-3 font-inter">
-            ML Personalisation Feed • Based on Your Behavior & Location
-          </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-        {recommendations.map((t) => (
-          <TurfCard 
-            key={t.id || t._id} 
-            turf={t} 
-            distance={t.distance ? `${(t.distance / 1000).toFixed(1)} km Away` : "Nearby"}
-            featured={true}
-          />
-        ))}
-      </div>
-    </section>
-  )}
 
 
  {/* ── FIND YOUR ARENA ── */}
  <section className="py-6 lg:py-12 px-4 lg:px-12 w-full">
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16 border-b border-white/5 pb-10">
  <div className="relative">
- <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#84CC16] rounded-full shadow-[0_0_25px_rgba(132,204,22,0.5)] hidden md:block"></div>
- <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- Find Your <span className="text-[#84CC16]">Arena</span>
+ <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#55DEE8] rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block"></div>
+ <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
+ Find Your <span className="text-[#55DEE8]">Arena</span>
  </h2>
  <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.4em] mt-4 font-inter">
  Premium Venue Discovery • Elite Sports Infrastructure
@@ -504,14 +464,14 @@ export default function Home() {
  onClick={() => {
  setActiveTab(tab.key);
  }}
- className={`px-8 py-2.5 rounded-full font-bold text-xs transition-all duration-300 uppercase tracking-widest ${activeTab === tab.key ? "bg-[#84CC16] text-black shadow-[0_0_20px_rgba(132,204,22,0.3)]" : "text-gray-500 hover:text-white"}`}>
+ className={`px-8 py-2.5 rounded-full font-bold text-xs transition-all duration-300 uppercase tracking-widest ${activeTab === tab.key ? "text-black shadow-[0_0_20px_rgba(85,222,232,0.3)]" : "text-gray-500 hover:text-white"}`} style={activeTab === tab.key ? { background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" } : {}}>
  {tab.label}
  </button>
  ))}
  </div>
  <button 
  onClick={() => document.getElementById('search-section')?.scrollIntoView({ behavior: 'smooth' })}
- className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-[0.2em] hover:text-[#84CC16] transition-colors"
+ className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-[0.2em] hover:text-[#55DEE8] transition-colors"
  >
  {userLocation?.city ? `${userLocation.city}, ${userLocation.state}` : "SELECT LOCATION"}
  </button>
@@ -523,9 +483,9 @@ export default function Home() {
  ) : (
  <div className="w-full py-20 px-6 md:px-10 rounded-[40px] border border-white/5 bg-[#0a0a0a] flex flex-col items-center justify-center text-center overflow-hidden relative group animate-fade-in">
  {/* Glow Effect */}
- <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#84CC16]/10 blur-[120px] rounded-full pointer-events-none" />
+ <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#55DEE8]/10 blur-[120px] rounded-full pointer-events-none" />
 
- <ShoppingBag size={48} className="text-gray-600 mb-6 group-hover:text-[#84CC16] transition-colors duration-500" />
+ <ShoppingBag size={48} className="text-gray-600 mb-6 group-hover:text-[#55DEE8] transition-colors duration-500" />
  <h3 className="font-display text-4xl md:text-5xl lg:text-6xl text-white uppercase leading-tight">
  Marketplace <br />
  <span style={{ color: PRI }}>Coming Soon</span>
@@ -554,7 +514,7 @@ export default function Home() {
  <p className="text-gray-500 text-sm uppercase tracking-wider mb-8">Try adjusting your search or filters</p>
  <button
  onClick={() => setTurfFilters({ searchTerm: "", city: "", state: "" })}
- className="px-8 py-3 bg-[#84CC16] text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-xl hover:scale-105 transition-all shadow-[0_0_20px_rgba(132,204,22,0.2)]"
+ className="px-8 py-3 text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-xl hover:scale-105 transition-all shadow-[0_0_20px_rgba(85,222,232,0.2)]" style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}
  >
  View All Venues
  </button>
@@ -572,7 +532,7 @@ export default function Home() {
  )}
 
  <div className="text-center mt-6 lg:mt-10">
- <Link to="/turfs" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-full border transition-all hover:border-[#84CC16] hover:text-[#84CC16]"
+ <Link to="/turfs" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-full border transition-all hover:border-[#55DEE8] hover:text-[#55DEE8]"
  style={{ borderColor: BDR, color: "#888" }}>
  View All Venues <ChevronRight size={16} />
  </Link>
@@ -585,16 +545,16 @@ export default function Home() {
  {/* Refined Section Header */}
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-8">
  <div className="relative">
- <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#84CC16] rounded-full shadow-[0_0_20px_rgba(132,204,22,0.4)] hidden md:block"></div>
- <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- Find Players <span className="text-[#84CC16]">Near You</span>
+ <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#55DEE8] rounded-full shadow-[0_0_20px_rgba(85,222,232,0.4)] hidden md:block"></div>
+ <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
+ Find Players <span className="text-[#55DEE8]">Near You</span>
  </h2>
  <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-3 font-inter">
  Global Talent Network • Skill-Matched Athletes
  </p>
  </div>
  
- <Link to="/players" className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-[#84CC16] hover:text-black hover:border-[#84CC16] transition-all duration-500">
+ <Link to="/players" className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-[#55DEE8] hover:text-black hover:border-[#55DEE8] transition-all duration-500">
  <span className="text-[11px] font-black uppercase tracking-widest">View All Players</span>
  <div className="w-6 h-6 rounded-full bg-white/5 group-hover:bg-black/10 flex items-center justify-center transition-colors">
  <ChevronRight size={14} />
@@ -615,7 +575,7 @@ export default function Home() {
  <p className="font-display text-2xl">No Players Yet</p>
  <p className="text-sm mt-1">Be the first to join the community!</p>
  <Link to="/signup" className="inline-flex items-center gap-2 mt-4 font-bold text-black px-6 py-2.5 rounded-full"
- style={{ backgroundColor: PRI }}>Join Now</Link>
+ style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}>Join Now</Link>
  </div>
  ) : (
  <div className="flex gap-4 md:gap-6 overflow-x-auto pt-8 pb-8 mt-2 no-scrollbar scroll-smooth px-0 md:px-2">
@@ -628,7 +588,7 @@ export default function Home() {
  key={p._id}
  className="shrink-0 w-[160px] md:w-[200px] group"
  >
- <div className="relative bg-[#121212] rounded-[28px] p-2.5 border border-white/5 transition-all duration-500 hover:border-[#84CC16]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
+ <div className="relative bg-[#121212] rounded-[28px] p-2.5 border border-white/5 transition-all duration-500 hover:border-[#55DEE8]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
  {/* Compact Profile Image Section */}
  <Link to={`/profile/${p._id}`} className="relative aspect-[1/1.1] rounded-[20px] overflow-hidden block mb-4">
  <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
@@ -647,7 +607,7 @@ export default function Home() {
  className="relative z-10 flex items-center justify-center w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a]"
  style={{ display: (p.profilePicture || p.profileImage) ? 'none' : 'flex' }}
  >
- <span className="text-[#84CC16] font-black text-5xl tracking-tighter opacity-20 group-hover:opacity-40 transition-opacity duration-500">
+ <span className="text-[#55DEE8] font-black text-5xl tracking-tighter opacity-20 group-hover:opacity-40 transition-opacity duration-500">
  {initials}
  </span>
  </div>
@@ -665,7 +625,7 @@ export default function Home() {
  <div className="px-2 pb-1.5">
  <div className="flex items-center gap-1.5 mb-1">
  <Link to={`/profile/${p._id}`}>
- <h3 className="text-white font-bold text-[15px] tracking-tight group-hover:text-[#84CC16] transition-colors line-clamp-1 font-open-sans">
+ <h3 className="text-white font-bold text-[15px] tracking-tight group-hover:text-[#55DEE8] transition-colors line-clamp-1 font-open-sans">
  {p.name || "Anonymous"}
  </h3>
  </Link>
@@ -675,7 +635,7 @@ export default function Home() {
  </div>
  
   <p className="text-white/30 text-[10px] font-medium leading-tight mb-4 line-clamp-2 flex items-center gap-1.5">
-  <MapPin size={10} className="text-[#84CC16]" /> {p.distance ? `${(p.distance/1000).toFixed(1)} km Away` : (p.city || "Nearby Player")}
+  <MapPin size={10} className="text-[#55DEE8]" /> {p.distance ? `${(p.distance/1000).toFixed(1)} km Away` : (p.city || "Nearby Player")}
   </p>
 
  {/* Bottom Bar */}
@@ -715,16 +675,16 @@ export default function Home() {
  <div className="w-full">
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-10">
  <div className="relative">
- <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#84CC16] rounded-full shadow-[0_0_25px_rgba(132,204,22,0.5)] hidden md:block"></div>
- <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- JOIN <span className="text-[#84CC16]">GAMES</span>
+ <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#55DEE8] rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block"></div>
+ <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
+ JOIN <span className="text-[#55DEE8]">GAMES</span>
  </h2>
  <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-4 font-inter">
  Community Matchmaking • No Team? No Problem.
  </p>
  </div>
 
- <Link to="/join-games" className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-[#84CC16] hover:text-black hover:border-[#84CC16] transition-all duration-500">
+ <Link to="/join-games" className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-[#55DEE8] hover:text-black hover:border-[#55DEE8] transition-all duration-500">
  <span className="text-[11px] font-black uppercase tracking-widest">View More Games</span>
  <div className="w-6 h-6 rounded-full bg-white/5 group-hover:bg-black/10 flex items-center justify-center transition-colors">
  <ChevronRight size={14} />
@@ -735,7 +695,7 @@ export default function Home() {
  {/* Location Filters */}
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
  <div className="relative">
- <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-[#CCFF00] transition-colors pointer-events-none" size={18} />
+ <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-[#55DEE8] transition-colors pointer-events-none" size={18} />
  <select
  value={selectedHomeState}
  onChange={(e) => {
@@ -743,7 +703,7 @@ export default function Home() {
  setSelectedHomeCity("");
  }}
  disabled={loadingStates}
- className="w-full bg-[#111] border border-white/10 rounded-2xl py-3 pl-12 pr-4 appearance-none text-sm text-white focus:border-[#CCFF00] outline-none transition-all font-bold disabled:opacity-50"
+ className="w-full bg-[#111] border border-white/10 rounded-2xl py-3 pl-12 pr-4 appearance-none text-sm text-white focus:border-[#55DEE8] outline-none transition-all font-bold disabled:opacity-50"
  >
  <option value="">{loadingStates ? 'Loading States...' : 'Select State'}</option>
  {states.map(s => <option key={s} value={s}>{s}</option>)}
@@ -751,12 +711,12 @@ export default function Home() {
  </div>
 
  <div className="relative">
- <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-[#CCFF00] transition-colors pointer-events-none" size={18} />
+ <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-[#55DEE8] transition-colors pointer-events-none" size={18} />
  <select
  value={selectedHomeCity}
  onChange={(e) => setSelectedHomeCity(e.target.value)}
  disabled={!selectedHomeState || loadingCities}
- className="w-full bg-[#111] border border-white/10 rounded-2xl py-3 pl-12 pr-4 appearance-none text-sm text-white focus:border-[#CCFF00] outline-none transition-all font-bold disabled:opacity-50"
+ className="w-full bg-[#111] border border-white/10 rounded-2xl py-3 pl-12 pr-4 appearance-none text-sm text-white focus:border-[#55DEE8] outline-none transition-all font-bold disabled:opacity-50"
  >
  <option value="">
  {loadingCities ? 'Loading Cities...' : !selectedHomeState ? 'Select state first' : 'Select City'}
@@ -773,7 +733,7 @@ export default function Home() {
  key={tab} 
  onClick={() => setSelectedGameSport(tab)}
  className="px-6 py-2 rounded-full font-bold text-xs shrink-0 transition-colors border"
- style={selectedGameSport === tab ? { backgroundColor: PRI, color: "#000", borderColor: PRI } : { backgroundColor: "transparent", color: "#888", borderColor: BDR }}
+ style={selectedGameSport === tab ? { background: GRAD, color: "#000", borderColor: "transparent" } : { backgroundColor: "transparent", color: "#888", borderColor: BDR }}
  >
  {tab}
  </button>
@@ -830,8 +790,8 @@ export default function Home() {
  <div className="flex items-start justify-between">
  <div className="flex flex-col gap-1">
  <div className="flex gap-2">
- <div className="px-3 py-1 bg-[#CCFF00]/20 border border-[#CCFF00]/40 rounded-full inline-flex">
- <span className="text-[9px] font-black text-[#CCFF00] uppercase tracking-widest">{g.gameType}</span>
+ <div className="px-3 py-1 bg-[#55DEE8]/20 border border-[#55DEE8]/40 rounded-full inline-flex">
+ <span className="text-[9px] font-black text-[#55DEE8] uppercase tracking-widest">{g.gameType}</span>
  </div>
  {isQuick && (
  <div className="px-3 py-1 bg-blue-500/20 border border-blue-500/40 rounded-full inline-flex">
@@ -842,10 +802,10 @@ export default function Home() {
  <div className="flex items-center gap-2">
  <button
  onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(g.shortId || g._id); toast.success('Game ID copied!'); }}
- className="px-2.5 py-1 bg-black/50 border border-white/15 hover:border-[#CCFF00]/40 rounded-full inline-flex items-center gap-1 transition-all"
+ className="px-2.5 py-1 bg-black/50 border border-white/15 hover:border-[#55DEE8]/40 rounded-full inline-flex items-center gap-1 transition-all"
  title="Click to copy"
  >
- <Info size={9} className="text-[#CCFF00]/70" />
+ <Info size={9} className="text-[#55DEE8]/70" />
  <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">ID: {g.shortId || g._id.slice(-6).toUpperCase()}</span>
  </button>
  <button
@@ -868,24 +828,24 @@ export default function Home() {
  toast.success('Link copied to clipboard!');
  }
  }}
- className="p-1.5 bg-black/50 border border-white/15 hover:border-[#CCFF00]/40 rounded-full flex items-center justify-center transition-all"
+ className="p-1.5 bg-black/50 border border-white/15 hover:border-[#55DEE8]/40 rounded-full flex items-center justify-center transition-all"
  title="Share Match"
  >
- <Share2 size={10} className="text-[#CCFF00]/70" />
+ <Share2 size={10} className="text-[#55DEE8]/70" />
  </button>
  </div>
  </div>
  <div className="flex items-center gap-1 bg-black/40 px-2.5 py-1 rounded-full border border-white/10">
- <span className="text-[10px] font-black text-[#CCFF00]">₹</span>
+ <span className="text-[10px] font-black text-[#55DEE8]">₹</span>
  <span className="text-xs font-black text-white">{g.perPlayerCharge || 'FREE'}</span>
  </div>
  </div>
 
  {/* Rivalry ledger */}
  <div className="flex items-center gap-2 mt-1">
- <div className="h-px flex-1 bg-[#CCFF00]/20" />
- <span className="text-[8px] font-black text-[#CCFF00]/60 uppercase tracking-[0.2em]">✦ {isQuick ? 'Casual Pool' : 'Rivalry Ledger'}</span>
- <div className="h-px flex-1 bg-[#CCFF00]/20" />
+ <div className="h-px flex-1 bg-[#55DEE8]/20" />
+ <span className="text-[8px] font-black text-[#55DEE8]/60 uppercase tracking-[0.2em]">✦ {isQuick ? 'Casual Pool' : 'Rivalry Ledger'}</span>
+ <div className="h-px flex-1 bg-[#55DEE8]/20" />
  </div>
 
  {/* Team matchup */}
@@ -895,12 +855,12 @@ export default function Home() {
  <>Casual {g.gameType} Match</>
  ) : (
  <>{g.teams?.teamA?.name || 'Team A'}{' '}
- <span className="text-[#CCFF00] text-xs flex items-center">V<span className="w-[1px] h-3 bg-[#CCFF00] ml-[1px] mr-[3px] opacity-60" />S</span>{' '}
+ <span className="text-[#55DEE8] ">VS</span>{' '}
  {g.teams?.teamB?.name || 'Team B'}</>
  )}
  </h3>
  <div className="flex items-center gap-1.5 mt-1.5">
- <MapPin size={10} className="text-[#CCFF00]" />
+ <MapPin size={10} className="text-[#55DEE8]" />
  <span className="text-[10px] text-white/50 truncate">
  {g.ground?.name || g.city || 'Self-Arranged Venue'}
  </span>
@@ -922,7 +882,7 @@ export default function Home() {
  {/* Open slots + avatar row */}
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
- <Users size={12} className="text-[#CCFF00]" />
+ <Users size={12} className="text-[#55DEE8]" />
  <div>
  <span className="text-sm font-black text-white">{openSlots} Open</span>
  <p className="text-[8px] font-black text-white/30 uppercase tracking-widest leading-none">Available Capacity</p>
@@ -932,7 +892,7 @@ export default function Home() {
  <div className="flex gap-1">
  {Array.from({ length: Math.min(totalSlots, 5) }).map((_, idx) => (
  <div key={idx}
- className={`w-5 h-5 rounded-full border ${idx < (totalSlots - openSlots) ? 'bg-[#CCFF00]/30 border-[#CCFF00]/50' : 'bg-white/5 border-white/10'}`}
+ className={`w-5 h-5 rounded-full border ${idx < (totalSlots - openSlots) ? 'bg-[#55DEE8]/30 border-[#55DEE8]/50' : 'bg-white/5 border-white/10'}`}
  />
  ))}
  </div>
@@ -941,8 +901,8 @@ export default function Home() {
  {/* Host + JOIN */}
  <div className="flex items-center justify-between mt-1">
  <div className="flex items-center gap-2">
- <div className="w-7 h-7 rounded-full bg-[#CCFF00]/20 border border-[#CCFF00]/40 flex items-center justify-center">
- <span className="text-[10px] font-black text-[#CCFF00]">{hostInitial}</span>
+ <div className="w-7 h-7 rounded-full bg-[#55DEE8]/20 border border-[#55DEE8]/40 flex items-center justify-center">
+ <span className="text-[10px] font-black text-[#55DEE8]">{hostInitial}</span>
  </div>
  <div>
  <p className="text-[8px] font-black text-white/30 uppercase tracking-widest">Commanded By</p>
@@ -953,7 +913,8 @@ export default function Home() {
  </div>
  <button
  onClick={(e) => { e.stopPropagation(); navigate('/join-games'); }}
- className="flex items-center gap-2 bg-[#CCFF00] hover:bg-[#d4ff1a] text-black px-5 py-2 rounded-full font-black text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(204,255,0,0.3)]"
+ className="flex items-center gap-2 text-black px-5 py-2 rounded-full font-black text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(85,222,232,0.4)] hover:scale-105"
+ style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}
  >
  JOIN <ChevronRight size={14} />
  </button>
@@ -975,9 +936,9 @@ export default function Home() {
  <div className="w-full">
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-10">
  <div className="relative">
- <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#84CC16] rounded-full shadow-[0_0_25px_rgba(132,204,22,0.5)] hidden md:block"></div>
- <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- PRO <span className="text-[#84CC16]">EXPERTS</span>
+ <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#55DEE8] rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block"></div>
+ <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
+ PRO <span className="text-[#55DEE8]">EXPERTS</span>
  </h2>
  <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-4 font-inter">
  Certified Coaching • Professional Officiating
@@ -991,8 +952,8 @@ export default function Home() {
  key={tab} 
  className={`px-6 py-2.5 rounded-full font-black text-[10px] shrink-0 transition-all duration-300 uppercase tracking-widest border
  ${i === 0 
- ? "bg-[#84CC16] text-black border-[#84CC16] shadow-[0_0_15px_rgba(132,204,22,0.3)]" 
- : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"}`}
+ ? "text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" 
+ : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"}`} style={i === 0 ? { background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)", borderColor: "#55DEE8" } : {}}
  >
  {tab}
  </button>
@@ -1017,7 +978,7 @@ export default function Home() {
  className="group cursor-pointer"
  onClick={() => navigate(`/professionals/${pro._id}`)}
  >
- <div className="relative bg-[#121212] rounded-[20px] p-1.5 border border-white/5 transition-all duration-500 hover:border-[#84CC16]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
+ <div className="relative bg-[#121212] rounded-[20px] p-1.5 border border-white/5 transition-all duration-500 hover:border-[#55DEE8]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
  
  {/* Compact Profile Image Section */}
  <div className="relative aspect-[1/1.2] rounded-[15px] overflow-hidden block mb-2.5">
@@ -1037,7 +998,7 @@ export default function Home() {
  className="relative z-10 flex items-center justify-center w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a]"
  style={{ display: pro.profilePicture ? 'none' : 'flex' }}
  >
- <span className="text-[#84CC16] font-black text-3xl tracking-tighter opacity-20 group-hover:opacity-40 transition-opacity duration-500">
+ <span className="text-[#55DEE8] font-black text-3xl tracking-tighter opacity-20 group-hover:opacity-40 transition-opacity duration-500">
  {pro.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
  </span>
  </div>
@@ -1045,7 +1006,7 @@ export default function Home() {
  
  {/* Price Badge */}
  <div className="absolute top-2 right-2 z-20">
- <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#84CC16] text-[8px] font-bold shadow-lg">
+ <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#55DEE8] text-[8px] font-bold shadow-lg">
  ₹{pro.price || "500"}/{pro.role === "coach" ? "hr" : "match"}
  </div>
  </div>
@@ -1053,11 +1014,11 @@ export default function Home() {
  {/* Role Badge */}
  <div className="absolute top-2 left-2 z-20">
  <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white text-[8px] font-black tracking-widest gap-1 shadow-lg">
- {pro.role === 'umpire' ? <Shield size={8} className="text-[#84CC16]" /> : 
- pro.role === 'streamer' ? <Video size={8} className="text-[#84CC16]" /> : 
- pro.role === 'scorer' ? <Activity size={8} className="text-[#84CC16]" /> : 
- <Award size={8} className="text-[#84CC16]" />}
- <span className="text-[#84CC16]">{pro.role?.toUpperCase()}</span>
+ {pro.role === 'umpire' ? <Shield size={8} className="text-[#55DEE8]" /> : 
+ pro.role === 'streamer' ? <Video size={8} className="text-[#55DEE8]" /> : 
+ pro.role === 'scorer' ? <Activity size={8} className="text-[#55DEE8]" /> : 
+ <Award size={8} className="text-[#55DEE8]" />}
+ <span className="text-[#55DEE8]">{pro.role?.toUpperCase()}</span>
  </div>
  </div>
  </div>
@@ -1065,7 +1026,7 @@ export default function Home() {
  {/* Content Section */}
  <div className="px-1.5 pb-1">
  <div className="flex items-center gap-1 mb-0.5">
- <h3 className="text-white font-bold text-[13px] tracking-tight group-hover:text-[#84CC16] transition-colors line-clamp-1 font-open-sans capitalize">
+ <h3 className="text-white font-bold text-[13px] tracking-tight group-hover:text-[#55DEE8] transition-colors line-clamp-1 font-open-sans capitalize">
  {pro.name?.toLowerCase()}
  </h3>
  <div className="flex items-center justify-center w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] shrink-0">
@@ -1081,7 +1042,7 @@ export default function Home() {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
  <div className="flex items-center gap-1 text-white/80">
- <Star size={12} className="text-[#84CC16] fill-[#84CC16]" />
+ <Star size={12} className="text-[#55DEE8] fill-[#55DEE8]" />
  <span className="text-[10px] font-bold">{pro.rating?.toFixed(1) || "5.0"}</span>
  </div>
  <div className="flex items-center text-white/30">
@@ -1096,7 +1057,8 @@ export default function Home() {
  e.stopPropagation();
  navigate(`/professionals/${pro._id}`);
  }}
- className="px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-wider transition-all duration-300 bg-[#222] border border-white/5 text-white hover:bg-white hover:text-black shadow-lg"
+ className="px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-wider transition-all duration-300 text-black hover:scale-105 shadow-[0_0_15px_rgba(85,222,232,0.3)]"
+ style={{ background: GRAD }}
  >
  BOOK
  </button>
@@ -1114,17 +1076,17 @@ export default function Home() {
  {/* ── BENTO GRID ── */}
  <section className="pt-10 lg:pt-20 pb-4 lg:pb-6 px-4 lg:px-12 w-full">
  <div className="text-center mb-8 lg:mb-14">
- <h2 className="font-display text-5xl md:text-6xl lg:text-7xl uppercase leading-[0.9]">
+ <h2 className="font-display text-4xl md:text-5xl lg:text-6xl uppercase leading-[0.9]">
  ALL IN ONE <span className="text-gray-500">SPORTS</span><br />
- EXPERIENCE <span className="inline-block px-4 py-2 ml-2 align-middle rounded-full font-script text-3xl md:text-4xl text-black" style={{ backgroundColor: PRI }}>Powered by AI ✨</span>
+ EXPERIENCE <span className="inline-block px-4 py-2 ml-2 align-middle rounded-full font-script text-3xl md:text-4xl text-black shadow-[0_0_25px_rgba(85,222,232,0.4)]" style={{ background: GRAD }}>Powered by AI ✨</span>
  </h2>
  </div>
 
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5" style={{ minHeight: "400px" }}>
  {/* Left Large Card */}
- <div className="lg:col-span-1 rounded-3xl p-8 relative overflow-hidden flex flex-col justify-end min-h-[300px]" style={{ background: "linear-gradient(135deg, #0d1f00, #0a0a0a)", border: `1px solid ${BDR}` }}>
- <div className="absolute top-6 left-6 w-12 h-12 rounded-2xl flex items-center justify-center border z-20" style={{ borderColor: PRI, backgroundColor: "rgba(132,204,22,0.1)" }}>
- <BookOpen size={20} style={{ color: PRI }} />
+ <div className="lg:col-span-1 rounded-3xl p-8 relative overflow-hidden flex flex-col justify-end min-h-[300px]" style={{ background: "linear-gradient(135deg, #001f22, #0a0a0a)", border: `1px solid ${BDR}` }}>
+ <div className="absolute top-6 left-6 w-12 h-12 rounded-2xl flex items-center justify-center z-20" style={{ background: GRAD }}>
+ <BookOpen size={20} style={{ color: "#000" }} />
  </div>
  <div className="absolute right-0 top-0 w-3/4 h-3/4 bg-no-repeat bg-contain bg-right-top z-10" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&q=80')", opacity: 0.3 }} />
  <div className="relative z-20">
@@ -1135,7 +1097,7 @@ export default function Home() {
  <span key={t} className="px-4 py-1.5 rounded-full text-xs font-bold border" style={{ borderColor: BDR, backgroundColor: "rgba(255,255,255,0.05)" }}>{t}</span>
  ))}
  </div>
- <Link to="/turfs" className="inline-block bg-white text-black font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition-colors">Find Venues</Link>
+ <Link to="/turfs" className="inline-block text-black font-bold py-3 px-8 rounded-full hover:scale-105 transition-all shadow-[0_0_20px_rgba(85,222,232,0.3)]" style={{ background: GRAD }}>Find Venues</Link>
  </div>
  </div>
 
@@ -1148,12 +1110,12 @@ export default function Home() {
  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #111, transparent)" }} />
  <div className="relative z-10 flex flex-col h-full justify-between">
  <div className="flex items-center gap-2">
- <span className="text-[#84CC16] font-bold text-xs uppercase tracking-widest flex items-center gap-1"><Trophy size={14} /> COMPETITIVE</span>
+ <span className="text-[#55DEE8] font-bold text-xs uppercase tracking-widest flex items-center gap-1"><Trophy size={14} /> COMPETITIVE</span>
  </div>
  <div>
  <h3 className="font-display text-4xl mb-1 leading-none">CHALLENGE<br />PLAYERS</h3>
  <p className="text-gray-400 text-sm mb-4">Skill-matched opponents.</p>
- <Link to="/players" className="font-bold text-white flex items-center gap-2 hover:text-[#84CC16] transition-colors">Start Match <ArrowRight size={16} /></Link>
+ <Link to="/players" className="font-bold text-white flex items-center gap-2 hover:text-[#55DEE8] transition-colors">Start Match <ArrowRight size={16} /></Link>
  </div>
  </div>
  </div>
@@ -1163,7 +1125,7 @@ export default function Home() {
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-2">
  <div className="w-8 h-8 rounded-lg flex items-center justify-center border" style={{ borderColor: "rgba(255,255,255,0.1)", backgroundColor: "rgba(255,255,255,0.05)" }}>
- <Users size={14} className="text-[#84CC16]" />
+ <Users size={14} className="text-[#55DEE8]" />
  </div>
  <h3 className="font-display text-xl uppercase">COMMUNITY FEED</h3>
  </div>
@@ -1175,7 +1137,7 @@ export default function Home() {
  realSocialPosts.slice(0, 2).map((post) => {
  const author = post.adminId || post.userId || post.ownerId;
  return (
- <div key={post._id} className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 group/post hover:border-[#84CC16]/30 transition-all">
+ <div key={post._id} className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 group/post hover:border-[#55DEE8]/30 transition-all">
  <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-900 shrink-0 relative">
  {author?.profilePicture ? (
  <img 
@@ -1202,7 +1164,7 @@ export default function Home() {
  <p className="text-[11px] font-bold text-white truncate">{author?.name || "Anonymous"}</p>
  <p className="text-[9px] text-gray-500 truncate">{post.content || post.title || "Shared a new post"}</p>
  </div>
- <ChevronRight size={14} className="text-gray-600 group-hover/post:text-[#84CC16] transition-colors" />
+ <ChevronRight size={14} className="text-gray-600 group-hover/post:text-[#55DEE8] transition-colors" />
  </div>
  );
  })
@@ -1220,7 +1182,7 @@ export default function Home() {
  {/* Marketplace, Coaches, Umpires */}
  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
  {/* Featured Community Highlight */}
- <div className="rounded-3xl p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#84CC16] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
+ <div className="rounded-3xl p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#55DEE8] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
  {realSocialPosts[0]?.image ? (
  <div className="absolute inset-0 bg-cover bg-center opacity-40 transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url(${realSocialPosts[0].image})` }} />
  ) : (
@@ -1228,16 +1190,16 @@ export default function Home() {
  )}
  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
  <div className="relative z-10 flex flex-col h-full justify-between">
- <div className="w-8 h-8 rounded-lg flex items-center justify-center border" style={{ borderColor: PRI, backgroundColor: "rgba(132,204,22,0.1)" }}>
- <Zap size={16} style={{ color: PRI }} />
+ <div className="w-8 h-8 rounded-lg flex items-center justify-center border" style={{ borderColor: "transparent", background: GRAD }}>
+ <Zap size={16} style={{ color: "#000" }} />
  </div>
  <div>
- <span className="text-[8px] font-bold text-[#84CC16] uppercase tracking-widest mb-1 block">Trending Now</span>
+ <span className="text-[8px] font-bold text-[#55DEE8] uppercase tracking-widest mb-1 block">Trending Now</span>
  <h3 className="font-display text-xl mb-1 leading-tight uppercase truncate">{realSocialPosts[0]?.title || "SOCIAL ARENA"}</h3>
  <p className="text-gray-400 text-[10px] mb-4 line-clamp-1">{realSocialPosts[0]?.content || "Check out what's happening in the field."}</p>
  <Link
  to="/community"
- className="font-bold text-white text-[10px] flex items-center gap-2 hover:text-[#84CC16] transition-colors uppercase tracking-widest"
+ className="font-bold text-white text-[10px] flex items-center gap-2 hover:text-[#55DEE8] transition-colors uppercase tracking-widest"
  >
  Explore <ArrowRight size={12} />
  </Link>
@@ -1246,33 +1208,33 @@ export default function Home() {
  </div>
 
  {/* Coaches */}
- <div className="rounded-3xl p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#84CC16] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
+ <div className="rounded-3xl p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#55DEE8] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
  <div className="absolute inset-0 bg-cover bg-center opacity-20 transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1526676037777-05a232554f77?w=600&q=80')" }} />
  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
  <div className="relative z-10 flex flex-col h-full justify-between">
- <div className="w-10 h-10 rounded-xl flex items-center justify-center border" style={{ borderColor: "#F59E0B", backgroundColor: "rgba(245,158,11,0.1)" }}>
- <Award size={20} style={{ color: "#F59E0B" }} />
+ <div className="w-10 h-10 rounded-xl flex items-center justify-center border" style={{ borderColor: "transparent", background: GRAD }}>
+ <Award size={20} style={{ color: "#000" }} />
  </div>
  <div>
  <h3 className="font-display text-2xl mb-1 leading-none uppercase">PRO COACHES</h3>
  <p className="text-gray-400 text-xs mb-4">Expert training.</p>
- <Link to="/professionals" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Find Coach <ArrowRight size={14} /></Link>
+ <Link to="/professionals" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#55DEE8] transition-colors">Find Coach <ArrowRight size={14} /></Link>
  </div>
  </div>
  </div>
 
  {/* Umpires */}
- <div className="rounded-3xl p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#84CC16] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
+ <div className="rounded-3xl p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#55DEE8] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
  <div className="absolute inset-0 bg-cover bg-center opacity-20 transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1519861531473-9200262188bf?w=600&q=80')" }} />
  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
  <div className="relative z-10 flex flex-col h-full justify-between">
- <div className="w-10 h-10 rounded-xl flex items-center justify-center border" style={{ borderColor: "#60A5FA", backgroundColor: "rgba(96,165,250,0.1)" }}>
- <Shield size={20} style={{ color: "#60A5FA" }} />
+ <div className="w-10 h-10 rounded-xl flex items-center justify-center border" style={{ borderColor: "transparent", background: GRAD }}>
+ <Shield size={20} style={{ color: "#000" }} />
  </div>
  <div>
  <h3 className="font-display text-2xl mb-1 leading-none uppercase">OFFICIALS</h3>
  <p className="text-gray-400 text-[10px] mb-4 uppercase tracking-tighter">Umpires • Scorers • Streamers</p>
- <Link to="/professionals" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#84CC16] transition-colors">Hire Now <ArrowRight size={14} /></Link>
+ <Link to="/professionals" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#55DEE8] transition-colors">Hire Now <ArrowRight size={14} /></Link>
  </div>
  </div>
  </div>
@@ -1286,12 +1248,12 @@ export default function Home() {
  <div className="w-full px-4 lg:px-12">
  <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 lg:mb-10 gap-4">
  <div>
- <h2 className="font-display text-3xl sm:text-4xl md:text-6xl uppercase flex items-center gap-2 md:gap-3">
- Your <span style={{ color: PRI }}>Social Arena</span> <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
+ <h2 className="font-display text-2xl sm:text-3xl md:text-5xl uppercase flex items-center gap-2 md:gap-3">
+ Your <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Social Arena</span> <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
  </h2>
  <p className="text-gray-400 mt-2 text-sm md:text-base">Swipe to see what's happening in the field</p>
  </div>
- <Link to="/community" className="text-white font-bold flex items-center gap-2 hover:text-[#84CC16] transition-colors uppercase tracking-widest text-sm">
+ <Link to="/community" className="text-white font-bold flex items-center gap-2 hover:text-[#55DEE8] transition-colors uppercase tracking-widest text-sm">
  Explore Community <ChevronRight size={16} />
  </Link>
  </div>
@@ -1394,7 +1356,7 @@ export default function Home() {
  <div className="w-full px-4 lg:px-12">
  <div className="text-center">
  <h2 className="text-5xl md:text-8xl font-bold uppercase leading-none tracking-tight">
- WHY CHOOSE <span className="text-[#84CC16]">BMSPORTZ?</span>
+ WHY CHOOSE <span className="text-[#55DEE8]">BMSPORTZ?</span>
  </h2>
  <p className="text-white/60 mt-10 text-lg md:text-2xl max-w-4xl mx-auto leading-relaxed font-light">
  BMSPORTZ is the only unified ecosystem designed to handle everything from your first booking to your last-minute matchmaking. We’ve eliminated the messy WhatsApp groups and endless phone calls. With real-time slot tracking, AI-powered skill matching, and a pro-level community, we provide the technology that lets you focus entirely on your game.
@@ -1426,7 +1388,7 @@ export default function Home() {
  </div>
  </div>
  <div className="p-6 flex flex-col flex-1">
- <h3 className="font-display text-2xl mb-2 group-hover:text-[#84CC16] transition-colors leading-none uppercase">{f.title}</h3>
+ <h3 className="font-display text-2xl mb-2 group-hover:text-[#55DEE8] transition-colors leading-none uppercase">{f.title}</h3>
  <p className="text-sm leading-relaxed" style={{ color: "#888" }}>{f.desc}</p>
  </div>
  </div>
@@ -1457,13 +1419,13 @@ export default function Home() {
 
  {/* Right Side: Content */}
  <div className="order-1 lg:order-2 text-center lg:text-left">
- <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-[#84CC16]/20 bg-[#84CC16]/5 mb-8">
- <div className="w-2 h-2 bg-[#84CC16] rounded-full animate-pulse" />
- <span className="text-[10px] font-bold tracking-widest text-[#84CC16] uppercase">Mobile App Coming Soon</span>
+ <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full mb-8" style={{ background: GRAD }}>
+ <div className="w-2 h-2 bg-black rounded-full animate-pulse" />
+ <span className="text-[10px] font-bold tracking-widest text-black uppercase">Mobile App Coming Soon</span>
  </div>
 
- <h2 className="text-6xl md:text-8xl font-bold uppercase leading-[0.9] mb-8 tracking-tight">
- BOOK <span className="text-white/20">•</span> PLAY <span className="text-white/20">•</span> <span className="text-[#84CC16]">WIN</span>
+ <h2 className="text-5xl md:text-7xl font-bold uppercase leading-[0.9] mb-8 tracking-tight">
+ BOOK <span className="text-white/20">•</span> PLAY <span className="text-white/20">•</span> <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>WIN</span>
  </h2>
 
  <p className="text-gray-400 text-base md:text-xl mb-12 max-w-xl mx-auto lg:mx-0">
@@ -1473,7 +1435,7 @@ export default function Home() {
  <div className="flex flex-row items-center gap-3 sm:gap-6 justify-center lg:justify-start w-full">
  {/* Google Play Button */}
  <div className="relative group flex-1 sm:flex-none">
- <div className="absolute -top-2 -right-1 sm:-right-2 z-20 bg-[#84CC16] text-black text-[6px] sm:text-[9px] font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest shadow-lg whitespace-nowrap">
+ <div className="absolute -top-2 -right-1 sm:-right-2 z-20 text-black text-[6px] sm:text-[9px] font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest shadow-lg whitespace-nowrap" style={{ background: GRAD }}>
  Coming Soon
  </div>
  <a href="#" className="flex items-center justify-center gap-2 sm:gap-4 bg-white/5 border px-3 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl transition-all cursor-not-allowed w-full" style={{ borderColor: BDR }}>
@@ -1491,7 +1453,7 @@ export default function Home() {
 
  {/* App Store Button */}
  <div className="relative group flex-1 sm:flex-none">
- <div className="absolute -top-2 -right-1 sm:-right-2 z-20 bg-[#84CC16] text-black text-[6px] sm:text-[9px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest shadow-lg whitespace-nowrap">
+ <div className="absolute -top-2 -right-1 sm:-right-2 z-20 text-black text-[6px] sm:text-[9px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest shadow-lg whitespace-nowrap" style={{ background: GRAD }}>
  Coming Soon
  </div>
  <a href="#" className="flex items-center justify-center gap-2 sm:gap-4 bg-white/5 border border-white/10 px-3 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl transition-all cursor-not-allowed w-full">
@@ -1526,8 +1488,8 @@ export default function Home() {
  { title: "BOOKINGS", sub: "YOUR PAST", icon: CalendarDays }
  ].map(item => (
  <div key={item.title} className="flex-1 flex flex-col lg:flex-row items-center justify-center lg:justify-start text-center lg:text-left gap-2 lg:gap-4 px-1 lg:px-6 py-4 lg:py-2" style={{ borderColor: BDR }}>
- <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-full flex items-center justify-center border shrink-0" style={{ borderColor: PRI, backgroundColor: "rgba(132,204,22,0.1)" }}>
- <item.icon className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: PRI }} />
+ <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-full flex items-center justify-center border shrink-0" style={{ borderColor: "transparent", background: GRAD }}>
+ <item.icon className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: "#000" }} />
  </div>
  <div className="w-full">
  <h4 className="font-display text-[9px] sm:text-xs lg:text-xl leading-tight lg:leading-none mb-0.5 lg:mb-1 text-white">{item.title}</h4>
