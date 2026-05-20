@@ -94,11 +94,13 @@ const logger = winston.createLogger({
       datePattern: 'YYYY-MM-DD',
       level: 'error',
       maxFiles: '14d',
+      zippedArchive: true,
     }),
     new winston.transports.DailyRotateFile({
       filename: 'logs/combined-%DATE%.log',
       datePattern: 'YYYY-MM-DD',
       maxFiles: '14d',
+      zippedArchive: true,
     }),
   ],
 });
