@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+﻿import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useState } from "react";
@@ -61,7 +61,7 @@ const usePartnerSignUpForm = (predefinedRole = "venu_owners") => {
       if (predefinedRole === "venu_owners" || predefinedRole === "owner") {
         dispatch(login({ token: result.token, role: result.role }));
         toast.success("Welcome to Kridaz!");
-        window.location.href = "/partner";
+        window.location.href = "/venue-owner";
       } else {
         const waitlistNumber = result.waitlistNumber || Math.floor(Math.random() * 50) + 1;
         toast.success("You're on the waitlist!");
@@ -88,3 +88,4 @@ const usePartnerSignUpForm = (predefinedRole = "venu_owners") => {
 };
 
 export default usePartnerSignUpForm;
+

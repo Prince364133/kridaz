@@ -1,44 +1,31 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, PlayCircle, Users, User, Zap, Coins } from "lucide-react";
-import { useSelector, useDispatch } from "react-redux";
-import { reelsApi } from "@redux/api/reelsApi";
-import { useCallback } from "react";
+import { Home, Search, Users, MessageSquare, UserSearch, Zap } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const MobileBottomNav = () => {
   const location = useLocation();
-  const dispatch = useDispatch();
   const { isLoggedIn, role } = useSelector((state) => state.auth);
 
   const getDashboardPath = () => {
     const roleStr = role?.toLowerCase() || "";
     if (roleStr.includes("admin")) return "/admin";
-    if (["venu_owners", "owner", "venue_owner", "verified_venue_owner"].some(r => roleStr.includes(r))) return "/partner";
+    if (["venu_owners", "owner", "venue_owner", "verified_venue_owner"].some(r => roleStr.includes(r))) return "/venue-owner";
     if (roleStr.includes("coach")) return "/coach";
     if (roleStr.includes("umpire")) return "/umpire";
     return "/profile";
   };
 
-  // Predictive Prefetching for Reels
-  const handlePrefetchReels = useCallback(() => {
-    // This will pre-load the Reels feed data in the background
-    // so the page is "instant" when they click it.
-    dispatch(
-      reelsApi.util.prefetch("getReelsFeed", undefined, { force: true })
-    );
-  }, [dispatch]);
 
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Venues", path: "/turfs", icon: Search },
     { 
-      name: "Reels", 
-      path: "/reels", 
-      icon: PlayCircle,
-      onMouseEnter: handlePrefetchReels,
-      onTouchStart: handlePrefetchReels
+      name: "Community", 
+      path: "/community", 
+      icon: MessageSquare,
     },
     { name: "Games", path: "/join-games", icon: Zap },
-    { name: "Profile", path: "/profile", icon: User },
+    { name: "Players", path: "/players", icon: UserSearch, protected: true },
   ];
 
   // Filter items based on login status and role

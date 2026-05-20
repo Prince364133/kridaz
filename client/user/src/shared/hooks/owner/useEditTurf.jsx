@@ -162,7 +162,7 @@ export default function useEditTurf(turfId) {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await axiosInstance.get("/api/admin/settings/payout");
+        const response = await axiosInstance.get("/api/settings/payout");
         setSettings(response.data.payoutSettings);
       } catch (err) {
         console.error("Failed to fetch payout settings:", err);
@@ -241,7 +241,7 @@ export default function useEditTurf(turfId) {
 
       } catch (err) {
         toast.error("Failed to fetch turf details");
-        navigate("/partner/turfs");
+        navigate("/venue-owner/turfs");
       } finally {
         setFetching(false);
       }
@@ -422,7 +422,7 @@ export default function useEditTurf(turfId) {
         }
       );
       toast.success(response.data.message);
-      navigate(`/partner/turf/${turfId}`);
+      navigate(`/venue-owner/turf/${turfId}`);
     } catch (error) {
       toast.error(error.response?.data?.message || "Update failed");
     } finally {
@@ -494,3 +494,4 @@ export default function useEditTurf(turfId) {
     settings
   };
 }
+

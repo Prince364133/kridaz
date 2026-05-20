@@ -138,7 +138,7 @@ export default function TurfDetails() {
       const success = await deleteArena();
       if (success) {
         toast.success("Arena decommissioned");
-        navigate("/partner/turfs");
+        navigate("/venue-owner/turfs");
       } else {
         toast.error("Failed to decommission arena");
       }
@@ -331,7 +331,7 @@ export default function TurfDetails() {
                 {turf.isActive ? "Visible" : "Hidden"}
              </button>
              <button 
-                onClick={() => navigate(`/partner/edit-turf/${id}`)}
+                onClick={() => navigate(`/venue-owner/edit-turf/${id}`)}
                 className={`px-6 py-2.5 border rounded-[8px] font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${
                    turf.status === 'rejected' 
                    ? "bg-red-500 text-white border-red-500 hover:bg-red-600 shadow-[0_5px_15px_rgba(239,68,68,0.2)]" 
@@ -816,5 +816,6 @@ export default function TurfDetails() {
     </div>
   );
 }
+
 
 

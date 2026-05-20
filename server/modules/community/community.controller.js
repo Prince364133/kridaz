@@ -94,38 +94,79 @@ export const confirmPost = async (req, res) => {
 
 
 
+
+import { redisClient as redis } from '../../config/redis.js';
+
+/**
+ * Platform-wide community stats.
+ *
+ * Strategy:
+ *  - `onlineNow`   → Redis SCARD (O(1), zero DB cost, always fresh)
+ *  - members/posts → cached in Redis for 30 s to prevent DB hammering
+ *    on high-traffic pages. Cache is keyed per-cluster via a shared key.
+ */
 export const getCommunityStats = async (req, res) => {
   try {
-    const [totalPosts, totalUsers, totalStories] = await Promise.all([
-      prisma.post.count(),
+    const CACHE_KEY = 'kridaz:community:stats:v1';
+    const CACHE_TTL = 30; // seconds
+
+    // ── 1. Online count — always live from Redis Set (O(1)) ─────────────────
+    const onlineNow = await redis.scard('kridaz:online:users').catch(() => 0);
+
+    // ── 2. Prisma stats — served from 30-second Redis cache ─────────────────
+    let cachedStats = null;
+    try {
+      const raw = await redis.get(CACHE_KEY);
+      if (raw) cachedStats = JSON.parse(raw);
+    } catch { /* cache miss — proceed to DB */ }
+
+    if (cachedStats) {
+      return res.status(200).json({
+        success: true,
+        stats: { ...cachedStats, onlineNow },
+      });
+    }
+
+    // Cache miss: query Prisma in parallel
+    const [totalMembers, totalPosts, commentsCount, postsByType] = await Promise.all([
       prisma.user.count({ where: { role: 'USER' } }),
-      prisma.story.count({ where: { expiresAt: { gt: new Date() } } })
+      prisma.post.count({ where: { status: 'ready' } }),
+      prisma.comment.count(),
+      prisma.post.groupBy({
+        by: ['mediaType'],
+        where: { status: 'ready' },
+        _count: { _all: true },
+      }),
     ]);
 
-    const postsWithLikes = await prisma.post.findMany({
-      select: {
-        _count: {
-          select: { likes: true }
-        }
-      }
-    });
-    const likesCount = postsWithLikes.reduce((sum, p) => sum + p._count.likes, 0);
-    const commentsCount = await prisma.comment.count();
+    // Compute per-type breakdowns
+    const postBreakdown = { image: 0, video: 0, text: 0 };
+    for (const row of postsByType) {
+      const t = row.mediaType?.toLowerCase();
+      if (t in postBreakdown) postBreakdown[t] = row._count._all;
+    }
 
-    res.status(200).json({
+    const fresh = {
+      members:  totalMembers,
+      posts:    totalPosts,
+      comments: commentsCount,
+      imagePosts: postBreakdown.image,
+      videoPosts: postBreakdown.video,
+      textPosts:  postBreakdown.text,
+    };
+
+    // Write to cache — fire-and-forget (non-blocking)
+    redis.set(CACHE_KEY, JSON.stringify(fresh), 'EX', CACHE_TTL).catch(() => {});
+
+    return res.status(200).json({
       success: true,
-      stats: {
-        members: totalUsers,
-        posts: totalPosts,
-        comments: commentsCount,
-        likes: likesCount,
-        activeStories: totalStories
-      }
+      stats: { ...fresh, onlineNow },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 export const createPost = async (req, res) => {
   try {
@@ -179,15 +220,61 @@ export const getPosts = async (req, res) => {
     const rawId = req.user?.id || req.admin?.id;
     const userId = await resolveUserId(rawId);
 
-    const posts = await prisma.post.findMany({
-      where: userId 
-        ? {
-            OR: [
-              { status: 'ready' },
-              { authorId: userId, status: { in: ['pending', 'processing'] } }
-            ]
+    const { search, page = 1, limit = 10, following } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const take = parseInt(limit);
+
+    let authorFilter = null;
+    if (userId && following === 'true') {
+      const follows = await prisma.userRelationship.findMany({
+        where: {
+          userId,
+          type: 'FOLLOW'
+        },
+        select: {
+          targetId: true
+        }
+      });
+      const followingIds = follows.map(f => f.targetId);
+      authorFilter = { authorId: { in: followingIds } };
+    }
+
+    const where = {};
+    const statusOr = userId 
+      ? [
+          { status: 'ready' },
+          { authorId: userId, status: { in: ['pending', 'processing'] } }
+        ]
+      : [{ status: 'ready' }];
+
+    const conditions = [];
+    conditions.push({ OR: statusOr });
+
+    if (authorFilter) {
+      conditions.push(authorFilter);
+    }
+
+    if (search) {
+      conditions.push({
+        OR: [
+          { title: { contains: search, mode: 'insensitive' } },
+          { content: { contains: search, mode: 'insensitive' } },
+          {
+            author: {
+              OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { username: { contains: search, mode: 'insensitive' } }
+              ]
+            }
           }
-        : { status: 'ready' },
+        ]
+      });
+    }
+
+    where.AND = conditions;
+
+    const posts = await prisma.post.findMany({
+      where,
       include: {
         author: { select: { id: true, name: true, profilePicture: true, username: true } },
         _count: {
@@ -202,7 +289,8 @@ export const getPosts = async (req, res) => {
         }
       },
       orderBy: { createdAt: 'desc' },
-      take: 20
+      skip,
+      take
     });
 
     // Map to legacy format

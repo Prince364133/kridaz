@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import {
   AreaChart,
   Area,
@@ -346,7 +346,7 @@ const OwnerDashboard = () => {
                       <p className="text-[12px] font-normal text-[#999999] uppercase tracking-widest">
                         Showing {Math.min(5, recentBookings.length)} of {totalBookings} bookings
                       </p>
-                      <Link to="/partner/bookings" className="text-[13px] font-normal uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-all font-inter" style={{ color: themeColor }}>
+                      <Link to="/venue-owner/bookings" className="text-[13px] font-normal uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-all font-inter" style={{ color: themeColor }}>
                         View All <ChevronRight size={14} />
                       </Link>
                     </div>
@@ -400,7 +400,7 @@ const OwnerDashboard = () => {
                     </div>
                   )}
 
-                  <Link to="/partner/bookings" className="w-full mt-8 py-3 bg-transparent border border-[#2D2D2D] hover:text-white text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter flex items-center justify-center"
+                  <Link to="/venue-owner/bookings" className="w-full mt-8 py-3 bg-transparent border border-[#2D2D2D] hover:text-white text-[#999999] text-[13px] font-normal uppercase tracking-widest rounded-[6px] transition-all font-inter flex items-center justify-center"
                         style={{ '--hover-bg': `${themeColor}1A`, '--hover-color': themeColor }}>
                     View Full Activity History
                   </Link>
@@ -467,3 +467,4 @@ const ChartCard = ({ title, subtitle, children, action, className = "h-full" }) 
 );
 
 export default OwnerDashboard;
+

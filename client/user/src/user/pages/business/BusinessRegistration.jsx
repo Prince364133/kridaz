@@ -1,4 +1,4 @@
-// Business Registration Page for Professional Upgrades
+﻿// Business Registration Page for Professional Upgrades
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -294,7 +294,7 @@ export default function BusinessRegistration() {
               else if (existingRole?.toLowerCase() === "umpire") navigate("/umpire");
               else if (existingRole?.toLowerCase() === "scorer") navigate("/scorer");
               else if (existingRole?.toLowerCase() === "streamer") navigate("/streamer");
-              else if (["venu_owners", "venue_owners", "venue"].includes(existingRole?.toLowerCase())) navigate("/partner");
+              else if (["venu_owners", "venue_owners", "venue"].includes(existingRole?.toLowerCase())) navigate("/venue-owner");
               else if (["admin", "bmsp_admin"].includes(existingRole?.toLowerCase())) navigate("/admin");
               else navigate("/");
             }}
@@ -765,6 +765,7 @@ function ShieldCheckIcon({ size, className }) {
     </svg>
   );
 }
+
 
 
 

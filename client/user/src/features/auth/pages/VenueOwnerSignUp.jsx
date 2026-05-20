@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+ï»¿import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import useSignUpForm from "../hooks/useSignUpForm";
 import { GoogleLogin } from "@react-oauth/google";
@@ -56,7 +56,7 @@ const VenueOwnerSignUp = () => {
     setMounted(true);
     // Redirect if already an owner
     if (user?.role?.includes("venu_owners") || user?.role === "owner" || role?.includes("venu_owners") || role === "owner") {
-      navigate("/partner");
+      navigate("/venue-owner");
     }
   }, [user, role, navigate]);
 
@@ -309,7 +309,7 @@ const VenueOwnerSignUp = () => {
                         <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Password</label>
                         <div className="relative">
                           <Lock size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
-                          <input {...register("password")} type="password" placeholder="GÇóGÇóGÇóGÇóGÇóGÇóGÇóGÇó" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all" />
+                          <input {...register("password")} type="password" placeholder="Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all" />
                         </div>
                         {errors.password && <p className="text-red-400 text-xs ml-1">{errors.password.message}</p>}
                       </div>
@@ -318,7 +318,7 @@ const VenueOwnerSignUp = () => {
                         <label className="text-xs font-bold text-white/20 uppercase tracking-widest group-focus-within/field:text-[#55DEE8] transition-colors ml-1">Confirm Password</label>
                         <div className="relative">
                           <ShieldCheck size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10" />
-                          <input {...register("confirmPassword")} type="password" placeholder="GÇóGÇóGÇóGÇóGÇóGÇóGÇóGÇó" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all" />
+                          <input {...register("confirmPassword")} type="password" placeholder="Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½" className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/10 outline-none transition-all" />
                         </div>
                         {errors.confirmPassword && <p className="text-red-400 text-xs ml-1">{errors.confirmPassword.message}</p>}
                       </div>
@@ -469,3 +469,4 @@ const VenueOwnerSignUp = () => {
 };
 
 export default VenueOwnerSignUp;
+

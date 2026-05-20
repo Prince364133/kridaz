@@ -44,7 +44,7 @@ const TurfManagement = () => {
            </div>
            
            <Link 
-            to="/partner/add-turf"
+            to="/venue-owner/add-turf"
             className="bg-[#55DEE8] hover:bg-[#B3FF00] text-black px-8 py-3 rounded-[8px] text-[13px] font-bold uppercase tracking-widest flex items-center gap-3 transition-all shadow-[var(--shadow-2)]"
           >
             <Plus size={18} strokeWidth={3} />
@@ -67,7 +67,7 @@ const TurfManagement = () => {
               turf={turf} 
               onDelete={() => deleteTurf(turf._id)}
               onToggleVisibility={() => toggleVisibility(turf._id)}
-              onEdit={() => navigate(`/partner/edit-turf/${turf._id}`)}
+              onEdit={() => navigate(`/venue-owner/edit-turf/${turf._id}`)}
             />
           ))}
         </div>
@@ -77,7 +77,7 @@ const TurfManagement = () => {
              <Plus size={32} />
           </div>
           <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px]">No active arenas found in your roster.</p>
-          <Link to="/partner/add-turf" className="mt-6 text-[#55DEE8] text-[11px] font-bold uppercase tracking-widest border-b border-[#55DEE8]/40 hover:border-[#55DEE8] transition-all pb-1">Initialize First Venue</Link>
+          <Link to="/venue-owner/add-turf" className="mt-6 text-[#55DEE8] text-[11px] font-bold uppercase tracking-widest border-b border-[#55DEE8]/40 hover:border-[#55DEE8] transition-all pb-1">Initialize First Venue</Link>
         </div>
       )}
       </div>
@@ -86,3 +86,4 @@ const TurfManagement = () => {
 };
 
 export default TurfManagement;
+

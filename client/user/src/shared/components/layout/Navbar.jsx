@@ -1,11 +1,26 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight } from "lucide-react";
-import { useState, useEffect } from "react";
+import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import { logout } from "@redux/slices/authSlice";
 import { reelsApi } from "@redux/api/reelsApi";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
+import useNotifications from "@hooks/shared/useNotifications";
+
+/**
+ * NotificationBadge — Shows unread notification count as a red dot/badge.
+ * Extracted as a sub-component to isolate the useNotifications hook call.
+ */
+const NotificationBadge = () => {
+  const { unreadCount } = useNotifications();
+  if (unreadCount <= 0) return null;
+  return (
+    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full flex items-center justify-center text-[9px] font-black text-white border-2 border-[#050505]">
+      {unreadCount > 9 ? "9+" : unreadCount}
+    </span>
+  );
+};
 
 const Navbar = () => {
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);
@@ -21,6 +36,47 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // ── Auto-detect city + state via browser Geolocation + Nominatim reverse-geocode ──
+  const [geoLabel, setGeoLabel] = useState(null); // null = not yet tried
+  const [geoLoading, setGeoLoading] = useState(false);
+
+  const detectLocation = useCallback(() => {
+    if (!navigator.geolocation) return;
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${coords.latitude}&lon=${coords.longitude}&format=json`,
+            { headers: { "Accept-Language": "en" } }
+          );
+          const data = await res.json();
+          const city =
+            data.address?.city ||
+            data.address?.town ||
+            data.address?.village ||
+            data.address?.county ||
+            "";
+          const state = data.address?.state || "";
+          setGeoLabel(city && state ? `${city}, ${state}` : city || state || "Unknown");
+        } catch {
+          setGeoLabel(null);
+        } finally {
+          setGeoLoading(false);
+        }
+      },
+      () => {
+        // Permission denied or unavailable — fall back to "Set Location"
+        setGeoLabel(null);
+        setGeoLoading(false);
+      },
+      { timeout: 8000 }
+    );
+  }, []);
+
+  // Attempt auto-detect once on mount
+  useEffect(() => { detectLocation(); }, [detectLocation]);
 
   const handleLogout = async () => {
     try {
@@ -48,11 +104,9 @@ const Navbar = () => {
   ] : [
     { name: "Home", path: "/" },
     { name: "Venues", path: "/turfs" },
-    { name: "Reels", path: "/reels" },
     { name: "Pros", path: "/professionals" },
     { name: "Join Games", path: "/join-games" },
     { name: "Community", path: "/community" },
-    { name: "Leaderboard", path: "/leaderboard" },
     { name: "Players", path: "/players" },
     { name: "Business", path: "#" },
   ];
@@ -76,10 +130,23 @@ const Navbar = () => {
             </Link>
 
             <div className="lg:hidden flex items-center gap-1 mt-0.5 ml-1 text-white/50">
-              <MapPin size={10} className="text-[#84CC16]" />
-              <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest truncate max-w-[100px]">
-                Set Location
-              </span>
+              <MapPin size={10} className={geoLoading ? "text-[#84CC16] animate-pulse" : "text-[#84CC16]"} />
+              {geoLoading ? (
+                <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/30 animate-pulse">
+                  Locating...
+                </span>
+              ) : geoLabel ? (
+                <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest truncate max-w-[120px] text-white/70">
+                  {geoLabel}
+                </span>
+              ) : (
+                <button
+                  onClick={detectLocation}
+                  className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/40 hover:text-[#84CC16] transition-colors"
+                >
+                  Set Location
+                </button>
+              )}
             </div>
           </div>
 
@@ -131,11 +198,7 @@ const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.path}
-                  onMouseEnter={() => {
-                    if (link.name === "Reels") {
-                      dispatch(reelsApi.util.prefetch("getReelsFeed", undefined, { force: true }));
-                    }
-                  }}
+                  onMouseEnter={() => {}}
                   className={`text-sm font-semibold transition-all hover:text-primary relative group/link ${location.pathname === link.path ? "text-primary" : "text-white/60"
                     }`}
                 >
@@ -165,16 +228,28 @@ const Navbar = () => {
             ) : (
               <div className="flex items-center gap-2 sm:gap-4">
 
+                {/* Notification Bell */}
+                <Link
+                  to="/notifications"
+                  className="relative w-10 sm:w-11 h-10 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
+                >
+                  <Bell size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+                  <NotificationBadge />
+                </Link>
+
+
+
                 <div className="flex items-center gap-2">
-                  {/* Greeting text - shown only on mobile */}
-                  {user?.name && (
-                    <span className="lg:hidden text-xs text-white/50 font-medium whitespace-nowrap">
-                      Hey, <span className="text-white font-semibold">{user.name.split(' ')[0]}</span>
-                    </span>
-                  )}
+                  {/* Mobile-only Players Button */}
+                  <Link
+                    to="/players"
+                    className="lg:hidden relative w-10 sm:w-11 h-10 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
+                  >
+                    <UserSearch size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+                  </Link>
 
                   {/* PROFILE DROPDOWN */}
-                  <div className="dropdown dropdown-end group/profile">
+                  <div className="hidden lg:block dropdown dropdown-end group/profile">
                     <div tabIndex={0} role="button" className="relative w-10 sm:w-12 h-10 sm:h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group overflow-hidden">
                       <User size={22} className="text-white/40 group-hover:text-[#84CC16] transition-colors absolute inset-0 m-auto" />
                       {(user?.profilePicture || user?.profileImage) ? (
@@ -234,9 +309,9 @@ const Navbar = () => {
                                 </Link>
                               )}
                               {(role?.toLowerCase().includes("venu_owners") || user?.role?.toLowerCase().includes("venu_owners") || role?.toLowerCase().includes("venue") || user?.role?.toLowerCase().includes("venue") || role?.toLowerCase().includes("owner") || user?.role?.toLowerCase().includes("owner")) && (
-                                <Link to="/partner" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                <Link to="/venue-owner" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                   <Activity size={18} className="text-white/40" />
-                                  <span className="text-sm font-medium">Partner Dashboard</span>
+                                  <span className="text-sm font-medium">Venue Owner Dashboard</span>
                                 </Link>
                               )}
                               {(role?.toLowerCase().includes("coach") || user?.role?.toLowerCase().includes("coach")) && (

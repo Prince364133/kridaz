@@ -701,14 +701,16 @@ export const deleteChat = async (req, res) => {
     if (!chat) return res.status(404).json({ message: "Chat not found" });
 
     const isAdmin = await checkIsAdmin(chatId, self);
-    const isCreator = (chat.createdByUserId === self.userId && chat.createdByOwnerId === self.ownerId);
+    const isCreator = 
+      (self.userId && chat.createdByUserId === self.userId) ||
+      (self.ownerId && chat.createdByOwnerId === self.ownerId);
 
     // Restrict deletion
     if (chat.isGroupChat) {
       if (chat.isCommunity && !isCreator) {
         return res.status(403).json({ message: "Only the creator can delete this community" });
       }
-      if (!isAdmin) {
+      if (!chat.isCommunity && !isAdmin) {
         return res.status(403).json({ message: "Only admins can delete this group" });
       }
     } else {
@@ -723,25 +725,70 @@ export const deleteChat = async (req, res) => {
     const io = getIO();
 
     // Cascading Delete for Communities
-    if (chat.isCommunity) {
-      const childGroups = await prisma.chat.findMany({ 
-        where: { parentCommunityId: chatId },
-        include: { participants: true }
-      });
-      
-      for (const child of childGroups) {
-        await prisma.message.deleteMany({ where: { chatId: child.id } });
-        if (io) {
-          child.participants.forEach(p => {
-            io.to(p.userId || p.ownerId).emit(SOCKET.CHAT_DELETED, child.id);
-          });
-        }
-      }
-      await prisma.chat.deleteMany({ where: { parentCommunityId: chatId } });
+    const childGroups = chat.isCommunity
+      ? await prisma.chat.findMany({ 
+          where: { parentCommunityId: chatId },
+          include: { participants: true }
+        })
+      : [];
+
+    const childGroupIds = childGroups.map(c => c.id);
+    const allChatIds = [chatId, ...childGroupIds];
+
+    // 1. Set latestMessageId to null to prevent foreign key violations when deleting messages
+    await prisma.chat.updateMany({
+      where: { id: { in: allChatIds } },
+      data: { latestMessageId: null }
+    });
+
+    // 2. Clear implicit many-to-many join tables to prevent foreign key constraint violations
+    try {
+      await prisma.$executeRawUnsafe(`
+        DELETE FROM "_MessageDeletedBy" 
+        WHERE "A" IN (SELECT id FROM "Message" WHERE "chatId" IN (${allChatIds.map(id => `'${id}'`).join(',')}))
+           OR "B" IN (SELECT id FROM "ChatParticipant" WHERE "chatId" IN (${allChatIds.map(id => `'${id}'`).join(',')}))
+      `);
+    } catch (e) {
+      logger.error("Error clearing _MessageDeletedBy:", e);
     }
 
-    // Delete messages associated with this chat
-    await prisma.message.deleteMany({ where: { chatId } });
+    try {
+      await prisma.$executeRawUnsafe(`
+        DELETE FROM "_MessageReadBy" 
+        WHERE "A" IN (SELECT id FROM "Message" WHERE "chatId" IN (${allChatIds.map(id => `'${id}'`).join(',')}))
+           OR "B" IN (SELECT id FROM "ChatParticipant" WHERE "chatId" IN (${allChatIds.map(id => `'${id}'`).join(',')}))
+      `);
+    } catch (e) {
+      logger.error("Error clearing _MessageReadBy:", e);
+    }
+
+    // 3. Delete all chat participants to avoid foreign key violations
+    await prisma.chatParticipant.deleteMany({
+      where: { chatId: { in: allChatIds } }
+    });
+
+    // 4. Delete all messages associated with the chats
+    await prisma.message.deleteMany({
+      where: { chatId: { in: allChatIds } }
+    });
+
+    // 5. Delete the child groups if community
+    if (chat.isCommunity && childGroupIds.length > 0) {
+      await prisma.chat.deleteMany({
+        where: { id: { in: childGroupIds } }
+      });
+    }
+
+    // 6. Emit socket events for child groups deletion
+    if (io && chat.isCommunity) {
+      for (const child of childGroups) {
+        child.participants.forEach(p => {
+          io.to(p.userId || p.ownerId).emit(SOCKET.CHAT_DELETED, child.id);
+        });
+      }
+    }
+
+    // Finally delete the chat itself
     await prisma.chat.delete({ where: { id: chatId } });
 
     if (io) {
@@ -798,31 +845,56 @@ export const makeGroupAdmin = async (req, res) => {
       return res.status(403).json({ message: "Only admins can promote others to admin" });
     }
 
-    const targetParticipant = await prisma.chatParticipant.findFirst({
+    let targetParticipant = await prisma.chatParticipant.findFirst({
       where: {
         chatId,
         userId: onModel === "User" ? userId : null,
         ownerId: onModel === "Owner" ? userId : null
       }
     });
-    if (!targetParticipant) return res.status(404).json({ message: "Participant not found" });
 
-    const updatedParticipant = await prisma.chatParticipant.update({
-      where: { id: targetParticipant.id },
-      data: { isAdmin: true },
-      include: {
-        chat: {
-          include: {
-            participants: {
-              include: {
-                user: { select: { id: true, name: true, profilePicture: true, email: true } },
-                owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+    let updatedParticipant;
+    if (!targetParticipant) {
+      updatedParticipant = await prisma.chatParticipant.create({
+        data: {
+          chatId,
+          userId: onModel === "User" ? userId : null,
+          ownerId: onModel === "Owner" ? userId : null,
+          onModel,
+          isAdmin: true,
+          isPending: false
+        },
+        include: {
+          chat: {
+            include: {
+              participants: {
+                include: {
+                  user: { select: { id: true, name: true, profilePicture: true, email: true } },
+                  owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+                }
               }
             }
           }
         }
-      }
-    });
+      });
+    } else {
+      updatedParticipant = await prisma.chatParticipant.update({
+        where: { id: targetParticipant.id },
+        data: { isAdmin: true },
+        include: {
+          chat: {
+            include: {
+              participants: {
+                include: {
+                  user: { select: { id: true, name: true, profilePicture: true, email: true } },
+                  owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+                }
+              }
+            }
+          }
+        }
+      });
+    }
 
     res.status(200).json(updatedParticipant.chat);
   } catch (error) {

@@ -54,6 +54,7 @@ export const ownerRegisterSchema = z.object({
     otp: z.string().min(6, "OTP must be 6 characters"),
     phoneOtp: z.string().min(6, "WhatsApp OTP must be 6 characters"),
     role: z.enum(Object.values(OWNER_ROLE)).optional(),
+    businessName: z.string().optional(),
   }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],

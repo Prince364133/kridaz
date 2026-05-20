@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { followUser, unfollowUser } from "@redux/slices/authSlice";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
 import {
   Heart, MessageCircle, Share2, Plus, Image as ImageIcon, X, MoreVertical, Send,
   Loader2, Trash2, Clock, User as UserIcon, Trophy, Edit, Edit3, Twitter, Facebook,
   Link as LinkIcon, Eye, ChevronDown, TrendingUp, Target, BarChart3, Users, Zap,
   ChevronRight, ShieldCheck, Calendar, Mail, ArrowRight, MonitorPlay, FileText,
-  Circle, Bookmark, Smile, Search, Play, Video, Home, Bell, PlaySquare, Globe, Hash, Music
+  Circle, Bookmark, Smile, Search, Play, Video, Home, PlaySquare, Globe, Hash, Music, ArrowLeft
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
@@ -17,6 +17,7 @@ import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import {
   communityApi,
   useGetCommunityFeedQuery,
+  useLazyGetCommunityFeedQuery,
   useGetStoriesFeedQuery,
   useGetCommunityStatsQuery,
   useCreatePostMutation,
@@ -32,6 +33,7 @@ import {
   useLazyGetStoryUploadUrlQuery,
   useConfirmStoryUploadMutation
 } from "@redux/api/communityApi";
+import { useLazySearchPlayersQuery } from "@redux/api/teamApi";
 import { useGetReelsFeedQuery } from "@redux/api/reelsApi";
 import { startUpload } from "@redux/slices/mediaUploadSlice";
 import ReelItem from "@features/reels/components/ReelItem";
@@ -50,8 +52,10 @@ const Community = () => {
   const isAdmin = role === 'admin' || role === 'BMSP_ADMIN';
 
   // RTK Query Hooks
-  const { data: communityData, isLoading: feedLoading } = useGetCommunityFeedQuery();
+  const [triggerGetFeed] = useLazyGetCommunityFeedQuery();
+  const [triggerSearchPlayers] = useLazySearchPlayersQuery();
   const { data: storiesData } = useGetStoriesFeedQuery();
+  const stories = storiesData?.stories || [];
   const { data: statsData } = useGetCommunityStatsQuery();
 
   const [createPost] = useCreatePostMutation();
@@ -68,52 +72,232 @@ const Community = () => {
   const [getStoryUploadUrl] = useLazyGetStoryUploadUrlQuery();
   const [confirmStoryUpload] = useConfirmStoryUploadMutation();
 
-  const { socket } = useSocket();
-
-  const [activeFilter, setActiveFilter] = useState("All");
+  // Filter / panel state â€” declared early because reels hook depends on activeFilter
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") === "shots" ? "Reels" : "All";
+  const [activeFilter, setActiveFilter] = useState(initialTab);
   const [activeSportFilter, setActiveSportFilter] = useState("");
   const [activePanel, setActivePanel] = useState(null); // 'messages' | 'notifications' | null
   const togglePanel = (panel) => setActivePanel(prev => prev === panel ? null : panel);
 
-  // Reels feed data
+  // Sync URL when Shots/Reels view is toggled (also puts the reel id in the URL)
+  const handleSetActiveFilter = (filter) => {
+    setActiveFilter(filter);
+    if (filter === "Reels") {
+      setSearchParams({ tab: "shots" }, { replace: true });
+    } else {
+      setSearchParams({}, { replace: true });
+    }
+  };
+
+
+  // Reels (Shots) hook â€” cursor-based infinite scroll
   const [reelCursor, setReelCursor] = useState(null);
   const [activeReelIndex, setActiveReelIndex] = useState(0);
-  const reelFeedRef = useState(null);
-  const { data: reelsData, isLoading: reelsLoading, isFetching: reelsFetching } = useGetReelsFeedQuery(
-    { cursor: reelCursor },
-    { skip: activeFilter !== "Reels" }
-  );
+  const {
+    data: reelsData,
+    isLoading: reelsLoading,
+    isFetching: reelsFetching,
+  } = useGetReelsFeedQuery(reelCursor ? { cursor: reelCursor } : undefined, {
+    skip: activeFilter !== "Reels",
+  });
   const reels = reelsData?.reels || [];
 
-  const rawPosts = communityData?.posts || [];
-  const posts = rawPosts.filter(post => {
-    if (activeSportFilter && post.sport?.toLowerCase() !== activeSportFilter.toLowerCase()) {
-      return false;
+  // Keep ?id= in sync with whichever reel is currently visible
+  useEffect(() => {
+    if (activeFilter !== "Reels" || reels.length === 0) return;
+    const currentReel = reels[activeReelIndex];
+    if (currentReel?.id) {
+      setSearchParams({ tab: "shots", id: currentReel.id }, { replace: true });
     }
-    if (activeFilter === "Reels") {
-      return post.image || post.imageUrl || post.videoUrl;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeReelIndex, activeFilter, reels.length]);
+
+  const { socket, onlineCount } = useSocket();
+
+  // (activeFilter, activeSportFilter, activePanel are declared above â€” before the reels hook)
+  
+  // Search state
+  const [feedSearchQuery, setFeedSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(feedSearchQuery);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [feedSearchQuery]);
+
+  // Pagination states
+  const [postsPage, setPostsPage] = useState(1);
+  const [loadedPosts, setLoadedPosts] = useState([]);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+  const [postsLoading, setPostsLoading] = useState(false);
+
+  const [playersPage, setPlayersPage] = useState(1);
+  const [loadedPlayers, setLoadedPlayers] = useState([]);
+  const [hasMorePlayers, setHasMorePlayers] = useState(true);
+  const [playersLoading, setPlayersLoading] = useState(false);
+
+  // Reset lists and page numbers when search query or filters change
+  useEffect(() => {
+    setLoadedPosts([]);
+    setPostsPage(1);
+    setHasMorePosts(true);
+
+    setLoadedPlayers([]);
+    setPlayersPage(1);
+    setHasMorePlayers(true);
+  }, [debouncedSearchQuery, activeFilter, activeSportFilter]);
+
+  // Fetch function for posts feed
+  const fetchPosts = async (pageNumber, isSearch) => {
+    if (postsLoading) return;
+    setPostsLoading(true);
+
+    try {
+      const params = {
+        page: pageNumber,
+        limit: 10,
+      };
+
+      if (isSearch) {
+        params.search = debouncedSearchQuery;
+      } else {
+        if (activeFilter === "Following") {
+          params.following = "true";
+        }
+      }
+
+      const res = await triggerGetFeed(params).unwrap();
+      const newPosts = res?.posts || [];
+
+      setLoadedPosts(prev => {
+        const existingIds = new Set(prev.map(p => p._id));
+        const filtered = newPosts.filter(p => !existingIds.has(p._id));
+        return pageNumber === 1 ? newPosts : [...prev, ...filtered];
+      });
+
+      if (newPosts.length < 10) {
+        setHasMorePosts(false);
+      } else {
+        setHasMorePosts(true);
+      }
+    } catch (err) {
+      console.error("Error fetching posts:", err);
+      toast.error("Failed to load posts");
+    } finally {
+      setPostsLoading(false);
     }
-    if (activeFilter === "Following") {
-      const authorId = post.adminId?._id || post.adminId || post.user?._id || post.user;
-      return followingIds?.includes(authorId);
+  };
+
+  // Fetch function for search players
+  const fetchPlayers = async (pageNumber) => {
+    if (!debouncedSearchQuery.trim()) return;
+    if (playersLoading) return;
+    setPlayersLoading(true);
+
+    try {
+      const res = await triggerSearchPlayers({
+        query: debouncedSearchQuery,
+        page: pageNumber,
+        limit: 10
+      }).unwrap();
+      const newPlayers = res?.players || [];
+
+      setLoadedPlayers(prev => {
+        const existingIds = new Set(prev.map(p => p.id));
+        const filtered = newPlayers.filter(p => !existingIds.has(p.id));
+        return pageNumber === 1 ? newPlayers : [...prev, ...filtered];
+      });
+
+      if (newPlayers.length < 10) {
+        setHasMorePlayers(false);
+      } else {
+        setHasMorePlayers(true);
+      }
+    } catch (err) {
+      console.error("Error searching players:", err);
+    } finally {
+      setPlayersLoading(false);
     }
-    return true;
-  });
-  const stories = storiesData?.stories || [];
-  const loading = feedLoading;
+  };
+
+  // Effects to handle page loading
+  useEffect(() => {
+    if (postsPage === 1) {
+      fetchPosts(1, !!debouncedSearchQuery.trim());
+    }
+  }, [postsPage, debouncedSearchQuery, activeFilter, activeSportFilter]);
+
+  useEffect(() => {
+    if (postsPage > 1) {
+      fetchPosts(postsPage, !!debouncedSearchQuery.trim());
+    }
+  }, [postsPage]);
+
+  useEffect(() => {
+    if (playersPage === 1 && debouncedSearchQuery.trim()) {
+      fetchPlayers(1);
+    }
+  }, [playersPage, debouncedSearchQuery]);
+
+  useEffect(() => {
+    if (playersPage > 1 && debouncedSearchQuery.trim()) {
+      fetchPlayers(playersPage);
+    }
+  }, [playersPage]);
+
+  // Window scroll listener for posts infinite scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (activeFilter === "Reels") return;
+      if (postsLoading || !hasMorePosts) return;
+
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 200) {
+        setPostsPage(prev => prev + 1);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [postsLoading, hasMorePosts, activeFilter]);
+
+  // Horizontal scroll listener for players search results pagination
+  const handlePlayersHorizontalScroll = (e) => {
+    if (playersLoading || !hasMorePlayers) return;
+
+    const target = e.currentTarget;
+    if (target.scrollWidth - target.scrollLeft <= target.clientWidth + 100) {
+      setPlayersPage(prev => prev + 1);
+    }
+  };
 
   // Socket Listeners for Real-time Updates
   useEffect(() => {
     if (!socket) return;
 
     const handleNewPost = (newPost) => {
-      dispatch(
-        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          if (!draft.posts.find(p => p._id === newPost._id)) {
-            draft.posts.unshift(newPost);
-          }
-        })
-      );
+      const formatted = {
+        ...newPost,
+        adminId: newPost.author,
+        mediaUrl: newPost.mediaUrls?.[0],
+        image: newPost.mediaType === 'image' ? newPost.mediaUrls?.[0] : null,
+        videoUrl: newPost.mediaType === 'video' ? newPost.mediaUrls?.[0] : null,
+        likesCount: newPost.likes?.length || 0,
+        totalComments: newPost.comments?.length || 0,
+        comments: newPost.comments?.map(c => ({
+          ...c,
+          userId: c.user
+        })) || []
+      };
+
+      setLoadedPosts(prev => {
+        if (prev.find(p => p._id === formatted._id)) return prev;
+        return [formatted, ...prev];
+      });
+
       dispatch(
         communityApi.util.updateQueryData('getCommunityStats', undefined, (draft) => {
           if (draft.stats) draft.stats.posts = (parseInt(draft.stats.posts) + 1).toString();
@@ -122,25 +306,29 @@ const Community = () => {
     };
 
     const handlePostLiked = ({ postId, likes, likesCount }) => {
-      dispatch(
-        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          const post = draft.posts.find(p => p._id === postId);
-          if (post) {
-            post.likes = likes;
-          }
-        })
-      );
+      setLoadedPosts(prev => prev.map(post => {
+        if (post._id === postId) {
+          return {
+            ...post,
+            likes,
+            likesCount: likesCount !== undefined ? likesCount : likes.length
+          };
+        }
+        return post;
+      }));
     };
 
     const handlePostCommented = ({ postId, comments }) => {
-      dispatch(
-        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          const post = draft.posts.find(p => p._id === postId);
-          if (post) {
-            post.comments = comments;
-          }
-        })
-      );
+      setLoadedPosts(prev => prev.map(post => {
+        if (post._id === postId) {
+          return {
+            ...post,
+            comments: comments.map(c => ({ ...c, userId: c.user })),
+            totalComments: comments.length
+          };
+        }
+        return post;
+      }));
       dispatch(
         communityApi.util.updateQueryData('getCommunityStats', undefined, (draft) => {
           if (draft.stats) draft.stats.comments = (parseInt(draft.stats.comments) + 1).toString();
@@ -149,11 +337,7 @@ const Community = () => {
     };
 
     const handlePostDeleted = (postId) => {
-      dispatch(
-        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          draft.posts = draft.posts.filter(p => p._id !== postId);
-        })
-      );
+      setLoadedPosts(prev => prev.filter(post => post._id !== postId));
       dispatch(
         communityApi.util.updateQueryData('getCommunityStats', undefined, (draft) => {
           if (draft.stats) draft.stats.posts = Math.max(0, parseInt(draft.stats.posts) - 1).toString();
@@ -162,30 +346,32 @@ const Community = () => {
     };
 
     const handleMediaProgress = ({ mediaId, progress, status }) => {
-      dispatch(
-        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          const post = draft.posts.find(p => p._id === mediaId);
-          if (post) {
-            post.status = 'pending';
-            post.processingProgress = progress;
-          }
-        })
-      );
+      setLoadedPosts(prev => prev.map(post => {
+        if (post._id === mediaId) {
+          return {
+            ...post,
+            status: 'pending',
+            processingProgress: progress
+          };
+        }
+        return post;
+      }));
     };
 
     const handleMediaComplete = ({ mediaId, hlsUrl, thumbnailUrl }) => {
-      dispatch(
-        communityApi.util.updateQueryData('getCommunityFeed', undefined, (draft) => {
-          const post = draft.posts.find(p => p._id === mediaId);
-          if (post) {
-            post.status = 'ready';
-            post.mediaUrl = hlsUrl;
-            post.image = thumbnailUrl;
-            post.processingProgress = 100;
-          }
-        })
-      );
-      dispatch(communityApi.util.invalidateTags(['Community', 'Stories']));
+      setLoadedPosts(prev => prev.map(post => {
+        if (post._id === mediaId) {
+          return {
+            ...post,
+            status: 'ready',
+            mediaUrl: hlsUrl,
+            image: thumbnailUrl,
+            processingProgress: 100
+          };
+        }
+        return post;
+      }));
+      dispatch(communityApi.util.invalidateTags(['Stories']));
     };
 
     socket.on('new_community_post', handleNewPost);
@@ -457,57 +643,9 @@ const Community = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white pt-4 pb-12 px-4 md:px-6 xl:pl-[100px] font-sans relative">
+    <div className="min-h-screen bg-[#050505] text-white pt-4 pb-12 px-4 md:px-6 font-sans relative">
 
-      {/* ================= FAR LEFT COLUMN (NAVBAR) ================= */}
-      <div className="hidden xl:flex flex-col gap-2 fixed left-0 top-[80px] w-[80px] z-50">
-        {/* Home */}
-        <div
-          onClick={() => setActiveFilter("All")}
-          title="Home"
-          className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activeFilter !== 'Reels' ? 'bg-[#84CC16]/5 border-l-[3px] border-[#84CC16]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
-        >
-          <Home size={24} className={activeFilter !== 'Reels' ? "text-[#84CC16]" : "text-white/70 group-hover:text-white"} fill={activeFilter !== 'Reels' ? "currentColor" : "none"} />
-        </div>
-        {/* Search */}
-        <div
-          onClick={() => setShowGlobalSearch(true)}
-          title="Search"
-          className="flex justify-center py-4 cursor-pointer group hover:bg-white/5 rounded-r-xl transition-colors border-l-[3px] border-transparent"
-        >
-          <Search size={24} className="text-white/70 group-hover:text-white" />
-        </div>
-        {/* Reels */}
-        <div
-          onClick={() => setActiveFilter(activeFilter === "Reels" ? "All" : "Reels")}
-          title="Reels"
-          className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activeFilter === 'Reels' ? 'bg-[#84CC16]/5 border-l-[3px] border-[#84CC16]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
-        >
-          <PlaySquare size={24} className={activeFilter === 'Reels' ? 'text-[#84CC16]' : 'text-white/70 group-hover:text-white'} />
-        </div>
-        {/* Notifications */}
-        <div
-          onClick={() => togglePanel('notifications')}
-          title="Notifications"
-          className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activePanel === 'notifications' ? 'bg-[#84CC16]/5 border-l-[3px] border-[#84CC16]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
-        >
-          <div className="relative">
-            <Bell size={24} className="text-white/70 group-hover:text-white" />
-            <div className="absolute -top-1.5 -right-1.5 w-[14px] h-[14px] bg-[#84CC16] rounded-full flex items-center justify-center text-[9px] font-black text-black border-2 border-[#050505]">3</div>
-          </div>
-        </div>
-        {/* Messages */}
-        <div
-          onClick={() => togglePanel('messages')}
-          title="Messages"
-          className={`flex justify-center py-4 cursor-pointer group rounded-r-xl transition-colors ${activePanel === 'messages' ? 'bg-[#84CC16]/5 border-l-[3px] border-[#84CC16]' : 'hover:bg-white/5 border-l-[3px] border-transparent'}`}
-        >
-          <div className="relative">
-            <Send size={24} className="text-white/70 group-hover:text-white" />
-            <div className="absolute -top-1.5 -right-1.5 w-[14px] h-[14px] bg-[#84CC16] rounded-full flex items-center justify-center text-[9px] font-black text-black border-2 border-[#050505]">5</div>
-          </div>
-        </div>
-      </div>
+
 
       {/* Global Search Modal */}
       <AnimatePresence>
@@ -590,313 +728,341 @@ const Community = () => {
       </AnimatePresence>
 
       <div className="max-w-[1500px] mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 gap-6">
 
-          {/* ================= NOTIFICATIONS COLUMN ================= */}
-          {activePanel === 'notifications' && (
-            <div className="hidden xl:block xl:col-span-3 transition-all duration-300">
-              <div className="bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5 flex flex-col h-[calc(100vh-100px)] sticky top-[80px]">
 
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-[14px] font-black uppercase tracking-widest" style={HEADING_STYLE}>NOTIFICATIONS</h3>
-                  <button onClick={() => setActivePanel(null)} className="text-white/40 hover:text-white p-1 bg-white/5 rounded-lg"><X size={16} /></button>
-                </div>
 
-                <div className="flex-1 overflow-y-auto no-scrollbar space-y-1 pr-1">
-                  {[
-                    { icon: Heart, color: "text-red-500", text: "simran.s liked your post", time: "2m", img: "simran.s" },
-                    { icon: MessageCircle, color: "text-blue-400", text: "rohit45 commented: 'Great game!'", time: "10m", img: "rohit45" },
-                    { icon: Users, color: "text-[#84CC16]", text: "deepak_29 started following you", time: "30m", img: "deepak_29" },
-                    { icon: Heart, color: "text-red-500", text: "vikash07 liked your story", time: "1h", img: "vikash07" },
-                    { icon: MessageCircle, color: "text-blue-400", text: "team_kridaz replied to your comment", time: "2h", img: "team_kridaz" },
-                    { icon: Users, color: "text-[#84CC16]", text: "aman.singh started following you", time: "3h", img: "aman.singh" },
-                    { icon: Trophy, color: "text-yellow-400", text: "You earned the 'Match Winner' badge!", time: "5h", img: "kridaz_bot" }
-                  ].map((notif, i) => (
-                    <div key={i} className="flex items-start gap-3 p-2.5 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group">
-                      <div className="relative shrink-0">
-                        <div className="w-[38px] h-[38px] rounded-full bg-[#111] border border-white/5 overflow-hidden">
-                          <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${notif.img}`} className="w-full h-full object-cover" />
-                        </div>
-                        <div className={`absolute -bottom-0.5 -right-0.5 w-[16px] h-[16px] rounded-full bg-[#111] flex items-center justify-center border border-[#0A0A0A]`}>
-                          <notif.icon size={9} className={notif.color} fill="currentColor" />
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[11px] font-medium text-white/80 group-hover:text-white transition-colors leading-snug">{notif.text}</div>
-                        <div className="text-[9px] font-bold text-white/30 mt-1">{notif.time} ago</div>
-                      </div>
-                      {i < 2 && <div className="w-2 h-2 rounded-full bg-[#84CC16] shrink-0 mt-1.5" />}
-                    </div>
-                  ))}
-                </div>
 
-                <div className="pt-4 mt-2 border-t border-white/5 flex justify-center">
-                  <button className="text-[#84CC16] text-[10px] font-bold hover:underline tracking-widest uppercase">View all notifications</button>
-                </div>
-
-              </div>
-            </div>
-          )}
-
-          {/* ================= LEFT COLUMN (MESSAGES) ================= */}
-          {activePanel === 'messages' && (
-            <div className="hidden xl:block xl:col-span-3 transition-all duration-300">
-              <div className="bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5 flex flex-col h-[calc(100vh-100px)] sticky top-[80px]">
-
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-[14px] font-black uppercase tracking-widest" style={HEADING_STYLE}>MESSAGES</h3>
-                  <button className="text-[#84CC16] hover:brightness-110 p-1 bg-white/5 rounded-lg">
-                    <Edit3 size={16} />
-                  </button>
-                </div>
-
-                <div className="relative mb-5">
-                  <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
-                  <input
-                    type="text"
-                    placeholder="Search messages"
-                    className="w-full bg-[#111] border border-white/5 rounded-full py-2.5 pl-9 pr-4 text-[11px] font-bold outline-none focus:border-white/20 transition-all placeholder:text-white/30"
-                  />
-                </div>
-
-                <div className="flex items-center gap-6 border-b border-white/10 mb-3 px-1">
-                  <button className="pb-2.5 text-[10px] font-black text-white border-b-2 border-[#84CC16] tracking-widest uppercase">PRIMARY</button>
-                  <button className="pb-2.5 text-[10px] font-black text-white/40 hover:text-white transition-colors tracking-widest uppercase">REQUESTS</button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto no-scrollbar space-y-1 mt-1 pr-1">
-                  {[
-                    { name: "simran.s", msg: "Great game! 🔥🔥", time: "2m", unread: 2 },
-                    { name: "rohit45", msg: "See you at the next match!", time: "10m", unread: 1 },
-                    { name: "deepak_29", msg: "That was insane! 💪", time: "30m", unread: 0 },
-                    { name: "vikash07", msg: "Let's train tomorrow", time: "45m", unread: 0 },
-                    { name: "katta_18", msg: "Keep pushing! 💚", time: "1h", unread: 0 },
-                    { name: "aman.singh", msg: "Photo", time: "1h", unread: 0 },
-                    { name: "team_kridaz", msg: "New announcement!", time: "2h", unread: 3 },
-                    { name: "arjun_11", msg: "Thanks bro! 🙌", time: "3h", unread: 0 }
-                  ].map((msg, i) => (
-                    <div key={i} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group">
-                      <div className="relative shrink-0">
-                        <div className="w-[36px] h-[36px] rounded-full bg-[#111] border border-white/5 flex items-center justify-center overflow-hidden">
-                          <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.name}`} className="w-full h-full object-cover" />
-                        </div>
-                        {msg.unread > 0 && <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#84CC16] rounded-full border-2 border-[#0A0A0A]" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[11px] font-bold truncate group-hover:text-[#84CC16] transition-colors">{msg.name}</div>
-                        <div className={`text-[10px] truncate mt-0.5 ${msg.unread > 0 ? 'font-bold text-white' : 'font-medium text-white/40'}`}>
-                          {msg.msg}
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1 shrink-0">
-                        <span className="text-[9px] font-bold text-white/30">{msg.time}</span>
-                        {msg.unread > 0 && (
-                          <div className="w-[16px] h-[16px] bg-[#84CC16] text-black rounded-full flex items-center justify-center text-[9px] font-black">
-                            {msg.unread}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="pt-4 mt-2 border-t border-white/5 flex justify-center">
-                  <button className="text-[#84CC16] text-[10px] font-bold hover:underline tracking-widest uppercase">
-                    View all messages
-                  </button>
-                </div>
-
-              </div>
-            </div>
-          )}
-
-          {/* ================= MIDDLE COLUMN (FEED) ================= */}
-          <div className={`lg:col-span-8 ${activePanel ? 'xl:col-span-6' : 'xl:col-span-8'} transition-all duration-300 ${activeFilter === 'Reels' ? 'h-[calc(100vh-100px)] sticky top-[80px]' : 'space-y-6'}`}>
+          {/* ================= FEED (centered, full-width on desktop) ================= */}
+          <div className={`max-w-3xl mx-auto w-full transition-all duration-300 ${activeFilter === 'Reels' ? 'h-[calc(100vh-100px)] sticky top-[80px] max-w-none' : 'space-y-6'}`}>
 
             {activeFilter !== "Reels" && (
               <div className="space-y-6 mb-6">
-                {/* Header Hero Area */}
-                <div className="relative overflow-hidden flex justify-between items-center pb-4">
-                  <div className="relative z-10 space-y-1">
-                    <h1 className="text-3xl md:text-[42px] font-black uppercase tracking-tighter flex items-center gap-2" style={HEADING_STYLE}>
-                      COMMUNITY <span className="text-[#84CC16]">HUB</span>
-                    </h1>
-                    <p className="text-[#84CC16] text-[14px] md:text-[20px] font-bold uppercase tracking-[0.2em]" style={SUBHEADING_STYLE}>
-                      CONNECT, SHARE, AND PLAY
-                    </p>
+
+                {/* Search, Post, and Message Header Row */}
+                <div className="relative z-10 flex items-center gap-3 pb-4">
+                  {/* Shots (Reels) Button */}
+                  <motion.button
+                    onClick={() => handleSetActiveFilter(activeFilter === "Reels" ? "All" : "Reels")}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    title="Shots"
+                    className={`flex items-center justify-center gap-2 shrink-0 px-3.5 py-3 rounded-xl font-bold uppercase text-[11px] tracking-wider border transition-all ${
+                      activeFilter === 'Reels'
+                        ? 'bg-[#84CC16]/10 border-[#84CC16]/40 text-[#84CC16] shadow-[0_0_12px_rgba(132,204,22,0.15)]'
+                        : 'bg-neutral-900 border-white/10 text-white/60 hover:text-white hover:border-white/20'
+                    }`}
+                  >
+                    <PlaySquare size={16} />
+                    <span className="hidden sm:inline">Shots</span>
+                  </motion.button>
+
+                  {/* Search input field styled with theme */}
+                  <div className="relative flex-1">
+                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+                    <input
+                      type="text"
+                      placeholder="Search community posts or players..."
+                      className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm font-bold text-white outline-none focus:border-[#84CC16]/50 focus:ring-1 focus:ring-[#84CC16]/20 transition-all placeholder:text-white/30"
+                      value={feedSearchQuery}
+                      onChange={(e) => setFeedSearchQuery(e.target.value)}
+                    />
+                    {feedSearchQuery && (
+                      <button
+                        onClick={() => setFeedSearchQuery("")}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
                   </div>
-                  {/* Mobile New Post Button */}
-                  <div className="block md:hidden relative z-10 shrink-0">
-                    <motion.button 
-                      onClick={() => gateInteraction(() => setShowPostModal(true))}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="px-4 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[15px] font-black uppercase tracking-widest text-[10px] flex items-center gap-1.5 shadow-[0_5px_15px_rgba(85,222,232,0.15)] transition-all cursor-pointer"
-                    >
-                      <Plus size={12} strokeWidth={3} />
-                      NEW POST
-                    </motion.button>
-                  </div>
+
+                  {/* Post Button */}
+                  <motion.button
+                    onClick={() => gateInteraction(() => setShowPostModal(true))}
+                    whileHover={{ scale: 1.02, filter: "brightness(1.1)" }}
+                    whileTap={{ scale: 0.98 }}
+                    title="New Post"
+                    className="flex items-center justify-center gap-2 bg-[#84CC16] text-black hover:bg-[#a3e635] px-3.5 py-3 md:px-4 rounded-xl font-bold uppercase text-[12px] tracking-wider transition-colors shrink-0"
+                  >
+                    <Plus size={16} strokeWidth={3} />
+                    <span className="hidden sm:inline">Post</span>
+                  </motion.button>
+
+                  {/* Message Button */}
+                  <motion.button
+                    onClick={() => gateInteraction(() => navigate('/messages'))}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    title="Messages"
+                    className="flex items-center justify-center gap-2 bg-neutral-900 hover:bg-neutral-800 border border-white/10 text-white px-3.5 py-3 md:px-4 rounded-xl font-bold uppercase text-[12px] tracking-wider transition-colors shrink-0"
+                  >
+                    <Send size={14} className="transform rotate-0" />
+                    <span className="hidden sm:inline">Message</span>
+                  </motion.button>
                 </div>
 
                 {/* Mobile-Only Raw Text Stats Section */}
                 <div className="block md:hidden text-center pb-1 text-[10px] text-white/50 font-bold uppercase tracking-wider" style={{ fontFamily: "'Inter', sans-serif" }}>
                   <span>{statsData?.stats?.members || "12.4K"} Members</span>
-                  <span className="mx-2 text-[#84CC16]">•</span>
+                  <span className="mx-2 text-[#84CC16]">â€¢</span>
                   <span>{statsData?.stats?.posts || "1.2K"} Posts</span>
-                  <span className="mx-2 text-[#84CC16]">•</span>
-                  <span className="text-[#84CC16]">{ "326" } Online</span>
+                  <span className="mx-2 text-[#84CC16]">â€¢</span>
+                  <span className="text-[#84CC16]">326 Online</span>
                 </div>
 
                 {/* Stories Section */}
-                <div className="bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5">
-                  <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth items-center pb-2">
+                {!debouncedSearchQuery.trim() && (
+                  <div className="bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5">
+                    <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth items-center pb-2">
 
-                    {/* Add Story */}
-                    <div
-                      onClick={() => gateInteraction(() => setShowStoryModal(true))}
-                      className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
-                    >
-                      <div className="w-[68px] h-[68px] rounded-full border border-dashed border-white/30 flex items-center justify-center group-hover:border-[#84CC16]/50 transition-all relative p-0.5">
-                        <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center overflow-hidden border border-white/10">
-                          <img src={user?.profilePicture || "/default-avatar.png"} className="w-full h-full object-cover opacity-60" />
-                        </div>
-                        <div className="absolute bottom-0 right-0 w-[22px] h-[22px] bg-[#84CC16] rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
-                          <Plus size={12} strokeWidth={4} className="text-black" />
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-bold text-white/60 group-hover:text-white transition-colors">Your story</span>
-                    </div>
-
-                    {/* Render Stories */}
-                    {stories.map((group, idx) => (
+                      {/* Add Story */}
                       <div
-                        key={group._id}
-                        onClick={() => { setSelectedStoryGroup(group); setCurrentStoryIndex(0); }}
+                        onClick={() => gateInteraction(() => setShowStoryModal(true))}
                         className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
                       >
-                        <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${idx === 0 ? 'bg-[#84CC16]' : 'bg-white/20'}`}>
-                          <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
-                            <div className="w-full h-full rounded-full overflow-hidden bg-[#111]">
-                              {group.stories[0].mediaUrl ? (
-                                <img
-                                  src={group.stories[0].thumbnailUrl || group.stories[0].mediaUrl}
-                                  alt=""
-                                  className={`w-full h-full object-cover ${(group.stories.some(s => s.status === 'pending' || s.status === 'processing')) ? 'blur-sm opacity-50' : ''}`}
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#84CC16] font-bold bg-[#111]">
-                                  {group.stories[0].content?.slice(0, 15)}
+                        <div className="w-[68px] h-[68px] rounded-full border border-dashed border-white/30 flex items-center justify-center group-hover:border-[#84CC16]/50 transition-all relative p-0.5">
+                          <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center overflow-hidden border border-white/10">
+                            <img src={user?.profilePicture || "/default-avatar.png"} className="w-full h-full object-cover opacity-60" />
+                          </div>
+                          <div className="absolute bottom-0 right-0 w-[22px] h-[22px] bg-[#84CC16] rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
+                            <Plus size={12} strokeWidth={4} className="text-black" />
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold text-white/60 group-hover:text-white transition-colors">Your story</span>
+                      </div>
+
+                      {/* Render Stories */}
+                      {stories.map((group, idx) => (
+                        <div
+                          key={group._id}
+                          onClick={() => { setSelectedStoryGroup(group); setCurrentStoryIndex(0); }}
+                          className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
+                        >
+                          <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${idx === 0 ? 'bg-[#84CC16]' : 'bg-white/20'}`}>
+                            <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
+                              <div className="w-full h-full rounded-full overflow-hidden bg-[#111]">
+                                {group.stories[0].mediaUrl ? (
+                                  <img
+                                    src={group.stories[0].thumbnailUrl || group.stories[0].mediaUrl}
+                                    alt=""
+                                    className={`w-full h-full object-cover ${(group.stories.some(s => s.status === 'pending' || s.status === 'processing')) ? 'blur-sm opacity-50' : ''}`}
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#84CC16] font-bold bg-[#111]">
+                                    {group.stories[0].content?.slice(0, 15)}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            {idx === 0 && (
+                              <div className="absolute -top-1 left-1/2 -translate-x-1/2 px-1.5 py-[2px] bg-red-500 rounded flex items-center text-[7px] font-black uppercase text-white shadow-lg tracking-wider border border-[#0A0A0A]">
+                                LIVE
+                              </div>
+                            )}
+                          </div>
+                          <span className="text-[10px] font-bold text-white/80 group-hover:text-[#84CC16] transition-colors truncate max-w-[68px]">
+                            {group.user?.name?.split(' ')[0] || "Player"}
+                          </span>
+                        </div>
+                      ))}
+
+                      {/* Dummy stories for design parity if feed is empty */}
+                      {stories.length < 5 && [
+                        { name: 'simran.s', live: false },
+                        { name: 'rohit45', live: false },
+                        { name: 'vikash07', live: false },
+                        { name: 'katta_18', live: false },
+                        { name: 'aman.singh', live: false }
+                      ].map((dummy, idx) => (
+                        <div key={idx} className="flex flex-col items-center gap-2.5 shrink-0 cursor-default opacity-40">
+                          <div className="w-[68px] h-[68px] rounded-full p-[2px] bg-[#84CC16]">
+                            <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
+                              <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center">
+                                <UserIcon size={24} className="text-white/20" />
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold text-white/60 truncate max-w-[68px]">{dummy.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Filters Row */}
+                {!debouncedSearchQuery.trim() && (
+                  <div>
+                    {/* Desktop View Filters Row */}
+                    <div className="hidden md:flex gap-2 overflow-x-auto no-scrollbar items-center">
+                      {["All", "Following", "Reels", "Highlights", "Match Moments", "Announcements"].map((filter) => (
+                        <button
+                          key={filter}
+                          onClick={() => handleSetActiveFilter(filter)}
+                          className={`px-4 py-2 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border ${activeFilter === filter
+                              ? 'bg-[#84CC16] text-black border-[#84CC16] hover:brightness-110'
+                              : 'bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white'
+                            }`}
+                        >
+                          {filter}
+                        </button>
+                      ))}
+                      <div className="ml-auto flex items-center gap-2 shrink-0">
+                        {/* Categories Dropdown â€” desktop */}
+                        <div className="relative">
+                          <select
+                            className="bg-neutral-900 border border-white/10 rounded-full py-2 pl-3 pr-7 text-white text-[11px] font-bold focus:outline-none focus:border-[#55DEE8]/40 transition-all appearance-none cursor-pointer"
+                            style={{ fontFamily: "'Inter', sans-serif" }}
+                            value={activeSportFilter}
+                            onChange={(e) => setActiveSportFilter(e.target.value)}
+                          >
+                            <option value="" className="bg-neutral-950 text-white">All Categories</option>
+                            {["Cricket", "Football", "Rugby", "Baseball", "Hockey", "Athletics"].map(s => (
+                              <option key={s} value={s.toLowerCase()} className="bg-neutral-950 text-white">{s}</option>
+                            ))}
+                          </select>
+                          <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40">
+                            <ChevronDown size={11} />
+                          </div>
+                        </div>
+                        {/* Sort: Latest */}
+                        <button className="px-3 py-2 rounded-full bg-transparent border border-white/10 text-white/70 hover:bg-white/5 text-[11px] font-bold flex items-center gap-1.5">
+                          Latest <ChevronDown size={12} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Mobile View Filters Dropdowns */}
+                    <div className="flex md:hidden gap-2.5 items-center justify-start">
+                      {/* Features Dropdown */}
+                      <div className="relative w-[115px]">
+                        <select
+                          className="w-full bg-neutral-900 border border-white/10 rounded-[15px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none focus:border-[#55DEE8]/40 transition-all appearance-none cursor-pointer"
+                          style={{ fontFamily: "'Inter', sans-serif" }}
+                          value={activeFilter}
+                          onChange={(e) => handleSetActiveFilter(e.target.value)}
+                        >
+                          {["All", "Following", "Reels", "Highlights", "Match Moments", "Announcements"].map(filter => (
+                            <option key={filter} value={filter} className="bg-neutral-950 text-white">{filter}</option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center text-white/40">
+                          <ChevronDown size={10} />
+                        </div>
+                      </div>
+
+                      {/* Categories Dropdown */}
+                      <div className="relative w-[115px]">
+                        <select
+                          className="w-full border border-transparent rounded-[15px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
+                          style={{ 
+                            fontFamily: "'Inter', sans-serif",
+                            backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
+                            backgroundOrigin: "border-box",
+                            backgroundClip: "padding-box, border-box"
+                          }}
+                          value={activeSportFilter}
+                          onChange={(e) => setActiveSportFilter(e.target.value)}
+                        >
+                          <option value="" className="bg-neutral-950 text-white">Categories</option>
+                          {["Cricket", "Football", "Rugby", "Baseball", "Hockey", "Athletics"].map(s => (
+                            <option key={s} value={s.toLowerCase()} className="bg-neutral-950 text-white">{s}</option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center text-white/40">
+                          <ChevronDown size={10} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Players Search Results Section */}
+                {debouncedSearchQuery.trim() !== "" && (
+                  <div className="flex flex-col gap-3 bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="text-xs font-black uppercase tracking-widest text-[#84CC16]" style={HEADING_STYLE}>
+                        PLAYERS MATCHING "{debouncedSearchQuery}"
+                      </h3>
+                      {playersLoading && <Loader2 size={16} className="text-[#84CC16] animate-spin" />}
+                    </div>
+
+                    {loadedPlayers.length === 0 && !playersLoading ? (
+                      <div className="text-center py-6 text-white/30 font-bold text-[12px] uppercase tracking-wider">
+                        No players found
+                      </div>
+                    ) : (
+                      <div 
+                        className="grid grid-rows-2 grid-flow-col gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 scroll-smooth"
+                        style={{ maxHeight: "240px", minHeight: loadedPlayers.length > 1 ? "180px" : "90px" }}
+                        onScroll={handlePlayersHorizontalScroll}
+                      >
+                        {loadedPlayers.map(player => (
+                          <div 
+                            key={player.id}
+                            onClick={() => navigate(`/profile/${player.id}`)}
+                            className="flex items-center gap-3 bg-neutral-900/50 hover:bg-neutral-900 border border-white/5 hover:border-[#84CC16]/30 p-3 rounded-xl cursor-pointer transition-all min-w-[220px] max-w-[280px] group shrink-0"
+                          >
+                            <div className="w-[42px] h-[42px] rounded-full bg-[#111] border border-white/10 overflow-hidden shrink-0">
+                              <img 
+                                src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} 
+                                className="w-full h-full object-cover" 
+                                alt=""
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-[13px] font-bold text-white group-hover:text-[#84CC16] transition-colors truncate">
+                                {player.name}
+                              </div>
+                              <div className="text-[11px] font-medium text-white/40 truncate">
+                                @{player.username || player.name.toLowerCase().replace(/\s+/g, '')}
+                              </div>
+                              {(player.city || player.state) && (
+                                <div className="text-[9px] font-semibold text-[#84CC16] mt-0.5 uppercase tracking-wider truncate">
+                                  {player.city}{player.city && player.state ? ', ' : ''}{player.state}
                                 </div>
                               )}
                             </div>
                           </div>
-                          {idx === 0 && (
-                            <div className="absolute -top-1 left-1/2 -translate-x-1/2 px-1.5 py-[2px] bg-red-500 rounded flex items-center text-[7px] font-black uppercase text-white shadow-lg tracking-wider border border-[#0A0A0A]">
-                              LIVE
-                            </div>
-                          )}
-                        </div>
-                        <span className="text-[10px] font-bold text-white/80 group-hover:text-[#84CC16] transition-colors truncate max-w-[68px]">
-                          {group.user?.name?.split(' ')[0] || "Player"}
-                        </span>
-                      </div>
-                    ))}
-
-                    {/* Dummy stories for design parity if feed is empty */}
-                    {stories.length < 5 && [
-                      { name: 'simran.s', live: false },
-                      { name: 'rohit45', live: false },
-                      { name: 'vikash07', live: false },
-                      { name: 'katta_18', live: false },
-                      { name: 'aman.singh', live: false }
-                    ].map((dummy, idx) => (
-                      <div key={idx} className="flex flex-col items-center gap-2.5 shrink-0 cursor-default opacity-40">
-                        <div className="w-[68px] h-[68px] rounded-full p-[2px] bg-[#84CC16]">
-                          <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
-                            <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center">
-                              <UserIcon size={24} className="text-white/20" />
-                            </div>
+                        ))}
+                        {hasMorePlayers && playersLoading && (
+                          <div className="flex items-center justify-center px-6 shrink-0 h-full">
+                            <Loader2 size={24} className="text-[#84CC16] animate-spin" />
                           </div>
-                        </div>
-                        <span className="text-[10px] font-bold text-white/60 truncate max-w-[68px]">{dummy.name}</span>
+                        )}
                       </div>
-                    ))}
+                    )}
                   </div>
-                </div>
+                )}
 
-                {/* Filters Row */}
-                <div>
-                  {/* Desktop View Filters Row */}
-                  <div className="hidden md:flex gap-2 overflow-x-auto no-scrollbar items-center">
-                    {["All", "Following", "Reels", "Highlights", "Match Moments", "Announcements"].map((filter) => (
-                      <button
-                        key={filter}
-                        onClick={() => setActiveFilter(filter)}
-                        className={`px-4 py-2 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border ${activeFilter === filter
-                            ? 'bg-[#84CC16] text-black border-[#84CC16] hover:brightness-110'
-                            : 'bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white'
-                          }`}
-                      >
-                        {filter}
-                      </button>
-                    ))}
-                    <div className="ml-auto flex shrink-0">
-                      <button className="px-3 py-2 rounded-full bg-transparent border border-white/10 text-white/70 hover:bg-white/5 text-[11px] font-bold flex items-center gap-1.5">
-                        Latest <ChevronDown size={12} />
-                      </button>
-                    </div>
+                {/* Posts Matching Heading */}
+                {debouncedSearchQuery.trim() !== "" && (
+                  <div className="pt-2">
+                    <h3 className="text-xs font-black uppercase tracking-widest text-[#84CC16]" style={HEADING_STYLE}>
+                      POSTS MATCHING "{debouncedSearchQuery}"
+                    </h3>
                   </div>
-
-                  {/* Mobile View Filters Dropdowns */}
-                  <div className="flex md:hidden gap-2.5 items-center justify-start">
-                    {/* Features Dropdown */}
-                    <div className="relative w-[115px]">
-                      <select
-                        className="w-full bg-neutral-900 border border-white/10 rounded-[15px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none focus:border-[#55DEE8]/40 transition-all appearance-none cursor-pointer"
-                        style={{ fontFamily: "'Inter', sans-serif" }}
-                        value={activeFilter}
-                        onChange={(e) => setActiveFilter(e.target.value)}
-                      >
-                        {["All", "Following", "Reels", "Highlights", "Match Moments", "Announcements"].map(filter => (
-                          <option key={filter} value={filter} className="bg-neutral-950 text-white">{filter}</option>
-                        ))}
-                      </select>
-                      <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center text-white/40">
-                        <ChevronDown size={10} />
-                      </div>
-                    </div>
-
-                    {/* Categories Dropdown */}
-                    <div className="relative w-[115px]">
-                      <select
-                        className="w-full border border-transparent rounded-[15px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
-                        style={{ 
-                          fontFamily: "'Inter', sans-serif",
-                          backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
-                          backgroundOrigin: "border-box",
-                          backgroundClip: "padding-box, border-box"
-                        }}
-                        value={activeSportFilter}
-                        onChange={(e) => setActiveSportFilter(e.target.value)}
-                      >
-                        <option value="" className="bg-neutral-950 text-white">Categories</option>
-                        {["Cricket", "Football", "Rugby", "Baseball", "Hockey", "Athletics"].map(s => (
-                          <option key={s} value={s.toLowerCase()} className="bg-neutral-950 text-white">{s}</option>
-                        ))}
-                      </select>
-                      <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center text-white/40">
-                        <ChevronDown size={10} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
             )}
 
             {/* Main Feed Posts / Reels */}
             {activeFilter === "Reels" ? (
-              <div className="flex justify-center h-[calc(100vh-180px)] bg-black/40 rounded-[15px]">
+              <div className="relative flex justify-center h-[calc(100vh-180px)] bg-black/40 rounded-[15px]">
+                {/* Back button & header */}
+                <div className="absolute top-3 left-3 right-3 z-30 flex items-center gap-3">
+                  <button
+                    onClick={() => handleSetActiveFilter("All")}
+                    className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 text-white px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-all"
+                  >
+                    <ArrowLeft size={14} strokeWidth={2.5} />
+                    <span>Community</span>
+                  </button>
+                  <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#84CC16]/20 text-[#84CC16] px-3 py-2 rounded-xl text-xs font-black uppercase tracking-widest">
+                    <PlaySquare size={13} />
+                    <span>Shots</span>
+                  </div>
+                </div>
                 <div
                   className="w-[380px] h-full overflow-y-scroll snap-y snap-mandatory no-scrollbar rounded-[15px]"
                   onScroll={(e) => {
@@ -933,17 +1099,17 @@ const Community = () => {
                   )}
                 </div>
               </div>
-            ) : loading ? (
+            ) : postsLoading ? (
               <div className="py-20 flex flex-col items-center justify-center gap-4">
                 <Loader2 size={32} className="text-[#84CC16] animate-spin" />
               </div>
-            ) : posts.length === 0 ? (
+            ) : loadedPosts.length === 0 ? (
               <div className="bg-[#0A0A0A] border border-white/5 rounded-[15px] p-16 text-center text-white/30 font-bold uppercase tracking-widest text-sm">
                 No posts found
               </div>
             ) : (
               <div className="space-y-6">
-                {posts.map(post => (
+                {loadedPosts.map(post => (
                   <div key={post._id} className="bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5 space-y-4">
                     {/* Post Header */}
                     <div className="flex items-center justify-between">
@@ -1091,125 +1257,15 @@ const Community = () => {
 
                   </div>
                 ))}
+                {hasMorePosts && postsLoading && (
+                  <div className="py-6 flex justify-center">
+                    <Loader2 size={24} className="text-[#84CC16] animate-spin" />
+                  </div>
+                )}
               </div>
             )}
           </div>
 
-          {/* ================= RIGHT COLUMN (WIDGETS) ================= */}
-          <div className={`lg:col-span-4 ${activePanel ? 'xl:col-span-3' : 'xl:col-span-4'} transition-all duration-300 space-y-6`}>
-
-            {/* New Post Button */}
-            <div className="hidden md:flex justify-end pt-1">
-              <motion.button 
-                onClick={() => gateInteraction(() => setShowPostModal(true))}
-                whileHover={{ scale: 1.05, filter: "brightness(1.15)", boxShadow: "0px 10px 30px rgba(85,222,232,0.3)" }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[15px] font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-2 shadow-[0_5px_15px_rgba(85,222,232,0.15)] transition-all cursor-pointer"
-              >
-                <motion.div
-                  variants={{
-                    hover: { rotate: 180 }
-                  }}
-                  animate={undefined}
-                  className="flex items-center justify-center"
-                  whileHover={{ rotate: 180 }}
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
-                >
-                  <Plus size={14} strokeWidth={3} />
-                </motion.div>
-                NEW POST
-              </motion.button>
-            </div>
-
-            <div className="sticky top-[80px] space-y-6">
-              {/* YOUR STATS */}
-              <div className="hidden md:block bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5 space-y-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-white">
-                    <BarChart3 size={16} className="text-[#84CC16]" />
-                    <h3 className="text-[11px] font-black uppercase tracking-[0.1em]" style={HEADING_STYLE}>YOUR STATS</h3>
-                  </div>
-                  <button className="text-[10px] font-bold text-[#84CC16] hover:underline">View all</button>
-                </div>
-
-                <div className="grid grid-cols-3 gap-y-5 gap-x-2">
-                  {[
-                    { label: "Members", value: statsData?.stats?.members || "12.4K", icon: Users },
-                    { label: "Posts", value: statsData?.stats?.posts || "1.2K", icon: FileText },
-                    { label: "Online Now", value: "326", icon: Circle, fill: true },
-                    { label: "Comments", value: statsData?.stats?.comments || "2.1K", icon: MessageCircle, desktopOnly: true },
-                    { label: "Likes", value: statsData?.stats?.likes || "8.7K", icon: Heart, desktopOnly: true },
-                    { label: "Tournaments", value: "48", icon: Trophy, desktopOnly: true }
-                  ].map((s, i) => (
-                    <div key={i} className={`flex flex-col gap-1 ${s.desktopOnly ? 'hidden md:flex' : 'flex'}`}>
-                      <div className="flex items-center gap-1.5 text-white/50">
-                        <s.icon size={10} className={s.fill ? "text-[#84CC16]" : ""} fill={s.fill ? "currentColor" : "none"} />
-                        <span className="text-[9px] font-bold leading-none">{s.label}</span>
-                      </div>
-                      <div className="text-[14px] font-black">{s.value}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* TRENDING TOPICS */}
-              <div className="hidden md:block bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5 space-y-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-white">
-                    <MonitorPlay size={16} className="text-[#84CC16]" />
-                    <h3 className="text-[11px] font-black uppercase tracking-[0.1em]" style={HEADING_STYLE}>CATEGORIES</h3>
-                  </div>
-                  <button className="text-[10px] font-bold text-[#84CC16] hover:underline">View all</button>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {["#Cricket", "#Football", "#Rugby", "#Baseball", "#Hockey", "#Athletics"].map((tag, i) => (
-                    <button key={i} className="px-3 py-1.5 bg-transparent border border-white/10 hover:bg-white/5 rounded-[15px] text-[10px] font-bold transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* SUGGESTED FOR YOU */}
-              <div className="hidden md:block bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5 space-y-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-white">
-                    <Zap size={16} className="text-[#84CC16]" fill="currentColor" />
-                    <h3 className="text-[11px] font-black uppercase tracking-[0.1em]" style={HEADING_STYLE}>SUGGESTED FOR YOU</h3>
-                  </div>
-                  <button className="text-[10px] font-bold text-[#84CC16] hover:underline">View all</button>
-                </div>
-
-                <div className="space-y-5">
-                  {[
-                    { name: "virat.kohli18", mutual: "2 mutual friends", verified: true },
-                    { name: "msdhoni07", mutual: "3 mutual friends", verified: true },
-                    { name: "jasprit.bumrah93", mutual: "1 mutual friend", verified: true },
-                    { name: "rohit45", mutual: "2 mutual friends", verified: false }
-                  ].map((u, i) => (
-                    <div key={i} className="flex items-center justify-between group cursor-pointer">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#111] border border-white/10 flex items-center justify-center overflow-hidden">
-                          <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${u.name}`} className="w-full h-full object-cover" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[11px] font-bold group-hover:text-[#84CC16] transition-colors">{u.name}</span>
-                            {u.verified && <ShieldCheck size={10} className="text-[#84CC16]" />}
-                          </div>
-                          <div className="text-[9px] font-bold text-white/40">{u.mutual}</div>
-                        </div>
-                      </div>
-                      <button className="px-3 py-1 bg-transparent border border-[#84CC16] text-[#84CC16] rounded-full text-[9px] font-bold hover:bg-[#84CC16] hover:text-black transition-all uppercase tracking-widest">
-                        Follow
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
 
 
         </div>
@@ -1324,7 +1380,7 @@ const Community = () => {
                   <textarea
                     value={newPost.content}
                     onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                    placeholder="What’s happening in your match? Share updates, highlights, or announcements…"
+                    placeholder="Whatâ€™s happening in your match? Share updates, highlights, or announcementsâ€¦"
                     maxLength={1000}
                     style={SUBHEADING_STYLE}
                     className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#BFF367]/30 focus:bg-white/[0.03] rounded-xl min-h-[100px] max-h-[200px] p-3.5 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
@@ -1486,7 +1542,7 @@ const Community = () => {
                   <textarea
                     value={newStory.content}
                     onChange={(e) => setNewStory({ ...newStory, content: e.target.value })}
-                    placeholder="Share a quick moment, match update, highlight, or announcement…"
+                    placeholder="Share a quick moment, match update, highlight, or announcementâ€¦"
                     style={SUBHEADING_STYLE}
                     className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#55DEE8]/30 focus:bg-white/[0.03] rounded-xl h-20 p-3 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
                   />

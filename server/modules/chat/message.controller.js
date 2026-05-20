@@ -136,14 +136,30 @@ export const sendMessage = async (req, res) => {
 
     // Find the participant record for the sender in-memory to avoid an extra DB roundtrip
     console.log("SEND_MESSAGE: Finding sender participant in-memory...");
-    const senderParticipant = chat.participants.find(p => 
+    let senderParticipant = chat.participants.find(p => 
       p.userId === participantData.userId && p.ownerId === participantData.ownerId
     );
     console.log("SEND_MESSAGE: Sender participant in-memory result:", JSON.stringify(senderParticipant));
 
     if (!senderParticipant) {
-      console.log("SEND_MESSAGE: Sender participant not found in chat");
-      return res.status(400).json({ message: "Sender is not a participant of this chat" });
+      // Check if user is an admin of the parent community or the chat
+      const isAllowedAdmin = await checkIsAdmin(chatId, participantData);
+      if (isAllowedAdmin) {
+        console.log("SEND_MESSAGE: Sender is authorized admin, auto-creating participant record...");
+        senderParticipant = await prisma.chatParticipant.create({
+          data: {
+            chatId,
+            userId: participantData.userId,
+            ownerId: participantData.ownerId,
+            onModel: participantData.onModel || "User",
+            isAdmin: true,
+            isPending: false
+          }
+        });
+      } else {
+        console.log("SEND_MESSAGE: Sender participant not found in chat");
+        return res.status(400).json({ message: "Sender is not a participant of this chat" });
+      }
     }
 
     console.log("SEND_MESSAGE: Creating message in DB...");

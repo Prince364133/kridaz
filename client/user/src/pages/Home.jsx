@@ -161,9 +161,9 @@ export default function Home() {
  }
  };
 
- // useEffect(() => {
- // detectLocation();
- // }, []);
+  useEffect(() => {
+    detectLocation();
+  }, []);
 
  useEffect(() => {
  const fetchData = async () => {
@@ -554,12 +554,6 @@ export default function Home() {
  </p>
  </div>
  
- <Link to="/players" className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-[#55DEE8] hover:text-black hover:border-[#55DEE8] transition-all duration-500">
- <span className="text-[11px] font-black uppercase tracking-widest">View All Players</span>
- <div className="w-6 h-6 rounded-full bg-white/5 group-hover:bg-black/10 flex items-center justify-center transition-colors">
- <ChevronRight size={14} />
- </div>
- </Link>
  </div>
 
  {/* Player cards */}
@@ -1115,7 +1109,6 @@ export default function Home() {
  <div>
  <h3 className="font-display text-4xl mb-1 leading-none">CHALLENGE<br />PLAYERS</h3>
  <p className="text-gray-400 text-sm mb-4">Skill-matched opponents.</p>
- <Link to="/players" className="font-bold text-white flex items-center gap-2 hover:text-[#55DEE8] transition-colors">Start Match <ArrowRight size={16} /></Link>
  </div>
  </div>
  </div>
@@ -1129,7 +1122,7 @@ export default function Home() {
  </div>
  <h3 className="font-display text-xl uppercase">COMMUNITY FEED</h3>
  </div>
- <Link to="/community" className="text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest">See All</Link>
+ 
  </div>
 
  <div className="flex-1 space-y-3">
@@ -1197,12 +1190,7 @@ export default function Home() {
  <span className="text-[8px] font-bold text-[#55DEE8] uppercase tracking-widest mb-1 block">Trending Now</span>
  <h3 className="font-display text-xl mb-1 leading-tight uppercase truncate">{realSocialPosts[0]?.title || "SOCIAL ARENA"}</h3>
  <p className="text-gray-400 text-[10px] mb-4 line-clamp-1">{realSocialPosts[0]?.content || "Check out what's happening in the field."}</p>
- <Link
- to="/community"
- className="font-bold text-white text-[10px] flex items-center gap-2 hover:text-[#55DEE8] transition-colors uppercase tracking-widest"
- >
- Explore <ArrowRight size={12} />
- </Link>
+ 
  </div>
  </div>
  </div>
@@ -1253,9 +1241,7 @@ export default function Home() {
  </h2>
  <p className="text-gray-400 mt-2 text-sm md:text-base">Swipe to see what's happening in the field</p>
  </div>
- <Link to="/community" className="text-white font-bold flex items-center gap-2 hover:text-[#55DEE8] transition-colors uppercase tracking-widest text-sm">
- Explore Community <ChevronRight size={16} />
- </Link>
+ 
  </div>
 
  <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x">

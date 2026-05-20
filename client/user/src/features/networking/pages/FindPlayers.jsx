@@ -105,22 +105,22 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
         <div className="grid grid-cols-3 w-full border-t border-white/5 pt-2 mb-2">
           <div className="flex flex-col items-center">
             <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Matches</span>
-            <span className="text-white font-black text-[10px]">GÇö</span>
+            <span className="text-white font-black text-[10px]">GÃ‡Ã¶</span>
           </div>
           <div className="flex flex-col items-center border-x border-white/5">
             <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Runs</span>
-            <span className="text-white font-black text-[10px]">GÇö</span>
+            <span className="text-white font-black text-[10px]">GÃ‡Ã¶</span>
           </div>
           <div className="flex flex-col items-center">
             <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Strike Rate</span>
-            <span className="text-white font-black text-[10px]">GÇö</span>
+            <span className="text-white font-black text-[10px]">GÃ‡Ã¶</span>
           </div>
         </div>
         <div className="flex items-center gap-2 w-full mt-auto">
-          <button onClick={() => handleFollowToggle(player._id)} className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player._id) ? "bg-white/5 text-white/20 border border-white/10" : "text-black hover:scale-105 shadow-[0_0_15px_rgba(85,222,232,0.3)]"}`} style={!followingIds.includes(player._id) ? { background: GRAD } : {}}>
-            {followingIds.includes(player._id) ? "Following" : "Follow"}
+          <button onClick={() => handleFollowToggle(player.id || player._id)} className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player.id || player._id) ? "bg-white/5 text-white/20 border border-white/10" : "text-black hover:scale-105 shadow-[0_0_15px_rgba(85,222,232,0.3)]"}`} style={!followingIds.includes(player.id || player._id) ? { background: GRAD } : {}}>
+            {followingIds.includes(player.id || player._id) ? "Following" : "Follow"}
           </button>
-          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8] transition-all">
+          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player.id || player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8] transition-all">
             <MessageCircle size={18} />
           </button>
         </div>
@@ -313,7 +313,7 @@ const FindPlayers = () => {
       if (nearby.length >= 2) {
         const clusterMembers = [player, ...nearby];
         clusterMembers.forEach(member => {
-          const idx = players.findIndex(p => p._id === member._id);
+          const idx = players.findIndex(p => (p.id || p._id) === (member.id || member._id));
           if (idx !== -1) assigned.add(idx);
         });
         
@@ -491,11 +491,11 @@ const FindPlayers = () => {
       });
       if (res.data.success) {
         if (res.data.players.length > 100 && !hasShownLimitToast) {
-          toast("Showing top nearby players. Zoom in to see more.", { icon: "=ƒôì" });
+          toast("Showing top nearby players. Zoom in to see more.", { icon: "=Æ’Ã´Ã¬" });
           setHasShownLimitToast(true);
         }
         const mapPlayers = res.data.players.map(p => ({
-          _id: p._id,
+          _id: p.id || p._id,
           name: p.name,
           username: p.username,
           profilePicture: p.profilePicture,
@@ -586,9 +586,9 @@ const FindPlayers = () => {
     
     const handleLocationUpdate = ({ userId, lat, lng }) => {
       setAllNearbyPlayers(prev => {
-        const existing = prev.find(p => p._id === userId);
+        const existing = prev.find(p => (p.id || p._id) === userId);
         if (existing) {
-          return prev.map(p => p._id === userId ? { ...p, lat, lng } : p);
+          return prev.map(p => (p.id || p._id) === userId ? { ...p, lat, lng } : p);
         }
         return prev;
       });
@@ -663,21 +663,22 @@ const FindPlayers = () => {
 
   const handleAvatarClick = (player) => {
     gateInteraction(() => {
+      const playerId = player.id || player._id;
       if (!player.hasActiveStory) {
-        navigate(`/profile/${player._id}`);
+        navigate(`/profile/${playerId}`);
         return;
       }
       const fetchStories = async () => {
         try {
-          const res = await axiosInstance.get(`/api/user/community/user-stories/${player._id}`);
+          const res = await axiosInstance.get(`/api/user/community/user-stories/${playerId}`);
           if (res.data.success && res.data.stories?.length > 0) {
             setViewingStoryGroup({ user: player, stories: res.data.stories });
           } else {
-            navigate(`/profile/${player._id}`);
+            navigate(`/profile/${playerId}`);
           }
         } catch (error) {
           toast.error("Failed to load stories");
-          navigate(`/profile/${player._id}`);
+          navigate(`/profile/${playerId}`);
         }
       };
       fetchStories();
@@ -958,7 +959,7 @@ const FindPlayers = () => {
           ) : activeTab === "players" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {players.map((player, idx) => (
-                <div key={player._id} id={`player-card-${player._id}`} className="transition-all duration-500">
+                <div key={player.id || player._id} id={`player-card-${player.id || player._id}`} className="transition-all duration-500">
                   <PlayerCard 
                     player={player} 
                     rank={idx}

@@ -1,6 +1,6 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ArrowRight, ShieldCheck, User, LogOut, ChevronDown } from "lucide-react";
+import { Menu, X, ArrowRight, ShieldCheck, User, LogOut, ChevronDown, LayoutDashboard } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
@@ -27,7 +27,7 @@ const GuestNavbar = () => {
   };
 
   const navLinks = [
-    { name: "Partner Overview", path: "/partners" },
+    { name: "Venue Owner Overview", path: "/venue-owners" },
     { name: "Venues", path: "/business/venue" },
     { name: "Coaches", path: "/business/coach" },
     { name: "Umpires", path: "/business/official" },
@@ -57,18 +57,18 @@ const GuestNavbar = () => {
             <div 
               tabIndex={0} 
               className={`flex items-center gap-1 text-sm font-medium transition-all cursor-pointer ${
-                location.pathname.startsWith("/business") || location.pathname === "/partners" ? "text-[#55DEE8]" : "text-white/60 hover:text-white"
+                location.pathname.startsWith("/business") || location.pathname === "/venue-owners" ? "text-[#55DEE8]" : "text-white/60 hover:text-white"
               }`}
             >
               Business <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-300" />
               <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#55DEE8] transition-all duration-300 ${
-                location.pathname.startsWith("/business") || location.pathname === "/partners" ? "w-full" : "w-0 group-hover:w-full"
+                location.pathname.startsWith("/business") || location.pathname === "/venue-owners" ? "w-full" : "w-0 group-hover:w-full"
               }`} />
             </div>
             <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-2xl bg-[#0d0d0d] border border-white/5 rounded-xl w-52 mt-0">
               <li>
-                <Link to="/partners" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                  Partner Overview
+                <Link to="/venue-owners" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                  Venue Owner Overview
                 </Link>
               </li>
               <div className="h-px bg-white/5 my-1 mx-2" />
@@ -137,7 +137,7 @@ const GuestNavbar = () => {
                 Login
               </Link>
               
-              <Link to="/partners" className="text-black h-10 px-6 rounded-md text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-[#55DEE8]/30 hover:scale-105" style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}>
+              <Link to="/venue-owners" className="text-black h-10 px-6 rounded-md text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-[#55DEE8]/30 hover:scale-105" style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}>
                 Join Now <ArrowRight size={16} />
               </Link>
             </>
@@ -145,15 +145,29 @@ const GuestNavbar = () => {
             <div className="flex items-center gap-4">
               <div className="hidden md:flex flex-col items-end border-r border-white/10 pr-4">
                 <span className="text-[10px] text-white/40 uppercase tracking-wider">Account Type</span>
-                <span className="text-sm font-bold text-[#55DEE8]">{role?.charAt(0).toUpperCase() + role?.slice(1) || "Partner"}</span>
+                <span className="text-sm font-bold text-[#55DEE8]">{(role === 'VENUE_OWNER' || role === 'venue_owner' || role === 'partner' || role === 'PARTNER') ? 'Venue Owner' : (role?.charAt(0).toUpperCase() + role?.slice(1) || 'Venue Owner')}</span>
               </div>
               <div className="dropdown dropdown-end">
                 <label tabIndex={0} className="w-10 h-10 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#55DEE8]/50 rounded-full transition-all cursor-pointer group">
                   <User size={20} className="text-white/60 group-hover:text-[#55DEE8] transition-colors" />
                 </label>
-                <ul tabIndex={0} className="dropdown-content mt-4 p-2 shadow-2xl bg-[#121212] border border-white/10 rounded-xl w-56 overflow-hidden backdrop-blur-xl">
+                <ul tabIndex={0} className="dropdown-content mt-4 p-2 shadow-2xl bg-[#121212] border border-white/10 rounded-xl w-56 overflow-hidden backdrop-blur-xl animate-fade-in">
                   <li>
-                    <Link to="/partner/profile" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                    <Link 
+                      to={
+                        (role === 'VENUE_OWNER' || role === 'venue_owner' || role === 'partner' || role === 'PARTNER')
+                          ? "/venue-owner"
+                          : (role === 'admin' || role === 'ADMIN' || role?.includes('ADMIN'))
+                          ? "/admin"
+                          : `/${role?.toLowerCase()}`
+                      }
+                      className="flex items-center gap-3 p-3 text-sm text-[#55DEE8] hover:text-white hover:bg-white/5 rounded-lg transition-all font-bold"
+                    >
+                      <LayoutDashboard size={16} /> Dashboard
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/venue-owner/profile" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
                       <User size={16} /> My Profile
                     </Link>
                   </li>
@@ -222,3 +236,4 @@ const GuestNavbar = () => {
 };
 
 export default GuestNavbar;
+

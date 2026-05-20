@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   Facebook, 
@@ -133,13 +133,13 @@ const UserFooter = () => {
             {/* Divider */}
             <div className="w-px h-5 bg-white/10 self-center hidden sm:block" />
 
-            {/* Partner CTA */}
+            {/* Venue Owner CTA */}
             <Link
-              to="/partners"
-              className="flex items-center gap-2 text-sm font-bold text-white hover:text-[#55DEE8] transition-colors group"
+              to="/venue-owners"
+              className="flex items-center gap-2 text-sm font-bold text-[#84CC16] hover:text-[#55DEE8] transition-colors group"
             >
               <Building2 size={15} className="group-hover:text-[#55DEE8] transition-colors" />
-              Partner With Us
+              Register as Venue Owner
               <ArrowUpRight size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </Link>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useGetMessagesQuery, useSendMessageMutation, useMarkMessagesReadMutation, useRemoveFromGroupMutation, useDeleteMessagesMutation, useCreateGroupChatMutation, useDeleteChatMutation, useGetChatsQuery } from '@redux/api/chatApi';
+import { useGetMessagesQuery, useSendMessageMutation, useMarkMessagesReadMutation, useRemoveFromGroupMutation, useDeleteMessagesMutation, useCreateGroupChatMutation, useDeleteChatMutation, useGetChatsQuery, transformMessage } from '@redux/api/chatApi';
 import { useSocket } from '@context/SocketContext';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -44,6 +44,19 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  }
  }, [data]);
 
+ // Redirect community view to Announcements page automatically
+ useEffect(() => {
+   if (chat?.isCommunity && chatData?.chats && onSelectChat) {
+     const announcementGroup = chatData.chats.find(c => 
+       (c.parentCommunity === chat._id || c.parentCommunity?._id === chat._id) && 
+       (c.isAnnouncementGroup || c.chatName === "Announcements")
+     );
+     if (announcementGroup) {
+       onSelectChat(announcementGroup);
+     }
+   }
+ }, [chat, chatData, onSelectChat]);
+
  useEffect(() => {
  // Close dropdown on outside click
  const handleClickOutside = (event) => {
@@ -77,13 +90,15 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  if (socket && chat) {
  socket.emit('join chat', chat._id);
 
- const handleNewMessage = (newMessage) => {
- if (chat._id === (newMessage.chat?._id || newMessage.chat)) {
- setMessages((prev) => [...prev, newMessage]);
- // Mark as read immediately since chat is open
- socket.emit('messages read', { chatId: chat._id, userId: user?._id || user?.id });
- }
- };
+    const handleNewMessage = (newMessage) => {
+      const transformed = transformMessage(newMessage);
+      const incomingChatId = transformed.chat?._id || transformed.chat?.id || transformed.chat;
+      if (chat._id === incomingChatId) {
+        setMessages((prev) => [...prev, transformed]);
+        // Mark as read immediately since chat is open
+        socket.emit('messages read', { chatId: chat._id, userId: user?._id || user?.id });
+      }
+    };
 
  const handleTyping = (room) => {
  if (room === chat._id) setShowTypingIndicator(true);
@@ -197,8 +212,8 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  // Format last seen
  // Format status text (online/last seen)
- const getStatusText = () => {
- if (chat.isGroupChat) return `${chat.users.length} members`;
+  const getStatusText = () => {
+    if (chat.isGroupChat) return `${chat.users?.length || 0} members`;
 
  const otherUser = getChatOtherUser();
  const otherId = otherUser?._id;
@@ -886,14 +901,17 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  {/* Input Area */}
  {!chat.isCommunity && (
- (() => {
+  (() => {
     const myId = (user?._id || user?.id || user?.userId)?.toString();
     
     // Check if user is an admin of the current group
     const isAdmin = chat.groupAdmins?.some(admin => {
       const adminId = (admin.user?._id || admin.user)?.toString();
       return adminId === myId;
-    }) || (chat.groupAdmin?._id || chat.groupAdmin?.user?._id || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy)?.toString() === myId;
+    }) || 
+    chat.createdByUserId?.toString() === myId || 
+    chat.createdByOwnerId?.toString() === myId ||
+    (chat.groupAdmin?._id || chat.groupAdmin?.user?._id || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy)?.toString() === myId;
     
     // Check if user is admin of parent community for announcement groups
     let isParentCommunityAdmin = false;
@@ -911,15 +929,15 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
           return adminId === myId;
         });
         
-        // Also check if I'm the creator of the parent community
-        const parentCreatorId = (pChat.createdBy?.user?._id || pChat.createdBy?.user || pChat.createdBy)?.toString();
-        if (parentCreatorId === myId) {
+        // Also check if I'm the creator or admin of the parent community via direct IDs
+        const parentCreatorId = (pChat.createdBy?.user?._id || pChat.createdBy?.user || pChat.createdBy || pChat.createdByUserId || pChat.createdByOwnerId)?.toString();
+        if (parentCreatorId === myId || pChat.createdByUserId?.toString() === myId || pChat.createdByOwnerId?.toString() === myId) {
           isParentCommunityAdmin = true;
         }
       }
     }
 
-    const canMessage = !chat.adminOnlyMessages || isAdmin || isParentCommunityAdmin;
+    const canMessage = isAnnouncement ? (isAdmin || isParentCommunityAdmin) : (!chat.adminOnlyMessages || isAdmin || isParentCommunityAdmin);
 
     return canMessage ? (
       <form onSubmit={handleSendMessage} className="p-3 bg-black/60 border-t border-white/10 z-10 relative">

@@ -74,7 +74,10 @@ export const teamApi = baseApi.injectEndpoints({
       invalidatesTags: (result, error, id) => [{ type: "Team", id }],
     }),
     searchPlayers: builder.query({
-      query: (query) => `/api/user/players/search?query=${query}`,
+      query: (params) => ({
+        url: "/api/user/players/search",
+        params: typeof params === "string" ? { query: params } : params,
+      }),
     }),
     inviteMember: builder.mutation({
       query: ({ teamId, userId }) => ({
@@ -110,6 +113,7 @@ export const {
   useGetNetworkQuery,
   useRequestToJoinMutation,
   useSearchPlayersQuery,
+  useLazySearchPlayersQuery,
   useInviteMemberMutation,
   useAddCustomMemberMutation,
 } = teamApi;

@@ -49,6 +49,8 @@ const TeamProfile            = lazy(() => import("@features/teams").then(m => ({
 const ReelsFeed              = lazy(() => import("@features/reels").then(m => ({ default: m.ReelsFeed })));
 const UploadReel             = lazy(() => import("@features/reels").then(m => ({ default: m.UploadReel })));
 const ReelAnalytics          = lazy(() => import("@features/reels").then(m => ({ default: m.ReelAnalytics })));
+const NotificationsPage      = lazy(() => import("@features/notifications").then(m => ({ default: m.NotificationsPage })));
+
 
 
 // ── Lazy: Business Landing Pages ───────────────────────────────────────────────────
@@ -200,7 +202,7 @@ const router = createBrowserRouter([
     ],
   },
 
-  // ΓöÇΓöÇ Venue Owner Portal (High Priority) ΓöÇΓöÇ
+  // ── Venue Owner Portal (High Priority) ──
   {
     path: "/venue-owner",
     element: (
@@ -370,6 +372,7 @@ const router = createBrowserRouter([
       { path: "professionals",      element: <S><FindProfessionals /></S> },
       { path: "professionals/:id",  element: <S><ProfessionalDetails /></S> },
       { path: "messages",           element: <ProtectedRoute><S><Messages /></S></ProtectedRoute> },
+      { path: "notifications",      element: <ProtectedRoute><S><NotificationsPage /></S></ProtectedRoute> },
       { path: "my-teams",           element: <ProtectedRoute><S><MyTeams /></S></ProtectedRoute> },
 
       // Business Landings
@@ -395,8 +398,8 @@ const router = createBrowserRouter([
       { path: "team/:id",         element: <S><TeamProfile /></S> },
       { path: "booking-invoice/:id", element: <S><BookingInvoice /></S> },
       { path: "analytics/:matchId",  element: <S><MatchAnalytics /></S> },
-      { path: "reels",               element: <S><ReelsFeed /></S> },
-      { path: "shorts/:id",          element: <S><ReelsFeed /></S> },
+      { path: "reels",               element: <Navigate to="/community" replace /> },
+      { path: "shorts/:id",          element: <Navigate to="/community" replace /> },
       { path: "reels/upload",        element: <ProtectedRoute><S><UploadReel /></S></ProtectedRoute> },
       { path: "reels/analytics",     element: <ProtectedRoute><S><ReelAnalytics /></S></ProtectedRoute> },
       { path: "leaderboard",         element: <S><Leaderboard /></S> },
@@ -409,9 +412,9 @@ const router = createBrowserRouter([
     ],
   },
 
-  // ΓöÇΓöÇ LEGACY & REDIRECTS ΓöÇΓöÇ
+  // ── LEGACY & REDIRECTS ──
   { path: "/owner",          element: <Navigate to="/venue-owner" replace /> },
-  { path: "/venue-owner",    element: <Navigate to="/business/venue" replace /> },
+  { path: "/partner",        element: <Navigate to="/venue-owner" replace /> },
   { path: "/coach-landing",  element: <Navigate to="/business/coach" replace /> },
   { path: "/umpire-landing", element: <Navigate to="/business/official" replace /> },
   { path: "/venue-owners",       element: <S><PartnersGateway /></S> },

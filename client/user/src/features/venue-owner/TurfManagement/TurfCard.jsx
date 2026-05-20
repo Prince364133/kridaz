@@ -4,7 +4,7 @@ import { Edit2, Trash2, Clock, MapPin, Tag, Star, LayoutDashboard, Eye, EyeOff }
 const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
   return (
     <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-[#55DEE8]/30 transition-all duration-500 h-full flex flex-col shadow-[var(--shadow-2)] relative">
-      <Link to={`/partner/turf/${turf._id}`} className="block h-40 relative overflow-hidden">
+      <Link to={`/venue-owner/turf/${turf._id}`} className="block h-40 relative overflow-hidden">
         <img
           src={turf.image}
           alt={turf.name}
@@ -23,7 +23,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
       </Link>
       
       <div className="p-4 flex flex-col flex-grow relative">
-        <Link to={`/partner/turf/${turf._id}`} className="block group/title">
+        <Link to={`/venue-owner/turf/${turf._id}`} className="block group/title">
            <div className="flex justify-between items-start mb-3">
               <div className="space-y-1">
                 <h2 className="text-[15px] font-bold text-white uppercase tracking-widest group-hover/title:text-[#55DEE8] transition-colors font-open-sans">
@@ -109,3 +109,4 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
 
 
 export default TurfCard;
+

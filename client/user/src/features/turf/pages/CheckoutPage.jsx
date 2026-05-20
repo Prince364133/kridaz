@@ -72,7 +72,7 @@ const CheckoutPage = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await axiosInstance.get("/api/admin/settings/payout");
+        const response = await axiosInstance.get("/api/settings/payout");
         setSettings(response.data.payoutSettings);
       } catch (err) {
         console.error("Failed to fetch payout settings:", err);
@@ -80,6 +80,22 @@ const CheckoutPage = () => {
     };
     fetchSettings();
   }, []);
+
+  useEffect(() => {
+    const fetchWallet = async () => {
+      try {
+        const response = await axiosInstance.get("/api/user/wallet/data");
+        if (response.data) {
+          setCurrentBalance(response.data.usableBalance ?? response.data.balance);
+        }
+      } catch (err) {
+        console.error("Failed to fetch wallet data:", err);
+      }
+    };
+    if (user) {
+      fetchWallet();
+    }
+  }, [user]);
 
   // Calculations
   const venueCharges = amount || 0;

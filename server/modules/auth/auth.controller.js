@@ -194,30 +194,40 @@ export const requestUpgrade = async (req, res) => {
     let owner = user.ownerProfile;
 
     if (owner) {
+      if (phone || city) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            city: city || user.city,
+            phone: phone || user.phone
+          }
+        });
+      }
       owner = await prisma.ownerProfile.update({
         where: { id: owner.id },
         data: {
-          upgradeRequested: true,
-          city: city || owner.city,
           bio: bio || owner.bio,
-          phone: phone || owner.phone,
           experience: experience || owner.experience,
           specialization: specialization || owner.specialization
         }
       });
     } else if (user.role?.toLowerCase().includes("umpire") || user.role?.toLowerCase().includes("coach")) {
+      if (phone || city) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            phone: phone || user.phone,
+            city: city || user.city
+          }
+        });
+      }
       owner = await prisma.ownerProfile.create({
         data: {
           userId: user.id,
-          name: user.name,
-          email: user.email,
-          phone: phone || user.phone || "",
-          role: user.role,
-          city: city || "",
           bio: bio || "",
           experience: experience || "",
           specialization: specialization || "Cricket",
-          upgradeRequested: true
+          businessName: user.name || "Independent Partner"
         }
       });
     }
@@ -314,13 +324,8 @@ export const registerUser = async (req, res) => {
         const owner = await tx.ownerProfile.create({
           data: {
             userId: user.id,
-            name,
-            email,
-            phone,
-            role: "LIMITED_UMPIRE",
             gender,
-            city: location || "",
-            gameTypes: sportTypes || []
+            businessName: name || "Independent Partner"
           }
         });
         ownerProfileId = owner.id;
@@ -398,7 +403,7 @@ export const registerUser = async (req, res) => {
 
 // Owner Registration
 export const registerOwner = async (req, res) => {
-  const { name, email, phone, password, role, gender, location, otp, phoneOtp } = req.body;
+  const { name, email, phone, password, role, gender, location, otp, phoneOtp, businessName } = req.body;
 
   try {
     const existingUser = await prisma.user.findFirst({
@@ -432,7 +437,7 @@ export const registerOwner = async (req, res) => {
     const professionalRoles = ["COACH", "UMPIRE", "coach", "umpire"];
     if (professionalRoles.includes(role)) {
       const count = await prisma.ownerProfile.count({
-        where: { role: { in: ["coach", "umpire", "COACH", "UMPIRE"] } }
+        where: { user: { role: { in: ["coach", "umpire", "COACH", "UMPIRE"] } } }
       });
       waitlistPosition = count + 1;
     }
@@ -457,11 +462,8 @@ export const registerOwner = async (req, res) => {
       const owner = await tx.ownerProfile.create({
         data: {
           userId: user.id,
-          name,
-          email,
-          phone,
-          role: role?.toUpperCase() || "OWNER",
-          city: location || ""
+          gender,
+          businessName: businessName || name || "Independent Partner"
         }
       });
 
@@ -844,17 +846,12 @@ export const googleAuth = async (req, res) => {
 
         if (requestedRole && requestedRole !== "user") {
           const count = await tx.ownerProfile.count({
-            where: { role: { in: ["coach", "umpire", "COACH", "UMPIRE"] } }
+            where: { user: { role: { in: ["coach", "umpire", "COACH", "UMPIRE"] } } }
           });
           const owner = await tx.ownerProfile.create({
             data: {
               userId: newUser.id,
-              name,
-              email,
-              googleId,
-              role: requestedRole.toUpperCase(),
-              waitlistPosition: count + 1,
-              password: hashedPassword
+              businessName: name || "Independent Partner"
             }
           });
           ownerProfileId = owner.id;
@@ -919,10 +916,7 @@ export const googleAuth = async (req, res) => {
             targetOwner = await prisma.ownerProfile.create({
               data: {
                 userId: user.id,
-                name: user.name,
-                email: user.email,
-                googleId: user.googleId,
-                role: "LIMITED_UMPIRE",
+                businessName: user.name || "Independent Partner"
               }
             });
 

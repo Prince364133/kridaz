@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   X, 
@@ -33,16 +33,16 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   };
 
   const mainNavItems = [
-    { to: "/partner", label: "Dashboard", icon: LayoutGrid },
-    { to: "/partner/bookings", label: "Bookings", icon: BookOpen },
-    { to: "/partner/turfs", label: "Grounds", icon: MapPin },
-    { to: "/partner/customers", label: "Customers", icon: Users },
-    { to: "/partner/intelligence", label: "Intelligence", icon: BarChart3 },
-    { to: "/partner/revenue", label: "Revenue", icon: IndianRupee },
-    { to: "/partner/banking", label: "Payout & Banking", icon: Landmark },
-    { to: "/partner/reviews", label: "Reviews", icon: Star },
-    { to: "/partner/promotions", label: "Promotions", icon: Tag },
-    { to: "/partner/support", label: "Docs & Support", icon: HelpCircle },
+    { to: "/venue-owner", label: "Dashboard", icon: LayoutGrid },
+    { to: "/venue-owner/bookings", label: "Bookings", icon: BookOpen },
+    { to: "/venue-owner/turfs", label: "Grounds", icon: MapPin },
+    { to: "/venue-owner/customers", label: "Customers", icon: Users },
+    { to: "/venue-owner/intelligence", label: "Intelligence", icon: BarChart3 },
+    { to: "/venue-owner/revenue", label: "Revenue", icon: IndianRupee },
+    { to: "/venue-owner/banking", label: "Payout & Banking", icon: Landmark },
+    { to: "/venue-owner/reviews", label: "Reviews", icon: Star },
+    { to: "/venue-owner/promotions", label: "Promotions", icon: Tag },
+    { to: "/venue-owner/support", label: "Docs & Support", icon: HelpCircle },
     { label: "Sign Out", icon: LogOut, action: "logout" },
   ];
 

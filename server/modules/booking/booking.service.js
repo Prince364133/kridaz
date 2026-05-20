@@ -320,7 +320,16 @@ export const verifyBookingPayment = async (userId, paymentData) => {
   });
 
   // Generate & send invoice
-  generateInvoice(updatedBooking, turf, user).then(pdfBuffer => {
+  const duration = Math.ceil((new Date(adjustedEndTime) - new Date(adjustedStartTime)) / (1000 * 60 * 60));
+  const invoiceBooking = {
+    ...updatedBooking,
+    selectedTurfDate: formattedDate,
+    startTime: formattedStartTime,
+    endTime: formattedEndTime,
+    duration
+  };
+
+  generateInvoice(invoiceBooking, turf, user).then(pdfBuffer => {
     const htmlContent = generateHTMLContent(
       turf.name,
       turf.city + ", " + turf.state,
@@ -408,7 +417,7 @@ export const processWalletBooking = async (userId, bookingData) => {
   const baseAmount = finalPrice - gstAmountCalc;
   const platformFee = Math.round(baseAmount * (platformFeePercentage / 100));
   const ownerRevenue = baseAmount - platformFee;
-  const amountToDeduct = finalPrice;
+  const amountToDeduct = bodyPaymentType === "PARTIAL" && bodyAdvanceAmount ? bodyAdvanceAmount : finalPrice;
 
   if (user.walletBalance < amountToDeduct) {
     const error = new Error("Insufficient wallet balance");

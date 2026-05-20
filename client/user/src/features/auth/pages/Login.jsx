@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+ï»¿import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import useLoginForm from "../hooks/useLoginForm";
@@ -50,7 +50,7 @@ const Login = () => {
     if (isLoggedIn && !showOnboarding) {
       const normalizedRole = role?.toLowerCase();
       if (normalizedRole === "admin" || normalizedRole === "bmsp_admin") navigate("/admin");
-      else if (normalizedRole === "venu_owners" || normalizedRole === "owner") navigate("/partner");
+      else if (normalizedRole === "venu_owners" || normalizedRole === "owner") navigate("/venue-owner");
       else if (normalizedRole === "coach") navigate("/coach");
       else if (normalizedRole === "umpire") navigate("/umpire");
       else if (normalizedRole === "scorer") navigate("/scorer");
@@ -61,13 +61,13 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-start pt-4 lg:pt-10 pb-12 font-sans">
-      {/* GöÇGöÇ BACKGROUND LAYER GöÇGöÇ */}
+      {/* Gï¿½ï¿½Gï¿½ï¿½ BACKGROUND LAYER Gï¿½ï¿½Gï¿½ï¿½ */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-black" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_transparent_0%,_black_100%)]" />
       </div>
 
-      {/* GöÇGöÇ MAIN CONTENT GöÇGöÇ */}
+      {/* Gï¿½ï¿½Gï¿½ï¿½ MAIN CONTENT Gï¿½ï¿½Gï¿½ï¿½ */}
       <div className={`relative z-10 w-full max-w-md mx-auto px-6 transition-all duration-1000 transform ${mounted ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
         
         <div className="flex flex-col items-center w-full max-w-md mx-auto">
@@ -167,7 +167,7 @@ const Login = () => {
                           <input
                             {...register("password")}
                             type="password"
-                            placeholder="GÇóGÇóGÇóGÇóGÇóGÇóGÇóGÇó"
+                            placeholder="Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½"
                             className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
                           />
                           {errors.password && <p className="text-xs text-red-500 mt-1 ml-1">{errors.password.message}</p>}
@@ -243,3 +243,4 @@ const Login = () => {
 };
 
 export default Login;
+

@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { 
   Facebook, 
@@ -28,7 +28,7 @@ const PartnerFooter = () => {
                 <img src="/logo.png" alt="Kridaz" className="h-10 lg:h-12 w-auto" />
               </div>
               <div className="border-l border-white/20 pl-4 h-10 flex flex-col justify-center">
-                <span className="block text-[10px] font-semibold text-[#55DEE8] tracking-wider uppercase leading-none mb-1">Partner Portal</span>
+                <span className="block text-[10px] font-semibold text-[#55DEE8] tracking-wider uppercase leading-none mb-1">Venue Owner Portal</span>
                 <span className="block text-xl font-bold text-white tracking-tight leading-none uppercase">Business</span>
               </div>
             </Link>
@@ -59,11 +59,11 @@ const PartnerFooter = () => {
             </div>
 
             <div className="space-y-6">
-              <h4 className="text-sm font-bold text-white uppercase tracking-wider">Partnership</h4>
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider">Venue Owners</h4>
               <ul className="space-y-3">
                 {[
-                  { name: "Join Network", path: "/partners" },
-                  { name: "Partner Program", path: "#" },
+                  { name: "Join Network", path: "/venue-owners" },
+                  { name: "Venue Owner Program", path: "#" },
                   { name: "Success Stories", path: "#" },
                   { name: "Guidelines", path: "#" }
                 ].map((link) => (

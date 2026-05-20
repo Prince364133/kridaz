@@ -26,7 +26,7 @@ import useNotifications from "@hooks/shared/useNotifications";
 import { formatDistanceToNow } from 'date-fns';
 
 /**
- * AuthenticatedNavbar GÇö Role-aware top navigation.
+ * AuthenticatedNavbar Gï¿½ï¿½ Role-aware top navigation.
  * Fully rebranded for Scorer users with Teal Green (#00C187) and Inter typography.
  */
 
@@ -49,7 +49,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const getBasePath = () => {
     const r = role?.toLowerCase();
     if (r === "admin" || r === "bmsp_admin") return "/admin";
-    if (r === "venu_owners" || r?.includes("venu_owners") || r === "owner" || r === "bmsp_owner" || r === "verified_venue_owner" || r === "venue_owner") return "/partner";
+    if (r === "venu_owners" || r?.includes("venu_owners") || r === "owner" || r === "bmsp_owner" || r === "verified_venue_owner" || r === "venue_owner") return "/venue-owner";
     if (r === "coach" || r === "bmsp_coach") return "/coach";
     if (r?.includes("umpire")) return "/umpire";
     if (r?.includes("scorer")) return "/scorer";
@@ -148,12 +148,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-white/40 text-[11px] font-black uppercase tracking-[0.2em]">{getTimeGreeting()},</span>
-            <span className="text-[11px] font-black uppercase tracking-[0.2em]" style={{ color: themeColor, textShadow: `0 0 15px ${themeColor}4D` }}>
-              {user?.name?.split(" ")[0] || user?.fullName?.split(" ")[0] || "User"}
-            </span>
-          </div>
+
         </div>
 
 
@@ -310,3 +305,4 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
 };
 
 export default AuthenticatedNavbar;
+

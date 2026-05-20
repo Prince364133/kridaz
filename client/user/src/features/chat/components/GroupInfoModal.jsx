@@ -7,7 +7,8 @@ import {
   useGetFollowersFollowingQuery, 
   useMakeGroupAdminMutation, 
   useDismissGroupAdminMutation,
-  useGetChatsQuery 
+  useGetChatsQuery,
+  useDeleteChatMutation
 } from '@redux/api/chatApi';
 
 const GroupInfoModal = ({ isOpen, onClose, chat }) => {
@@ -21,6 +22,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  const [addToGroup] = useAddToGroupMutation();
  const [makeAdmin] = useMakeGroupAdminMutation();
  const [dismissAdmin] = useDismissGroupAdminMutation();
+ const [deleteChat] = useDeleteChatMutation();
  const { data: networkData } = useGetFollowersFollowingQuery();
 
  if (!isOpen || !chat) return null;
@@ -29,7 +31,10 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
   const isAdmin = chat.groupAdmins?.some(admin => {
     const adminId = (admin.user?._id || admin.user)?.toString();
     return myIds.includes(adminId);
-  }) || myIds.includes((chat.groupAdmin?._id || chat.groupAdmin?.user?._id || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy)?.toString());
+  }) || 
+  myIds.includes(chat.createdByUserId?.toString()) ||
+  myIds.includes(chat.createdByOwnerId?.toString()) ||
+  myIds.includes((chat.groupAdmin?._id || chat.groupAdmin?.user?._id || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy)?.toString());
 
  const handleRename = async () => {
  if (!groupName || groupName === chat.chatName) {
@@ -54,18 +59,33 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  }
  };
 
- const handleLeaveGroup = async () => {
- if (window.confirm("Are you sure you want to leave this group?")) {
- try {
- const myIdToSend = user?._id || user?.id || user?.userId;
- await removeFromGroup({ chatId: chat._id, userId: myIdToSend }).unwrap();
- onClose(); // Close modal after leaving, ChatWindow might unmount because chat is no longer selected
- window.location.reload(); // Simple refresh to clear chat state
- } catch (err) {
- console.error("Failed to leave group", err);
- }
- }
- };
+  const createdById = (chat.createdBy?._id || chat.createdBy?.id || chat.createdByUserId || chat.createdByOwnerId)?.toString();
+  const isCreator = myIds.includes(createdById);
+
+  const handleDeleteCommunity = async () => {
+    if (window.confirm("Are you sure you want to delete this community? This will permanently delete all associated groups and messages under this community.")) {
+      try {
+        await deleteChat(chat._id).unwrap();
+        onClose();
+        window.location.reload();
+      } catch (err) {
+        console.error("Failed to delete community", err);
+      }
+    }
+  };
+
+  const handleLeaveGroup = async () => {
+    if (window.confirm(chat.isCommunity ? "Are you sure you want to leave this community?" : "Are you sure you want to leave this group?")) {
+      try {
+        const myIdToSend = user?._id || user?.id || user?.userId;
+        await removeFromGroup({ chatId: chat._id, userId: myIdToSend }).unwrap();
+        onClose(); // Close modal after leaving, ChatWindow might unmount because chat is no longer selected
+        window.location.reload(); // Simple refresh to clear chat state
+      } catch (err) {
+        console.error("Failed to leave group", err);
+      }
+    }
+  };
 
   const handleAddUser = async (userId) => {
     try {
@@ -103,7 +123,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
 
  // Users not currently in the group
  const availableUsers = connections.filter(c => 
- !chat.users.some(u => (u.user?._id || u.user) === c._id) &&
+ !chat.users?.some(u => (u.user?._id || u.user) === c._id) &&
  !chat.pendingMembers?.some(p => (p.user?._id || p.user) === c._id)
  );
 
@@ -384,18 +404,32 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  </div>
  </div>
 
- {/* Action Footer (Leave Group) */}
- <div className="bg-[#111111] py-2 shadow-sm mb-10">
- <button 
- onClick={handleLeaveGroup}
- className="w-full flex items-center gap-4 px-6 py-4 hover:bg-white/[0.03] text-[#EF4444] transition-colors"
- >
- <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
- </svg>
- <span className="text-[15px] font-medium tracking-wide">Exit group</span>
- </button>
- </div>
+  {/* Action Footer */}
+  <div className="bg-[#111111] py-2 shadow-sm mb-10">
+    {chat.isCommunity && isCreator ? (
+      <button 
+        onClick={handleDeleteCommunity}
+        className="w-full flex items-center gap-4 px-6 py-4 hover:bg-white/[0.03] text-[#EF4444] transition-colors"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+        <span className="text-[15px] font-medium tracking-wide">Delete Community</span>
+      </button>
+    ) : (
+      <button 
+        onClick={handleLeaveGroup}
+        className="w-full flex items-center gap-4 px-6 py-4 hover:bg-white/[0.03] text-[#EF4444] transition-colors"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        <span className="text-[15px] font-medium tracking-wide">
+          {chat.isCommunity ? "Leave Community" : "Exit group"}
+        </span>
+      </button>
+    )}
+  </div>
  </div>
  </div>
  </>

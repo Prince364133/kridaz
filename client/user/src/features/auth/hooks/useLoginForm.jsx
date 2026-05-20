@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+﻿import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useState } from "react";
@@ -44,7 +44,7 @@ const useLoginForm = () => {
     if (normalizedRole === "admin") {
       navigate("/admin");
     } else if (normalizedRole === "owner") {
-      navigate("/partner");
+      navigate("/venue-owner");
     } else if (normalizedRole === "coach") {
       navigate("/coach");
     } else if (normalizedRole === "umpire") {
@@ -170,3 +170,4 @@ const useLoginForm = () => {
 };
 
 export default useLoginForm;
+

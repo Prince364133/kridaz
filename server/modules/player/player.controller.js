@@ -148,10 +148,13 @@ export const getPublicPlayers = async (req, res) => {
 
 export const searchPlayers = async (req, res) => {
   try {
-    const { query } = req.query;
+    const { query, page = 1, limit = 10 } = req.query;
     if (!query) {
       return res.status(200).json({ success: true, players: [] });
     }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const take = parseInt(limit);
 
     const users = await prisma.user.findMany({
       where: {
@@ -169,7 +172,8 @@ export const searchPlayers = async (req, res) => {
         city: true,
         state: true
       },
-      take: 20
+      skip,
+      take
     });
 
     const userIds = users.map(u => u.id);

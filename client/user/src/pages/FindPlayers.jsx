@@ -97,10 +97,10 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
           </div>
         </div>
         <div className="flex items-center gap-2 w-full mt-auto">
-          <button onClick={() => handleFollowToggle(player._id)} className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player._id) ? "bg-white/5 text-white/20 border border-white/10" : "bg-[#55DEE8] text-black hover:bg-[#88EEF6]"}`}>
-            {followingIds.includes(player._id) ? "Following" : "Follow"}
+          <button onClick={() => handleFollowToggle(player.id || player._id)} className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player.id || player._id) ? "bg-white/5 text-white/20 border border-white/10" : "bg-[#55DEE8] text-black hover:bg-[#88EEF6]"}`}>
+            {followingIds.includes(player.id || player._id) ? "Following" : "Follow"}
           </button>
-          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8] transition-all">
+          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player.id || player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8] transition-all">
             <MessageCircle size={18} />
           </button>
         </div>
@@ -281,7 +281,7 @@ const FindPlayers = () => {
   const fetchFollowingStatus = async () => {
     try {
       const response = await axiosInstance.get("/api/user/players/network");
-      const ids = (response.data.following || []).filter(p => p).map(p => p._id);
+      const ids = (response.data.following || []).filter(p => p).map(p => p.id || p._id);
       setFollowingIds(ids);
     } catch (error) {
       console.error("Error fetching network:", error);
@@ -319,21 +319,22 @@ const FindPlayers = () => {
 
   const handleAvatarClick = (player) => {
     gateInteraction(() => {
+      const playerId = player.id || player._id;
       if (!player.hasActiveStory) {
-        navigate(`/profile/${player._id}`);
+        navigate(`/profile/${playerId}`);
         return;
       }
       const fetchStories = async () => {
         try {
-          const res = await axiosInstance.get(`/api/user/community/user-stories/${player._id}`);
+          const res = await axiosInstance.get(`/api/user/community/user-stories/${playerId}`);
           if (res.data.success && res.data.stories?.length > 0) {
             setViewingStoryGroup({ user: player, stories: res.data.stories });
           } else {
-            navigate(`/profile/${player._id}`);
+            navigate(`/profile/${playerId}`);
           }
         } catch (error) {
           toast.error("Failed to load stories");
-          navigate(`/profile/${player._id}`);
+          navigate(`/profile/${playerId}`);
         }
       };
       fetchStories();
@@ -411,7 +412,7 @@ const FindPlayers = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {players.map((player, idx) => (
               <PlayerCard 
-                key={player._id} 
+                key={player.id || player._id} 
                 player={player} 
                 rank={idx}
                 followingIds={followingIds}

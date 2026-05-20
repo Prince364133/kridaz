@@ -1,0 +1,399 @@
+import { useState, useEffect, useCallback } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Bell, Check, CheckCheck, Trash2, Users, MessageCircle, Calendar,
+  Heart, Trophy, Loader2, ShieldCheck, Zap, X, ChevronRight,
+  Bookmark, CreditCard, AlertTriangle, Star, ArrowLeft
+} from "lucide-react";
+import axiosInstance from "@hooks/useAxiosInstance";
+import { useSocket } from "@context/SocketContext";
+import { formatDistanceToNow } from "date-fns";
+
+const PRI = "#84CC16";
+const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
+
+/**
+ * Notification type → visual configuration map.
+ * Each type has an icon, color, and route resolution strategy.
+ */
+const NOTIF_CONFIG = {
+  FOLLOW: {
+    icon: Users,
+    color: "#84CC16",
+    bgColor: "rgba(132,204,22,0.08)",
+    getRoute: (notif) => `/profile/${notif.metadata?.senderId || ""}`,
+  },
+  MESSAGE: {
+    icon: MessageCircle,
+    color: "#60A5FA",
+    bgColor: "rgba(96,165,250,0.08)",
+    getRoute: () => "/messages",
+  },
+  BOOKING: {
+    icon: Calendar,
+    color: "#F59E0B",
+    bgColor: "rgba(245,158,11,0.08)",
+    getRoute: (notif) => notif.link || `/booking-pass/${notif.metadata?.bookingId || ""}`,
+  },
+  LIKE: {
+    icon: Heart,
+    color: "#EF4444",
+    bgColor: "rgba(239,68,68,0.08)",
+    getRoute: (notif) => notif.link || "/community",
+  },
+  COMMENT: {
+    icon: MessageCircle,
+    color: "#8B5CF6",
+    bgColor: "rgba(139,92,246,0.08)",
+    getRoute: (notif) => notif.link || "/community",
+  },
+  PAYMENT: {
+    icon: CreditCard,
+    color: "#10B981",
+    bgColor: "rgba(16,185,129,0.08)",
+    getRoute: (notif) => notif.link || "/wallet",
+  },
+  REVIEW: {
+    icon: Star,
+    color: "#FBBF24",
+    bgColor: "rgba(251,191,36,0.08)",
+    getRoute: (notif) => notif.link || "/profile",
+  },
+  SUPPORT: {
+    icon: ShieldCheck,
+    color: "#06B6D4",
+    bgColor: "rgba(6,182,212,0.08)",
+    getRoute: (notif) => notif.link || "/profile",
+  },
+  WITHDRAWAL: {
+    icon: AlertTriangle,
+    color: "#F97316",
+    bgColor: "rgba(249,115,22,0.08)",
+    getRoute: (notif) => notif.link || "/wallet",
+  },
+  SYSTEM: {
+    icon: Zap,
+    color: "#A78BFA",
+    bgColor: "rgba(167,139,250,0.08)",
+    getRoute: (notif) => notif.link || "/",
+  },
+};
+
+const DEFAULT_CONFIG = {
+  icon: Bell,
+  color: "#84CC16",
+  bgColor: "rgba(132,204,22,0.08)",
+  getRoute: (notif) => notif.link || "/",
+};
+
+/**
+ * Resolves the correct API base URL based on user role.
+ */
+const getBaseUrl = (user) => {
+  if (!user) return "/api/user/notifications";
+  const role = user.role?.toLowerCase() || "";
+  if (role === "admin" || role.includes("bmsp_admin")) return "/api/admin/notifications";
+  if (["venu_owners", "owner", "verified_venue_owner", "bmsp_owner", "coach", "umpire", "scorer", "streamer"]
+    .some((r) => role.includes(r))) return "/api/owner/notifications";
+  return "/api/user/notifications";
+};
+
+/**
+ * NotificationsPage — Dedicated full-page notification center.
+ *
+ * Architecture:
+ *  - UI Layer: Pure rendering of notification cards, filters, and empty states.
+ *  - Behavior Layer: Manages fetch, mark-read, clear, real-time socket listeners.
+ *  - Service Layer: Axios calls to notification API endpoints.
+ */
+const NotificationsPage = () => {
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+  const { socket } = useSocket();
+
+  // ── State ────────────────────────────────────────────────────────────────
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState("all"); // all | unread
+
+  // ── Service Layer: API calls ─────────────────────────────────────────────
+  const baseUrl = getBaseUrl(user);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get(baseUrl);
+      if (response.data.success) {
+        setNotifications(response.data.notifications || []);
+      }
+    } catch (error) {
+      console.error("[NotificationsPage] Fetch error:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [baseUrl]);
+
+  const markAsRead = async (id) => {
+    try {
+      await axiosInstance.put(`${baseUrl}/${id}/mark-read`);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id || n._id === id ? { ...n, isRead: true } : n))
+      );
+    } catch (error) {
+      console.error("[NotificationsPage] Mark read error:", error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      await axiosInstance.put(`${baseUrl}/mark-all-read`);
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    } catch (error) {
+      console.error("[NotificationsPage] Mark all read error:", error);
+    }
+  };
+
+  const clearAll = async () => {
+    try {
+      await axiosInstance.delete(`${baseUrl}/clear`);
+      setNotifications([]);
+    } catch (error) {
+      console.error("[NotificationsPage] Clear all error:", error);
+    }
+  };
+
+  // ── Behavior Layer: Effects ──────────────────────────────────────────────
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  // Real-time: listen for new notifications via socket
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewNotification = (notification) => {
+      setNotifications((prev) => [notification, ...prev]);
+    };
+
+    socket.on("new_notification", handleNewNotification);
+    return () => {
+      socket.off("new_notification", handleNewNotification);
+    };
+  }, [socket]);
+
+  // ── Derived data ─────────────────────────────────────────────────────────
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const filtered =
+    activeFilter === "unread"
+      ? notifications.filter((n) => !n.isRead)
+      : notifications;
+
+  // ── Handlers ─────────────────────────────────────────────────────────────
+  const handleNotificationClick = (notif) => {
+    const id = notif.id || notif._id;
+    if (!notif.isRead) markAsRead(id);
+
+    const type = notif.type?.toUpperCase() || "SYSTEM";
+    const config = NOTIF_CONFIG[type] || DEFAULT_CONFIG;
+    const route = config.getRoute(notif);
+    if (route) navigate(route);
+  };
+
+  const getConfig = (type) => {
+    const key = (type || "SYSTEM").toUpperCase();
+    return NOTIF_CONFIG[key] || DEFAULT_CONFIG;
+  };
+
+  // ── UI Layer: Render ─────────────────────────────────────────────────────
+  return (
+    <div className="min-h-screen bg-[#050505] pt-6 pb-20 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+
+        {/* ── Header ──────────────────────────────────────────────── */}
+        <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-white/50 hover:text-white hover:border-white/10 transition-all"
+          >
+            <ArrowLeft size={18} />
+          </button>
+          <div className="flex-1">
+            <h1
+              className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider"
+              style={HEADING_STYLE}
+            >
+              Notifications
+            </h1>
+            <p className="text-[11px] font-semibold text-white/30 mt-0.5 tracking-widest uppercase" style={SUBHEADING_STYLE}>
+              {unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
+            </p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllAsRead}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#84CC16]/10 border border-[#84CC16]/20 text-[#84CC16] text-[10px] font-black uppercase tracking-widest hover:bg-[#84CC16]/20 transition-all"
+              >
+                <CheckCheck size={14} />
+                <span className="hidden sm:inline">Read All</span>
+              </button>
+            )}
+            {notifications.length > 0 && (
+              <button
+                onClick={clearAll}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 transition-all"
+              >
+                <Trash2 size={14} />
+                <span className="hidden sm:inline">Clear</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Filters ─────────────────────────────────────────────── */}
+        <div className="flex items-center gap-2 mb-6">
+          {["all", "unread"].map((filter) => (
+            <button
+              key={filter}
+              onClick={() => setActiveFilter(filter)}
+              className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border ${
+                activeFilter === filter
+                  ? "bg-[#84CC16]/10 border-[#84CC16]/30 text-[#84CC16]"
+                  : "bg-white/[0.02] border-white/5 text-white/40 hover:text-white/60 hover:border-white/10"
+              }`}
+            >
+              {filter === "all" ? "All" : `Unread (${unreadCount})`}
+            </button>
+          ))}
+        </div>
+
+        {/* ── Notification List ────────────────────────────────────── */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-32 gap-4">
+            <Loader2 size={36} className="text-[#84CC16] animate-spin" />
+            <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">
+              Loading notifications…
+            </p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-32 gap-5">
+            <div className="w-24 h-24 rounded-2xl bg-white/[0.02] border border-dashed border-white/10 flex items-center justify-center">
+              <Bell size={40} className="text-white/10" />
+            </div>
+            <div className="text-center">
+              <p className="text-[13px] font-black text-white/30 uppercase tracking-widest">
+                {activeFilter === "unread" ? "No unread notifications" : "No notifications yet"}
+              </p>
+              <p className="text-[11px] text-white/15 mt-1 font-medium" style={SUBHEADING_STYLE}>
+                {activeFilter === "unread"
+                  ? "You're all caught up!"
+                  : "When you get notifications, they'll show up here"}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <AnimatePresence mode="popLayout">
+              {filtered.map((notif, index) => {
+                const id = notif.id || notif._id;
+                const config = getConfig(notif.type);
+                const IconComponent = config.icon;
+
+                return (
+                  <motion.div
+                    key={id}
+                    layout
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -40 }}
+                    transition={{ duration: 0.2, delay: index * 0.03 }}
+                    onClick={() => handleNotificationClick(notif)}
+                    className={`group relative flex items-start gap-4 p-4 sm:p-5 rounded-2xl border cursor-pointer transition-all duration-300 ${
+                      notif.isRead
+                        ? "bg-white/[0.01] border-white/[0.03] hover:bg-white/[0.03]"
+                        : "bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.05]"
+                    }`}
+                  >
+                    {/* Unread indicator */}
+                    {!notif.isRead && (
+                      <div className="absolute top-4 right-4 w-2.5 h-2.5 rounded-full bg-[#84CC16] shadow-[0_0_8px_rgba(132,204,22,0.5)]" />
+                    )}
+
+                    {/* Icon */}
+                    <div
+                      className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border border-white/5 transition-transform group-hover:scale-105"
+                      style={{
+                        backgroundColor: notif.isRead ? "rgba(255,255,255,0.03)" : config.bgColor,
+                      }}
+                    >
+                      <IconComponent
+                        size={18}
+                        style={{ color: notif.isRead ? "#555" : config.color }}
+                      />
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <h4
+                          className={`text-[13px] font-bold leading-tight transition-colors ${
+                            notif.isRead
+                              ? "text-white/40"
+                              : "text-white group-hover:text-[#84CC16]"
+                          }`}
+                          style={SUBHEADING_STYLE}
+                        >
+                          {notif.title}
+                        </h4>
+                      </div>
+                      <p
+                        className={`text-[12px] mt-1 leading-relaxed ${
+                          notif.isRead ? "text-white/25" : "text-white/50"
+                        }`}
+                        style={SUBHEADING_STYLE}
+                      >
+                        {notif.message}
+                      </p>
+                      <div className="flex items-center gap-3 mt-2">
+                        <span className="text-[10px] font-bold text-white/20 uppercase tracking-wider">
+                          {notif.createdAt
+                            ? formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true }).replace("about ", "")
+                            : "Just now"}
+                        </span>
+                        {notif.type && (
+                          <span
+                            className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border"
+                            style={{
+                              color: notif.isRead ? "#444" : config.color,
+                              borderColor: notif.isRead ? "rgba(255,255,255,0.05)" : config.color + "30",
+                              backgroundColor: notif.isRead ? "transparent" : config.bgColor,
+                            }}
+                          >
+                            {notif.type}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Chevron */}
+                    <ChevronRight
+                      size={16}
+                      className="text-white/10 group-hover:text-white/30 transition-colors shrink-0 mt-1"
+                    />
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default NotificationsPage;

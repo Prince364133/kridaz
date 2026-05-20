@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { X, Search, UserPlus, UserMinus, Loader2, MapPin, Users } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -37,18 +37,19 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
 
   const handleFollowToggle = async (targetUser) => {
     gateInteraction(async () => {
-      const isFollowing = followingIds.includes(targetUser._id);
+      const targetId = targetUser.id || targetUser._id;
+      const isFollowing = followingIds.includes(targetId);
       try {
         if (isFollowing) {
-          const response = await axiosInstance.post(`/api/user/players/${targetUser._id}/unfollow`);
+          const response = await axiosInstance.post(`/api/user/players/${targetId}/unfollow`);
           if (response.data.success) {
-            dispatch(unfollowUser(targetUser._id));
+            dispatch(unfollowUser(targetId));
             toast.success(`Unfollowed ${targetUser.name}`);
           }
         } else {
-          const response = await axiosInstance.post(`/api/user/players/${targetUser._id}/follow`);
+          const response = await axiosInstance.post(`/api/user/players/${targetId}/follow`);
           if (response.data.success) {
-            dispatch(followUser(targetUser._id));
+            dispatch(followUser(targetId));
             toast.success(`Following ${targetUser.name}`);
           }
         }
@@ -68,8 +69,10 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
   );
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
-    const aIsMutual = followingIds.includes(a._id);
-    const bIsMutual = followingIds.includes(b._id);
+    const aId = a.id || a._id;
+    const bId = b.id || b._id;
+    const aIsMutual = followingIds.includes(aId);
+    const bIsMutual = followingIds.includes(bId);
     if (aIsMutual && !bIsMutual) return -1;
     if (!aIsMutual && bIsMutual) return 1;
     return 0;
@@ -113,13 +116,14 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
           ) : sortedUsers.length > 0 ? (
             <div className="space-y-1">
               {sortedUsers.map((user) => {
-                const isFollowing = followingIds.includes(user._id);
-                const isSelf = currentUser?._id === user._id;
+                const userId = user.id || user._id;
+                const isFollowing = followingIds.includes(userId);
+                const isSelf = (currentUser?.id || currentUser?._id) === userId;
 
                 return (
-                  <div key={user._id} className="flex items-center justify-between p-3 hover:bg-[#000000] rounded-[8px] transition-colors group">
+                  <div key={userId} className="flex items-center justify-between p-3 hover:bg-[#000000] rounded-[8px] transition-colors group">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <Link to={`/profile/${user._id}`} onClick={onClose} className="shrink-0 w-10 h-10 rounded-[6px] overflow-hidden bg-[#000000] border border-[#2D2D2D]">
+                      <Link to={`/profile/${userId}`} onClick={onClose} className="shrink-0 w-10 h-10 rounded-[6px] overflow-hidden bg-[#000000] border border-[#2D2D2D]">
                         {user.profilePicture ? (
                           <img 
                             src={user.profilePicture} 
@@ -141,7 +145,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                         </div>
                       </Link>
                       <div className="overflow-hidden">
-                        <Link to={`/profile/${user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#55DEE8] transition-colors truncate">
+                        <Link to={`/profile/${user.id || user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#55DEE8] transition-colors truncate">
                           {user.name}
                         </Link>
                         <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase tracking-widest truncate">

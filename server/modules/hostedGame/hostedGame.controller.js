@@ -1703,7 +1703,8 @@ export const claimInviteSlot = async (req, res) => {
                 name: userDetails.name || inviteData.name,
                 email: userDetails.email || inviteData.email,
                 phone: userDetails.phone || inviteData.phone || "",
-                role: "LIMITED_UMPIRE"
+                role: "LIMITED_UMPIRE",
+                businessName: userDetails.name || inviteData.name || "Independent Partner"
               }
             });
             

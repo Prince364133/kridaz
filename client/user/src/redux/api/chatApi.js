@@ -1,13 +1,164 @@
 import { baseApi } from "./baseApi";
 
+export const transformMessage = (msg) => {
+  if (!msg) return msg;
+
+  let sender = null;
+  if (msg.senderUser) {
+    sender = {
+      ...msg.senderUser,
+      _id: msg.senderUser.id,
+      id: msg.senderUser.id,
+      user: {
+        ...msg.senderUser,
+        _id: msg.senderUser.id,
+        id: msg.senderUser.id,
+      }
+    };
+  } else if (msg.senderOwner) {
+    sender = {
+      ...msg.senderOwner,
+      _id: msg.senderOwner.id,
+      id: msg.senderOwner.id,
+      name: msg.senderOwner.businessName || msg.senderOwner.user?.name,
+      profilePicture: msg.senderOwner.user?.profilePicture,
+      user: {
+        ...msg.senderOwner,
+        _id: msg.senderOwner.id,
+        id: msg.senderOwner.id,
+        name: msg.senderOwner.businessName || msg.senderOwner.user?.name,
+        profilePicture: msg.senderOwner.user?.profilePicture,
+      }
+    };
+  } else if (msg.sender) {
+    sender = msg.sender;
+  }
+
+  let chat = msg.chat;
+  if (chat && typeof chat === 'object') {
+    chat = {
+      ...chat,
+      _id: chat.id,
+    };
+  }
+
+  return {
+    ...msg,
+    _id: msg.id,
+    sender,
+    chat,
+  };
+};
+
+export const transformChat = (chat) => {
+  if (!chat) return chat;
+
+  const users = (chat.participants || []).map((p) => {
+    let userObj = p.user;
+    if (p.owner) {
+      userObj = {
+        ...p.owner.user,
+        name: p.owner.businessName || p.owner.user?.name,
+        profilePicture: p.owner.user?.profilePicture,
+        ...p.owner,
+      };
+    }
+    
+    const userId = p.userId || p.ownerId;
+    const resolvedUserObj = userObj ? {
+      ...userObj,
+      _id: userObj.id || userId,
+      id: userObj.id || userId,
+    } : {
+      _id: userId,
+      id: userId,
+      name: "Deleted User",
+    };
+
+    return {
+      ...p,
+      _id: p.id,
+      user: resolvedUserObj,
+    };
+  });
+
+  const groupAdmins = (chat.participants || [])
+    .filter((p) => p.role === 'ADMIN' || p.role === 'SUPER_ADMIN' || p.isChatAdmin || p.isAdmin)
+    .map((p) => {
+      let userObj = p.user;
+      if (p.owner) {
+        userObj = {
+          ...p.owner.user,
+          name: p.owner.businessName || p.owner.user?.name,
+          profilePicture: p.owner.user?.profilePicture,
+          ...p.owner,
+        };
+      }
+      const userId = p.userId || p.ownerId;
+      return {
+        ...p,
+        _id: p.id,
+        user: userObj ? {
+          ...userObj,
+          _id: userObj.id || userId,
+          id: userObj.id || userId,
+        } : {
+          _id: userId,
+          id: userId,
+        }
+      };
+    });
+
+  let createdBy = chat.createdBy;
+  if (chat.createdByUser) {
+    createdBy = {
+      ...chat.createdByUser,
+      _id: chat.createdByUser.id,
+    };
+  } else if (chat.createdByOwner) {
+    createdBy = {
+      ...chat.createdByOwner,
+      _id: chat.createdByOwner.id,
+      name: chat.createdByOwner.businessName || chat.createdByOwner.user?.name,
+      profilePicture: chat.createdByOwner.user?.profilePicture,
+    };
+  } else if (chat.createdByUserId) {
+    createdBy = {
+      _id: chat.createdByUserId,
+      id: chat.createdByUserId,
+    };
+  } else if (chat.createdByOwnerId) {
+    createdBy = {
+      _id: chat.createdByOwnerId,
+      id: chat.createdByOwnerId,
+    };
+  }
+
+  let latestMessage = chat.latestMessage;
+  if (latestMessage) {
+    latestMessage = transformMessage(latestMessage);
+  }
+
+  return {
+    ...chat,
+    _id: chat.id,
+    users,
+    groupAdmins,
+    createdBy,
+    latestMessage,
+  };
+};
+
 export const chatApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getChats: builder.query({
       query: () => "/api/chat",
+      transformResponse: (response) => Array.isArray(response) ? response.map(transformChat) : response,
       providesTags: ["Chat"],
     }),
     getMessages: builder.query({
       query: (chatId) => `/api/chat/message/${chatId}`,
+      transformResponse: (response) => Array.isArray(response) ? response.map(transformMessage) : response,
       providesTags: (result, error, chatId) => [{ type: "Message", id: chatId }],
     }),
     sendMessage: builder.mutation({
@@ -16,6 +167,7 @@ export const chatApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      transformResponse: (response) => transformMessage(response),
       invalidatesTags: (result, error, { chatId }) => [{ type: "Message", id: chatId }, "Chat"],
     }),
     createGroupChat: builder.mutation({
@@ -24,6 +176,7 @@ export const chatApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      transformResponse: (response) => transformChat(response),
       invalidatesTags: ["Chat"],
     }),
     accessChat: builder.mutation({
@@ -32,6 +185,7 @@ export const chatApi = baseApi.injectEndpoints({
         method: "POST",
         body: { userId },
       }),
+      transformResponse: (response) => transformChat(response),
       invalidatesTags: ["Chat"],
     }),
     respondToInvitation: builder.mutation({
@@ -40,6 +194,7 @@ export const chatApi = baseApi.injectEndpoints({
         method: "POST",
         body: { chatId, status },
       }),
+      transformResponse: (response) => transformChat(response),
       invalidatesTags: ["Chat"],
     }),
     getFollowersFollowing: builder.query({
@@ -62,7 +217,7 @@ export const chatApi = baseApi.injectEndpoints({
           method: "PUT",
           body: data,
         });
-        return result.data ? { data: result.data } : { error: result.error };
+        return result.data ? { data: transformChat(result.data) } : { error: result.error };
       },
       invalidatesTags: ["Chat"],
     }),
@@ -72,6 +227,7 @@ export const chatApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      transformResponse: (response) => transformChat(response),
       invalidatesTags: ["Chat"],
     }),
     removeFromGroup: builder.mutation({

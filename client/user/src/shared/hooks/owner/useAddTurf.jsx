@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -290,7 +290,7 @@ export default function useAddTurf() {
       );
        const result = response.data;
       toast.success(result.message);
-      navigate("/partner/turfs");
+      navigate("/venue-owner/turfs");
      } catch (error) {
       if (error.response) {
         toast.error(error.response?.data?.message);
@@ -370,3 +370,4 @@ export default function useAddTurf() {
     updateSlotPrice
   };
 }
+

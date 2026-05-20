@@ -5,7 +5,7 @@ import ScrollToTop from "@components/common/ScrollToTop";
 
 const PublicLayout = () => {
   const location = useLocation();
-  const landingPages = ["/", "/venue-owner", "/coach-landing", "/umpire-landing", "/login", "/signup/venue-owner", "/signup/coach", "/signup/umpire", "/coming-soon", "/partners"];
+  const landingPages = ["/", "/venue-owner", "/coach-landing", "/umpire-landing", "/login", "/signup/venue-owner", "/signup/coach", "/signup/umpire", "/coming-soon", "/venue-owners"];
   const isLandingPage = landingPages.includes(location.pathname);
 
   return (
