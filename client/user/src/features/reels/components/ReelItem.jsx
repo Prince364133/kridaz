@@ -17,11 +17,11 @@ const ReelItem = ({ reel, isVisible }) => {
   const [commentText, setCommentText] = useState('');
   const [addComment] = useAddCommentMutation();
 
-  const isCreator = user?.id === reel.creatorId?._id || user?.id === reel.creatorId;
+  const isCreator = user?.id === (reel.creatorId?.id || reel.creatorId?._id) || user?.id === reel.creatorId;
 
   const handleLike = () => {
     setIsLiked(!isLiked);
-    interact({ reelId: reel._id, type: 'like' });
+    interact({ reelId: reel.id || reel._id, type: 'like' });
     if (!isLiked) {
       setShowHeartAnim(true);
       setTimeout(() => setShowHeartAnim(false), 800);
@@ -41,7 +41,7 @@ const ReelItem = ({ reel, isVisible }) => {
     const shareData = {
       title: 'Kridaz Shorts',
       text: reel.caption,
-      url: `${window.location.origin}/shorts/${reel._id}`
+      url: `${window.location.origin}/shorts/${reel.id || reel._id}`
     };
 
     try {
@@ -51,7 +51,7 @@ const ReelItem = ({ reel, isVisible }) => {
         await navigator.clipboard.writeText(shareData.url);
         toast.success('Link copied to clipboard!');
       }
-      interact({ reelId: reel._id, type: 'share' });
+      interact({ reelId: reel.id || reel._id, type: 'share' });
     } catch (err) {
       console.error('Share failed:', err);
     }
@@ -60,7 +60,7 @@ const ReelItem = ({ reel, isVisible }) => {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this short?')) {
       try {
-        await deleteReel(reel._id).unwrap();
+        await deleteReel(reel.id || reel._id).unwrap();
         toast.success('Short deleted');
       } catch (err) {
         toast.error('Failed to delete short');
@@ -73,7 +73,7 @@ const ReelItem = ({ reel, isVisible }) => {
     if (!commentText.trim()) return;
 
     try {
-      await addComment({ reelId: reel._id, text: commentText }).unwrap();
+      await addComment({ reelId: reel.id || reel._id, text: commentText }).unwrap();
       setCommentText('');
       toast.success('Comment added');
     } catch (err) {
@@ -81,7 +81,7 @@ const ReelItem = ({ reel, isVisible }) => {
     }
   };
 
-  const isProcessing = reel.status === 'pending' && !reel.temp;
+  const isProcessing = (reel.status === 'pending' || reel.status === 'processing') && !reel.temp;
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden flex items-center justify-center">
@@ -117,7 +117,7 @@ const ReelItem = ({ reel, isVisible }) => {
           </div>
         ) : (
           <ReelPlayer 
-            reelId={reel._id}
+            reelId={reel.id || reel._id}
             hlsUrl={reel.hlsUrl || reel.rawVideoUrl} 
             isVisible={isVisible} 
             poster={reel.thumbnailUrl}
@@ -227,7 +227,7 @@ const ReelItem = ({ reel, isVisible }) => {
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full border-2 border-white/80 overflow-hidden shadow-lg">
             <img 
-              src={reel.creatorId?.profilePicture || `https://avatar.vercel.sh/${reel.creatorId?._id || 'kridaz'}`} 
+              src={reel.creatorId?.profilePicture || `https://avatar.vercel.sh/${reel.creatorId?.id || reel.creatorId?._id || 'kridaz'}`} 
               alt={reel.creatorId?.username} 
               className="w-full h-full object-cover"
             />
@@ -235,7 +235,7 @@ const ReelItem = ({ reel, isVisible }) => {
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <h3 className="text-white font-bold text-[15px]">@{reel.creatorId?.username || 'kridaz_user'}</h3>
-              <span className="text-white/40 text-xs">GÇó</span>
+              <span className="text-white/40 text-xs">Gï¿½ï¿½</span>
               <button className="text-white border border-white/40 px-3 py-0.5 rounded-md text-[11px] font-bold hover:bg-white/10 transition-colors">
                 Follow
               </button>
@@ -254,7 +254,7 @@ const ReelItem = ({ reel, isVisible }) => {
           <Music size={12} className="text-white animate-spin-slow" />
           <div className="overflow-hidden w-32">
             <p className="text-white text-[11px] font-semibold whitespace-nowrap animate-marquee">
-              Original Audio GÇó {reel.creatorId?.name || 'Kridaz Audio'}
+              Original Audio Gï¿½ï¿½ {reel.creatorId?.name || 'Kridaz Audio'}
             </p>
           </div>
         </div>

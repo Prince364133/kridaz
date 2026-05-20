@@ -15,8 +15,9 @@ const ReelsFeed = () => {
   const { data, isLoading, isFetching } = useGetReelsFeedQuery({ cursor, initialId });
   
   // Optimistic UI state
-  const { isUploading, activeUpload } = useSelector(state => state.mediaUpload);
-  const { user } = useSelector(state => state.auth);
+  const { isUploading, activeUpload } = useSelector((/** @type {any} */ state) => state.mediaUpload);
+  const { user } = useSelector((/** @type {any} */ state) => state.auth);
+  const typedDispatch = /** @type {any} */ (dispatch);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const feedRef = useRef(null);
@@ -32,65 +33,90 @@ const ReelsFeed = () => {
     if (!socket) return;
 
     socket.on('reel_liked', ({ reelId, likes }) => {
-      dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-          const reel = draft.reels.find((r) => r._id === reelId);
-          if (reel) {
-            reel.stats.likes = likes;
-          }
-        })
-      );
+      const patchFeed = (queryArg) => {
+        typedDispatch(
+          reelsApi.util.updateQueryData('getReelsFeed', queryArg, (draft) => {
+            const reel = draft.reels.find((r) => (r.id || r._id) === reelId);
+            if (reel) {
+              reel.stats.likes = likes;
+            }
+          })
+        );
+      };
+      patchFeed(undefined);
+      patchFeed({});
+      patchFeed({ cursor: null, initialId: undefined });
     });
 
     socket.on('reel_commented', ({ reelId }) => {
-      dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-          const reel = draft.reels.find((r) => r._id === reelId);
-          if (reel) {
-            reel.stats.comments += 1;
-          }
-        })
-      );
+      const patchFeed = (queryArg) => {
+        typedDispatch(
+          reelsApi.util.updateQueryData('getReelsFeed', queryArg, (draft) => {
+            const reel = draft.reels.find((r) => (r.id || r._id) === reelId);
+            if (reel) {
+              reel.stats.comments += 1;
+            }
+          })
+        );
+      };
+      patchFeed(undefined);
+      patchFeed({});
+      patchFeed({ cursor: null, initialId: undefined });
     });
 
     socket.on('reel_deleted', ({ reelId }) => {
-      dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-          if (!draft || !draft.reels) return;
-          draft.reels = draft.reels.filter((r) => r._id !== reelId);
-        })
-      );
+      const patchFeed = (queryArg) => {
+        typedDispatch(
+          reelsApi.util.updateQueryData('getReelsFeed', queryArg, (draft) => {
+            if (!draft || !draft.reels) return;
+            draft.reels = draft.reels.filter((r) => (r.id || r._id) !== reelId);
+          })
+        );
+      };
+      patchFeed(undefined);
+      patchFeed({});
+      patchFeed({ cursor: null, initialId: undefined });
     });
     
     socket.on('MEDIA_PROCESSING_PROGRESS', ({ mediaId, mediaType, progress, status }) => {
       if (mediaType === 'reel') {
-        dispatch(
-          reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-            if (!draft || !draft.reels) return;
-            const reel = draft.reels.find((r) => r._id === mediaId);
-            if (reel) {
-              reel.status = 'pending';
-              reel.processingProgress = progress;
-              reel.processingStatus = status;
-            }
-          })
-        );
+        const patchFeed = (queryArg) => {
+          typedDispatch(
+            reelsApi.util.updateQueryData('getReelsFeed', queryArg, (draft) => {
+              if (!draft || !draft.reels) return;
+              const reel = draft.reels.find((r) => (r.id || r._id) === mediaId);
+              if (reel) {
+                reel.status = 'pending';
+                reel.processingProgress = progress;
+                reel.processingStatus = status;
+              }
+            })
+          );
+        };
+        patchFeed(undefined);
+        patchFeed({});
+        patchFeed({ cursor: null, initialId: undefined });
       }
     });
 
     socket.on('MEDIA_PROCESSING_COMPLETE', ({ mediaId, mediaType, hlsUrl, thumbnailUrl }) => {
       if (mediaType === 'reel') {
-        dispatch(
-          reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-            if (!draft || !draft.reels) return;
-            const reel = draft.reels.find((r) => r._id === mediaId);
-            if (reel) {
-              reel.status = 'ready';
-              reel.hlsUrl = hlsUrl;
-              reel.thumbnailUrl = thumbnailUrl;
-            }
-          })
-        );
+        const patchFeed = (queryArg) => {
+          typedDispatch(
+            reelsApi.util.updateQueryData('getReelsFeed', queryArg, (draft) => {
+              if (!draft || !draft.reels) return;
+              const reel = draft.reels.find((r) => (r.id || r._id) === mediaId);
+              if (reel) {
+                reel.status = 'ready';
+                reel.hlsUrl = hlsUrl;
+                reel.thumbnailUrl = thumbnailUrl;
+              }
+            })
+          );
+        };
+        patchFeed(undefined);
+        patchFeed({});
+        patchFeed({ cursor: null, initialId: undefined });
       }
     });
 
@@ -122,7 +148,7 @@ const ReelsFeed = () => {
             // Mask URL (only for non-temp reels)
             const currentReel = reels[index];
             if (currentReel && !currentReel.temp) {
-              window.history.replaceState(null, '', `/shorts/${currentReel._id}`);
+              window.history.replaceState(null, '', `/shorts/${currentReel.id || currentReel._id}`);
             }
 
             // Load more trigger
@@ -191,15 +217,14 @@ const ReelsFeed = () => {
           
           return (
             <div 
-              key={reel._id} 
+              key={reel.id || reel._id} 
               data-index={index}
               className="reels-item-wrapper w-full h-full snap-start snap-always"
             >
               {isNear ? (
-                <ReelItem 
+              <ReelItem 
                   reel={reel} 
                   isVisible={isActive}
-                  isNext={index === activeIndex + 1}
                 />
               ) : (
                 <div className="w-full h-full bg-black flex items-center justify-center">

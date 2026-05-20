@@ -52,10 +52,30 @@ export default function AdminDashboard() {
     bookingHistory = []
   } = dashboardData || {};
 
-  const chartData = bookingHistory.map(item => ({
-    name: new Date(item.date).toLocaleDateString(undefined, { weekday: 'short' }),
-    amount: item.amount,
-  }));
+  // Extremely defensive formatting to prevent any UI crashes due to malformed or null API payloads
+  const safeTotalUsers = Number(totalUsers) || 0;
+  const safeTotalTurfs = Number(totalTurfs) || 0;
+  const safePendingTurfs = Number(pendingTurfs) || 0;
+  const safeTotalBookings = Number(totalBookings) || 0;
+  const safeTotalPayouts = Number(totalPayouts) || 0;
+  const safeOpenTickets = Number(openTickets) || 0;
+  const safePendingDisputes = Number(pendingDisputes) || 0;
+  const safeTotalCommunityPosts = Number(totalCommunityPosts) || 0;
+  const safeTotalHostedGames = Number(totalHostedGames) || 0;
+  const safePublishedBlogs = Number(publishedBlogs) || 0;
+  const safeTotalUserWalletBalance = Number(totalUserWalletBalance) || 0;
+
+  const safeBookingHistory = Array.isArray(bookingHistory) ? bookingHistory : [];
+  const safeRecentAuditLogs = Array.isArray(recentAuditLogs) ? recentAuditLogs : [];
+
+  const chartData = safeBookingHistory.map(item => {
+    const d = item?.date ? new Date(item.date) : null;
+    const isValid = d && !isNaN(d.getTime());
+    return {
+      name: isValid ? d.toLocaleDateString(undefined, { weekday: 'short' }) : "N/A",
+      amount: Number(item?.amount) || 0,
+    };
+  });
 
   const COLORS = ["#CCFF00", "#10B981", "#3B82F6", "#6366F1"];
 
@@ -67,38 +87,38 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-5 relative z-10">
         <StatsCard 
           title="Total Users" 
-          value={totalUsers} 
+          value={safeTotalUsers} 
           icon={Users} 
           onClick={() => navigate("/admin/users")}
         />
         <StatsCard 
           title="Active Venues" 
-          value={totalTurfs} 
+          value={safeTotalTurfs} 
           icon={Landmark} 
           onClick={() => navigate("/admin/turfs")}
         />
         <StatsCard 
           title="Pending Approvals" 
-          value={pendingTurfs} 
+          value={safePendingTurfs} 
           icon={Clock} 
-          trend={pendingTurfs > 0 ? "Action Required" : "Cleared"} 
-          trendNegative={pendingTurfs > 0}
+          trend={safePendingTurfs > 0 ? "Action Required" : "Cleared"} 
+          trendNegative={safePendingTurfs > 0}
           onClick={() => navigate("/admin/turfs")}
         />
-        <StatsCard title="Marketplace Volume" value={totalBookings} icon={Activity} />
+        <StatsCard title="Marketplace Volume" value={safeTotalBookings} icon={Activity} />
         <StatsCard 
           title="Total Payouts" 
-          value={totalPayouts} 
+          value={safeTotalPayouts} 
           prefix="Rs " 
           icon={CreditCard} 
           onClick={() => navigate("/admin/withdrawals")}
         />
         <StatsCard 
           title="Support Load" 
-          value={openTickets} 
+          value={safeOpenTickets} 
           icon={MessageSquare} 
-          trend={openTickets > 10 ? "High" : openTickets > 0 ? "Active" : "Clear"} 
-          trendNegative={openTickets > 10}
+          trend={safeOpenTickets > 10 ? "High" : safeOpenTickets > 0 ? "Active" : "Clear"} 
+          trendNegative={safeOpenTickets > 10}
           onClick={() => navigate("/admin/support")}
         />
       </div>
@@ -144,10 +164,10 @@ export default function AdminDashboard() {
         <div className="lg:col-span-4 space-y-6">
           <ChartCard title="Moderation Queue" subtitle="Pending Content Approvals">
             <div className="space-y-4 mt-2">
-              <ModerationItem icon={BookOpen} label="Blogs" count={publishedBlogs} onClick={() => navigate("/admin/blogs")} />
-              <ModerationItem icon={Share2} label="Community Posts" count={totalCommunityPosts} onClick={() => navigate("/admin/community")} />
-              <ModerationItem icon={Trophy} label="Hosted Games" count={totalHostedGames} onClick={() => navigate("/admin/games")} />
-              <ModerationItem icon={ShieldAlert} label="Active Disputes" count={pendingDisputes} color="text-red-500" onClick={() => navigate("/admin/disputes")} />
+              <ModerationItem icon={BookOpen} label="Blogs" count={safePublishedBlogs} onClick={() => navigate("/admin/blogs")} />
+              <ModerationItem icon={Share2} label="Community Posts" count={safeTotalCommunityPosts} onClick={() => navigate("/admin/community")} />
+              <ModerationItem icon={Trophy} label="Hosted Games" count={safeTotalHostedGames} onClick={() => navigate("/admin/games")} />
+              <ModerationItem icon={ShieldAlert} label="Active Disputes" count={safePendingDisputes} color="text-red-500" onClick={() => navigate("/admin/disputes")} />
             </div>
             <button 
               onClick={() => navigate("/admin/marketing")}
@@ -165,21 +185,27 @@ export default function AdminDashboard() {
               Governance Stream
             </h2>
             <div className="space-y-4 pr-2">
-              {recentAuditLogs.map((log, i) => (
-                <div 
-                  key={i} 
-                  onClick={() => navigate("/admin/audit")}
-                  className="border-l border-[#2D2D2D] pl-4 py-1 relative cursor-pointer hover:bg-white/[0.02] transition-colors"
-                >
-                  <div className="absolute top-0 left-[-4.5px] w-2 h-2 rounded-full bg-[#CCFF00]/50" />
-                  <p className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-tight">{log.action}</p>
-                  <p className="text-[11px] text-white/80 mt-0.5">{log.details?.email || log.module}</p>
-                  <div className="flex justify-between items-center mt-1">
-                    <span className="text-[9px] text-gray-500 font-medium">By {log.admin?.name || "Admin"}</span>
-                    <span className="text-[9px] text-gray-500">{new Date(log.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+              {safeRecentAuditLogs.map((log, i) => {
+                const d = log?.createdAt ? new Date(log.createdAt) : null;
+                const isValidDate = d && !isNaN(d.getTime());
+                return (
+                  <div 
+                    key={i} 
+                    onClick={() => navigate("/admin/audit")}
+                    className="border-l border-[#2D2D2D] pl-4 py-1 relative cursor-pointer hover:bg-white/[0.02] transition-colors"
+                  >
+                    <div className="absolute top-0 left-[-4.5px] w-2 h-2 rounded-full bg-[#CCFF00]/50" />
+                    <p className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-tight">{log?.action || "SYSTEM"}</p>
+                    <p className="text-[11px] text-white/80 mt-0.5">{log?.details?.email || log?.module || ""}</p>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-[9px] text-gray-500 font-medium">By {log?.admin?.name || "System"}</span>
+                      <span className="text-[9px] text-gray-500">
+                        {isValidDate ? d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "N/A"}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -189,7 +215,7 @@ export default function AdminDashboard() {
   );
 }
 
-const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend, trendNegative, onClick }) => (
+const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend = null, trendNegative = false, onClick = null }) => (
   <div 
     onClick={onClick}
     className={`bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#CCFF00]/30 transition-all duration-500 min-h-[140px] shadow-2xl ${onClick ? 'cursor-pointer' : ''}`}
@@ -217,7 +243,7 @@ const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend, 
   </div>
 );
 
-const ChartCard = ({ title, subtitle, children, action }) => (
+const ChartCard = ({ title, subtitle, children, action = null }) => (
   <div className="bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-2xl relative overflow-hidden group flex flex-col h-full">
     <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-[60px] group-hover:bg-[#CCFF00]/10 transition-colors pointer-events-none"></div>
     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 relative z-10 shrink-0">

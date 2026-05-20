@@ -36,7 +36,9 @@ const mediaUploadSlice = createSlice({
     },
     clearUpload: (state) => {
       if (state.activeUpload && state.activeUpload.status === 'success') {
-        state.recentUploads.unshift(state.activeUpload);
+        // Strip out the non-serializable File object to avoid Redux serialization warnings/errors
+        const { file, ...serializableUpload } = state.activeUpload;
+        state.recentUploads.unshift(serializableUpload);
       }
       state.activeUpload = null;
     },

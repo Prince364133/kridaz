@@ -14,8 +14,8 @@ import { closeLoginModal } from "@redux/slices/uiSlice";
 const Root = () => {
   const location = useLocation();
   const dispatch = useDispatch();
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
-  const { loginModal } = useSelector((state) => state.ui);
+  const { user, isAuthenticated } = useSelector((/** @type {any} */ state) => state.auth);
+  const { loginModal } = useSelector((/** @type {any} */ state) => state.ui);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
