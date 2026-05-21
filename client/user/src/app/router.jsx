@@ -65,6 +65,8 @@ const BusinessRegistration   = lazy(() => import("@features/business").then(m =>
 const PrivacyPolicy              = lazy(() => import("@features/legal").then(m => ({ default: m.PrivacyPolicy })));
 const TermsOfService             = lazy(() => import("@features/legal").then(m => ({ default: m.TermsOfService })));
 const DataDeletionInstructions   = lazy(() => import("@features/legal").then(m => ({ default: m.DataDeletionInstructions })));
+const ContactUs                  = lazy(() => import("@features/legal").then(m => ({ default: m.ContactUs })));
+const FAQ                        = lazy(() => import("@features/legal").then(m => ({ default: m.FAQ })));
 
 
 // ΓöÇΓöÇ Lazy: Owner / Venue Owner Portal Pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
@@ -311,6 +313,7 @@ const router = createBrowserRouter([
       { path: "business/venue",     element: <S><UserVenueOwnerLanding /></S> },
       { path: "business/professional", element: <S><ProfessionalLanding /></S> },
       { path: "business/registration", element: <S><BusinessRegistration /></S> },
+      { path: "business/register", element: <S><BusinessRegistration /></S> },
 
       // Business Auth
       { path: "signup/venue",    element: <S><BusinessRegistration defaultRole="venu_owners" /></S> },
@@ -337,6 +340,8 @@ const router = createBrowserRouter([
       { path: "privacy-policy",              element: <S><PrivacyPolicy /></S> },
       { path: "terms-of-service",            element: <S><TermsOfService /></S> },
       { path: "data-deletion-instructions",  element: <S><DataDeletionInstructions /></S> },
+      { path: "contact-us",                  element: <S><ContactUs /></S> },
+      { path: "faq",                         element: <S><FAQ /></S> },
       { path: "*", element: <NotFound /> },
     ],
   },
@@ -349,6 +354,7 @@ const router = createBrowserRouter([
   { path: "/business/coach",  element: <Navigate to="/business/professional" replace /> },
   { path: "/business/official", element: <Navigate to="/business/professional" replace /> },
   { path: "/business/scorer", element: <Navigate to="/business/professional" replace /> },
+  { path: "/coach",           element: <Navigate to="/professional/coach" replace /> },
   { path: "/business/streamer", element: <Navigate to="/business/professional" replace /> },
   // Catch-all (Global)
   { path: "*", element: <NotFound /> },

@@ -51,7 +51,7 @@ const Login = () => {
       const normalizedRole = role?.toLowerCase();
       if (normalizedRole === "admin" || normalizedRole === "bmsp_admin") navigate("/admin");
       else if (normalizedRole === "venu_owners" || normalizedRole === "owner") navigate("/venue-owner");
-      else if (normalizedRole === "coach") navigate("/coach");
+      else if (normalizedRole === "coach") navigate("/professional/coach");
       else if (normalizedRole === "umpire") navigate("/umpire");
       else if (normalizedRole === "scorer") navigate("/scorer");
       else if (normalizedRole === "streamer") navigate("/streamer");
@@ -147,6 +147,13 @@ const Login = () => {
                           <input
                             {...register("email")}
                             type="text"
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (/^\d+$/.test(val)) {
+                                e.target.value = val.slice(0, 10);
+                              }
+                              register("email").onChange(e);
+                            }}
                             placeholder="name@example.com or 9876543210"
                             className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
                           />
@@ -194,7 +201,7 @@ const Login = () => {
                       {/* Turnstile Bot Protection */}
                       <div className="flex justify-center my-4">
                         <Turnstile
-                          sitekey="0x4AAAAAAA7f_T_9-vI7yP6U" // Dummy test key, should be replaced with real key in production
+                          sitekey={import.meta.env.DEV ? "1x00000000000000000000AA" : import.meta.env.VITE_TURNSTILE_SITE_KEY}
                           onVerify={(token) => setTurnstileToken(token)}
                           theme="dark"
                         />

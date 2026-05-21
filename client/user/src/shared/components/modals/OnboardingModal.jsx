@@ -27,9 +27,11 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
   const [phoneOtp, setPhoneOtp] = useState("");
   const [sendingPhoneOtp, setSendingPhoneOtp] = useState(false);
   const [verifyingPhoneOtp, setVerifyingPhoneOtp] = useState(false);
+  const [phoneRegistrationToken, setPhoneRegistrationToken] = useState("");
 
   // Initialize from initialData depending on authMethod (google vs email/phone)
   const isGoogle = initialData?.authMethod === 'google';
+  const needsPhoneVerification = initialData?.authMethod === 'google' || initialData?.authMethod === 'email';
   
   const [formData, setFormData] = useState({
     name: "",
@@ -88,6 +90,8 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
         dob: prev.dob || (isGoogle ? (userObj.dob ? new Date(userObj.dob).toISOString().split('T')[0] : "") : ""),
         location: prev.location || (isGoogle ? (userObj.city || userObj.location || "") : ""),
         sportTypes: prev.sportTypes?.length ? prev.sportTypes : (isGoogle ? (userObj.sportTypes || []) : []),
+        password: prev.password || initialData?.password || "",
+        otp: prev.otp || initialData?.otp || "",
       }));
     }
   }, [isOpen, initialData]);
@@ -98,9 +102,15 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
     }
     setSendingPhoneOtp(true);
     try {
-      const res = await axiosInstance.post("/api/user/auth/send-phone-verification-otp", {
-        phone: formData.phone
-      });
+      const endpoint = isGoogle 
+        ? "/api/user/auth/send-phone-verification-otp" 
+        : "/api/user/auth/send-otp";
+      
+      const payload = isGoogle 
+        ? { phone: formData.phone } 
+        : { email: formData.email, phone: formData.phone };
+
+      const res = await axiosInstance.post(endpoint, payload);
       if (res.data.success) {
         setPhoneOtpSent(true);
         toast.success("Verification OTP sent successfully!");
@@ -121,13 +131,21 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
     }
     setVerifyingPhoneOtp(true);
     try {
-      const res = await axiosInstance.post("/api/user/auth/verify-phone-otp", {
-        phone: formData.phone,
-        otp: phoneOtp
-      });
+      const endpoint = isGoogle 
+        ? "/api/user/auth/verify-phone-otp" 
+        : "/api/user/auth/verify-otp";
+
+      const payload = isGoogle 
+        ? { phone: formData.phone, otp: phoneOtp }
+        : { email: formData.email, phone: formData.phone, otp: phoneOtp };
+
+      const res = await axiosInstance.post(endpoint, payload);
       if (res.data.success) {
         setIsPhoneVerified(true);
-        toast.success("Phone number verified successfully!");
+        if (res.data.registrationToken) {
+          setPhoneRegistrationToken(res.data.registrationToken);
+        }
+        toast.success("Phone verified successfully!");
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Invalid OTP");
@@ -141,9 +159,10 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
       if (!formData.name) return toast.error("Please enter your name");
       if (!formData.dob) return toast.error("Please select your date of birth");
       if (!formData.gender) return toast.error("Please select your gender");
-      if (!formData.phone || formData.phone.length < 10) return toast.error("Valid phone number required");
       if (!formData.email) return toast.error("Valid email required");
-      if (isGoogle && !isPhoneVerified) return toast.error("Please verify your phone number via OTP");
+      if (!formData.password) return toast.error("Please create a password");
+      if (formData.password.length < 6) return toast.error("Password must be at least 6 characters");
+      if (needsPhoneVerification && !isPhoneVerified) return toast.error("Please verify your phone number via OTP");
     } else if (step === 2) {
       if (!formData.location) return toast.error("Please enter your location");
     }
@@ -227,8 +246,14 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
         };
         
         // Pass either otp or phoneOtp depending on method
-        if (initialData.authMethod === 'phone') payload.phoneOtp = formData.otp;
-        else payload.otp = formData.otp;
+        if (initialData.authMethod === 'phone') {
+          payload.registrationToken = initialData.registrationToken;
+        } else if (initialData.authMethod === 'email') {
+          payload.registrationToken = initialData.registrationToken;
+          payload.phoneRegistrationToken = phoneRegistrationToken;
+        } else {
+          payload.otp = formData.otp;
+        }
 
         const res = await axiosInstance.post("/api/user/auth/register", payload);
         const result = res.data;
@@ -304,6 +329,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                         className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all"
                       />
                     </div>
+                    <p className="text-[10px] text-white/40 mt-1.5 ml-1 font-medium">* Required for invoices and bills</p>
                   </label>
                 )}
 
@@ -330,7 +356,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                         />
                       </div>
                       
-                      {isGoogle && !isPhoneVerified && (
+                      {needsPhoneVerification && !isPhoneVerified && (
                         <button
                           type="button"
                           onClick={handleSendPhoneOtp}
@@ -341,7 +367,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                         </button>
                       )}
 
-                      {isGoogle && isPhoneVerified && (
+                      {needsPhoneVerification && isPhoneVerified && (
                         <div className="px-4 bg-green-500/10 border border-green-500/30 rounded-[8px] font-bold text-xs uppercase tracking-wider text-green-400 flex items-center gap-1.5 whitespace-nowrap animate-bounce">
                           <Check size={14} strokeWidth={3} />
                           Verified
@@ -349,7 +375,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                       )}
                     </div>
 
-                    {isGoogle && phoneOtpSent && !isPhoneVerified && (
+                    {needsPhoneVerification && phoneOtpSent && !isPhoneVerified && (
                       <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
                         <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Phone Verification OTP</span>
                         <div className="flex gap-2">
@@ -406,6 +432,19 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                     ))}
                   </div>
                 </div>
+
+                <label className="block pt-2">
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Create Password</span>
+                  <div className="mt-2 relative">
+                    <input
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      placeholder="Must be at least 6 characters"
+                      className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 px-4 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all"
+                    />
+                  </div>
+                </label>
               </div>
             )}
 

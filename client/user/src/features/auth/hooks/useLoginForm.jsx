@@ -47,7 +47,7 @@ const useLoginForm = () => {
     } else if (normalizedRole === "owner") {
       navigate("/venue-owner");
     } else if (normalizedRole === "coach") {
-      navigate("/coach");
+      navigate("/professional/coach");
     } else if (normalizedRole === "umpire") {
       navigate("/umpire");
     } else if (normalizedRole === "scorer") {

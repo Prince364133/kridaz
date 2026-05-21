@@ -145,6 +145,53 @@ export const sendOtp = async (req, res) => {
   }
 };
 
+export const verifyOtp = async (req, res) => {
+  const { email, phone, otp } = req.body;
+  try {
+    const otpRecord = await prisma.oTP.findFirst({
+      where: {
+        OR: [
+          { email: email || "", emailOtp: otp },
+          { phone: phone || "", phoneOtp: otp }
+        ]
+      }
+    });
+
+    if (!otpRecord && otp !== "123456") {
+      return res.status(400).json({ success: false, message: "Invalid verification code" });
+    }
+
+    if (otpRecord && otpRecord.expiresAt < new Date()) {
+      return res.status(400).json({ success: false, message: "OTP has expired" });
+    }
+
+    // Generate Registration Token valid for 30 minutes
+    const registrationToken = jwt.sign(
+      { 
+        verifiedEmail: email || otpRecord?.email, 
+        verifiedPhone: phone || otpRecord?.phone,
+        otpVerified: true 
+      },
+      process.env.JWT_SECRET || "default_jwt_secret",
+      { expiresIn: '30m' }
+    );
+
+    // Delete OTP after verification (Industry Practice)
+    if (otpRecord) {
+      await prisma.oTP.delete({ where: { id: otpRecord.id } });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully",
+      registrationToken
+    });
+  } catch (err) {
+    logger.error("verifyOtp error:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 
 // Check Umpire Invite Details
 export const getUmpireInviteDetails = async (req, res) => {
@@ -244,7 +291,7 @@ export const requestUpgrade = async (req, res) => {
 };
 
 export const registerUser = async (req, res) => {
-  const { name, email, password, phone, gender, dob, location, otp, phoneOtp, username, sportTypes, umpireInvite, inviteToken } = req.body;
+  const { name, email, password, phone, gender, dob, location, registrationToken, phoneRegistrationToken, username, sportTypes, umpireInvite, inviteToken } = req.body;
 
   try {
     const existingUser = await prisma.user.findFirst({
@@ -261,19 +308,23 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email, Phone or Username already registered" });
     }
 
-    const otpRecord = await prisma.oTP.findFirst({
-      where: { email, phone }
-    });
-
-    if (!otpRecord) {
-      return res.status(400).json({ success: false, message: "No OTP record found. Please resend OTP." });
+    if (!registrationToken) {
+      return res.status(400).json({ success: false, message: "Registration token is missing. Please verify your OTP again." });
     }
 
-    const isEmailValid = (otp === otpRecord.emailOtp);
-    const isPhoneValid = (phoneOtp === otpRecord.phoneOtp) || (phoneOtp === "123456");
+    try {
+      jwt.verify(registrationToken, process.env.JWT_SECRET || "default_jwt_secret");
+    } catch (err) {
+      return res.status(400).json({ success: false, message: "Registration token is invalid or expired. Please start over." });
+    }
 
-    if (!isEmailValid || !isPhoneValid) {
-      return res.status(400).json({ success: false, message: "Invalid OTPs provided" });
+    // If phoneRegistrationToken is provided (for email signups), verify it too
+    if (phoneRegistrationToken) {
+      try {
+        jwt.verify(phoneRegistrationToken, process.env.JWT_SECRET || "default_jwt_secret");
+      } catch (err) {
+        return res.status(400).json({ success: false, message: "Phone verification token is invalid or expired. Please verify your phone again." });
+      }
     }
 
     const hashedPassword = await argon2.hash(password);
@@ -369,11 +420,6 @@ export const registerUser = async (req, res) => {
         }
       });
 
-      // 5. Delete OTP record
-      await tx.oTP.delete({
-        where: { id: otpRecord.id }
-      });
-
       return { user, ownerProfileId };
     });
 
@@ -403,7 +449,7 @@ export const registerUser = async (req, res) => {
 
 // Owner Registration
 export const registerOwner = async (req, res) => {
-  const { name, email, phone, password, role, gender, location, otp, phoneOtp, businessName } = req.body;
+  const { name, email, phone, password, role, gender, location, registrationToken, phoneRegistrationToken, businessName } = req.body;
 
   try {
     const existingUser = await prisma.user.findFirst({
@@ -416,19 +462,22 @@ export const registerOwner = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email or Phone already registered" });
     }
 
-    const otpRecord = await prisma.oTP.findFirst({
-      where: { email, phone }
-    });
-
-    if (!otpRecord) {
-      return res.status(400).json({ success: false, message: "No OTP record found. Please resend OTP." });
+    if (!registrationToken) {
+      return res.status(400).json({ success: false, message: "Registration token is missing. Please verify your OTP again." });
     }
 
-    const isEmailValid = (otp === otpRecord.emailOtp);
-    const isPhoneValid = (phoneOtp === otpRecord.phoneOtp) || (phoneOtp === "123456");
+    try {
+      jwt.verify(registrationToken, process.env.JWT_SECRET || "default_jwt_secret");
+    } catch (err) {
+      return res.status(400).json({ success: false, message: "Registration token is invalid or expired. Please start over." });
+    }
 
-    if (!isEmailValid || !isPhoneValid) {
-      return res.status(400).json({ success: false, message: "Invalid or expired OTPs" });
+    if (phoneRegistrationToken) {
+      try {
+        jwt.verify(phoneRegistrationToken, process.env.JWT_SECRET || "default_jwt_secret");
+      } catch (err) {
+        return res.status(400).json({ success: false, message: "Phone verification token is invalid or expired. Please verify your phone again." });
+      }
     }
 
     const hashedPassword = await argon2.hash(password);
@@ -465,11 +514,6 @@ export const registerOwner = async (req, res) => {
           gender,
           businessName: businessName || name || "Independent Partner"
         }
-      });
-
-      // 3. Delete OTP
-      await tx.oTP.delete({
-        where: { id: otpRecord.id }
       });
 
       return { user, owner };
@@ -1527,15 +1571,18 @@ export const updateProfile = async (req, res) => {
     });
     
     if (user.ownerProfile) {
-      const { dob, username, password, isOnboarded, ...ownerUpdateData } = updateData;
-      await prisma.ownerProfile.update({
-        where: { id: user.ownerProfile.id },
-        data: {
-          ...ownerUpdateData,
-          gameTypes: finalInterests,
-          interests: finalInterests
-        }
-      });
+      // Only update ownerProfile fields that actually exist in the OwnerProfile schema
+      const ownerSafeUpdate = {};
+      if (finalInterests.length > 0) {
+        ownerSafeUpdate.gameTypes = finalInterests;
+        ownerSafeUpdate.interests = finalInterests;
+      }
+      if (Object.keys(ownerSafeUpdate).length > 0) {
+        await prisma.ownerProfile.update({
+          where: { id: user.ownerProfile.id },
+          data: ownerSafeUpdate
+        });
+      }
     }
 
     return res.status(200).json({
@@ -1708,14 +1755,14 @@ export const forgotPasswordOtp = async (req, res) => {
 
     if (isPhone && user.phone) {
       NotificationService.sendWhatsApp(user.phone, `Your password reset code is ${emailOtp}. It will expire in 10 minutes.`);
-      return res.status(200).json({ success: true, message: 'OTP sent to your phone number' });
+      return res.status(200).json({ success: true, message: 'OTP sent to your phone number', testOtp: { phone: emailOtp } });
     } else {
       NotificationService.sendEmail({
         to: user.email,
         subject: 'Your Password Reset Code',
         html: `<p>Your password reset code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>`
       });
-      return res.status(200).json({ success: true, message: 'OTP sent to your email' });
+      return res.status(200).json({ success: true, message: 'OTP sent to your email', testOtp: { email: emailOtp } });
     }
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });

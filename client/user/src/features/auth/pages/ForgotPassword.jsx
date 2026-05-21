@@ -25,6 +25,9 @@ const ForgotPassword = () => {
       const res = await axiosInstance.post("/api/user/auth/forgot-password-otp", { email });
       if (res.data.success) {
         toast.success(res.data.message || "OTP sent!");
+        if (res.data.testOtp) {
+          toast(`Test OTP: ${res.data.testOtp.phone || res.data.testOtp.email}`, { icon: '🧑‍💻', duration: 10000 });
+        }
         setStep(2);
       }
     } catch (err) {

@@ -508,7 +508,7 @@ const FindPlayers = () => {
   const fetchNearbyPlayers = useCallback(async () => {
     if (!userLocation) return;
     try {
-      const res = await axiosInstance.get("/api/user/players/nearby", {
+      const res = await axiosInstance.get("/api/user/players", {
         params: {
           lat: userLocation.lat,
           lng: userLocation.lng,

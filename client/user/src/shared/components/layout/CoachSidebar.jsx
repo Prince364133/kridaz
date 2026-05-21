@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   X, 
@@ -33,16 +33,16 @@ const CoachSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   };
 
   const mainNavItems = [
-    { to: "/coach", label: "Overview", icon: LayoutDashboard },
-    { to: "/coach/students", label: "Roster", icon: Users },
-    { to: "/coach/sessions", label: "Sessions", icon: Calendar },
-    { to: "/coach/availability", label: "Availability", icon: Clock },
-    { to: "/coach/bookings", label: "Bookings", icon: Activity },
-    { to: "/coach/revenue", label: "Earnings", icon: IndianRupee },
-    { to: "/coach/banking", label: "Payout & Banking", icon: Landmark },
-    { to: "/coach/profile", label: "Profile", icon: User },
-    { to: "/coach/masterclass", label: "Masterclass", icon: Video },
-    { to: "/coach/support", label: "Docs & Support", icon: HelpCircle },
+    { to: "/professional/coach", label: "Overview", icon: LayoutDashboard },
+    { to: "/professional/coach/students", label: "Roster", icon: Users },
+    { to: "/professional/coach/sessions", label: "Sessions", icon: Calendar },
+    { to: "/professional/coach/availability", label: "Availability", icon: Clock },
+    { to: "/professional/coach/bookings", label: "Bookings", icon: Activity },
+    { to: "/professional/coach/revenue", label: "Earnings", icon: IndianRupee },
+    { to: "/professional/coach/banking", label: "Payout & Banking", icon: Landmark },
+    { to: "/professional/coach/profile", label: "Profile", icon: User },
+    { to: "/professional/coach/masterclass", label: "Masterclass", icon: Video },
+    { to: "/professional/coach/support", label: "Docs & Support", icon: HelpCircle },
   ];
 
   const bottomNavItems = [];

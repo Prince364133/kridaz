@@ -100,8 +100,8 @@ const UserFooter = () => {
 
             {/* Nav Links */}
             {[
-              { name: "Contact Us", path: "#" },
-              { name: "FAQ", path: "#" },
+              { name: "Contact Us", path: "/contact-us" },
+              { name: "FAQ", path: "/faq" },
               { name: "Terms of Service", path: "/terms-of-service" },
               { name: "Privacy Policy", path: "/privacy-policy" },
               { name: "Data Deletion Instructions", path: "/data-deletion-instructions" },

@@ -210,7 +210,7 @@ export default function Home() {
  if (!isLoggedIn) return;
  try {
  const response = await axiosInstance.get("/api/user/players/network");
- const ids = (response.data.following || []).filter(p => p).map(p => p._id);
+ const ids = (response.data.following || []).filter(p => p).map(p => p.id || p._id);
  setFollowingIds(ids);
  } catch (error) {
  console.error("Error fetching network:", error);
@@ -323,16 +323,17 @@ export default function Home() {
  e.stopPropagation();
  
  gateInteraction(async () => {
- const isFollowing = followingIds.includes(p._id);
+ const playerId = p.id || p._id;
+ const isFollowing = followingIds.includes(playerId);
  try {
- const endpoint = `/api/user/players/${p._id}/${isFollowing ? 'unfollow' : 'follow'}`;
+ const endpoint = `/api/user/players/${playerId}/${isFollowing ? 'unfollow' : 'follow'}`;
  await axiosInstance.post(endpoint);
  
  if (isFollowing) {
- setFollowingIds(prev => prev.filter(id => id !== p._id));
+ setFollowingIds(prev => prev.filter(id => id !== playerId));
  toast.success(`Unfollowed ${p.name}`);
  } else {
- setFollowingIds(prev => [...prev, p._id]);
+ setFollowingIds(prev => [...prev, playerId]);
  toast.success(`Following ${p.name}`);
  }
  } catch (err) {
@@ -554,13 +555,13 @@ export default function Home() {
  <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
  {players.slice(0, 10).map(p => {
  const initials = p.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "??";
- const isFollowing = followingIds.includes(p._id);
+ const isFollowing = followingIds.includes(p.id || p._id);
  
  return (
- <div key={p._id} className="shrink-0 w-[160px] md:w-[190px] group">
+ <div key={p.id || p._id} className="shrink-0 w-[160px] md:w-[190px] group">
  <div className="relative bg-[#121212] rounded-[28px] p-2.5 border border-white/5 transition-all duration-500 hover:border-[#55DEE8]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
  {/* Profile Image */}
- <Link to={`/profile/${p._id}`} className="relative aspect-[1/1.1] rounded-[20px] overflow-hidden block mb-4">
+ <Link to={`/profile/${p.id || p._id}`} className="relative aspect-[1/1.1] rounded-[20px] overflow-hidden block mb-4">
  <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
  {(p.profilePicture || p.profileImage) ? (
  <img 
@@ -1197,7 +1198,7 @@ export default function Home() {
  <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x">
  {(realSocialPosts.length > 0 ? realSocialPosts : socialPosts).map((post, idx) => {
  const author = post.adminId || post.userId || post.ownerId;
- const isFollowing = author && followingIds.includes(author._id);
+ const isFollowing = author && followingIds.includes(author.id || author._id);
  
  return (
  <div key={post._id || idx} className="w-[300px] md:w-[340px] aspect-[4/5] shrink-0 bg-[#0A0A0A] border rounded-[2rem] overflow-hidden snap-start group transition-all flex flex-col" style={{ borderColor: BDR }}>

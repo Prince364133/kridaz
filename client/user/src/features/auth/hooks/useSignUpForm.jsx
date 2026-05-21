@@ -1,4 +1,4 @@
-﻿import { useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useState, useEffect } from "react";
@@ -196,7 +196,7 @@ const useSignUpForm = (predefinedRole = "user") => {
       } else if ((role === "owner" || role === "venu_owners")) {
         navigate("/venue-owner");
       } else if (role === "coach") {
-        navigate("/coach");
+        navigate("/professional/coach");
       } else if (role === "streamer") {
         navigate("/streamer");
       } else {
@@ -266,7 +266,7 @@ const useSignUpForm = (predefinedRole = "user") => {
       } else if ((role === "owner" || role === "venu_owners")) {
         navigate("/venue-owner");
       } else if (role === "coach") {
-        navigate("/coach");
+        navigate("/professional/coach");
       } else if (role === "streamer") {
         navigate("/streamer");
       } else {

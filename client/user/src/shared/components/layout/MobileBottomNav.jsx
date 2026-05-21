@@ -12,7 +12,7 @@ const MobileBottomNav = () => {
     const roleStr = role?.toLowerCase() || "";
     if (roleStr.includes("admin")) return "/admin";
     if (["venu_owners", "owner", "venue_owner", "verified_venue_owner"].some(r => roleStr.includes(r))) return "/venue-owner";
-    if (roleStr.includes("coach")) return "/coach";
+    if (roleStr.includes("coach")) return "/professional/coach";
     if (roleStr.includes("umpire")) return "/umpire";
     return "/profile";
   };

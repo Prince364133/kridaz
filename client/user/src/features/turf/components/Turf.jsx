@@ -5,7 +5,6 @@ import useTurfData from "../hooks/useTurfData.jsx";
 import SearchTurf from "@components/search/SearchTurf.jsx";
 import { Trophy, MapPin, Loader2, Sparkles } from "lucide-react";
 import useRecommendations from "@hooks/useRecommendations";
-import { useScrollDirection } from "@hooks/useScrollDirection.js";
 
 /**
  * Turf — Venue discovery page.
@@ -22,7 +21,6 @@ const Turf = () => {
   const [searchFilters, setSearchFilters] = useState({});
   const [userLocation, setUserLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState("detecting"); // 'detecting' | 'granted' | 'denied'
-  const { scrollDirection } = useScrollDirection();
 
   const { turfs, loading } = useTurfData(searchFilters);
 
@@ -119,9 +117,7 @@ const Turf = () => {
       <div className="max-w-screen-2xl mx-auto px-6 pt-0 relative z-10">
 
         {/* ── Sticky Header (Search) ──────────────────────── */}
-        <div className={`sticky z-40 bg-black/95 backdrop-blur-md pt-3 pb-4 -mx-6 px-6 mb-4 border-b border-white/5 transition-transform duration-500 top-16 sm:top-20 ${
-          scrollDirection === "down" ? "-translate-y-[150%]" : "translate-y-0"
-        }`}>
+        <div className="sticky z-40 bg-black/95 backdrop-blur-md pt-3 pb-4 -mx-6 px-6 mb-4 border-b border-white/5 top-16 sm:top-20">
           <SearchTurf onSearch={handleSearch} userLocation={userLocation} />
         </div>
 

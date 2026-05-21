@@ -21,7 +21,8 @@ export const getAllTurfs = async (req, res) => {
       isActive: true
     };
 
-    if (isVal(city)) where.city = { contains: city, mode: 'insensitive' };
+    // We want to show venues from their city, but also other cities in the same state.
+    // So we don't strictly filter out other cities, we just sort by city match or distance later.
     if (isVal(state)) where.state = { contains: state, mode: 'insensitive' };
     
     if (isVal(searchTerm) && searchTerm !== "All") {
@@ -34,10 +35,14 @@ export const getAllTurfs = async (req, res) => {
     const cacheKey = generateCacheKey("turfs:list", { searchTerm, city, state, lat, lng, radius });
 
     const formattedTurfs = await getOrSetCache(cacheKey, async () => {
+      let resultTurfs = [];
+
       if (lat && lng) {
-        const r = radius ? parseFloat(radius) : 5000;
-        const nearbyTurfs = await findNearby('Turf', parseFloat(lat), parseFloat(lng), r, {
+        // Use a huge default radius (500km) to ensure we cover the whole state if no specific radius is passed
+        const r = radius ? parseFloat(radius) : 500000;
+        resultTurfs = await findNearby('Turf', parseFloat(lat), parseFloat(lng), r, {
           where,
+          take: 100, // fetch enough to show rest of state
           include: {
             owner: {
               include: {
@@ -49,9 +54,41 @@ export const getAllTurfs = async (req, res) => {
             reviews: { select: { rating: true } }
           }
         });
-        
-        return nearbyTurfs.map(t => {
-          const totalRating = t.reviews.reduce((acc, r) => acc + r.rating, 0);
+      } else {
+        resultTurfs = await prisma.turf.findMany({
+          where,
+          include: {
+            owner: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                    profilePicture: true
+                  }
+                }
+              }
+            },
+            reviews: { select: { rating: true } }
+          }
+        });
+
+        // If city is provided but no lat/lng, manually sort to put the requested city first
+        if (isVal(city)) {
+          const targetCity = city.toLowerCase().trim();
+          resultTurfs.sort((a, b) => {
+            const isACity = a.city?.toLowerCase().trim() === targetCity;
+            const isBCity = b.city?.toLowerCase().trim() === targetCity;
+            if (isACity && !isBCity) return -1;
+            if (!isACity && isBCity) return 1;
+            return 0;
+          });
+        }
+      }
+
+      return resultTurfs.map(t => {
+        const totalRating = t.reviews.reduce((acc, r) => acc + r.rating, 0);
           const avgRating = t.reviews.length > 0 ? (totalRating / t.reviews.length) : 0;
           return {
             ...t,
@@ -69,49 +106,6 @@ export const getAllTurfs = async (req, res) => {
             } : null
           };
         });
-      }
-
-      const turfs = await prisma.turf.findMany({
-        where,
-        include: {
-          owner: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  username: true,
-                  profilePicture: true
-                }
-              }
-            }
-          },
-          reviews: {
-            select: { rating: true }
-          }
-        }
-      });
-
-      return turfs.map(t => {
-        const totalRating = t.reviews.reduce((acc, r) => acc + r.rating, 0);
-        const avgRating = t.reviews.length > 0 ? (totalRating / t.reviews.length) : 0;
-        
-        return {
-          ...t,
-          _id: t.id,
-          avgRating,
-          owner: t.owner ? {
-            id: t.owner.id,
-            businessName: t.owner.businessName,
-            user: t.owner.user ? {
-              id: t.owner.user.id,
-              name: t.owner.user.name,
-              username: t.owner.user.username,
-              profilePicture: t.owner.user.profilePicture
-            } : null
-          } : null
-        };
-      });
     }, 900); // 15 minute TTL
 
     return res.status(200).json({ turfs: formattedTurfs });

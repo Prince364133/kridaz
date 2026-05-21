@@ -50,7 +50,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
     const r = role?.toLowerCase();
     if (r === "admin" || r === "bmsp_admin") return "/admin";
     if (r === "venu_owners" || r?.includes("venu_owners") || r === "owner" || r === "bmsp_owner" || r === "verified_venue_owner" || r === "venue_owner") return "/venue-owner";
-    if (r === "coach" || r === "bmsp_coach") return "/coach";
+    if (r === "coach" || r === "bmsp_coach") return "/professional/coach";
     if (r?.includes("umpire")) return "/umpire";
     if (r?.includes("scorer")) return "/scorer";
     return "";
@@ -273,17 +273,6 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
             {showProfileMenu && (
               <div className="absolute right-0 mt-4 w-52 bg-[#000000] border border-white/10 rounded-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 <div className="py-2">
-                  <button 
-                    onClick={() => {
-                      setShowProfileMenu(false);
-                      handleProfileClick();
-                    }}
-                    className="w-full flex items-center gap-3 px-5 py-3.5 text-[11px] font-black uppercase tracking-widest text-neutral-400 hover:bg-white/[0.03] hover:text-white transition-all"
-                  >
-                    <User size={16} style={{ color: themeColor }} />
-                    Dossier
-                  </button>
-                  <div className="h-[1px] bg-white/5 mx-4 my-1" />
                   <button 
                     onClick={() => {
                       setShowProfileMenu(false);

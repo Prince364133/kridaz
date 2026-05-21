@@ -65,13 +65,7 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
             className="h-[95%] w-[90%] object-contain filter drop-shadow-[0_10px_30px_rgba(85, 222, 232,0.4)] group-hover:scale-110 transition-transform duration-700 select-none"
           />
         </div>
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-          <div className="bg-black border-2 border-[#55DEE8] w-12 h-14 flex items-center justify-center" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
-            <span className="text-[#55DEE8] font-black text-sm uppercase">
-              {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
-            </span>
-          </div>
-        </div>
+
       </div>
 
       <div className="flex-1 px-3 pt-4 pb-2 flex flex-col items-center text-center">

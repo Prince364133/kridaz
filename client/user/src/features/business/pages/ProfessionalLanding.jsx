@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { ArrowRight, Users, Target, Video, CheckCircle, Trophy, X, Landmark, User, QrCode } from "lucide-react";
+import { ArrowRight, Users, Target, Video, CheckCircle, Trophy, X, Landmark, User, QrCode, FileCheck, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import axiosInstance from "@hooks/useAxiosInstance.js";
 import ScrollToTop from "@components/common/ScrollToTop";
 import toast from "react-hot-toast";
 
@@ -23,9 +25,16 @@ const availableRoles = [
 const BG = "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1800&q=80&auto=format&fit=crop";
 
 export default function ProfessionalLanding() {
-  const [modalStep, setModalStep] = useState(0); // 0: closed, 1: role selection, 2: dummy document upload
+  const [modalStep, setModalStep] = useState(0); // 0: closed, 1: role selection, 2: document upload
   const [selectedRoles, setSelectedRoles] = useState([]);
+  const [aadharFront, setAadharFront] = useState(null);
+  const [aadharBack, setAadharBack] = useState(null);
+  const [panFront, setPanFront] = useState(null);
+  const [panBack, setPanBack] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const navigate = useNavigate();
+  const { user, isLoggedIn } = useSelector((state) => state.auth);
 
   const toggleRole = (roleId) => {
     if (selectedRoles.includes(roleId)) {
@@ -40,14 +49,83 @@ export default function ProfessionalLanding() {
       toast.error("Please select at least one role");
       return;
     }
+    if (!isLoggedIn) {
+      toast.error("Please login to apply as a professional.");
+      return;
+    }
+    if (user?.ownerProfile || ["coach", "umpire", "streamer", "commentator", "venue_owner"].includes(user?.role?.toLowerCase())) {
+       toast.error(`You already have a professional role (${user?.role}).`);
+       return;
+    }
     setModalStep(2);
   };
 
-  const handleDocumentSubmit = (e) => {
+  const handleDocumentSubmit = async (e) => {
     e.preventDefault();
-    setModalStep(0);
-    // Redirect to actual business registration
-    navigate(`/business/register?role=${selectedRoles.join(',')}`);
+    if (!aadharFront || !aadharBack || !panFront || !panBack) {
+      toast.error("Please upload front and back of both Aadhaar and PAN cards.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const data = new FormData();
+      data.append("name", user?.name || "");
+      data.append("email", user?.email || "");
+      data.append("phone", user?.phone || "");
+      data.append("role", selectedRoles[0]);
+      
+      data.append("documents", aadharFront);
+      data.append("documents", aadharBack);
+      data.append("documents", panFront);
+      data.append("documents", panBack);
+
+      const response = await axiosInstance.post("/api/user/auth/upgrade-request", data, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      if (response.data.success) {
+        toast.success("Application submitted successfully!");
+        setModalStep(0);
+        setSelectedRoles([]);
+        setAadharFront(null);
+        setAadharBack(null);
+        setPanFront(null);
+        setPanBack(null);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to submit application");
+      if (err.response?.data?.message?.includes("already have a pending application") || err.response?.data?.message?.includes("already has a professional role")) {
+         setModalStep(0);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAadharUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!aadharFront) {
+        setAadharFront(file);
+      } else if (!aadharBack) {
+        setAadharBack(file);
+      }
+    }
+    e.target.value = null; 
+  };
+
+  const handlePanUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!panFront) {
+        setPanFront(file);
+      } else if (!panBack) {
+        setPanBack(file);
+      }
+    }
+    e.target.value = null; 
   };
 
   return (
@@ -194,36 +272,75 @@ export default function ProfessionalLanding() {
             >
               <X size={24} />
             </button>
-            <h2 className="text-2xl font-bold mb-2 uppercase tracking-wider text-white text-center" style={{ fontFamily: "'Open Sans'" }}>Select Your Role</h2>
-            <p className="text-gray-400 text-center mb-8 text-sm">Please select your primary profession.</p>
             
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              {availableRoles.map((role) => {
-                const isSelected = selectedRoles.includes(role.id);
-                return (
-                  <button
-                    key={role.id}
-                    onClick={() => toggleRole(role.id)}
-                    className={`flex flex-col items-center justify-center p-6 border rounded-[10px] transition-all ${
-                      isSelected 
-                        ? 'border-[#55DEE8] bg-[#55DEE8]/10 text-white' 
-                        : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/30 hover:bg-white/10'
-                    }`}
-                  >
-                    <role.icon size={32} className={`mb-3 ${isSelected ? 'text-[#55DEE8]' : ''}`} />
-                    <span className="font-bold uppercase tracking-wider text-sm">{role.label}</span>
-                  </button>
-                )
-              })}
-            </div>
+            {user?.ownerProfile || ["coach", "umpire", "streamer", "commentator", "venue_owner"].includes(user?.role?.toLowerCase()) ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 rounded-full border flex items-center justify-center mx-auto mb-6" style={{ borderColor: "rgba(191,243,103,0.3)", backgroundColor: "rgba(191,243,103,0.1)" }}>
+                  <CheckCircle size={32} className="text-[#BFF367]" />
+                </div>
+                <h2 className="text-2xl font-bold mb-4 uppercase tracking-wider text-white" style={{ fontFamily: "'Open Sans'" }}>Already a Professional</h2>
+                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                  You already have an active professional role ({user?.role}). You can manage your professional profile from your dashboard.
+                </p>
+                <button 
+                  onClick={() => { setModalStep(0); navigate("/business/dashboard"); }}
+                  className="w-full py-4 rounded-[10px] font-bold text-black uppercase tracking-widest hover:brightness-110 transition-all"
+                  style={{ background: GRADIENT, fontFamily: "'Inter'" }}
+                >
+                  Go to Dashboard <ArrowRight size={20} className="inline ml-2" />
+                </button>
+              </div>
+            ) : user?.applicationStatus === "pending" ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 rounded-full border flex items-center justify-center mx-auto mb-6" style={{ borderColor: "rgba(85,222,232,0.3)", backgroundColor: "rgba(85,222,232,0.1)" }}>
+                  <Loader2 size={32} className="text-[#55DEE8] animate-spin" />
+                </div>
+                <h2 className="text-2xl font-bold mb-4 uppercase tracking-wider text-white" style={{ fontFamily: "'Open Sans'" }}>Application Pending</h2>
+                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                  You already have a pending application for a professional role. Please wait for our team to review it. We will notify you once a decision is made.
+                </p>
+                <button 
+                  onClick={() => setModalStep(0)}
+                  className="w-full py-4 rounded-[10px] font-bold text-black uppercase tracking-widest hover:brightness-110 transition-all"
+                  style={{ background: GRADIENT, fontFamily: "'Inter'" }}
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold mb-2 uppercase tracking-wider text-white text-center" style={{ fontFamily: "'Open Sans'" }}>Select Your Role</h2>
+                <p className="text-gray-400 text-center mb-8 text-sm">Please select your primary profession.</p>
+                
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  {availableRoles.map((role) => {
+                    const isSelected = selectedRoles.includes(role.id);
+                    return (
+                      <button
+                        key={role.id}
+                        onClick={() => toggleRole(role.id)}
+                        className={`flex flex-col items-center justify-center p-6 border rounded-[10px] transition-all ${
+                          isSelected 
+                            ? 'border-[#55DEE8] bg-[#55DEE8]/10 text-white' 
+                            : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/30 hover:bg-white/10'
+                        }`}
+                      >
+                        <role.icon size={32} className={`mb-3 ${isSelected ? 'text-[#55DEE8]' : ''}`} />
+                        <span className="font-bold uppercase tracking-wider text-sm">{role.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
 
-            <button 
-              onClick={handleRoleContinue}
-              className="w-full py-4 rounded-[10px] font-bold text-black uppercase tracking-widest hover:brightness-110 transition-all"
-              style={{ background: GRADIENT, fontFamily: "'Inter'" }}
-            >
-              Continue <ArrowRight size={20} className="inline ml-2" />
-            </button>
+                <button 
+                  onClick={handleRoleContinue}
+                  className="w-full py-4 rounded-[10px] font-bold text-black uppercase tracking-widest hover:brightness-110 transition-all"
+                  style={{ background: GRADIENT, fontFamily: "'Inter'" }}
+                >
+                  Continue <ArrowRight size={20} className="inline ml-2" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -242,14 +359,23 @@ export default function ProfessionalLanding() {
             <form className="space-y-6 mt-4" onSubmit={handleDocumentSubmit}>
               
               <div className="grid grid-cols-2 gap-4 md:gap-6">
-                {/* Aadhaar Upload Box Skeleton */}
-                <label className="flex flex-col items-center gap-3 md:gap-4 cursor-pointer group">
+                {/* Aadhaar Upload Box */}
+                <label className={`flex flex-col items-center gap-3 md:gap-4 cursor-pointer group ${aadharFront && aadharBack ? 'opacity-80' : ''}`}>
                   <span className="text-white font-black tracking-wider uppercase text-center text-sm md:text-base" style={{ fontFamily: "'Inter'" }}>AADHAAR CARD</span>
-                  <div className="relative w-full h-[110px] md:h-[130px] bg-[#D9D9D9] rounded-[10px] p-2 md:p-3 overflow-hidden shadow-inner flex flex-col justify-between group-hover:ring-2 group-hover:ring-[#55DEE8] transition-all">
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center z-10 backdrop-blur-sm">
-                      <span className="text-white font-bold tracking-wider uppercase text-center text-[10px] md:text-xs" style={{ fontFamily: "'Inter'" }}>Upload Aadhaar</span>
-                    </div>
+                  <div className={`relative w-full h-[110px] md:h-[130px] bg-[#D9D9D9] rounded-[10px] p-2 md:p-3 overflow-hidden shadow-inner flex flex-col justify-between transition-all ${aadharFront && aadharBack ? 'ring-2 ring-[#55DEE8]' : 'group-hover:ring-2 group-hover:ring-[#55DEE8]'}`}>
+                    {/* Hover Overlay & Upload Logic */}
+                    {aadharFront && aadharBack ? (
+                      <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-10 backdrop-blur-sm">
+                        <FileCheck className="text-[#55DEE8] mb-2" size={32} />
+                        <span className="text-white font-bold tracking-wider uppercase text-center text-xs" style={{ fontFamily: "'Inter'" }}>Aadhaar Uploaded</span>
+                      </div>
+                    ) : (
+                      <div className={`absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-10 backdrop-blur-sm transition-opacity ${aadharFront && !aadharBack ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                         <span className="text-white font-bold tracking-wider uppercase text-center text-[10px] md:text-xs" style={{ fontFamily: "'Inter'" }}>
+                           {aadharFront ? "Upload Aadhaar Back" : "Upload Aadhaar Front"}
+                         </span>
+                      </div>
+                    )}
 
                     {/* Content */}
                     <div className="flex justify-between items-start opacity-60">
@@ -271,17 +397,26 @@ export default function ProfessionalLanding() {
                       </div>
                     </div>
                   </div>
-                  <input type="file" accept="image/*" className="hidden" required />
+                  <input type="file" accept="image/*" className="hidden" onChange={handleAadharUpload} disabled={aadharFront && aadharBack} />
                 </label>
 
-                {/* PAN Upload Box Skeleton */}
-                <label className="flex flex-col items-center gap-3 md:gap-4 cursor-pointer group">
+                {/* PAN Upload Box */}
+                <label className={`flex flex-col items-center gap-3 md:gap-4 cursor-pointer group ${panFront && panBack ? 'opacity-80' : ''}`}>
                   <span className="text-white font-black tracking-wider uppercase text-center text-sm md:text-base" style={{ fontFamily: "'Inter'" }}>PAN CARD</span>
-                  <div className="relative w-full h-[110px] md:h-[130px] bg-[#D9D9D9] rounded-[10px] overflow-hidden shadow-inner flex flex-col justify-between group-hover:ring-2 group-hover:ring-[#BFF367] transition-all">
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center z-10 backdrop-blur-sm">
-                      <span className="text-white font-bold tracking-wider uppercase text-center text-[10px] md:text-xs" style={{ fontFamily: "'Inter'" }}>Upload PAN</span>
-                    </div>
+                  <div className={`relative w-full h-[110px] md:h-[130px] bg-[#D9D9D9] rounded-[10px] overflow-hidden shadow-inner flex flex-col justify-between transition-all ${panFront && panBack ? 'ring-2 ring-[#BFF367]' : 'group-hover:ring-2 group-hover:ring-[#BFF367]'}`}>
+                    {/* Hover Overlay & Upload Logic */}
+                    {panFront && panBack ? (
+                      <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-10 backdrop-blur-sm">
+                        <FileCheck className="text-[#BFF367] mb-2" size={32} />
+                        <span className="text-white font-bold tracking-wider uppercase text-center text-xs" style={{ fontFamily: "'Inter'" }}>PAN Uploaded</span>
+                      </div>
+                    ) : (
+                      <div className={`absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-10 backdrop-blur-sm transition-opacity ${panFront && !panBack ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                         <span className="text-white font-bold tracking-wider uppercase text-center text-[10px] md:text-xs" style={{ fontFamily: "'Inter'" }}>
+                           {panFront ? "Upload PAN Back" : "Upload PAN Front"}
+                         </span>
+                      </div>
+                    )}
 
                     {/* Top Stripe */}
                     <div className="w-full h-5 md:h-6 bg-gray-400/60 flex justify-between items-center px-2 md:px-3 opacity-60 shrink-0">
@@ -314,17 +449,22 @@ export default function ProfessionalLanding() {
                       </div>
                     </div>
                   </div>
-                  <input type="file" accept="image/*" className="hidden" required />
+                  <input type="file" accept="image/*" className="hidden" onChange={handlePanUpload} disabled={panFront && panBack} />
                 </label>
               </div>
 
               <div className="flex justify-center mt-6">
                 <button 
                   type="submit" 
-                  className="w-full max-w-[240px] py-3 rounded-[10px] font-bold text-black uppercase tracking-widest hover:brightness-110 transition-all"
+                  disabled={isSubmitting}
+                  className="w-full max-w-[240px] py-3 rounded-[10px] font-bold text-black uppercase tracking-widest hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
                   style={{ background: GRADIENT, fontFamily: "'Inter'" }}
                 >
-                  Submit & Register
+                  {isSubmitting ? (
+                     <><Loader2 size={20} className="animate-spin" /> Submitting</>
+                  ) : (
+                     "Submit & Register"
+                  )}
                 </button>
               </div>
             </form>

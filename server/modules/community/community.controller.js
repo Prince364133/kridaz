@@ -254,6 +254,10 @@ export const getPosts = async (req, res) => {
       conditions.push(authorFilter);
     }
 
+    if (!userId) {
+      conditions.push({ author: { role: 'ADMIN' } });
+    }
+
     if (search) {
       conditions.push({
         OR: [

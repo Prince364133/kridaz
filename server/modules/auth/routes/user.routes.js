@@ -3,18 +3,22 @@ import {
   registerUser, 
   login,
   sendOtp,
+  verifyOtp,
   loginStep1,
   googleAuth,
   getMe,
   logout,
   refreshToken,
   updateProfile,
+  updateProfilePicture,
   checkUsername,
   generateRecoveryTokens,
   loginWithRecoveryToken,
   upgradeRequest,
   sendPhoneVerificationOtp,
-  verifyPhoneOtp
+  verifyPhoneOtp,
+  forgotPasswordOtp,
+  resetPassword
 } from "../auth.controller.js";
 import { 
   userRegisterSchema, 
@@ -50,6 +54,7 @@ const router = express.Router();
  *     tags: [Auth]
  */
 router.post("/send-otp", otpLimiter, verifyTurnstile, validate(sendOtpSchema), sendOtp);
+router.post("/verify-otp", otpLimiter, verifyOtp);
 
 /**
  * @swagger
@@ -146,6 +151,7 @@ router.post("/logout", logout);
  *       - BearerAuth: []
  */
 router.put("/updateProfile", userAuth, updateProfile);
+router.post("/profile-picture", userAuth, upload.single("profilePicture"), updateProfilePicture);
 router.post("/send-phone-verification-otp", userAuth, sendPhoneVerificationOtp);
 router.post("/verify-phone-otp", userAuth, verifyPhoneOtp);
 
@@ -170,5 +176,9 @@ router.post("/recovery/generate", userAuth, generateRecoveryTokens);
  *       - BearerAuth: []
  */
 router.post("/upgrade-request", userAuth, upload.array("documents", 10), upgradeRequest);
+
+// ── Password Reset Routes ───────────────────────────────────────────────────
+router.post("/forgot-password-otp", forgotPasswordOtp);
+router.post("/reset-password", resetPassword);
 
 export default router;

@@ -14,7 +14,7 @@ export default function PublicRoute({ children }) {
     // Route to role-specific dashboards
     if (normalizedRole?.includes("admin")) return <Navigate to="/admin" replace />;
     if (normalizedRole?.includes("owner") || normalizedRole?.includes("venue")) return <Navigate to="/venue-owner" replace />;
-    if (normalizedRole === "coach") return <Navigate to="/coach" replace />;
+    if (normalizedRole === "coach") return <Navigate to="/professional/coach" replace />;
     if (normalizedRole === "umpire") return <Navigate to="/umpire" replace />;
 
     return <Navigate to="/" replace />;

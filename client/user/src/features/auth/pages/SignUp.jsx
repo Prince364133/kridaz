@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 import Turnstile from "react-turnstile";
 import OnboardingModal from "@components/modals/OnboardingModal";
-import { ArrowRight, ChevronLeft, Mail, Phone, Lock, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ChevronLeft, User as UserIcon, Lock, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useDispatch } from "react-redux";
@@ -11,9 +11,11 @@ import { login } from "@redux/slices/authSlice";
 
 const SignUp = () => {
   const [mounted, setMounted] = useState(false);
-  const [authMode, setAuthMode] = useState('initial'); // 'initial', 'email', 'phone'
+  const [authMode, setAuthMode] = useState('unified'); // 'unified', 'email', 'phone'
   const [step, setStep] = useState(1); // 1: Input, 2: OTP, 3: Password
   
+  const [countryCode, setCountryCode] = useState("+91");
+  const [identifier, setIdentifier] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -36,27 +38,41 @@ const SignUp = () => {
     if (inviteToken) {
       localStorage.setItem("pendingInvite", inviteToken);
       const emailParam = searchParams.get("email");
-      if (emailParam) setEmail(decodeURIComponent(emailParam));
+      if (emailParam) setIdentifier(decodeURIComponent(emailParam));
     }
     if (umpireToken) {
       localStorage.setItem("umpireInvite", umpireToken);
       const emailParam = searchParams.get("email");
-      if (emailParam) setEmail(decodeURIComponent(emailParam));
+      if (emailParam) setIdentifier(decodeURIComponent(emailParam));
     }
   }, [searchParams]);
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (authMode === 'email' && !email) return toast.error("Email required");
-    if (authMode === 'phone' && (!phone || phone.length < 10)) return toast.error("Valid phone number required");
+    if (!identifier) return toast.error("Email or Phone number required");
+
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+    const isPhone = /^\d{10}$/.test(identifier);
+
+    if (!isEmail && !isPhone) {
+      return toast.error("Please enter a valid email or 10-digit phone number");
+    }
+
+    const mode = isEmail ? 'email' : 'phone';
+    setAuthMode(mode);
+    
+    const formattedPhone = countryCode + identifier;
+
+    if (isEmail) setEmail(identifier);
+    else setPhone(formattedPhone);
     
     setLoading(true);
     try {
-      const payload = authMode === 'email' ? { email } : { phone };
+      const payload = isEmail ? { email: identifier } : { phone: formattedPhone };
       const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
       toast.success(res.data.message);
       if (res.data.testOtp) {
-         toast(authMode === 'email' ? `Test OTP: ${res.data.testOtp.email}` : `Test OTP: ${res.data.testOtp.phone}`, { icon: '🧑‍💻', duration: 10000 });
+         toast(isEmail ? `Test OTP: ${res.data.testOtp.email}` : `Test OTP: ${res.data.testOtp.phone}`, { icon: '🧑‍💻', duration: 10000 });
       }
       setStep(2);
     } catch (err) {
@@ -66,10 +82,32 @@ const SignUp = () => {
     }
   };
 
-  const handleVerifyOtp = (e) => {
+  const handleVerifyOtp = async (e) => {
     e.preventDefault();
     if (!otp || otp.length < 6) return toast.error("Valid 6-digit OTP required");
-    setStep(3);
+    
+    setLoading(true);
+    try {
+      const payload = authMode === 'email' ? { email, otp } : { phone, otp };
+      const res = await axiosInstance.post('/api/user/auth/verify-otp', payload);
+      
+      if (res.data.success) {
+        toast.success("OTP verified successfully!");
+        setOnboardingData({
+          authMethod: authMode,
+          email: authMode === 'email' ? email : '',
+          phone: authMode === 'phone' ? phone : '',
+          otp,
+          password: "",
+          registrationToken: res.data.registrationToken
+        });
+        setShowOnboarding(true);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Invalid OTP");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePasswordSubmit = (e) => {
@@ -145,7 +183,7 @@ const SignUp = () => {
             <div className="w-full relative z-20">
               <div className="space-y-6">
                 
-                {authMode === 'initial' && (
+                {step === 1 && (
                   <>
                     <GoogleAuthButton 
                       mode="signup"
@@ -156,121 +194,104 @@ const SignUp = () => {
 
                     <div className="flex items-center gap-4 my-6">
                       <div className="h-px bg-white/10 flex-1" />
-                      <span className="text-xs text-white/40 font-medium uppercase tracking-wider">or</span>
+                      <span className="text-xs text-white/40 font-medium uppercase tracking-wider">or continue with</span>
                       <div className="h-px bg-white/10 flex-1" />
-                    </div>
-
-                    <div className="space-y-4">
-                      <button 
-                        onClick={() => setAuthMode('email')}
-                        className="group relative w-full flex items-center justify-center h-14 px-6 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-[#55DEE8]/40 rounded-2xl transition-all duration-500 shadow-xl"
-                      >
-                        <Mail className="w-5 h-5 text-white/60 mr-3 group-hover:text-[#55DEE8] transition-colors" />
-                        <span className="text-sm font-bold text-white tracking-wide uppercase">Sign up with Email</span>
-                      </button>
-
-                      <button 
-                        onClick={() => setAuthMode('phone')}
-                        className="group relative w-full flex items-center justify-center h-14 px-6 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-[#55DEE8]/40 rounded-2xl transition-all duration-500 shadow-xl"
-                      >
-                        <Phone className="w-5 h-5 text-white/60 mr-3 group-hover:text-[#55DEE8] transition-colors" />
-                        <span className="text-sm font-bold text-white tracking-wide uppercase">Switch to Phone Sign up</span>
-                      </button>
                     </div>
                   </>
                 )}
 
-                {authMode !== 'initial' && (
-                  <form onSubmit={step === 1 ? handleSendOtp : step === 2 ? handleVerifyOtp : handlePasswordSubmit} className="space-y-6">
+                <form onSubmit={step === 1 ? handleSendOtp : handleVerifyOtp} className="space-y-6">
+                  {step > 1 && (
                     <button
                       type="button"
-                      onClick={() => { setAuthMode('initial'); setStep(1); }}
+                      onClick={() => { setAuthMode('unified'); setStep(1); }}
                       className="text-[#55DEE8] flex items-center text-sm font-medium hover:underline mb-4"
                     >
                       <ChevronLeft size={16} className="mr-1" />
                       Back to options
                     </button>
+                  )}
 
-                    {step === 1 && (
-                      <div className="space-y-4">
-                        <label className="text-sm font-medium text-white/60 ml-1">
-                          {authMode === 'email' ? 'Email Address' : 'Phone Number'}
-                        </label>
-                        <div className="relative group/field">
-                          {authMode === 'email' ? (
-                            <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
-                          ) : (
-                            <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
-                          )}
-                          <input 
-                            type={authMode === 'email' ? 'email' : 'tel'}
-                            required
-                            value={authMode === 'email' ? email : phone}
-                            onChange={(e) => authMode === 'email' ? setEmail(e.target.value) : setPhone(e.target.value)}
-                            placeholder={authMode === 'email' ? 'name@example.com' : '+91 00000 00000'}
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {step === 2 && (
-                      <div className="space-y-4">
-                        <label className="text-sm font-medium text-white/60 ml-1">
-                          Enter OTP sent to {authMode === 'email' ? email : phone}
-                        </label>
-                        <div className="relative group/field">
-                          <CheckCircle2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
+                  {step === 1 && (
+                    <div className="space-y-4">
+                      <label className="text-sm font-medium text-white/60 ml-1">
+                        Email Address or Phone Number
+                      </label>
+                      <div className="relative group/field flex gap-2">
+                        {(!identifier || /^\d/.test(identifier)) && (
+                          <select
+                            value={countryCode}
+                            onChange={(e) => setCountryCode(e.target.value)}
+                            className="bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 px-2 text-white text-sm outline-none transition-all cursor-pointer w-20 appearance-none text-center"
+                          >
+                            <option value="+91" className="text-black">+91 🇮🇳</option>
+                            <option value="+1" className="text-black">+1 🇺🇸</option>
+                            <option value="+44" className="text-black">+44 🇬🇧</option>
+                            <option value="+61" className="text-black">+61 🇦🇺</option>
+                            <option value="+971" className="text-black">+971 🇦🇪</option>
+                          </select>
+                        )}
+                        <div className="relative flex-1">
+                          <UserIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                           <input 
                             type="text"
                             required
-                            maxLength={6}
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value)}
-                            placeholder="6-digit OTP"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all tracking-[0.5em] font-mono"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {step === 3 && (
-                      <div className="space-y-4">
-                        <label className="text-sm font-medium text-white/60 ml-1">
-                          Create Password
-                        </label>
-                        <div className="relative group/field">
-                          <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
-                          <input 
-                            type="password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
+                            value={identifier}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (/^\d+$/.test(val)) {
+                                setIdentifier(val.slice(0, 10));
+                              } else {
+                                setIdentifier(val);
+                              }
+                            }}
+                            placeholder="name@example.com or 9876543210"
                             className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
                       </div>
-                    )}
-
-                    <div className="flex justify-center my-4">
-                      <Turnstile
-                        sitekey="0x4AAAAAAA7f_T_9-vI7yP6U"
-                        onVerify={(token) => setTurnstileToken(token)}
-                        theme="dark"
-                      />
                     </div>
+                  )}
 
-                    <button 
-                      type="submit" 
-                      disabled={loading || !turnstileToken}
-                      className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
-                    >
-                      {loading ? "Processing..." : step === 3 ? "Complete Profile" : "Continue"}
-                      {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
-                    </button>
-                  </form>
-                )}
+                  {step === 2 && (
+                    <div className="space-y-4">
+                      <label className="text-sm font-medium text-white/60 ml-1">
+                        Enter OTP sent to {authMode === 'email' ? email : phone}
+                      </label>
+                      <div className="relative group/field">
+                        <CheckCircle2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
+                        <input 
+                          type="text"
+                          required
+                          maxLength={6}
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value)}
+                          placeholder="6-digit OTP"
+                          className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all tracking-[0.5em] font-mono"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+
+
+                  <div className="flex justify-center my-4">
+                    <Turnstile
+                      sitekey={import.meta.env.DEV ? "1x00000000000000000000AA" : import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                      onVerify={(token) => setTurnstileToken(token)}
+                      theme="dark"
+                    />
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    disabled={loading || !turnstileToken}
+                    className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
+                  >
+                    {loading ? "Processing..." : step === 2 ? "Complete Profile" : "Continue"}
+                    {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
+                  </button>
+                </form>
               </div>
             </div>
 
@@ -310,3 +331,4 @@ const SignUp = () => {
 };
 
 export default SignUp;
+

@@ -58,7 +58,7 @@ const VerificationCenter = () => {
     if (!adminInfo.name || !adminInfo.designation) {
       return toast.error("Please provide admin name and designation");
     }
-    await handleAccept(selectedRequest._id, { 
+    await handleAccept(selectedRequest.id, { 
       adminName: adminInfo.name, 
       adminDesignation: adminInfo.designation 
     });
@@ -204,13 +204,13 @@ const VerificationCenter = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 pb-10">
               {displayRequests.map((request) => (
                 <OwnerRequestCard
-                  key={request._id}
+                  key={request.id}
                   request={request}
                   onAccept={() => { setSelectedRequest(request); setShowApprovalModal(true); }}
                   onReject={handleReject}
                   onReconsider={handleReconsider}
                   onViewDetail={() => handleOpenDetail(request)}
-                  isProcessing={requestId === request._id}
+                  isProcessing={requestId === request.id}
                   type={activeTab}
                 />
               ))}
@@ -223,8 +223,8 @@ const VerificationCenter = () => {
               request={selectedRequest} 
               onClose={handleCloseDetail}
               onAccept={() => { setIsDetailModalOpen(false); setShowApprovalModal(true); }}
-              onReject={() => { handleReject(selectedRequest._id); handleCloseDetail(); }}
-              isProcessing={requestId === selectedRequest?._id}
+              onReject={() => { handleReject(selectedRequest.id); handleCloseDetail(); }}
+              isProcessing={requestId === selectedRequest?.id}
               type={activeTab}
             />
           )}

@@ -277,7 +277,7 @@ export default function BusinessRegistration() {
           </p>
           <button
             onClick={() => {
-              if (existingRole?.toLowerCase() === "coach") navigate("/coach");
+              if (existingRole?.toLowerCase() === "coach") navigate("/professional/coach");
               else if (existingRole?.toLowerCase() === "umpire") navigate("/umpire");
               else if (existingRole?.toLowerCase() === "scorer") navigate("/scorer");
               else if (existingRole?.toLowerCase() === "streamer") navigate("/streamer");
