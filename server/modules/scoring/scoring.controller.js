@@ -10,6 +10,32 @@ const handleControllerError = (res, error, fallbackMsg = "Internal Server Error"
   res.status(status).json({ success: false, message: error.message || fallbackMsg });
 };
 
+export const setupScoringGame = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const matchData = req.body;
+    
+    const game = await scoringService.createScoringMatch(userId, matchData);
+    
+    res.status(201).json({ success: true, game });
+  } catch (error) {
+    logger.error("[Scoring] Setup Scoring Game Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+export const getMyScoringGames = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const games = await scoringService.getUserScoringGames(userId);
+    
+    res.status(200).json({ success: true, games });
+  } catch (error) {
+    logger.error("[Scoring] Get My Games Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
 /**
  * Initialize a Live Stream overlay session
  */

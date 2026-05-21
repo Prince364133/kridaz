@@ -29,8 +29,10 @@ export const getPublicPlayers = async (req, res) => {
     if (state) where.state = { contains: state, mode: 'insensitive' };
     if (sport) where.sportTypes = { has: sport }; // Assuming sportTypes is an enum or string array in Prisma
     
+    let currentUserId = null;
     if (req.user?.id) {
-      where.id = { not: req.user.id };
+      currentUserId = await resolveUserId(req.user.id);
+      where.id = { not: currentUserId };
     }
 
     // PostGIS-native proximity search if coordinates provided
@@ -65,8 +67,8 @@ export const getPublicPlayers = async (req, res) => {
         const players = nearbyUsers.map((u) => {
           const uIdStr = u.id;
           const stats = networkStats.get(uIdStr) || { followerIds: [], followingIds: [] };
-          const isFollowing = req.user ? stats.followerIds.includes(req.user.id.toString()) : false;
-          const isFollowedBy = req.user ? stats.followingIds.includes(req.user.id.toString()) : false;
+          const isFollowing = currentUserId ? stats.followerIds.includes(currentUserId) : false;
+          const isFollowedBy = currentUserId ? stats.followingIds.includes(currentUserId) : false;
           return {
             id: u.id,
             name: u.name,
@@ -118,8 +120,8 @@ export const getPublicPlayers = async (req, res) => {
       const uIdStr = u.id;
       const stats = networkStats.get(uIdStr) || { followerIds: [], followingIds: [] };
       
-      const isFollowing = req.user ? stats.followerIds.includes(req.user.id.toString()) : false;
-      const isFollowedBy = req.user ? stats.followingIds.includes(req.user.id.toString()) : false;
+      const isFollowing = currentUserId ? stats.followerIds.includes(currentUserId) : false;
+      const isFollowedBy = currentUserId ? stats.followingIds.includes(currentUserId) : false;
 
       return {
         id: u.id,
@@ -156,13 +158,18 @@ export const searchPlayers = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const take = parseInt(limit);
 
+    let currentUserId = null;
+    if (req.user?.id) {
+      currentUserId = await resolveUserId(req.user.id);
+    }
+
     const users = await prisma.user.findMany({
       where: {
         OR: [
           { name: { contains: query, mode: 'insensitive' } },
           { username: { contains: query, mode: 'insensitive' } }
         ],
-        id: { not: req.user?.id }
+        ...(currentUserId ? { id: { not: currentUserId } } : {})
       },
       select: {
         id: true,
@@ -196,8 +203,8 @@ export const searchPlayers = async (req, res) => {
       const uIdStr = u.id;
       const stats = networkStats.get(uIdStr) || { followerIds: [], followingIds: [] };
       
-      const isFollowing = req.user ? stats.followerIds.includes(req.user.id.toString()) : false;
-      const isFollowedBy = req.user ? stats.followingIds.includes(req.user.id.toString()) : false;
+      const isFollowing = currentUserId ? stats.followerIds.includes(currentUserId) : false;
+      const isFollowedBy = currentUserId ? stats.followingIds.includes(currentUserId) : false;
 
       return {
         id: u.id,

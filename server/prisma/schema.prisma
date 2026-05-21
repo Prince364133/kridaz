@@ -429,6 +429,16 @@ model HostedGame {
   customUmpire      Json?
   customScorer      Json?
   customStreamer    Json?
+  
+  // New fields for Scoring Match
+  name              String?
+  format            String?
+  ballType          String?
+  groundType        String?
+  scoringPassword   String?
+  youtubeLiveUrl    String?
+  maxMembers        Int                  @default(11)
+  
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
   broadcasts        Broadcast[]

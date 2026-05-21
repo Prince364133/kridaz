@@ -134,7 +134,7 @@ export const createTeam = async (req, res) => {
 
     // Generate QR Code for join link
     const frontendUrl = process.env.USER_URL || process.env.CLIENT_URLS?.split(",")[0] || "https://kridaz.com";
-    const qrUrl = `${frontendUrl}/team-pass/${team.id}`;
+    const qrUrl = `${frontendUrl}/team/${team.id}`;
     let newTeam = team;
     try {
       logger.info("Generating QR code for team join link:", qrUrl);
@@ -526,7 +526,7 @@ export const getTeamById = async (req, res) => {
     // Generate QR code if missing
     if (!team.qrCode) {
       const frontendUrl = process.env.USER_URL || process.env.CLIENT_URLS?.split(",")[0] || "https://kridaz.com";
-      const qrUrl = `${frontendUrl}/team-pass/${team.id}`;
+      const qrUrl = `${frontendUrl}/team/${team.id}`;
       try {
         logger.info("Generating missing QR code for team:", team.id);
         const qrCodeUrl = await generateQRCode(qrUrl);
@@ -979,6 +979,75 @@ export const requestToJoin = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @route   POST /api/team/:id/handle-join-request
+// @desc    Accept or reject a member join request
+export const handleJoinRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId, action } = req.body;
+    const currentUserId = req.user.id;
+
+    if (!["ACCEPT", "REJECT"].includes(action)) {
+      return res.status(400).json({ success: false, message: "Invalid action" });
+    }
+
+    // Verify team ownership
+    const team = await prisma.team.findUnique({ where: { id } });
+    if (!team) return res.status(404).json({ success: false, message: "Team not found" });
+    
+    if (team.ownerId !== currentUserId) {
+      return res.status(403).json({ success: false, message: "Only team owner can handle requests" });
+    }
+
+    const memberRequest = await prisma.teamMember.findFirst({
+      where: { teamId: id, userId, status: "PENDING" }
+    });
+
+    if (!memberRequest) {
+      return res.status(404).json({ success: false, message: "Pending request not found" });
+    }
+
+    if (action === "ACCEPT") {
+      await prisma.teamMember.update({
+        where: { id: memberRequest.id },
+        data: { status: "JOINED" }
+      });
+      
+      await prisma.notification.create({
+        data: {
+          userId,
+          type: "TEAM_JOIN_ACCEPTED",
+          title: "Join Request Accepted",
+          message: `Your request to join ${team.name} has been accepted!`,
+          metadata: { teamId: team.id }
+        }
+      });
+      
+      res.status(200).json({ success: true, message: "Join request accepted" });
+    } else {
+      await prisma.teamMember.delete({
+        where: { id: memberRequest.id }
+      });
+      
+      await prisma.notification.create({
+        data: {
+          userId,
+          type: "TEAM_JOIN_REJECTED",
+          title: "Join Request Rejected",
+          message: `Your request to join ${team.name} has been declined.`,
+          metadata: { teamId: team.id }
+        }
+      });
+      
+      res.status(200).json({ success: true, message: "Join request rejected" });
+    }
+  } catch (error) {
+    logger.error("Handle join request error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 
 // @route   GET /api/team/opponents
 // @desc    Get all opponent teams linked to my teams

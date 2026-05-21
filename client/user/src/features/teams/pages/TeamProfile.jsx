@@ -55,6 +55,7 @@ const TeamProfile = () => {
 
   const [showChallengeModal, setShowChallengeModal] = useState(false);
   const [showSquadModal, setShowSquadModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [selectedMyTeam, setSelectedMyTeam] = useState('');
 
   if (isLoading) {
@@ -272,18 +273,28 @@ const TeamProfile = () => {
 
               <div className="space-y-2 pt-2">
                 <div className="grid grid-cols-2 gap-2">
-                  <button 
-                    onClick={handleJoinRequest}
-                    disabled={isJoining || isPendingMember || isOwner || isMember}
-                    className={`py-3 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 transition-all ${isPendingMember || isOwner || isMember ? 'bg-white/5 text-white/20 border border-white/10' : 'bg-[#55DEE8] text-black hover:brightness-110 shadow-[0_5px_15px_rgba(85,222,232,0.2)]'}`}
-                  >
-                    {isJoining ? <Loader2 size={12} className="animate-spin" /> : (
-                      <>
-                        <UserPlus size={14} />
-                        Join
-                      </>
-                    )}
-                  </button>
+                  {isMember ? (
+                    <button 
+                      onClick={() => toast.success('Left the team.')}
+                      className="py-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-red-500/20 transition-all"
+                    >
+                      <UserPlus size={14} className="rotate-45" />
+                      Leave Team
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={handleJoinRequest}
+                      disabled={isJoining || isPendingMember || isOwner}
+                      className={`py-3 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 transition-all ${isPendingMember || isOwner ? 'bg-white/5 text-white/20 border border-white/10' : 'bg-[#55DEE8] text-black hover:brightness-110 shadow-[0_5px_15px_rgba(85,222,232,0.2)]'}`}
+                    >
+                      {isJoining ? <Loader2 size={12} className="animate-spin" /> : (
+                        <>
+                          <UserPlus size={14} />
+                          {isPendingMember ? 'Request Sent' : 'Join'}
+                        </>
+                      )}
+                    </button>
+                  )}
                   <button 
                     onClick={() => setShowChallengeModal(true)}
                     className="py-3 border-2 border-[#55DEE8] text-[#55DEE8] rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-[#55DEE8] hover:text-black transition-all"
@@ -309,7 +320,7 @@ const TeamProfile = () => {
                 </div>
 
                 <button 
-                  onClick={handleShare}
+                  onClick={() => setShowShareModal(true)}
                   className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-white font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-2 hover:bg-white/10"
                 >
                   <Share2 size={12} /> Share Team
@@ -522,6 +533,43 @@ const TeamProfile = () => {
                    <button onClick={handleChallenge} className="flex-1 py-3 bg-[#55DEE8] rounded-xl text-black font-black uppercase text-[9px]">Send</button>
                  </div>
                </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Share Modal */}
+        {showShareModal && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowShareModal(false)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-sm bg-[#0A0A0A] border border-white/10 rounded-[24px] p-6 text-center">
+               <div className="w-16 h-16 mx-auto bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-4">
+                 <Share2 size={24} className="text-[#55DEE8]" />
+               </div>
+               <h2 className="text-xl font-black text-white uppercase tracking-tighter mb-2">Share Team</h2>
+               <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-6">Invite players to join {team.name}</p>
+               
+               <div className="space-y-3">
+                 <button onClick={handleShare} className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white font-black uppercase text-[10px] flex items-center justify-center gap-2 border border-white/5 transition-colors">
+                   <Share2 size={14} /> Native Share
+                 </button>
+                 <button onClick={() => {
+                   navigator.clipboard.writeText(window.location.href);
+                   toast.success('Link copied to clipboard!');
+                   setShowShareModal(false);
+                 }} className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white font-black uppercase text-[10px] flex items-center justify-center gap-2 border border-white/5 transition-colors">
+                   <Copy size={14} /> Copy Link
+                 </button>
+                 <button onClick={() => {
+                   const text = `Hey, join my team ${team.name}!\n\nLink: ${window.location.href}`;
+                   navigate(`/community?createPost=true&text=${encodeURIComponent(text)}`);
+                 }} className="w-full py-3 bg-[#55DEE8] hover:brightness-110 rounded-xl text-black font-black uppercase text-[10px] flex items-center justify-center gap-2 transition-colors shadow-[0_0_15px_rgba(85,222,232,0.2)]">
+                   <Users size={14} /> Post to Community
+                 </button>
+               </div>
+               
+               <button onClick={() => setShowShareModal(false)} className="mt-6 text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-white transition-colors">
+                 Cancel
+               </button>
             </motion.div>
           </div>
         )}

@@ -1,11 +1,12 @@
 import React from 'react';
 import { Users, UserPlus, Trophy, Calendar, Mail, Phone, Shield, ChevronRight, Check, X, Search, Copy } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useHandleOpponentRequestMutation } from '@redux/api/teamApi';
+import { useHandleOpponentRequestMutation, useHandleJoinRequestMutation } from '@redux/api/teamApi';
 import toast from 'react-hot-toast';
 
 const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
   const [handleRequest, { isLoading: isHandling }] = useHandleOpponentRequestMutation();
+  const [handleJoinRequest, { isLoading: isHandlingJoin }] = useHandleJoinRequestMutation();
 
   if (!team) {
     return (
@@ -31,10 +32,20 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
     );
   }
 
-  const members = team.members || [];
+  const members = team.members?.filter(m => m.status === 'JOINED' || m.status === undefined) || [];
+  const pendingMembers = team.members?.filter(m => m.status === 'PENDING') || [];
   const customMembers = team.customMembers || [];
   const opponents = team.opponents || [];
   const pendingRequests = team.opponentRequests?.filter(r => r.status === 'PENDING') || [];
+
+  const onHandleJoin = async (userId, action) => {
+    try {
+      await handleJoinRequest({ teamId: team._id, userId, action }).unwrap();
+      toast.success(`Join request ${action.toLowerCase()}ed`);
+    } catch (err) {
+      toast.error(err.data?.message || 'Failed to handle join request');
+    }
+  };
 
   const onHandleOpponent = async (requestId, action) => {
     try {
@@ -167,6 +178,45 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
                         <button 
                           disabled={isHandling}
                           onClick={() => onHandleOpponent(req._id, 'REJECT')}
+                          className="w-8 h-8 bg-white/5 text-white/40 rounded-[15px] flex items-center justify-center hover:bg-white/10 transition-colors"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Pending Member Requests */}
+            {pendingMembers.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-white font-bold text-lg tracking-tight flex items-center gap-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  <span className="w-1 h-5 bg-[#55DEE8] rounded-full" />
+                  Join Requests ({pendingMembers.length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {pendingMembers.map((req) => (
+                    <div key={req._id} className="bg-[#55DEE8]/5 border border-[#55DEE8]/20 p-4 rounded-[15px] flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-[10px] bg-white/5 overflow-hidden border border-white/10 shrink-0">
+                        <img src={req.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${req.username}`} alt={req.username} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-bold text-sm truncate uppercase tracking-tight">{req.username}</p>
+                        <p className="text-[#55DEE8]/60 text-[9px] font-bold uppercase tracking-widest mt-0.5">Wants to join</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          disabled={isHandlingJoin}
+                          onClick={() => onHandleJoin(req.user?._id || req.userId, 'ACCEPT')}
+                          className="w-8 h-8 bg-[#55DEE8] text-black rounded-[15px] flex items-center justify-center hover:brightness-110 transition-colors"
+                        >
+                          <Check size={12} />
+                        </button>
+                        <button 
+                          disabled={isHandlingJoin}
+                          onClick={() => onHandleJoin(req.user?._id || req.userId, 'REJECT')}
                           className="w-8 h-8 bg-white/5 text-white/40 rounded-[15px] flex items-center justify-center hover:bg-white/10 transition-colors"
                         >
                           <X size={12} />

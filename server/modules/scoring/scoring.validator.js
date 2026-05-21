@@ -28,3 +28,24 @@ export const tossSchema = z.object({
     decision: z.enum(["BAT", "BOWL"]),
   }),
 });
+
+export const setupScoringGameSchema = z.object({
+  body: z.object({
+    matchName: z.string().min(1, "Match Name is required"),
+    format: z.string().optional(),
+    ballType: z.string().optional(),
+    groundType: z.string().optional(),
+    maxMembers: z.number().int().positive().optional(),
+    teamAId: z.string().optional(),
+    teamBId: z.string().optional(),
+    teamAData: z.any().optional(),
+    teamBData: z.any().optional(),
+    teamAPlayers: z.array(z.any()).optional(),
+    teamBPlayers: z.array(z.any()).optional(),
+    venueId: z.string().optional(),
+    tossWinner: z.string().optional(),
+    tossDecision: z.string().optional(),
+    scoringPassword: z.string().min(4, "Password must be at least 4 characters").optional(),
+    youtubeLiveUrl: z.string().url().optional().or(z.literal('')),
+  })
+});

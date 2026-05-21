@@ -12,7 +12,8 @@ import {
   handleOpponentRequest,
   getOpponentTeams,
   updateTeam,
-  deleteTeam
+  deleteTeam,
+  handleJoinRequest
 } from "../team.controller.js";
 import { authenticate } from "../../../middleware/auth.middleware.js";
 import upload from "../../../middleware/uploads/upload.middleware.js";
@@ -188,6 +189,20 @@ router.post("/join/:token", joinTeam);
  *         description: Join request sent
  */
 router.post("/join-request/:id", requestToJoin);
+
+/**
+ * @swagger
+ * /team/{id}/handle-join-request:
+ *   post:
+ *     summary: Handle a member join request
+ *     tags: [Team]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Join request handled
+ */
+router.post("/:id/handle-join-request", handleJoinRequest);
 
 /**
  * @swagger

@@ -424,6 +424,23 @@ const Community = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
+  // Check URL params for creating a post (e.g. from Team Profile share)
+  useEffect(() => {
+    if (searchParams.get('createPost') === 'true') {
+      const text = searchParams.get('text');
+      if (text) {
+        setNewPost(prev => ({ ...prev, content: text }));
+      }
+      setShowPostModal(true);
+      
+      // Clean up the URL
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('createPost');
+      newParams.delete('text');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
   useEffect(() => {
     if (!showGlobalSearch) return;
     const delayDebounceFn = setTimeout(async () => {

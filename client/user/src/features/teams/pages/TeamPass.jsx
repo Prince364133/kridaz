@@ -8,7 +8,7 @@ import {
 import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
-import useAxiosInstance from '@hooks/useAxiosInstance';
+import axiosInstance from '@infrastructure/axios';
 
 const PRI = "#55DEE8";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
@@ -18,7 +18,6 @@ const TeamPass = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const passRef = useRef(null);
-  const axios = useAxiosInstance();
 
   const [team, setTeam] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,7 +26,7 @@ const TeamPass = () => {
   useEffect(() => {
     const fetchTeam = async () => {
       try {
-        const res = await axios.get(`/team/${id}`);
+        const res = await axiosInstance.get(`/api/team/${id}`);
         setTeam(res.data.team);
       } catch (err) {
         toast.error('Failed to load team data');
@@ -189,8 +188,12 @@ const TeamPass = () => {
               </div>
             </div>
             
-            <div className="w-20 h-20 bg-white rounded-2xl p-1.5 flex items-center justify-center shadow-lg relative group">
-              <QrCode size={68} className="text-black" />
+            <div className="w-20 h-20 bg-white rounded-2xl p-1.5 flex items-center justify-center shadow-lg relative group overflow-hidden">
+              {team?.qrCode ? (
+                <img src={team.qrCode} alt="Team QR" className="w-full h-full object-cover" />
+              ) : (
+                <QrCode size={68} className="text-black" />
+              )}
               <div className="absolute inset-0 bg-black/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <Info size={16} className="text-black" />
               </div>

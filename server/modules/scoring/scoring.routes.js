@@ -16,10 +16,12 @@ import {
   undoLastBall,
   // Phase 3: Live overlay
   getLiveScore,
+  setupScoringGame,
+  getMyScoringGames,
 } from "./scoring.controller.js";
 import verifyAuth from "../../middleware/jwt/auth.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
-import { startScoringSchema, updateScoreSchema, tossSchema } from "./scoring.validator.js";
+import { startScoringSchema, updateScoreSchema, tossSchema, setupScoringGameSchema } from "./scoring.validator.js";
 
 const router = Router();
 
@@ -106,6 +108,34 @@ router.get("/live-score/:matchId", getLiveScore);
 
 // Protected routes (Only authorized umpires can score)
 router.use(verifyAuth);
+
+/**
+ * @swagger
+ * /scoring/setup:
+ *   post:
+ *     summary: Setup a new Scoring Match
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Match created
+ */
+router.post("/setup", validate(setupScoringGameSchema), setupScoringGame);
+
+/**
+ * @swagger
+ * /scoring/my-games:
+ *   get:
+ *     summary: Get scoring matches for the current user
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Matches retrieved
+ */
+router.get("/my-games", getMyScoringGames);
 
 /**
  * @swagger

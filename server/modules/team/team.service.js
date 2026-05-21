@@ -95,7 +95,7 @@ export const getTeamWithDetails = async (id) => {
  */
 export const ensureTeamQRCode = async (teamId) => {
   const frontendUrl = process.env.USER_URL || process.env.CLIENT_URLS?.split(",")[0] || "https://kridaz.com";
-  const qrUrl = `${frontendUrl}/team-pass/${teamId}`;
+  const qrUrl = `${frontendUrl}/team/${teamId}`;
 
   try {
     const qrCodeUrl = await generateQRCode(qrUrl);

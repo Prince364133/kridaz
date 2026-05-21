@@ -1011,3 +1011,141 @@ export const fetchLiveScoreSnapshot = async (matchId) => {
   await liveStateService.setLiveScore(matchId, snapshot);
   return { data: snapshot, source: 'prisma' };
 };
+
+/**
+ * Creates a new ScoringMatch (using the HostedGame model acting as the parent record)
+ */
+export const createScoringMatch = async (userId, matchData) => {
+  const {
+    matchName,
+    format,
+    ballType,
+    groundType,
+    maxMembers,
+    teamAId,
+    teamBId,
+    teamAData,
+    teamBData,
+    teamAPlayers,
+    teamBPlayers,
+    venueId,
+    tossWinner,
+    tossDecision,
+    scoringPassword,
+    youtubeLiveUrl
+  } = matchData;
+
+  // Generate a random 6-character short ID
+  const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+  // We map this into HostedGame to reuse the existing structure.
+  const game = await prisma.hostedGame.create({
+    data: {
+      gameType: "SCORING_MATCH", // Optional: to differentiate from regular hosted games
+      title: matchName || "Custom Scoring Match",
+      sport: "CRICKET",
+      format: format || "T20",
+      ballType: ballType || "TENNIS",
+      shortId,
+      hostId: userId,
+      umpireId: userId,
+      status: "SCHEDULED",
+      scoringStatus: "NOT_STARTED",
+      scoringPassword,
+      youtubeVideoId: youtubeLiveUrl || null,
+      maxMembers: maxMembers || 22,
+      pricePerMember: 0,
+      currency: "INR",
+      paymentStatus: "NOT_REQUIRED",
+      teams: {
+        create: [
+          {
+            teamKey: "teamA",
+            name: teamAData?.name || "Team A",
+            existingTeamId: teamAId || null,
+          },
+          {
+            teamKey: "teamB",
+            name: teamBData?.name || "Team B",
+            existingTeamId: teamBId || null,
+          }
+        ]
+      }
+    },
+    include: {
+      teams: true
+    }
+  });
+
+  // Assign players to the respective team slots if provided
+  const teamASlotCreates = [];
+  if (teamAPlayers && teamAPlayers.length > 0) {
+    const teamARecord = game.teams.find(t => t.teamKey === "teamA");
+    if (teamARecord) {
+      teamAPlayers.forEach(p => {
+        teamASlotCreates.push({
+          hostedGameId: game.id,
+          teamId: teamARecord.id,
+          userId: p.id,
+          status: "CONFIRMED"
+        });
+      });
+    }
+  }
+
+  const teamBSlotCreates = [];
+  if (teamBPlayers && teamBPlayers.length > 0) {
+    const teamBRecord = game.teams.find(t => t.teamKey === "teamB");
+    if (teamBRecord) {
+      teamBPlayers.forEach(p => {
+        teamBSlotCreates.push({
+          hostedGameId: game.id,
+          teamId: teamBRecord.id,
+          userId: p.id,
+          status: "CONFIRMED"
+        });
+      });
+    }
+  }
+
+  if (teamASlotCreates.length > 0 || teamBSlotCreates.length > 0) {
+    await prisma.hostedGameSlot.createMany({
+      data: [...teamASlotCreates, ...teamBSlotCreates]
+    });
+  }
+
+  return await prisma.hostedGame.findUnique({
+    where: { id: game.id },
+    include: {
+      teams: {
+        include: { slots: { include: { user: { select: { name: true, id: true, profilePicture: true } } } } }
+      }
+    }
+  });
+};
+
+/**
+ * Get all scoring games associated with the user
+ */
+export const getUserScoringGames = async (userId) => {
+  return await prisma.hostedGame.findMany({
+    where: {
+      OR: [
+        { hostId: userId },
+        { umpireId: userId }
+      ],
+      gameType: "SCORING_MATCH",
+    },
+    include: {
+      teams: {
+        include: {
+          slots: { include: { user: { select: { id: true, name: true, profilePicture: true } } } }
+        }
+      }
+    },
+    orderBy: {
+      createdAt: "desc"
+    }
+  });
+};
+
