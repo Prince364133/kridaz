@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
+import { fetchStates, fetchCities } from "../../../shared/utils/locationService";
 import { 
   Search, 
   MapPin, 
@@ -258,7 +259,7 @@ const FindPlayers = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [followingIds, setFollowingIds] = useState([]);
-  const [filters, setFilters] = useState({ city: "", sport: "" });
+  const [filters, setFilters] = useState({ state: "", city: "", sport: "" });
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "players";
   
@@ -271,6 +272,30 @@ const FindPlayers = () => {
   const [snapState, setSnapState] = useState("HALF");
   const [selectedRadius, setSelectedRadius] = useState(5);
   const [isRadiusChanging, setIsRadiusChanging] = useState(false);
+  
+  const [statesList, setStatesList] = useState([]);
+  const [citiesList, setCitiesList] = useState([]);
+
+  useEffect(() => {
+    const loadStates = async () => {
+      const s = await fetchStates();
+      setStatesList(s);
+    };
+    loadStates();
+  }, []);
+
+  useEffect(() => {
+    const loadCities = async () => {
+      if (filters.state) {
+        const c = await fetchCities(filters.state);
+        setCitiesList(c);
+      } else {
+        setCitiesList([]);
+      }
+    };
+    loadCities();
+  }, [filters.state]);
+
   const [showNearbyOnly, setShowNearbyOnly] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const { socket } = useSocket();
@@ -449,6 +474,7 @@ const FindPlayers = () => {
     try {
       setLoading(true);
       const params = {
+        state: filters.state,
         city: filters.city,
         sportType: filters.sport,
         search: searchQuery,
@@ -457,6 +483,7 @@ const FindPlayers = () => {
       
       const response = await axiosInstance.get("/api/user/players", {
         params: {
+          state: filters.state,
           city: filters.city,
           sport: filters.sport,
           search: searchQuery,
@@ -605,6 +632,7 @@ const FindPlayers = () => {
     try {
       setLoading(true);
       const params = {};
+      if (filters.state) params.state = filters.state;
       if (filters.city) params.city = filters.city;
       if (filters.sport) params.sportType = filters.sport;
       if (searchQuery) params.search = searchQuery;
@@ -711,14 +739,14 @@ const FindPlayers = () => {
   };
 
   return (
-    <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 overflow-hidden pt-16" : "min-h-screen pt-20 overflow-y-auto no-scrollbar"}`}>
+    <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 overflow-hidden pt-16" : "min-h-screen overflow-y-auto no-scrollbar"}`}>
       
       {activeTab === "players" && (
         <>
           <motion.div 
             animate={{ height: `${SNAP_STATES[snapState]}vh` }}
             transition={{ type: "spring", damping: 25, stiffness: 150 }}
-            className="relative w-full bg-[#0a0a0a] border-b border-[#55DEE8]/30 overflow-hidden"
+            className="relative w-full bg-[#0a0a0a] border-b border-[#55DEE8]/30 overflow-hidden lg:hidden"
           >
             <AnimatePresence>
               {snapState !== "COLLAPSED" && (
@@ -839,14 +867,14 @@ const FindPlayers = () => {
                     <div className="bg-black/80 backdrop-blur-2xl border border-[#55DEE8]/30 rounded-full p-1.5 px-6 flex items-center justify-between shadow-2xl">
                         <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Radius</span>
                         <div className="flex items-center gap-1">
-                          {[1, 2, 5, 10].map(r => (
+                          {[5, 10, 20, 50, 100].map(r => (
                               <button 
                                 key={r}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setSelectedRadius(r);
                                 }}
-                                className={`min-w-[44px] py-1.5 rounded-full text-[9px] font-black transition-all uppercase ${selectedRadius === r ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" : "text-white/40 hover:text-white/70"}`}
+                                className={`min-w-[40px] px-2 py-1.5 rounded-full text-[9px] font-black transition-all uppercase ${selectedRadius === r ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" : "text-white/40 hover:text-white/70"}`}
                               >
                                 {r}KM
                               </button>
@@ -865,7 +893,7 @@ const FindPlayers = () => {
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={0.1}
             onDragEnd={handleDragEnd}
-            className="w-full h-10 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing bg-black z-50 group border-b border-white/5"
+            className="w-full h-10 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing bg-black z-50 group border-b border-white/5 lg:hidden"
           >
             <div className="w-12 h-1.5 bg-white/10 rounded-full group-hover:bg-[#55DEE8]/40 transition-colors" />
             <div className="text-[8px] font-bold text-white/10 uppercase tracking-[0.3em] mt-1 group-hover:text-[#55DEE8]/40 transition-colors">
@@ -876,8 +904,8 @@ const FindPlayers = () => {
       )}
 
       {/* BOTTOM PANEL: Feed */}
-      <div className={`flex-1 ${activeTab === "players" ? "overflow-y-auto no-scrollbar pb-24" : "pb-12"} px-4 md:px-8 bg-black pt-6`}>
-        <div className="max-w-6xl mx-auto space-y-6 mt-6">
+      <div className={`flex-1 ${activeTab === "players" ? "overflow-y-auto no-scrollbar pb-24 pt-6" : "pb-12 pt-2"} px-4 md:px-8 bg-black`}>
+        <div className={`max-w-6xl mx-auto space-y-6 ${activeTab === "players" ? "mt-6" : "mt-2"}`}>
           
           {/* Tab Switcher */}
           <div className="flex items-center gap-4 border-b border-white/5 pb-1">
@@ -900,7 +928,6 @@ const FindPlayers = () => {
           {/* Compact Header Row */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02] border border-white/5 rounded-2xl p-3 md:p-4">
             <div className="flex items-center gap-4 flex-1">
-              <h2 className="text-[10px] md:text-xs font-bold text-white/20 uppercase tracking-[0.2em] whitespace-nowrap hidden sm:block" style={SUBHEADING_STYLE}>{activeTab === "players" ? "Active Players" : "Verified Teams"}</h2>
               <div className="relative flex-1 max-w-md group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors" size={16} />
                 <input 
@@ -913,7 +940,7 @@ const FindPlayers = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
               <select 
                 value={filters.sport}
                 onChange={(e) => handleFilterChange("sport", e.target.value)}
@@ -922,12 +949,58 @@ const FindPlayers = () => {
                 <option value="">All Sports</option>
                 {sports.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
-              <div className="relative group">
+              
+              {/* PC View Filters (Hidden on Mobile/Tab) */}
+              <div className="hidden lg:flex items-center gap-2">
+                <div className="relative group">
+                  <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
+                  <select 
+                    value={filters.state || ""}
+                    onChange={(e) => {
+                      handleFilterChange("state", e.target.value);
+                      handleFilterChange("city", "");
+                    }}
+                    className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 cursor-pointer hover:bg-white/10 transition-all appearance-none"
+                  >
+                    <option value="">STATE...</option>
+                    {statesList.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div className="relative group">
+                  <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
+                  <select 
+                    value={filters.city || ""}
+                    onChange={(e) => handleFilterChange("city", e.target.value)}
+                    className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 cursor-pointer hover:bg-white/10 transition-all appearance-none"
+                    disabled={!filters.state}
+                  >
+                    <option value="">CITY...</option>
+                    {citiesList.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="relative group">
+                  <Navigation className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
+                  <select 
+                    value={selectedRadius}
+                    onChange={(e) => setSelectedRadius(Number(e.target.value))}
+                    className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none cursor-pointer hover:bg-white/10 transition-all appearance-none w-24 md:w-28"
+                  >
+                    <option value="5">5 KM</option>
+                    <option value="10">10 KM</option>
+                    <option value="20">20 KM</option>
+                    <option value="50">50 KM</option>
+                    <option value="100">100 KM</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Mobile/Tab Location Filter */}
+              <div className="relative group lg:hidden">
                 <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
                 <input 
                   type="text"
                   placeholder="LOCATION..."
-                  value={filters.city}
+                  value={filters.city || ""}
                   onChange={(e) => handleFilterChange("city", e.target.value)}
                   className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 placeholder:text-white/20"
                 />

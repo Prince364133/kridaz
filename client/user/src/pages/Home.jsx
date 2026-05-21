@@ -36,13 +36,7 @@ const socialPosts = [
 ];
 
 
-const highlights = [
- { image: "https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=1200", span: "col-span-3" }, // Stadium
- { image: "https://images.pexels.com/photos/159515/football-american-football-runner-player-159515.jpeg?auto=compress&cs=tinysrgb&w=800", span: "col-span-3" }, // Football Action
- { image: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80", span: "col-span-2" }, // Cricket/Turf
- { image: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&w=800&q=80", span: "col-span-2" }, // Basketball/Football
- { image: "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?w=800&q=80", span: "col-span-2" }, // Tennis
-];
+
 
 const comparisonFeatures = [
  { name: "Ground Booking", others: "Basic Search", bms: "Ultra-Fast Booking", status: "essential" },
@@ -1273,23 +1267,7 @@ export default function Home() {
  {/* ── VIDEO GALLERY ── */}
  <VideoSection videos={marketing.videos} />
 
- {/* ── PLAYBOOK HIGHLIGHTS (Images) ── */}
- <section className="w-full">
- <div className="grid grid-cols-6 gap-0">
- {highlights.map((item, idx) => (
- <div
- key={idx}
- className={`relative h-[300px] md:h-[400px] overflow-hidden group border-white/5 bg-[#050505] transition-all duration-700 ${item.span}`}
- >
- <img
- src={item.image}
- alt="Highlight"
- className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
- />
- </div>
- ))}
- </div>
- </section>
+
 
  {/* ── WHY CHOOSE BMSPORTZ ── */}
  {/* Hiding section as per user request */}
