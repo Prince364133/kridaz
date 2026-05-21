@@ -10,8 +10,8 @@ const useDisputes = () => {
   const fetchDisputes = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get("/api/admin/dispute/get-all");
-      setDisputes(response.data.disputes);
+      const response = await axiosInstance.get("/api/admin/dispute");
+      setDisputes(response.data.data || []);
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch disputes");

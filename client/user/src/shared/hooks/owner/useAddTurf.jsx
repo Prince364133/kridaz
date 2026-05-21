@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -280,7 +280,7 @@ export default function useAddTurf() {
      }
     try {
       const response = await axiosInstance.post(
-        "/api/owner/turf/register",
+        "/api/owner/turf/owner/register",
         formData,
         {
           headers: {

@@ -80,7 +80,7 @@ const OwnerDashboard = () => {
     bookingsPerTurfWeek = [],
     bookingsPerTurfMonth = [],
     revenueOverTimeRaw = [],
-    revenueByCategory = [],
+    revenueByVenue = [],
     occupancyHeatmap = [],
     venueHealth = {},
     recentBookings = [],
@@ -97,15 +97,15 @@ const OwnerDashboard = () => {
 
   const revenueDataMap = {
     Day: (dashboardData.revenueTrendDay || []).map(i => ({
-      date: `${String(i._id).padStart(2, '0')}:00`,
+      date: `${String(i.id || i._id).padStart(2, '0')}:00`,
       revenue: i.revenue
     })),
     Week: (dashboardData.revenueTrendWeek || []).map(i => ({
-      date: new Date(i._id).toLocaleDateString("en-US", { weekday: "short" }),
+      date: new Date(i.id || i._id).toLocaleDateString("en-US", { weekday: "short" }),
       revenue: i.revenue,
     })),
     Month: (dashboardData.revenueTrendMonth || []).map(i => ({
-      date: new Date(i._id).toLocaleDateString("en-US", { day: "numeric", month: "short" }),
+      date: new Date(i.id || i._id).toLocaleDateString("en-US", { day: "numeric", month: "short" }),
       revenue: i.revenue,
     })),
   };
@@ -219,12 +219,12 @@ const OwnerDashboard = () => {
             {/* Revenue Split */}
             <div className="lg:col-span-6">
               <ChartCard title="Revenue Split" subtitle="Distribution by sport category">
-                {revenueByCategory.length > 0 ? (
+                {revenueByVenue.length > 0 ? (
                   <div className="flex flex-col items-center justify-center h-[300px]">
                     <ResponsiveContainer width="100%" height={180}>
                       <PieChart>
                         <Pie
-                          data={revenueByCategory}
+                          data={revenueByVenue}
                           cx="50%"
                           cy="50%"
                           innerRadius={40}
@@ -233,7 +233,7 @@ const OwnerDashboard = () => {
                           dataKey="value"
                           stroke="none"
                         >
-                          {revenueByCategory.map((entry, index) => (
+                          {revenueByVenue.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
@@ -244,7 +244,7 @@ const OwnerDashboard = () => {
                       </PieChart>
                     </ResponsiveContainer>
                     <div className="grid grid-cols-1 gap-2 mt-4 w-full px-2">
-                      {revenueByCategory.slice(0, 4).map((item, idx) => (
+                      {revenueByVenue.slice(0, 4).map((item, idx) => (
                         <div key={idx} className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />

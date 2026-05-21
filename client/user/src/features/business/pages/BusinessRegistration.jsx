@@ -1,4 +1,4 @@
-﻿// Business Registration Page for Professional Upgrades
+// Business Registration Page for Professional Upgrades
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -24,10 +24,10 @@ import { searchLocations } from "@user/utils/locationService";
 
 const PRI = "#CCFF00";
 
-export default function BusinessRegistration() {
+export default function BusinessRegistration({ defaultRole }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const roleFromUrl = searchParams.get("role") || "venu_owners";
+  const roleFromUrl = searchParams.get("role") || defaultRole || "venu_owners";
   
   const { user, isLoggedIn } = useSelector((state) => state.auth);
   const [step, setStep] = useState(1);
@@ -87,21 +87,7 @@ export default function BusinessRegistration() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      // If guest, redirect to specific professional signup pages based on the role
-      if (roleFromUrl === 'venu_owners' || roleFromUrl === 'venue_owners' || roleFromUrl === 'venue') {
-        navigate("/signup/venue");
-      } else if (roleFromUrl === 'coach') {
-        navigate("/signup/coach");
-      } else if (roleFromUrl === 'umpire') {
-        navigate("/signup/official");
-      } else if (roleFromUrl === 'streamer') {
-        navigate("/signup/streamer");
-      } else if (roleFromUrl === 'scorer') {
-        navigate("/signup/scorer");
-      } else {
-        toast.error("Please login first to register your business");
-        navigate("/login?redirect=" + encodeURIComponent("/business/register?role=" + roleFromUrl));
-      }
+      // Allow unauthenticated users to view the form, but they will be intercepted on interaction
       return;
     }
 
@@ -180,6 +166,12 @@ export default function BusinessRegistration() {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
+
+    if (!isLoggedIn) {
+      toast.error("Please login first to register your business");
+      navigate("/login?redirect=" + encodeURIComponent("/business/register?role=" + roleFromUrl));
+      return;
+    }
 
     if (hasRoleConflict) {
       toast.error("Role conflict detected. Please contact support.");
@@ -356,6 +348,17 @@ export default function BusinessRegistration() {
 
             {/* Role conflict banner removed as it's now handled by the early return view */}
 
+            <div className="relative">
+              {!isLoggedIn && (
+                <div 
+                  className="absolute inset-0 z-50 cursor-pointer"
+                  onClick={() => {
+                    toast.error("Please login first to register your business");
+                    navigate("/login?redirect=" + encodeURIComponent("/business/register?role=" + roleFromUrl));
+                  }}
+                  title="Click to login and continue"
+                />
+              )}
             <form onSubmit={handleFormSubmit} className="space-y-6">
               
               <div className="p-6 rounded-[8px] border border-[#2D2D2D] bg-[#000000] space-y-6 relative overflow-hidden">
@@ -452,6 +455,7 @@ export default function BusinessRegistration() {
                 )}
               </button>
             </form>
+            </div>
           </div>
 
           <aside className="space-y-6 sticky top-24 self-start">

@@ -783,6 +783,7 @@ export const loginWithRecoveryToken = async (req, res) => {
 
 // Google Auth
 export const googleAuth = async (req, res) => {
+  console.log("GOOGLE AUTH REQ BODY:", req.body);
   const { credential, accessToken, role: requestedRole, umpireInvite, inviteToken, password } = req.body;
   try {
     let payload;

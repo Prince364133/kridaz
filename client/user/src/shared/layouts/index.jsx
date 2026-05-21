@@ -4,4 +4,5 @@ export { default as GuestLayout } from "./GuestLayout";
 export { default as CoachLayout } from "./CoachLayout";
 export { default as UmpireLayout } from "./UmpireLayout";
 export { default as StreamerLayout } from './StreamerLayout';
+export { default as ProfessionalLayout } from "./ProfessionalLayout";
 export { default as ScorerLayout } from './ScorerLayout';

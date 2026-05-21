@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart, 
   Bar, 
@@ -28,10 +28,11 @@ const PeakHoursChart = () => {
 
   const fetchTurfs = async () => {
     try {
-      const res = await axiosInstance.get('/api/owner/turf/all');
-      setTurfs(res.data);
-      if (res.data.length > 0) {
-        setSelectedTurf(res.data[0]._id);
+      const res = await axiosInstance.get('/api/owner/turf/owner/all');
+      const data = Array.isArray(res.data) ? res.data : [];
+      setTurfs(data);
+      if (data.length > 0) {
+        setSelectedTurf(data[0]._id);
       }
     } catch (error) {
       console.error("Error fetching turfs:", error);

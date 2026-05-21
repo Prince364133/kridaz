@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock, User, Phone, Mail, MapPin, X } from 'lucide-react';
 import axiosInstance from '@hooks/useAxiosInstance';
 
@@ -16,10 +16,11 @@ const OccupancyHeatmap = () => {
 
   const fetchTurfs = async () => {
     try {
-      const res = await axiosInstance.get('/api/owner/turf/all');
-      setTurfs(res.data);
-      if (res.data.length > 0) {
-        setSelectedTurf(res.data[0]._id);
+      const res = await axiosInstance.get('/api/owner/turf/owner/all');
+      const data = Array.isArray(res.data) ? res.data : [];
+      setTurfs(data);
+      if (data.length > 0) {
+        setSelectedTurf(data[0]._id);
       }
     } catch (error) {
       console.error("Error fetching turfs:", error);
@@ -150,10 +151,10 @@ const OccupancyHeatmap = () => {
                     <div className="flex items-center justify-between mb-4">
                        <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-[6px] bg-[#55DEE8] flex items-center justify-center text-black font-black text-lg">
-                             {b.user[0]}
+                             {b.user?.[0] || 'G'}
                           </div>
                           <div>
-                             <h4 className="text-white font-bold uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors">{b.user}</h4>
+                             <h4 className="text-white font-bold uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors">{b.user || 'Guest'}</h4>
                              <p className="text-[10px] text-[#999999] uppercase tracking-widest">{b.turf}</p>
                           </div>
                        </div>

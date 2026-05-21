@@ -87,6 +87,7 @@ const SignUp = () => {
   };
 
   const handleGoogleSuccess = async (googleResponse) => {
+      console.log("GOOGLE RESPONSE:", googleResponse);
       setLoading(true);
       try {
         const inviteToken = localStorage.getItem("pendingInvite");
@@ -97,6 +98,7 @@ const SignUp = () => {
         } else if (googleResponse.access_token) {
           payload.accessToken = googleResponse.access_token;
         }
+        console.log("SENDING PAYLOAD:", payload);
   
         const response = await axiosInstance.post(`/api/user/auth/google-auth`, payload);
         const result = response.data;

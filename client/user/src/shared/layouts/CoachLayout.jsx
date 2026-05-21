@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { CoachSidebar, AuthenticatedNavbar } from "@components/layout";
 import MobileBottomNav from "@user/components/layout/MobileBottomNav";
-import ErrorBoundary from "@components/common/ErrorBoundary";
 
 const CoachLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,9 +40,7 @@ const CoachLayout = () => {
         `}
         >
           <div className="w-full p-4 pb-24 lg:pb-10">
-            <ErrorBoundary>
-              <Outlet />
-            </ErrorBoundary>
+            <Outlet />
           </div>
         </main>
       </div>

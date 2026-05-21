@@ -8,7 +8,8 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const navigate = useNavigate();
 
-  const to = `/turf/${turf.id || turf._id}`;
+  // Ensure fallback values so we don't crash
+  const to = `/venue/${turf.id || turf._id}`;
   const images = turf.images?.length > 0 ? turf.images : [turf.image];
   const rating = turf.avgRating ?? 4.8;
   const price = turf.pricePerHour ?? 800;
@@ -49,7 +50,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
     e.stopPropagation();
     const targetId = turf.id || turf._id;
     try {
-      const shareUrl = `${window.location.origin}/turf/${targetId}`;
+      const shareUrl = `${window.location.origin}/venue/${targetId}`;
       await navigator.clipboard.writeText(shareUrl);
       
       // Try using Toast or standard fallback alert

@@ -1,10 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { Home, Search, Users, MessageSquare, UserSearch, Zap } from "lucide-react";
 import { useSelector } from "react-redux";
+import { useScrollDirection } from "@hooks/useScrollDirection.js";
 
 const MobileBottomNav = () => {
   const location = useLocation();
   const { isLoggedIn, role } = useSelector((state) => state.auth);
+  const { scrollDirection, scrolled } = useScrollDirection();
 
   const getDashboardPath = () => {
     const roleStr = role?.toLowerCase() || "";
@@ -18,7 +20,7 @@ const MobileBottomNav = () => {
 
   const navItems = [
     { name: "Home", path: "/", icon: Home },
-    { name: "Venues", path: "/turfs", icon: Search },
+    { name: "Venues", path: "/venues", icon: Search },
     { 
       name: "Community", 
       path: "/community", 
@@ -35,7 +37,9 @@ const MobileBottomNav = () => {
   });
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-black/80 backdrop-blur-2xl border-t border-white/10 px-4 pb-safe-area-inset-bottom">
+    <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-black/80 backdrop-blur-2xl border-t border-white/10 px-4 pb-safe-area-inset-bottom transition-transform duration-500 ${
+      scrollDirection === "up" ? "translate-y-full" : "translate-y-0"
+    }`}>
       <div className="flex justify-between items-center h-16 max-w-md mx-auto">
         {visibleItems.slice(0, 5).map((item) => {
           const isActive = location.pathname === item.path;

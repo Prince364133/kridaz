@@ -14,8 +14,8 @@ const useOwnerReviews = () => {
   const fetchTurfs = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("/api/owner/reviews/turfs-with-reviews");
-      setTurfs(response.data);
+      const response = await axiosInstance.get("/api/owner/reviews/owner/turfs-with-reviews");
+      setTurfs(Array.isArray(response.data) ? response.data : []);
       setLoading(false);
     } catch (err) {
       setError("Failed to fetch turfs and reviews");

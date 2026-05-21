@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+ï»¿import React, { useState, useEffect } from "react";
 import { Controller } from "react-hook-form";
 import { FormField } from "@components/common";
 import useAddTurf from "@hooks/owner/useAddTurf";
@@ -131,8 +131,8 @@ const AddTurf = () => {
                 {...register("facilityCategory", { required: "Please select a facility category" })}
                 className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#55DEE8]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
               >
-                <option value="">Select Category (e.g. Turf, Ground)</option>
-                <option value="Turf">Turf</option>
+                <option value="">Select Category (e.g. Venue, Ground)</option>
+                <option value="Turf">Venue</option>
                 <option value="Ground">Ground</option>
                 <option value="Court">Court</option>
                 <option value="Stadium">Stadium</option>
@@ -237,7 +237,7 @@ const AddTurf = () => {
             <div className="form-control">
               <label className="label mb-4">
                 <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center gap-2">
-                   =ƒôì Venue Coordinates & Map Preview
+                   =ï¿½ï¿½ï¿½ Venue Coordinates & Map Preview
                 </span>
               </label>
 
@@ -259,7 +259,7 @@ const AddTurf = () => {
                   className={`shrink-0 px-6 rounded-[8px] bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 hover:bg-[#55DEE8] hover:text-black transition-all flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest ${isLocating ? 'animate-pulse' : ''}`}
                   title="Capture Current Location"
                 >
-                  {isLocating ? "LocatingGÇª" : "=ƒôí GPS"}
+                  {isLocating ? "LocatingGÇª" : "=ï¿½ï¿½ï¿½ GPS"}
                 </button>
               </div>
               <p className="text-[10px] text-[#444] mb-4 uppercase tracking-widest italic ml-1">
@@ -280,7 +280,7 @@ const AddTurf = () => {
                   />
                   <div className="absolute bottom-0 left-0 right-0 px-4 py-2.5 bg-black/80 backdrop-blur-sm flex items-center justify-between border-t border-[#2D2D2D]">
                     <span className="text-[10px] font-bold text-[#55DEE8] uppercase tracking-[2px]">
-                      {watchedLat && watchedLng ? `=ƒôí GPS: ${Number(watchedLat).toFixed(5)}, ${Number(watchedLng).toFixed(5)}` : "=ƒôì Address-based preview"}
+                      {watchedLat && watchedLng ? `=ï¿½ï¿½ï¿½ GPS: ${Number(watchedLat).toFixed(5)}, ${Number(watchedLng).toFixed(5)}` : "=ï¿½ï¿½ï¿½ Address-based preview"}
                     </span>
                     {watchedLat && watchedLng && (
                       <a
@@ -289,7 +289,7 @@ const AddTurf = () => {
                         rel="noopener noreferrer"
                         className="text-[10px] font-bold text-[#878C9F] hover:text-[#55DEE8] uppercase tracking-widest transition-colors"
                       >
-                        Open in Maps Gåù
+                        Open in Maps Gï¿½ï¿½
                       </a>
                     )}
                   </div>

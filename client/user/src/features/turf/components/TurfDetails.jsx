@@ -190,8 +190,8 @@ const TurfDetails = () => {
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
         <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-[15px] text-center max-w-md w-full">
           <Info className="w-16 h-16 text-zinc-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Turf Not Found</h2>
-          <Link to="/turfs" className="inline-flex items-center gap-2 bg-[#BFF367] text-black px-6 py-3 rounded-full font-bold">
+          <h2 className="text-2xl font-bold text-white mb-2">Venue Not Found</h2>
+          <Link to="/venues" className="inline-flex items-center gap-2 bg-[#BFF367] text-black px-6 py-3 rounded-full font-bold">
             <ChevronLeft className="w-5 h-5" /> Back to Discovery
           </Link>
         </div>

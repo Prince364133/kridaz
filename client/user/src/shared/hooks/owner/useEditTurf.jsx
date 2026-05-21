@@ -174,8 +174,13 @@ export default function useEditTurf(turfId) {
   useEffect(() => {
     const fetchTurf = async () => {
       try {
-        const response = await axiosInstance.get(`/api/owner/turf/${turfId}/details`);
-        const { turf: turfData } = response.data;
+        const response = await axiosInstance.get(`/api/owner/turf/owner/${turfId}/details`);
+        
+        const turfData = response.data;
+        
+        if (!turfData) {
+          throw new Error("Turf not found");
+        }
         setTurf(turfData);
         setPendingUpdates(turfData.pendingUpdates || {});
 
@@ -413,7 +418,7 @@ export default function useEditTurf(turfId) {
 
     try {
       const response = await axiosInstance.put(
-        `/api/owner/turf/${turfId}`,
+        `/api/owner/turf/owner/${turfId}`,
         formData,
         {
           headers: {

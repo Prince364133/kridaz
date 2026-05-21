@@ -46,7 +46,7 @@ export default function VenueOwnerLanding() {
               Venue Partners
             </div>
             <h1 className="font-display text-4xl md:text-7xl leading-[1.1] md:leading-none uppercase mb-6">
-              Maximize Your <br /><span style={{ color: PRI }}>Turf Utilization.</span>
+              Maximize Your <br /><span style={{ color: PRI }}>Venue Utilization.</span>
             </h1>
             <p className="text-gray-400 text-base md:text-lg mb-8 max-w-lg mx-auto md:mx-0">
               Transform your sports facility into a fully automated, high-yield business. Kridaz connects you with thousands of local players actively looking for venues.

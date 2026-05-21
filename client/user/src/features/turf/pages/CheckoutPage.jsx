@@ -108,8 +108,8 @@ const CheckoutPage = () => {
 
   useEffect(() => {
     if (!turfId || !startTime || !selectedDate) {
-      toast.error("Invalid booking details. Please select a slot again.");
-      navigate(`/turf/${turfId}`);
+      toast.error("Checkout interrupted. Redirecting to venue...");
+      navigate(`/venue/${turfId}`);
     }
   }, [turfId, startTime, selectedDate, navigate]);
 

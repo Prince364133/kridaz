@@ -6,24 +6,24 @@ import {
   ArrowDownLeft, IndianRupee, Wallet, CalendarDays, Zap
 } from "lucide-react";
 import useBanking from "@hooks/owner/useBanking";
-import useOwnerDashboard from "@hooks/owner/useOwnerDashboard";
+import useStreamerDashboard from "@hooks/owner/useStreamerDashboard";
 import useOwnerWallet from "@hooks/owner/useOwnerWallet";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
 /**
- * PayoutBanking GÇö Secure banking, KYC, and settlement management.
+ * StreamerBanking GÇö Secure banking, KYC, and settlement management.
  * Fully standardized for the Console design language (Inter font, 8px radii, glassmorphism).
  */
 
-const PayoutBanking = () => {
+const StreamerBanking = () => {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
   const themeColor = isScorer ? "#00C187" : "#55DEE8";
   const vaultTitle = isScorer ? "Payout & Settlement" : "Marketplace Vault";
 
   const { bankingDetails, walletBalance, payoutSettings, loading: bankingLoading, isPayoutDay, updateBanking, requestPayout, verifyPassword } = useBanking();
-  const { dashboardData, loading: dashboardLoading } = useOwnerDashboard();
+  const { dashboardData, loading: dashboardLoading } = useStreamerDashboard();
   const { walletData, withdrawals, loading: walletLoading, refresh: refreshWallet } = useOwnerWallet();
   
   const [isEditingBank, setIsEditingBank] = useState(false);
@@ -547,4 +547,5 @@ const PayoutBanking = () => {
   );
 };
 
-export default PayoutBanking;
+export default StreamerBanking;
+

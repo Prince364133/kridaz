@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
 // ΓöÇΓöÇ Eager: Layouts (used on nearly every route ΓÇö small files, no split benefit) ΓöÇΓöÇ
-import { AdminLayout, PartnerLayout, GuestLayout, CoachLayout, UmpireLayout, StreamerLayout, ScorerLayout } from "@layouts";
+import { AdminLayout, PartnerLayout, GuestLayout, CoachLayout, UmpireLayout, StreamerLayout, ScorerLayout, ProfessionalLayout } from "@layouts";
 import UserRoot from "@user/layouts/Root";
 
 // ΓöÇΓöÇ Eager: Route guards & error utilities (must be synchronous) ΓöÇΓöÇ
@@ -12,6 +12,8 @@ import { NotFound, RootRedirect, ErrorBoundary } from "@components/common";
 
 // ΓöÇΓöÇ Spinner shown while any lazy chunk loads ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const PageLoader = () => null;
+
+const ProfessionalDashboard = lazy(() => import("@features/professional/pages/ProfessionalDashboard"));
 
 // ΓöÇΓöÇ Lazy: User Portal Pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const UserHome               = lazy(() => import("@user/pages/Home"));
@@ -55,10 +57,7 @@ const NotificationsPage      = lazy(() => import("@features/notifications").then
 
 // ── Lazy: Business Landing Pages ───────────────────────────────────────────────────
 const UserVenueOwnerLanding  = lazy(() => import("@features/business").then(m => ({ default: m.VenueOwnerLanding })));
-const UserCoachLanding       = lazy(() => import("@features/business").then(m => ({ default: m.CoachLanding })));
-const UserUmpireLanding      = lazy(() => import("@features/business").then(m => ({ default: m.UmpireLanding })));
-const UserStreamerLanding     = lazy(() => import("@features/business").then(m => ({ default: m.StreamerLanding })));
-const UserScorerLanding      = lazy(() => import("@features/business").then(m => ({ default: m.ScorerLanding })));
+const ProfessionalLanding    = lazy(() => import("@features/business").then(m => ({ default: m.ProfessionalLanding })));
 const BusinessRegistration   = lazy(() => import("@features/business").then(m => ({ default: m.BusinessRegistration })));
 
 
@@ -69,13 +68,8 @@ const DataDeletionInstructions   = lazy(() => import("@features/legal").then(m =
 
 
 // ΓöÇΓöÇ Lazy: Owner / Venue Owner Portal Pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const PartnersGateway  = lazy(() => import("@features/business").then(m => ({ default: m.PartnersGateway })));
 
-const VenueOwnerSignUp = lazy(() => import("@features/auth").then(m => ({ default: m.VenueOwnerSignUp })));
-const CoachSignUp      = lazy(() => import("@features/auth").then(m => ({ default: m.CoachSignUp })));
-const UmpireSignUp     = lazy(() => import("@features/auth").then(m => ({ default: m.UmpireSignUp })));
-const ScorerSignUp     = lazy(() => import("@features/auth").then(m => ({ default: m.ScorerSignUp })));
-const StreamerSignUp   = lazy(() => import("@features/auth").then(m => ({ default: m.StreamerSignUp })));
+
 
 // ── Lazy: Streamer Components ────────────────────────────────────────────────────────────────────────────────
 const StreamSetup    = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamSetup })));
@@ -101,7 +95,7 @@ const CustomerDirectory  = lazy(() => import("@features/venue-owner").then(m => 
 const VenueIntelligence  = lazy(() => import("@features/venue-owner").then(m => ({ default: m.VenueIntelligence })));
 const OwnerRevenue       = lazy(() => import("@features/venue-owner").then(m => ({ default: m.OwnerRevenue })));
 const OwnerPromotions    = lazy(() => import("@features/venue-owner").then(m => ({ default: m.OwnerPromotions })));
-const PayoutBanking      = lazy(() => import("@features/venue-owner").then(m => ({ default: m.PayoutBanking })));
+const VenueBanking       = lazy(() => import("@features/venue-owner").then(m => ({ default: m.VenueBanking })));
 const PartnerSupport     = lazy(() => import("@features/venue-owner").then(m => ({ default: m.PartnerSupport })));
 
 // ΓöÇΓöÇ Lazy: Coach Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
@@ -119,7 +113,8 @@ const UmpireFeedback  = lazy(() => import("@features/umpire").then(m => ({ defau
 // ── Lazy: Streamer Portal Components ─────────────────────────────────────────────────────────────────────────
 const StreamerDashboard = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamerDashboard })));
 const StreamerMatches   = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamerMatches })));
-const StreamerSchedule  = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamerSchedule })));
+const StreamerSchedule= lazy(() => import("@features/streamer").then(m => ({ default: m.StreamerSchedule })));
+const CreateStream    = lazy(() => import("@features/streamer/pages/CreateStream"));
 
 // ΓöÇΓöÇ Lazy: Scorer Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const ScorerDashboard = lazy(() => import("@features/scorer").then(m => ({ default: m.ScorerDashboard })));
@@ -223,101 +218,38 @@ const router = createBrowserRouter([
       { path: "revenue",       element: <S><OwnerRevenue /></S> },
       { path: "promotions",    element: <S><OwnerPromotions /></S> },
       { path: "support",       element: <S><PartnerSupport /></S> },
-      { path: "banking",       element: <S><PayoutBanking /></S> },
+      { path: "banking",       element: <S><VenueBanking /></S> },
       { path: "profile",       element: <S><DashboardProfile /></S> },
       { path: "*",             element: <NotFound /> },
     ],
   },
 
-  // ΓöÇΓöÇ COACH PORTAL (High Priority) ΓöÇΓöÇ
+  // ─── PROFESSIONAL PORTAL (UNIFIED) ───
   {
-    path: "/coach",
+    path: "/professional/:role",
     element: (
-      <ProtectedRoute requiredRole="coach">
-        <CoachLayout />
+      <ProtectedRoute requiredRole={["coach", "umpire", "streamer", "commentator", "limited_umpire", "limited_streamer"]}>
+        <ProfessionalLayout />
       </ProtectedRoute>
     ),
     children: [
-      { index: true,          element: <S><CoachDashboard /></S> },
-      { path: "students",     element: <S><CoachStudents /></S> },
-      { path: "sessions",     element: <S><CoachSessions /></S> },
-      { path: "masterclass",  element: <S><CoachMasterclass /></S> },
-      { path: "availability", element: <S><ProfessionalAvailability /></S> },
-      { path: "bookings",     element: <S><ProfessionalBookings /></S> },
-      { path: "reviews",      element: <S><ProfessionalReviews /></S> },
-      { path: "revenue",      element: <S><OwnerRevenue /></S> },
-      { path: "support",      element: <S><PartnerSupport /></S> },
-      { path: "banking",      element: <S><PayoutBanking /></S> },
-      { path: "profile",      element: <S><ProfessionalProfile /></S> },
-      { path: "*",            element: <NotFound /> },
-    ],
-  },
-
-  // ΓöÇΓöÇ UMPIRE PORTAL (High Priority) ΓöÇΓöÇ
-  {
-    path: "/umpire",
-    element: (
-      <ProtectedRoute requiredRole="umpire">
-        <UmpireLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true,          element: <S><UmpireDashboard /></S> },
-      { path: "matches",      element: <S><UmpireMatches /></S> },
-      { path: "schedule",     element: <S><UmpireSchedule /></S> },
-      { path: "availability", element: <S><ProfessionalAvailability /></S> },
-      { path: "bookings",     element: <S><ProfessionalBookings /></S> },
-      { path: "reviews",      element: <S><ProfessionalReviews /></S> },
-      { path: "revenue",      element: <S><OwnerRevenue /></S> },
-      { path: "support",      element: <S><PartnerSupport /></S> },
-      { path: "banking",      element: <S><PayoutBanking /></S> },
-      { path: "profile",      element: <S><ProfessionalProfile /></S> },
-      { path: "*",            element: <NotFound /> },
-    ],
-  },
-
-  // ΓöÇΓöÇ STREAMER PORTAL ΓöÇΓöÇ
-  {
-    path: "/streamer",
-    element: (
-      <ProtectedRoute requiredRole="streamer">
-        <StreamerLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true,                        element: <S><StreamerDashboard /></S> },
-      { path: "matches",                    element: <S><StreamerMatches /></S> },
+      { index: true,                        element: <S><ProfessionalDashboard /></S> },
+      // Umpire Specific
+      { path: "umpire-matches",             element: <S><UmpireMatches /></S> },
+      // Streamer Specific
+      { path: "streamer-matches",           element: <S><StreamerMatches /></S> },
       { path: "manage/:matchId",            element: <S><ManageStream /></S> },
       { path: "ticker-gallery/:matchId?",   element: <S><TickerGallery /></S> },
-      { path: "schedule",                   element: <S><StreamerSchedule /></S> },
+      { path: "create-stream",              element: <S><CreateStream /></S> },
+      // Common
+      { path: "availability",               element: <S><ProfessionalAvailability /></S> },
+      { path: "bookings",                   element: <S><ProfessionalBookings /></S> },
+      { path: "reviews",                    element: <S><ProfessionalReviews /></S> },
       { path: "revenue",                    element: <S><OwnerRevenue /></S> },
       { path: "support",                    element: <S><PartnerSupport /></S> },
-      { path: "banking",                    element: <S><PayoutBanking /></S> },
+      { path: "banking",                    element: <S><VenueBanking /></S> },
       { path: "profile",                    element: <S><ProfessionalProfile /></S> },
       { path: "*",                          element: <NotFound /> },
-    ],
-  },
-
-  // ΓöÇΓöÇ SCORER PORTAL ΓöÇΓöÇ
-  {
-    path: "/scorer",
-    element: (
-      <ProtectedRoute requiredRole="scorer">
-        <ScorerLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true,          element: <S><ScorerDashboard /></S> },
-      { path: "matches",      element: <S><ScorerMatches /></S> },
-      { path: "schedule",     element: <S><UmpireSchedule /></S> },
-      { path: "availability", element: <S><ProfessionalAvailability /></S> },
-      { path: "bookings",     element: <S><ProfessionalBookings /></S> },
-      { path: "reviews",      element: <S><ProfessionalReviews /></S> },
-      { path: "revenue",      element: <S><OwnerRevenue /></S> },
-      { path: "support",      element: <S><PartnerSupport /></S> },
-      { path: "banking",      element: <S><PayoutBanking /></S> },
-      { path: "profile",      element: <S><ProfessionalProfile /></S> },
-      { path: "*",            element: <NotFound /> },
     ],
   },
 
@@ -352,8 +284,8 @@ const router = createBrowserRouter([
       { path: "auth/login",   element: <PublicRoute><S><UserLogin /></S></PublicRoute> },
       { path: "auth/signup",  element: <PublicRoute><S><UserSignUp /></S></PublicRoute> },
       { path: "forgot-password", element: <PublicRoute><S><ForgotPassword /></S></PublicRoute> },
-      { path: "turfs",        element: <S><UserTurf /></S> },
-      { path: "turf/:id",     element: <S><UserTurfDetails /></S> },
+      { path: "venues",       element: <S><UserTurf /></S> },
+      { path: "venue/:id",    element: <S><UserTurfDetails /></S> },
       { path: "profile/:userId?", element: <ProtectedRoute><S><UserProfile /></S></ProtectedRoute> },
       { path: "blogs",        element: <S><UserBlogs /></S> },
       { path: "blogs/:id",    element: <S><UserBlogDetail /></S> },
@@ -377,18 +309,15 @@ const router = createBrowserRouter([
 
       // Business Landings
       { path: "business/venue",     element: <S><UserVenueOwnerLanding /></S> },
-      { path: "business/coach",     element: <S><UserCoachLanding /></S> },
-      { path: "business/official",  element: <S><UserUmpireLanding /></S> },
-      { path: "business/streamer",  element: <S><UserStreamerLanding /></S> },
-      { path: "business/scorer",    element: <S><UserScorerLanding /></S> },
-      { path: "business/register",  element: <S><BusinessRegistration /></S> },
+      { path: "business/professional", element: <S><ProfessionalLanding /></S> },
+      { path: "business/registration", element: <S><BusinessRegistration /></S> },
 
       // Business Auth
-      { path: "signup/venue",    element: <PublicRoute><S><VenueOwnerSignUp /></S></PublicRoute> },
-      { path: "signup/coach",    element: <PublicRoute><S><CoachSignUp /></S></PublicRoute> },
-      { path: "signup/official", element: <PublicRoute><S><UmpireSignUp /></S></PublicRoute> },
-      { path: "signup/streamer", element: <PublicRoute><S><StreamerSignUp /></S></PublicRoute> },
-      { path: "signup/scorer",   element: <PublicRoute><S><ScorerSignUp /></S></PublicRoute> },
+      { path: "signup/venue",    element: <S><BusinessRegistration defaultRole="venu_owners" /></S> },
+      { path: "signup/coach",    element: <S><BusinessRegistration defaultRole="coach" /></S> },
+      { path: "signup/official", element: <S><BusinessRegistration defaultRole="umpire" /></S> },
+      { path: "signup/streamer", element: <S><BusinessRegistration defaultRole="streamer" /></S> },
+      { path: "signup/scorer",   element: <S><BusinessRegistration defaultRole="scorer" /></S> },
 
       { path: "wallet",           element: <ProtectedRoute><S><UserWallet /></S></ProtectedRoute> },
       { path: "booking-history",  element: <ProtectedRoute><S><UserTurfBookingHistory /></S></ProtectedRoute> },
@@ -415,10 +344,12 @@ const router = createBrowserRouter([
   // ── LEGACY & REDIRECTS ──
   { path: "/owner",          element: <Navigate to="/venue-owner" replace /> },
   { path: "/partner",        element: <Navigate to="/venue-owner" replace /> },
-  { path: "/coach-landing",  element: <Navigate to="/business/coach" replace /> },
-  { path: "/umpire-landing", element: <Navigate to="/business/official" replace /> },
-  { path: "/venue-owners",       element: <S><PartnersGateway /></S> },
-
+  { path: "/coach-landing",  element: <Navigate to="/business/professional" replace /> },
+  { path: "/umpire-landing", element: <Navigate to="/business/professional" replace /> },
+  { path: "/business/coach",  element: <Navigate to="/business/professional" replace /> },
+  { path: "/business/official", element: <Navigate to="/business/professional" replace /> },
+  { path: "/business/scorer", element: <Navigate to="/business/professional" replace /> },
+  { path: "/business/streamer", element: <Navigate to="/business/professional" replace /> },
   // Catch-all (Global)
   { path: "*", element: <NotFound /> },
 ]);

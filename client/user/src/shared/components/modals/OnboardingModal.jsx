@@ -417,7 +417,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                   </div>
                   <div className="space-y-1">
                     <h4 className="text-white font-bold">Local Experience</h4>
-                    <p className="text-white/40 text-xs">Tell us where you are to find turfs and players near you.</p>
+                    <p className="text-white/40 text-xs">Tell us where you are to find venues and players near you.</p>
                   </div>
                 </div>
                 

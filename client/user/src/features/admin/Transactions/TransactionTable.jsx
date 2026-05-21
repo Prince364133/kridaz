@@ -53,22 +53,22 @@ const TransactionTable = ({
               <td className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-1 rounded-full bg-white/5 group-hover:bg-[#55DEE8]/20 transition-colors">
-                     <Avatar name={transaction.user.name} size="32" round={true} />
+                     <Avatar name={transaction.user?.name || "Unknown"} size="32" round={true} />
                   </div>
-                  <span className="font-bold text-sm tracking-tight">{transaction.user.name}</span>
+                  <span className="font-bold text-sm tracking-tight">{transaction.user?.name || "Unknown"}</span>
                 </div>
               </td>
               <td className="p-4 text-xs font-medium text-gray-400">
                 {new Date(transaction.createdAt).toLocaleDateString()}
               </td>
               <td className="p-4">
-                 <span className="text-xs font-bold uppercase tracking-widest text-[#55DEE8]">{transaction.turf.name}</span>
+                 <span className="text-xs font-bold uppercase tracking-widest text-[#55DEE8]">{transaction.turf?.name || "Unknown"}</span>
               </td>
               <td className="p-4 text-xs text-gray-500 truncate max-w-[120px]">
-                {transaction.payment.orderId}
+                {transaction.payment?.orderId || "N/A"}
               </td>
               <td className="p-4 text-xs text-gray-500 truncate max-w-[120px]">
-                {transaction.payment.paymentId}
+                {transaction.payment?.paymentId || "N/A"}
               </td>
               <td className="p-4 text-right">
                  <span className="font-bold text-sm text-[#55DEE8] tracking-tight">Rs {transaction.totalPrice}</span>

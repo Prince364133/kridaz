@@ -34,7 +34,7 @@ export const getAllProfessionals = async (req, res) => {
     }
 
     if (sport && sport !== "All") {
-      where.gameTypes = { contains: sport, mode: "insensitive" };
+      where.user.sportTypes = { has: sport };
     }
 
     const professionals = await prisma.ownerProfile.findMany({
@@ -47,7 +47,8 @@ export const getAllProfessionals = async (req, res) => {
             role: true,
             city: true,
             state: true,
-            profilePicture: true
+            profilePicture: true,
+            sportTypes: true
           }
         }
       },
@@ -65,7 +66,7 @@ export const getAllProfessionals = async (req, res) => {
       city: prof.user?.city || "",
       state: prof.user?.state || "",
       image: prof.user?.profilePicture || null,
-      gameTypes: prof.gameTypes,
+      gameTypes: prof.user?.sportTypes || [],
       specialization: prof.specialization,
       experience: prof.experience,
       rating: prof.rating,
@@ -436,11 +437,12 @@ export const updateProfessionalProfile = async (req, res) => {
         throw new Error("Owner profile not found");
       }
 
-      // 2. Update User details if name, city, state are provided
+      // 2. Update User details if name, city, state, or gameTypes are provided
       const userUpdate = {};
       if (name) userUpdate.name = name;
       if (city) userUpdate.city = city;
       if (state) userUpdate.state = state;
+      if (gameTypes) userUpdate.sportTypes = gameTypes;
 
       if (Object.keys(userUpdate).length > 0) {
         await tx.user.update({
@@ -453,7 +455,6 @@ export const updateProfessionalProfile = async (req, res) => {
       const updateData = {
         bio,
         price: hourlyPrice ? parseFloat(hourlyPrice) : undefined,
-        gameTypes,
         gender,
         dob: dob ? new Date(dob) : undefined,
         coachingLevel,

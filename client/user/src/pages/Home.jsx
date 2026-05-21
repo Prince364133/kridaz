@@ -388,7 +388,7 @@ export default function Home() {
  </p>
 
  <Link
- to={isLoggedIn ? "/turfs" : "/signup"}
+ to={isLoggedIn ? "/venues" : "/signup"}
  className="block w-fit group mb-4 lg:mb-12"
  >
  <div className="inline-flex items-center gap-2 bg-[#84CC16] text-black px-8 py-3.5 rounded-full font-bold group-hover:scale-105 transition-all text-sm lg:text-base shadow-[0_0_20px_rgba(132,204,22,0.4)]">
@@ -517,7 +517,7 @@ export default function Home() {
  )}
 
  <div className="text-center mt-6 lg:mt-10">
- <Link to="/turfs" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-full border transition-all hover:border-[#55DEE8] hover:text-[#55DEE8]"
+ <Link to="/venues" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-full border transition-all hover:border-[#55DEE8] hover:text-[#55DEE8]"
  style={{ borderColor: BDR, color: "#888" }}>
  View All Venues <ChevronRight size={16} />
  </Link>
@@ -1074,7 +1074,7 @@ export default function Home() {
  <span key={t} className="px-4 py-1.5 rounded-full text-xs font-bold border" style={{ borderColor: BDR, backgroundColor: "rgba(255,255,255,0.05)" }}>{t}</span>
  ))}
  </div>
- <Link to="/turfs" className="inline-block text-black font-bold py-3 px-8 rounded-full hover:scale-105 transition-all shadow-[0_0_20px_rgba(85,222,232,0.3)]" style={{ background: GRAD }}>Find Venues</Link>
+ <Link to="/venues" className="inline-block text-black font-bold py-3 px-8 rounded-full hover:scale-105 transition-all shadow-[0_0_20px_rgba(85,222,232,0.3)]" style={{ background: GRAD }}>Find Venues</Link>
  </div>
  </div>
 

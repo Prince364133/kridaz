@@ -7,6 +7,7 @@ import { reelsApi } from "@redux/api/reelsApi";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 import useNotifications from "@hooks/shared/useNotifications";
+import { useScrollDirection } from "@hooks/useScrollDirection.js";
 
 /**
  * NotificationBadge — Shows unread notification count as a red dot/badge.
@@ -29,13 +30,8 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const partnerUrl = import.meta.env.VITE_PARTNER_URL || "http://localhost:5174";
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const isPartnerPortal = location.pathname.startsWith("/partners");
+  const { scrollDirection, scrolled: isScrolled } = useScrollDirection();
 
   // ── Auto-detect city + state via browser Geolocation + Nominatim reverse-geocode ──
   const [geoLabel, setGeoLabel] = useState(null); // null = not yet tried
@@ -93,17 +89,12 @@ const Navbar = () => {
     }
   };
 
-  const isPartnerPortal = location.pathname.startsWith("/partners");
-
   const navLinks = isPartnerPortal ? [
     { name: "Venues", path: "/business/venue" },
-    { name: "Coaches", path: "/business/coach" },
-    { name: "Officials", path: "/business/official" },
-    { name: "Scorers", path: "/business/scorer" },
-    { name: "Streamers", path: "/business/streamer" },
+    { name: "Professionals", path: "/business/professional" },
   ] : [
     { name: "Home", path: "/" },
-    { name: "Venues", path: "/turfs" },
+    { name: "Venues", path: "/venues" },
     { name: "Pros", path: "/professionals" },
     { name: "Join Games", path: "/join-games" },
     { name: "Community", path: "/community" },
@@ -114,7 +105,9 @@ const Navbar = () => {
   // Removed dedicated BOOKINGS link
 
   return (
-    <nav className="sticky top-0 z-[100] flex flex-col">
+    <nav className={`sticky top-0 z-[100] flex flex-col transition-transform duration-500 ${
+      scrollDirection === "down" ? "-translate-y-full" : "translate-y-0"
+    }`}>
 
       <div className={`flex justify-center transition-all duration-500 ${isScrolled ? "pt-0" : "pt-0"}`}>
         <div
@@ -171,23 +164,8 @@ const Navbar = () => {
                         </Link>
                       </li>
                       <li>
-                        <Link to="/business/coach" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
-                          Coaches
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/business/official" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
-                          Umpire
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/business/scorer" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
-                          Scorer
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/business/streamer" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
-                          YouTube Streamer
+                        <Link to="/business/professional" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                          Professionals
                         </Link>
                       </li>
                     </ul>
@@ -338,28 +316,10 @@ const Navbar = () => {
                                   <span className="text-sm font-medium">Venue Owner Dashboard</span>
                                 </Link>
                               )}
-                              {(role?.toLowerCase().includes("coach") || user?.role?.toLowerCase().includes("coach")) && (
-                                <Link to="/coach" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                              {(["coach", "umpire", "streamer", "commentator", "limited_umpire", "limited_streamer", "scorer"].some(r => role?.toLowerCase().includes(r) || user?.role?.toLowerCase().includes(r))) && (
+                                <Link to={`/professional/${role?.toLowerCase() || user?.role?.toLowerCase()}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                   <Zap size={18} className="text-white/40" />
-                                  <span className="text-sm font-medium">Coach Portal</span>
-                                </Link>
-                              )}
-                              {(role?.toLowerCase().includes("umpire") || user?.role?.toLowerCase().includes("umpire")) && (
-                                <Link to="/umpire" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                                  <Zap size={18} className="text-white/40" />
-                                  <span className="text-sm font-medium">Umpire Portal</span>
-                                </Link>
-                              )}
-                              {(role?.toLowerCase().includes("scorer") || user?.role?.toLowerCase().includes("scorer")) && (
-                                <Link to="/scorer" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                                  <Zap size={18} className="text-white/40" />
-                                  <span className="text-sm font-medium">Scorer Portal</span>
-                                </Link>
-                              )}
-                              {(role?.toLowerCase().includes("streamer") || user?.role?.toLowerCase().includes("streamer")) && (
-                                <Link to="/streamer" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                                  <Zap size={18} className="text-white/40" />
-                                  <span className="text-sm font-medium">Streamer Portal</span>
+                                  <span className="text-sm font-medium">Professional Portal</span>
                                 </Link>
                               )}
                               <div className="h-[1px] bg-white/5 my-1" />

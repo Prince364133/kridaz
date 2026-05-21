@@ -77,7 +77,7 @@ const UserFooter = () => {
                 {regions[0].links.map((link, idx) => (
                   <React.Fragment key={link}>
                     <Link 
-                      to="/turfs" 
+                      to="/venues" 
                       className="text-[11px] font-bold text-white/40 hover:text-white transition-all uppercase tracking-wider hover:translate-x-1"
                     >
                       {link}

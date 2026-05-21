@@ -16,7 +16,7 @@ import supportRouter from "../../modules/support/routes/admin.routes.js"
 import auditRouter from "../../modules/audit/routes/admin.routes.js"
 import settingsRouter from "../../modules/settings/routes/admin.routes.js"
 import adminNotificationRouter from "../../modules/notification/notification.routes.js"
-import adminDisputeRouter from "../../modules/dispute/dispute.routes.js"
+import adminDisputeRouter from "../../modules/dispute/routes/admin.routes.js"
 import gameRouter from "../../modules/hostedGame/hostedGame.routes.js"
 import verifyAdminToken from "../../middleware/jwt/admin.middleware.js"
 

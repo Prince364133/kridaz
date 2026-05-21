@@ -5,6 +5,7 @@ import useTurfData from "../hooks/useTurfData.jsx";
 import SearchTurf from "@components/search/SearchTurf.jsx";
 import { Trophy, MapPin, Loader2, Sparkles } from "lucide-react";
 import useRecommendations from "@hooks/useRecommendations";
+import { useScrollDirection } from "@hooks/useScrollDirection.js";
 
 /**
  * Turf — Venue discovery page.
@@ -21,6 +22,7 @@ const Turf = () => {
   const [searchFilters, setSearchFilters] = useState({});
   const [userLocation, setUserLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState("detecting"); // 'detecting' | 'granted' | 'denied'
+  const { scrollDirection } = useScrollDirection();
 
   const { turfs, loading } = useTurfData(searchFilters);
 
@@ -116,13 +118,15 @@ const Turf = () => {
     <div className="min-h-screen bg-black text-white pb-20 overflow-x-hidden">
       <div className="max-w-screen-2xl mx-auto px-6 pt-0 relative z-10">
 
-        {/* ── Sticky Search Bar ────────────────────────────────────── */}
-        <div className="sticky top-0 z-40 bg-black/95 backdrop-blur-md pt-2 pb-2 -mx-6 px-6 mb-10 border-b border-white/5">
+        {/* ── Sticky Header (Search) ──────────────────────── */}
+        <div className={`sticky z-40 bg-black/95 backdrop-blur-md pt-3 pb-4 -mx-6 px-6 mb-4 border-b border-white/5 transition-transform duration-500 top-16 sm:top-20 ${
+          scrollDirection === "down" ? "-translate-y-[150%]" : "translate-y-0"
+        }`}>
           <SearchTurf onSearch={handleSearch} userLocation={userLocation} />
         </div>
 
-        {/* ── Section Header ───────────────────────────────────────── */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 border-b border-white/5 pb-6 gap-4">
+        {/* ── Venue Counts (Non-Sticky) ──────────────────────── */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
           <div className="flex flex-col gap-1">
             <h2 className="text-base md:text-lg font-bold uppercase tracking-[0.05em] text-white flex items-center gap-3 font-sans">
               <MapPin size={18} className="text-[#BFF367]" />
@@ -133,7 +137,6 @@ const Turf = () => {
               )}
             </h2>
           </div>
-
         </div>
 
         {/* ── Cards Grid ───────────────────────────────────────────── */}

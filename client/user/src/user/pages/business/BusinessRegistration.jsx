@@ -1,4 +1,4 @@
-﻿// Business Registration Page for Professional Upgrades
+// Business Registration Page for Professional Upgrades
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -92,21 +92,8 @@ export default function BusinessRegistration() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      // If guest, redirect to specific professional signup pages based on the role
-      if (roleFromUrl === 'venu_owners' || roleFromUrl === 'venue_owners' || roleFromUrl === 'venue') {
-        navigate("/signup/venue");
-      } else if (roleFromUrl === 'coach') {
-        navigate("/signup/coach");
-      } else if (roleFromUrl === 'umpire') {
-        navigate("/signup/official");
-      } else if (roleFromUrl === 'streamer') {
-        navigate("/signup/streamer");
-      } else if (roleFromUrl === 'scorer') {
-        navigate("/signup/scorer");
-      } else {
-        toast.error("Please login first to register your business");
-        navigate("/login?redirect=" + encodeURIComponent("/business/register?role=" + roleFromUrl));
-      }
+      toast.error("Please login first to register as a professional");
+      navigate("/login?redirect=" + encodeURIComponent("/business/register?role=" + roleFromUrl));
       return;
     }
 

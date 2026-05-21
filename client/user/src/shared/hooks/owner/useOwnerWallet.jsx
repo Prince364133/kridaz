@@ -16,8 +16,8 @@ const useOwnerWallet = () => {
   const fetchWalletData = useCallback(async () => {
     try {
       const [walletRes, withdrawalsRes] = await Promise.all([
-        axiosInstance.get("/api/owner/wallet/data"),
-        axiosInstance.get("/api/owner/wallet/withdrawals")
+        axiosInstance.get("/api/owner/wallet/owner/data"),
+        axiosInstance.get("/api/owner/wallet/owner/withdrawals")
       ]);
       setWalletData(walletRes.data);
       setWithdrawals(withdrawalsRes.data.requests);

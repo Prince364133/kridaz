@@ -119,7 +119,7 @@ const SupportCenter = () => {
                               {selectedTicket.status}
                            </span>
                            <span className="text-[10px] bg-white/5 text-gray-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">
-                              ID: {selectedTicket._id.slice(-6)}
+                              ID: {selectedTicket?._id?.slice(-6) || 'N/A'}
                            </span>
                         </div>
                      </div>

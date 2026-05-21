@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { ArrowLeft, Eye, ThumbsUp, Clock, User, Tag, Calendar, ChevronRight } from "lucide-react";
@@ -176,7 +176,7 @@ export default function BlogDetail() {
           </h3>
           <p className="text-gray-500 text-sm mb-6">Book a premium sports venue in your city ΓÇö instantly.</p>
           <Link
-            to="/turfs"
+            to="/venues"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-sm uppercase tracking-widest text-black hover:brightness-110 transition-all"
             style={{ backgroundColor: PRI }}
           >

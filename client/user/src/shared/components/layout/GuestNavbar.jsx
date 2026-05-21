@@ -4,22 +4,17 @@ import { Menu, X, ArrowRight, ShieldCheck, User, LogOut, ChevronDown, LayoutDash
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
+import { useScrollDirection } from "@hooks/useScrollDirection.js";
 
 const GuestNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { scrollDirection, scrolled } = useScrollDirection();
 
   const { isLoggedIn, role } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:5173";
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -29,18 +24,15 @@ const GuestNavbar = () => {
   const navLinks = [
     { name: "Venue Owner Overview", path: "/venue-owners" },
     { name: "Venues", path: "/business/venue" },
-    { name: "Coaches", path: "/business/coach" },
-    { name: "Umpires", path: "/business/official" },
-    { name: "Scorers", path: "/business/scorer" },
-    { name: "Streamers", path: "/business/streamer" },
+    { name: "Professionals", path: "/business/professional" },
     { name: "Community", path: "/community" },
     { name: "Find Players", path: "/players" },
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-transform duration-500 ${
       scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/5 py-2" : "bg-transparent py-4"
-    }`}>
+    } ${scrollDirection === "down" ? "-translate-y-full" : "translate-y-0"}`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
         
         {/* Brand Logo Unit */}
@@ -78,23 +70,8 @@ const GuestNavbar = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/business/coach" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                  Coaches
-                </Link>
-              </li>
-              <li>
-                <Link to="/business/official" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                  Umpires
-                </Link>
-              </li>
-              <li>
-                <Link to="/business/scorer" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                  Scorers
-                </Link>
-              </li>
-              <li>
-                <Link to="/business/streamer" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                  Streamers
+                <Link to="/business/professional" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                  Professionals
                 </Link>
               </li>
             </ul>

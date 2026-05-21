@@ -55,7 +55,7 @@ const useOwnerRequests = () => {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get("/api/admin/partner-requests/all");
+      const response = await axiosInstance.get("/api/admin/venue-owner-requests/all");
       const { pendingRequests, rejectedRequests: rejected } = response.data;
       
       setAllRequests(pendingRequests);
@@ -74,7 +74,7 @@ const useOwnerRequests = () => {
   const handleAccept = async (id, adminData) => {
     setRequestId(id);
     try {
-      const response = await axiosInstance.put(`/api/admin/partner-requests/${id}/accept`, adminData);
+      const response = await axiosInstance.put(`/api/admin/venue-owner-requests/${id}/accept`, adminData);
       toast.success(response.data.message);
       fetchRequests(); // Refresh to get updated stats and lists
     } catch (err) {
@@ -88,7 +88,7 @@ const useOwnerRequests = () => {
   const handleReject = async (id) => {
     setRequestId(id);
     try {
-      const response = await axiosInstance.delete(`/api/admin/partner-requests/${id}`);
+      const response = await axiosInstance.delete(`/api/admin/venue-owner-requests/${id}`);
       toast.success(response.data.message);
       fetchRequests();
     } catch (err) {
@@ -102,7 +102,7 @@ const useOwnerRequests = () => {
   const handleReconsider = async (id) => {
     setRequestId(id);
     try {
-      const response = await axiosInstance.put(`/api/admin/partner-requests/reconsider/${id}`);
+      const response = await axiosInstance.put(`/api/admin/venue-owner-requests/reconsider/${id}`);
       toast.success(response.data.message);
       fetchRequests();
     } catch (error) {

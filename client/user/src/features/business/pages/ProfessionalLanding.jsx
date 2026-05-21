@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { ArrowRight, Users, Target, Video, CheckCircle, Star, Trophy, X, User, Contact, Landmark, QrCode } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, Users, Target, Video, CheckCircle, Trophy, X, Landmark, User, QrCode } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import ScrollToTop from "@components/common/ScrollToTop";
+import toast from "react-hot-toast";
 
 const GRADIENT = "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)";
 const GRADIENT_START = "#55DEE8";
@@ -12,10 +13,42 @@ const benefits = [
   { icon: Video, title: "Host Masterclasses", desc: "Set up exclusive training sessions, bootcamps, and video analysis." }
 ];
 
+const availableRoles = [
+  { id: 'coach', label: 'Coach', icon: Trophy },
+  { id: 'umpire', label: 'Umpire', icon: Target },
+  { id: 'streamer', label: 'Streamer', icon: Video },
+  { id: 'commentator', label: 'Commentator', icon: Users }
+];
+
 const BG = "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1800&q=80&auto=format&fit=crop";
 
-export default function CoachLanding() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function ProfessionalLanding() {
+  const [modalStep, setModalStep] = useState(0); // 0: closed, 1: role selection, 2: dummy document upload
+  const [selectedRoles, setSelectedRoles] = useState([]);
+  const navigate = useNavigate();
+
+  const toggleRole = (roleId) => {
+    if (selectedRoles.includes(roleId)) {
+      setSelectedRoles([]);
+    } else {
+      setSelectedRoles([roleId]);
+    }
+  };
+
+  const handleRoleContinue = () => {
+    if (selectedRoles.length === 0) {
+      toast.error("Please select at least one role");
+      return;
+    }
+    setModalStep(2);
+  };
+
+  const handleDocumentSubmit = (e) => {
+    e.preventDefault();
+    setModalStep(0);
+    // Redirect to actual business registration
+    navigate(`/business/register?role=${selectedRoles.join(',')}`);
+  };
 
   return (
     <div className="relative min-h-screen text-white pt-4 pb-20 overflow-hidden" style={{ backgroundColor: "#000" }}>
@@ -58,7 +91,7 @@ export default function CoachLanding() {
               style={{ background: "rgba(85,222,232,0.08)", borderColor: "rgba(85,222,232,0.25)" }}
             >
               <span style={{ background: GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontFamily: "'Inter'" }}>
-                Professional Coaches
+                Unified Professionals
               </span>
             </div>
             <h1 className="text-[48px] md:text-[72px] leading-[1.1] uppercase mb-6 font-bold text-white" style={{ fontFamily: "'Open Sans'" }}>
@@ -66,14 +99,14 @@ export default function CoachLanding() {
               <span style={{ background: GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Legacy.</span>
             </h1>
             <p className="text-gray-400 mb-6 max-w-lg mx-auto md:mx-0 leading-relaxed text-sm md:text-base" style={{ fontFamily: "'Inter'" }}>
-              Take your coaching business to the next level. Kridaz provides the digital infrastructure to manage your students, schedule sessions, and grow your brand.
+              Take your professional career to the next level. Kridaz provides the digital infrastructure to manage your clients, schedule sessions, and grow your brand as a Coach, Umpire, Scorer, or Streamer.
             </p>
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setModalStep(1)}
               className="inline-flex items-center gap-3 font-bold text-black rounded-full px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest text-sm md:text-base"
               style={{ background: GRADIENT }}
             >
-              Join as a Coach <ArrowRight size={20} />
+              Join as a Professional <ArrowRight size={20} />
             </button>
           </div>
 
@@ -101,12 +134,12 @@ export default function CoachLanding() {
 
         {/* ── How It Works ── */}
         <div className="mt-20 md:mt-32 text-center">
-          <h2 className="text-3xl md:text-5xl font-black text-white mb-10 md:mb-12 uppercase tracking-tight" style={{ fontFamily: "'Open Sans'" }}>How to Scale Your Academy</h2>
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-10 md:mb-12 uppercase tracking-tight" style={{ fontFamily: "'Open Sans'" }}>How to Scale Your Profession</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
             {[
-              { icon: Users, title: "Setup Academy", desc: "List your sports, define age groups, and set your fee structure." },
-              { icon: Target, title: "Manage Attendance", desc: "Digital attendance, progress reports, and parent communication tools." },
-              { icon: CheckCircle, title: "Automate Billing", desc: "Automatic invoices and payment reminders so you can focus on coaching." }
+              { icon: Users, title: "Setup Profile", desc: "List your sports, define your skills, and set your fee structure." },
+              { icon: Target, title: "Manage Bookings", desc: "Digital calendar, match reports, and client communication tools." },
+              { icon: CheckCircle, title: "Automate Billing", desc: "Automatic invoices and payment reminders so you can focus on the game." }
             ].map((step, i) => (
               <div key={i} className="p-6 md:p-8 bg-white/5 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-white/10 hover:border-[#55DEE8]/30 transition-all group">
                 <div className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 md:mb-6 rounded-xl md:rounded-2xl bg-white/10 group-hover:bg-[#55DEE8]/20 transition-colors">
@@ -121,11 +154,11 @@ export default function CoachLanding() {
 
         {/* ── Testimonials ── */}
         <div className="mt-20 md:mt-32 max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-5xl font-black text-white text-center mb-10 md:mb-16 uppercase tracking-tight" style={{ fontFamily: "'Open Sans'" }}>Coach Spotlight</h2>
+          <h2 className="text-3xl md:text-5xl font-black text-white text-center mb-10 md:mb-16 uppercase tracking-tight" style={{ fontFamily: "'Open Sans'" }}>Professional Spotlight</h2>
           <div className="grid gap-6 md:gap-8">
             {[
               { 
-                text: "“Managing 100+ students across 3 batches was a nightmare. Kridaz simplified my administrative work by 80%.”", 
+                text: "“Managing 100+ clients across multiple sports was a nightmare. Kridaz simplified my administrative work by 80%.”", 
                 name: "Coach Arjun", 
                 role: "National Cricket Academy", 
                 icon: Trophy 
@@ -149,23 +182,64 @@ export default function CoachLanding() {
             ))}
           </div>
         </div>
-
-
       </div>
 
-      {/* ── Registration Modal ── */}
-      {isModalOpen && (
+      {/* ── Modals ── */}
+      {modalStep === 1 && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-[#111] border border-white/10 rounded-[10px] p-6 md:p-8 w-full max-w-lg relative animate-fadeInUp">
             <button 
-              onClick={() => setIsModalOpen(false)}
+              onClick={() => setModalStep(0)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
             >
               <X size={24} />
             </button>
-            <h2 className="text-2xl font-bold mb-8 uppercase tracking-wider text-white text-center" style={{ fontFamily: "'Open Sans'" }}>Complete Your Application</h2>
+            <h2 className="text-2xl font-bold mb-2 uppercase tracking-wider text-white text-center" style={{ fontFamily: "'Open Sans'" }}>Select Your Role</h2>
+            <p className="text-gray-400 text-center mb-8 text-sm">Please select your primary profession.</p>
             
-            <form className="space-y-6 mt-4" onSubmit={(e) => { e.preventDefault(); setIsModalOpen(false); alert("Application submitted successfully!"); }}>
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              {availableRoles.map((role) => {
+                const isSelected = selectedRoles.includes(role.id);
+                return (
+                  <button
+                    key={role.id}
+                    onClick={() => toggleRole(role.id)}
+                    className={`flex flex-col items-center justify-center p-6 border rounded-[10px] transition-all ${
+                      isSelected 
+                        ? 'border-[#55DEE8] bg-[#55DEE8]/10 text-white' 
+                        : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/30 hover:bg-white/10'
+                    }`}
+                  >
+                    <role.icon size={32} className={`mb-3 ${isSelected ? 'text-[#55DEE8]' : ''}`} />
+                    <span className="font-bold uppercase tracking-wider text-sm">{role.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+
+            <button 
+              onClick={handleRoleContinue}
+              className="w-full py-4 rounded-[10px] font-bold text-black uppercase tracking-widest hover:brightness-110 transition-all"
+              style={{ background: GRADIENT, fontFamily: "'Inter'" }}
+            >
+              Continue <ArrowRight size={20} className="inline ml-2" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {modalStep === 2 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#111] border border-white/10 rounded-[10px] p-6 md:p-8 w-full max-w-lg relative animate-fadeInUp">
+            <button 
+              onClick={() => setModalStep(1)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            >
+              <X size={24} />
+            </button>
+            <h2 className="text-2xl font-bold mb-8 uppercase tracking-wider text-white text-center" style={{ fontFamily: "'Open Sans'" }}>Document Verification</h2>
+            
+            <form className="space-y-6 mt-4" onSubmit={handleDocumentSubmit}>
               
               <div className="grid grid-cols-2 gap-4 md:gap-6">
                 {/* Aadhaar Upload Box Skeleton */}
@@ -250,7 +324,7 @@ export default function CoachLanding() {
                   className="w-full max-w-[240px] py-3 rounded-[10px] font-bold text-black uppercase tracking-widest hover:brightness-110 transition-all"
                   style={{ background: GRADIENT, fontFamily: "'Inter'" }}
                 >
-                  Submit Documents
+                  Submit & Register
                 </button>
               </div>
             </form>
