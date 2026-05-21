@@ -267,10 +267,15 @@ const router = createBrowserRouter([
   {
     path: "/scoring/:matchId",
     element: (
-      <ProtectedRoute requiredRole={["scorer"]}>
+      <ProtectedRoute>
         <S><ScoringApp /></S>
       </ProtectedRoute>
     ),
+  },
+
+  {
+    path: "/live-overlay/:matchId",
+    element: <S><LiveOverlay /></S>,
   },
 
   // ΓöÇΓöÇ USER PORTAL (Fall-through Priority) ΓöÇΓöÇ
@@ -335,8 +340,8 @@ const router = createBrowserRouter([
       { path: "reels/upload",        element: <ProtectedRoute><S><UploadReel /></S></ProtectedRoute> },
       { path: "reels/analytics",     element: <ProtectedRoute><S><ReelAnalytics /></S></ProtectedRoute> },
       { path: "leaderboard",         element: <S><Leaderboard /></S> },
-      { path: "live-overlay/:matchId",  element: <S><LiveOverlay /></S> },
       { path: "live-score/:matchId",    element: <S><LiveScoreboard /></S> },
+      { path: "scoring/live/:matchId",  element: <S><LiveScoreboard /></S> },
       { path: "privacy-policy",              element: <S><PrivacyPolicy /></S> },
       { path: "terms-of-service",            element: <S><TermsOfService /></S> },
       { path: "data-deletion-instructions",  element: <S><DataDeletionInstructions /></S> },

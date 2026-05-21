@@ -18,6 +18,9 @@ import {
   getLiveScore,
   setupScoringGame,
   getMyScoringGames,
+  getScoringGameById,
+  authenticateScoringApp,
+  notifyPlayers
 } from "./scoring.controller.js";
 import verifyAuth from "../../middleware/jwt/auth.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
@@ -106,6 +109,34 @@ router.get("/analytics/:matchId", getMatchAnalytics);
  */
 router.get("/live-score/:matchId", getLiveScore);
 
+/**
+ * @swagger
+ * /scoring/auth/{gameId}:
+ *   post:
+ *     summary: Authenticate scoring app access with password
+ *     tags: [Scoring]
+ *     parameters:
+ *       - in: path
+ *         name: gameId
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Returns a scorer token
+ *       401:
+ *         description: Invalid password
+ */
+router.post("/auth/:gameId", authenticateScoringApp);
+
 // Protected routes (Only authorized umpires can score)
 router.use(verifyAuth);
 
@@ -121,7 +152,7 @@ router.use(verifyAuth);
  *       200:
  *         description: Match created
  */
-router.post("/setup", validate(setupScoringGameSchema), setupScoringGame);
+router.post("/setup", verifyAuth, validate(setupScoringGameSchema), setupScoringGame);
 
 /**
  * @swagger
@@ -135,7 +166,28 @@ router.post("/setup", validate(setupScoringGameSchema), setupScoringGame);
  *       200:
  *         description: Matches retrieved
  */
-router.get("/my-games", getMyScoringGames);
+router.get("/my-games", verifyAuth, getMyScoringGames);
+
+/**
+ * @swagger
+ * /scoring/game/{gameId}:
+ *   get:
+ *     summary: Get a scoring game by ID (full details)
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: gameId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Full game details
+ */
+router.get("/game/:gameId", verifyAuth, getScoringGameById);
+
+
 
 /**
  * @swagger
@@ -191,6 +243,30 @@ router.put("/update", validate(updateScoreSchema), updateScore);
  *         description: Match completed
  */
 router.post("/complete", completeMatch);
+
+/**
+ * @swagger
+ * /scoring/notify-players:
+ *   post:
+ *     summary: Notify players about the match
+ *     description: Dispatches push/socket notifications to all players in the match
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               matchId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Notifications dispatched
+ */
+router.post("/notify-players", notifyPlayers);
 
 /**
  * @swagger
@@ -295,16 +371,25 @@ router.post("/set-players", setPlayers);
 /**
  * @swagger
  * /scoring/undo:
- *   delete:
+ *   post:
  *     summary: Undo last action
  *     description: Reverts the last ball or action recorded.
  *     tags: [Scoring]
  *     security:
  *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               scoringId:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Action reverted
  */
-router.delete("/undo", undoLastBall);
+router.post("/undo", undoLastBall);
 
 export default router;

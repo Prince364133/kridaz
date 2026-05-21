@@ -42,10 +42,12 @@ export const setupScoringGameSchema = z.object({
     teamBData: z.any().optional(),
     teamAPlayers: z.array(z.any()).optional(),
     teamBPlayers: z.array(z.any()).optional(),
-    venueId: z.string().optional(),
+    venueId: z.string().optional().nullable(),
+    sportType: z.string().optional(),
+    professionals: z.array(z.any()).optional(),
     tossWinner: z.string().optional(),
     tossDecision: z.string().optional(),
-    scoringPassword: z.string().min(4, "Password must be at least 4 characters").optional(),
-    youtubeLiveUrl: z.string().url().optional().or(z.literal('')),
+    scoringPassword: z.string().min(4, "Password must be at least 4 characters").optional().nullable().or(z.literal('')),
+    youtubeLiveUrl: z.string().url().optional().nullable().or(z.literal('')),
   })
 });

@@ -180,6 +180,37 @@ const LiveScoreboard = () => {
  </div>
  );
 
+ if (score.status === 'NOT_STARTED') {
+    return (
+      <div className="min-h-screen bg-[#050505] text-white flex flex-col font-inter">
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center gap-6">
+          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
+            <Activity size={32} className="text-primary animate-pulse" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black italic uppercase tracking-tighter mb-2">{score.matchName}</h1>
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center justify-center gap-2">
+              <span className="text-white">{score.teamA?.name || 'Team A'}</span>
+              <span className="text-primary text-[10px]">VS</span>
+              <span className="text-white">{score.teamB?.name || 'Team B'}</span>
+            </p>
+          </div>
+          <div className="mt-8 px-6 py-3 bg-white/[0.04] rounded-2xl border border-white/[0.08]">
+            <p className="text-[11px] text-primary font-black uppercase tracking-widest animate-pulse">
+              {score.message || "Match starts soon"}
+            </p>
+          </div>
+          <button
+            onClick={() => navigate(-1)}
+            className="mt-12 px-8 py-3 bg-white/10 hover:bg-white/15 active:bg-white/5 transition-colors rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2"
+          >
+            <ChevronLeft size={14} /> Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
  const striker = score.batters?.[0] || null;
  const nonStriker = score.batters?.[1] || null;
  const bowler = score.bowler || null;

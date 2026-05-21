@@ -18,17 +18,37 @@ const useCricketScoring = (matchId) => {
     return { ...scoring, hostedGameId: scoring.matchId };
   };
 
+  const updateMatchData = (scoringResponseData) => {
+    setMatchData(prev => {
+      const data = normalise(scoringResponseData);
+      if (data && prev && typeof prev.hostedGameId === 'object') {
+        data.hostedGameId = prev.hostedGameId;
+      }
+      cache(data);
+      return data;
+    });
+  };
+
   const cache = (data) => {
     if (data) localStorage.setItem(`scoring_${matchId}`, JSON.stringify(data));
+  };
+
+  const getHeaders = () => {
+    const scorerToken = localStorage.getItem(`scorer_token_${matchId}`);
+    return scorerToken ? { Authorization: `Bearer ${scorerToken}` } : {};
   };
 
   // ── Status fetch ─────────────────────────────────────────────────────────────
   const fetchMatchStatus = useCallback(async () => {
     try {
-      const response = await axiosInstance.get(`/api/scoring/status/${matchId}`);
+      const response = await axiosInstance.get(`/api/scoring/status/${matchId}`, { headers: getHeaders() });
       let data = normalise(response.data.scoring);
 
-      if (!data && response.data.hostedGame) {
+      if (data) {
+        if (response.data.hostedGame) {
+          data.hostedGameId = response.data.hostedGame;
+        }
+      } else if (response.data.hostedGame) {
         data = { hostedGameId: response.data.hostedGame, innings: [] };
       }
 
@@ -36,7 +56,11 @@ const useCricketScoring = (matchId) => {
       setError(null);
       cache(data);
     } catch (err) {
-      setError(err.message || 'Failed to fetch match status');
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError('UNAUTHORIZED');
+      } else {
+        setError(err.message || 'Failed to fetch match status');
+      }
       const cached = localStorage.getItem(`scoring_${matchId}`);
       if (cached) setMatchData(JSON.parse(cached));
     } finally {
@@ -51,7 +75,7 @@ const useCricketScoring = (matchId) => {
   // ── Analytics ────────────────────────────────────────────────────────────────
   const fetchAnalytics = async () => {
     try {
-      const response = await axiosInstance.get(`/api/scoring/analytics/${matchId}`);
+      const response = await axiosInstance.get(`/api/scoring/analytics/${matchId}`, { headers: getHeaders() });
       return response.data;
     } catch (err) {
       return { success: false, error: err.message };
@@ -76,12 +100,10 @@ const useCricketScoring = (matchId) => {
   const recordBall = async (ballData) => {
     try {
       const response = await axiosInstance.put('/api/scoring/update', {
-        scoringId: matchData?._id,
+        scoringId: matchData?.id || matchData?._id,
         ballData,
-      });
-      const data = normalise(response.data.scoring);
-      setMatchData(data);
-      cache(data);
+      }, { headers: getHeaders() });
+      updateMatchData(response.data.scoring);
       return {
         success: true,
         overComplete: response.data.overComplete,
@@ -100,12 +122,10 @@ const useCricketScoring = (matchId) => {
   const setPlayers = async (players) => {
     try {
       const response = await axiosInstance.post('/api/scoring/set-players', {
-        scoringId: matchData?._id,
+        scoringId: matchData?.id || matchData?._id,
         ...players,
-      });
-      const data = normalise(response.data.scoring);
-      setMatchData(data);
-      cache(data);
+      }, { headers: getHeaders() });
+      updateMatchData(response.data.scoring);
       return { success: true };
     } catch (err) {
       return { success: false, error: err.response?.data?.message || err.message };
@@ -116,10 +136,10 @@ const useCricketScoring = (matchId) => {
   const setToss = async ({ winnerTeam, decision }) => {
     try {
       const response = await axiosInstance.post('/api/scoring/toss', {
-        scoringId: matchData?._id,
-        winnerTeam,
+        scoringId: matchData?.id || matchData?._id,
+        wonByTeamId: winnerTeam,
         decision,
-      });
+      }, { headers: getHeaders() });
       setMatchData(prev => ({ ...prev, toss: response.data.toss }));
       return { success: true };
     } catch (err) {
@@ -130,12 +150,12 @@ const useCricketScoring = (matchId) => {
   // ── Undo last ball (P1.6) ────────────────────────────────────────────────────
   const undoBall = async () => {
     try {
-      const response = await axiosInstance.delete('/api/scoring/undo', {
-        data: { scoringId: matchData?._id },
+      const response = await axiosInstance.post('/api/scoring/undo', {
+        scoringId: matchData?.id || matchData?._id
+      }, {
+        headers: getHeaders(),
       });
-      const data = normalise(response.data.scoring);
-      setMatchData(data);
-      cache(data);
+      updateMatchData(response.data.scoring);
       return { success: true };
     } catch (err) {
       return { success: false, error: err.response?.data?.message || err.message };
@@ -148,9 +168,8 @@ const useCricketScoring = (matchId) => {
       const response = await axiosInstance.post('/api/scoring/start', {
         matchId,
         battingTeamId: teamId,
-      });
-      const data = normalise(response.data.scoring);
-      setMatchData(data);
+      }, { headers: getHeaders() });
+      updateMatchData(response.data.scoring);
       return { success: true };
     } catch (err) {
       const msg = err.response?.data?.message || err.message || 'Failed to start innings';
@@ -163,8 +182,8 @@ const useCricketScoring = (matchId) => {
   const completeMatch = async () => {
     try {
       const response = await axiosInstance.post('/api/scoring/complete', {
-        scoringId: matchData?._id,
-      });
+        scoringId: matchData?.id || matchData?._id,
+      }, { headers: getHeaders() });
       if (response.data.success) {
         setMatchData(prev => ({ ...prev, status: 'COMPLETED' }));
         return { success: true, data: response.data };

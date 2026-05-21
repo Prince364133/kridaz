@@ -63,8 +63,8 @@ const GLOBAL_CSS = `
  body, html {
  background: transparent !important;
  overflow: hidden;
- width: 1920px;
- height: 1080px;
+ width: 100vw;
+ height: 100vh;
  font-family: 'Inter', sans-serif;
  }
 
@@ -112,10 +112,10 @@ const GLOBAL_CSS = `
  }
  .ticker-container {
  position: absolute;
- bottom: 90px; /* Above the main bar */
+ bottom: clamp(44px, 8.4vh, 90px);
  left: 0;
  right: 0;
- height: 34px;
+ height: clamp(22px, 3.2vh, 36px);
  background: rgba(163, 230, 53, 0.95);
  display: flex;
  align-items: center;
@@ -128,11 +128,11 @@ const GLOBAL_CSS = `
  .ticker-label {
  background: #000;
  color: #a3e635;
- padding: 0 16px;
+ padding: 0 clamp(6px, 1.2vw, 16px);
  height: 100%;
  display: flex;
  align-items: center;
- font-size: 11px;
+ font-size: clamp(7px, 0.7vw, 11px);
  font-weight: 900;
  text-transform: uppercase;
  letter-spacing: 2px;
@@ -383,8 +383,26 @@ const LiveOverlay = () => {
  };
  }, [matchId, token, fetchScore, showBadge]);
 
- // ─── Nothing to render until first data ─────────────────────────────────────
- if (!score) return null;
+  // ─── Nothing to render until first data ─────────────────────────────────────
+  if (!score) return null;
+
+  if (score.status === 'NOT_STARTED') {
+    return (
+      <div style={{ width: '100vw', height: '100vh', background: 'transparent', position: 'relative', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 90,
+          background: 'rgba(5,5,5,0.88)', backdropFilter: 'blur(20px)',
+          borderTop: '2px solid #a3e635', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          animation: 'tickerIn 0.6s cubic-bezier(0.16,1,0.3,1) both'
+        }}>
+          <div style={{ fontSize: 24, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '2px' }}>
+            <span style={{ color: '#a3e635' }}>{score.teamA?.name}</span> <span style={{ opacity: 0.5, margin: '0 16px' }}>VS</span> <span style={{ color: '#a3e635' }}>{score.teamB?.name}</span>
+            <span style={{ marginLeft: 32, fontSize: 20, color: '#9ca3af' }}>MATCH STARTS SOON</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
  const striker = score.batters?.[0] || null;
  const nonStriker = score.batters?.[1] || null;
@@ -394,7 +412,7 @@ const LiveOverlay = () => {
  const strikerSR = striker ? `SR ${striker.strikeRate || ((striker.balls ? ((striker.runs /striker.balls)*100).toFixed(0) : 0))}` : '';
 
  return (
- <div style={{ width: 1920, height: 1080, background: 'transparent', position: 'relative', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
+ <div style={{ width: '100vw', height: '100vh', background: 'transparent', position: 'relative', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
 
  {/* ── Event badge ─────────────────────────────────────────────────────── */}
  {badge && <EventBadge event={badge} />}
@@ -423,89 +441,93 @@ const LiveOverlay = () => {
  {/* ── Ticker bar (fixed bottom) ───────────────────────────────────────── */}
  <div style={{
  position: 'absolute', bottom: 0, left: 0, right: 0,
- height: 90,
+ height: 'clamp(52px, 8.4vh, 90px)',
  background: 'rgba(5,5,5,0.88)',
  backdropFilter: 'blur(20px)',
  borderTop: '2px solid #a3e635',
  display: 'flex', alignItems: 'stretch',
  animation: 'tickerIn 0.6s cubic-bezier(0.16,1,0.3,1) both',
+ overflow: 'hidden',
  }}>
 
  {/* ── TEAM + SCORE (left) ─────────────────────────────────────────── */}
  <div style={{
- minWidth: 260,
+ minWidth: 'clamp(100px, 14vw, 260px)',
  background: 'rgba(163,230,53,0.08)',
  borderRight: '1px solid rgba(255,255,255,0.06)',
- padding: '0 24px',
+ padding: '0 clamp(8px, 1.5vw, 24px)',
  display: 'flex', flexDirection: 'column', justifyContent: 'center',
  }}>
- <div style={{ fontSize: 9, fontWeight: 900, color: '#a3e635', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 4 }}>
- LIVE MATCH
+ <div style={{ fontSize: 'clamp(6px, 0.6vw, 9px)', fontWeight: 900, color: '#a3e635', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 2 }}>
+ LIVE
  </div>
- <div style={{ fontSize: 15, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '-0.5px', lineHeight: 1.1 }}>
+ <div style={{ fontSize: 'clamp(9px, 1vw, 15px)', fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '-0.5px', lineHeight: 1.1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
  {score.battingTeamName}
  </div>
  </div>
 
  {/* ── SCORE / OVERS ───────────────────────────────────────────────── */}
  <div style={{
- padding: '0 28px',
- display: 'flex', alignItems: 'center', gap: 20,
+ padding: '0 clamp(8px, 1.8vw, 28px)',
+ display: 'flex', alignItems: 'center', gap: 'clamp(6px, 1.2vw, 20px)',
  borderRight: '1px solid rgba(255,255,255,0.06)',
+ flexShrink: 0,
  }}>
- <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
- <span style={{ fontSize: 46, fontWeight: 900, fontStyle: '', lineHeight: 1, color: '#fff', letterSpacing: -2 }}>
+ <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
+ <span style={{ fontSize: 'clamp(20px, 3.5vw, 46px)', fontWeight: 900, lineHeight: 1, color: '#fff', letterSpacing: -1 }}>
  {score.totalRuns}
  </span>
- <span style={{ fontSize: 30, fontWeight: 900, color: '#a3e635', fontStyle: '' }}>/</span>
- <span style={{ fontSize: 38, fontWeight: 900, fontStyle: '', color: '#fff', letterSpacing: -1 }}>
+ <span style={{ fontSize: 'clamp(14px, 2.2vw, 30px)', fontWeight: 900, color: '#a3e635' }}>/</span>
+ <span style={{ fontSize: 'clamp(18px, 2.8vw, 38px)', fontWeight: 900, color: '#fff' }}>
  {score.totalWickets}
  </span>
  </div>
- <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
- <div style={{ fontSize: 9, color: '#6b7280', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.25em' }}>OVERS</div>
- <div style={{ fontSize: 20, fontWeight: 900, color: '#e5e7eb' }}>{score.overString}</div>
+ <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+ <div style={{ fontSize: 'clamp(6px, 0.55vw, 9px)', color: '#6b7280', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>OVS</div>
+ <div style={{ fontSize: 'clamp(10px, 1.3vw, 20px)', fontWeight: 900, color: '#e5e7eb' }}>{score.overString}</div>
  {score.crr && (
- <div style={{ fontSize: 11, color: '#a3e635', fontWeight: 700 }}>CRR {score.crr}</div>
+ <div style={{ fontSize: 'clamp(7px, 0.6vw, 11px)', color: '#a3e635', fontWeight: 700 }}>CRR {score.crr}</div>
  )}
  </div>
  {score.target && (
  <div style={{
- padding: '6px 14px', background: 'rgba(163,230,53,0.12)', borderRadius: 8,
+ padding: 'clamp(2px, 0.4vh, 6px) clamp(4px, 0.8vw, 14px)',
+ background: 'rgba(163,230,53,0.12)', borderRadius: 6,
  border: '1px solid rgba(163,230,53,0.25)',
  }}>
- <div style={{ fontSize: 9, color: '#a3e635', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>TARGET</div>
- <div style={{ fontSize: 22, fontWeight: 900, color: '#fff' }}>{score.target}</div>
+ <div style={{ fontSize: 'clamp(6px, 0.55vw, 9px)', color: '#a3e635', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em' }}>TGT</div>
+ <div style={{ fontSize: 'clamp(10px, 1.4vw, 22px)', fontWeight: 900, color: '#fff' }}>{score.target}</div>
  </div>
  )}
  </div>
 
  {/* ── BATSMEN ─────────────────────────────────────────────────────── */}
  <div style={{
- padding: '0 24px',
- display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4,
+ padding: '0 clamp(6px, 1.4vw, 24px)',
+ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2,
  borderRight: '1px solid rgba(255,255,255,0.06)',
- minWidth: 280,
+ minWidth: 'clamp(100px, 16vw, 280px)',
+ overflow: 'hidden',
  }}>
  {striker && (
- <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
- <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#a3e635', flexShrink: 0 }} />
- <span style={{ fontSize: 13, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: -0.3, flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+ <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(4px, 0.6vw, 10px)' }}>
+ <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#a3e635', flexShrink: 0 }} />
+ <span style={{ fontSize: 'clamp(8px, 0.85vw, 13px)', fontWeight: 900, color: '#fff', textTransform: 'uppercase', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
  {striker.name}
  </span>
- <span style={{ fontSize: 16, fontWeight: 900, color: '#fff' }}>{striker.runs}</span>
- <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 700 }}>({striker.balls})</span>
- <span style={{ fontSize: 10, color: '#a3e635', fontWeight: 700 }}>{strikerSR}</span>
+ <span style={{ fontSize: 'clamp(10px, 1vw, 16px)', fontWeight: 900, color: '#fff', flexShrink: 0 }}>{striker.runs}</span>
+ <span style={{ fontSize: 'clamp(7px, 0.65vw, 11px)', color: '#6b7280', fontWeight: 700, flexShrink: 0 }}>({striker.balls})</span>
+ <span style={{ fontSize: 'clamp(7px, 0.6vw, 10px)', color: '#a3e635', fontWeight: 700, flexShrink: 0 }}>{strikerSR}</span>
  </div>
  )}
  {nonStriker && (
- <div style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: 0.6 }}>
- <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'transparent', flexShrink: 0 }} />
- <span style={{ fontSize: 12, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+ <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(4px, 0.6vw, 10px)', opacity: 0.6 }}>
+ <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'transparent', border: '1px solid #9ca3af', flexShrink: 0 }} />
+ <span style={{ fontSize: 'clamp(7px, 0.78vw, 12px)', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
  {nonStriker.name}
  </span>
- <span style={{ fontSize: 14, fontWeight: 900, color: '#9ca3af' }}>{nonStriker.runs}</span>
- <span style={{ fontSize: 10, color: '#4b5563', fontWeight: 700 }}>({nonStriker.balls})</span>
+ <span style={{ fontSize: 'clamp(9px, 0.9vw, 14px)', fontWeight: 900, color: '#9ca3af', flexShrink: 0 }}>{nonStriker.runs}</span>
+ <span style={{ fontSize: 'clamp(7px, 0.6vw, 10px)', color: '#4b5563', fontWeight: 700, flexShrink: 0 }}>({nonStriker.balls})</span>
  </div>
  )}
  </div>
@@ -513,37 +535,38 @@ const LiveOverlay = () => {
  {/* ── BOWLER ──────────────────────────────────────────────────────── */}
  {bowler && (
  <div style={{
- padding: '0 24px',
+ padding: '0 clamp(6px, 1.4vw, 24px)',
  display: 'flex', flexDirection: 'column', justifyContent: 'center',
  borderRight: '1px solid rgba(255,255,255,0.06)',
- minWidth: 200,
+ minWidth: 'clamp(80px, 12vw, 200px)',
+ overflow: 'hidden',
  }}>
- <div style={{ fontSize: 9, color: '#6b7280', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: 4 }}>BOWLING</div>
- <div style={{ fontSize: 13, fontWeight: 900, color: '#fff', textTransform: 'uppercase', marginBottom: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: 160 }}>
+ <div style={{ fontSize: 'clamp(6px, 0.55vw, 9px)', color: '#6b7280', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 2 }}>BOWLING</div>
+ <div style={{ fontSize: 'clamp(8px, 0.85vw, 13px)', fontWeight: 900, color: '#fff', textTransform: 'uppercase', marginBottom: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
  {bowler.name}
  </div>
- <div style={{ fontSize: 12, color: '#9ca3af', fontWeight: 700 }}>
+ <div style={{ fontSize: 'clamp(7px, 0.75vw, 12px)', color: '#9ca3af', fontWeight: 700, whiteSpace: 'nowrap' }}>
  {bowler.overs}.{bowler.balls} – {bowler.wickets}/{bowler.runs}
- {bowler.economy > 0 && <span style={{ color: '#6b7280', marginLeft: 6 }}>Eco {bowler.economy}</span>}
+ {bowler.economy > 0 && <span style={{ color: '#6b7280', marginLeft: 4 }}>Eco {bowler.economy}</span>}
  </div>
  </div>
  )}
 
  {/* ── LAST 6 BALLS ────────────────────────────────────────────────── */}
  <div style={{
- padding: '0 20px',
- display: 'flex', alignItems: 'center', gap: 10,
+ padding: '0 clamp(6px, 1.2vw, 20px)',
+ display: 'flex', alignItems: 'center', gap: 'clamp(4px, 0.6vw, 10px)',
  flex: 1,
+ overflow: 'hidden',
  }}>
- <div style={{ fontSize: 9, color: '#4b5563', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.25em', marginRight: 4, whiteSpace: 'nowrap' }}>THIS OVER</div>
- <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+ <div style={{ fontSize: 'clamp(6px, 0.55vw, 9px)', color: '#4b5563', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginRight: 2, whiteSpace: 'nowrap' }}>OVER</div>
+ <div style={{ display: 'flex', gap: 'clamp(3px, 0.5vw, 8px)', alignItems: 'center', flexWrap: 'nowrap' }}>
  {(score.last6Balls || []).slice(-6).map((b, i) => (
- <BallPill key={i} ball={b} size={36} />
+ <BallPill key={i} ball={b} size='clamp(22px, 2.8vw, 36px)' />
  ))}
- {/* Placeholder dots for unfilled balls */}
  {Array.from({ length: Math.max(0, 6 - (score.last6Balls?.length || 0)) }).map((_, i) => (
  <div key={`ph-${i}`} style={{
- width: 36, height: 36, borderRadius: '50%',
+ width: 'clamp(22px, 2.8vw, 36px)', height: 'clamp(22px, 2.8vw, 36px)', borderRadius: '50%',
  border: '2px dashed rgba(255,255,255,0.08)',
  flexShrink: 0,
  }} />
@@ -552,7 +575,7 @@ const LiveOverlay = () => {
  </div>
 
  {/* ── CONNECTION DOT ──────────────────────────────────────────────── */}
- <div style={{ padding: '0 16px', display: 'flex', alignItems: 'center' }}>
+ <div style={{ padding: '0 clamp(6px, 1vw, 16px)', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
  <div style={{
  width: 8, height: 8, borderRadius: '50%',
  background: connected ? '#22c55e' : '#ef4444',

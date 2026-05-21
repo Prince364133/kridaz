@@ -17,6 +17,9 @@ import {
 } from '@redux/api/teamApi';
 import toast from 'react-hot-toast';
 import useLoginOnDemand from '@hooks/useLoginOnDemand';
+import StartScoringModal from '@features/scoring/components/StartScoringModal';
+import ScoringMatchCard from '@features/scoring/components/ScoringMatchCard';
+import { useGetMyScoringGamesQuery } from '@redux/api/scoringApi';
 
 const PRI = "#55DEE8";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
@@ -50,12 +53,14 @@ const TeamProfile = () => {
 
   const { data: teamData, isLoading, error } = useGetTeamByIdQuery(id);
   const { data: myTeamsData } = useGetMyTeamsQuery(undefined, { skip: !isLoggedIn });
+  const { data: scoringGamesData } = useGetMyScoringGamesQuery(undefined, { skip: !isLoggedIn });
   const [requestJoin, { isLoading: isJoining }] = useRequestToJoinMutation();
   const [requestOpponent, { isLoading: isChallenging }] = useRequestOpponentMutation();
 
   const [showChallengeModal, setShowChallengeModal] = useState(false);
   const [showSquadModal, setShowSquadModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showScoringModal, setShowScoringModal] = useState(false);
   const [selectedMyTeam, setSelectedMyTeam] = useState('');
 
   if (isLoading) {
@@ -85,6 +90,16 @@ const TeamProfile = () => {
   }
 
   const team = teamData.team;
+
+  // Filter active scoring matches for the current team
+  const teamMatches = (scoringGamesData?.games || []).filter(game => {
+    const teamNameLower = team?.name?.toLowerCase();
+    const teamId = team?.id || team?._id;
+    return game.teams?.some(t => 
+      (t.name && t.name.toLowerCase() === teamNameLower) || 
+      (t.teamId && t.teamId === teamId)
+    );
+  });
   
   // Combine real members with mock data if real members are less than 15
   const displayMembers = team.members?.length > 1 
@@ -304,20 +319,57 @@ const TeamProfile = () => {
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2">
                   <button 
                     onClick={() => navigate(`/messages?teamId=${id}`)}
-                    className="py-2.5 bg-white/5 border border-white/10 rounded-xl text-white font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-2 hover:bg-white/10"
+                    className="w-full py-2.5 bg-white/5 border border-white/10 rounded-xl text-white font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-2 hover:bg-white/10"
                   >
-                    <MessageCircle size={12} /> Chat
+                    <MessageCircle size={12} /> Chat with Team
                   </button>
-                  <button 
-                    onClick={() => navigate(`/team-pass/${id}`)}
-                    className="py-2.5 bg-white/5 border border-white/10 rounded-xl text-white font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-2 hover:bg-white/10"
-                  >
-                    <Ticket size={12} /> Pass
-                  </button>
+
+                  {/* Digital Pass QR Card */}
+                  <div className="bg-gradient-to-br from-[#55DEE8]/10 to-transparent border border-white/5 rounded-2xl p-4 flex flex-col items-center gap-3 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-[#55DEE8]/5 blur-xl rounded-full" />
+                    
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-1.5 text-gray-400">
+                        <Ticket size={12} className="text-[#55DEE8]" />
+                        <span className="text-[7px] font-black uppercase tracking-widest">Digital Team Pass</span>
+                      </div>
+                      <Fingerprint size={12} className="text-white/20" />
+                    </div>
+
+                    <div className="relative w-28 h-28 bg-white border border-white/10 rounded-xl p-2 flex items-center justify-center group-hover:scale-[1.02] transition-transform overflow-hidden">
+                      {team.qrCode ? (
+                        <img 
+                          src={team.qrCode} 
+                          alt="Team QR Pass" 
+                          className="w-full h-full object-contain opacity-90 transition-transform" 
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center gap-1 text-black/20">
+                          <QrCode size={32} strokeWidth={1.5} />
+                          <span className="text-[6px] font-black uppercase tracking-widest">Generating...</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <button 
+                      onClick={() => navigate(`/team-pass/${id}`)}
+                      className="w-full py-2 bg-[#55DEE8]/10 hover:bg-[#55DEE8] hover:text-black border border-[#55DEE8]/20 rounded-xl text-[#55DEE8] font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-1.5 transition-all"
+                    >
+                      View Full Pass
+                    </button>
+                  </div>
                 </div>
+
+                <button
+                  onClick={() => setShowScoringModal(true)}
+                  className="w-full mt-2 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-widest text-[9px] rounded-xl flex items-center justify-center gap-2 hover:brightness-110 shadow-lg shadow-[#55DEE8]/10"
+                >
+                  <Play size={14} className="fill-black" />
+                  Start Scoring Match
+                </button>
 
                 <button 
                   onClick={() => setShowShareModal(true)}
@@ -381,6 +433,46 @@ const TeamProfile = () => {
                 ))}
               </div>
             </div>
+
+            {/* Active Scoring Matches */}
+            {teamMatches && teamMatches.length > 0 && (
+              <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <h2 className="text-lg font-black uppercase tracking-tight flex items-center gap-2" style={HEADING_STYLE}>
+                      Active Scoring Matches <span className="inline-block w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_#EF4444] animate-pulse" />
+                    </h2>
+                    <p className="text-[7px] font-black text-gray-700 uppercase tracking-widest">Real-time live scored matches</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {teamMatches.map((game) => {
+                    const mappedMatch = {
+                      _id: game.id,
+                      status: game.scoringStatus === 'NOT_STARTED' ? 'SETUP' : game.scoringStatus,
+                      sportType: game.sportType || 'Cricket',
+                      matchName: game.name || game.title || 'Scoring Match',
+                      teamA: {
+                        name: game.teams?.find(t => t.teamKey === 'teamA')?.name || 'Team A',
+                        logo: game.teams?.find(t => t.teamKey === 'teamA')?.image || null
+                      },
+                      teamB: {
+                        name: game.teams?.find(t => t.teamKey === 'teamB')?.name || 'Team B',
+                        logo: game.teams?.find(t => t.teamKey === 'teamB')?.image || null
+                      },
+                      youtubeStreamUrl: game.youtubeStreamUrl || null
+                    };
+                    return (
+                      <ScoringMatchCard 
+                        key={game.id} 
+                        match={mappedMatch} 
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Match History */}
             <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-6 space-y-4">
@@ -574,6 +666,11 @@ const TeamProfile = () => {
           </div>
         )}
       </AnimatePresence>
+
+      <StartScoringModal 
+        isOpen={showScoringModal} 
+        onClose={() => setShowScoringModal(false)} 
+      />
     </div>
   );
 };

@@ -205,7 +205,12 @@ const checkAndAwardBadges = (user) => {
  * Initializes live overlay broadcasting details for OBS/External scoreboards.
  */
 export const goLiveSession = async (matchId) => {
-  const hostedGame = await prisma.hostedGame.findUnique({ where: { id: matchId } });
+  let hostedGame = await prisma.hostedGame.findUnique({ where: { id: matchId } });
+  if (!hostedGame) {
+    const scoring = await prisma.cricketMatch.findUnique({ where: { id: matchId } });
+    if (scoring) hostedGame = await prisma.hostedGame.findUnique({ where: { id: scoring.gameId } });
+  }
+
   if (!hostedGame) {
     const error = new Error("Match not found");
     error.statusCode = 404;
@@ -249,8 +254,8 @@ export const goLiveSession = async (matchId) => {
     streamStatus: 'starting',
     youtubeVideoId: hostedGame.youtubeVideoId,
     urls: {
-      obsOverlay: `${appBase}/live-overlay/${matchId}?token=${overlayToken}`,
-      publicScoreboard: `${appBase}/live-score/${matchId}`
+      obsOverlay: `${appBase}/live-overlay/${hostedGame.id}?token=${overlayToken}`,
+      publicScoreboard: `${appBase}/live-score/${hostedGame.id}`
     }
   };
 };
@@ -259,15 +264,22 @@ export const goLiveSession = async (matchId) => {
  * Ends live broadcasting for the match.
  */
 export const endLiveSession = async (matchId) => {
-  const hostedGame = await prisma.hostedGame.findUnique({ where: { id: matchId } });
+  let hostedGame = await prisma.hostedGame.findUnique({ where: { id: matchId } });
+  if (!hostedGame) {
+    const scoring = await prisma.cricketMatch.findUnique({ where: { id: matchId } });
+    if (scoring) hostedGame = await prisma.hostedGame.findUnique({ where: { id: scoring.gameId } });
+  }
+
   if (!hostedGame) {
     const error = new Error("Match not found");
     error.statusCode = 404;
     throw error;
   }
 
+  const finalMatchId = hostedGame.id;
+
   await prisma.hostedGame.update({
-    where: { id: matchId },
+    where: { id: finalMatchId },
     data: {
       isLive: false,
       overlayToken: null,
@@ -276,7 +288,7 @@ export const endLiveSession = async (matchId) => {
   });
 
   try {
-    await liveStateService.setStreamStatus(matchId, 'ended');
+    await liveStateService.setStreamStatus(finalMatchId, 'ended');
   } catch (redisErr) {
     logger.warn("[Scoring] Redis cleanup failed (non-fatal):", redisErr.message);
   }
@@ -286,17 +298,23 @@ export const endLiveSession = async (matchId) => {
  * Updates YouTube streaming config keys.
  */
 export const configureStream = async (matchId, { youtubeVideoId, youtubeLiveChatId }) => {
-  const hostedGame = await prisma.hostedGame.findUnique({ where: { id: matchId } });
+  let hostedGame = await prisma.hostedGame.findUnique({ where: { id: matchId } });
+  if (!hostedGame) {
+    const scoring = await prisma.cricketMatch.findUnique({ where: { id: matchId } });
+    if (scoring) hostedGame = await prisma.hostedGame.findUnique({ where: { id: scoring.gameId } });
+  }
+
   if (!hostedGame) {
     const error = new Error("Match not found");
     error.statusCode = 404;
     throw error;
   }
 
+  const finalMatchId = hostedGame.id;
   const streamStatus = youtubeVideoId ? 'online' : 'offline';
 
   await prisma.hostedGame.update({
-    where: { id: matchId },
+    where: { id: finalMatchId },
     data: {
       streamConfig: {
         upsert: {
@@ -308,7 +326,7 @@ export const configureStream = async (matchId, { youtubeVideoId, youtubeLiveChat
     }
   });
 
-  await liveStateService.setStreamStatus(matchId, streamStatus);
+  await liveStateService.setStreamStatus(finalMatchId, streamStatus);
   return { streamStatus };
 };
 
@@ -834,7 +852,8 @@ export const fetchMatchStatus = async (matchId) => {
           include: {
             slots: {
               include: {
-                user: { select: { name: true, profilePicture: true } }
+                user: { select: { name: true, profilePicture: true } },
+                customPlayer: true
               }
             }
           }
@@ -845,7 +864,7 @@ export const fetchMatchStatus = async (matchId) => {
     const mappedHostedGame = mapHostedGame(hostedGame);
     const scoringSnapshot = computeScoreSnapshot(scoringWithUsers, mappedHostedGame);
     
-    return { type: "SCORING_EXISTS", scoring: scoringWithUsers, scoringSnapshot };
+    return { type: "SCORING_EXISTS", scoring: scoringWithUsers, scoringSnapshot, hostedGame: mappedHostedGame };
   }
 
   const hostedGame = await prisma.hostedGame.findUnique({
@@ -857,7 +876,8 @@ export const fetchMatchStatus = async (matchId) => {
         include: {
           slots: {
             include: {
-              user: { select: { name: true, profilePicture: true } }
+              user: { select: { name: true, profilePicture: true } },
+              customPlayer: true
             }
           }
         }
@@ -968,17 +988,6 @@ export const fetchLiveScoreSnapshot = async (matchId) => {
     return { data: cached, source: 'redis' };
   }
 
-  const scoring = await prisma.cricketMatch.findUnique({
-    where: { gameId: matchId },
-    include: { innings: true, playerStats: true }
-  });
-
-  if (!scoring) {
-    const error = new Error("No live score found for this match");
-    error.statusCode = 404;
-    throw error;
-  }
-
   const match = await prisma.hostedGame.findUnique({
     where: { id: matchId },
     include: {
@@ -1001,11 +1010,33 @@ export const fetchLiveScoreSnapshot = async (matchId) => {
   }
 
   const mappedMatch = mapHostedGame(match);
-  const snapshot = computeScoreSnapshot(scoring, mappedMatch);
+
+  const scoring = await prisma.cricketMatch.findUnique({
+    where: { gameId: matchId },
+    include: { 
+      innings: true, 
+      playerStats: true,
+      timeline: { take: 6, orderBy: { timestamp: 'desc' } }
+    }
+  });
+
+  let snapshot = null;
+  if (scoring) {
+    snapshot = computeScoreSnapshot(scoring, mappedMatch);
+  }
+
   if (!snapshot) {
-    const error = new Error("Match has not started yet");
-    error.statusCode = 404;
-    throw error;
+    // Return a minimal placeholder snapshot if scoring hasn't started yet
+    snapshot = {
+      matchId: match.id,
+      status: 'NOT_STARTED',
+      matchName: match.name,
+      teamA: mappedMatch.teamA,
+      teamB: mappedMatch.teamB,
+      tossWinner: null,
+      tossDecision: null,
+      message: 'Match starts soon',
+    };
   }
 
   await liveStateService.setLiveScore(matchId, snapshot);
@@ -1013,7 +1044,40 @@ export const fetchLiveScoreSnapshot = async (matchId) => {
 };
 
 /**
- * Creates a new ScoringMatch (using the HostedGame model acting as the parent record)
+ * Generates a collision-safe 8-character alphanumeric short ID.
+ * Retries up to 10 times using DB uniqueness check, then falls back to
+ * a timestamp-prefixed ID to guarantee uniqueness under high concurrency.
+ */
+const generateUniqueShortId = async () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const candidate = Array.from({ length: 8 }, () =>
+      chars[Math.floor(Math.random() * chars.length)]
+    ).join('');
+    const existing = await prisma.hostedGame.findUnique({ where: { shortId: candidate } });
+    if (!existing) return candidate;
+  }
+  // Fallback: timestamp base36 prefix ensures uniqueness even at massive concurrency
+  const tsFragment = Date.now().toString(36).toUpperCase().slice(-4);
+  const randFragment = Array.from({ length: 4 }, () =>
+    chars[Math.floor(Math.random() * chars.length)]
+  ).join('');
+  return tsFragment + randFragment;
+};
+
+/**
+ * Creates a new ScoringMatch (using the HostedGame model acting as the parent record).
+ *
+ * Field mapping (HostedGame schema → service):
+ *   name            ← matchName
+ *   gameType        ← "SCORING_MATCH"
+ *   format          ← format
+ *   ballType        ← ballType
+ *   groundType      ← groundType
+ *   youtubeLiveUrl  ← youtubeLiveUrl
+ *   scoringPassword ← hashed password (argon2)
+ *   maxMembers      ← maxMembers (default 11)
+ *   shortId         ← collision-safe alphanumeric ID
  */
 export const createScoringMatch = async (userId, matchData) => {
   const {
@@ -1035,39 +1099,71 @@ export const createScoringMatch = async (userId, matchData) => {
     youtubeLiveUrl
   } = matchData;
 
-  // Generate a random 6-character short ID
-  const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
+  // Hash the scoring password for security (argon2)
+  let hashedPassword = null;
+  if (scoringPassword && scoringPassword.trim() !== '') {
+    const argon2 = await import('argon2');
+    hashedPassword = await argon2.hash(scoringPassword);
+  }
 
-  // We map this into HostedGame to reuse the existing structure.
+  // Look up team names/images from Team model if IDs are provided
+  let teamAName = teamAData?.name || 'Team A';
+  let teamAImage = teamAData?.image || null;
+  let teamBName = teamBData?.name || 'Team B';
+  let teamBImage = teamBData?.image || null;
+
+  if (teamAId) {
+    const teamA = await prisma.team.findUnique({
+      where: { id: teamAId },
+      select: { name: true, logo: true, image: true }
+    });
+    if (teamA) {
+      teamAName = teamA.name;
+      teamAImage = teamA.logo || teamA.image || null;
+    }
+  }
+  if (teamBId) {
+    const teamB = await prisma.team.findUnique({
+      where: { id: teamBId },
+      select: { name: true, logo: true, image: true }
+    });
+    if (teamB) {
+      teamBName = teamB.name;
+      teamBImage = teamB.logo || teamB.image || null;
+    }
+  }
+
+  const shortId = await generateUniqueShortId();
+
+  // Create the HostedGame with nested GameTeam records
   const game = await prisma.hostedGame.create({
     data: {
-      gameType: "SCORING_MATCH", // Optional: to differentiate from regular hosted games
-      title: matchName || "Custom Scoring Match",
-      sport: "CRICKET",
-      format: format || "T20",
-      ballType: ballType || "TENNIS",
+      gameType: 'SCORING_MATCH',
+      name: matchName || 'Custom Scoring Match',
+      format: format || 'T20',
+      ballType: ballType || 'TENNIS',
+      groundType: groundType || 'OUTDOOR',
       shortId,
       hostId: userId,
-      umpireId: userId,
-      status: "SCHEDULED",
-      scoringStatus: "NOT_STARTED",
-      scoringPassword,
-      youtubeVideoId: youtubeLiveUrl || null,
-      maxMembers: maxMembers || 22,
-      pricePerMember: 0,
-      currency: "INR",
-      paymentStatus: "NOT_REQUIRED",
+      status: 'ACTIVE',
+      scoringStatus: 'NOT_STARTED',
+      scoringPassword: hashedPassword,
+      youtubeLiveUrl: youtubeLiveUrl || null,
+      maxMembers: maxMembers || 11,
+      date: new Date(),
+      time: new Date().toTimeString().split(' ')[0],
+      oversPerInnings: format === 'T20' ? 20 : format === 'ODI' ? 50 : format === 'T10' ? 10 : 20,
       teams: {
         create: [
           {
-            teamKey: "teamA",
-            name: teamAData?.name || "Team A",
-            existingTeamId: teamAId || null,
+            teamKey: 'teamA',
+            name: teamAName,
+            image: teamAImage,
           },
           {
-            teamKey: "teamB",
-            name: teamBData?.name || "Team B",
-            existingTeamId: teamBId || null,
+            teamKey: 'teamB',
+            name: teamBName,
+            image: teamBImage,
           }
         ]
       }
@@ -1077,52 +1173,95 @@ export const createScoringMatch = async (userId, matchData) => {
     }
   });
 
-  // Assign players to the respective team slots if provided
-  const teamASlotCreates = [];
-  if (teamAPlayers && teamAPlayers.length > 0) {
-    const teamARecord = game.teams.find(t => t.teamKey === "teamA");
-    if (teamARecord) {
-      teamAPlayers.forEach(p => {
-        teamASlotCreates.push({
-          hostedGameId: game.id,
-          teamId: teamARecord.id,
-          userId: p.id,
-          status: "CONFIRMED"
-        });
+  // Assign players to GameSlots for each team
+  const slotCreates = [];
+
+  const processPlayerSlot = async (p, teamRecord) => {
+    if (p.isCustom) {
+      // Create CustomPlayerInvite
+      const customInvite = await prisma.customPlayerInvite.create({
+        data: {
+          gameId: game.id,
+          name: p.name,
+          email: `${p.id}@kridaz.custom`, // Dummy email
+          inviteStatus: 'ACCEPTED',
+        }
       });
+      return {
+        gameId: game.id,
+        teamId: teamRecord.id,
+        userId: null,
+        customPlayerId: customInvite.id,
+        status: 'CONFIRMED',
+        role: p.role || 'PLAYER'
+      };
+    } else {
+      return {
+        gameId: game.id,
+        teamId: teamRecord.id,
+        userId: p.id || p.userId,
+        status: 'CONFIRMED',
+        role: p.role || 'PLAYER'
+      };
+    }
+  };
+
+  const teamARecord = game.teams.find(t => t.teamKey === 'teamA');
+  if (teamARecord && teamAPlayers && teamAPlayers.length > 0) {
+    const aSlots = await Promise.all(teamAPlayers.map(p => processPlayerSlot(p, teamARecord)));
+    slotCreates.push(...aSlots);
+  }
+
+  const teamBRecord = game.teams.find(t => t.teamKey === 'teamB');
+  if (teamBRecord && teamBPlayers && teamBPlayers.length > 0) {
+    const bSlots = await Promise.all(teamBPlayers.map(p => processPlayerSlot(p, teamBRecord)));
+    slotCreates.push(...bSlots);
+  }
+
+  if (slotCreates.length > 0) {
+    await prisma.gameSlot.createMany({ data: slotCreates });
+  }
+
+  if (tossWinner && tossDecision) {
+    let battingTeamKey = 'teamA';
+    if (tossWinner === teamAId) {
+      battingTeamKey = tossDecision === 'BAT' ? 'teamA' : 'teamB';
+    } else if (tossWinner === teamBId) {
+      battingTeamKey = tossDecision === 'BAT' ? 'teamB' : 'teamA';
+    }
+    
+    try {
+      await initializeScoringSession(game.id, battingTeamKey, userId, 'ADMIN');
+      
+      await prisma.cricketMatch.update({
+        where: { gameId: game.id },
+        data: {
+          tossWinner: tossWinner === teamAId ? teamAName : teamBName,
+          tossDecision: tossDecision
+        }
+      });
+    } catch (err) {
+      console.error("Error auto-initializing scoring session:", err);
     }
   }
 
-  const teamBSlotCreates = [];
-  if (teamBPlayers && teamBPlayers.length > 0) {
-    const teamBRecord = game.teams.find(t => t.teamKey === "teamB");
-    if (teamBRecord) {
-      teamBPlayers.forEach(p => {
-        teamBSlotCreates.push({
-          hostedGameId: game.id,
-          teamId: teamBRecord.id,
-          userId: p.id,
-          status: "CONFIRMED"
-        });
-      });
-    }
-  }
-
-  if (teamASlotCreates.length > 0 || teamBSlotCreates.length > 0) {
-    await prisma.hostedGameSlot.createMany({
-      data: [...teamASlotCreates, ...teamBSlotCreates]
-    });
-  }
-
+  // Return full game with teams + player slots
   return await prisma.hostedGame.findUnique({
     where: { id: game.id },
     include: {
       teams: {
-        include: { slots: { include: { user: { select: { name: true, id: true, profilePicture: true } } } } }
+        include: {
+          slots: {
+            include: {
+              user: { select: { id: true, name: true, profilePicture: true } }
+            }
+          }
+        }
       }
     }
   });
 };
+
 
 /**
  * Get all scoring games associated with the user
@@ -1149,3 +1288,82 @@ export const getUserScoringGames = async (userId) => {
   });
 };
 
+/**
+ * Get a single scoring game by ID with full team/player/match details.
+ */
+export const getScoringGameById = async (gameId) => {
+  return await prisma.hostedGame.findUnique({
+    where: { id: gameId },
+    include: {
+      teams: {
+        include: {
+          slots: {
+            include: {
+              user: { select: { id: true, name: true, profilePicture: true, username: true } }
+            }
+          }
+        }
+      },
+      cricketMatch: {
+        select: {
+          id: true,
+          status: true,
+          tossWinner: true,
+          tossDecision: true,
+          currentInningsIndex: true,
+          oversPerInnings: true,
+          strikerId: true,
+          nonStrikerId: true,
+          bowlerId: true,
+        }
+      },
+      turf: {
+        select: { id: true, name: true, location: true, city: true, image: true }
+      }
+    }
+  });
+};
+
+/**
+ * Verify the scoring app password for a game.
+ * Returns a short-lived JWT scoped to this specific game with SCORER role.
+ * Throws named errors for controller-level HTTP status mapping.
+ */
+export const verifyScoringPassword = async (gameId, password) => {
+  const game = await prisma.hostedGame.findUnique({
+    where: { id: gameId },
+    select: { id: true, scoringPassword: true, hostId: true, shortId: true }
+  });
+
+  if (!game) {
+    const err = new Error("GAME_NOT_FOUND");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  if (!game.scoringPassword) {
+    // No password set — allow open access
+    const token = jwt.sign(
+      { gameId: game.id, role: 'SCORER', shortId: game.shortId },
+      process.env.JWT_SECRET,
+      { expiresIn: '8h' }
+    );
+    return { token };
+  }
+
+  // Verify with argon2 (same lib used across the codebase)
+  const argon2 = await import('argon2');
+  const isValid = await argon2.verify(game.scoringPassword, password);
+  if (!isValid) {
+    const err = new Error("INVALID_PASSWORD");
+    err.statusCode = 401;
+    throw err;
+  }
+
+  const token = jwt.sign(
+    { gameId: game.id, role: 'SCORER', shortId: game.shortId },
+    process.env.JWT_SECRET,
+    { expiresIn: '8h' }
+  );
+  return { token };
+};

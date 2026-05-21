@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy } from 'lucide-react';
+import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import useCricketScoring from '../hooks/useCricketScoring';
@@ -8,7 +8,12 @@ import BallByBallHistory from '@features/scoring/components/BallByBallHistory';
 import InningsSetupModal from '@features/scoring/components/InningsSetupModal';
 import WicketModal from '@features/scoring/components/WicketModal';
 import ExtraRunsModal from '@features/scoring/components/ExtraRunsModal';
+import SelectBowlerModal from '@features/scoring/components/SelectBowlerModal';
+import TossModal from '@features/scoring/components/TossModal';
+import { io } from 'socket.io-client';
+import ScoringPasswordModal from '../components/ScoringPasswordModal';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6001';
 /**
  * ScoringApp — The primary match scoring console.
  * Fully rebranded for the Scorer Portal with Teal Green (#00C187) and Inter font.
@@ -37,8 +42,8 @@ const ballLabel = (ball) => {
 function MembersTab({ matchData }) {
   const [teamTab, setTeamTab] = useState('teamA');
   const game = matchData?.hostedGameId;
-  const teamA = game?.teams?.teamA;
-  const teamB = game?.teams?.teamB;
+  const teamA = game?.teamA || matchData?.teamA || (Array.isArray(game?.teams) ? game.teams.find(t => t.teamKey === 'teamA') : game?.teams?.teamA);
+  const teamB = game?.teamB || matchData?.teamB || (Array.isArray(game?.teams) ? game.teams.find(t => t.teamKey === 'teamB') : game?.teams?.teamB);
   const activeTeam = teamTab === 'teamA' ? teamA : teamB;
 
   const getBattingStats = (userId) =>
@@ -60,7 +65,7 @@ function MembersTab({ matchData }) {
       {activeTeam?.slots?.length > 0 ? (
         <div className="space-y-2.5">
           {activeTeam.slots.map((slot, i) => {
-            const uid = slot.user?._id || slot.user;
+            const uid = slot.user?._id || slot.user?.id || slot.userId || slot.user;
             const bat = getBattingStats(uid);
             const bowl = getBowlingStats(uid);
             return (
@@ -71,8 +76,8 @@ function MembersTab({ matchData }) {
                     : <User size={18} style={{ color: THEME_COLOR }} />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-black uppercase tracking-tight text-white truncate">{slot.user?.name || `Player ${i + 1}`}</p>
-                  <p className="text-[9px] text-neutral-500 font-black uppercase tracking-widest mt-0.5">{slot.role}</p>
+                  <p className="text-[13px] font-black uppercase tracking-tight text-white">{slot.user?.name || slot.customPlayer?.name || `Player ${i + 1}`}</p>
+                  <p className="text-[9px] text-neutral-500 font-black uppercase tracking-widest mt-0.5">{slot.role || 'Player'}</p>
                 </div>
                 <div className="text-right shrink-0 space-y-1">
                   {bat && <p className="text-[11px] font-black" style={{ color: THEME_COLOR }}>{bat.runs}({bat.balls}) <span className="text-[8px] text-neutral-600">BAT</span></p>}
@@ -109,6 +114,9 @@ const ScoringApp = () => {
   const [liveEnabled, setLiveEnabled] = useState(false);
   const [liveUrls, setLiveUrls] = useState(null);
   const [liveLoading, setLiveLoading] = useState(false);
+  const [passwordVerified, setPasswordVerified] = useState(sessionStorage.getItem(`scoringAuth_${matchId}`) === 'true');
+  const [authAction, setAuthAction] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const {
     matchData,
@@ -116,10 +124,49 @@ const ScoringApp = () => {
     error,
     recordBall,
     setPlayers,
+    setToss,
     undoBall,
     completeMatch,
     refresh
   } = useCricketScoring(matchId);
+
+  const [scoringLock, setScoringLock] = useState('PENDING'); // 'PENDING' | 'GRANTED' | 'DENIED'
+  
+  React.useEffect(() => {
+    if (!passwordVerified) return; // Wait until password verified
+
+    const scorerToken = localStorage.getItem(`scorer_token_${matchId}`);
+    
+    // Connect to socket
+    const socket = io(API_BASE, {
+      auth: { token: scorerToken },
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+    });
+
+    socket.on('connect', () => {
+      socket.emit('scoring:acquire_lock', { matchId });
+    });
+
+    socket.on('scoring:lock_granted', () => {
+      setScoringLock('GRANTED');
+    });
+
+    socket.on('scoring:lock_denied', () => {
+      setScoringLock('DENIED');
+    });
+
+    socket.on('scoring:lock_released', () => {
+      // Someone released it, try to acquire it again
+      socket.emit('scoring:acquire_lock', { matchId });
+    });
+
+    return () => {
+      socket.emit('scoring:release_lock', { matchId });
+      socket.disconnect();
+    };
+  }, [matchId, passwordVerified]);
 
   React.useEffect(() => {
     const hostedGame = matchData?.hostedGameId;
@@ -150,6 +197,8 @@ const ScoringApp = () => {
 
   const [showInningsSetup, setShowInningsSetup] = useState(false);
   const [showWicketModal, setShowWicketModal] = useState(false);
+  const [showBowlerModal, setShowBowlerModal] = useState(false);
+  const [showTossModal, setShowTossModal] = useState(false);
   const [extraModal, setExtraModal] = useState(null);
 
   const score = (() => {
@@ -167,10 +216,11 @@ const ScoringApp = () => {
 
   const getTeamSlots = (teamKey) => {
     const game = matchData?.hostedGameId;
-    const team = game?.teams?.[teamKey];
+    const team = game?.[teamKey] || matchData?.[teamKey] || (Array.isArray(game?.teams) ? game.teams.find(t => t.teamKey === teamKey) : game?.teams?.[teamKey]);
     return (team?.slots || []).map(s => ({
-      userId: s.user?._id || s.user,
+      userId: s.user?._id || s.user?.id || s.userId || s.user || s.customPlayerId || s.id,
       name: s.user?.name || s.customPlayer?.name || 'Player',
+      role: s.role,
     })).filter(p => p.userId);
   };
 
@@ -180,23 +230,80 @@ const ScoringApp = () => {
   const battingSlots = getTeamSlots(battingTeamKey);
   const bowlingSlots = getTeamSlots(bowlingTeamKey);
 
-  const strikerStats  = matchData?.battingStats?.find(b => b.user?._id === matchData?.currentStriker || b.user === matchData?.currentStriker);
-  const nonStrikerStats = matchData?.battingStats?.find(b => b.user?._id === matchData?.currentNonStriker || b.user === matchData?.currentNonStriker);
-  const bowlerStats   = matchData?.bowlingStats?.find(b => b.user?._id === matchData?.currentBowler || b.user === matchData?.currentBowler);
-  const strikerSlot   = battingSlots.find(p => p.userId === matchData?.currentStriker?.toString?.() || p.userId === matchData?.currentStriker);
-  const nonStrikerSlot= battingSlots.find(p => p.userId === matchData?.currentNonStriker?.toString?.() || p.userId === matchData?.currentNonStriker);
-  const bowlerSlot    = bowlingSlots.find(p => p.userId === matchData?.currentBowler?.toString?.() || p.userId === matchData?.currentBowler);
+  const strikerStats  = matchData?.battingStats?.find(b => b.user?._id === matchData?.strikerId || b.user === matchData?.strikerId);
+  const nonStrikerStats = matchData?.battingStats?.find(b => b.user?._id === matchData?.nonStrikerId || b.user === matchData?.nonStrikerId);
+  const bowlerStats   = matchData?.bowlingStats?.find(b => b.user?._id === matchData?.bowlerId || b.user === matchData?.bowlerId);
+  const strikerSlot   = battingSlots.find(p => p.userId === matchData?.strikerId?.toString?.() || p.userId === matchData?.strikerId);
+  const nonStrikerSlot= battingSlots.find(p => p.userId === matchData?.nonStrikerId?.toString?.() || p.userId === matchData?.nonStrikerId);
+  const bowlerSlot    = bowlingSlots.find(p => p.userId === matchData?.bowlerId?.toString?.() || p.userId === matchData?.bowlerId);
 
   const outBatterIds = new Set((matchData?.battingStats || []).filter(b => b.outStatus !== 'NOT_OUT').map(b => b.user?.toString?.() || b.user));
   const remainingBatters = battingSlots.filter(p =>
-    p.userId !== matchData?.currentStriker?.toString?.() &&
-    p.userId !== matchData?.currentNonStriker?.toString?.() &&
+    p.userId !== matchData?.strikerId?.toString?.() &&
+    p.userId !== matchData?.nonStrikerId?.toString?.() &&
     !outBatterIds.has(p.userId)
   );
 
-  const needsInningsSetup = matchData?._id && matchData?.innings?.length > 0 && !matchData?.currentStriker;
+  const needsInningsSetup = (matchData?.id || matchData?._id) && matchData?.innings?.length > 0 && !matchData?.strikerId;
+  const needsMatchStart = (matchData?.id || matchData?._id) && (!matchData?.innings || matchData?.innings?.length === 0);
   const isFirstInnings = matchData?.currentInningsIndex === 0;
   const isFirstInningsComplete = isFirstInnings && (currentInnings?.totalWickets >= 10 || currentInnings?.totalBalls >= (matchData?.matchId?.oversPerInnings * 6));
+
+  const hasPassword = !!(matchData?.hostedGameId?.scoringPassword || matchData?.scoringPassword);
+  const isLocked = hasPassword && !passwordVerified && !needsMatchStart;
+
+  if (isLocked) {
+    return (
+      <ScoringPasswordModal 
+        matchId={matchId} 
+        onSuccess={(token) => {
+          localStorage.setItem(`scorer_token_${matchId}`, token);
+          setPasswordVerified(true);
+        }} 
+        actionLabel="Unlock Scoring Console"
+      />
+    );
+  }
+
+  const handleScore = async (payload) => {
+    if (!matchData?.strikerId || !matchData?.bowlerId) {
+      toast.error("Please setup the next pair and bowler first.");
+      return { success: false, message: "Missing players" };
+    }
+    const fullPayload = {
+      ...payload,
+      batsmanId: matchData.strikerId,
+      bowlerId: matchData.bowlerId
+    };
+    const result = await recordBall(fullPayload);
+    if (result.success && result.overComplete) {
+      setShowBowlerModal(true);
+    }
+    return result;
+  };
+
+  if (scoringLock === 'PENDING' && passwordVerified) return (
+    <div className="min-h-screen bg-black flex items-center justify-center font-inter">
+      <div className="text-center">
+        <div className="w-10 h-10 border-4 border-[#00C187]/20 border-t-[#00C187] rounded-full animate-spin mx-auto mb-4" />
+        <h2 className="text-[13px] font-black uppercase tracking-widest text-[#00C187]">Acquiring Scoring Lock</h2>
+      </div>
+    </div>
+  );
+
+  if (scoringLock === 'DENIED') return (
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center font-inter z-50">
+      <Shield style={{ color: THEME_COLOR }} className="mb-6 opacity-80" size={56} />
+      <h2 className="text-2xl font-black uppercase tracking-tighter mb-3">Scoring Locked</h2>
+      <p className="text-[13px] text-neutral-400 font-medium mb-8 max-w-sm">
+        Someone else is currently scoring this game. Please wait until they leave to gain access.
+      </p>
+      <div className="flex items-center gap-3 bg-[#00C187]/10 border border-[#00C187]/20 px-6 py-4 rounded-2xl">
+        <div className="w-4 h-4 border-2 border-[#00C187]/30 border-t-[#00C187] rounded-full animate-spin" />
+        <span className="text-[11px] font-black uppercase tracking-widest text-[#00C187]">Waiting in queue...</span>
+      </div>
+    </div>
+  );
 
   if (loading) return (
     <div className="min-h-screen bg-black flex items-center justify-center font-inter">
@@ -218,7 +325,33 @@ const ScoringApp = () => {
       case 'history': return <HistoryTab matchData={matchData} />;
       default: return (
         <div className="space-y-6 font-inter">
-          {needsInningsSetup && !isFirstInningsComplete && (
+          {needsMatchStart && (
+              <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] space-y-6 text-center relative overflow-hidden shadow-2xl">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
+                <div className="w-16 h-16 bg-[#00C187]/10 border border-[#00C187]/20 rounded-3xl flex items-center justify-center mx-auto shadow-lg">
+                  <Play size={28} style={{ color: THEME_COLOR }} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black uppercase tracking-tighter">Match Ready</h3>
+                  <p className="text-[11px] text-neutral-500 font-black uppercase tracking-widest mt-2">Initialize scoring</p>
+                </div>
+                <button
+                  onClick={() => {
+                    if (hasPassword && !passwordVerified) {
+                      setAuthAction('start');
+                      setShowAuthModal(true);
+                    } else {
+                      setShowTossModal(true);
+                    }
+                  }}
+                  className="w-full py-5 bg-[#00C187]/10 border border-[#00C187]/30 rounded-[2rem] text-center text-[#00C187] text-[13px] font-black uppercase tracking-[0.2em] shadow-xl"
+                >
+                  ⚡ Start Match
+                </button>
+              </div>
+          )}
+
+          {needsInningsSetup && !needsMatchStart && !isFirstInningsComplete && (
             <button
               onClick={() => setShowInningsSetup(true)}
               className="w-full py-5 bg-[#00C187]/10 border border-[#00C187]/30 rounded-[2rem] text-center text-[#00C187] text-[11px] font-black uppercase tracking-[0.2em] animate-pulse shadow-xl"
@@ -327,7 +460,7 @@ const ScoringApp = () => {
             <div className="grid grid-cols-4 gap-3.5">
               {[0, 1, 2, 3].map(run => (
                 <button key={run}
-                  onClick={() => recordBall({ runs: run, extraType: 'NONE' })}
+                  onClick={() => handleScore({ runs: run, extraType: 'NONE' })}
                   className="h-16 bg-white/[0.03] border border-white/5 rounded-3xl flex items-center justify-center text-2xl font-black text-white hover:bg-[#00C187]/10 hover:border-[#00C187]/40 transition-all transform active:scale-90 shadow-lg">
                   {run}
                 </button>
@@ -336,7 +469,7 @@ const ScoringApp = () => {
             <div className="grid grid-cols-4 gap-3.5">
               {[4, 6].map(run => (
                 <button key={run}
-                  onClick={() => recordBall({ runs: run, isBoundary: true, extraType: 'NONE' })}
+                  onClick={() => handleScore({ runs: run, isBoundary: true, extraType: 'NONE' })}
                   className="h-16 rounded-3xl flex items-center justify-center text-2xl font-black text-black transform active:scale-95 shadow-xl transition-all"
                   style={{ backgroundColor: THEME_COLOR, boxShadow: `0 10px 25px ${THEME_COLOR}33` }}>
                   {run}
@@ -464,32 +597,48 @@ const ScoringApp = () => {
 
         {/* Action Bar */}
         <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/95 to-transparent z-[60]">
-          <div className="max-w-xl mx-auto grid grid-cols-2 gap-4">
-            <button 
-              onClick={async () => {
-                const result = await undoBall();
-                if (result.success) toast.success('Reverted last ball');
-                else toast.error(result.error || 'Undo limit reached');
-              }}
-              className="h-16 bg-white/5 border border-white/10 rounded-3xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-white transform active:scale-95 shadow-xl"
-            >
-              <Undo2 size={16} /> Undo Ball
-            </button>
-            <button 
-              onClick={() => completeMatch()}
-              className="h-16 bg-white/[0.03] border border-white/10 rounded-3xl text-[10px] font-black uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl flex items-center justify-center gap-3"
-              style={{ color: THEME_COLOR, borderColor: `${THEME_COLOR}33` }}
-            >
-              <CheckCircle2 size={16} /> Terminate
-            </button>
+            <div className="max-w-xl mx-auto grid grid-cols-3 gap-3">
+              <button 
+                onClick={() => setShowInningsSetup(true)}
+                className="h-16 bg-white/5 border border-white/10 rounded-3xl text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex flex-col items-center justify-center gap-1.5 text-white transform active:scale-95 shadow-xl"
+              >
+                <Users size={16} /> <span className="mt-0.5">Players</span>
+              </button>
+              <button 
+                onClick={async () => {
+                  const result = await undoBall();
+                  if (result.success) toast.success('Reverted last ball');
+                  else toast.error(result.error || 'Undo limit reached');
+                }}
+                className="h-16 bg-white/5 border border-white/10 rounded-3xl text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex flex-col items-center justify-center gap-1.5 text-white transform active:scale-95 shadow-xl"
+              >
+                <Undo2 size={16} /> <span className="mt-0.5">Undo</span>
+              </button>
+              <button 
+                onClick={() => {
+                  if (hasPassword) {
+                    setAuthAction('end');
+                    setShowAuthModal(true);
+                  } else {
+                    if (window.confirm('Are you sure you want to end this match?')) {
+                      completeMatch();
+                      navigate('/');
+                    }
+                  }
+                }}
+                className="h-16 bg-white/[0.03] border border-white/10 rounded-3xl text-[9px] font-black uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl flex flex-col items-center justify-center gap-1.5"
+                style={{ color: THEME_COLOR, borderColor: `${THEME_COLOR}33` }}
+              >
+                <CheckCircle2 size={16} /> <span className="mt-0.5">End Match</span>
+              </button>
+            </div>
           </div>
-        </div>
       </div>
 
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl p-6 flex items-center justify-center animate-in fade-in duration-500">
-          <div className="w-full max-w-sm bg-[#000] border border-white/10 rounded-[3rem] p-10 space-y-10 shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-sm max-h-[90vh] overflow-y-auto bg-[#000] border border-white/10 rounded-[3rem] p-10 space-y-10 shadow-2xl relative">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
             <div className="flex justify-between items-center">
                <h3 className="text-2xl font-black uppercase tracking-tighter text-white">Interface Config</h3>
@@ -650,7 +799,7 @@ const ScoringApp = () => {
           fieldingTeamSlots={bowlingSlots}
           battingTeamSlots={remainingBatters}
           onConfirm={async ({ wicketType, fielderId, nextBatterId }) => {
-            const result = await recordBall({
+            const result = await handleScore({
               runs: 0,
               isWicket: true,
               wicketType,
@@ -676,7 +825,7 @@ const ScoringApp = () => {
             const isWide = extraModal === 'WIDE';
             const isNoBall = extraModal === 'NO_BALL';
             const totalRuns = (isWide || isNoBall) ? runs + 1 : runs;
-            const result = await recordBall({
+            const result = await handleScore({
               runs: totalRuns,
               isExtra: true,
               extraType: extraModal,
@@ -687,6 +836,86 @@ const ScoringApp = () => {
             setExtraModal(null);
           }}
           onClose={() => setExtraModal(null)}
+        />
+      )}
+
+      {showBowlerModal && (
+        <SelectBowlerModal
+          pool={bowlingSlots}
+          currentBowlerId={matchData.bowlerId}
+          onConfirm={async (bowlerId) => {
+            const res = await setPlayers({ bowlerId });
+            if (res.success) {
+              toast.success('Next bowler selected');
+              setShowBowlerModal(false);
+            } else {
+              toast.error(res.error || 'Failed to select bowler');
+            }
+          }}
+        />
+      )}
+
+      {showTossModal && (
+        <TossModal
+          teamA={matchData?.teamA || matchData?.hostedGameId?.teamA || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamA') : null)}
+          teamB={matchData?.teamB || matchData?.hostedGameId?.teamB || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamB') : null)}
+          onConfirm={async ({ winnerTeam, decision }) => {
+            const res = await setToss({ winnerTeam, decision });
+            if (res.success) {
+              toast.success('Toss recorded! Starting match...');
+              
+              // Determine batting team
+              const isTeamAWinner = winnerTeam === (matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id);
+              let battingTeamId = matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id;
+              if ((isTeamAWinner && decision === 'BAT') || (!isTeamAWinner && decision === 'BOWL')) {
+                battingTeamId = matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id;
+              } else {
+                battingTeamId = matchData?.teamB?.id || matchData?.hostedGameId?.teamB?.id;
+              }
+
+              try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/start`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                  },
+                  body: JSON.stringify({ matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, battingTeamId })
+                });
+                const data = await response.json();
+                if (data.success) {
+                  toast.success('Match started successfully!');
+                  setShowTossModal(false);
+                  refresh();
+                } else {
+                  toast.error('Failed to start match');
+                }
+              } catch (e) {
+                toast.error('Error starting match');
+              }
+            } else {
+              toast.error(res.error || 'Failed to record toss');
+            }
+          }}
+        />
+      )}
+
+      {showAuthModal && (
+        <ScoringPasswordModal
+          matchId={matchId}
+          actionLabel={authAction === 'end' ? 'Confirm End Match' : 'Unlock Scoring Console'}
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={(token) => {
+            localStorage.setItem(`scorer_token_${matchId}`, token);
+            setPasswordVerified(true);
+            setShowAuthModal(false);
+            if (authAction === 'start') {
+              setShowTossModal(true);
+            } else if (authAction === 'end') {
+              completeMatch();
+              navigate('/');
+            }
+          }}
         />
       )}
     </div>

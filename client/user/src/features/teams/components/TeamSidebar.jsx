@@ -135,12 +135,27 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
             const itemId = isMatch ? item.id : item._id;
             const isSelected = selectedTeamId === itemId;
             
-            if (isMatch) {
-              return (
+              const statusColors = {
+                'NOT_STARTED': { bg: 'bg-white/10', text: 'text-white/50' },
+                'LIVE':        { bg: 'bg-red-500/20', text: 'text-red-400' },
+                'COMPLETED':   { bg: 'bg-[#BFF367]/10', text: 'text-[#BFF367]' },
+              };
+              const statusStyle = statusColors[item.scoringStatus] || statusColors['NOT_STARTED'];
+              if (isMatch) return (
                 <div key={itemId} className="w-full flex flex-col p-3 rounded-[15px] bg-white/[0.02] border border-white/5 mb-2 hover:border-white/10 transition-colors">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-black text-[#55DEE8]">{item.title}</h4>
-                    <span className="text-[10px] font-black text-black bg-[#BFF367] px-2 py-0.5 rounded uppercase">{item.shortId}</span>
+                    <h4 className="font-black text-[#55DEE8] text-sm truncate flex-1 mr-2">{item.name || item.title}</h4>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${statusStyle.bg} ${statusStyle.text}`}>
+                        {item.scoringStatus === 'NOT_STARTED' ? 'SETUP' : item.scoringStatus}
+                      </span>
+                      <span className="text-[10px] font-black text-black bg-[#BFF367] px-2 py-0.5 rounded uppercase">{item.shortId}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 mb-1">
+                    <span className="text-[10px] text-white/30 uppercase font-bold">{item.format}</span>
+                    <span className="text-white/20">·</span>
+                    <span className="text-[10px] text-white/30 uppercase font-bold">{item.ballType}</span>
                   </div>
                   <div className="flex gap-2 mb-3">
                     <div className="flex-1 text-center bg-black/40 rounded-lg py-1 border border-white/5">
@@ -157,7 +172,6 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                   </div>
                 </div>
               );
-            }
 
             return (
               <motion.button
@@ -221,6 +235,10 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
       <StartScoringModal
         isOpen={isStartScoringOpen}
         onClose={() => setIsStartScoringOpen(false)}
+        onSuccess={() => {
+          setIsStartScoringOpen(false);
+          setActiveTab('scoringMatches');
+        }}
       />
     </div>
   );

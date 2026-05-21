@@ -118,6 +118,15 @@ export const computeScoreSnapshot = (scoring, match) => {
     last6Balls: lastBalls,
     batters: activeBatters,
     bowler: currentBowler,
-    result: scoring.status === "COMPLETED" ? "Match Ended" : null
+    result: scoring.status === "COMPLETED" ? "Match Ended" : null,
+    status: match.status,
+    youtubeVideoId: match.youtubeLiveUrl ? extractYouTubeId(match.youtubeLiveUrl) : (match.streamConfig?.youtubeVideoId || null)
   };
 };
+
+function extractYouTubeId(url) {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
