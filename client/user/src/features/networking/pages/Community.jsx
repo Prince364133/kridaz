@@ -6,9 +6,10 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import {
   Heart, MessageCircle, Share2, Plus, Image as ImageIcon, X, MoreVertical, Send,
   Loader2, Trash2, Clock, User as UserIcon, Trophy, Edit, Edit3, Twitter, Facebook,
-  Link as LinkIcon, Eye, ChevronDown, TrendingUp, Target, BarChart3, Users, Zap,
+  Eye, ChevronDown, TrendingUp, Target, BarChart3, Users, Zap,
   ChevronRight, ShieldCheck, Calendar, Mail, ArrowRight, MonitorPlay, FileText,
-  Circle, Bookmark, Smile, Search, Play, Video, Home, PlaySquare, Globe, Hash, Music, ArrowLeft
+  Circle, Bookmark, Smile, Search, Play, Video, Home, PlaySquare, Globe, Hash, Music, ArrowLeft,
+  Instagram, Copy
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
@@ -40,9 +41,19 @@ import ReelItem from "@features/reels/components/ReelItem";
 import { useSocket } from "@context/SocketContext";
 import { uploadFileToR2 } from "@utils/mediaUpload";
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
+
+const getPostShareId = (post) => post?._id || post?.id;
+
+const sharePlatforms = [
+  { id: "native", name: "More", icon: Share2 },
+  { id: "copy", name: "Copy Link", icon: Copy },
+  { id: "whatsapp", name: "WhatsApp", icon: MessageCircle },
+  { id: "instagram", name: "Instagram", icon: Instagram },
+  { id: "facebook", name: "Facebook", icon: Facebook },
+];
 
 const Community = () => {
   const { user, role, isLoggedIn, followingIds } = useSelector((state) => state.auth);
@@ -406,6 +417,7 @@ const Community = () => {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
 
   const [commentInputs, setCommentInputs] = useState({});
+  const [sharePostId, setSharePostId] = useState(null);
 
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -634,12 +646,75 @@ const Community = () => {
     });
   };
 
-  const handleShareToPlatform = (platform, postId) => {
-    const url = `${window.location.origin}${window.location.pathname}?post=${postId}`;
-    if (platform === 'copy') {
-      navigator.clipboard.writeText(url);
-      toast.success("Link copied!");
+  const copyShareLink = async (url, label = "Link copied!") => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(label);
+    } catch (error) {
+      toast.error("Unable to copy link");
     }
+  };
+
+  const handleShareToPlatform = async (platform, postId) => {
+    const url = `${window.location.origin}${window.location.pathname}?post=${postId}`;
+    const text = "Check out this post on Kridaz!";
+    const encodedUrl = encodeURIComponent(url);
+    const encodedText = encodeURIComponent(text);
+    const encodedTextWithUrl = encodeURIComponent(`${text} ${url}`);
+    const openShare = (shareUrl) => window.open(shareUrl, "_blank", "noopener,noreferrer");
+
+    if (platform === "native") {
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: "Kridaz Community", text, url });
+          setSharePostId(null);
+          return;
+        } catch (error) {
+          if (error?.name === "AbortError") return;
+        }
+      }
+      await copyShareLink(url);
+      setSharePostId(null);
+      return;
+    }
+
+    if (platform === "copy") {
+      await copyShareLink(url);
+    } else if (platform === "twitter") {
+      openShare(`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`);
+    } else if (platform === "facebook") {
+      openShare(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`);
+    } else if (platform === "whatsapp") {
+      openShare(`https://api.whatsapp.com/send?text=${encodedTextWithUrl}`);
+    } else if (platform === "linkedin") {
+      openShare(`https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`);
+    } else if (platform === "telegram") {
+      openShare(`https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`);
+    } else if (platform === "threads") {
+      openShare(`https://www.threads.net/intent/post?text=${encodedTextWithUrl}`);
+    } else if (platform === "reddit") {
+      openShare(`https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedText}`);
+    } else if (platform === "pinterest") {
+      openShare(`https://www.pinterest.com/pin/create/button/?url=${encodedUrl}&description=${encodedText}`);
+    } else if (platform === "email") {
+      window.location.href = `mailto:?subject=${encodeURIComponent("Kridaz Community Post")}&body=${encodedTextWithUrl}`;
+    } else if (platform === "sms") {
+      window.location.href = `sms:?&body=${encodedTextWithUrl}`;
+    } else if (platform === "messenger") {
+      await copyShareLink(url, "Link copied for Messenger");
+      openShare("https://www.messenger.com/");
+    } else if (platform === "instagram") {
+      await copyShareLink(url, "Link copied for Instagram");
+      openShare("https://www.instagram.com/");
+    } else if (platform === "snapchat") {
+      await copyShareLink(url, "Link copied for Snapchat");
+      openShare("https://www.snapchat.com/");
+    } else if (platform === "tiktok") {
+      await copyShareLink(url, "Link copied for TikTok");
+      openShare("https://www.tiktok.com/");
+    }
+
+    setSharePostId(null);
   };
 
   return (
@@ -666,7 +741,7 @@ const Community = () => {
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 p-5 border-b border-white/5 bg-[#111]">
-                <Search size={20} className="text-[#84CC16]" />
+                <Search size={20} className="text-[#55DEE8]" />
                 <input
                   type="text"
                   autoFocus
@@ -683,7 +758,7 @@ const Community = () => {
               <div className="max-h-[50vh] overflow-y-auto no-scrollbar">
                 {isSearching ? (
                   <div className="flex justify-center p-12">
-                    <Loader2 size={32} className="text-[#84CC16] animate-spin" />
+                    <Loader2 size={32} className="text-[#55DEE8] animate-spin" />
                   </div>
                 ) : searchResults.length > 0 ? (
                   <div className="p-2 space-y-1">
@@ -703,10 +778,10 @@ const Community = () => {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-[14px] font-bold text-white group-hover:text-[#84CC16] transition-colors truncate">{player.name}</div>
+                          <div className="text-[14px] font-bold text-white group-hover:text-[#55DEE8] transition-colors truncate">{player.name}</div>
                           <div className="text-[12px] font-medium text-white/40 truncate">@{player.username || player.name.toLowerCase().replace(/\s+/g, '')}</div>
                         </div>
-                        <div className="px-3 py-1.5 rounded-full border border-white/10 text-[10px] font-bold text-white/50 group-hover:border-[#84CC16] group-hover:text-[#84CC16] transition-all">
+                        <div className="px-3 py-1.5 rounded-full border border-white/10 text-[10px] font-bold text-white/50 group-hover:border-[#55DEE8] group-hover:text-[#55DEE8] transition-all">
                           View Profile
                         </div>
                       </div>
@@ -741,21 +816,6 @@ const Community = () => {
 
                 {/* Search, Post, and Message Header Row */}
                 <div className="relative z-10 flex items-center gap-3 pb-4">
-                  {/* Shots (Reels) Button */}
-                  <motion.button
-                    onClick={() => handleSetActiveFilter(activeFilter === "Reels" ? "All" : "Reels")}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    title="Shots"
-                    className={`flex items-center justify-center gap-2 shrink-0 px-3.5 py-3 rounded-xl font-bold uppercase text-[11px] tracking-wider border transition-all ${
-                      activeFilter === 'Reels'
-                        ? 'bg-[#84CC16]/10 border-[#84CC16]/40 text-[#84CC16] shadow-[0_0_12px_rgba(132,204,22,0.15)]'
-                        : 'bg-neutral-900 border-white/10 text-white/60 hover:text-white hover:border-white/20'
-                    }`}
-                  >
-                    <PlaySquare size={16} />
-                    <span className="hidden sm:inline">Shots</span>
-                  </motion.button>
 
                   {/* Search input field styled with theme */}
                   <div className="relative flex-1">
@@ -763,7 +823,7 @@ const Community = () => {
                     <input
                       type="text"
                       placeholder="Search community posts or players..."
-                      className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm font-bold text-white outline-none focus:border-[#84CC16]/50 focus:ring-1 focus:ring-[#84CC16]/20 transition-all placeholder:text-white/30"
+                      className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm font-bold text-white outline-none focus:border-[#55DEE8]/50 focus:ring-1 focus:ring-[#55DEE8]/20 transition-all placeholder:text-white/30"
                       value={feedSearchQuery}
                       onChange={(e) => setFeedSearchQuery(e.target.value)}
                     />
@@ -780,25 +840,43 @@ const Community = () => {
                   {/* Post Button */}
                   <motion.button
                     onClick={() => gateInteraction(() => setShowPostModal(true))}
-                    whileHover={{ scale: 1.02, filter: "brightness(1.1)" }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     title="New Post"
-                    className="flex items-center justify-center gap-2 bg-[#84CC16] text-black hover:bg-[#a3e635] px-3.5 py-3 md:px-4 rounded-xl font-bold uppercase text-[12px] tracking-wider transition-colors shrink-0"
+                    className="relative flex items-center justify-center w-11 h-11 rounded-full shrink-0 group z-10"
                   >
-                    <Plus size={16} strokeWidth={3} />
-                    <span className="hidden sm:inline">Post</span>
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-[-1]" viewBox="0 0 100 100">
+                      <defs>
+                        <linearGradient id="post-btn-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop stopColor="#55DEE8" offset="0%" />
+                          <stop stopColor="#BFF367" offset="100%" />
+                        </linearGradient>
+                      </defs>
+                      <circle cx="50" cy="50" r="47" fill="none" stroke="url(#post-btn-grad)" strokeWidth="4" pathLength="100" strokeDasharray="4 6" strokeLinecap="round" />
+                    </svg>
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity z-[-1]" />
+                    <Plus size={20} strokeWidth={2.5} className="relative z-10 text-white group-hover:text-black transition-colors" />
                   </motion.button>
 
                   {/* Message Button */}
                   <motion.button
                     onClick={() => gateInteraction(() => navigate('/messages'))}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     title="Messages"
-                    className="flex items-center justify-center gap-2 bg-neutral-900 hover:bg-neutral-800 border border-white/10 text-white px-3.5 py-3 md:px-4 rounded-xl font-bold uppercase text-[12px] tracking-wider transition-colors shrink-0"
+                    className="relative flex items-center justify-center w-11 h-11 rounded-full shrink-0 group z-10"
                   >
-                    <Send size={14} className="transform rotate-0" />
-                    <span className="hidden sm:inline">Message</span>
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-[-1]" viewBox="0 0 100 100">
+                      <defs>
+                        <linearGradient id="msg-btn-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop stopColor="#55DEE8" offset="0%" />
+                          <stop stopColor="#BFF367" offset="100%" />
+                        </linearGradient>
+                      </defs>
+                      <circle cx="50" cy="50" r="47" fill="none" stroke="url(#msg-btn-grad)" strokeWidth="4" pathLength="100" strokeDasharray="4 6" strokeLinecap="round" />
+                    </svg>
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity z-[-1]" />
+                    <Send size={18} className="relative z-10 text-white group-hover:text-black transition-colors transform rotate-0 -ml-0.5" />
                   </motion.button>
                 </div>
 
@@ -814,11 +892,11 @@ const Community = () => {
                         onClick={() => gateInteraction(() => setShowStoryModal(true))}
                         className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
                       >
-                        <div className="w-[68px] h-[68px] rounded-full border border-dashed border-white/30 flex items-center justify-center group-hover:border-[#84CC16]/50 transition-all relative p-0.5">
+                        <div className="w-[68px] h-[68px] rounded-full border border-dashed border-white/30 flex items-center justify-center group-hover:border-[#55DEE8]/50 transition-all relative p-0.5">
                           <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center overflow-hidden border border-white/10">
                             <img src={user?.profilePicture || "/default-avatar.png"} className="w-full h-full object-cover opacity-60" />
                           </div>
-                          <div className="absolute bottom-0 right-0 w-[22px] h-[22px] bg-[#84CC16] rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
+                          <div className="absolute bottom-0 right-0 w-[22px] h-[22px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
                             <Plus size={12} strokeWidth={4} className="text-black" />
                           </div>
                         </div>
@@ -832,7 +910,7 @@ const Community = () => {
                           onClick={() => { setSelectedStoryGroup(group); setCurrentStoryIndex(0); }}
                           className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
                         >
-                          <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${idx === 0 ? 'bg-[#84CC16]' : 'bg-white/20'}`}>
+                          <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${idx === 0 ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367]' : 'bg-white/20'}`}>
                             <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
                               <div className="w-full h-full rounded-full overflow-hidden bg-[#111]">
                                 {group.stories[0].mediaUrl ? (
@@ -842,7 +920,7 @@ const Community = () => {
                                     className={`w-full h-full object-cover ${(group.stories.some(s => s.status === 'pending' || s.status === 'processing')) ? 'blur-sm opacity-50' : ''}`}
                                   />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#84CC16] font-bold bg-[#111]">
+                                  <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#55DEE8] font-bold bg-[#111]">
                                     {group.stories[0].content?.slice(0, 15)}
                                   </div>
                                 )}
@@ -854,31 +932,13 @@ const Community = () => {
                               </div>
                             )}
                           </div>
-                          <span className="text-[10px] font-bold text-white/80 group-hover:text-[#84CC16] transition-colors truncate max-w-[68px]">
+                          <span className="text-[10px] font-bold text-white/80 group-hover:text-[#55DEE8] transition-colors truncate max-w-[68px]">
                             {group.user?.name?.split(' ')[0] || "Player"}
                           </span>
                         </div>
                       ))}
 
-                      {/* Dummy stories for design parity if feed is empty */}
-                      {stories.length < 5 && [
-                        { name: 'simran.s', live: false },
-                        { name: 'rohit45', live: false },
-                        { name: 'vikash07', live: false },
-                        { name: 'katta_18', live: false },
-                        { name: 'aman.singh', live: false }
-                      ].map((dummy, idx) => (
-                        <div key={idx} className="flex flex-col items-center gap-2.5 shrink-0 cursor-default opacity-40">
-                          <div className="w-[68px] h-[68px] rounded-full p-[2px] bg-[#84CC16]">
-                            <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
-                              <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center">
-                                <UserIcon size={24} className="text-white/20" />
-                              </div>
-                            </div>
-                          </div>
-                          <span className="text-[10px] font-bold text-white/60 truncate max-w-[68px]">{dummy.name}</span>
-                        </div>
-                      ))}
+
                     </div>
                   </div>
                 )}
@@ -893,7 +953,7 @@ const Community = () => {
                           key={filter}
                           onClick={() => handleSetActiveFilter(filter)}
                           className={`px-4 py-2 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border ${activeFilter === filter
-                              ? 'bg-[#84CC16] text-black border-[#84CC16] hover:brightness-110'
+                              ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent hover:brightness-110'
                               : 'bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white'
                             }`}
                         >
@@ -927,6 +987,28 @@ const Community = () => {
 
                     {/* Mobile View Filters Dropdowns */}
                     <div className="flex md:hidden gap-2.5 items-center justify-start">
+                      {/* Mobile Reels Button */}
+                      <button
+                        onClick={() => handleSetActiveFilter(activeFilter === "Reels" ? "All" : "Reels")}
+                        className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-[15px] text-[10px] font-bold uppercase tracking-wider transition-all shrink-0 z-10 group ${
+                          activeFilter === 'Reels' 
+                            ? 'text-[#55DEE8] bg-[#55DEE8]/10' 
+                            : 'text-white/70 hover:text-white'
+                        }`}
+                      >
+                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-[-1]">
+                          <defs>
+                            <linearGradient id="mob-reels-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop stopColor="#55DEE8" offset="0%" />
+                              <stop stopColor="#BFF367" offset="100%" />
+                            </linearGradient>
+                          </defs>
+                          <rect x="1" y="1" width="calc(100% - 2px)" height="calc(100% - 2px)" rx="14" fill="none" stroke="url(#mob-reels-grad)" strokeWidth="1.5" strokeDasharray="3 4" strokeLinecap="round" className={`transition-opacity ${activeFilter === 'Reels' ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`} />
+                        </svg>
+                        <PlaySquare size={12} className={activeFilter === 'Reels' ? 'text-[#55DEE8]' : 'text-white/70 group-hover:text-white transition-colors'} />
+                        Reels
+                      </button>
+
                       {/* Features Dropdown */}
                       <div className="relative w-[115px]">
                         <select
@@ -974,10 +1056,10 @@ const Community = () => {
                 {debouncedSearchQuery.trim() !== "" && (
                   <div className="flex flex-col gap-3 bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-xs font-black uppercase tracking-widest text-[#84CC16]" style={HEADING_STYLE}>
+                      <h3 className="text-xs font-black uppercase tracking-widest text-[#55DEE8]" style={HEADING_STYLE}>
                         PLAYERS MATCHING "{debouncedSearchQuery}"
                       </h3>
-                      {playersLoading && <Loader2 size={16} className="text-[#84CC16] animate-spin" />}
+                      {playersLoading && <Loader2 size={16} className="text-[#55DEE8] animate-spin" />}
                     </div>
 
                     {loadedPlayers.length === 0 && !playersLoading ? (
@@ -994,7 +1076,7 @@ const Community = () => {
                           <div 
                             key={player.id}
                             onClick={() => navigate(`/profile/${player.id}`)}
-                            className="flex items-center gap-3 bg-neutral-900/50 hover:bg-neutral-900 border border-white/5 hover:border-[#84CC16]/30 p-3 rounded-xl cursor-pointer transition-all min-w-[220px] max-w-[280px] group shrink-0"
+                            className="flex items-center gap-3 bg-neutral-900/50 hover:bg-neutral-900 border border-white/5 hover:border-[#55DEE8]/30 p-3 rounded-xl cursor-pointer transition-all min-w-[220px] max-w-[280px] group shrink-0"
                           >
                             <div className="w-[42px] h-[42px] rounded-full bg-[#111] border border-white/10 overflow-hidden shrink-0">
                               <img 
@@ -1004,14 +1086,14 @@ const Community = () => {
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="text-[13px] font-bold text-white group-hover:text-[#84CC16] transition-colors truncate">
+                              <div className="text-[13px] font-bold text-white group-hover:text-[#55DEE8] transition-colors truncate">
                                 {player.name}
                               </div>
                               <div className="text-[11px] font-medium text-white/40 truncate">
                                 @{player.username || player.name.toLowerCase().replace(/\s+/g, '')}
                               </div>
                               {(player.city || player.state) && (
-                                <div className="text-[9px] font-semibold text-[#84CC16] mt-0.5 uppercase tracking-wider truncate">
+                                <div className="text-[9px] font-semibold text-[#55DEE8] mt-0.5 uppercase tracking-wider truncate">
                                   {player.city}{player.city && player.state ? ', ' : ''}{player.state}
                                 </div>
                               )}
@@ -1020,7 +1102,7 @@ const Community = () => {
                         ))}
                         {hasMorePlayers && playersLoading && (
                           <div className="flex items-center justify-center px-6 shrink-0 h-full">
-                            <Loader2 size={24} className="text-[#84CC16] animate-spin" />
+                            <Loader2 size={24} className="text-[#55DEE8] animate-spin" />
                           </div>
                         )}
                       </div>
@@ -1031,7 +1113,7 @@ const Community = () => {
                 {/* Posts Matching Heading */}
                 {debouncedSearchQuery.trim() !== "" && (
                   <div className="pt-2">
-                    <h3 className="text-xs font-black uppercase tracking-widest text-[#84CC16]" style={HEADING_STYLE}>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-[#55DEE8]" style={HEADING_STYLE}>
                       POSTS MATCHING "{debouncedSearchQuery}"
                     </h3>
                   </div>
@@ -1051,7 +1133,7 @@ const Community = () => {
                     <ArrowLeft size={14} strokeWidth={2.5} />
                     <span>Community</span>
                   </button>
-                  <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#84CC16]/20 text-[#84CC16] px-3 py-2 rounded-xl text-xs font-black uppercase tracking-widest">
+                  <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#55DEE8]/20 text-[#55DEE8] px-3 py-2 rounded-xl text-xs font-black uppercase tracking-widest">
                     <PlaySquare size={13} />
                     <span>Shots</span>
                   </div>
@@ -1069,7 +1151,7 @@ const Community = () => {
                 >
                   {reelsLoading ? (
                     <div className="h-full flex items-center justify-center bg-black">
-                      <Loader2 size={36} className="text-[#84CC16] animate-spin" />
+                      <Loader2 size={36} className="text-[#55DEE8] animate-spin" />
                     </div>
                   ) : reels.length > 0 ? reels.map((reel, index) => (
                     <div key={reel._id} className="w-full h-full snap-start snap-always relative bg-black overflow-hidden flex-shrink-0">
@@ -1087,14 +1169,14 @@ const Community = () => {
                   )}
                   {reelsFetching && (
                     <div className="h-20 flex items-center justify-center snap-start">
-                      <Loader2 size={24} className="text-[#84CC16] animate-spin" />
+                      <Loader2 size={24} className="text-[#55DEE8] animate-spin" />
                     </div>
                   )}
                 </div>
               </div>
             ) : postsLoading ? (
               <div className="py-20 flex flex-col items-center justify-center gap-4">
-                <Loader2 size={32} className="text-[#84CC16] animate-spin" />
+                <Loader2 size={32} className="text-[#55DEE8] animate-spin" />
               </div>
             ) : loadedPosts.length === 0 ? (
               <div className="bg-[#0A0A0A] border border-white/5 rounded-[15px] p-16 text-center text-white/30 font-bold uppercase tracking-widest text-sm">
@@ -1114,7 +1196,7 @@ const Community = () => {
                         <div>
                           <div className="flex items-center gap-1.5">
                             <span className="text-[13px] font-bold">{post.adminId?.name || "Player"}</span>
-                            <ShieldCheck size={14} className="text-[#84CC16]" />
+                            <ShieldCheck size={14} className="text-[#55DEE8]" />
                           </div>
                           <div className="text-[11px] font-bold text-white/40 mt-0.5">
                             2h ago
@@ -1154,7 +1236,7 @@ const Community = () => {
                                   cx="48"
                                   cy="48"
                                   r="40"
-                                  stroke="#84CC16"
+                                  stroke="#55DEE8"
                                   strokeWidth="6"
                                   fill="transparent"
                                   strokeDasharray={2 * Math.PI * 40}
@@ -1167,13 +1249,13 @@ const Community = () => {
                               </div>
                             </div>
                             <div className="mt-4 flex flex-col items-center gap-1">
-                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#84CC16] animate-pulse">
+                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#55DEE8] animate-pulse">
                                 {post.status === 'processing' ? 'Optimizing Media' : 'Preparing Upload'}
                               </span>
                               <div className="flex gap-1">
-                                <span className="w-1 h-1 bg-[#84CC16] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                                <span className="w-1 h-1 bg-[#84CC16] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                                <span className="w-1 h-1 bg-[#84CC16] rounded-full animate-bounce"></span>
+                                <span className="w-1 h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                <span className="w-1 h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                <span className="w-1 h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full animate-bounce"></span>
                               </div>
                             </div>
                           </div>
@@ -1192,14 +1274,26 @@ const Community = () => {
                     <div className="flex items-center justify-between pt-1">
                       <div className="flex items-center gap-5">
                         <button onClick={() => handleLike(post._id)} className="flex items-center gap-2 group">
-                          <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l._id || l) === user?._id) ? 'fill-[#84CC16] text-[#84CC16]' : 'text-white/70 group-hover:text-red-500'}`} />
+                          <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l._id || l) === user?._id) ? 'fill-[#55DEE8] text-[#55DEE8]' : 'text-white/70 group-hover:text-red-500'}`} />
                           <span className="text-[12px] font-bold text-white">{post.likes?.length || 0}</span>
                         </button>
                         <button className="flex items-center gap-2 group">
                           <MessageCircle size={20} className="text-white/70 group-hover:text-white transition-colors" />
                           <span className="text-[12px] font-bold text-white">{post.comments?.length || 0}</span>
                         </button>
-                        <button onClick={() => handleShareToPlatform('copy', post._id)} className="flex items-center gap-2 group">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const postId = getPostShareId(post);
+                            if (!postId) {
+                              toast.error("Unable to share this post");
+                              return;
+                            }
+                            setSharePostId(postId);
+                          }}
+                          className="flex items-center gap-2 group"
+                        >
                           <Send size={18} className="text-white/70 group-hover:text-white transition-colors" />
                           <span className="text-[12px] font-bold text-white">Share</span>
                         </button>
@@ -1252,7 +1346,7 @@ const Community = () => {
                 ))}
                 {hasMorePosts && postsLoading && (
                   <div className="py-6 flex justify-center">
-                    <Loader2 size={24} className="text-[#84CC16] animate-spin" />
+                    <Loader2 size={24} className="text-[#55DEE8] animate-spin" />
                   </div>
                 )}
               </div>
@@ -1265,6 +1359,69 @@ const Community = () => {
       </div>
 
       <AnimatePresence>
+        {/* Share Modal */}
+        {sharePostId && (
+          <div className="fixed inset-0 z-[9999] flex items-end justify-center p-0 sm:items-center sm:p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSharePostId(null)}
+              className="absolute inset-0 bg-[#030303]/75 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 34, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 24, scale: 0.96 }}
+              transition={{ type: "spring", damping: 24, stiffness: 260 }}
+              className="relative z-20 w-full max-h-[86vh] overflow-hidden rounded-t-[24px] border border-white/10 bg-neutral-950/95 shadow-[0_25px_80px_rgba(0,0,0,0.85)] backdrop-blur-2xl sm:max-w-xl sm:rounded-[22px]"
+              style={HEADING_STYLE}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative flex items-start justify-between gap-4 border-b border-white/5 px-5 py-4 sm:px-6">
+                <div>
+                  <h3 className="text-lg font-black text-white" style={HEADING_STYLE}>Share post</h3>
+                  <p className="mt-1 text-[11px] font-medium text-white/45">
+                    Choose a platform to send this community post.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSharePostId(null)}
+                  className="rounded-full p-2 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+                  aria-label="Close share options"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="relative px-5 py-5 sm:px-6">
+                <div className="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-5 sm:gap-x-4">
+                  {sharePlatforms.map((app) => {
+                    const Icon = app.icon;
+
+                    return (
+                      <div key={app.id} className="flex min-w-0 flex-col items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleShareToPlatform(app.id, sharePostId)}
+                          className="flex h-14 w-14 items-center justify-center rounded-full border border-[#55DEE8]/25 bg-gradient-to-br from-[#55DEE8]/10 to-[#BFF367]/10 text-white/80 shadow-[0_0_18px_rgba(85,222,232,0.08)] transition-all hover:border-[#BFF367]/50 hover:from-[#55DEE8]/20 hover:to-[#BFF367]/20 hover:text-[#BFF367] active:scale-95"
+                          aria-label={`Share to ${app.name}`}
+                        >
+                          <Icon size={23} strokeWidth={2.2} />
+                        </button>
+                        <span className="w-full truncate text-center text-[10px] font-bold text-white/60">
+                          {app.name}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
         {/* Post Modal */}
         {showPostModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ perspective: "1200px" }}>
