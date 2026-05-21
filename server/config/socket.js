@@ -142,7 +142,15 @@ const socketConfig = (server) => {
       const lockKey = `kridaz:scoring_lock:${matchId}`;
       const currentLock = await redis.get(lockKey);
       
-      if (!currentLock || currentLock === socket.id) {
+      let isStale = false;
+      if (currentLock && currentLock !== socket.id) {
+        const sockets = await io.in(currentLock).fetchSockets();
+        if (sockets.length === 0) {
+          isStale = true; // The socket that held the lock is no longer connected
+        }
+      }
+      
+      if (!currentLock || currentLock === socket.id || isStale) {
         // Grant lock
         await redis.set(lockKey, socket.id, 'EX', 10800); // 3 hours
         socket.scoringMatchId = matchId;

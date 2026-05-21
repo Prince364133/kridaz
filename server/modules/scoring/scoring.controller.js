@@ -363,3 +363,20 @@ export const getLiveScore = async (req, res) => {
     handleControllerError(res, error);
   }
 };
+
+/**
+ * Permanently delete a match
+ */
+export const deleteMatch = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const { password } = req.body;
+    
+    await scoringService.deleteMatch(matchId, password, req.user.id);
+
+    return res.status(200).json({ success: true, message: 'Match deleted successfully' });
+  } catch (error) {
+    logger.error("[Scoring] Delete Match Controller Error:", error);
+    handleControllerError(res, error);
+  }
+};

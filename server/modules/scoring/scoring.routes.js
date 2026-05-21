@@ -20,7 +20,8 @@ import {
   getMyScoringGames,
   getScoringGameById,
   authenticateScoringApp,
-  notifyPlayers
+  notifyPlayers,
+  deleteMatch
 } from "./scoring.controller.js";
 import verifyAuth from "../../middleware/jwt/auth.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
@@ -391,5 +392,17 @@ router.post("/set-players", setPlayers);
  *         description: Action reverted
  */
 router.post("/undo", undoLastBall);
+
+/**
+ * @swagger
+ * /scoring/match/{matchId}:
+ *   delete:
+ *     summary: Delete match permanently
+ *     description: Permanently deletes a match if the correct scoring password is provided.
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ */
+router.delete("/match/:matchId", verifyAuth, deleteMatch);
 
 export default router;
