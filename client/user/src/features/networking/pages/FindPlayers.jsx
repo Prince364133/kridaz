@@ -48,22 +48,24 @@ const MOCK_PLAYERS = [
   { _id: "m4", name: "Simulated Rahul", latOffset: -0.015, lngOffset: -0.015, sport: "Cricket" }
 ];
 
-const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvatarClick, currentUser, navigate, gateInteraction }) => {
-  const shapes = [
-    "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
-    "circle(50% at 50% 50%)",
-    "polygon(50% 0%, 100% 100%, 0% 100%)",
-    "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)"
-  ];
-  const shape = shapes[rank % shapes.length];
-
+const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClick, currentUser, navigate, gateInteraction }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-black rounded-[16px] border border-[#55DEE8]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-[#55DEE8]/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+      className="relative bg-black rounded-[16px] border border-[#55DEE8]/20 overflow-hidden flex flex-col h-[360px] p-1 group transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
     >
+      <div
+        className="pointer-events-none absolute inset-0 rounded-[16px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          padding: 1,
+          background: GRAD,
+          WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+          WebkitMaskComposite: "xor",
+          maskComposite: "exclude"
+        }}
+      />
       <div className="flex justify-end items-start p-4 absolute top-0 left-0 right-0 z-20">
         <div className="p-1.5 bg-[#55DEE8]/10 rounded-lg border border-[#55DEE8]/20">
           <ShieldCheck size={14} className="text-[#55DEE8]" />
@@ -71,27 +73,12 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
       </div>
 
       <div className="h-40 relative mt-2 flex items-center justify-center overflow-hidden">
-        <div 
-          className="absolute w-52 h-52 bg-[#55DEE8]/10 border border-[#55DEE8]/30 blur-sm opacity-50 group-hover:opacity-80 transition-opacity duration-700"
-          style={{ clipPath: shape }}
-        />
-        <div 
-          className="absolute w-48 h-48 border-2 border-[#55DEE8]/40"
-          style={{ clipPath: shape }}
-        />
         <div className="relative w-full h-full flex items-center justify-center z-10 pointer-events-none">
           <img 
             src={player.profilePicture || "https://pngimg.com/d/cricket_PNG102.png"} 
             alt="" 
             className="h-[95%] w-[90%] object-contain filter drop-shadow-[0_10px_30px_rgba(85,222,232,0.4)] group-hover:scale-110 transition-transform duration-700 select-none"
           />
-        </div>
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-          <div className="bg-black border-2 border-[#55DEE8] w-12 h-14 flex items-center justify-center" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
-            <span className="text-[#55DEE8] font-black text-sm uppercase">
-              {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
-            </span>
-          </div>
         </div>
       </div>
 
@@ -1031,11 +1018,10 @@ const FindPlayers = () => {
             </div>
           ) : activeTab === "players" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {players.map((player, idx) => (
+              {players.map((player) => (
                 <div key={player.id || player._id} id={`player-card-${player.id || player._id}`} className="transition-all duration-500">
                   <PlayerCard 
                     player={player} 
-                    rank={idx}
                     followingIds={followingIds}
                     handleFollowToggle={handleFollowToggle}
                     handleAvatarClick={handleAvatarClick}

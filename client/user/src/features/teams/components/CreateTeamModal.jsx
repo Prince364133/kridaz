@@ -1,80 +1,149 @@
-import React, { useState, useRef } from 'react';
+/* eslint-disable react/prop-types */
+import { useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { toast } from 'react-hot-toast';
+import {
+  ArrowLeft,
+  ArrowRight,
+  ChevronDown,
+  Loader2,
+  Map,
+  MapPin,
+  Shield,
+  Sparkles,
+  Upload,
+  Users,
+  X
+} from 'lucide-react';
 import { useCreateTeamMutation } from '@redux/api/teamApi';
 import { useUploadFileMutation } from '@redux/api/uploadApi';
-import { X, Camera, Loader2, Users, Upload, Trash2, MapPin, Map, Shield, Phone, MessageSquare, Sparkles } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'react-hot-toast';
 
 const STATE_CITIES_MAP = {
-  'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane'],
-  'Karnataka': ['Bengaluru', 'Mysore', 'Hubli', 'Mangalore'],
-  'Delhi': ['New Delhi', 'Noida', 'Gurgaon', 'Faridabad'],
+  Maharashtra: ['Mumbai', 'Pune', 'Nagpur', 'Thane'],
+  Karnataka: ['Bengaluru', 'Mysore', 'Hubli', 'Mangalore'],
+  Delhi: ['New Delhi', 'Noida', 'Gurgaon', 'Faridabad'],
   'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Trichy'],
-  'Telangana': ['Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar']
+  Telangana: ['Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar']
 };
+
+const GRADIENT = 'linear-gradient(90deg, #3ec6c1 0%, #8bc34a 100%)';
+const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
+const BODY_STYLE = { fontFamily: "'Inter', sans-serif" };
+
+const initialFormData = {
+  name: '',
+  description: '',
+  sport: 'CRICKET',
+  state: '',
+  city: '',
+  captainName: '',
+  captainPhone: '',
+  image: ''
+};
+
+const stepVariants = {
+  enter: (direction) => ({
+    opacity: 0,
+    x: direction > 0 ? 48 : -48
+  }),
+  center: {
+    opacity: 1,
+    x: 0
+  },
+  exit: (direction) => ({
+    opacity: 0,
+    x: direction > 0 ? -48 : 48
+  })
+};
+
+const FieldLabel = ({ children, right }) => (
+  <div className="flex items-center justify-between px-1">
+    <label className="text-[10px] font-black uppercase tracking-[0.18em] text-white/45" style={BODY_STYLE}>
+      {children}
+    </label>
+    {right}
+  </div>
+);
+
+const InputShell = ({ icon: Icon, children }) => (
+  <div className="group relative">
+    {Icon && (
+      <Icon
+        size={16}
+        className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/[0.22] transition-colors duration-[250ms] group-focus-within:text-[#3ec6c1]"
+      />
+    )}
+    {children}
+  </div>
+);
+
+const fieldClass =
+  'h-12 w-full rounded-2xl border border-white/[0.08] bg-white/[0.035] text-sm font-semibold text-white outline-none transition-all duration-[250ms] placeholder:text-white/25 focus:border-[#3ec6c1]/60 focus:bg-white/[0.055] focus:shadow-[0_0_22px_rgba(62,198,193,0.12)]';
 
 const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
   const [createTeam, { isLoading: isCreating }] = useCreateTeamMutation();
   const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation();
   const fileInputRef = useRef(null);
-  const textareaRef = useRef(null);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    sport: 'CRICKET',
-    state: '',
-    city: '',
-    captainName: '',
-    captainPhone: '',
-    image: ''
-  });
-
+  const [step, setStep] = useState(1);
+  const [direction, setDirection] = useState(1);
   const [preview, setPreview] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isGeneratingEmblem, setIsGeneratingEmblem] = useState(false);
+  const [isGeneratingLogo, setIsGeneratingLogo] = useState(false);
   const [citiesList, setCitiesList] = useState([]);
+  const [formData, setFormData] = useState(initialFormData);
+
+  const canGoNext = Boolean(formData.name.trim() && formData.sport && formData.state && formData.city);
+  const isBusy = isCreating || isUploading || isGeneratingLogo;
+  const descriptionCount = formData.description.length;
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleStateChange = (e) => {
     const selectedState = e.target.value;
     const cities = STATE_CITIES_MAP[selectedState] || [];
+
     setCitiesList(cities);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       state: selectedState,
-      city: cities[0] || ''
+      city: ''
     }));
   };
 
-  const handleTextareaChange = (e) => {
-    handleChange(e);
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
+  const resetModal = () => {
+    setStep(1);
+    setDirection(1);
+    setPreview(null);
+    setIsGeneratingLogo(false);
+    setCitiesList([]);
+    setFormData(initialFormData);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleClose = () => {
+    if (isBusy) return;
+    onClose();
   };
 
   const uploadFileHelper = async (file) => {
     if (!file) return;
+
     if (file.size > 5 * 1024 * 1024) {
       toast.error('File size exceeds 5MB limit');
       return;
     }
-    
+
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result);
-    };
+    reader.onloadend = () => setPreview(reader.result);
     reader.readAsDataURL(file);
 
     try {
       const response = await uploadFile(file).unwrap();
       if (response.success) {
-        setFormData(prev => ({ ...prev, image: response.url }));
+        setFormData((prev) => ({ ...prev, image: response.url }));
         toast.success('Logo uploaded successfully');
       }
     } catch (err) {
@@ -84,520 +153,497 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    await uploadFileHelper(file);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
+    await uploadFileHelper(e.target.files[0]);
   };
 
   const handleDrop = async (e) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      await uploadFileHelper(file);
-    }
+    await uploadFileHelper(e.dataTransfer.files[0]);
   };
 
-  const handleRemoveLogo = (e) => {
-    e.stopPropagation();
-    setPreview(null);
-    setFormData(prev => ({ ...prev, image: '' }));
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    toast.success('Logo removed');
-  };
-
-  const generateEsportsEmblem = async (e) => {
-    e.stopPropagation();
-    if (!formData.name) {
-      toast.error('Please type a Team Name first to generate an emblem');
+  const generateRandomLogo = async () => {
+    const teamName = formData.name.trim();
+    if (!teamName) {
+      toast.error('Enter a team name first');
       return;
     }
 
-    setIsGeneratingEmblem(true);
-    const loadingToast = toast.loading('Forging Emblem...');
+    setIsGeneratingLogo(true);
 
     try {
       const canvas = document.createElement('canvas');
-      canvas.width = 512;
-      canvas.height = 512;
+      canvas.width = 720;
+      canvas.height = 720;
       const ctx = canvas.getContext('2d');
+      const initials = teamName
+        .split(/\s+/)
+        .slice(0, 3)
+        .map((word) => word[0])
+        .join('')
+        .toUpperCase();
+      const accentSets = [
+        ['#3ec6c1', '#8bc34a'],
+        ['#35bfb9', '#94c94f'],
+        ['#46d2cb', '#7eb83f'],
+        ['#2fb3ae', '#a0d65a']
+      ];
+      const [accentA, accentB] = accentSets[Math.floor(Math.random() * accentSets.length)];
+      const bgGlowX = 360;
+      const bgGlowY = 360;
 
-      // 1. Cyberpunk backdrop glow
-      ctx.fillStyle = '#0a0a0a';
-      ctx.fillRect(0, 0, 512, 512);
+      ctx.fillStyle = '#050505';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const radialGlow = ctx.createRadialGradient(256, 256, 40, 256, 256, 240);
-      radialGlow.addColorStop(0, 'rgba(85, 222, 232, 0.18)');
-      radialGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = radialGlow;
-      ctx.fillRect(0, 0, 512, 512);
+      const glow = ctx.createRadialGradient(bgGlowX, bgGlowY, 30, bgGlowX, bgGlowY, 420);
+      glow.addColorStop(0, `${accentA}55`);
+      glow.addColorStop(0.35, `${accentB}22`);
+      glow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 2. Shield Polygon
+      ctx.save();
+      ctx.translate(360, 360);
       ctx.beginPath();
-      ctx.moveTo(256, 40);
-      ctx.lineTo(440, 120);
-      ctx.lineTo(400, 360);
-      ctx.lineTo(256, 470);
-      ctx.lineTo(112, 360);
-      ctx.lineTo(72, 120);
+      ctx.moveTo(0, -260);
+      ctx.lineTo(210, -120);
+      ctx.lineTo(175, 170);
+      ctx.lineTo(0, 275);
+      ctx.lineTo(-175, 170);
+      ctx.lineTo(-210, -120);
       ctx.closePath();
-
-      ctx.fillStyle = '#121212';
+      ctx.fillStyle = 'rgba(12,12,14,0.96)';
       ctx.fill();
 
-      // Carbon texture lines
-      ctx.save();
-      ctx.clip();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.015)';
-      ctx.lineWidth = 3;
-      for (let y = 0; y < 512; y += 12) {
+      const borderGradient = ctx.createLinearGradient(-230, -230, 230, 230);
+      borderGradient.addColorStop(0, accentA);
+      borderGradient.addColorStop(1, accentB);
+      ctx.lineWidth = 16;
+      ctx.strokeStyle = borderGradient;
+      ctx.shadowColor = accentA;
+      ctx.shadowBlur = 22;
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(255,255,255,0.045)';
+      ctx.lineWidth = 2;
+      for (let line = -260; line <= 260; line += 28) {
         ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(512, y);
+        ctx.moveTo(-240, line);
+        ctx.lineTo(240, line + 70);
         ctx.stroke();
       }
-      ctx.restore();
 
-      // 3. Cyber Gradient border
-      const gradient = ctx.createLinearGradient(0, 40, 512, 470);
-      gradient.addColorStop(0, '#55DEE8');
-      gradient.addColorStop(1, '#BFF367');
-
-      ctx.beginPath();
-      ctx.moveTo(256, 40);
-      ctx.lineTo(440, 120);
-      ctx.lineTo(400, 360);
-      ctx.lineTo(256, 470);
-      ctx.lineTo(112, 360);
-      ctx.lineTo(72, 120);
-      ctx.closePath();
-
-      ctx.strokeStyle = gradient;
-      ctx.lineWidth = 10;
-      ctx.lineJoin = 'round';
-      ctx.stroke();
-
-      // Target decals
-      ctx.strokeStyle = 'rgba(85, 222, 232, 0.3)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(256, 20);
-      ctx.lineTo(256, 48);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(40, 256);
-      ctx.lineTo(65, 256);
-      ctx.moveTo(447, 256);
-      ctx.lineTo(472, 256);
-      ctx.stroke();
-
-      // 4. Draw Initials
-      const words = formData.name.trim().split(/\s+/);
-      const initials = words.slice(0, 3).map(w => w[0]).join('').toUpperCase();
-
-      ctx.shadowColor = '#55DEE8';
-      ctx.shadowBlur = 12;
+      ctx.shadowColor = accentA;
+      ctx.shadowBlur = 24;
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'italic 900 110px "Space Mono", "Bebas Neue", sans-serif';
+      ctx.font = '900 148px "Open Sans", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(initials || 'K', 256, 230);
+      ctx.fillText(initials || 'K', 0, -22);
 
-      // Reset shadow
       ctx.shadowBlur = 0;
+      ctx.fillStyle = borderGradient;
+      ctx.font = '900 30px "Inter", sans-serif';
+      ctx.fillText(formData.sport || 'TEAM', 0, 128);
+      ctx.restore();
 
-      // Draw active sport name banner
-      ctx.fillStyle = gradient;
-      ctx.font = 'black 22px "Inter", sans-serif';
-      ctx.fillText(formData.sport || 'TEAM', 256, 310);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('Logo generation failed');
 
-      // Draw bottom squads label
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-      ctx.fillRect(140, 355, 232, 36);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-      ctx.strokeRect(140, 355, 232, 36);
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 12px "Inter", sans-serif';
-      const cityLabel = formData.city ? formData.city.toUpperCase().slice(0, 16) : 'SQUAD';
-      ctx.fillText(cityLabel, 256, 373);
-
-      // 5. Convert & Upload
-      canvas.toBlob(async (blob) => {
-        const file = new File([blob], `${formData.name.toLowerCase().replace(/\s+/g, '_')}_logo.png`, { type: 'image/png' });
-        await uploadFileHelper(file);
-        setIsGeneratingEmblem(false);
-        toast.dismiss(loadingToast);
-        toast.success('Dynamic Esports Emblem generated successfully!');
-      }, 'image/png');
-
+      const safeName = teamName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'team';
+      const file = new File([blob], `${safeName}-generated-logo.png`, { type: 'image/png' });
+      await uploadFileHelper(file);
+      toast.success('Random logo generated');
     } catch (err) {
-      console.error(err);
-      setIsGeneratingEmblem(false);
-      toast.dismiss(loadingToast);
-      toast.error('Failed to generate emblem');
+      toast.error('Failed to generate logo');
+    } finally {
+      setIsGeneratingLogo(false);
     }
+  };
+
+  const goNext = () => {
+    if (!canGoNext || isBusy) return;
+    setDirection(1);
+    setStep(2);
+  };
+
+  const goBack = () => {
+    if (isBusy) return;
+    setDirection(-1);
+    setStep(1);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name) return toast.error('Team name is required');
-    
+    if (!canGoNext) {
+      toast.error('Complete basic team information first');
+      setDirection(-1);
+      setStep(1);
+      return;
+    }
+
     try {
       const response = await createTeam({
         ...formData,
         type: 'MY_TEAM'
       }).unwrap();
+
       toast.success('Team created successfully!');
       if (onSuccess) onSuccess(response.team);
       onClose();
-      setFormData({
-        name: '',
-        description: '',
-        sport: 'CRICKET',
-        state: '',
-        city: '',
-        captainName: '',
-        captainPhone: '',
-        image: ''
-      });
-      setPreview(null);
+      resetModal();
     } catch (err) {
       toast.error(err.data?.message || 'Failed to create team');
     }
   };
 
-  const isSubmitDisabled = !formData.name || isCreating || isUploading || isGeneratingEmblem;
-
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={resetModal}>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto">
-          {/* Backdrop */}
-          <motion.div 
+        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-[#050505] p-4">
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/85 backdrop-blur-md"
+            onClick={handleClose}
+            className="fixed inset-0 bg-black/75 backdrop-blur-lg"
           />
-          
-          {/* Modal Container */}
-          <motion.div 
-            initial={{ scale: 0.95, opacity: 0, y: 15 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 15 }}
-            transition={{ type: "spring", duration: 0.5, bounce: 0.2 }}
-            className="relative w-full max-w-lg bg-[#0a0a0a]/90 border border-white/10 rounded-[15px] overflow-hidden shadow-[0_0_50px_rgba(85,222,232,0.1)] backdrop-blur-2xl z-10 my-4"
+          <div className="pointer-events-none fixed -left-24 top-12 h-64 w-64 rounded-full bg-[#3ec6c1]/12 blur-[90px]" />
+          <div className="pointer-events-none fixed -right-24 bottom-10 h-72 w-72 rounded-full bg-[#8bc34a]/10 blur-[95px]" />
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 18 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 18 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            className="relative z-10 my-4 w-full max-w-lg overflow-hidden rounded-[28px] border border-white/[0.06] bg-[#0b0b0c]/82 shadow-[0_0_55px_rgba(62,198,193,0.16),0_28px_90px_rgba(0,0,0,0.55)] backdrop-blur-2xl"
+            style={{ maxWidth: 520 }}
           >
-            {/* Header */}
-            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-              <div>
-                <h3 className="text-lg font-bold text-white tracking-tight" style={{ fontFamily: "'Open Sans', sans-serif" }}>
-                  Create Team
-                </h3>
-                <p className="text-[11px] text-white/40 font-medium tracking-wide mt-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  Build your squad and compete with others
-                </p>
-              </div>
-              <button 
-                onClick={onClose} 
-                className="w-9 h-9 rounded-[15px] bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 border border-white/5 transition-all hover:shadow-[0_0_15px_rgba(85,222,232,0.3)] hover:border-[#55DEE8]/30 duration-300"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
-              {/* Integrated Logo Upload Area */}
-              <div className="space-y-1.5">
-                <div className="flex justify-between items-center px-1">
-                  <label className="text-[9px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Team Logo
-                  </label>
-                  {formData.name && (
-                    <button
-                      type="button"
-                      disabled={isGeneratingEmblem || isUploading}
-                      onClick={generateEsportsEmblem}
-                      className="text-[9px] font-black text-[#55DEE8] hover:text-[#BFF367] disabled:text-white/20 uppercase tracking-wider flex items-center gap-1 transition-all duration-200 hover:scale-105 active:scale-95 disabled:pointer-events-none hover:shadow-[0_0_8px_rgba(85,222,232,0.4)]"
-                    >
-                      <Sparkles size={10} className="animate-pulse" /> Generate Esports Emblem
-                    </button>
-                  )}
+            <div
+              className="pointer-events-none absolute inset-0 rounded-[28px]"
+              style={{
+                padding: 1,
+                background: GRADIENT,
+                opacity: 0.32,
+                WebkitMask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
+                WebkitMaskComposite: 'xor',
+                maskComposite: 'exclude'
+              }}
+            />
+            <div className="relative z-10 border-b border-white/[0.06] bg-white/[0.025] px-6 py-5 sm:px-7">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-[22px] font-black uppercase tracking-tight text-white" style={HEADING_STYLE}>
+                    {step === 1 ? 'CREATE TEAM' : 'TEAM DETAILS'}
+                  </h2>
+                  <p className="mt-1 text-sm font-medium text-white/45" style={BODY_STYLE}>
+                    {step === 1 ? 'Build your squad and compete with others' : 'Add more information about your squad'}
+                  </p>
                 </div>
-                <div 
-                  onClick={() => fileInputRef.current?.click()}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  className={`relative h-24 rounded-[15px] bg-white/[0.02] border border-dashed flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all duration-300 group ${
-                    isDragging 
-                      ? 'border-[#55DEE8] bg-[#55DEE8]/5 shadow-[0_0_20px_rgba(85,222,232,0.15)]' 
-                      : 'border-white/10 hover:border-[#55DEE8]/40 hover:bg-white/[0.04] hover:shadow-[0_0_15px_rgba(85,222,232,0.05)]'
-                  }`}
-                >
-                  <input 
-                    type="file" 
-                    ref={fileInputRef}
-                    className="hidden" 
-                    accept="image/*"
-                    onChange={handleFileChange}
-                  />
-
-                  {preview ? (
-                    <div className="w-full h-full relative group/preview flex items-center justify-center">
-                      <img src={preview} alt="Team logo" className="w-full h-full object-contain p-2" />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center duration-300">
-                        <button 
-                          type="button"
-                          onClick={handleRemoveLogo}
-                          className="p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-[15px] shadow-lg transition-transform hover:scale-105 active:scale-95 duration-200"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  ) : isUploading || isGeneratingEmblem ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <Loader2 className="text-[#55DEE8] animate-spin" size={24} />
-                      <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider animate-pulse" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        {isGeneratingEmblem ? 'Forging Emblem...' : 'Uploading Logo...'}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center text-center p-3">
-                      <div className="w-8 h-8 rounded-[15px] bg-white/5 flex items-center justify-center mb-1 group-hover:scale-105 group-hover:bg-[#55DEE8]/10 group-hover:text-[#55DEE8] transition-all duration-300">
-                        <Upload size={14} className="text-white/40 group-hover:text-[#55DEE8] transition-colors" />
-                      </div>
-                      <span className="text-[11px] font-bold text-white/80 tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Upload Team Logo
-                      </span>
-                      <span className="text-[8px] text-white/30 font-medium uppercase tracking-widest mt-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        PNG, JPG up to 5MB
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* ROW 1: Team Name & Sport */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Team Name */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center px-1">
-                    <label className="text-[9px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Team Name *
-                    </label>
-                    <span className="text-[8px] font-bold text-white/30 tracking-wider">
-                      {formData.name.length} / 30
-                    </span>
-                  </div>
-                  <div className="relative group">
-                    <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
-                    <input 
-                      type="text" 
-                      name="name"
-                      placeholder="e.g. Royal Strikers"
-                      maxLength={30}
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-white/[0.02] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Sport */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center px-1">
-                    <label className="text-[9px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Sport
-                    </label>
-                    <span className="text-[8px] font-bold text-transparent select-none">
-                      spacer
-                    </span>
-                  </div>
-                  <div className="relative">
-                    <select 
-                      name="sport"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-[#111] border border-white/10 rounded-[15px] py-2.5 px-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer"
-                      value={formData.sport}
-                      onChange={handleChange}
-                    >
-                      <option value="CRICKET">Cricket</option>
-                      <option value="FOOTBALL">Football</option>
-                      <option value="BADMINTON">Badminton</option>
-                      <option value="VOLLEYBALL">Volleyball</option>
-                      <option value="BASKETBALL">Basketball</option>
-                    </select>
-                    <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex items-center text-white/40">
-                      <Users size={12} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* ROW 2: State & City */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* State */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center px-1">
-                    <label className="text-[9px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      State
-                    </label>
-                  </div>
-                  <div className="relative group">
-                    <Map className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
-                    <select 
-                      name="state"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-[#111] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-8 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer"
-                      value={formData.state}
-                      onChange={handleStateChange}
-                    >
-                      <option value="">Select State</option>
-                      {Object.keys(STATE_CITIES_MAP).map(st => (
-                        <option key={st} value={st}>{st}</option>
-                      ))}
-                    </select>
-                    <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex items-center text-white/40">
-                      <Users size={12} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* City */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center px-1">
-                    <label className="text-[9px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      City
-                    </label>
-                  </div>
-                  <div className="relative group">
-                    <MapPin className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
-                    <select 
-                      name="city"
-                      disabled={!formData.state}
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-[#111] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-8 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                      value={formData.city}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select City</option>
-                      {citiesList.map(ct => (
-                        <option key={ct} value={ct}>{ct}</option>
-                      ))}
-                    </select>
-                    <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex items-center text-white/40">
-                      <Users size={12} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* ROW 3: Description */}
-              <div className="space-y-1.5">
-                <div className="flex justify-between items-center px-1">
-                  <label className="text-[9px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Description
-                  </label>
-                  <span className="text-[8px] font-bold text-white/30 tracking-wider">
-                    {formData.description.length} / 200
-                  </span>
-                </div>
-                <div className="relative group">
-                  <MessageSquare className="absolute left-4 top-3 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
-                  <textarea 
-                    name="description"
-                    ref={textareaRef}
-                    placeholder="Tell something about your team, playstyle, achievements, or goals..."
-                    maxLength={200}
-                    rows={2}
-                    style={{ fontFamily: "'Inter', sans-serif" }}
-                    className="w-full bg-white/[0.02] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 resize-none min-h-[64px] leading-relaxed"
-                    value={formData.description}
-                    onChange={handleTextareaChange}
-                  />
-                </div>
-              </div>
-
-              {/* ROW 4: Captain Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-white/40 uppercase tracking-widest px-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Captain Name
-                  </label>
-                  <div className="relative group">
-                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
-                    <input 
-                      type="text" 
-                      name="captainName"
-                      placeholder="Name"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-white/[0.02] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
-                      value={formData.captainName}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-white/40 uppercase tracking-widest px-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Captain Phone (Optional)
-                  </label>
-                  <div className="relative group">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
-                    <input 
-                      type="text" 
-                      name="captainPhone"
-                      placeholder="Phone number"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-white/[0.02] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
-                      value={formData.captainPhone}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-3 pt-3 border-t border-white/5">
                 <button
                   type="button"
-                  onClick={onClose}
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white font-bold rounded-[15px] border border-white/5 hover:border-white/10 transition-all duration-300 text-xs"
+                  onClick={handleClose}
+                  disabled={isBusy}
+                  className="relative h-11 w-11 shrink-0 rounded-full border border-white/[0.08] bg-white/[0.04] text-white/[0.42] shadow-[0_0_18px_rgba(62,198,193,0.08)] transition-all duration-[250ms] hover:scale-105 hover:border-[#3ec6c1]/35 hover:bg-white/[0.07] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Close create team modal"
                 >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  disabled={isSubmitDisabled}
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                  className="flex-[2] py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:brightness-[1.04] text-black font-black uppercase tracking-wider rounded-[15px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0 text-xs"
-                >
-                  {isCreating ? (
-                    <>
-                      <Loader2 className="animate-spin" size={14} />
-                      Creating...
-                    </>
-                  ) : (
-                    'Create Team'
-                  )}
+                  <X size={19} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
                 </button>
               </div>
+
+              <div className="mt-5 flex items-center gap-4">
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ background: GRADIENT }}
+                    animate={{ width: step === 1 ? '50%' : '92%' }}
+                    transition={{ duration: 0.25 }}
+                  />
+                </div>
+                <span className="text-xs font-black uppercase tracking-[0.16em] text-white/45" style={BODY_STYLE}>
+                  Step {step} of 2
+                </span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="relative z-10 px-6 py-5 sm:px-7">
+              <AnimatePresence mode="wait" custom={direction}>
+                {step === 1 ? (
+                  <motion.div
+                    key="create-team-step"
+                    custom={direction}
+                    variants={stepVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                    className="min-h-[410px] space-y-4"
+                  >
+                    <div className="space-y-2">
+                      <FieldLabel
+                        right={formData.name.trim() ? (
+                          <button
+                            type="button"
+                            onClick={generateRandomLogo}
+                            disabled={isBusy}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-[#3ec6c1]/20 bg-[#3ec6c1]/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-[#8bc34a] transition-all duration-[250ms] hover:scale-105 hover:border-[#8bc34a]/40 hover:bg-[#8bc34a]/10 disabled:cursor-not-allowed disabled:opacity-40"
+                            style={BODY_STYLE}
+                          >
+                            {isGeneratingLogo ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+                            Generate Logo
+                          </button>
+                        ) : null}
+                      >
+                        Upload Team Logo
+                      </FieldLabel>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setIsDragging(true);
+                        }}
+                        onDragLeave={() => setIsDragging(false)}
+                        onDrop={handleDrop}
+                        className={`group relative flex h-32 w-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed bg-white/[0.025] text-center transition-all duration-[250ms] hover:scale-[1.01] hover:bg-white/[0.04] ${
+                          isDragging
+                            ? 'border-[#3ec6c1] shadow-[0_0_28px_rgba(62,198,193,0.18)]'
+                            : 'border-white/[0.12] shadow-[inset_0_0_24px_rgba(255,255,255,0.015)] hover:border-[#3ec6c1]/55 hover:shadow-[0_0_26px_rgba(62,198,193,0.11)]'
+                        }`}
+                      >
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleFileChange}
+                        />
+                        {preview ? (
+                          <img src={preview} alt="Team logo preview" className="h-full w-full object-contain p-3" />
+                        ) : isUploading || isGeneratingLogo ? (
+                          <>
+                            <Loader2 size={24} className="animate-spin text-[#3ec6c1]" />
+                            <span className="mt-3 text-xs font-black uppercase tracking-[0.16em] text-white/75" style={BODY_STYLE}>
+                              {isGeneratingLogo ? 'Generating Logo' : 'Uploading Logo'}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="relative h-11 w-11 rounded-full bg-white/[0.06] text-white/45 transition-all duration-[250ms] group-hover:bg-[#3ec6c1]/12 group-hover:text-[#3ec6c1]">
+                              <Upload size={18} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+                            </span>
+                            <span className="mt-3 text-xs font-black uppercase tracking-[0.16em] text-white/78" style={BODY_STYLE}>
+                              Upload Team Logo
+                            </span>
+                            <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white/30" style={BODY_STYLE}>
+                              PNG, JPG up to 5MB
+                            </span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <FieldLabel
+                          right={<span className="text-[10px] font-bold text-white/28" style={BODY_STYLE}>{formData.name.length} / 30</span>}
+                        >
+                          Team Name
+                        </FieldLabel>
+                        <InputShell icon={Users}>
+                          <input
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            maxLength={30}
+                            placeholder="e.g. Royal Strikers"
+                            className={`${fieldClass} pl-11 pr-4`}
+                            style={BODY_STYLE}
+                            required
+                          />
+                        </InputShell>
+                      </div>
+
+                      <div className="space-y-2">
+                        <FieldLabel>Sport</FieldLabel>
+                        <InputShell>
+                          <select
+                            name="sport"
+                            value={formData.sport}
+                            onChange={handleChange}
+                            className={`${fieldClass} appearance-none px-4 pr-11`}
+                            style={BODY_STYLE}
+                            required
+                          >
+                            <option value="CRICKET">Cricket</option>
+                            <option value="FOOTBALL">Football</option>
+                            <option value="BADMINTON">Badminton</option>
+                            <option value="VOLLEYBALL">Volleyball</option>
+                            <option value="BASKETBALL">Basketball</option>
+                            <option value="ESPORTS">Esports</option>
+                          </select>
+                          <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/30" />
+                        </InputShell>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <FieldLabel>State</FieldLabel>
+                        <InputShell icon={Map}>
+                          <select
+                            name="state"
+                            value={formData.state}
+                            onChange={handleStateChange}
+                            className={`${fieldClass} appearance-none pl-11 pr-11`}
+                            style={BODY_STYLE}
+                            required
+                          >
+                            <option value="">Select State</option>
+                            {Object.keys(STATE_CITIES_MAP).map((state) => (
+                              <option key={state} value={state}>{state}</option>
+                            ))}
+                          </select>
+                          <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/30" />
+                        </InputShell>
+                      </div>
+
+                      <div className="space-y-2">
+                        <FieldLabel>City</FieldLabel>
+                        <InputShell icon={MapPin}>
+                          <select
+                            name="city"
+                            value={formData.city}
+                            onChange={handleChange}
+                            disabled={!formData.state}
+                            className={`${fieldClass} appearance-none pl-11 pr-11 disabled:cursor-not-allowed disabled:opacity-45`}
+                            style={BODY_STYLE}
+                            required
+                          >
+                            <option value="">Select City</option>
+                            {citiesList.map((city) => (
+                              <option key={city} value={city}>{city}</option>
+                            ))}
+                          </select>
+                          <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/30" />
+                        </InputShell>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t border-white/[0.06] pt-4 sm:flex-row sm:items-center">
+                      <button
+                        type="button"
+                        onClick={handleClose}
+                        disabled={isBusy}
+                        className="h-12 flex-1 rounded-full border border-white/[0.08] bg-white/[0.035] text-sm font-bold text-white/62 transition-all duration-[250ms] hover:scale-[1.01] hover:border-white/15 hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                        style={BODY_STYLE}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={goNext}
+                        disabled={!canGoNext || isBusy}
+                        className="flex h-12 min-w-0 flex-[1.6] items-center justify-center gap-1.5 rounded-full px-4 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[0_0_24px_rgba(62,198,193,0.16)] transition-all duration-[250ms] hover:scale-[1.02] hover:shadow-[0_0_32px_rgba(139,195,74,0.2)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 sm:gap-2 sm:text-sm sm:tracking-[0.14em]"
+                        style={{ background: GRADIENT, ...BODY_STYLE }}
+                      >
+                        <span className="whitespace-nowrap leading-none">Next</span>
+                        <ArrowRight size={17} className="shrink-0" />
+                      </button>
+                    </div>
+
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="team-details-step"
+                    custom={direction}
+                    variants={stepVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                    className="min-h-[410px] space-y-4"
+                  >
+                    <div className="space-y-2">
+                      <FieldLabel
+                        right={<span className="text-[10px] font-bold text-white/28" style={BODY_STYLE}>{descriptionCount} / 200</span>}
+                      >
+                        Description
+                      </FieldLabel>
+                      <textarea
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        maxLength={200}
+                        rows={5}
+                        placeholder="Tell something about your team, playstyle, achievements, or goals..."
+                        className="min-h-[128px] w-full resize-none rounded-3xl border border-white/[0.08] bg-white/[0.035] px-4 py-4 text-sm font-semibold leading-relaxed text-white outline-none transition-all duration-[250ms] placeholder:text-white/25 focus:border-[#3ec6c1]/60 focus:bg-white/[0.055] focus:shadow-[0_0_22px_rgba(62,198,193,0.12)]"
+                        style={BODY_STYLE}
+                      />
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <FieldLabel>Captain Name</FieldLabel>
+                        <InputShell icon={Shield}>
+                          <input
+                            name="captainName"
+                            value={formData.captainName}
+                            onChange={handleChange}
+                            placeholder="Name"
+                            className={`${fieldClass} pl-11 pr-4`}
+                            style={BODY_STYLE}
+                          />
+                        </InputShell>
+                      </div>
+
+                      <div className="space-y-2">
+                        <FieldLabel>Captain Phone (Optional)</FieldLabel>
+                        <InputShell>
+                          <input
+                            name="captainPhone"
+                            value={formData.captainPhone}
+                            onChange={handleChange}
+                            inputMode="tel"
+                            placeholder="Phone number"
+                            className={`${fieldClass} px-4`}
+                            style={BODY_STYLE}
+                          />
+                        </InputShell>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t border-white/[0.06] pt-4 sm:flex-row sm:items-center">
+                      <button
+                        type="button"
+                        onClick={goBack}
+                        disabled={isBusy}
+                        className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.035] text-sm font-bold text-white/62 transition-all duration-[250ms] hover:scale-[1.01] hover:border-white/15 hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                        style={BODY_STYLE}
+                      >
+                        <ArrowLeft size={16} /> Back
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!canGoNext || isBusy}
+                        className="flex h-12 min-w-0 flex-[1.7] items-center justify-center gap-1.5 rounded-full px-4 text-xs font-black uppercase tracking-[0.07em] text-black shadow-[0_0_24px_rgba(62,198,193,0.16)] transition-all duration-[250ms] hover:scale-[1.02] hover:shadow-[0_0_32px_rgba(139,195,74,0.2)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 sm:gap-2 sm:text-sm sm:tracking-[0.12em]"
+                        style={{ background: GRADIENT, ...BODY_STYLE }}
+                      >
+                        {isCreating ? (
+                          <>
+                            <Loader2 size={17} className="shrink-0 animate-spin" />
+                            <span className="whitespace-nowrap leading-none">Creating</span>
+                          </>
+                        ) : (
+                          <span className="whitespace-nowrap leading-none">Create Team</span>
+                        )}
+                      </button>
+                    </div>
+
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </form>
           </motion.div>
         </div>
