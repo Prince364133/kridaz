@@ -57,6 +57,18 @@ const socketConfig = (server) => {
 
     socket.on(SOCKET.JOIN_CHAT, (room) => socket.join(room));
 
+    socket.on(SOCKET.JOIN_MATCH, (matchId) => {
+      if (!matchId) return;
+      socket.join(matchId);
+      logger.info(`[Socket] Socket ${socket.id} joined match room: ${matchId}`);
+    });
+
+    socket.on(SOCKET.OVERLAY_JOIN, ({ matchId, token }) => {
+      if (!matchId) return;
+      socket.join(matchId);
+      logger.info(`[Socket] Socket ${socket.id} joined overlay match room: ${matchId} (token: ${token})`);
+    });
+
     socket.on("typing", (room) => socket.in(room).emit("typing", room));
     socket.on("stop typing", (room) => socket.in(room).emit("stop typing", room));
 
@@ -135,8 +147,56 @@ const socketConfig = (server) => {
       }
     });
 
+    socket.on("scoring:acquire_lock", async ({ matchId }) => {
+      if (!matchId) return;
+      socket.join(`scoring_wait_${matchId}`);
+      
+      const lockKey = `kridaz:scoring_lock:${matchId}`;
+      const currentLock = await redis.get(lockKey);
+      
+      let isStale = false;
+      if (currentLock && currentLock !== socket.id) {
+        const sockets = await io.in(currentLock).fetchSockets();
+        if (sockets.length === 0) {
+          isStale = true; // The socket that held the lock is no longer connected
+        }
+      }
+      
+      if (!currentLock || currentLock === socket.id || isStale) {
+        // Grant lock
+        await redis.set(lockKey, socket.id, 'EX', 10800); // 3 hours
+        socket.scoringMatchId = matchId;
+        socket.emit("scoring:lock_granted", { matchId });
+      } else {
+        // Deny lock
+        socket.emit("scoring:lock_denied", { matchId });
+      }
+    });
+
+    socket.on("scoring:release_lock", async ({ matchId }) => {
+      if (!matchId) return;
+      const lockKey = `kridaz:scoring_lock:${matchId}`;
+      const currentLock = await redis.get(lockKey);
+      
+      if (currentLock === socket.id) {
+        await redis.del(lockKey);
+        socket.scoringMatchId = null;
+        socket.leave(`scoring_wait_${matchId}`);
+        io.to(`scoring_wait_${matchId}`).emit("scoring:lock_released", { matchId });
+      }
+    });
+
     socket.on("disconnect", async () => {
       // TODO (Prometheus P4-2): Decrement socket_connections_total gauge here
+      
+      if (socket.scoringMatchId) {
+        const lockKey = `kridaz:scoring_lock:${socket.scoringMatchId}`;
+        const currentLock = await redis.get(lockKey);
+        if (currentLock === socket.id) {
+          await redis.del(lockKey);
+          io.to(`scoring_wait_${socket.scoringMatchId}`).emit("scoring:lock_released", { matchId: socket.scoringMatchId });
+        }
+      }
 
       if (socket.userId) {
         const lastSeen = new Date();

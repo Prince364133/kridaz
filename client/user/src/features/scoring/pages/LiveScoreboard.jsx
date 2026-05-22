@@ -89,6 +89,68 @@ function Card({ children, className = '' }) {
  );
 }
 
+// ─── Team badge rendering component ────────────────────────────────────────────
+function TeamBadge({ team, fallbackName, size = 'md' }) {
+  const [error, setError] = useState(false);
+  const name = team?.name || fallbackName || 'Team';
+  const imgUrl = team?.image;
+  const initial = name.charAt(0).toUpperCase();
+
+  const sizeClasses = {
+    xs: 'w-5 h-5 text-[9px]',
+    sm: 'w-6 h-6 text-[10px]',
+    md: 'w-10 h-10 text-sm',
+    lg: 'w-16 h-16 text-xl',
+    xl: 'w-20 h-20 text-2xl',
+  };
+
+  const cls = `rounded-full flex items-center justify-center shrink-0 font-black tracking-tight select-none border border-white/10 ${sizeClasses[size] || sizeClasses.md}`;
+
+  if (imgUrl && !error) {
+    return (
+      <img
+        src={imgUrl}
+        alt={name}
+        className={`${sizeClasses[size] || sizeClasses.md} rounded-full object-cover shrink-0 border border-white/10`}
+        onError={() => setError(true)}
+      />
+    );
+  }
+
+  return (
+    <div className={`${cls} bg-gradient-to-br from-primary/20 to-blue-500/10 text-primary`}>
+      {initial}
+    </div>
+  );
+}
+
+// ─── Player avatar rendering component ──────────────────────────────────────────
+function PlayerAvatar({ src, name, active, size = 'sm', isBowler = false }) {
+  const [error, setError] = useState(false);
+  const sizeClasses = {
+    sm: 'w-7 h-7',
+    md: 'w-8 h-8',
+  };
+
+  const bgCls = isBowler ? 'bg-blue-500/10' : (active ? 'bg-primary/10' : 'bg-white/5');
+  const iconCls = isBowler ? 'text-blue-400' : (active ? 'text-primary' : 'text-gray-500');
+
+  return (
+    <div className={`${sizeClasses[size]} rounded-full flex items-center justify-center overflow-hidden shrink-0 ${bgCls}`}>
+      {src && !error ? (
+        <img
+          src={src}
+          alt={name}
+          className="w-full h-full object-cover"
+          onError={() => setError(true)}
+        />
+      ) : (
+        <User size={12} className={iconCls} />
+      )}
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 const LiveScoreboard = () => {
  const { matchId } = useParams();
@@ -180,6 +242,85 @@ const LiveScoreboard = () => {
  </div>
  );
 
+  if (score.status === 'NOT_STARTED' || !score.isLive) {
+    return (
+      <div className="min-h-screen bg-[#050505] text-white flex flex-col font-inter justify-between">
+        {/* Header bar */}
+        <div className="px-4 py-3 bg-black/40 border-b border-white/[0.05] flex items-center">
+          <button
+            onClick={() => navigate(-1)}
+            className="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-full transition-colors mr-3"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <span className="text-[11px] font-black uppercase tracking-wider text-gray-400">Match Details</span>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center gap-8 max-w-xl mx-auto w-full">
+          <div>
+            <h1 className="text-2xl font-black italic uppercase tracking-tighter text-white/95 mb-1">
+              {score.matchName || "Upcoming Match"}
+            </h1>
+            <div className="flex items-center justify-center gap-1.5 text-[9px] text-primary font-black uppercase tracking-widest">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              Not Started
+            </div>
+          </div>
+
+          {/* VS Matchup Layout */}
+          <div className="w-full bg-white/[0.02] border border-white/[0.05] rounded-[2.5rem] p-8 relative overflow-hidden">
+            {/* Ambient gradients */}
+            <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-32 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 relative z-10">
+              {/* Team A */}
+              <div className="flex flex-col items-center gap-3">
+                <TeamBadge team={score.teamA} fallbackName="Team A" size="xl" />
+                <span className="text-sm font-black uppercase tracking-tight text-white leading-tight">
+                  {score.teamA?.name || 'Team A'}
+                </span>
+              </div>
+
+              {/* VS Divider */}
+              <div className="flex flex-col items-center gap-1">
+                <div className="w-[1px] h-8 bg-gradient-to-b from-transparent to-white/10" />
+                <div className="px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-[10px] font-black tracking-widest uppercase">
+                  VS
+                </div>
+                <div className="w-[1px] h-8 bg-gradient-to-t from-transparent to-white/10" />
+              </div>
+
+              {/* Team B */}
+              <div className="flex flex-col items-center gap-3">
+                <TeamBadge team={score.teamB} fallbackName="Team B" size="xl" />
+                <span className="text-sm font-black uppercase tracking-tight text-white leading-tight">
+                  {score.teamB?.name || 'Team B'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-6 py-3 bg-white/[0.04] rounded-2xl border border-white/[0.08] max-w-sm">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+              {score.message || "Match starts soon. Keep this page open to sync scores live."}
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-6 flex justify-center">
+          <button
+            onClick={() => navigate(-1)}
+            className="px-8 py-3 bg-white/5 hover:bg-white/10 active:bg-white/5 border border-white/10 transition-all rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2"
+          >
+            <ChevronLeft size={14} /> Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
  const striker = score.batters?.[0] || null;
  const nonStriker = score.batters?.[1] || null;
  const bowler = score.bowler || null;
@@ -261,9 +402,12 @@ const LiveScoreboard = () => {
  </div>
  )}
 
- <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.4em] mb-3">
- {score.battingTeamName} — {score.result ? 'Final Score' : 'Current Score'}
- </p>
+  <div className="flex items-center justify-center gap-2 mb-3">
+    <TeamBadge team={{ image: score.battingTeamImage, name: score.battingTeamName }} fallbackName={score.battingTeamName} size="xs" />
+    <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em]">
+      {score.battingTeamName} — {score.result ? 'Final Score' : 'Current Score'}
+    </p>
+  </div>
 
  <div className="flex items-baseline justify-center gap-2 mb-2">
  <span className="text-7xl font-black tracking-tighter italic leading-none" style={{ animation: 'none' }}>
@@ -332,9 +476,7 @@ const LiveScoreboard = () => {
  {i === 0 && (
  <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
  )}
- <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${i === 0 ? 'bg-primary/10' : 'bg-white/5'}`}>
- <User size={12} className={i === 0 ? 'text-primary' : 'text-gray-500'} />
- </div>
+ <PlayerAvatar src={p.profilePicture} name={p.name} active={i === 0} />
  <span className={`text-[11px] font-black uppercase truncate ${i === 0 ? 'text-white' : 'text-gray-500'}`}>
  {p.name}
  </span>
@@ -375,9 +517,7 @@ const LiveScoreboard = () => {
  </div>
  <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-x-3 items-center py-1">
  <div className="flex items-center gap-2 overflow-hidden">
- <div className="w-7 h-7 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
- <User size={12} className="text-blue-400" />
- </div>
+ <PlayerAvatar src={bowler.profilePicture} name={bowler.name} isBowler={true} />
  <span className="text-[11px] font-black uppercase truncate text-white">{bowler.name}</span>
  </div>
  <span className="text-right text-sm font-black text-white w-6">{bowler.overs}.{bowler.balls}</span>

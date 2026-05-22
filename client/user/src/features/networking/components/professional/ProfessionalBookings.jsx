@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { Check, X, Clock, User, Phone, Mail, MessageSquare, Loader2, Calendar, Shield, IndianRupee } from "lucide-react";
@@ -6,14 +6,14 @@ import toast from "react-hot-toast";
 import { format } from "date-fns";
 
 /**
- * ProfessionalBookings — Rebranded for the Scorer Portal.
+ * ProfessionalBookings ΓÇö Rebranded for the Scorer Portal.
  * Enforces Teal Green (#00C187) and Inter typography.
  */
 
 export default function ProfessionalBookings() {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -119,7 +119,7 @@ export default function ProfessionalBookings() {
                     }}>
                       {booking.status === 'ACCEPTED' ? 'SCHEDULED' : booking.status}
                     </div>
-                    <p className="text-3xl font-black text-white mt-2 font-inter tracking-tighter">₹{Number(booking.totalAmount).toLocaleString()}</p>
+                    <p className="text-3xl font-black text-white mt-2 font-inter tracking-tighter">Γé╣{Number(booking.totalAmount).toLocaleString()}</p>
                   </div>
                 </div>
 

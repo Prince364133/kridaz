@@ -21,7 +21,7 @@ const OwnerRequestsCard = ({ request, onAccept, onReject, onReconsider, onViewDe
       {/* Header: User Info */}
       <div 
         onClick={() => {
-          const uId = typeof request.userId === 'object' ? request.userId?._id : request.userId;
+          const uId = typeof request.userId === 'object' ? request.userId?.id : request.userId;
           if(uId) navigate(`/profile/${uId}`);
         }}
         className="flex items-center gap-4 mb-6 pb-6 border-b border-[#2D2D2D]/30 relative z-10 cursor-pointer group/profile"
@@ -91,7 +91,7 @@ const OwnerRequestsCard = ({ request, onAccept, onReject, onReconsider, onViewDe
       <div className="mt-8 relative z-10">
         {isRejected ? (
           <button
-            onClick={() => onReconsider(request._id)}
+            onClick={() => onReconsider(request.id)}
             disabled={isProcessing}
             className="w-full py-3 bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:bg-[#CCFF00]/5 text-white hover:text-[#CCFF00] text-[11px] font-bold uppercase tracking-[0.2em] rounded-[6px] transition-all flex items-center justify-center gap-2 group/btn disabled:opacity-50"
           >
@@ -101,14 +101,14 @@ const OwnerRequestsCard = ({ request, onAccept, onReject, onReconsider, onViewDe
         ) : (
           <div className="grid grid-cols-2 gap-3">
             <button
-              onClick={() => onReject(request._id)}
+              onClick={() => onReject(request.id)}
               disabled={isProcessing}
               className="py-2.5 bg-transparent border border-[#FF3B3B]/30 hover:border-[#FF3B3B] hover:bg-[#FF3B3B]/5 text-[#FF3B3B] text-[11px] font-medium uppercase tracking-[0.15em] rounded-[6px] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isProcessing ? "..." : "Decline"}
             </button>
             <button
-              onClick={() => onAccept(request._id)}
+              onClick={() => onAccept(request.id)}
               disabled={isProcessing}
               className="py-2.5 bg-[#CCFF00] hover:bg-[#DFFF00] text-black text-[11px] font-bold uppercase tracking-[0.15em] rounded-[6px] transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(204,255,0,0.2)] disabled:opacity-50 group/btn"
             >

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { X, Trash2, Eye, Calendar, User as UserIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -23,7 +23,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  if (!storyGroup) return null;
 
  const currentStory = storyGroup.stories[currentStoryIndex];
- const isOwner = currentUser && ((storyGroup.user.id || storyGroup.user._id) === (currentUser.id || currentUser._id) || storyGroup.user === (currentUser.id || currentUser._id));
+ const isOwner = currentUser && (storyGroup.user._id === currentUser._id || storyGroup.user === currentUser._id);
 
  return (
  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black animate-in fade-in duration-300">
@@ -42,7 +42,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  {storyGroup.stories.map((_, idx) => (
  <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
  <div 
- className={`h-full bg-[#CCFF00] transition-all duration-300 ${idx < currentStoryIndex ? 'w-full' : idx === currentStoryIndex ? 'w-full animate-progress' : 'w-0'}`}
+ className={`h-full bg-[#55DEE8] transition-all duration-300 ${idx < currentStoryIndex ? 'w-full' : idx === currentStoryIndex ? 'w-full animate-progress' : 'w-0'}`}
  style={{ animationDuration: '5s' }}
  />
  </div>
@@ -97,20 +97,20 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  {/* Footer */}
  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black to-transparent flex items-center gap-4 z-[110]">
  <Link 
- to={`/profile/${storyGroup.user.id || storyGroup.user._id}`} 
- className="w-10 h-10 rounded-full border-2 border-[#CCFF00] overflow-hidden hover:opacity-80 transition-opacity shrink-0"
+ to={`/profile/${storyGroup.user._id}`} 
+ className="w-10 h-10 rounded-full border-2 border-[#55DEE8] overflow-hidden hover:opacity-80 transition-opacity shrink-0"
  onClick={(e) => e.stopPropagation()}
  >
  <img src={storyGroup.user.profilePicture || "/default-avatar.png"} alt="" className="w-full h-full object-cover" />
  </Link>
  <div className="flex-1 min-w-0">
  <Link 
- to={`/profile/${storyGroup.user.id || storyGroup.user._id}`} 
+ to={`/profile/${storyGroup.user._id}`} 
  className="hover:opacity-80 transition-opacity inline-block max-w-full"
  onClick={(e) => e.stopPropagation()}
  >
  <p className="text-xs font-bold uppercase tracking-wider text-white truncate">{storyGroup.user.name}</p>
- <p className="text-[10px] text-[#CCFF00] font-bold uppercase tracking-widest truncate">@{storyGroup.user.username}</p>
+ <p className="text-[10px] text-[#55DEE8] font-bold uppercase tracking-widest truncate">@{storyGroup.user.username}</p>
  </Link>
  </div>
  <div className="flex flex-col items-end gap-2">
@@ -129,8 +129,8 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  }}
  className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all group"
  >
- <Eye size={12} className="text-[#CCFF00]" />
- <span className="text-[10px] font-black text-white group-hover:text-[#CCFF00]">
+ <Eye size={12} className="text-[#55DEE8]" />
+ <span className="text-[10px] font-black text-white group-hover:text-[#55DEE8]">
  {currentStory.viewers?.length || 0} Views
  </span>
  </button>
@@ -140,7 +140,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  <button 
  onClick={(e) => {
  e.stopPropagation();
- onDelete(currentStory.id || currentStory._id);
+ onDelete(currentStory._id);
  }}
  className="p-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl transition-all shrink-0 border border-red-500/20"
  >
@@ -159,8 +159,8 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  >
  <div className="p-6 border-b border-white/10 flex items-center justify-between bg-black/40">
  <div className="flex items-center gap-3">
- <div className="w-8 h-8 rounded-lg bg-[#CCFF00]/10 flex items-center justify-center">
- <Eye size={16} className="text-[#CCFF00]" />
+ <div className="w-8 h-8 rounded-lg bg-[#55DEE8]/10 flex items-center justify-center">
+ <Eye size={16} className="text-[#55DEE8]" />
  </div>
  <div>
  <h3 className="text-sm font-black uppercase tracking-tighter text-white">Story Insights</h3>
@@ -180,13 +180,13 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  <div className="space-y-2">
  {currentStory.viewers.map((viewer) => (
  <Link
- key={viewer.id || viewer._id}
- to={`/profile/${viewer.id || viewer._id}`}
+ key={viewer._id}
+ to={`/profile/${viewer._id}`}
  onClick={() => onClose()}
  className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
  >
  <div className="relative">
- <div className="w-12 h-12 rounded-full border-2 border-[#2D2D2D] group-hover:border-[#CCFF00] overflow-hidden transition-colors">
+ <div className="w-12 h-12 rounded-full border-2 border-[#2D2D2D] group-hover:border-[#55DEE8] overflow-hidden transition-colors">
  <img 
  src={viewer.profilePicture || "/default-avatar.png"} 
  alt="" 
@@ -194,15 +194,15 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  />
  </div>
  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#111] border border-white/10 rounded-full flex items-center justify-center">
- <UserIcon size={10} className="text-[#CCFF00]" />
+ <UserIcon size={10} className="text-[#55DEE8]" />
  </div>
  </div>
  <div className="flex-1 min-w-0">
- <p className="text-sm font-bold text-white truncate group-hover:text-[#CCFF00] transition-colors">{viewer.name}</p>
+ <p className="text-sm font-bold text-white truncate group-hover:text-[#55DEE8] transition-colors">{viewer.name}</p>
  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest truncate">@{viewer.username}</p>
  </div>
- <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#CCFF00]/20 transition-all opacity-0 group-hover:opacity-100">
- <Eye size={14} className="text-[#CCFF00]" />
+ <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#55DEE8]/20 transition-all opacity-0 group-hover:opacity-100">
+ <Eye size={14} className="text-[#55DEE8]" />
  </div>
  </Link>
  ))}

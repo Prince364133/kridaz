@@ -8,9 +8,11 @@ import {
   getNetworkById,
   getNearbyPlayers,
   updateUserLocation,
-  updateNotificationPreferences
+  updateNotificationPreferences,
+  getPlayerRecommendations
 } from '../player.controller.js';
 import userAuth from "../../../middleware/jwt/user.middleware.js";
+
 
 const router = express.Router();
 
@@ -44,6 +46,17 @@ router.get('/search', searchPlayers);
  *       - BearerAuth: []
  */
 router.get('/nearby', userAuth, getNearbyPlayers);
+
+/**
+ * @swagger
+ * /player/recommendations:
+ *   get:
+ *     summary: Get personalized follow recommendations for the current player
+ *     tags: [Player]
+ *     security:
+ *       - BearerAuth: []
+ */
+router.get('/recommendations', userAuth, getPlayerRecommendations);
 
 /**
  * @swagger

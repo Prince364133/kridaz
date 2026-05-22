@@ -10,5 +10,5 @@ export { default as CustomerDirectory } from "./Customers/CustomerDirectory";
 export { default as VenueIntelligence } from "./Intelligence/VenueIntelligence";
 export { default as OwnerRevenue } from "./Revenue/OwnerRevenue";
 export { default as OwnerPromotions } from "./Promotions/OwnerPromotions";
-export { default as PayoutBanking } from "./Banking/PayoutBanking";
+export { default as VenueBanking } from "./Banking/VenueBanking";
 export { default as PartnerSupport } from "./Support/PartnerSupport";

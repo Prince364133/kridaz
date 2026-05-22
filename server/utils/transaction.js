@@ -18,6 +18,9 @@ export const runInTransaction = async (callback) => {
       });
       logger.info("✅ Prisma Transaction Committed");
       return result;
+    }, {
+      maxWait: 5000,
+      timeout: 25000
     });
   } catch (error) {
     logger.error("❌ Prisma Transaction Failed:", error);

@@ -280,7 +280,7 @@ export default function useAddTurf() {
      }
     try {
       const response = await axiosInstance.post(
-        "/api/owner/turf/register",
+        "/api/owner/turf/owner/register",
         formData,
         {
           headers: {
@@ -290,7 +290,7 @@ export default function useAddTurf() {
       );
        const result = response.data;
       toast.success(result.message);
-      navigate("/partner/turfs");
+      navigate("/venue-owner/turfs");
      } catch (error) {
       if (error.response) {
         toast.error(error.response?.data?.message);
@@ -370,3 +370,4 @@ export default function useAddTurf() {
     updateSlotPrice
   };
 }
+

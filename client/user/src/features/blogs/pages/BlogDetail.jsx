@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { ArrowLeft, Eye, ThumbsUp, Clock, User, Tag, Calendar, ChevronRight } from "lucide-react";
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
 const BDR = "#2A2A2A";
 
 export default function BlogDetail() {
@@ -65,7 +65,7 @@ export default function BlogDetail() {
   return (
     <div className="min-h-screen bg-black text-white pb-24">
 
-      {/* ── HERO ── */}
+      {/* ΓöÇΓöÇ HERO ΓöÇΓöÇ */}
       <div className="relative h-[60vh] min-h-[400px] overflow-hidden">
         <img
           src={blog.imageUrl}
@@ -115,7 +115,7 @@ export default function BlogDetail() {
         </div>
       </div>
 
-      {/* ── META BAR ── */}
+      {/* ΓöÇΓöÇ META BAR ΓöÇΓöÇ */}
       <div className="border-b" style={{ borderColor: BDR, backgroundColor: "#050505" }}>
         <div className="max-w-4xl mx-auto px-6 py-5 flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
@@ -146,7 +146,7 @@ export default function BlogDetail() {
         </div>
       </div>
 
-      {/* ── ARTICLE BODY ── */}
+      {/* ΓöÇΓöÇ ARTICLE BODY ΓöÇΓöÇ */}
       <div className="max-w-4xl mx-auto px-6 pt-14">
         <div
           className="text-gray-400 text-lg leading-relaxed space-y-6
@@ -154,18 +154,18 @@ export default function BlogDetail() {
             [&_h3]:text-white [&_h3]:text-2xl [&_h3]:font-black [&_h3]:uppercase [&_h3]:tracking-tight [&_h3]:mt-8 [&_h3]:mb-3
             [&_p]:mb-6 [&_p]:leading-relaxed
             [&_strong]:text-white [&_strong]:font-bold
-            [&_a]:text-[#84CC16] [&_a]:no-underline hover:[&_a]:underline
+            [&_a]:text-[#55DEE8] [&_a]:no-underline hover:[&_a]:underline
             [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2
             [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:space-y-2
             [&_li]:leading-relaxed
-            [&_blockquote]:border-l-4 [&_blockquote]:border-[#84CC16] [&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-gray-500
+            [&_blockquote]:border-l-4 [&_blockquote]:border-[#55DEE8] [&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-gray-500
             [&_hr]:border-white/10 [&_hr]:my-10
             [&_img]:rounded-2xl [&_img]:w-full [&_img]:object-cover"
           dangerouslySetInnerHTML={{ __html: blog.content }}
         />
       </div>
 
-      {/* ── FOOTER CTA ── */}
+      {/* ΓöÇΓöÇ FOOTER CTA ΓöÇΓöÇ */}
       <div className="max-w-4xl mx-auto px-6 pt-20">
         <div
           className="rounded-[2rem] border p-10 text-center"
@@ -174,9 +174,9 @@ export default function BlogDetail() {
           <h3 className="text-2xl font-black uppercase tracking-tight mb-3">
             Ready to play?
           </h3>
-          <p className="text-gray-500 text-sm mb-6">Book a premium sports venue in your city — instantly.</p>
+          <p className="text-gray-500 text-sm mb-6">Book a premium sports venue in your city ΓÇö instantly.</p>
           <Link
-            to="/turfs"
+            to="/venues"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-sm uppercase tracking-widest text-black hover:brightness-110 transition-all"
             style={{ backgroundColor: PRI }}
           >

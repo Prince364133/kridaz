@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Helmet } from 'react-helmet-async';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGetReelsFeedQuery, reelsApi } from '@redux/api/reelsApi';
-import ReelItem from '../components/ReelItem';
+import ReelItem from '@features/reels/components/ReelItem';
 import { ChevronLeft, Camera } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSocket } from '@context/SocketContext';
 import { useDispatch, useSelector } from 'react-redux';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
 
 const ReelsFeed = () => {
   const navigate = useNavigate();
@@ -14,11 +12,12 @@ const ReelsFeed = () => {
   const { socket } = useSocket();
   const { id: initialId } = useParams();
   const [cursor, setCursor] = useState(null);
-  const { data, isLoading, isFetching, refetch } = useGetReelsFeedQuery({ cursor, initialId });
+  const { data, isLoading, isFetching } = useGetReelsFeedQuery({ cursor, initialId });
   
   // Optimistic UI state
-  const { isUploading, activeUpload } = useSelector(state => state.mediaUpload);
-  const { user } = useSelector(state => state.auth);
+  const { isUploading, activeUpload } = useSelector((/** @type {any} */ state) => state.mediaUpload);
+  const { user } = useSelector((/** @type {any} */ state) => state.auth);
+  const typedDispatch = /** @type {any} */ (dispatch);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const feedRef = useRef(null);
@@ -29,102 +28,106 @@ const ReelsFeed = () => {
     return data?.reels || [];
   }, [data?.reels]);
 
-  // ── Socket listeners for real-time updates ───────────────────────────────
-  // NOTE: Backend uses Prisma UUID `id` field (not Mongo `_id`). All cache
-  // lookups MUST use r.id to correctly patch the RTK Query cache.
+  // Socket listeners for real-time updates
   useEffect(() => {
     if (!socket) return;
 
-    socket.on(SOCKET.REEL_LIKED, ({ reelId, likes }) => {
-      dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-          if (!draft?.reels) return;
-          const reel = draft.reels.find((r) => r.id === reelId);
-          if (reel) reel.stats.likes = likes;
-        })
-      );
+    socket.on('reel_liked', ({ reelId, likes }) => {
+      const patchFeed = (queryArg) => {
+        typedDispatch(
+          reelsApi.util.updateQueryData('getReelsFeed', queryArg, (draft) => {
+            const reel = draft.reels.find((r) => (r.id || r._id) === reelId);
+            if (reel) {
+              reel.stats.likes = likes;
+            }
+          })
+        );
+      };
+      patchFeed(undefined);
+      patchFeed({});
+      patchFeed({ cursor: null, initialId: undefined });
     });
 
-    socket.on(SOCKET.REEL_COMMENTED, ({ reelId }) => {
-      dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-          if (!draft?.reels) return;
-          const reel = draft.reels.find((r) => r.id === reelId);
-          if (reel) reel.stats.comments += 1;
-        })
-      );
+    socket.on('reel_commented', ({ reelId }) => {
+      const patchFeed = (queryArg) => {
+        typedDispatch(
+          reelsApi.util.updateQueryData('getReelsFeed', queryArg, (draft) => {
+            const reel = draft.reels.find((r) => (r.id || r._id) === reelId);
+            if (reel) {
+              reel.stats.comments += 1;
+            }
+          })
+        );
+      };
+      patchFeed(undefined);
+      patchFeed({});
+      patchFeed({ cursor: null, initialId: undefined });
     });
 
-    socket.on(SOCKET.REEL_DELETED, ({ reelId }) => {
-      dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-          if (!draft?.reels) return;
-          draft.reels = draft.reels.filter((r) => r.id !== reelId);
-        })
-      );
+    socket.on('reel_deleted', ({ reelId }) => {
+      const patchFeed = (queryArg) => {
+        typedDispatch(
+          reelsApi.util.updateQueryData('getReelsFeed', queryArg, (draft) => {
+            if (!draft || !draft.reels) return;
+            draft.reels = draft.reels.filter((r) => (r.id || r._id) !== reelId);
+          })
+        );
+      };
+      patchFeed(undefined);
+      patchFeed({});
+      patchFeed({ cursor: null, initialId: undefined });
+    });
+    
+    socket.on('MEDIA_PROCESSING_PROGRESS', ({ mediaId, mediaType, progress, status }) => {
+      if (mediaType === 'reel') {
+        const patchFeed = (queryArg) => {
+          typedDispatch(
+            reelsApi.util.updateQueryData('getReelsFeed', queryArg, (draft) => {
+              if (!draft || !draft.reels) return;
+              const reel = draft.reels.find((r) => (r.id || r._id) === mediaId);
+              if (reel) {
+                reel.status = 'pending';
+                reel.processingProgress = progress;
+                reel.processingStatus = status;
+              }
+            })
+          );
+        };
+        patchFeed(undefined);
+        patchFeed({});
+        patchFeed({ cursor: null, initialId: undefined });
+      }
     });
 
-    socket.on(SOCKET.MEDIA_PROCESSING_PROGRESS, ({ mediaId, mediaType, progress, status }) => {
-      if (mediaType !== 'reel') return;
-      dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-          if (!draft?.reels) return;
-          // Match on r.id — Prisma returns UUID as `id`, not `_id`
-          const reel = draft.reels.find((r) => r.id === mediaId);
-          if (reel) {
-            reel.status = 'processing';
-            reel.processingProgress = progress;
-            reel.processingStatus = status;
-          }
-        })
-      );
-    });
-
-    socket.on(SOCKET.MEDIA_PROCESSING_COMPLETE, ({ mediaId, mediaType, hlsUrl, thumbnailUrl }) => {
-      if (mediaType !== 'reel') return;
-      dispatch(
-        reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
-          if (!draft?.reels) return;
-          const reel = draft.reels.find((r) => r.id === mediaId);
-          if (reel) {
-            reel.status = 'ready';
-            reel.hlsUrl = hlsUrl;
-            reel.thumbnailUrl = thumbnailUrl;
-            reel.processingProgress = 100;
-          }
-        })
-      );
+    socket.on('MEDIA_PROCESSING_COMPLETE', ({ mediaId, mediaType, hlsUrl, thumbnailUrl }) => {
+      if (mediaType === 'reel') {
+        const patchFeed = (queryArg) => {
+          typedDispatch(
+            reelsApi.util.updateQueryData('getReelsFeed', queryArg, (draft) => {
+              if (!draft || !draft.reels) return;
+              const reel = draft.reels.find((r) => (r.id || r._id) === mediaId);
+              if (reel) {
+                reel.status = 'ready';
+                reel.hlsUrl = hlsUrl;
+                reel.thumbnailUrl = thumbnailUrl;
+              }
+            })
+          );
+        };
+        patchFeed(undefined);
+        patchFeed({});
+        patchFeed({ cursor: null, initialId: undefined });
+      }
     });
 
     return () => {
-      socket.off(SOCKET.REEL_LIKED);
-      socket.off(SOCKET.REEL_COMMENTED);
-      socket.off(SOCKET.REEL_DELETED);
-      socket.off(SOCKET.MEDIA_PROCESSING_PROGRESS);
-      socket.off(SOCKET.MEDIA_PROCESSING_COMPLETE);
+      socket.off('reel_liked');
+      socket.off('reel_commented');
+      socket.off('reel_deleted');
+      socket.off('MEDIA_PROCESSING_PROGRESS');
+      socket.off('MEDIA_PROCESSING_COMPLETE');
     };
   }, [socket, dispatch, cursor, initialId]);
-
-  // ── Polling fallback for pending/processing reels ─────────────────────────
-  // If the socket is disconnected OR drops events, pending reels would be stuck
-  // forever. Poll every 8 s while any reel is still being processed.
-  useEffect(() => {
-    const hasPendingReels = reels.some(
-      (r) => r.status === 'pending' || r.status === 'processing'
-    );
-
-    // Always poll when pending reels exist and socket is down.
-    // Also poll when socket is up but as a safety net (stops once all ready).
-    if (!hasPendingReels) return;
-
-    // Always poll as a safety net — socket events can be missed if the
-    // emitter room name mismatches, or if the user reconnects mid-processing.
-    const interval = setInterval(() => {
-      refetch();
-    }, 6000);
-
-    return () => clearInterval(interval);
-  }, [reels, refetch]);
 
   // IntersectionObserver for active reel tracking
   useEffect(() => {
@@ -145,7 +148,7 @@ const ReelsFeed = () => {
             // Mask URL (only for non-temp reels)
             const currentReel = reels[index];
             if (currentReel && !currentReel.temp) {
-              window.history.replaceState(null, '', `/shorts/${currentReel.id}`);
+              window.history.replaceState(null, '', `/shorts/${currentReel.id || currentReel._id}`);
             }
 
             // Load more trigger
@@ -178,16 +181,13 @@ const ReelsFeed = () => {
   if (isLoading && !data) {
     return (
       <div className="h-screen w-full bg-black flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#84CC16] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-[#55DEE8] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
     <div className="fixed inset-0 h-[100dvh] w-full bg-black overflow-hidden z-50 flex justify-center">
-      <Helmet>
-        <title>Shorts | Kridaz</title>
-      </Helmet>
       {/* Header Overlay */}
       <div className="absolute top-0 w-full max-w-[500px] p-6 flex items-center justify-between z-30 pointer-events-none">
         <button 
@@ -217,15 +217,14 @@ const ReelsFeed = () => {
           
           return (
             <div 
-              key={reel.id} 
+              key={reel.id || reel._id} 
               data-index={index}
               className="reels-item-wrapper w-full h-full snap-start snap-always"
             >
               {isNear ? (
-                <ReelItem 
+              <ReelItem 
                   reel={reel} 
                   isVisible={isActive}
-                  isNext={index === activeIndex + 1}
                 />
               ) : (
                 <div className="w-full h-full bg-black flex items-center justify-center">
@@ -241,7 +240,7 @@ const ReelsFeed = () => {
         
         {isFetching && (
           <div className="h-full w-full flex items-center justify-center snap-start">
-            <div className="w-8 h-8 border-3 border-[#84CC16] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-3 border-[#55DEE8] border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}
 
@@ -251,7 +250,7 @@ const ReelsFeed = () => {
             <p className="text-gray-400 text-center">Be the first one to post a reel!</p>
             <button 
               onClick={() => navigate('/reels/upload')}
-              className="mt-6 px-6 py-2 bg-[#84CC16] text-black font-bold rounded-full hover:scale-105 active:scale-95 transition-transform"
+              className="mt-6 px-6 py-2 bg-[#55DEE8] text-black font-bold rounded-full hover:scale-105 active:scale-95 transition-transform"
             >
               Create Short
             </button>

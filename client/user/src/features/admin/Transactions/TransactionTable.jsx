@@ -16,15 +16,15 @@ const TransactionTable = ({
             <th className="p-4 text-xs font-bold uppercase tracking-widest text-gray-500 border-b border-white/5">User</th>
             <th className="p-4 text-xs font-bold uppercase tracking-widest text-gray-500 border-b border-white/5">
               <button
-                className="flex items-center group transition-colors hover:text-[#84CC16]"
+                className="flex items-center group transition-colors hover:text-[#55DEE8]"
                 onClick={() => onSort("createdAt")}
               >
                 Date
                 {sortField === "createdAt" &&
                   (sortDirection === "asc" ? (
-                    <ChevronUp className="ml-2 h-3 w-3 text-[#84CC16]" />
+                    <ChevronUp className="ml-2 h-3 w-3 text-[#55DEE8]" />
                   ) : (
-                    <ChevronDown className="ml-2 h-3 w-3 text-[#84CC16]" />
+                    <ChevronDown className="ml-2 h-3 w-3 text-[#55DEE8]" />
                   ))}
               </button>
             </th>
@@ -33,15 +33,15 @@ const TransactionTable = ({
             <th className="p-4 text-xs font-bold uppercase tracking-widest text-gray-500 border-b border-white/5">Payment ID</th>
             <th className="p-4 text-xs font-bold uppercase tracking-widest text-gray-500 border-b border-white/5 text-right">
               <button
-                className="flex items-center justify-end w-full group transition-colors hover:text-[#84CC16]"
+                className="flex items-center justify-end w-full group transition-colors hover:text-[#55DEE8]"
                 onClick={() => onSort("totalPrice")}
               >
                 Amount
                 {sortField === "totalPrice" &&
                   (sortDirection === "asc" ? (
-                    <ChevronUp className="ml-2 h-3 w-3 text-[#84CC16]" />
+                    <ChevronUp className="ml-2 h-3 w-3 text-[#55DEE8]" />
                   ) : (
-                    <ChevronDown className="ml-2 h-3 w-3 text-[#84CC16]" />
+                    <ChevronDown className="ml-2 h-3 w-3 text-[#55DEE8]" />
                   ))}
               </button>
             </th>
@@ -52,26 +52,26 @@ const TransactionTable = ({
             <tr key={transaction._id} className="group hover:bg-white/[0.02] transition-colors">
               <td className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-1 rounded-full bg-white/5 group-hover:bg-[#84CC16]/20 transition-colors">
-                     <Avatar name={transaction.user.name} size="32" round={true} />
+                  <div className="p-1 rounded-full bg-white/5 group-hover:bg-[#55DEE8]/20 transition-colors">
+                     <Avatar name={transaction.user?.name || "Unknown"} size="32" round={true} />
                   </div>
-                  <span className="font-bold text-sm tracking-tight">{transaction.user.name}</span>
+                  <span className="font-bold text-sm tracking-tight">{transaction.user?.name || "Unknown"}</span>
                 </div>
               </td>
               <td className="p-4 text-xs font-medium text-gray-400">
                 {new Date(transaction.createdAt).toLocaleDateString()}
               </td>
               <td className="p-4">
-                 <span className="text-xs font-bold uppercase tracking-widest text-[#84CC16]">{transaction.turf.name}</span>
+                 <span className="text-xs font-bold uppercase tracking-widest text-[#55DEE8]">{transaction.turf?.name || "Unknown"}</span>
               </td>
               <td className="p-4 text-xs text-gray-500 truncate max-w-[120px]">
-                {transaction.payment.orderId}
+                {transaction.payment?.orderId || "N/A"}
               </td>
               <td className="p-4 text-xs text-gray-500 truncate max-w-[120px]">
-                {transaction.payment.paymentId}
+                {transaction.payment?.paymentId || "N/A"}
               </td>
               <td className="p-4 text-right">
-                 <span className="font-bold text-sm text-[#84CC16] tracking-tight">Rs {transaction.totalPrice}</span>
+                 <span className="font-bold text-sm text-[#55DEE8] tracking-tight">Rs {transaction.totalPrice}</span>
               </td>
             </tr>
           ))}

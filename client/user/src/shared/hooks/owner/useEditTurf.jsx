@@ -162,7 +162,7 @@ export default function useEditTurf(turfId) {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await axiosInstance.get("/api/admin/settings/payout");
+        const response = await axiosInstance.get("/api/settings/payout");
         setSettings(response.data.payoutSettings);
       } catch (err) {
         console.error("Failed to fetch payout settings:", err);
@@ -174,8 +174,13 @@ export default function useEditTurf(turfId) {
   useEffect(() => {
     const fetchTurf = async () => {
       try {
-        const response = await axiosInstance.get(`/api/owner/turf/${turfId}/details`);
-        const { turf: turfData } = response.data;
+        const response = await axiosInstance.get(`/api/owner/turf/owner/${turfId}/details`);
+        
+        const turfData = response.data;
+        
+        if (!turfData) {
+          throw new Error("Turf not found");
+        }
         setTurf(turfData);
         setPendingUpdates(turfData.pendingUpdates || {});
 
@@ -241,7 +246,7 @@ export default function useEditTurf(turfId) {
 
       } catch (err) {
         toast.error("Failed to fetch turf details");
-        navigate("/partner/turfs");
+        navigate("/venue-owner/turfs");
       } finally {
         setFetching(false);
       }
@@ -413,7 +418,7 @@ export default function useEditTurf(turfId) {
 
     try {
       const response = await axiosInstance.put(
-        `/api/owner/turf/${turfId}`,
+        `/api/owner/turf/owner/${turfId}`,
         formData,
         {
           headers: {
@@ -422,7 +427,7 @@ export default function useEditTurf(turfId) {
         }
       );
       toast.success(response.data.message);
-      navigate(`/partner/turf/${turfId}`);
+      navigate(`/venue-owner/turf/${turfId}`);
     } catch (error) {
       toast.error(error.response?.data?.message || "Update failed");
     } finally {
@@ -494,3 +499,4 @@ export default function useEditTurf(turfId) {
     settings
   };
 }
+

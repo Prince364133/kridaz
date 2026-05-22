@@ -26,7 +26,7 @@ export const createTopupOrder = async (req, res) => {
     }
 
     const options = {
-      amount: amount * 100, // Razorpay takes amount in paise
+      amount: Math.round(Number(amount) * 100), // Razorpay takes amount in paise
       currency: "INR",
       receipt: `topup_${Date.now()}`,
     };

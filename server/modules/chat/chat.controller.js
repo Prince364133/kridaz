@@ -8,7 +8,7 @@ import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 
 // Helper: resolve the correct user IDs and model for the current request
 function resolveCurrentUser(req) {
-  const isOwner = req.user?.role?.includes("venu_owners") || req.user?.role === "owner" || req.owner?.role?.includes("venu_owners") || req.owner?.role === "owner";
+  const isOwner = req.user?.role?.includes("venue") || req.user?.role === "owner" || req.owner?.role?.includes("venue") || req.owner?.role === "owner";
 
   const currentUserId = isOwner
     ? (req.user?.ownerId || req.owner?.ownerId || req.user?.id || req.owner?.id)
@@ -37,6 +37,17 @@ async function checkIsAdmin(chatId, participantData) {
   return !!participant;
 }
 
+// In-memory registry to serialize concurrent chat creation requests for the same participant pair
+const inFlightChatCreations = new Map();
+
+const getCreationKey = (userIdA, ownerIdA, userIdB, ownerIdB) => {
+  const ids = [
+    `${userIdA || ''}-${ownerIdA || ''}`,
+    `${userIdB || ''}-${ownerIdB || ''}`
+  ].sort();
+  return ids.join(':::');
+};
+
 /**
  * Access or create a one-on-one chat
  */
@@ -50,7 +61,25 @@ export const accessChat = async (req, res) => {
     ? { ownerId: userId, userId: null, onModel: "Owner" }
     : { userId: userId, ownerId: null, onModel: "User" };
 
-  try {
+  const key = getCreationKey(
+    currentParticipant.userId,
+    currentParticipant.ownerId,
+    targetParticipant.userId,
+    targetParticipant.ownerId
+  );
+
+  // If a request for this exact participant pair is already in flight, await its completion
+  if (inFlightChatCreations.has(key)) {
+    try {
+      const existingChat = await inFlightChatCreations.get(key);
+      return res.status(200).json(existingChat);
+    } catch (err) {
+      // If the in-flight creation failed, fall through to attempt again
+    }
+  }
+
+  // Helper inside accessChat that does the DB query and creation
+  const performAccessOrCreate = async () => {
     // Find existing 1-on-1 chat
     const existingChats = await prisma.chat.findMany({
       where: {
@@ -84,7 +113,7 @@ export const accessChat = async (req, res) => {
     );
 
     if (chat) {
-      return res.status(200).json(chat);
+      return chat;
     }
 
     // Create new 1-on-1 chat
@@ -116,10 +145,21 @@ export const accessChat = async (req, res) => {
       }
     });
 
-    return res.status(200).json(newChat);
+    return newChat;
+  };
+
+  const creationPromise = performAccessOrCreate();
+  inFlightChatCreations.set(key, creationPromise);
+
+  try {
+    const result = await creationPromise;
+    return res.status(200).json(result);
   } catch (error) {
     logger.error("Error in accessChat:", error);
     return res.status(400).json({ message: error.message });
+  } finally {
+    // Make sure we clean up the registry so subsequent accesses start fresh lookups
+    inFlightChatCreations.delete(key);
   }
 };
 
@@ -221,7 +261,7 @@ export const fetchChats = async (req, res) => {
  * Create a new Group Chat or Community
  */
 export const createGroupChat = async (req, res) => {
-  const { name, users, isCommunity, description, groupImage } = req.body;
+  const { name, users, isCommunity, description, groupImage, parentCommunity } = req.body;
   const { participantData: self } = resolveCurrentUser(req);
 
   if (!name || !users) {
@@ -241,6 +281,7 @@ export const createGroupChat = async (req, res) => {
         chatName: name,
         isGroupChat: true,
         isCommunity: !!isCommunity,
+        parentCommunityId: parentCommunity || null,
         description: description || "",
         groupImage: groupImage || "",
         createdByUserId: self.userId,
@@ -303,6 +344,17 @@ export const createGroupChat = async (req, res) => {
               }
             ]
           }
+        }
+      });
+    }
+
+    // Real-time update for all participants
+    const io = getIO();
+    if (io) {
+      newChat.participants.forEach(p => {
+        const uid = p.userId || p.ownerId;
+        if (uid) {
+          io.to(uid.toString()).emit(SOCKET.CHAT_UPDATED, newChat);
         }
       });
     }
@@ -403,12 +455,48 @@ export const respondToInvite = async (req, res) => {
           }
         }
       });
+
+      // Real-time updates for all participants
+      const io = getIO();
+      if (io) {
+        updatedParticipant.chat.participants.forEach(p => {
+          const uid = p.userId || p.ownerId;
+          if (uid) {
+            io.to(uid.toString()).emit(SOCKET.CHAT_UPDATED, updatedParticipant.chat);
+          }
+        });
+      }
+
       res.status(200).json(updatedParticipant.chat);
     } else {
       // Rejected: Just remove the participant record
-      await prisma.chatParticipant.delete({
-        where: { id: participant.id }
+      const deletedParticipant = await prisma.chatParticipant.delete({
+        where: { id: participant.id },
+        include: {
+          chat: {
+            include: {
+              participants: {
+                include: {
+                  user: { select: { id: true, name: true, profilePicture: true, email: true } },
+                  owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+                }
+              }
+            }
+          }
+        }
       });
+
+      // Real-time updates for all remaining participants
+      const io = getIO();
+      if (io) {
+        deletedParticipant.chat.participants.forEach(p => {
+          const uid = p.userId || p.ownerId;
+          if (uid) {
+            io.to(uid.toString()).emit(SOCKET.CHAT_UPDATED, deletedParticipant.chat);
+          }
+        });
+      }
+
       res.status(200).json({ message: "Invite rejected" });
     }
   } catch (error) {
@@ -613,14 +701,16 @@ export const deleteChat = async (req, res) => {
     if (!chat) return res.status(404).json({ message: "Chat not found" });
 
     const isAdmin = await checkIsAdmin(chatId, self);
-    const isCreator = (chat.createdByUserId === self.userId && chat.createdByOwnerId === self.ownerId);
+    const isCreator = 
+      (self.userId && chat.createdByUserId === self.userId) ||
+      (self.ownerId && chat.createdByOwnerId === self.ownerId);
 
     // Restrict deletion
     if (chat.isGroupChat) {
       if (chat.isCommunity && !isCreator) {
         return res.status(403).json({ message: "Only the creator can delete this community" });
       }
-      if (!isAdmin) {
+      if (!chat.isCommunity && !isAdmin) {
         return res.status(403).json({ message: "Only admins can delete this group" });
       }
     } else {
@@ -635,25 +725,70 @@ export const deleteChat = async (req, res) => {
     const io = getIO();
 
     // Cascading Delete for Communities
-    if (chat.isCommunity) {
-      const childGroups = await prisma.chat.findMany({ 
-        where: { parentCommunityId: chatId },
-        include: { participants: true }
-      });
-      
-      for (const child of childGroups) {
-        await prisma.message.deleteMany({ where: { chatId: child.id } });
-        if (io) {
-          child.participants.forEach(p => {
-            io.to(p.userId || p.ownerId).emit(SOCKET.CHAT_DELETED, child.id);
-          });
-        }
-      }
-      await prisma.chat.deleteMany({ where: { parentCommunityId: chatId } });
+    const childGroups = chat.isCommunity
+      ? await prisma.chat.findMany({ 
+          where: { parentCommunityId: chatId },
+          include: { participants: true }
+        })
+      : [];
+
+    const childGroupIds = childGroups.map(c => c.id);
+    const allChatIds = [chatId, ...childGroupIds];
+
+    // 1. Set latestMessageId to null to prevent foreign key violations when deleting messages
+    await prisma.chat.updateMany({
+      where: { id: { in: allChatIds } },
+      data: { latestMessageId: null }
+    });
+
+    // 2. Clear implicit many-to-many join tables to prevent foreign key constraint violations
+    try {
+      await prisma.$executeRawUnsafe(`
+        DELETE FROM "_MessageDeletedBy" 
+        WHERE "A" IN (SELECT id FROM "Message" WHERE "chatId" IN (${allChatIds.map(id => `'${id}'`).join(',')}))
+           OR "B" IN (SELECT id FROM "ChatParticipant" WHERE "chatId" IN (${allChatIds.map(id => `'${id}'`).join(',')}))
+      `);
+    } catch (e) {
+      logger.error("Error clearing _MessageDeletedBy:", e);
     }
 
-    // Delete messages associated with this chat
-    await prisma.message.deleteMany({ where: { chatId } });
+    try {
+      await prisma.$executeRawUnsafe(`
+        DELETE FROM "_MessageReadBy" 
+        WHERE "A" IN (SELECT id FROM "Message" WHERE "chatId" IN (${allChatIds.map(id => `'${id}'`).join(',')}))
+           OR "B" IN (SELECT id FROM "ChatParticipant" WHERE "chatId" IN (${allChatIds.map(id => `'${id}'`).join(',')}))
+      `);
+    } catch (e) {
+      logger.error("Error clearing _MessageReadBy:", e);
+    }
+
+    // 3. Delete all chat participants to avoid foreign key violations
+    await prisma.chatParticipant.deleteMany({
+      where: { chatId: { in: allChatIds } }
+    });
+
+    // 4. Delete all messages associated with the chats
+    await prisma.message.deleteMany({
+      where: { chatId: { in: allChatIds } }
+    });
+
+    // 5. Delete the child groups if community
+    if (chat.isCommunity && childGroupIds.length > 0) {
+      await prisma.chat.deleteMany({
+        where: { id: { in: childGroupIds } }
+      });
+    }
+
+    // 6. Emit socket events for child groups deletion
+    if (io && chat.isCommunity) {
+      for (const child of childGroups) {
+        child.participants.forEach(p => {
+          io.to(p.userId || p.ownerId).emit(SOCKET.CHAT_DELETED, child.id);
+        });
+      }
+    }
+
+    // Finally delete the chat itself
     await prisma.chat.delete({ where: { id: chatId } });
 
     if (io) {
@@ -710,31 +845,56 @@ export const makeGroupAdmin = async (req, res) => {
       return res.status(403).json({ message: "Only admins can promote others to admin" });
     }
 
-    const targetParticipant = await prisma.chatParticipant.findFirst({
+    let targetParticipant = await prisma.chatParticipant.findFirst({
       where: {
         chatId,
         userId: onModel === "User" ? userId : null,
         ownerId: onModel === "Owner" ? userId : null
       }
     });
-    if (!targetParticipant) return res.status(404).json({ message: "Participant not found" });
 
-    const updatedParticipant = await prisma.chatParticipant.update({
-      where: { id: targetParticipant.id },
-      data: { isAdmin: true },
-      include: {
-        chat: {
-          include: {
-            participants: {
-              include: {
-                user: { select: { id: true, name: true, profilePicture: true, email: true } },
-                owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+    let updatedParticipant;
+    if (!targetParticipant) {
+      updatedParticipant = await prisma.chatParticipant.create({
+        data: {
+          chatId,
+          userId: onModel === "User" ? userId : null,
+          ownerId: onModel === "Owner" ? userId : null,
+          onModel,
+          isAdmin: true,
+          isPending: false
+        },
+        include: {
+          chat: {
+            include: {
+              participants: {
+                include: {
+                  user: { select: { id: true, name: true, profilePicture: true, email: true } },
+                  owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+                }
               }
             }
           }
         }
-      }
-    });
+      });
+    } else {
+      updatedParticipant = await prisma.chatParticipant.update({
+        where: { id: targetParticipant.id },
+        data: { isAdmin: true },
+        include: {
+          chat: {
+            include: {
+              participants: {
+                include: {
+                  user: { select: { id: true, name: true, profilePicture: true, email: true } },
+                  owner: { include: { user: { select: { name: true, profilePicture: true } } } }
+                }
+              }
+            }
+          }
+        }
+      });
+    }
 
     res.status(200).json(updatedParticipant.chat);
   } catch (error) {

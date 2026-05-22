@@ -7,6 +7,12 @@ import { X, AlertTriangle, ChevronRight, Users } from 'lucide-react';
  *
  * Shown when the umpire presses WICKET.
  * Collects: wicketType, fielderId (if applicable), nextBatterId, extraRuns (run out).
+ *
+ * Props:
+ *   fieldingTeamSlots  – [{ userId, name }]
+ *   battingTeamSlots   – [{ userId, name }] (remaining batters, excluding current striker)
+ *   onConfirm({ wicketType, fielderId, nextBatterId, runs }) – called after confirmation
+ *   onClose()
  */
 
 const WICKET_TYPES = [

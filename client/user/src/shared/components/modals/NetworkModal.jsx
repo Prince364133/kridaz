@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { X, Search, UserPlus, UserMinus, Loader2, MapPin, Users } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -37,18 +37,19 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
 
   const handleFollowToggle = async (targetUser) => {
     gateInteraction(async () => {
-      const isFollowing = followingIds.includes(targetUser._id);
+      const targetId = targetUser.id || targetUser._id;
+      const isFollowing = followingIds.includes(targetId);
       try {
         if (isFollowing) {
-          const response = await axiosInstance.post(`/api/user/players/${targetUser._id}/unfollow`);
+          const response = await axiosInstance.post(`/api/user/players/${targetId}/unfollow`);
           if (response.data.success) {
-            dispatch(unfollowUser(targetUser._id));
+            dispatch(unfollowUser(targetId));
             toast.success(`Unfollowed ${targetUser.name}`);
           }
         } else {
-          const response = await axiosInstance.post(`/api/user/players/${targetUser._id}/follow`);
+          const response = await axiosInstance.post(`/api/user/players/${targetId}/follow`);
           if (response.data.success) {
-            dispatch(followUser(targetUser._id));
+            dispatch(followUser(targetId));
             toast.success(`Following ${targetUser.name}`);
           }
         }
@@ -68,8 +69,10 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
   );
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
-    const aIsMutual = followingIds.includes(a._id);
-    const bIsMutual = followingIds.includes(b._id);
+    const aId = a.id || a._id;
+    const bId = b.id || b._id;
+    const aIsMutual = followingIds.includes(aId);
+    const bIsMutual = followingIds.includes(bId);
     if (aIsMutual && !bIsMutual) return -1;
     if (!aIsMutual && bIsMutual) return 1;
     return 0;
@@ -83,7 +86,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
         <div className="flex items-center justify-between p-4 border-b border-[#2D2D2D]">
           <h2 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
             {type === "followers" ? "Followers" : "Following"}
-            <span className="text-[#CCFF00] bg-[#CCFF00]/10 px-2 py-0.5 rounded-full text-[10px]">
+            <span className="text-[#55DEE8] bg-[#55DEE8]/10 px-2 py-0.5 rounded-full text-[10px]">
               {initialCount}
             </span>
           </h2>
@@ -100,7 +103,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
               placeholder="SEARCH..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[6px] py-2.5 pl-10 pr-4 text-xs text-white placeholder:text-white/20 outline-none focus:border-[#CCFF00]/50 transition-all uppercase tracking-widest"
+              className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[6px] py-2.5 pl-10 pr-4 text-xs text-white placeholder:text-white/20 outline-none focus:border-[#55DEE8]/50 transition-all uppercase tracking-widest"
             />
           </div>
         </div>
@@ -108,18 +111,19 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
         <div className="h-[400px] overflow-y-auto no-scrollbar p-2">
           {loading ? (
             <div className="h-full flex items-center justify-center">
-              <Loader2 className="animate-spin text-[#CCFF00]" size={32} />
+              <Loader2 className="animate-spin text-[#55DEE8]" size={32} />
             </div>
           ) : sortedUsers.length > 0 ? (
             <div className="space-y-1">
               {sortedUsers.map((user) => {
-                const isFollowing = followingIds.includes(user._id);
-                const isSelf = currentUser?._id === user._id;
+                const userId = user.id || user._id;
+                const isFollowing = followingIds.includes(userId);
+                const isSelf = (currentUser?.id || currentUser?._id) === userId;
 
                 return (
-                  <div key={user._id} className="flex items-center justify-between p-3 hover:bg-[#000000] rounded-[8px] transition-colors group">
+                  <div key={userId} className="flex items-center justify-between p-3 hover:bg-[#000000] rounded-[8px] transition-colors group">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <Link to={`/profile/${user._id}`} onClick={onClose} className="shrink-0 w-10 h-10 rounded-[6px] overflow-hidden bg-[#000000] border border-[#2D2D2D]">
+                      <Link to={`/profile/${userId}`} onClick={onClose} className="shrink-0 w-10 h-10 rounded-[6px] overflow-hidden bg-[#000000] border border-[#2D2D2D]">
                         {user.profilePicture ? (
                           <img 
                             src={user.profilePicture} 
@@ -132,24 +136,24 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                           />
                         ) : null}
                         <div 
-                          className="w-full h-full flex items-center justify-center bg-[#CCFF00]/10"
+                          className="w-full h-full flex items-center justify-center bg-[#55DEE8]/10"
                           style={{ display: user.profilePicture ? 'none' : 'flex' }}
                         >
-                          <span className="text-[#CCFF00] font-black text-[10px]">
+                          <span className="text-[#55DEE8] font-black text-[10px]">
                             {user.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
                           </span>
                         </div>
                       </Link>
                       <div className="overflow-hidden">
-                        <Link to={`/profile/${user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#CCFF00] transition-colors truncate">
+                        <Link to={`/profile/${user.id || user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#55DEE8] transition-colors truncate">
                           {user.name}
                         </Link>
                         <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase tracking-widest truncate">
                           <span>@{user.username || user.businessDetails?.businessName || "player"}</span>
                           {isFollowing && (
                             <>
-                              <span className="text-white/20">â€¢</span>
-                              <span className="text-[#CCFF00]/60">Following</span>
+                              <span className="text-white/20">ΓÇó</span>
+                              <span className="text-[#55DEE8]/60">Following</span>
                             </>
                           )}
                         </div>
@@ -162,7 +166,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                         className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
                           isFollowing
                             ? "bg-[#000000] text-white/40 border border-[#2D2D2D] hover:bg-white/10"
-                            : "bg-[#CCFF00] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(132,204,22,0.15)]"
+                            : "bg-[#55DEE8] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(85,222,232,0.15)]"
                         }`}
                       >
                         {isFollowing ? "Following" : "Follow"}

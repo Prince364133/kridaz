@@ -34,7 +34,7 @@ export const getAllProfessionals = async (req, res) => {
     }
 
     if (sport && sport !== "All") {
-      where.gameTypes = { contains: sport, mode: "insensitive" };
+      where.user.sportTypes = { has: sport };
     }
 
     const professionals = await prisma.ownerProfile.findMany({
@@ -47,7 +47,8 @@ export const getAllProfessionals = async (req, res) => {
             role: true,
             city: true,
             state: true,
-            profilePicture: true
+            profilePicture: true,
+            sportTypes: true
           }
         }
       },
@@ -65,7 +66,7 @@ export const getAllProfessionals = async (req, res) => {
       city: prof.user?.city || "",
       state: prof.user?.state || "",
       image: prof.user?.profilePicture || null,
-      gameTypes: prof.gameTypes,
+      gameTypes: prof.user?.sportTypes || [],
       specialization: prof.specialization,
       experience: prof.experience,
       rating: prof.rating,
@@ -309,6 +310,43 @@ export const handleBookingRequest = async (req, res) => {
           where: { id: bookingId },
           data: { status: "ACCEPTED" }
         });
+
+        // 4. Auto-create tasks for the booked slots
+        const user = await tx.user.findUnique({ where: { id: booking.userId } });
+        if (user) {
+          // Check if customer exists in directory
+          let customer = await tx.professionalCustomer.findFirst({
+            where: { professionalId, userId: booking.userId }
+          });
+          
+          if (!customer) {
+            customer = await tx.professionalCustomer.create({
+              data: {
+                professionalId,
+                userId: booking.userId,
+                name: user.name,
+                email: user.email,
+                phone: user.phone
+              }
+            });
+          }
+
+          // Generate tasks per slot
+          if (booking.slots && Array.isArray(booking.slots)) {
+            const tasks = booking.slots.map(slot => ({
+              professionalId,
+              customerId: customer.id,
+              title: `${booking.bookingType} with ${user.name}`,
+              description: booking.message || "Auto-generated from booking",
+              date: new Date(booking.date),
+              startTime: slot.startTime,
+              endTime: slot.endTime,
+              reminderMinutes: 30
+            }));
+            
+            await tx.professionalTask.createMany({ data: tasks });
+          }
+        }
       } else if (status === "REJECTED") {
         // 1. Release reserved balance for user
         await WalletService.release(booking.userId, 'user', booking.totalAmount, false, tx);
@@ -436,11 +474,12 @@ export const updateProfessionalProfile = async (req, res) => {
         throw new Error("Owner profile not found");
       }
 
-      // 2. Update User details if name, city, state are provided
+      // 2. Update User details if name, city, state, or gameTypes are provided
       const userUpdate = {};
       if (name) userUpdate.name = name;
       if (city) userUpdate.city = city;
       if (state) userUpdate.state = state;
+      if (gameTypes) userUpdate.sportTypes = gameTypes;
 
       if (Object.keys(userUpdate).length > 0) {
         await tx.user.update({
@@ -453,7 +492,6 @@ export const updateProfessionalProfile = async (req, res) => {
       const updateData = {
         bio,
         price: hourlyPrice ? parseFloat(hourlyPrice) : undefined,
-        gameTypes,
         gender,
         dob: dob ? new Date(dob) : undefined,
         coachingLevel,
@@ -496,6 +534,141 @@ export const updateProfessionalProfile = async (req, res) => {
     return res.status(200).json({ message: "Profile updated successfully", professional: updatedProfessional });
   } catch (error) {
     logger.error("Error in updateProfessionalProfile:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// --- PRACTICE SCHEDULING & CUSTOMERS ---
+
+export const getProfessionalTasks = async (req, res) => {
+  const professionalId = req.user.ownerId;
+  if (!professionalId) return res.status(403).json({ message: "Unauthorized" });
+  
+  const { startDate, endDate } = req.query;
+
+  try {
+    const tasks = await prisma.professionalTask.findMany({
+      where: {
+        professionalId,
+        date: {
+          gte: startDate ? new Date(startDate) : undefined,
+          lte: endDate ? new Date(endDate) : undefined,
+        }
+      },
+      include: {
+        customer: true
+      },
+      orderBy: {
+        date: 'asc'
+      }
+    });
+
+    return res.status(200).json({ tasks });
+  } catch (error) {
+    logger.error("Error in getProfessionalTasks:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const createProfessionalTask = async (req, res) => {
+  const professionalId = req.user.ownerId;
+  if (!professionalId) return res.status(403).json({ message: "Unauthorized" });
+
+  const { title, description, date, startTime, endTime, customerId, reminderMinutes } = req.body;
+
+  try {
+    // Basic slot validation to ensure max 2 tasks per slot
+    const existingTasksInSlot = await prisma.professionalTask.count({
+      where: {
+        professionalId,
+        date: new Date(date),
+        startTime
+      }
+    });
+
+    if (existingTasksInSlot >= 2) {
+      return res.status(400).json({ message: "Maximum of 2 tasks allowed per 2-hour slot." });
+    }
+
+    const task = await prisma.professionalTask.create({
+      data: {
+        professionalId,
+        title,
+        description,
+        date: new Date(date),
+        startTime,
+        endTime,
+        customerId: customerId || null,
+        reminderMinutes: parseInt(reminderMinutes) || 30
+      },
+      include: {
+        customer: true
+      }
+    });
+
+    return res.status(201).json({ message: "Task created successfully", task });
+  } catch (error) {
+    logger.error("Error in createProfessionalTask:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const getProfessionalCustomers = async (req, res) => {
+  const professionalId = req.user.ownerId;
+  if (!professionalId) return res.status(403).json({ message: "Unauthorized" });
+
+  try {
+    const customers = await prisma.professionalCustomer.findMany({
+      where: { professionalId },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return res.status(200).json({ customers });
+  } catch (error) {
+    logger.error("Error in getProfessionalCustomers:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const createProfessionalCustomer = async (req, res) => {
+  const professionalId = req.user.ownerId;
+  if (!professionalId) return res.status(403).json({ message: "Unauthorized" });
+
+  const { name, email, phone, userId } = req.body;
+
+  try {
+    const customer = await prisma.professionalCustomer.create({
+      data: {
+        professionalId,
+        name,
+        email,
+        phone,
+        userId: userId || null
+      }
+    });
+
+    return res.status(201).json({ message: "Customer added successfully", customer });
+  } catch (error) {
+    logger.error("Error in createProfessionalCustomer:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateWorkingHours = async (req, res) => {
+  const professionalId = req.user.ownerId;
+  if (!professionalId) return res.status(403).json({ message: "Unauthorized" });
+
+  const { workingHours } = req.body;
+
+  try {
+    const updatedProfile = await prisma.ownerProfile.update({
+      where: { id: professionalId },
+      data: { workingHours }
+    });
+
+    return res.status(200).json({ message: "Working hours updated successfully", workingHours: updatedProfile.workingHours });
+  } catch (error) {
+    logger.error("Error in updateWorkingHours:", error);
     return res.status(500).json({ message: error.message });
   }
 };

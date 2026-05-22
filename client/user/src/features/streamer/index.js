@@ -7,3 +7,5 @@ export { default as TickerGallery } from "./components/TickerGallery.jsx";
 export { default as ManageStream } from "./pages/ManageStream.jsx";
 export { FacebookConnected, FacebookError } from './pages/FacebookAuthStatus.jsx';
 export { YouTubeConnected, YouTubeError } from './pages/YouTubeAuthStatus.jsx';
+
+export { default as StreamerBanking } from './Banking/StreamerBanking';

@@ -72,13 +72,13 @@
 /* ── Design Tokens ──────────────────────────────────────────────── */
 :root {
   /* Unified Primary - Main Branch Official */
-  --primary:       #CCFF00; /* Updated to Match requested Neon Green */
-  --primary-glow:  rgba(204, 255, 0, 0.4);
-  --primary-dark:  #B3FF00;
+  --primary:       #55DEE8; /* Updated to Match requested brand Cyan */
+  --primary-glow:  rgba(85, 222, 232, 0.4);
+  --primary-dark:  #00b4c2;
   
   /* Legacy/Sunny specific names pointing to unified color */
-  --action-green:  #CCFF00;
-  --neon-lime:     #CCFF00;
+  --action-green:  #55DEE8;
+  --neon-lime:     #55DEE8;
   
   /* Backgrounds & Surfaces */
   --bg-base:       #000000;
@@ -113,7 +113,7 @@
 
 /* ── Typography ──────────────────────────────────────────────────── */
 h1, h2, h3, .font-display {
-  font-family: "Bebas Neue", sans-serif; /* Removed !important */
+  font-family: "Bebas Neue", sans-serif;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -437,12 +437,12 @@ body {
 }
 
 .datepicker-dark .react-datepicker__time-list-item:hover {
-  background-color: #CCFF00 !important;
+  background-color: #55DEE8 !important;
   color: black !important;
 }
 
 .datepicker-dark .react-datepicker__time-list-item--selected {
-  background-color: #CCFF00 !important;
+  background-color: #55DEE8 !important;
   color: black !important;
 }
 
@@ -452,7 +452,7 @@ body {
 
 .datepicker-dark .react-datepicker__current-month, 
 .datepicker-dark .react-datepicker-time__header {
-  color: #CCFF00 !important;
+  color: #55DEE8 !important;
   font-size: 11px !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;

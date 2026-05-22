@@ -3,7 +3,10 @@ import { baseApi } from './baseApi';
 export const communityApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getCommunityFeed: builder.query({
-      query: () => '/api/user/community',
+      query: (params) => ({
+        url: '/api/user/community',
+        params,
+      }),
       providesTags: ['Community'],
     }),
     getStoriesFeed: builder.query({
@@ -173,6 +176,7 @@ export const communityApi = baseApi.injectEndpoints({
 
 export const {
   useGetCommunityFeedQuery,
+  useLazyGetCommunityFeedQuery,
   useGetStoriesFeedQuery,
   useGetCommunityStatsQuery,
   useCreatePostMutation,

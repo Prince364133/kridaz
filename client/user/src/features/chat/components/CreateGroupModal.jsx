@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useGetFollowersFollowingQuery, useCreateGroupChatMutation } from '../../../redux/api/chatApi';
+import { useGetFollowersFollowingQuery, useCreateGroupChatMutation } from '@redux/api/chatApi';
 
 const CreateGroupModal = ({ isOpen, onClose, onSuccess }) => {
   const [groupName, setGroupName] = useState('');
@@ -113,3 +113,4 @@ const CreateGroupModal = ({ isOpen, onClose, onSuccess }) => {
 };
 
 export default CreateGroupModal;
+

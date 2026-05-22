@@ -16,10 +16,15 @@ import {
   undoLastBall,
   // Phase 3: Live overlay
   getLiveScore,
+  setupScoringGame,
+  getMyScoringGames,
+  getScoringGameById,
+  authenticateScoringApp,
+  notifyPlayers
 } from "./scoring.controller.js";
 import verifyAuth from "../../middleware/jwt/auth.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
-import { startScoringSchema, updateScoreSchema, tossSchema } from "./scoring.validator.js";
+import { startScoringSchema, updateScoreSchema, tossSchema, setupScoringGameSchema, undoLastBallSchema, completeMatchSchema, startNextInningsSchema, setPlayersSchema } from "./scoring.validator.js";
 
 const router = Router();
 
@@ -104,8 +109,85 @@ router.get("/analytics/:matchId", getMatchAnalytics);
  */
 router.get("/live-score/:matchId", getLiveScore);
 
+/**
+ * @swagger
+ * /scoring/auth/{gameId}:
+ *   post:
+ *     summary: Authenticate scoring app access with password
+ *     tags: [Scoring]
+ *     parameters:
+ *       - in: path
+ *         name: gameId
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Returns a scorer token
+ *       401:
+ *         description: Invalid password
+ */
+router.post("/auth/:gameId", authenticateScoringApp);
+
 // Protected routes (Only authorized umpires can score)
 router.use(verifyAuth);
+
+/**
+ * @swagger
+ * /scoring/setup:
+ *   post:
+ *     summary: Setup a new Scoring Match
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Match created
+ */
+router.post("/setup", verifyAuth, validate(setupScoringGameSchema), setupScoringGame);
+
+/**
+ * @swagger
+ * /scoring/my-games:
+ *   get:
+ *     summary: Get scoring matches for the current user
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Matches retrieved
+ */
+router.get("/my-games", verifyAuth, getMyScoringGames);
+
+/**
+ * @swagger
+ * /scoring/game/{gameId}:
+ *   get:
+ *     summary: Get a scoring game by ID (full details)
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: gameId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Full game details
+ */
+router.get("/game/:gameId", verifyAuth, getScoringGameById);
+
+
 
 /**
  * @swagger
@@ -160,7 +242,31 @@ router.put("/update", validate(updateScoreSchema), updateScore);
  *       200:
  *         description: Match completed
  */
-router.post("/complete", completeMatch);
+router.post("/complete", validate(completeMatchSchema), completeMatch);
+
+/**
+ * @swagger
+ * /scoring/notify-players:
+ *   post:
+ *     summary: Notify players about the match
+ *     description: Dispatches push/socket notifications to all players in the match
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               matchId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Notifications dispatched
+ */
+router.post("/notify-players", notifyPlayers);
 
 /**
  * @swagger
@@ -221,7 +327,7 @@ router.post("/:matchId/stream-config", updateStreamConfig);
  *       200:
  *         description: Innings started
  */
-router.post("/next-innings", startNextInnings);
+router.post("/next-innings", validate(startNextInningsSchema), startNextInnings);
 
 /**
  * @swagger
@@ -260,21 +366,30 @@ router.post("/toss", validate(tossSchema), setToss);
  *       200:
  *         description: Players assigned
  */
-router.post("/set-players", setPlayers);
+router.post("/set-players", validate(setPlayersSchema), setPlayers);
 
 /**
  * @swagger
  * /scoring/undo:
- *   delete:
+ *   post:
  *     summary: Undo last action
  *     description: Reverts the last ball or action recorded.
  *     tags: [Scoring]
  *     security:
  *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               scoringId:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Action reverted
  */
-router.delete("/undo", undoLastBall);
+router.post("/undo", validate(undoLastBallSchema), undoLastBall);
 
 export default router;

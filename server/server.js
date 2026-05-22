@@ -98,4 +98,4 @@ const startServer = () => {
 };
 
 // Start the server
-startServer();
+startServer(); // triggered restart

@@ -7,8 +7,4 @@ export { default as Login } from "./pages/Login.jsx";
 export { default as SignUp } from "./pages/SignUp.jsx";
 export { default as ForgotPassword } from "./pages/ForgotPassword.jsx";
 export { default as PartnersGateway } from "./pages/PartnersGateway.jsx";
-export { default as VenueOwnerSignUp } from "./pages/VenueOwnerSignUp.jsx";
-export { default as CoachSignUp } from "./pages/CoachSignUp.jsx";
-export { default as UmpireSignUp } from "./pages/UmpireSignUp.jsx";
-export { default as ScorerSignUp } from "./pages/ScorerSignUp.jsx";
-export { default as StreamerSignUp } from "./pages/StreamerSignUp.jsx";
+

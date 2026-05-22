@@ -1,2 +1,2 @@
-import axiosInstance from "../../infrastructure/axios";
+import axiosInstance from "@infrastructure/axios";
 export default axiosInstance;

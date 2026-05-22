@@ -1,6 +1,6 @@
 import axios from "axios";
-import { store } from "../redux/store";
-import { logout, restoreAuth } from "../redux/slices/authSlice";
+import { store } from "@redux/store";
+import { logout, restoreAuth } from "@redux/slices/authSlice";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "",
@@ -49,7 +49,11 @@ axiosInstance.interceptors.response.use(
       }
     } else if (error.response?.status === 401 || error.response?.status === 403) {
       if (!isAuthCheck) {
-        store.dispatch(logout());
+        console.warn("API returned 401/403. URL:", originalRequest?.url, "Message:", error.response?.data?.message);
+        const msg = error.response?.data?.message || "";
+        if (msg.includes("Invalid token") || msg.includes("Session invalid")) {
+          store.dispatch(logout());
+        }
       }
     }
     return Promise.reject(error);

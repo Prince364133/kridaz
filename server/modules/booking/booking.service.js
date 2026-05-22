@@ -19,6 +19,7 @@ import adjustTime from "../../utils/adjustTime.js";
 import { generateHTMLContent } from "../../utils/generateEmail.js";
 import { generateInvoice } from "../../utils/generateInvoice.js";
 import NotificationService from "../../services/notification.service.js";
+import WalletService from "../../services/wallet.service.js";
 import { format, parseISO, parse } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
 import logger from "../../utils/logger.js";
@@ -316,11 +317,20 @@ export const verifyBookingPayment = async (userId, paymentData) => {
     title: "New Booking Received",
     message: `A new booking has been confirmed for ${turf.name} on ${formattedDate}.`,
     type: "BOOKING",
-    link: "/partner/bookings"
+    link: "/venue-owner/bookings"
   });
 
   // Generate & send invoice
-  generateInvoice(updatedBooking, turf, user).then(pdfBuffer => {
+  const duration = Math.ceil((new Date(adjustedEndTime) - new Date(adjustedStartTime)) / (1000 * 60 * 60));
+  const invoiceBooking = {
+    ...updatedBooking,
+    selectedTurfDate: formattedDate,
+    startTime: formattedStartTime,
+    endTime: formattedEndTime,
+    duration
+  };
+
+  generateInvoice(invoiceBooking, turf, user).then(pdfBuffer => {
     const htmlContent = generateHTMLContent(
       turf.name,
       turf.city + ", " + turf.state,
@@ -367,6 +377,7 @@ export const processWalletBooking = async (userId, bookingData) => {
     couponCode,
     balanceAmount: bodyBalanceAmount,
     paymentType: bodyPaymentType,
+    advanceAmount: bodyAdvanceAmount,
   } = bookingData;
 
   const turfId = bodyTurfId || id;
@@ -380,7 +391,7 @@ export const processWalletBooking = async (userId, bookingData) => {
   const [user, turf, settingsDoc] = await Promise.all([
     prisma.user.findUnique({ 
       where: { id: userId },
-      select: { id: true, name: true, email: true, phone: true, walletBalance: true }
+      select: { id: true, name: true, email: true, phone: true }
     }),
     prisma.turf.findUnique({ 
       where: { id: turfId },
@@ -408,9 +419,11 @@ export const processWalletBooking = async (userId, bookingData) => {
   const baseAmount = finalPrice - gstAmountCalc;
   const platformFee = Math.round(baseAmount * (platformFeePercentage / 100));
   const ownerRevenue = baseAmount - platformFee;
-  const amountToDeduct = finalPrice;
+  const amountToDeduct = bodyPaymentType === "PARTIAL" && bodyAdvanceAmount ? bodyAdvanceAmount : finalPrice;
 
-  if (user.walletBalance < amountToDeduct) {
+  const wallet = await WalletService.getWallet(userId, "user");
+
+  if (wallet.usableBalance < amountToDeduct) {
     const error = new Error("Insufficient wallet balance");
     error.statusCode = 400;
     throw error;
@@ -436,10 +449,11 @@ export const processWalletBooking = async (userId, bookingData) => {
 
   const booking = await prisma.$transaction(async (tx) => {
     // Deduct from wallet
+    await WalletService.debit(userId, "user", amountToDeduct, tx);
+    
     await tx.user.update({
       where: { id: userId },
       data: { 
-        walletBalance: { decrement: amountToDeduct },
         bookingCount: { increment: 1 }
       }
     });
@@ -558,7 +572,7 @@ export const processWalletBooking = async (userId, bookingData) => {
     title: "New Wallet Booking",
     message: `A new booking has been confirmed for ${turf.name} via Wallet on ${formattedDate}.`,
     type: "BOOKING",
-    link: "/partner/bookings"
+    link: "/venue-owner/bookings"
   });
 
   return updatedBooking;
@@ -785,6 +799,7 @@ export const processManualBooking = async (ownerId, manualData) => {
 
     return await tx.booking.create({
       data: {
+        userId: ownerId,
         turfId,
         timeSlotId: timeSlot.id,
         playStartTime: adjustedStartTime,
@@ -853,7 +868,7 @@ export const processBookingCancellation = async (userId, bookingId) => {
       throw error;
     }
 
-    const refundAmount = Math.round(booking.totalPrice * 0.3);
+    const refundAmount = Math.round(booking.paidAmount * 0.3);
 
     // 1. Update Booking
     const updatedBooking = await tx.booking.update({
@@ -866,10 +881,7 @@ export const processBookingCancellation = async (userId, bookingId) => {
 
     // 2. Refund to User Wallet
     if (refundAmount > 0) {
-      await tx.user.update({
-        where: { id: userId },
-        data: { walletBalance: { increment: refundAmount } }
-      });
+      await WalletService.credit(userId, "user", refundAmount, tx);
 
       await tx.walletTransaction.create({
         data: {
@@ -957,3 +969,4 @@ export const findAdminBookings = async (filters) => {
 
   return { bookings, total };
 };
+

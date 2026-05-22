@@ -3,16 +3,22 @@ import {
   registerUser, 
   login,
   sendOtp,
+  verifyOtp,
   loginStep1,
   googleAuth,
   getMe,
   logout,
   refreshToken,
   updateProfile,
+  updateProfilePicture,
   checkUsername,
   generateRecoveryTokens,
   loginWithRecoveryToken,
-  upgradeRequest
+  upgradeRequest,
+  sendPhoneVerificationOtp,
+  verifyPhoneOtp,
+  forgotPasswordOtp,
+  resetPassword
 } from "../auth.controller.js";
 import { 
   userRegisterSchema, 
@@ -27,7 +33,7 @@ import {
   authLimiter,
   otpLimiter,
 } from "../../../middleware/rateLimiter.middleware.js";
-import { validateTurnstile } from "../../../middleware/turnstile.middleware.js";
+import { verifyTurnstile } from "../../../middleware/turnstile.middleware.js";
 
 const router = express.Router();
 
@@ -47,7 +53,8 @@ const router = express.Router();
  *     summary: Send OTP to email
  *     tags: [Auth]
  */
-router.post("/send-otp", otpLimiter, validateTurnstile, validate(sendOtpSchema), sendOtp);
+router.post("/send-otp", otpLimiter, verifyTurnstile, validate(sendOtpSchema), sendOtp);
+router.post("/verify-otp", otpLimiter, verifyOtp);
 
 /**
  * @swagger
@@ -56,7 +63,7 @@ router.post("/send-otp", otpLimiter, validateTurnstile, validate(sendOtpSchema),
  *     summary: Register a new user
  *     tags: [Auth]
  */
-router.post("/register", authLimiter, validateTurnstile, validate(userRegisterSchema), registerUser);
+router.post("/register", authLimiter, verifyTurnstile, validate(userRegisterSchema), registerUser);
 
 /**
  * @swagger
@@ -65,7 +72,7 @@ router.post("/register", authLimiter, validateTurnstile, validate(userRegisterSc
  *     summary: Login Step 1 - Password verification
  *     tags: [Auth]
  */
-router.post("/login-step1", otpLimiter, validateTurnstile, validate(loginStep1Schema), loginStep1);
+router.post("/login-step1", otpLimiter, verifyTurnstile, validate(loginStep1Schema), loginStep1);
 
 /**
  * @swagger
@@ -74,7 +81,7 @@ router.post("/login-step1", otpLimiter, validateTurnstile, validate(loginStep1Sc
  *     summary: Login Step 2 - Complete login
  *     tags: [Auth]
  */
-router.post("/login", authLimiter, validateTurnstile, validate(userLoginSchema), login);
+router.post("/login", authLimiter, verifyTurnstile, validate(userLoginSchema), login);
 
 /**
  * @swagger
@@ -144,6 +151,9 @@ router.post("/logout", logout);
  *       - BearerAuth: []
  */
 router.put("/updateProfile", userAuth, updateProfile);
+router.post("/profile-picture", userAuth, upload.single("profilePicture"), updateProfilePicture);
+router.post("/send-phone-verification-otp", userAuth, sendPhoneVerificationOtp);
+router.post("/verify-phone-otp", userAuth, verifyPhoneOtp);
 
 /**
  * @swagger
@@ -166,5 +176,9 @@ router.post("/recovery/generate", userAuth, generateRecoveryTokens);
  *       - BearerAuth: []
  */
 router.post("/upgrade-request", userAuth, upload.array("documents", 10), upgradeRequest);
+
+// ── Password Reset Routes ───────────────────────────────────────────────────
+router.post("/forgot-password-otp", forgotPasswordOtp);
+router.post("/reset-password", resetPassword);
 
 export default router;

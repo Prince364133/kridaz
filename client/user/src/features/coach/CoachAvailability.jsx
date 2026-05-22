@@ -4,11 +4,11 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import { Calendar, Clock, Plus, Trash2, Save, Loader2, CalendarDays, Zap } from "lucide-react";
 import toast from "react-hot-toast";
 import { format, addDays, startOfToday, parse } from "date-fns";
-import ClockPicker from "../common/ClockPicker";
+import ClockPicker from "@components/common/ClockPicker";
 
 export default function CoachAvailability() {
   const { user } = useSelector((state) => state.auth);
-  const themeColor = "#CCFF00";
+  const themeColor = "#55DEE8";
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -123,7 +123,7 @@ export default function CoachAvailability() {
                   {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
                 </p>
                 <p className="text-[10px] font-semibold uppercase tracking-widest opacity-80" style={{ color: themeColor }}>
-                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} •{" "}
+                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} ΓÇó{" "}
                   {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
                 </p>
               </div>
@@ -164,7 +164,7 @@ export default function CoachAvailability() {
                       className={`relative flex flex-col items-center justify-center p-3 rounded-lg border transition-all duration-300 ${
                         isSelected 
                         ? "text-black border-transparent shadow-lg" 
-                        : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#CCFF00]/30 hover:bg-[#2D2D2D]/50"
+                        : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/30 hover:bg-[#2D2D2D]/50"
                       }`}
                       style={isSelected ? { backgroundColor: themeColor, boxShadow: `0 0 20px ${themeColor}66` } : {}}
                     >
@@ -186,15 +186,15 @@ export default function CoachAvailability() {
               </div>
               <ul className="space-y-3 text-[11px] font-medium text-[#878C9F] uppercase tracking-widest leading-relaxed font-inter relative z-10">
                 <li className="flex items-start gap-2">
-                  <span style={{ color: themeColor }}>•</span>
+                  <span style={{ color: themeColor }}>ΓÇó</span>
                   <span>Define specific slots for different session types</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span style={{ color: themeColor }}>•</span>
+                  <span style={{ color: themeColor }}>ΓÇó</span>
                   <span>System prevents removal of assigned slots</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span style={{ color: themeColor }}>•</span>
+                  <span style={{ color: themeColor }}>ΓÇó</span>
                   <span>Maintaining consistency improves booking rates</span>
                 </li>
               </ul>

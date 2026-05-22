@@ -2,36 +2,39 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
-import Navbar from "../components/layout/Navbar";
-import MobileBottomNav from "../components/layout/MobileBottomNav";
-import UserFooter from "../components/layout/UserFooter";
-import ScrollToTop from "../components/common/ScrollToTop";
-import BackgroundUploadManager from "../components/BackgroundUploadManager";
-import OnboardingModal from "../components/modals/OnboardingModal";
-import LoginModal from "../components/modals/LoginModal";
+import Navbar from "@components/layout/Navbar";
+import MobileBottomNav from "@components/layout/MobileBottomNav";
+import UserFooter from "@components/layout/UserFooter";
+import ScrollToTop from "@components/common/ScrollToTop";
+import BackgroundUploadManager from "@components/BackgroundUploadManager";
+import OnboardingModal from "@components/modals/OnboardingModal";
+import LoginModal from "@components/modals/LoginModal";
 import { closeLoginModal } from "@redux/slices/uiSlice";
 
 const Root = () => {
   const location = useLocation();
   const dispatch = useDispatch();
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
-  const { loginModal } = useSelector((state) => state.ui);
+  const { user, isAuthenticated } = useSelector((/** @type {any} */ state) => state.auth);
+  const { loginModal } = useSelector((/** @type {any} */ state) => state.ui);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    // Show onboarding for regular users who have an incomplete profile
+    // Show onboarding for regular users who have not completed onboarding
     if (isAuthenticated && user?.role?.toLowerCase() === "user") {
-      const isIncomplete = !user.phone || !user.gender || !user.location || !user.sportTypes || user.sportTypes.length === 0;
-      if (isIncomplete) {
+      if (user.isOnboarded === false || !user.isOnboarded) {
         setShowOnboarding(true);
+      } else {
+        setShowOnboarding(false);
       }
+    } else {
+      setShowOnboarding(false);
     }
   }, [isAuthenticated, user]);
 
   const searchParams = new URLSearchParams(location.search);
-  const isPlayersPage = location.pathname === '/players' && searchParams.get('tab') !== 'teams';
+  const isPlayersPage = location.pathname === '/players';
   const isReelsPage = location.pathname.startsWith('/reels') || location.pathname.startsWith('/shorts');
-  const hideNav = isReelsPage || isPlayersPage || location.pathname.startsWith('/messages') || location.pathname.startsWith('/my-teams');
+  const hideNav = isReelsPage || location.pathname.startsWith('/messages') || location.pathname.startsWith('/my-teams') || isPlayersPage;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -44,8 +47,13 @@ const Root = () => {
       />
       <OnboardingModal 
         isOpen={showOnboarding} 
-        onClose={() => setShowOnboarding(false)} 
-        onComplete={() => setShowOnboarding(false)}
+        onClose={() => {
+          setShowOnboarding(false);
+        }} 
+        onComplete={() => {
+          setShowOnboarding(false);
+        }}
+        initialData={{ authMethod: 'google', user: user || {} }}
       />
       <ScrollToTop />
       {!isReelsPage && <Navbar />}

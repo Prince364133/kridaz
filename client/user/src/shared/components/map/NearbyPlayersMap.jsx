@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, useMap, useMapEvents, Marker, Popup } from "react-leaflet";
+﻿import { MapContainer, TileLayer, useMap, useMapEvents, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useMemo } from "react";
 import L from "leaflet";
@@ -18,9 +18,9 @@ const mapStyles = `
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: #84CC16;
+    background: #55DEE8;
     border: 3px solid white;
-    box-shadow: 0 0 0 4px rgba(132,204,22,0.3);
+    box-shadow: 0 0 0 4px rgba(85,222,232,0.3);
     animation: pulse 2s infinite;
     display: flex;
     align-items: center;
@@ -33,9 +33,9 @@ const mapStyles = `
     object-cover: cover;
   }
   @keyframes pulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(132,204,22,0.7); }
-    70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(132,204,22,0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(132,204,22,0); }
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(85,222,232,0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(85,222,232,0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(85,222,232,0); }
   }
   .leaflet-container {
     width: 100%;
@@ -45,14 +45,14 @@ const mapStyles = `
   .premium-map-popup .leaflet-popup-content-wrapper {
     background: rgba(10, 10, 10, 0.9) !important;
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(132, 204, 22, 0.3);
+    border: 1px solid rgba(85, 222, 232, 0.3);
     border-radius: 20px;
     padding: 2px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.8);
   }
   .premium-map-popup .leaflet-popup-tip {
     background: rgba(10, 10, 10, 0.9) !important;
-    border: 1px solid rgba(132, 204, 22, 0.3);
+    border: 1px solid rgba(85, 222, 232, 0.3);
   }
   .premium-map-popup .leaflet-popup-content {
     margin: 12px;
@@ -93,7 +93,7 @@ const MapController = ({ userLocation, radiusKm }) => {
       }
       circleRef.current = L.circle([userLocation.lat, userLocation.lng], {
         radius: radiusKm * 1000,
-        color: '#84CC16',
+        color: '#55DEE8',
         fillOpacity: 0.05,
         strokeOpacity: 0.3,
         weight: 1
@@ -112,7 +112,7 @@ const MapController = ({ userLocation, radiusKm }) => {
 const createClusterIcon = (count, previews) => {
   const avatarsHtml = previews.map(p => 
     `<img src="${p.profilePicture || 'https://pngimg.com/d/cricket_PNG102.png'}" 
-          style="width:14px;height:14px;border-radius:50%;object-fit:cover;border:1px solid #84CC16" />`
+          style="width:14px;height:14px;border-radius:50%;object-fit:cover;border:1px solid #55DEE8" />`
   ).join('');
 
   const html = `
@@ -121,15 +121,15 @@ const createClusterIcon = (count, previews) => {
         width: 56px; height: 56px;
         border-radius: 50%;
         background: rgba(0,0,0,0.85);
-        border: 2.5px solid #84CC16;
+        border: 2.5px solid #55DEE8;
         display: flex; align-items: center; justify-content: center;
         flex-wrap: wrap; gap: 2px; padding: 4px;
-        box-shadow: 0 0 0 3px rgba(132,204,22,0.2);
+        box-shadow: 0 0 0 3px rgba(85,222,232,0.2);
       ">
         ${avatarsHtml}
         <div style="
           position:absolute; top:-6px; right:-6px;
-          background:#84CC16; color:black;
+          background:#55DEE8; color:black;
           border-radius:99px; padding:1px 5px;
           font-size:10px; font-weight:900;
         ">${count}</div>
@@ -152,7 +152,7 @@ const createPlayerIcon = (profilePicture) => {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        border: 2.5px solid #84CC16;
+        border: 2.5px solid #55DEE8;
         overflow: hidden;
         box-shadow: 0 2px 8px rgba(0,0,0,0.5);
         background: #0a0a0a;
@@ -166,7 +166,7 @@ const createPlayerIcon = (profilePicture) => {
         width: 0; height: 0;
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
-        border-top: 8px solid #84CC16;
+        border-top: 8px solid #55DEE8;
         margin: 0 auto;
       "></div>
     </div>
@@ -201,7 +201,7 @@ const PlayerMarker = ({ player, onPlayerClick }) => {
     >
       <Popup closeButton={false} className="premium-map-popup">
         <div className="flex flex-col items-center gap-2 p-1 min-w-[120px]">
-          <div className="w-12 h-12 rounded-full border-2 border-[#84CC16] overflow-hidden">
+          <div className="w-12 h-12 rounded-full border-2 border-[#55DEE8] overflow-hidden">
              <img 
                src={player.profilePicture || "https://pngimg.com/d/cricket_PNG102.png"} 
                className="w-full h-full object-cover" 
@@ -211,8 +211,8 @@ const PlayerMarker = ({ player, onPlayerClick }) => {
           <div className="text-center">
             <h4 className="text-white font-black uppercase text-[10px] tracking-widest leading-tight">{player.name}</h4>
             <div className="flex items-center justify-center gap-1 mt-1">
-               <Activity size={10} className="text-[#84CC16]" />
-               <span className="text-[#84CC16] text-[8px] font-black uppercase tracking-tighter">
+               <Activity size={10} className="text-[#55DEE8]" />
+               <span className="text-[#55DEE8] text-[8px] font-black uppercase tracking-tighter">
                 {player.sportTypes?.[0] || 'Active Player'}
                </span>
             </div>

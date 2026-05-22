@@ -3,8 +3,8 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import { Check, X, Clock, User, Phone, Mail, MessageSquare, Loader2, Calendar, Shield, IndianRupee } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
-import useCoachDashboard from "@hooks/useCoachDashboard";
-import DashboardSkeleton from "@components/DashboardSkeleton";
+import useCoachDashboard from "@hooks/owner/useCoachDashboard";
+import DashboardSkeleton from "@features/venue-owner/Dashboard/DashboardSkeleton";
 
 export default function CoachBookings() {
   const { dashboardData, loading } = useCoachDashboard();
@@ -61,13 +61,13 @@ export default function CoachBookings() {
     <div className="h-full custom-scrollbar bg-[#000000]">
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative font-['Open_Sans']">
         
-        {/* Header Section â€” Exact Copy of Dashboard Design */}
+        {/* Header Section GÇö Exact Copy of Dashboard Design */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 pb-2 border-b border-white/5">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <div className="w-1.5 h-8 bg-[#CCFF00] rounded-full" />
+              <div className="w-1.5 h-8 bg-[#55DEE8] rounded-full" />
               <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
-                Booking <span className="text-[#CCFF00]">Roster</span>
+                Booking <span className="text-[#55DEE8]">Roster</span>
               </h1>
             </div>
             <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
@@ -77,15 +77,15 @@ export default function CoachBookings() {
           
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-2xl backdrop-blur-xl">
-              <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-xl flex items-center justify-center text-[#CCFF00]">
+              <div className="w-12 h-12 bg-[#55DEE8]/10 rounded-xl flex items-center justify-center text-[#55DEE8]">
                 <Calendar size={24} />
               </div>
               <div className="space-y-0.5">
                 <p className="text-white text-lg font-bold leading-none font-inter">
                   {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
                 </p>
-                <p className="text-[#CCFF00] text-[10px] font-semibold uppercase tracking-widest opacity-80">
-                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} â€¢{" "}
+                <p className="text-[#55DEE8] text-[10px] font-semibold uppercase tracking-widest opacity-80">
+                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} GÇó{" "}
                   {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
                 </p>
               </div>
@@ -104,7 +104,7 @@ export default function CoachBookings() {
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {bookings.map((booking) => (
-            <div key={booking._id} className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-[#CCFF00]/30 transition-all shadow-[var(--shadow-2)]">
+            <div key={booking._id} className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-[#55DEE8]/30 transition-all shadow-[var(--shadow-2)]">
               <div className="p-6 lg:p-8">
                 <div className="flex flex-col md:flex-row justify-between gap-8">
                   {/* User Info */}
@@ -114,15 +114,15 @@ export default function CoachBookings() {
                         src={booking.user?.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80"} 
                         className="w-20 h-20 rounded-[6px] object-cover border border-[#2D2D2D]"
                       />
-                      <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-[#CCFF00] rounded-[4px] flex items-center justify-center border border-[#CCFF00]/20">
+                      <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-[#55DEE8] rounded-[4px] flex items-center justify-center border border-[#55DEE8]/20">
                         <User size={12} className="text-black" />
                       </div>
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-white font-inter mb-2 tracking-tight">{booking.user?.name}</h3>
                       <div className="flex flex-wrap gap-4">
-                        <span className="flex items-center gap-1 text-[11px] font-medium text-[#878C9F] tracking-wider uppercase font-inter"><Phone size={12} className="text-[#CCFF00]" /> {booking.user?.phone}</span>
-                        <span className="flex items-center gap-1 text-[11px] font-medium text-[#878C9F] tracking-wider uppercase font-inter"><Mail size={12} className="text-[#CCFF00]" /> {booking.user?.email}</span>
+                        <span className="flex items-center gap-1 text-[11px] font-medium text-[#878C9F] tracking-wider uppercase font-inter"><Phone size={12} className="text-[#55DEE8]" /> {booking.user?.phone}</span>
+                        <span className="flex items-center gap-1 text-[11px] font-medium text-[#878C9F] tracking-wider uppercase font-inter"><Mail size={12} className="text-[#55DEE8]" /> {booking.user?.email}</span>
                       </div>
                     </div>
                   </div>
@@ -131,12 +131,12 @@ export default function CoachBookings() {
                   <div className="flex flex-col md:items-end gap-2">
                     <div className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border font-inter ${
                       booking.status === 'PENDING' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
-                      booking.status === 'ACCEPTED' ? 'bg-[#CCFF00]/10 border-[#CCFF00]/20 text-[#CCFF00]' :
+                      booking.status === 'ACCEPTED' ? 'bg-[#55DEE8]/10 border-[#55DEE8]/20 text-[#55DEE8]' :
                       'bg-red-500/10 border-red-500/20 text-red-500'
                     }`}>
                       {booking.status}
                     </div>
-                    <p className="text-2xl font-bold text-white mt-2 font-inter tracking-tight">â‚¹{booking.totalAmount}</p>
+                    <p className="text-2xl font-bold text-white mt-2 font-inter tracking-tight">Gé¦{booking.totalAmount}</p>
                     <p className="text-[10px] font-medium text-[#878C9F] uppercase tracking-wider font-inter">Reserved in wallet</p>
                   </div>
                 </div>
@@ -146,7 +146,7 @@ export default function CoachBookings() {
                     <p className="text-[10px] font-medium text-[#878C9F] uppercase tracking-wider font-inter">Scheduled Session</p>
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-[6px] bg-[#2D2D2D]/30 flex flex-col items-center justify-center border border-[#2D2D2D] text-center">
-                        <span className="text-[9px] font-bold text-[#CCFF00] uppercase font-inter">{format(new Date(booking.date), 'MMM')}</span>
+                        <span className="text-[9px] font-bold text-[#55DEE8] uppercase font-inter">{format(new Date(booking.date), 'MMM')}</span>
                         <span className="text-xl font-bold text-white leading-none font-inter">{format(new Date(booking.date), 'dd')}</span>
                       </div>
                       <div>
@@ -172,7 +172,7 @@ export default function CoachBookings() {
                     <button 
                       onClick={() => handleAction(booking._id, 'ACCEPTED')}
                       disabled={actionLoading === booking._id}
-                      className="flex-1 h-12 bg-[#CCFF00] text-black rounded-[6px] font-bold uppercase text-[11px] tracking-widest hover:scale-[0.98] active:scale-95 transition-all flex items-center justify-center gap-2 font-inter shadow-[var(--shadow-2)]"
+                      className="flex-1 h-12 bg-[#55DEE8] text-black rounded-[6px] font-bold uppercase text-[11px] tracking-widest hover:scale-[0.98] active:scale-95 transition-all flex items-center justify-center gap-2 font-inter shadow-[var(--shadow-2)]"
                     >
                       {actionLoading === booking._id ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />} Accept Request
                     </button>

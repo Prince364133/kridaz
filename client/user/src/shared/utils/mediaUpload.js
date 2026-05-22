@@ -2,10 +2,10 @@
  * Uploads a file directly to R2 using a pre-signed URL
  * @param {string} uploadUrl - The pre-signed URL from the backend
  * @param {File} file - The file object to upload
- * @param {Function} onProgress - Callback for upload progress (simulated with fetch)
+ * @param {Function} [onProgress] - Callback for upload progress (simulated with fetch)
  * @returns {Promise<void>}
  */
-export const uploadFileToR2 = (uploadUrl, file, onProgress) => {
+export const uploadFileToR2 = (uploadUrl, file, onProgress = undefined) => {
   return new Promise((resolve, reject) => {
     console.log('[R2_UPLOAD] Starting XHR to:', uploadUrl);
     if (!uploadUrl) return reject(new Error('Upload URL is missing'));

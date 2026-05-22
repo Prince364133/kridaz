@@ -2,7 +2,7 @@ import React from "react";
 import { Search, IndianRupee, CalendarDays, X } from "lucide-react";
 
 const inputCls =
-  "h-9 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#84CC16]/50 focus:bg-white/8 transition-all px-3 w-full";
+  "h-9 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#55DEE8]/50 focus:bg-white/8 transition-all px-3 w-full";
 
 const TransactionFilters = ({ filters, onFilterChange, onClear }) => {
   const hasActiveFilter = Object.values(filters).some((v) => v !== "");

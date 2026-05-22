@@ -33,16 +33,16 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   };
 
   const mainNavItems = [
-    { to: "/partner", label: "Dashboard", icon: LayoutGrid },
-    { to: "/partner/bookings", label: "Bookings", icon: BookOpen },
-    { to: "/partner/turfs", label: "Grounds", icon: MapPin },
-    { to: "/partner/customers", label: "Customers", icon: Users },
-    { to: "/partner/intelligence", label: "Intelligence", icon: BarChart3 },
-    { to: "/partner/revenue", label: "Revenue", icon: IndianRupee },
-    { to: "/partner/banking", label: "Payout & Banking", icon: Landmark },
-    { to: "/partner/reviews", label: "Reviews", icon: Star },
-    { to: "/partner/promotions", label: "Promotions", icon: Tag },
-    { to: "/partner/support", label: "Docs & Support", icon: HelpCircle },
+    { to: "/venue-owner", label: "Dashboard", icon: LayoutGrid },
+    { to: "/venue-owner/bookings", label: "Bookings", icon: BookOpen },
+    { to: "/venue-owner/turfs", label: "Grounds", icon: MapPin },
+    { to: "/venue-owner/customers", label: "Customers", icon: Users },
+    { to: "/venue-owner/intelligence", label: "Intelligence", icon: BarChart3 },
+    { to: "/venue-owner/revenue", label: "Revenue", icon: IndianRupee },
+    { to: "/venue-owner/banking", label: "Payout & Banking", icon: Landmark },
+    { to: "/venue-owner/reviews", label: "Reviews", icon: Star },
+    { to: "/venue-owner/promotions", label: "Promotions", icon: Tag },
+    { to: "/venue-owner/support", label: "Docs & Support", icon: HelpCircle },
     { label: "Sign Out", icon: LogOut, action: "logout" },
   ];
 
@@ -59,8 +59,8 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         to={item.to || "#"}
         className={`flex items-center h-[48px] px-4 group relative transition-all duration-300 rounded-[8px] mx-2 mb-1 border border-transparent ${
           isActive 
-            ? "bg-[#CCFF00] text-black shadow-[0_4px_15px_rgba(204,255,0,0.2)] border-[#CCFF00]/20" 
-            : "bg-transparent text-[#999999] hover:bg-[#CCFF00]/5 hover:text-[#CCFF00] hover:border-[#CCFF00]/10"
+            ? "bg-[#55DEE8] text-black shadow-[0_4px_15px_rgba(204,255,0,0.2)] border-[#55DEE8]/20" 
+            : "bg-transparent text-[#999999] hover:bg-[#55DEE8]/5 hover:text-[#55DEE8] hover:border-[#55DEE8]/10"
         } ${isLogout ? "hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20" : ""}`}
         onClick={(e) => {
           if (isLogout) {
@@ -77,7 +77,7 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
           <Icon 
             size={20} 
             className={`transition-colors duration-300 ${
-              isActive ? "text-black" : "text-[#999999] group-hover:text-[#CCFF00]"
+              isActive ? "text-black" : "text-[#999999] group-hover:text-[#55DEE8]"
             } ${isLogout ? "group-hover:text-red-500" : ""}`} 
           />
         </div>
@@ -98,7 +98,7 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     >
       <div className="flex flex-col p-4 border-b border-[#2D2D2D] bg-[#000000] gap-4 lg:hidden">
         <div className="flex items-center justify-end">
-          <button onClick={toggleSidebar} className="text-[#999999] hover:text-[#CCFF00] transition-colors">
+          <button onClick={toggleSidebar} className="text-[#999999] hover:text-[#55DEE8] transition-colors">
             <X size={20} />
           </button>
         </div>

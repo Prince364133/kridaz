@@ -6,6 +6,8 @@ import { runInTransaction } from "../../utils/transaction.js";
 import { generateUserToken } from "../../utils/generateJwtToken.js";
 import WalletService from "../../services/wallet.service.js";
 import logger from "../../utils/logger.js";
+import { getIO } from "../../config/socket.js";
+import { liveStateService } from "../../services/liveState.service.js";
 
 const fullGameInclude = {
   host: { select: { id: true, name: true, profilePicture: true } },
@@ -151,26 +153,44 @@ export const getUmpiresForHosting = async (req, res) => {
     
     const umpires = await prisma.ownerProfile.findMany({
       where: {
-        role: "UMPIRE",
-        ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
-        ...(state ? { state: { contains: state, mode: 'insensitive' } } : {}),
-        // Note: gameTypes in OwnerProfile is Json, we might need a better way if it's an array
+        user: {
+          role: "UMPIRE",
+          ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
+          ...(state ? { state: { contains: state, mode: 'insensitive' } } : {}),
+        }
       },
       select: {
         id: true,
-        name: true,
-        email: true,
-        phone: true,
-        profilePicture: true,
         price: true,
-        gameTypes: true,
-        city: true,
-        state: true
+        user: {
+          select: {
+            name: true,
+            email: true,
+            phone: true,
+            profilePicture: true,
+            city: true,
+            state: true,
+            sportTypes: true
+          }
+        }
       }
     });
 
-    return res.status(200).json({ umpires });
+    const formattedUmpires = umpires.map(u => ({
+      id: u.id,
+      price: u.price,
+      gameTypes: u.user.sportTypes || [],
+      name: u.user.name,
+      email: u.user.email,
+      phone: u.user.phone,
+      profilePicture: u.user.profilePicture,
+      city: u.user.city,
+      state: u.user.state
+    }));
+
+    return res.status(200).json({ umpires: formattedUmpires });
   } catch (error) {
+    logger.error("getUmpiresForHosting error:", error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -181,25 +201,44 @@ export const getStreamersForHosting = async (req, res) => {
     
     const streamers = await prisma.ownerProfile.findMany({
       where: {
-        role: "STREAMER",
-        ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
-        ...(state ? { state: { contains: state, mode: 'insensitive' } } : {}),
+        user: {
+          role: "STREAMER",
+          ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
+          ...(state ? { state: { contains: state, mode: 'insensitive' } } : {}),
+        }
       },
       select: {
         id: true,
-        name: true,
-        email: true,
-        phone: true,
-        profilePicture: true,
         price: true,
-        gameTypes: true,
-        city: true,
-        state: true
+        user: {
+          select: {
+            name: true,
+            email: true,
+            phone: true,
+            profilePicture: true,
+            city: true,
+            state: true,
+            sportTypes: true
+          }
+        }
       }
     });
 
-    return res.status(200).json({ streamers });
+    const formattedStreamers = streamers.map(s => ({
+      id: s.id,
+      price: s.price,
+      gameTypes: s.user.sportTypes || [],
+      name: s.user.name,
+      email: s.user.email,
+      phone: s.user.phone,
+      profilePicture: s.user.profilePicture,
+      city: s.user.city,
+      state: s.user.state
+    }));
+
+    return res.status(200).json({ streamers: formattedStreamers });
   } catch (error) {
+    logger.error("getStreamersForHosting error:", error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -555,7 +594,7 @@ export const approveJoinRequest = async (req, res) => {
       } else if (game.gameMode === "QUICK") {
         targetSlot = game.slots[slotIndex];
       } else {
-        const teamKey = team === "A" ? "teamA" : "teamB";
+        const teamKey = (team === "A" || team === "teamA") ? "teamA" : "teamB";
         const targetTeam = game.teams.find(t => t.teamKey === teamKey);
         if (!targetTeam) throw new Error("Team not found");
         targetSlot = targetTeam.slots[slotIndex];
@@ -651,7 +690,7 @@ export const rejectJoinRequest = async (req, res) => {
       } else if (game.gameMode === "QUICK") {
         targetSlot = game.slots[slotIndex];
       } else {
-        const teamKey = team === "A" ? "teamA" : "teamB";
+        const teamKey = (team === "A" || team === "teamA") ? "teamA" : "teamB";
         const targetTeam = game.teams.find(t => t.teamKey === teamKey);
         if (!targetTeam) throw new Error("Team not found");
         targetSlot = targetTeam.slots[slotIndex];
@@ -726,6 +765,7 @@ export const cancelHostedGame = async (req, res) => {
       }
 
       const pendingSlots = allSlots.filter(slot => slot.status === "PENDING" && slot.userId);
+      const joinedSlots = allSlots.filter(slot => slot.status === "JOINED" && slot.userId);
       const perPlayerCharge = Number(game.perPlayerCharge || 0);
 
       for (const slot of pendingSlots) {
@@ -737,6 +777,32 @@ export const cancelHostedGame = async (req, res) => {
             type: "REFUND",
             status: "SUCCESS",
             description: `Refunded reserved coins due to game cancellation: ${game.gameType}`
+          }
+        });
+      }
+
+      for (const slot of joinedSlots) {
+        // Debit host (refund from host's balance)
+        await WalletService.debit(hostId, 'user', perPlayerCharge, tx);
+        await tx.walletTransaction.create({
+          data: {
+            userId: hostId,
+            amount: perPlayerCharge,
+            type: "REFUND_DEBIT",
+            status: "SUCCESS",
+            description: `Deducted slot payment for game cancellation: ${game.gameType}`
+          }
+        });
+
+        // Credit player
+        await WalletService.credit(slot.userId, 'user', perPlayerCharge, tx);
+        await tx.walletTransaction.create({
+          data: {
+            userId: slot.userId,
+            amount: perPlayerCharge,
+            type: "REFUND",
+            status: "SUCCESS",
+            description: `Refunded slot payment due to game cancellation: ${game.gameType}`
           }
         });
       }
@@ -821,8 +887,22 @@ export const leaveHostedGame = async (req, res) => {
       } 
       // If joined, refund coins
       else if (userSlot.status === "JOINED") {
-        await WalletService.credit(userId, 'user', perPlayerCharge, tx);
+        const hostId = game.hostId;
 
+        // Debit host (refund from host's balance)
+        await WalletService.debit(hostId, 'user', perPlayerCharge, tx);
+        await tx.walletTransaction.create({
+          data: {
+            userId: hostId,
+            amount: perPlayerCharge,
+            type: "REFUND_DEBIT",
+            status: "SUCCESS",
+            description: `Deducted slot payment because player left game: ${game.gameType}`
+          }
+        });
+
+        // Credit player
+        await WalletService.credit(userId, 'user', perPlayerCharge, tx);
         await tx.walletTransaction.create({
           data: {
             userId,
@@ -845,7 +925,6 @@ export const leaveHostedGame = async (req, res) => {
     });
 
     return res.status(200).json({ success: true, message: "Left game and coins processed." });
-    return res.status(200).json({ success: true, message: "Left game and coins updated." });
   } catch (error) {
     logger.error("Error in leaveHostedGame:", error);
     return res.status(error.status || 500).json({ message: error.message });
@@ -1626,7 +1705,8 @@ export const claimInviteSlot = async (req, res) => {
                 name: userDetails.name || inviteData.name,
                 email: userDetails.email || inviteData.email,
                 phone: userDetails.phone || inviteData.phone || "",
-                role: "LIMITED_UMPIRE"
+                role: "LIMITED_UMPIRE",
+                businessName: userDetails.name || inviteData.name || "Independent Partner"
               }
             });
             
@@ -1666,7 +1746,7 @@ export const claimInviteSlot = async (req, res) => {
       } else {
         // Handle Player Claim
         if (inviteData.mustPay && game.perPlayerCharge > 0) {
-          await WalletService.reserve(userId, game.perPlayerCharge, "JOIN_GAME", "Reserved for claiming invited slot in game", tx);
+          await WalletService.reserve(userId, 'user', game.perPlayerCharge, tx);
         }
 
         // Update custom player status
@@ -1724,8 +1804,8 @@ export const updateTickerTheme = async (req, res) => {
     const game = await prisma.hostedGame.findUnique({ where: { id } });
     if (!game) throw new Error("Game not found");
 
-    // Authorization: Only Host or assigned Streamer
-    if (game.hostId !== userId && game.streamerId !== userId) {
+    // Authorization: Only Host, assigned Streamer, or Scorer
+    if (game.hostId !== userId && game.streamerId !== userId && game.scorerId !== userId) {
       return res.status(403).json({ success: false, message: "Unauthorized to update ticker theme" });
     }
 
@@ -1733,6 +1813,30 @@ export const updateTickerTheme = async (req, res) => {
       where: { id },
       data: { tickerTheme }
     });
+
+    // Update Redis cache live score theme if it exists
+    try {
+      const cachedScore = await liveStateService.getLiveScore(id);
+      if (cachedScore) {
+        cachedScore.tickerTheme = tickerTheme;
+        await liveStateService.setLiveScore(id, cachedScore);
+        
+        // Broadcast theme & score updates via Socket.IO
+        const io = getIO();
+        if (io) {
+          io.to(id).emit("scoreUpdated", cachedScore);
+          io.to(id).emit("themeUpdated", tickerTheme);
+        }
+      } else {
+        // Even if no score is cached, still broadcast theme update
+        const io = getIO();
+        if (io) {
+          io.to(id).emit("themeUpdated", tickerTheme);
+        }
+      }
+    } catch (cacheErr) {
+      logger.error("[Scoring] Redis/Socket error on ticker theme update:", cacheErr);
+    }
     
     return res.status(200).json({ success: true, game: updatedGame });
   } catch (error) {

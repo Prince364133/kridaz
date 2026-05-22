@@ -13,6 +13,32 @@ const sidebars: SidebarsConfig = {
         'backend/architecture',
         'backend/module-guide',
         'backend/security',
+        {
+          type: 'category',
+          label: 'Recommendation Engines',
+          items: [
+            'backend/recommendation-engines/overview',
+            'backend/recommendation-engines/ground-engine',
+            'backend/recommendation-engines/user-engine',
+          ],
+        },
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Upcoming Features',
+      items: [
+        'backend/ads-platform',
+        'backend/tournament-stage-builder',
+        {
+          type: 'category',
+          label: 'Tournament Stage Builder (Postgres)',
+          items: [
+            'backend/tournament/architecture',
+            'backend/tournament/prompts',
+          ],
+        },
+        'backend/voice-rooms',
       ],
     },
     {

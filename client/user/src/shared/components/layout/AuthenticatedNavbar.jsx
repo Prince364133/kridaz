@@ -22,11 +22,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import axiosInstance from "@hooks/useAxiosInstance";
 import ManualBookingModal from "@features/venue-owner/ManualBookingModal";
-import useNotifications from "../../hooks/shared/useNotifications";
+import useNotifications from "@hooks/shared/useNotifications";
 import { formatDistanceToNow } from 'date-fns';
 
 /**
- * AuthenticatedNavbar — Role-aware top navigation.
+ * AuthenticatedNavbar G�� Role-aware top navigation.
  * Fully rebranded for Scorer users with Teal Green (#00C187) and Inter typography.
  */
 
@@ -42,15 +42,15 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const user = useSelector((state) => state?.auth?.user);
   const role = useSelector((state) => state?.auth?.role);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
 
   const { notifications, loading, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
 
   const getBasePath = () => {
     const r = role?.toLowerCase();
     if (r === "admin" || r === "bmsp_admin") return "/admin";
-    if (r === "venu_owners" || r?.includes("venu_owners") || r === "owner" || r === "bmsp_owner" || r === "verified_venue_owner" || r === "venue_owner") return "/partner";
-    if (r === "coach" || r === "bmsp_coach") return "/coach";
+    if (r === "venu_owners" || r?.includes("venu_owners") || r === "owner" || r === "bmsp_owner" || r === "verified_venue_owner" || r === "venue_owner") return "/venue-owner";
+    if (r === "coach" || r === "bmsp_coach") return "/professional/coach";
     if (r?.includes("umpire")) return "/umpire";
     if (r?.includes("scorer")) return "/scorer";
     return "";
@@ -148,12 +148,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-white/40 text-[11px] font-black uppercase tracking-[0.2em]">{getTimeGreeting()},</span>
-            <span className="text-[11px] font-black uppercase tracking-[0.2em]" style={{ color: themeColor, textShadow: `0 0 15px ${themeColor}4D` }}>
-              {user?.name?.split(" ")[0] || user?.fullName?.split(" ")[0] || "User"}
-            </span>
-          </div>
+
         </div>
 
 
@@ -281,17 +276,6 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
                   <button 
                     onClick={() => {
                       setShowProfileMenu(false);
-                      handleProfileClick();
-                    }}
-                    className="w-full flex items-center gap-3 px-5 py-3.5 text-[11px] font-black uppercase tracking-widest text-neutral-400 hover:bg-white/[0.03] hover:text-white transition-all"
-                  >
-                    <User size={16} style={{ color: themeColor }} />
-                    Dossier
-                  </button>
-                  <div className="h-[1px] bg-white/5 mx-4 my-1" />
-                  <button 
-                    onClick={() => {
-                      setShowProfileMenu(false);
                       handleLogout();
                     }}
                     className="w-full flex items-center gap-3 px-5 py-3.5 text-[11px] font-black uppercase tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all"
@@ -310,3 +294,4 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
 };
 
 export default AuthenticatedNavbar;
+

@@ -4,10 +4,10 @@ import {
   ArrowLeft, Mail, Phone, MapPin, Shield, Calendar, 
   IndianRupee, Star, Briefcase, Award, Clock, Activity, CreditCard, Trash2 
 } from "lucide-react";
-import useProfessionals from "../../../hooks/admin/useProfessionals";
-import ConfirmationModal from "../../shared/ConfirmationModal";
+import useProfessionals from "@hooks/admin/useProfessionals";
+import ConfirmationModal from "@components/shared/ConfirmationModal";
 
-import axiosInstance from "../../../hooks/useAxiosInstance";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 const ProfessionalDetailsPage = () => {
   const { id } = useParams();

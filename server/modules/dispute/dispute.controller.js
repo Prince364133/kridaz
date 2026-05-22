@@ -101,7 +101,7 @@ export const raiseDispute = async (req, res) => {
         title: "Dispute Raised on Booking",
         message: `A user has raised a dispute for your turf booking. Funds have been frozen until resolution.`,
         type: "SUPPORT",
-        link: "/partner/dashboard"
+        link: "/venue-owner/dashboard"
       });
     }
 
@@ -451,7 +451,7 @@ export const resolveDispute = async (req, res) => {
         title: "Dispute Resolved",
         message: `The dispute on booking ${booking.id} has been resolved: ${resolutionAction}.`,
         type: "SUPPORT",
-        link: "/partner/dashboard"
+        link: "/venue-owner/dashboard"
       });
     }
 
@@ -469,3 +469,4 @@ export const resolveDispute = async (req, res) => {
     });
   }
 };
+

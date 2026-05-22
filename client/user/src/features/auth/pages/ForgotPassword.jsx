@@ -16,7 +16,7 @@ const ForgotPassword = () => {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!email) {
-      toast.error("Please enter your email");
+      toast.error("Please enter your email or phone number");
       return;
     }
     
@@ -24,7 +24,10 @@ const ForgotPassword = () => {
     try {
       const res = await axiosInstance.post("/api/user/auth/forgot-password-otp", { email });
       if (res.data.success) {
-        toast.success("OTP sent to your email!");
+        toast.success(res.data.message || "OTP sent!");
+        if (res.data.testOtp) {
+          toast(`Test OTP: ${res.data.testOtp.phone || res.data.testOtp.email}`, { icon: '🧑‍💻', duration: 10000 });
+        }
         setStep(2);
       }
     } catch (err) {
@@ -79,8 +82,9 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen bg-[#000] relative flex items-center justify-center font-sans p-4">
-      {/* Background layer */}
-      <div className="absolute inset-0 z-0 bg-black" />
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_transparent_0%,_black_100%)] opacity-80" />
+      </div>
 
       <div className="w-full max-w-md relative z-10">
         <Link 
@@ -92,13 +96,13 @@ const ForgotPassword = () => {
         </Link>
 
         <div className="bg-[#0A0A0A] border border-white/5 rounded-[32px] p-8 md:p-12 shadow-2xl relative overflow-hidden">
-          <div className="absolute -top-32 -right-32 w-64 h-64 bg-[#84CC16]/10 blur-[100px] rounded-full pointer-events-none" />
+          <div className="absolute -top-32 -right-32 w-64 h-64 bg-[#55DEE8]/10 blur-[100px] rounded-full pointer-events-none" />
 
           <div className="mb-10 text-center">
-            <div className="w-16 h-16 bg-[#84CC16]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-[#84CC16]/20">
-              {step === 1 && <Mail size={32} className="text-[#84CC16]" />}
-              {step === 2 && <ShieldCheck size={32} className="text-[#84CC16]" />}
-              {step === 3 && <KeyRound size={32} className="text-[#84CC16]" />}
+            <div className="w-16 h-16 bg-[#55DEE8]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-[#55DEE8]/20">
+              {step === 1 && <Mail size={32} className="text-[#55DEE8]" />}
+              {step === 2 && <ShieldCheck size={32} className="text-[#55DEE8]" />}
+              {step === 3 && <KeyRound size={32} className="text-[#55DEE8]" />}
             </div>
             <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
               {step === 1 && "Reset Password"}
@@ -106,7 +110,7 @@ const ForgotPassword = () => {
               {step === 3 && "New Password"}
             </h1>
             <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest">
-              {step === 1 && "Enter your email to receive a recovery code."}
+              {step === 1 && "Enter your email or phone number to receive a recovery code."}
               {step === 2 && `Enter the 6-digit code sent to ${email}`}
               {step === 3 && "Set a strong password for your account."}
             </p>
@@ -116,23 +120,23 @@ const ForgotPassword = () => {
           {step === 1 && (
             <form onSubmit={handleSendOtp} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Email Address</label>
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Email or Phone Number</label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#84CC16] transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#55DEE8] transition-colors">
                     <Mail size={18} />
                   </div>
                   <input
-                    type="email" required
+                    type="text" required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter registered email"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#84CC16]/50 transition-all text-sm font-bold"
+                    placeholder="Enter registered email or phone"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
                   />
                 </div>
               </div>
               <button
                 type="submit" disabled={loading}
-                className="w-full h-14 bg-[#84CC16] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
+                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
               >
                 {loading ? <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" /> : <>Send Code <ArrowRight size={16} /></>}
               </button>
@@ -145,26 +149,26 @@ const ForgotPassword = () => {
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">6-Digit Code</label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#84CC16] transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#55DEE8] transition-colors">
                     <ShieldCheck size={18} />
                   </div>
                   <input
                     type="text" required
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    placeholder="••••••"
+                    placeholder="ΓÇóΓÇóΓÇóΓÇóΓÇóΓÇó"
                     maxLength={6}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#84CC16]/50 transition-all text-center text-xl font-black tracking-[0.5em]"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-center text-xl font-black tracking-[0.5em]"
                   />
                 </div>
               </div>
               <button
                 type="submit"
-                className="w-full h-14 bg-[#84CC16] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
+                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
               >
                 Verify Code <CheckCircle2 size={16} />
               </button>
-              <button type="button" onClick={() => setStep(1)} className="w-full text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-white transition-colors">Change Email</button>
+              <button type="button" onClick={() => setStep(1)} className="w-full text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-white transition-colors">Change Details</button>
             </form>
           )}
 
@@ -175,7 +179,7 @@ const ForgotPassword = () => {
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">New Password</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#84CC16] transition-colors">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#55DEE8] transition-colors">
                       <KeyRound size={18} />
                     </div>
                     <input
@@ -183,14 +187,14 @@ const ForgotPassword = () => {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Min 8 characters"
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#84CC16]/50 transition-all text-sm font-bold"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Confirm Password</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#84CC16] transition-colors">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#55DEE8] transition-colors">
                       <KeyRound size={18} />
                     </div>
                     <input
@@ -198,14 +202,14 @@ const ForgotPassword = () => {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Repeat new password"
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#84CC16]/50 transition-all text-sm font-bold"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
                     />
                   </div>
                 </div>
               </div>
               <button
                 type="submit" disabled={loading}
-                className="w-full h-14 bg-[#84CC16] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
+                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
               >
                 {loading ? <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" /> : "Update Password"}
               </button>

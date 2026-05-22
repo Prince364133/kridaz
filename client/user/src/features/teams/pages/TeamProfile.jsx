@@ -17,8 +17,11 @@ import {
 } from '@redux/api/teamApi';
 import toast from 'react-hot-toast';
 import useLoginOnDemand from '@hooks/useLoginOnDemand';
+import StartScoringModal from '@features/scoring/components/StartScoringModal';
+import ScoringMatchCard from '@features/scoring/components/ScoringMatchCard';
+import { useGetMyScoringGamesQuery } from '@redux/api/scoringApi';
 
-const PRI = "#84CC16";
+const PRI = "#55DEE8";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
 
@@ -44,23 +47,27 @@ const MOCK_SQUAD = [
 const TeamProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  // @ts-ignore
   const { user: currentUser, isLoggedIn } = useSelector((state) => state.auth);
   const { gateInteraction } = useLoginOnDemand();
 
   const { data: teamData, isLoading, error } = useGetTeamByIdQuery(id);
   const { data: myTeamsData } = useGetMyTeamsQuery(undefined, { skip: !isLoggedIn });
+  const { data: scoringGamesData } = useGetMyScoringGamesQuery(undefined, { skip: !isLoggedIn });
   const [requestJoin, { isLoading: isJoining }] = useRequestToJoinMutation();
   const [requestOpponent, { isLoading: isChallenging }] = useRequestOpponentMutation();
 
   const [showChallengeModal, setShowChallengeModal] = useState(false);
   const [showSquadModal, setShowSquadModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showScoringModal, setShowScoringModal] = useState(false);
   const [selectedMyTeam, setSelectedMyTeam] = useState('');
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 text-[#84CC16] animate-spin" />
+          <Loader2 className="w-10 h-10 text-[#55DEE8] animate-spin" />
           <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">Assembling...</p>
         </div>
       </div>
@@ -74,7 +81,7 @@ const TeamProfile = () => {
         <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2" style={HEADING_STYLE}>Team Not Found</h2>
         <button
           onClick={() => navigate('/players')}
-          className="px-6 py-2.5 bg-[#84CC16] text-black rounded-xl font-black uppercase text-[10px] tracking-widest hover:brightness-110 transition-all"
+          className="px-6 py-2.5 bg-[#55DEE8] text-black rounded-xl font-black uppercase text-[10px] tracking-widest hover:brightness-110 transition-all"
         >
           Back to Discovery
         </button>
@@ -83,6 +90,16 @@ const TeamProfile = () => {
   }
 
   const team = teamData.team;
+
+  // Filter active scoring matches for the current team
+  const teamMatches = (scoringGamesData?.games || []).filter(game => {
+    const teamNameLower = team?.name?.toLowerCase();
+    const teamId = team?.id || team?._id;
+    return game.teams?.some(t => 
+      (t.name && t.name.toLowerCase() === teamNameLower) || 
+      (t.teamId && t.teamId === teamId)
+    );
+  });
   
   // Combine real members with mock data if real members are less than 15
   const displayMembers = team.members?.length > 1 
@@ -157,18 +174,18 @@ const TeamProfile = () => {
 
               {/* Top Row: Logo & Info */}
               <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start mb-auto">
-                <div className="w-32 h-32 md:w-36 md:h-36 rounded-[24px] bg-black border-2 border-[#84CC16] p-2 flex items-center justify-center shadow-[0_0_30px_rgba(132,204,22,0.1)] relative overflow-hidden group shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#84CC16]/20 to-transparent" />
+                <div className="w-32 h-32 md:w-36 md:h-36 rounded-[24px] bg-black border-2 border-[#55DEE8] p-2 flex items-center justify-center shadow-[0_0_30px_rgba(85,222,232,0.1)] relative overflow-hidden group shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#55DEE8]/20 to-transparent" />
                   {team.logo ? (
                     <img src={team.logo} alt={team.name} className="w-full h-full object-cover rounded-[16px]" />
                   ) : (
-                    <Trophy size={40} className="text-[#84CC16]/20" />
+                    <Trophy size={40} className="text-[#55DEE8]/20" />
                   )}
                 </div>
 
                 <div className="flex-1 space-y-3">
                   <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 bg-[#84CC16]/10 text-[#84CC16] text-[8px] font-black uppercase tracking-widest rounded-full border border-[#84CC16]/20">
+                    <span className="px-3 py-1 bg-[#55DEE8]/10 text-[#55DEE8] text-[8px] font-black uppercase tracking-widest rounded-full border border-[#55DEE8]/20">
                       {team.sportType || 'Cricket'}
                     </span>
                     <span className="px-3 py-1 bg-white/5 border border-white/10 text-white/30 text-[8px] font-black uppercase tracking-widest rounded-full">
@@ -181,7 +198,7 @@ const TeamProfile = () => {
                       <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter" style={HEADING_STYLE}>
                         {team.name}
                       </h1>
-                      <div className="w-5 h-5 bg-[#84CC16] rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(132,204,22,0.3)]">
+                      <div className="w-5 h-5 bg-[#55DEE8] rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(85,222,232,0.3)]">
                         <CheckCircle2 size={12} className="text-black" />
                       </div>
                     </div>
@@ -193,7 +210,7 @@ const TeamProfile = () => {
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-4">
                     <div className="space-y-0.5">
                       <p className="text-[8px] font-black text-gray-700 uppercase tracking-widest">Team ID</p>
-                      <button onClick={copyId} className="flex items-center gap-1.5 text-[#84CC16] font-black text-[10px] hover:brightness-110">
+                      <button onClick={copyId} className="flex items-center gap-1.5 text-[#55DEE8] font-black text-[10px] hover:brightness-110">
                         {team.teamCode} <Copy size={10} className="opacity-30" />
                       </button>
                     </div>
@@ -201,7 +218,7 @@ const TeamProfile = () => {
                     <div className="space-y-0.5">
                       <p className="text-[8px] font-black text-gray-700 uppercase tracking-widest">Captain</p>
                       <div className="flex items-center gap-1.5 text-white font-black text-[10px] uppercase">
-                        <Users size={12} className="text-[#84CC16]" />
+                        <Users size={12} className="text-[#55DEE8]" />
                         {team.owner?.name || 'Prasenjeet Yadav'}
                       </div>
                     </div>
@@ -209,7 +226,7 @@ const TeamProfile = () => {
                     <div className="space-y-0.5">
                       <p className="text-[8px] font-black text-gray-700 uppercase tracking-widest">Location</p>
                       <div className="flex items-center gap-1.5 text-white font-black text-[10px] uppercase">
-                        <MapPin size={12} className="text-[#84CC16]" />
+                        <MapPin size={12} className="text-[#55DEE8]" />
                         {team.city || 'Hyderabad'}, TS
                       </div>
                     </div>
@@ -217,7 +234,7 @@ const TeamProfile = () => {
                     <div className="space-y-0.5">
                       <p className="text-[8px] font-black text-gray-700 uppercase tracking-widest">Created</p>
                       <div className="flex items-center gap-1.5 text-white font-black text-[10px] uppercase">
-                        <Calendar size={12} className="text-[#84CC16]" />
+                        <Calendar size={12} className="text-[#55DEE8]" />
                         {new Date(team.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                       </div>
                     </div>
@@ -234,10 +251,10 @@ const TeamProfile = () => {
                     { label: 'Win Rate', value: '75%', icon: TrendingUp },
                     { label: 'Runs', value: '12.4k', icon: BarChart3 },
                     { label: 'Avg Score', value: '145', icon: Target },
-                    { label: 'Streak', value: '6W', icon: Zap, color: '#84CC16' }
+                    { label: 'Streak', value: '6W', icon: Zap, color: '#55DEE8' }
                   ].map((stat, i) => (
                     <div key={i} className="flex flex-col items-start gap-1 group relative">
-                      <div className="flex items-center gap-1.5 text-gray-700 group-hover:text-[#84CC16] transition-colors">
+                      <div className="flex items-center gap-1.5 text-gray-700 group-hover:text-[#55DEE8] transition-colors">
                         <stat.icon size={10} />
                         <span className="text-[6px] font-black uppercase tracking-widest">{stat.label}</span>
                       </div>
@@ -271,44 +288,91 @@ const TeamProfile = () => {
 
               <div className="space-y-2 pt-2">
                 <div className="grid grid-cols-2 gap-2">
-                  <button 
-                    onClick={handleJoinRequest}
-                    disabled={isJoining || isPendingMember || isOwner || isMember}
-                    className={`py-3 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 transition-all ${isPendingMember || isOwner || isMember ? 'bg-white/5 text-white/20 border border-white/10' : 'bg-[#84CC16] text-black hover:brightness-110 shadow-[0_5px_15px_rgba(132,204,22,0.2)]'}`}
-                  >
-                    {isJoining ? <Loader2 size={12} className="animate-spin" /> : (
-                      <>
-                        <UserPlus size={14} />
-                        Join
-                      </>
-                    )}
-                  </button>
+                  {isMember ? (
+                    <button 
+                      onClick={() => toast.success('Left the team.')}
+                      className="py-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-red-500/20 transition-all"
+                    >
+                      <UserPlus size={14} className="rotate-45" />
+                      Leave Team
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={handleJoinRequest}
+                      disabled={isJoining || isPendingMember || isOwner}
+                      className={`py-3 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 transition-all ${isPendingMember || isOwner ? 'bg-white/5 text-white/20 border border-white/10' : 'bg-[#55DEE8] text-black hover:brightness-110 shadow-[0_5px_15px_rgba(85,222,232,0.2)]'}`}
+                    >
+                      {isJoining ? <Loader2 size={12} className="animate-spin" /> : (
+                        <>
+                          <UserPlus size={14} />
+                          {isPendingMember ? 'Request Sent' : 'Join'}
+                        </>
+                      )}
+                    </button>
+                  )}
                   <button 
                     onClick={() => setShowChallengeModal(true)}
-                    className="py-3 border-2 border-[#84CC16] text-[#84CC16] rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-[#84CC16] hover:text-black transition-all"
+                    className="py-3 border-2 border-[#55DEE8] text-[#55DEE8] rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-[#55DEE8] hover:text-black transition-all"
                   >
                     <Swords size={14} />
                     Challenge
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2">
                   <button 
                     onClick={() => navigate(`/messages?teamId=${id}`)}
-                    className="py-2.5 bg-white/5 border border-white/10 rounded-xl text-white font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-2 hover:bg-white/10"
+                    className="w-full py-2.5 bg-white/5 border border-white/10 rounded-xl text-white font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-2 hover:bg-white/10"
                   >
-                    <MessageCircle size={12} /> Chat
+                    <MessageCircle size={12} /> Chat with Team
                   </button>
-                  <button 
-                    onClick={() => navigate(`/team-pass/${id}`)}
-                    className="py-2.5 bg-white/5 border border-white/10 rounded-xl text-white font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-2 hover:bg-white/10"
-                  >
-                    <Ticket size={12} /> Pass
-                  </button>
+
+                  {/* Digital Pass QR Card */}
+                  <div className="bg-gradient-to-br from-[#55DEE8]/10 to-transparent border border-white/5 rounded-2xl p-4 flex flex-col items-center gap-3 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-[#55DEE8]/5 blur-xl rounded-full" />
+                    
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-1.5 text-gray-400">
+                        <Ticket size={12} className="text-[#55DEE8]" />
+                        <span className="text-[7px] font-black uppercase tracking-widest">Digital Team Pass</span>
+                      </div>
+                      <Fingerprint size={12} className="text-white/20" />
+                    </div>
+
+                    <div className="relative w-28 h-28 bg-white border border-white/10 rounded-xl p-2 flex items-center justify-center group-hover:scale-[1.02] transition-transform overflow-hidden">
+                      {team.qrCode ? (
+                        <img 
+                          src={team.qrCode} 
+                          alt="Team QR Pass" 
+                          className="w-full h-full object-contain opacity-90 transition-transform" 
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center gap-1 text-black/20">
+                          <QrCode size={32} strokeWidth={1.5} />
+                          <span className="text-[6px] font-black uppercase tracking-widest">Generating...</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <button 
+                      onClick={() => navigate(`/team-pass/${id}`)}
+                      className="w-full py-2 bg-[#55DEE8]/10 hover:bg-[#55DEE8] hover:text-black border border-[#55DEE8]/20 rounded-xl text-[#55DEE8] font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-1.5 transition-all"
+                    >
+                      View Full Pass
+                    </button>
+                  </div>
                 </div>
 
+                <button
+                  onClick={() => setShowScoringModal(true)}
+                  className="w-full mt-2 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-widest text-[9px] rounded-xl flex items-center justify-center gap-2 hover:brightness-110 shadow-lg shadow-[#55DEE8]/10"
+                >
+                  <Play size={14} className="fill-black" />
+                  Start Scoring Match
+                </button>
+
                 <button 
-                  onClick={handleShare}
+                  onClick={() => setShowShareModal(true)}
                   className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-white font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-2 hover:bg-white/10"
                 >
                   <Share2 size={12} /> Share Team
@@ -316,7 +380,7 @@ const TeamProfile = () => {
               </div>
 
               <div className="mt-auto pt-4 text-center">
-                <Link to="/my-teams" className="flex items-center justify-center gap-2 text-[#84CC16] text-[8px] font-black uppercase tracking-widest hover:underline group">
+                <Link to="/my-teams" className="flex items-center justify-center gap-2 text-[#55DEE8] text-[8px] font-black uppercase tracking-widest hover:underline group">
                   Dashboard <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
@@ -336,7 +400,7 @@ const TeamProfile = () => {
                 </h2>
                 <button 
                   onClick={() => setShowSquadModal(true)}
-                  className="text-[8px] font-black text-[#84CC16] uppercase tracking-widest bg-[#84CC16]/10 px-3 py-1.5 rounded-lg border border-[#84CC16]/20"
+                  className="text-[8px] font-black text-[#55DEE8] uppercase tracking-widest bg-[#55DEE8]/10 px-3 py-1.5 rounded-lg border border-[#55DEE8]/20"
                 >
                   View All
                 </button>
@@ -344,9 +408,9 @@ const TeamProfile = () => {
 
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 {displayMembers.slice(0, 5).map((member, i) => (
-                  <div key={i} className="bg-white/[0.01] border border-white/5 rounded-[20px] p-3 flex flex-col items-center gap-2 group hover:border-[#84CC16]/20 transition-all text-center">
+                  <div key={i} className="bg-white/[0.01] border border-white/5 rounded-[20px] p-3 flex flex-col items-center gap-2 group hover:border-[#55DEE8]/20 transition-all text-center">
                     <div className="relative">
-                      <div className="w-14 h-14 rounded-full border-2 border-[#84CC16] p-0.5 overflow-hidden">
+                      <div className="w-14 h-14 rounded-full border-2 border-[#55DEE8] p-0.5 overflow-hidden">
                          <div className="w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden">
                            {member.user?.profilePicture ? (
                              <img src={member.user.profilePicture} className="w-full h-full object-cover" alt="" />
@@ -356,7 +420,7 @@ const TeamProfile = () => {
                          </div>
                       </div>
                       {member.role === 'CAPTAIN' && (
-                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#84CC16] rounded-full border-2 border-black flex items-center justify-center shadow-lg">
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#55DEE8] rounded-full border-2 border-black flex items-center justify-center shadow-lg">
                           <Crown size={10} className="text-black" />
                         </div>
                       )}
@@ -370,11 +434,51 @@ const TeamProfile = () => {
               </div>
             </div>
 
+            {/* Active Scoring Matches */}
+            {teamMatches && teamMatches.length > 0 && (
+              <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <h2 className="text-lg font-black uppercase tracking-tight flex items-center gap-2" style={HEADING_STYLE}>
+                      Active Scoring Matches <span className="inline-block w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_#EF4444] animate-pulse" />
+                    </h2>
+                    <p className="text-[7px] font-black text-gray-700 uppercase tracking-widest">Real-time live scored matches</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {teamMatches.map((game) => {
+                    const mappedMatch = {
+                      _id: game.id,
+                      status: game.scoringStatus === 'NOT_STARTED' ? 'SETUP' : game.scoringStatus,
+                      sportType: game.sportType || 'Cricket',
+                      matchName: game.name || game.title || 'Scoring Match',
+                      teamA: {
+                        name: game.teams?.find(t => t.teamKey === 'teamA')?.name || 'Team A',
+                        logo: game.teams?.find(t => t.teamKey === 'teamA')?.image || null
+                      },
+                      teamB: {
+                        name: game.teams?.find(t => t.teamKey === 'teamB')?.name || 'Team B',
+                        logo: game.teams?.find(t => t.teamKey === 'teamB')?.image || null
+                      },
+                      youtubeStreamUrl: game.youtubeStreamUrl || null
+                    };
+                    return (
+                      <ScoringMatchCard 
+                        key={game.id} 
+                        match={mappedMatch} 
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Match History */}
             <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-black uppercase tracking-tight" style={HEADING_STYLE}>Match History</h2>
-                <button className="text-[8px] font-black text-[#84CC16] uppercase tracking-widest bg-[#84CC16]/10 px-3 py-1.5 rounded-lg border border-[#84CC16]/20">Full History</button>
+                <button className="text-[8px] font-black text-[#55DEE8] uppercase tracking-widest bg-[#55DEE8]/10 px-3 py-1.5 rounded-lg border border-[#55DEE8]/20">Full History</button>
               </div>
 
               <div className="overflow-hidden">
@@ -399,11 +503,11 @@ const TeamProfile = () => {
                         <td className="py-3 text-[10px] font-black text-white uppercase tracking-tight">{m.opp}</td>
                         <td className="py-3 text-center font-black text-white text-[10px]">{m.score}</td>
                         <td className="py-3 text-center">
-                          <span className={`text-[9px] font-black ${m.lost ? 'text-red-500' : 'text-[#84CC16]'}`}>{m.res}</span>
+                          <span className={`text-[9px] font-black ${m.lost ? 'text-red-500' : 'text-[#55DEE8]'}`}>{m.res}</span>
                         </td>
                         <td className="py-3 text-[9px] font-black text-white/40 uppercase">{m.mvp}</td>
                         <td className="py-3 text-right">
-                           <Play size={8} fill="currentColor" className="text-white/20 group-hover:text-[#84CC16]" />
+                           <Play size={8} fill="currentColor" className="text-white/20 group-hover:text-[#55DEE8]" />
                         </td>
                       </tr>
                     ))}
@@ -415,9 +519,9 @@ const TeamProfile = () => {
 
           <div className="lg:col-span-4 space-y-4">
              {/* Promo */}
-             <div className="bg-gradient-to-br from-[#84CC16]/10 to-transparent border border-white/5 rounded-[24px] p-6 relative overflow-hidden group">
+             <div className="bg-gradient-to-br from-[#55DEE8]/10 to-transparent border border-white/5 rounded-[24px] p-6 relative overflow-hidden group">
                <div className="relative z-10 space-y-4">
-                  <Zap size={32} className="text-[#84CC16]" />
+                  <Zap size={32} className="text-[#55DEE8]" />
                   <div>
                     <h3 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2" style={HEADING_STYLE}>Elevate Squad</h3>
                     <p className="text-gray-600 text-[9px] font-black uppercase leading-relaxed tracking-widest">Upgrade to pro for advanced analytics and live streaming.</p>
@@ -426,14 +530,14 @@ const TeamProfile = () => {
                     Upgrade <ArrowRight size={14} strokeWidth={3} />
                   </button>
                </div>
-               <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#84CC16]/5 blur-[60px] rounded-full" />
+               <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#55DEE8]/5 blur-[60px] rounded-full" />
             </div>
 
             {/* Rivals */}
              <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-6 space-y-4">
                <div className="flex items-center justify-between">
                 <h2 className="text-lg font-black uppercase tracking-tight" style={HEADING_STYLE}>Rivals</h2>
-                <button className="text-[8px] font-black text-[#84CC16] uppercase tracking-widest bg-[#84CC16]/10 px-2.5 py-1.5 rounded-lg border border-[#84CC16]/20">All</button>
+                <button className="text-[8px] font-black text-[#55DEE8] uppercase tracking-widest bg-[#55DEE8]/10 px-2.5 py-1.5 rounded-lg border border-[#55DEE8]/20">All</button>
               </div>
               <div className="space-y-3">
                  {[
@@ -442,13 +546,13 @@ const TeamProfile = () => {
                 ].map((r, i) => (
                   <div key={i} className="flex items-center gap-3 bg-white/[0.01] p-3 rounded-xl border border-white/5">
                      <div className="w-8 h-8 rounded-lg bg-black border border-white/10 flex items-center justify-center shrink-0">
-                        <Shield size={16} className="text-[#84CC16]/20" />
+                        <Shield size={16} className="text-[#55DEE8]/20" />
                      </div>
                      <div className="flex-1">
                         <h4 className="font-black text-[10px] text-white uppercase">{r.name}</h4>
-                        <p className="text-[7px] font-black text-[#84CC16] uppercase">Score: {r.score}</p>
+                        <p className="text-[7px] font-black text-[#55DEE8] uppercase">Score: {r.score}</p>
                      </div>
-                     <button className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#84CC16]">
+                     <button className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8]">
                         <Swords size={12} />
                      </button>
                   </div>
@@ -469,7 +573,7 @@ const TeamProfile = () => {
                <div className="p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0A0A0A] z-10">
                   <div>
                     <h2 className="text-xl font-black text-white uppercase tracking-tighter" style={HEADING_STYLE}>Full Squad Roster</h2>
-                    <p className="text-[9px] text-[#84CC16] font-black uppercase tracking-widest mt-1">{displayMembers.length} Official Members</p>
+                    <p className="text-[9px] text-[#55DEE8] font-black uppercase tracking-widest mt-1">{displayMembers.length} Official Members</p>
                   </div>
                   <button onClick={() => setShowSquadModal(false)} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors">
                     <X size={20} />
@@ -479,15 +583,15 @@ const TeamProfile = () => {
                <div className="p-6 overflow-y-auto custom-scrollbar">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {displayMembers.map((member, i) => (
-                      <div key={i} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 flex flex-col items-center gap-3 hover:border-[#84CC16]/20 transition-all text-center">
+                      <div key={i} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 flex flex-col items-center gap-3 hover:border-[#55DEE8]/20 transition-all text-center">
                         <div className="relative">
-                          <div className="w-16 h-16 rounded-full border-2 border-[#84CC16] p-0.5 overflow-hidden">
+                          <div className="w-16 h-16 rounded-full border-2 border-[#55DEE8] p-0.5 overflow-hidden">
                             <div className="w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden">
                                {member.user?.profilePicture ? <img src={member.user.profilePicture} className="w-full h-full object-cover" /> : <Users size={20} className="text-gray-800" />}
                             </div>
                           </div>
                           {member.role === 'CAPTAIN' && (
-                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#84CC16] rounded-full border-2 border-black flex items-center justify-center">
+                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#55DEE8] rounded-full border-2 border-black flex items-center justify-center">
                               <Crown size={10} className="text-black" />
                             </div>
                           )}
@@ -512,19 +616,61 @@ const TeamProfile = () => {
                <h2 className="text-xl font-black text-white uppercase tracking-tighter mb-4">Challenge Squad</h2>
                <div className="space-y-3">
                  {myTeamsData?.teams?.filter(t => t.sportType === team.sportType)?.map(t => (
-                   <button key={t._id} onClick={() => setSelectedMyTeam(t._id)} className={`w-full p-3 rounded-xl border transition-all flex items-center gap-3 text-left ${selectedMyTeam === t._id ? 'bg-[#84CC16]/10 border-[#84CC16]' : 'bg-white/5 border-white/5'}`}>
+                   <button key={t._id} onClick={() => setSelectedMyTeam(t._id)} className={`w-full p-3 rounded-xl border transition-all flex items-center gap-3 text-left ${selectedMyTeam === t._id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/5'}`}>
                      <p className="font-black uppercase text-[10px] text-white">{t.name}</p>
                    </button>
                  ))}
                  <div className="flex gap-3 pt-4">
                    <button onClick={() => setShowChallengeModal(false)} className="flex-1 py-3 bg-white/5 rounded-xl text-white font-black uppercase text-[9px]">Cancel</button>
-                   <button onClick={handleChallenge} className="flex-1 py-3 bg-[#84CC16] rounded-xl text-black font-black uppercase text-[9px]">Send</button>
+                   <button onClick={handleChallenge} className="flex-1 py-3 bg-[#55DEE8] rounded-xl text-black font-black uppercase text-[9px]">Send</button>
                  </div>
                </div>
             </motion.div>
           </div>
         )}
+
+        {/* Share Modal */}
+        {showShareModal && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowShareModal(false)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-sm bg-[#0A0A0A] border border-white/10 rounded-[24px] p-6 text-center">
+               <div className="w-16 h-16 mx-auto bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-4">
+                 <Share2 size={24} className="text-[#55DEE8]" />
+               </div>
+               <h2 className="text-xl font-black text-white uppercase tracking-tighter mb-2">Share Team</h2>
+               <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-6">Invite players to join {team.name}</p>
+               
+               <div className="space-y-3">
+                 <button onClick={handleShare} className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white font-black uppercase text-[10px] flex items-center justify-center gap-2 border border-white/5 transition-colors">
+                   <Share2 size={14} /> Native Share
+                 </button>
+                 <button onClick={() => {
+                   navigator.clipboard.writeText(window.location.href);
+                   toast.success('Link copied to clipboard!');
+                   setShowShareModal(false);
+                 }} className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white font-black uppercase text-[10px] flex items-center justify-center gap-2 border border-white/5 transition-colors">
+                   <Copy size={14} /> Copy Link
+                 </button>
+                 <button onClick={() => {
+                   const text = `Hey, join my team ${team.name}!\n\nLink: ${window.location.href}`;
+                   navigate(`/community?createPost=true&text=${encodeURIComponent(text)}`);
+                 }} className="w-full py-3 bg-[#55DEE8] hover:brightness-110 rounded-xl text-black font-black uppercase text-[10px] flex items-center justify-center gap-2 transition-colors shadow-[0_0_15px_rgba(85,222,232,0.2)]">
+                   <Users size={14} /> Post to Community
+                 </button>
+               </div>
+               
+               <button onClick={() => setShowShareModal(false)} className="mt-6 text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-white transition-colors">
+                 Cancel
+               </button>
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
+
+      <StartScoringModal 
+        isOpen={showScoringModal} 
+        onClose={() => setShowScoringModal(false)} 
+      />
     </div>
   );
 };

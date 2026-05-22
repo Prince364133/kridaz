@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Star, ChevronLeft, ChevronRight, Zap, Heart, Timer, MessageSquareShare } from "lucide-react";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const navigate = useNavigate();
 
-  const to = `/turf/${turf._id}`;
+  // Ensure fallback values so we don't crash
+  const to = `/venue/${turf.id || turf._id}`;
   const images = turf.images?.length > 0 ? turf.images : [turf.image];
   const rating = turf.avgRating ?? 4.8;
   const price = turf.pricePerHour ?? 800;
@@ -30,16 +32,40 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
     setCurrentImageIndex((p) => (p - 1 + images.length) % images.length); 
   };
 
-  const toggleWishlist = (e) => {
+  const toggleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
+    const targetId = turf.id || turf._id;
+    try {
+      setIsWishlisted(!isWishlisted);
+      await axiosInstance.post("/api/user/turf/user/like", { turfId: targetId });
+    } catch (err) {
+      setIsWishlisted(isWishlisted); // Revert state on failure
+      console.error("[TELEMETRY] Failed to toggle wishlist like:", err);
+    }
+  };
+
+  const handleShare = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const targetId = turf.id || turf._id;
+    try {
+      const shareUrl = `${window.location.origin}/venue/${targetId}`;
+      await navigator.clipboard.writeText(shareUrl);
+      
+      // Try using Toast or standard fallback alert
+      alert("Ground detail link copied to clipboard!");
+      
+      await axiosInstance.post("/api/user/turf/user/share", { turfId: targetId });
+    } catch (err) {
+      console.error("[TELEMETRY] Failed to record turf share:", err);
+    }
   };
 
   return (
     <div
       onClick={() => navigate(to)}
-      className="group relative h-[280px] md:h-[360px] w-full rounded-[1.25rem] md:rounded-[2rem] overflow-hidden cursor-pointer bg-[#0d0d0d] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 hover:border-[#84CC16]/30"
+      className="group relative h-[280px] md:h-[360px] w-full rounded-[15px] overflow-hidden cursor-pointer bg-[#0d0d0d] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 hover:border-[#BFF367]/30"
     >
       {/* ── Background Image ── */}
       <div className="absolute inset-0">
@@ -56,20 +82,20 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
       <div className="absolute top-3 md:top-5 left-3 md:left-5 z-20 flex flex-col gap-2 md:gap-2.5 items-start">
         <div className="flex items-center gap-1.5 md:gap-2.5">
           {/* Sport Tag */}
-          <span className="bg-[#84CC16] text-black text-[8px] md:text-[10px] font-black px-2 md:px-3 py-1 md:py-1.5 rounded-lg md:rounded-xl uppercase tracking-widest shadow-2xl">
+          <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[8px] md:text-[10px] font-black px-2 md:px-3 py-1 md:py-1.5 rounded-[10px] uppercase tracking-widest shadow-2xl">
             {turf.sportTypes?.[0] || "SPORT"}
           </span>
 
           {/* Slots Left Badge */}
-          <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-lg md:rounded-xl px-2 md:px-3 py-1 md:py-1.5 flex items-center gap-1 md:gap-2 shadow-2xl">
-            <Timer size={10} className="text-[#84CC16]" />
+          <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-[10px] px-2 md:px-3 py-1 md:py-1.5 flex items-center gap-1 md:gap-2 shadow-2xl">
+            <Timer size={10} className="text-[#BFF367]" />
             <span className="text-white text-[8px] md:text-[10px] font-black uppercase tracking-tighter">{slotsLeft} {window.innerWidth < 768 ? "L" : "Slots Left"}</span>
           </div>
         </div>
 
         {featured && (
-          <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/10 px-2 md:px-3 py-1 md:py-1.5 rounded-lg md:rounded-xl shadow-lg">
-            <Zap size={10} className="text-[#84CC16] fill-[#84CC16]" />
+          <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/10 px-2 md:px-3 py-1 md:py-1.5 rounded-[10px] shadow-lg">
+            <Zap size={8} md:size={10} className="text-[#BFF367] fill-[#BFF367]" />
             <span className="text-[7px] md:text-[9px] font-black text-white uppercase tracking-wider">Featured</span>
           </div>
         )}
@@ -79,10 +105,10 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
       <div className="absolute top-3 md:top-5 right-3 md:right-5 z-20">
         <button 
           onClick={toggleWishlist}
-          className="p-2 md:p-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-[#84CC16] transition-all duration-300 group/heart"
+          className="p-2 md:p-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-gradient-to-r hover:from-[#55DEE8] hover:to-[#BFF367] transition-all duration-300 group/heart"
         >
           <Heart 
-            size={18} 
+            size={14} md:size={18} 
             className={`transition-all duration-300 ${
               isWishlisted ? "fill-red-500 text-red-500 scale-110" : "text-white group-hover/heart:scale-110 group-hover/heart:text-black"
             }`} 
@@ -93,11 +119,11 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
       {/* ── Carousel Controls ── */}
       {images.length > 1 && (
         <div className="absolute inset-y-0 inset-x-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30">
-          <button onClick={prevImage} className="p-1.5 md:p-2 bg-black/40 hover:bg-[#84CC16] hover:text-black backdrop-blur-sm rounded-full text-white transition-all border border-white/10">
-            <ChevronLeft size={16} />
+          <button onClick={prevImage} className="p-1.5 md:p-2 bg-black/40 hover:bg-[#BFF367] hover:text-black backdrop-blur-sm rounded-full text-white transition-all border border-white/10">
+            <ChevronLeft size={14} md:size={16} />
           </button>
-          <button onClick={nextImage} className="p-1.5 md:p-2 bg-black/40 hover:bg-[#84CC16] hover:text-black backdrop-blur-sm rounded-full text-white transition-all border border-white/10">
-            <ChevronRight size={16} />
+          <button onClick={nextImage} className="p-1.5 md:p-2 bg-black/40 hover:bg-[#BFF367] hover:text-black backdrop-blur-sm rounded-full text-white transition-all border border-white/10">
+            <ChevronRight size={14} md:size={16} />
           </button>
         </div>
       )}
@@ -111,36 +137,41 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
           <div className="space-y-3 md:space-y-4">
             {/* Name & Location */}
             <div className="space-y-1 md:space-y-1.5">
-              <h3 className="text-base md:text-xl font-bold text-white tracking-tight leading-tight group-hover:text-[#84CC16] transition-colors line-clamp-1">
+              <h3 className="text-base md:text-xl font-bold text-white tracking-tight leading-tight group-hover:text-[#BFF367] transition-colors line-clamp-1 font-inter">
                 {turf.name}
               </h3>
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 md:gap-2 overflow-hidden">
-                  <MapPin size={12} className="text-[#84CC16] shrink-0" />
-                  <p className="text-[10px] md:text-sm font-semibold text-white/60 truncate">
+                  <MapPin size={10} md:size={12} className="text-[#55DEE8] shrink-0" />
+                  <p className="text-[10px] md:text-sm font-semibold text-white/60 truncate font-inter">
                     {turf.city || turf.location || "Nearby Venue"}
                   </p>
                 </div>
-                <MessageSquareShare size={14} className="text-[#84CC16] hover:scale-110 transition-transform cursor-pointer shrink-0" />
+                <button
+                  onClick={handleShare}
+                  className="p-1 hover:bg-white/10 rounded-full transition-all duration-300"
+                >
+                  <MessageSquareShare size={14} className="text-[#84CC16] hover:scale-110 transition-transform cursor-pointer shrink-0" />
+                </button>
               </div>
             </div>
 
             {/* Pricing & Rating Row */}
             <div className="flex items-center justify-between items-end pt-2 md:pt-3 border-t border-white/10">
               <div className="flex flex-col">
-                <span className="text-[7px] md:text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5 md:mb-1">Starting</span>
+                <span className="text-[7px] md:text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-0.5 md:mb-1 font-inter">Starting</span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-lg md:text-2xl font-black text-[#84CC16]">₹{price}</span>
-                  <span className="text-[8px] md:text-xs font-bold text-white/40 uppercase">/ hr</span>
+                  <span className="text-lg md:text-2xl font-black text-[#BFF367]">₹{price}</span>
+                  <span className="text-[8px] md:text-xs font-bold text-white/40 uppercase font-inter">/ hr</span>
                 </div>
               </div>
 
               <div className="flex flex-col items-end gap-0.5 md:gap-1">
-                <div className="flex items-center gap-1 md:gap-1.5 text-[#84CC16]">
-                  <Star size={18} className="fill-current" />
-                  <span className="text-sm md:text-lg font-black">{rating.toFixed(1)}</span>
+                <div className="flex items-center gap-1 md:gap-1.5 text-[#BFF367]">
+                  <Star size={14} md:size={18} className="fill-current" />
+                  <span className="text-sm md:text-lg font-black font-inter">{rating.toFixed(1)}</span>
                 </div>
-                <div className="flex items-center gap-1 text-[7px] md:text-[9px] font-black text-[#84CC16] uppercase tracking-widest">
+                <div className="flex items-center gap-1 text-[7px] md:text-[9px] font-black text-[#BFF367] uppercase tracking-widest font-inter">
                   {distance || "1.2km Away"}
                 </div>
               </div>

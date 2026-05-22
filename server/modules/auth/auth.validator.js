@@ -4,38 +4,46 @@ import { OWNER_ROLE } from "@kridaz/shared-constants/roles";
 
 export const sendOtpSchema = z.object({
   body: z.object({
-    email: z.string().email("Email is invalid"),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+  }).refine((data) => data.email || data.phone, {
+    message: "Email or Phone is required",
+    path: ["email"],
   }),
 });
 
 export const userRegisterSchema = z.object({
   body: z.object({
     name: z.string().min(1, "Name is required"),
-    email: z.string().email("Email is invalid"),
+    email: z.string().email("Email is invalid").optional().or(z.literal('')),
     phone: z.string().min(1, "Phone number is required"),
     gender: z.string().min(1, "Gender is required"),
     location: z.string().min(1, "Location is required"),
     password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(1, "Confirm Password is required"),
-    otp: z.string().min(6, "OTP must be 6 characters"),
-    phoneOtp: z.string().min(6, "WhatsApp OTP must be 6 characters"),
+    confirmPassword: z.string().optional(),
+    otp: z.string().optional(),
+    phoneOtp: z.string().optional(),
+    dob: z.string().optional(),
     sportTypes: z.array(z.string()).optional(),
-  }).refine((data) => data.password === data.confirmPassword, {
+  }).refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
+  }).refine((data) => data.otp || data.phoneOtp, {
+    message: "Either Email OTP or Phone OTP is required",
+    path: ["otp"],
   }),
 });
 
 export const loginStep1Schema = z.object({
   body: z.object({
-    email: z.string().email("Email is invalid"),
+    email: z.string().min(1, "Email or Phone is required"),
     password: z.string().min(1, "Password is required"),
   }),
 });
 
 export const userLoginSchema = z.object({
   body: z.object({
-    email: z.string().email("Email is invalid"),
+    email: z.string().min(1, "Email or Phone is required"),
     password: z.string().min(1, "Password is required"),
     otp: z.string().min(6, "OTP must be 6 characters").optional(),
   }),
@@ -44,18 +52,22 @@ export const userLoginSchema = z.object({
 export const ownerRegisterSchema = z.object({
   body: z.object({
     name: z.string().min(1, "Name is required"),
-    email: z.string().email("Email is invalid"),
+    email: z.string().email("Email is invalid").optional().or(z.literal('')),
     phone: z.string().min(1, "Phone number is required"),
     gender: z.string().min(1, "Gender is required"),
     location: z.string().min(1, "Location is required"),
     password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(1, "Confirm Password is required"),
-    otp: z.string().min(6, "OTP must be 6 characters"),
-    phoneOtp: z.string().min(6, "WhatsApp OTP must be 6 characters"),
+    confirmPassword: z.string().optional(),
+    otp: z.string().optional(),
+    phoneOtp: z.string().optional(),
     role: z.enum(Object.values(OWNER_ROLE)).optional(),
-  }).refine((data) => data.password === data.confirmPassword, {
+    businessName: z.string().optional(),
+  }).refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
+  }).refine((data) => data.otp || data.phoneOtp, {
+    message: "Either Email OTP or Phone OTP is required",
+    path: ["otp"],
   }),
 });
 

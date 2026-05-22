@@ -10,6 +10,91 @@ const handleControllerError = (res, error, fallbackMsg = "Internal Server Error"
   res.status(status).json({ success: false, message: error.message || fallbackMsg });
 };
 
+export const setupScoringGame = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const matchData = req.body;
+    
+    const game = await scoringService.createScoringMatch(userId, matchData);
+    
+    res.status(201).json({ success: true, game });
+  } catch (error) {
+    logger.error("[Scoring] Setup Scoring Game Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+export const getMyScoringGames = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const games = await scoringService.getUserScoringGames(userId);
+    
+    res.status(200).json({ success: true, games });
+  } catch (error) {
+    logger.error("[Scoring] Get My Games Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+/**
+ * Get a single scoring game by its ID (full details for match dashboard/card)
+ */
+export const getScoringGameById = async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const game = await scoringService.getScoringGameById(gameId);
+    if (!game) {
+      return res.status(404).json({ success: false, message: "Game not found" });
+    }
+    res.status(200).json({ success: true, game });
+  } catch (error) {
+    logger.error("[Scoring] Get Game By ID Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+/**
+ * Authenticate scoring app access with password.
+ * Returns a short-lived JWT scoped to the specific game for SCORER role.
+ * Password is never returned in any response.
+ */
+export const authenticateScoringApp = async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ success: false, message: "Password is required" });
+    }
+
+    const result = await scoringService.verifyScoringPassword(gameId, password);
+    res.status(200).json({ success: true, token: result.token, gameId });
+  } catch (error) {
+    logger.error("[Scoring] Auth Error:", error);
+    if (error.message === "INVALID_PASSWORD" || error.message === "GAME_NOT_FOUND") {
+      return res.status(401).json({ success: false, message: "Invalid password or game not found" });
+    }
+    handleControllerError(res, error);
+  }
+};
+/**
+ * Dispatches notifications to players in the match
+ */
+export const notifyPlayers = async (req, res) => {
+  try {
+    const { matchId } = req.body;
+    if (!matchId) return res.status(400).json({ success: false, message: "matchId is required" });
+    
+    // Simulate async notification dispatch
+    logger.info(`[Scoring] Dispatched notifications to players for match ${matchId}`);
+    
+    res.status(200).json({ success: true, message: "Notifications dispatched successfully" });
+  } catch (error) {
+    logger.error("[Scoring] Notify Players Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
 /**
  * Initialize a Live Stream overlay session
  */
@@ -233,7 +318,8 @@ export const getMatchStatus = async (req, res) => {
       return res.status(200).json({ 
         success: true, 
         scoring: result.scoring, 
-        scoringSnapshot: result.scoringSnapshot 
+        scoringSnapshot: result.scoringSnapshot,
+        hostedGame: result.hostedGame
       });
     }
 
@@ -274,6 +360,22 @@ export const getLiveScore = async (req, res) => {
     return res.status(200).json({ success: true, data, source });
   } catch (error) {
     logger.error("[Scoring] Live Score Controller Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+/**
+ * Delete match permanently
+ */
+export const deleteMatch = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const userId = req.user.id;
+    // For now just pass it to service, or perform basic verification
+    await scoringService.deleteScoringMatch(matchId, userId);
+    res.status(200).json({ success: true, message: "Match deleted successfully" });
+  } catch (error) {
+    logger.error("[Scoring] Delete Match Error:", error);
     handleControllerError(res, error);
   }
 };

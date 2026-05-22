@@ -8,20 +8,28 @@ import generateQRCode from "../../utils/generateQRCode.js";
 const mapTeamUserAvatar = (team) => {
   if (!team) return null;
   const formatted = { ...team };
+  formatted._id = team.id;
   if (formatted.owner) {
     formatted.owner = {
       ...formatted.owner,
+      _id: formatted.owner.id,
       avatar: formatted.owner.profilePicture || null
     };
   }
   if (Array.isArray(formatted.members)) {
     formatted.members = formatted.members.map(m => {
       const formattedMember = { ...m };
+      formattedMember._id = m.id;
       if (formattedMember.user) {
         formattedMember.user = {
           ...formattedMember.user,
+          _id: formattedMember.user.id,
           avatar: formattedMember.user.profilePicture || null
         };
+        // Flatten user fields to the root of the member object for frontend backwards compatibility
+        formattedMember.username = formattedMember.user.username || formattedMember.user.name;
+        formattedMember.profilePic = formattedMember.user.profilePicture || formattedMember.user.avatar || null;
+        formattedMember.phone = formattedMember.user.phone || null;
       }
       return formattedMember;
     });
@@ -34,9 +42,11 @@ const mapTeamUserAvatar = (team) => {
   ];
   formatted.opponents = opponentsList.map(opp => {
     const mappedOpp = { ...opp };
+    mappedOpp._id = opp.id;
     if (mappedOpp.owner) {
       mappedOpp.owner = {
         ...mappedOpp.owner,
+        _id: mappedOpp.owner.id,
         avatar: mappedOpp.owner.profilePicture || null
       };
     }
@@ -45,6 +55,21 @@ const mapTeamUserAvatar = (team) => {
   delete formatted.Team_A;
   delete formatted.Team_B;
 
+  // Map opponent requests received to opponentRequests array for the frontend
+  if (Array.isArray(formatted.opponentRequestsReceived)) {
+    formatted.opponentRequests = formatted.opponentRequestsReceived.map(req => {
+      const formattedReq = { ...req };
+      formattedReq._id = req.id;
+      if (formattedReq.from) {
+        formattedReq.fromTeam = {
+          ...formattedReq.from,
+          _id: formattedReq.from.id
+        };
+      }
+      return formattedReq;
+    });
+  }
+
   return formatted;
 };
 
@@ -52,10 +77,12 @@ const mapTeamUserAvatar = (team) => {
 // @desc    Create a new team with a unique team code
 export const createTeam = async (req, res) => {
   try {
-    const { name, description, sport, sportType, captainName, captainPhone, city, latitude, longitude, lat, lng } = req.body;
+    const { name, description, sport, sportType, captainName, captainPhone, captainContact, city, latitude, longitude, lat, lng } = req.body;
     
-    const finalLat = latitude || lat;
-    const finalLng = longitude || lng;
+    const rawLat = latitude || lat;
+    const rawLng = longitude || lng;
+    const finalLat = rawLat && rawLat !== "undefined" && rawLat !== "null" && !isNaN(parseFloat(rawLat)) ? parseFloat(rawLat) : null;
+    const finalLng = rawLng && rawLng !== "undefined" && rawLng !== "null" && !isNaN(parseFloat(rawLng)) ? parseFloat(rawLng) : null;
     
     logger.info("Creating team for user:", req.user?.id, "Body:", req.body);
 
@@ -76,48 +103,51 @@ export const createTeam = async (req, res) => {
       imageUrl = await uploadToCloudinary(req.file.buffer, "teams");
     }
 
-    const newTeam = await prisma.$transaction(async (tx) => {
-      const team = await tx.team.create({
-        data: {
-          name,
-          description,
-          sportType: sport || sportType || "CRICKET",
-          captainName: captainName || req.user.name || "N/A",
-          captainPhone: captainPhone || req.user.phone || "N/A",
-          logo: imageUrl,
-          image: imageUrl,
-          city: city || "N/A",
-          teamCode,
-          ownerId: req.user.id,
-          latitude: finalLat ? parseFloat(finalLat) : null,
-          longitude: finalLng ? parseFloat(finalLng) : null,
-          members: {
-            create: [
-              { userId: req.user.id, role: "CAPTAIN", status: "JOINED" }
-            ]
-          }
-        },
-        include: {
-          members: true
+    const team = await prisma.team.create({
+      data: {
+        name,
+        description,
+        sportType: sport || sportType || "CRICKET",
+        captainName: captainName || req.user.name || "N/A",
+        captainPhone: captainPhone || captainContact || req.user.phone || "N/A",
+        logo: imageUrl,
+        image: imageUrl,
+        city: city || "N/A",
+        teamCode,
+        ownerId: req.user.id,
+        latitude: finalLat,
+        longitude: finalLng,
+        members: {
+          create: [
+            { userId: req.user.id, role: "CAPTAIN", status: "JOINED" }
+          ]
         }
-      });
-
-      // Generate QR Code for join link
-      const frontendUrl = process.env.USER_URL || process.env.CLIENT_URLS?.split(",")[0] || "https://kridaz.com";
-      const qrUrl = `${frontendUrl}/team-pass/${team.id}`;
-      try {
-        logger.info("Generating QR code for team join link:", qrUrl);
-        const qrCodeUrl = await generateQRCode(qrUrl);
-        return await tx.team.update({
-          where: { id: team.id },
-          data: { qrCode: qrCodeUrl },
-          include: { members: { include: { user: true } } }
-        });
-      } catch (qrError) {
-        logger.error("Failed to generate team QR code:", qrError);
-        return team;
+      },
+      include: {
+        members: {
+          include: {
+            user: true
+          }
+        }
       }
     });
+
+    // Generate QR Code for join link
+    const frontendUrl = process.env.USER_URL || process.env.CLIENT_URLS?.split(",")[0] || "https://kridaz.com";
+    const qrUrl = `${frontendUrl}/team/${team.id}`;
+    let newTeam = team;
+    try {
+      logger.info("Generating QR code for team join link:", qrUrl);
+      const qrCodeUrl = await generateQRCode(qrUrl);
+      newTeam = await prisma.team.update({
+        where: { id: team.id },
+        data: { qrCode: qrCodeUrl },
+        include: { members: { include: { user: true } } }
+      });
+    } catch (qrError) {
+      logger.error("Failed to generate team QR code:", qrError);
+    }
+
 
     logger.info("Team created successfully:", newTeam.id);
 
@@ -128,7 +158,7 @@ export const createTeam = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      team: newTeam,
+      team: mapTeamUserAvatar(newTeam),
       message: "Team created successfully",
     });
   } catch (error) {
@@ -496,7 +526,7 @@ export const getTeamById = async (req, res) => {
     // Generate QR code if missing
     if (!team.qrCode) {
       const frontendUrl = process.env.USER_URL || process.env.CLIENT_URLS?.split(",")[0] || "https://kridaz.com";
-      const qrUrl = `${frontendUrl}/team-pass/${team.id}`;
+      const qrUrl = `${frontendUrl}/team/${team.id}`;
       try {
         logger.info("Generating missing QR code for team:", team.id);
         const qrCodeUrl = await generateQRCode(qrUrl);
@@ -529,10 +559,12 @@ export const getTeamById = async (req, res) => {
 export const updateTeam = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, sportType, captainName, captainPhone, city, visibility, latitude, longitude, lat, lng } = req.body;
+    const { name, description, sportType, captainName, captainPhone, captainContact, city, visibility, latitude, longitude, lat, lng } = req.body;
     
-    const finalLat = latitude || lat;
-    const finalLng = longitude || lng;
+    const rawLat = latitude || lat;
+    const rawLng = longitude || lng;
+    const finalLat = rawLat && rawLat !== "undefined" && rawLat !== "null" && !isNaN(parseFloat(rawLat)) ? parseFloat(rawLat) : undefined;
+    const finalLng = rawLng && rawLng !== "undefined" && rawLng !== "null" && !isNaN(parseFloat(rawLng)) ? parseFloat(rawLng) : undefined;
 
     const team = await prisma.team.findUnique({ where: { id } });
     if (!team) {
@@ -555,22 +587,22 @@ export const updateTeam = async (req, res) => {
         description: description || team.description,
         sportType: sportType || team.sportType,
         captainName: captainName || team.captainName,
-        captainPhone: captainPhone || team.captainPhone,
+        captainPhone: captainPhone || captainContact || team.captainPhone,
         city: city || team.city,
         visibility: visibility || team.visibility,
-        latitude: finalLat ? parseFloat(finalLat) : team.latitude,
-        longitude: finalLng ? parseFloat(finalLng) : team.longitude,
+        latitude: finalLat,
+        longitude: finalLng,
         image: imageUrl,
         logo: imageUrl
       }
     });
 
     // PostGIS Sync
-    if (finalLat && finalLng) {
-      await updateGeoPoint('Team', id, parseFloat(finalLat), parseFloat(finalLng));
+    if (finalLat !== undefined && finalLng !== undefined) {
+      await updateGeoPoint('Team', id, finalLat, finalLng);
     }
 
-    return res.status(200).json({ success: true, team: updatedTeam, message: "Team updated successfully" });
+    return res.status(200).json({ success: true, team: mapTeamUserAvatar(updatedTeam), message: "Team updated successfully" });
   } catch (error) {
     logger.error("Update team error:", error);
     return res.status(500).json({ success: false, message: error.message });
@@ -947,6 +979,75 @@ export const requestToJoin = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @route   POST /api/team/:id/handle-join-request
+// @desc    Accept or reject a member join request
+export const handleJoinRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId, action } = req.body;
+    const currentUserId = req.user.id;
+
+    if (!["ACCEPT", "REJECT"].includes(action)) {
+      return res.status(400).json({ success: false, message: "Invalid action" });
+    }
+
+    // Verify team ownership
+    const team = await prisma.team.findUnique({ where: { id } });
+    if (!team) return res.status(404).json({ success: false, message: "Team not found" });
+    
+    if (team.ownerId !== currentUserId) {
+      return res.status(403).json({ success: false, message: "Only team owner can handle requests" });
+    }
+
+    const memberRequest = await prisma.teamMember.findFirst({
+      where: { teamId: id, userId, status: "PENDING" }
+    });
+
+    if (!memberRequest) {
+      return res.status(404).json({ success: false, message: "Pending request not found" });
+    }
+
+    if (action === "ACCEPT") {
+      await prisma.teamMember.update({
+        where: { id: memberRequest.id },
+        data: { status: "JOINED" }
+      });
+      
+      await prisma.notification.create({
+        data: {
+          userId,
+          type: "TEAM_JOIN_ACCEPTED",
+          title: "Join Request Accepted",
+          message: `Your request to join ${team.name} has been accepted!`,
+          metadata: { teamId: team.id }
+        }
+      });
+      
+      res.status(200).json({ success: true, message: "Join request accepted" });
+    } else {
+      await prisma.teamMember.delete({
+        where: { id: memberRequest.id }
+      });
+      
+      await prisma.notification.create({
+        data: {
+          userId,
+          type: "TEAM_JOIN_REJECTED",
+          title: "Join Request Rejected",
+          message: `Your request to join ${team.name} has been declined.`,
+          metadata: { teamId: team.id }
+        }
+      });
+      
+      res.status(200).json({ success: true, message: "Join request rejected" });
+    }
+  } catch (error) {
+    logger.error("Handle join request error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 
 // @route   GET /api/team/opponents
 // @desc    Get all opponent teams linked to my teams

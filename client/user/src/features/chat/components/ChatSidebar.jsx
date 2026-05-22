@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { SOCKET } from '@kridaz/shared-constants/socketEvents';
-import { useGetChatsQuery, useRespondToInvitationMutation, useTogglePinChatMutation, useDeleteChatMutation, useRemoveFromGroupMutation } from '../../../redux/api/chatApi';
+import { useGetChatsQuery, useRespondToInvitationMutation, useTogglePinChatMutation, useDeleteChatMutation, useRemoveFromGroupMutation, transformMessage } from '@redux/api/chatApi';
 import { useSelector } from 'react-redux';
-import { useSocket } from '../../../context/SocketContext';
+import { useSocket } from '@context/SocketContext';
 import { 
   MessageSquare, 
   Plus, 
@@ -17,9 +16,15 @@ import {
   MoreVertical,
   Pin,
   PinOff,
-  Trash2
+  Trash2,
+  ChevronDown,
+  ChevronRight,
+  Megaphone,
+  Crown
 } from 'lucide-react';
-import ConfirmModal from '../../../shared/components/modals/ConfirmModal';
+import ConfirmModal from '@components/modals/ConfirmModal';
+import AddGroupToCommunityModal from './AddGroupToCommunityModal';
+import ManageCommunityAdminsModal from './ManageCommunityAdminsModal';
 
 const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateCommunity, onEditProfile, onChatDeleted }) => {
   const { user } = useSelector((state) => state.auth);
@@ -36,6 +41,58 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
   const [togglePinChat] = useTogglePinChatMutation();
   const [deleteChatMutation] = useDeleteChatMutation();
   const [removeFromGroup] = useRemoveFromGroupMutation();
+
+  const [expandedCommunities, setExpandedCommunities] = useState({});
+  const [isAddGroupModalOpen, setIsAddGroupModalOpen] = useState(false);
+  const [selectedCommunityId, setSelectedCommunityId] = useState(null);
+  
+  const [isManageAdminsOpen, setIsManageAdminsOpen] = useState(false);
+  const [selectedCommunityForAdmins, setSelectedCommunityForAdmins] = useState(null);
+
+  const handleOpenManageAdmins = (community, event) => {
+    if (event) event.stopPropagation();
+    setSelectedCommunityForAdmins(community);
+    setIsManageAdminsOpen(true);
+  };
+
+  const isCommunityAdmin = (communityChat) => {
+    const myId = (user?._id || user?.id || user?.userId)?.toString();
+    
+    // Check direct creator IDs from database
+    const creatorUserId = communityChat.createdByUserId?.toString();
+    const creatorOwnerId = communityChat.createdByOwnerId?.toString();
+    if (creatorUserId === myId || creatorOwnerId === myId) return true;
+
+    const creatorId = (communityChat.createdBy?.user?._id || communityChat.createdBy?.user || communityChat.createdBy)?.toString();
+    if (creatorId === myId) return true;
+    
+    const isGroupAdmin = communityChat.groupAdmins?.some(admin => {
+      const adminId = (admin.user?._id || admin.user)?.toString();
+      return adminId === myId;
+    });
+    if (isGroupAdmin) return true;
+
+    const adminSingleId = (communityChat.groupAdmin?._id || communityChat.groupAdmin?.user?._id || communityChat.groupAdmin)?.toString();
+    if (adminSingleId === myId) return true;
+
+    return false;
+  };
+
+  const getCommunityTotalUnread = (communityId) => {
+    let total = unreadCounts[communityId] || 0;
+    chats.forEach(c => {
+      if ((c.parentCommunity === communityId || c.parentCommunity?._id === communityId) && !c.isCommunity) {
+        total += unreadCounts[c._id] || 0;
+      }
+    });
+    return total;
+  };
+
+  const handleOpenAddGroup = (communityId, event) => {
+    event.stopPropagation();
+    setSelectedCommunityId(communityId);
+    setIsAddGroupModalOpen(true);
+  };
 
   const [confirmModalConfig, setConfirmModalConfig] = useState({
     isOpen: false,
@@ -72,9 +129,10 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
     if (!socket) return;
 
     const handleNewMessage = (newMessage) => {
-      const chatId = newMessage.chat?._id || newMessage.chat;
+      const transformed = transformMessage(newMessage);
+      const chatId = transformed.chat?._id || transformed.chat?.id || transformed.chat;
       // If this chat is not currently selected, increment unread
-      if (chatId !== selectedChatId) {
+      if (chatId && chatId !== selectedChatId) {
         setUnreadCounts(prev => ({
           ...prev,
           [chatId]: (prev[chatId] || 0) + 1
@@ -107,20 +165,20 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
       refetch();
     };
 
-    socket.on(SOCKET.MESSAGE_RECEIVED, handleNewMessage);
-    socket.on(SOCKET.TYPING, handleTyping);
-    socket.on(SOCKET.STOP_TYPING, handleStopTyping);
-    socket.on(SOCKET.CHAT_UPDATED, handleChatUpdated);
-    socket.on(SOCKET.CHAT_DELETED, handleChatDeleted);
-    socket.on(SOCKET.USER_PROFILE_UPDATED, handleProfileUpdated);
+    socket.on('message recieved', handleNewMessage);
+    socket.on('typing', handleTyping);
+    socket.on('stop typing', handleStopTyping);
+    socket.on('chat updated', handleChatUpdated);
+    socket.on('chat deleted', handleChatDeleted);
+    socket.on('user profile updated', handleProfileUpdated);
 
     return () => {
-      socket.off(SOCKET.MESSAGE_RECEIVED, handleNewMessage);
-      socket.off(SOCKET.TYPING, handleTyping);
-      socket.off(SOCKET.STOP_TYPING, handleStopTyping);
-      socket.off(SOCKET.CHAT_UPDATED, handleChatUpdated);
-      socket.off(SOCKET.CHAT_DELETED, handleChatDeleted);
-      socket.off(SOCKET.USER_PROFILE_UPDATED, handleProfileUpdated);
+      socket.off('message recieved', handleNewMessage);
+      socket.off('typing', handleTyping);
+      socket.off('stop typing', handleStopTyping);
+      socket.off('chat updated', handleChatUpdated);
+      socket.off('chat deleted', handleChatDeleted);
+      socket.off('user profile updated', handleProfileUpdated);
     };
   }, [socket, selectedChatId, refetch]);
 
@@ -174,7 +232,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
       const groupImg = chat.groupImage;
       return (
         <div className="relative">
-          <div className="w-12 h-12 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center overflow-hidden shadow-lg">
+          <div className="w-12 h-12 rounded-full border border-white/10 bg-[#55DEE8]/10 flex items-center justify-center overflow-hidden shadow-lg">
             {groupImg ? (
               <img 
                 src={groupImg} 
@@ -187,10 +245,10 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
               />
             ) : null}
             <div 
-              className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#84CC16]/20 to-[#84CC16]/5"
+              className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#55DEE8]/20 to-[#55DEE8]/5"
               style={{ display: groupImg ? 'none' : 'flex' }}
             >
-              <Users size={22} className="text-[#84CC16] opacity-80" />
+              <Users size={22} className="text-[#55DEE8] opacity-80" />
             </div>
           </div>
         </div>
@@ -201,7 +259,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
 
     return (
       <div className="relative">
-        <div className="w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden shadow-lg group-hover/chat:border-[#84CC16]/30 transition-all">
+        <div className="w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden shadow-lg group-hover/chat:border-[#55DEE8]/30 transition-all">
           {imageUrl ? (
             <img 
               src={imageUrl} 
@@ -217,14 +275,14 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
             className="w-full h-full flex items-center justify-center bg-gradient-to-br from-white/10 to-white/5"
             style={{ display: imageUrl ? 'none' : 'flex' }}
           >
-            <span className="text-[#84CC16] font-black text-sm tracking-tighter">
+            <span className="text-[#55DEE8] font-black text-sm tracking-tighter">
               {getInitials(otherUser?.name)}
             </span>
           </div>
         </div>
         {/* Online dot */}
         {online && (
-          <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#84CC16] rounded-full border-[3px] border-[#0a0a0a] shadow-sm animate-pulse" />
+          <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#55DEE8] rounded-full border-[3px] border-[#0a0a0a] shadow-sm animate-pulse" />
         )}
       </div>
     );
@@ -255,7 +313,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
   if (isLoading) {
     return (
       <div className="w-full md:w-80 h-full border-r border-white/10 bg-black/20 flex flex-col items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[#84CC16] animate-spin mb-4 opacity-20" />
+        <Loader2 className="w-8 h-8 text-[#55DEE8] animate-spin mb-4 opacity-20" />
         <p className="text-white/20 text-xs font-bold uppercase tracking-widest">Loading Chats</p>
       </div>
     );
@@ -292,7 +350,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
         <div className="relative" ref={addMenuRef}>
           <button 
             onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
-            className={`w-10 h-10 ${isAddMenuOpen ? 'bg-[#84CC16] text-black' : 'bg-[#84CC16]/10 text-[#84CC16]'} hover:bg-[#84CC16] hover:text-black rounded-xl transition-all flex items-center justify-center group`}
+            className={`w-10 h-10 ${isAddMenuOpen ? 'bg-[#55DEE8] text-black' : 'bg-[#55DEE8]/10 text-[#55DEE8]'} hover:bg-[#55DEE8] hover:text-black rounded-xl transition-all flex items-center justify-center group`}
             title="Add New"
           >
             <Plus size={20} className={`${isAddMenuOpen ? 'rotate-45' : ''} transition-transform duration-300`} />
@@ -305,7 +363,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                   setIsAddMenuOpen(false);
                   onCreateGroup();
                 }}
-                className="w-full px-4 py-3 text-left text-sm text-white/80 hover:bg-[#84CC16] hover:text-black flex items-center gap-3 transition-colors"
+                className="w-full px-4 py-3 text-left text-sm text-white/80 hover:bg-[#55DEE8] hover:text-black flex items-center gap-3 transition-colors"
               >
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-black/10">
                   <Users size={16} />
@@ -322,7 +380,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                   // Trigger community creation
                   if (typeof onCreateCommunity === 'function') onCreateCommunity();
                 }}
-                className="w-full px-4 py-3 text-left text-sm text-white/80 hover:bg-[#84CC16] hover:text-black flex items-center gap-3 transition-colors"
+                className="w-full px-4 py-3 text-left text-sm text-white/80 hover:bg-[#55DEE8] hover:text-black flex items-center gap-3 transition-colors"
               >
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-black/10">
                   <MessageSquare size={16} />
@@ -341,7 +399,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
           className="relative group cursor-pointer shrink-0"
           onClick={onEditProfile}
         >
-          <div className="w-10 h-10 rounded-full border border-white/10 bg-[#84CC16]/10 flex items-center justify-center overflow-hidden hover:border-[#84CC16]/50 transition-all shadow-lg active:scale-95 group-hover:shadow-[#84CC16]/10">
+          <div className="w-10 h-10 rounded-full border border-white/10 bg-[#55DEE8]/10 flex items-center justify-center overflow-hidden hover:border-[#55DEE8]/50 transition-all shadow-lg active:scale-95 group-hover:shadow-[#55DEE8]/10">
             {(user?.profilePicture || user?.profileImage) ? (
               <img 
                 src={user.profilePicture || user.profileImage} 
@@ -354,17 +412,17 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
               />
             ) : null}
             <div 
-              className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#84CC16]/20 to-[#84CC16]/5"
+              className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#55DEE8]/20 to-[#55DEE8]/5"
               style={{ display: (user?.profilePicture || user?.profileImage) ? 'none' : 'flex' }}
             >
-              <span className="text-[#84CC16] font-black text-xs tracking-tighter">
+              <span className="text-[#55DEE8] font-black text-xs tracking-tighter">
                 {user?.name ? user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "ME"}
               </span>
             </div>
           </div>
           
           {/* Tooltip */}
-          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-[#1a1a1a] text-[#84CC16] text-[9px] font-black uppercase tracking-[0.2em] rounded-lg border border-[#84CC16]/20 shadow-2xl opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-y-1 whitespace-nowrap pointer-events-none z-[100] backdrop-blur-md">
+          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-[#1a1a1a] text-[#55DEE8] text-[9px] font-black uppercase tracking-[0.2em] rounded-lg border border-[#55DEE8]/20 shadow-2xl opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-y-1 whitespace-nowrap pointer-events-none z-[100] backdrop-blur-md">
             My Profile
           </div>
         </div>
@@ -375,7 +433,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
         {/* Invitations Section */}
         {invitations.length > 0 && (
           <div className="p-3 space-y-2">
-            <h3 className="px-3 py-2 text-[10px] font-black text-[#84CC16] uppercase tracking-[0.2em]">Pending Invitations</h3>
+            <h3 className="px-3 py-2 text-[10px] font-black text-[#55DEE8] uppercase tracking-[0.2em]">Pending Invitations</h3>
             {invitations.map((chat) => (
               <div key={chat._id} className="bg-white/[0.03] border border-white/5 rounded-2xl p-4">
                 <div className="flex items-center gap-3 mb-3">
@@ -394,7 +452,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                 <div className="flex gap-2">
                   <button 
                     onClick={() => handleRespond(chat._id, 'accepted')}
-                    className="flex-1 h-9 bg-[#84CC16] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    className="flex-1 h-9 bg-[#55DEE8] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
                   >
                     Accept
                   </button>
@@ -429,221 +487,335 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
             const latestSenderId = chat.latestMessage?.sender?.user?._id || chat.latestMessage?.sender?.user;
             const latestSenderName = chat.latestMessage?.sender?.user?.name || chat.latestMessage?.sender?.name;
             const isMySentMessage = [myId].includes(latestSenderId) || (latestSenderName && latestSenderName === user?.name);
+            const isExpanded = !!expandedCommunities[chat._id];
+            const childGroups = chat.isCommunity
+              ? chats.filter(c => (c.parentCommunity === chat._id || c.parentCommunity?._id === chat._id) && !c.isCommunity)
+              : [];
+            const isChildSelected = chat.isCommunity && childGroups.some(c => selectedChatId === c._id);
 
             return (
               <div key={chat._id} className="relative group/chat">
                 <button
-                  onClick={() => onSelectChat(chat)}
+                  onClick={() => {
+                    if (chat.isCommunity) {
+                      const announcementGroup = chats.find(c => 
+                        (c.parentCommunity === chat._id || c.parentCommunity?._id === chat._id) && 
+                        (c.isAnnouncementGroup || c.chatName === "Announcements")
+                      );
+                      if (announcementGroup) {
+                        onSelectChat(announcementGroup);
+                      } else {
+                        onSelectChat(chat);
+                      }
+                      setExpandedCommunities(prev => ({
+                        ...prev,
+                        [chat._id]: !prev[chat._id]
+                      }));
+                    } else {
+                      onSelectChat(chat);
+                    }
+                  }}
                   className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
-                    isSelected
-                      ? 'bg-[#84CC16]/10 border border-[#84CC16]/20' 
+                    isSelected || (chat.isCommunity && isChildSelected)
+                      ? 'bg-[#55DEE8]/10 border border-[#55DEE8]/20' 
                       : 'hover:bg-white/[0.03] border border-transparent'
                   }`}
                 >
                   <div className="relative shrink-0">
                     {renderAvatar(chat)}
                     {chat.isCommunity ? (
-                      <div className="absolute -bottom-1 -right-1 bg-[#84CC16] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Com</div>
+                      <div className="absolute -bottom-1 -right-1 bg-[#55DEE8] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Com</div>
                     ) : chat.isGroupChat ? (
-                      <div className="absolute -bottom-1 -right-1 bg-[#84CC16] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Grp</div>
+                      <div className="absolute -bottom-1 -right-1 bg-[#55DEE8] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Grp</div>
                     ) : null}
                   </div>
                   <div className="flex-1 text-left overflow-hidden min-w-0">
                     <div className="flex justify-between items-center mb-0.5">
-                      <p className={`font-bold truncate text-sm transition-colors ${
-                        isSelected ? 'text-[#84CC16]' : unreadCount > 0 ? 'text-white' : 'text-white/80 group-hover/chat:text-white'
-                      }`}>
-                        {isPinned && <Pin size={10} className="inline mr-1 text-[#84CC16]" />}
-                        {getChatName(chat)}
-                      </p>
-                    <span className={`text-[10px] font-medium shrink-0 ml-2 ${
-                      unreadCount > 0 ? 'text-[#84CC16]' : 'text-white/20'
-                    }`}>
-                      {chat.latestMessage ? formatTime(chat.latestMessage.createdAt) : ""}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 flex-1 min-w-0">
-                      {isMySentMessage && !isTypingInChat && (
-                        <CheckCheck size={14} className="text-[#84CC16]/40 shrink-0" />
-                      )}
-                      <p className={`text-xs truncate ${
-                        isTypingInChat 
-                          ? 'text-[#84CC16] font-medium italic' 
-                          : isSelected 
-                            ? 'text-[#84CC16]/60' 
-                            : unreadCount > 0 
-                              ? 'text-white/70 font-medium' 
-                              : 'text-white/40 group-hover:text-white/60'
-                      }`}>
-                        {isTypingInChat 
-                          ? 'typing...' 
-                          : chat.latestMessage 
-                            ? chat.latestMessage.content 
-                            : chat.isCommunity ? "Community Created" : "No messages yet"
-                        }
-                      </p>
-                    </div>
-                    {unreadCount > 0 && (
-                      <div className="shrink-0 min-w-[20px] h-5 bg-[#84CC16] text-black text-[10px] font-black rounded-full flex items-center justify-center px-1.5">
-                        {unreadCount > 99 ? '99+' : unreadCount}
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {chat.isCommunity && (
+                          <span className="text-white/40 shrink-0">
+                            {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                          </span>
+                        )}
+                        <p className={`font-bold truncate text-sm transition-colors ${
+                          isSelected || (chat.isCommunity && isChildSelected) ? 'text-[#55DEE8]' : unreadCount > 0 ? 'text-white' : 'text-white/80 group-hover/chat:text-white'
+                        }`}>
+                          {isPinned && <Pin size={10} className="inline mr-1 text-[#55DEE8]" />}
+                          {getChatName(chat)}
+                        </p>
+                        {chat.isCommunity && isCommunityAdmin(chat) && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenAddGroup(chat._id, e);
+                            }}
+                            className="p-1 bg-[#55DEE8]/10 hover:bg-[#55DEE8] text-[#55DEE8] hover:text-black rounded transition-all ml-1 shrink-0 flex items-center justify-center"
+                            title="Add Group to Community"
+                          >
+                            <Plus size={11} className="stroke-[3]" />
+                          </button>
+                        )}
                       </div>
-                    )}
+                      <span className={`text-[10px] font-medium shrink-0 ml-2 ${
+                        unreadCount > 0 ? 'text-[#55DEE8]' : 'text-white/20'
+                      }`}>
+                        {chat.latestMessage ? formatTime(chat.latestMessage.createdAt) : ""}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 flex-1 min-w-0">
+                        {isMySentMessage && !isTypingInChat && (
+                          <CheckCheck size={14} className="text-[#55DEE8]/40 shrink-0" />
+                        )}
+                        <p className={`text-xs truncate ${
+                          isTypingInChat 
+                            ? 'text-[#55DEE8] font-medium italic' 
+                            : isSelected 
+                              ? 'text-[#55DEE8]/60' 
+                              : unreadCount > 0 
+                                ? 'text-white/70 font-medium' 
+                                : 'text-white/40 group-hover:text-white/60'
+                        }`}>
+                          {isTypingInChat 
+                            ? 'typing...' 
+                            : chat.latestMessage 
+                              ? chat.latestMessage.content 
+                              : chat.isCommunity ? "Community Created" : "No messages yet"
+                          }
+                        </p>
+                      </div>
+                      {unreadCount > 0 && (
+                        <div className="shrink-0 min-w-[20px] h-5 bg-[#55DEE8] text-black text-[10px] font-black rounded-full flex items-center justify-center px-1.5">
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </button>
-              
-              {/* 3-Dot Menu Button */}
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 transition-opacity">
-                <button 
-                  onClick={(e) => { 
-                    e.stopPropagation(); 
-                    setActiveMenu(activeMenu === chat._id ? null : chat._id); 
-                  }} 
-                  className="text-white/40 hover:text-white p-1 rounded-full hover:bg-white/10"
-                >
-                  <MoreVertical size={16} />
                 </button>
-              </div>
+                
+                {/* 3-Dot Menu Button */}
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 transition-opacity">
+                  <button 
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setActiveMenu(activeMenu === chat._id ? null : chat._id); 
+                    }} 
+                    className="text-white/40 hover:text-white p-1 rounded-full hover:bg-white/10"
+                  >
+                    <MoreVertical size={16} />
+                  </button>
+                </div>
 
-              {/* Dropdown Menu */}
-              {activeMenu === chat._id && (() => {
-                const isGroupAdmin = chat.isGroupChat && chat.groupAdmins?.some(admin => {
-                  const adminId = (admin.user?._id || admin.user)?.toString();
-                  return adminId === myId;
-                });
+                {/* Dropdown Menu */}
+                {activeMenu === chat._id && (() => {
+                  const isGroupAdmin = chat.isGroupChat && chat.groupAdmins?.some(admin => {
+                    const adminId = (admin.user?._id || admin.user)?.toString();
+                    return adminId === myId;
+                  });
 
-                const creatorId = (chat.createdBy?.user?._id || chat.createdBy?.user)?.toString();
-                const isCreator = creatorId === myId;
+                  const creatorId = (chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy || chat.createdByUserId || chat.createdByOwnerId)?.toString();
+                  const isCreator = creatorId === myId || chat.createdByUserId?.toString() === myId || chat.createdByOwnerId?.toString() === myId;
 
-                const handleDelete = async () => {
-                  setActiveMenu(null);
-                  try {
-                    await deleteChatMutation(chat._id).unwrap();
-                    if (selectedChatId === chat._id) onChatDeleted?.();
-                  } catch (err) {
-                    console.error("Delete failed:", err);
-                    alert(err.data?.message || "Failed to delete");
-                  }
-                };
+                  const handleDelete = async () => {
+                    setActiveMenu(null);
+                    try {
+                      await deleteChatMutation(chat._id).unwrap();
+                      if (selectedChatId === chat._id) onChatDeleted?.();
+                    } catch (err) {
+                      console.error("Delete failed:", err);
+                      alert(err.data?.message || "Failed to delete");
+                    }
+                  };
 
-                const handleExit = async () => {
-                  setActiveMenu(null);
-                  try {
-                    await removeFromGroup({ chatId: chat._id, userId: myId }).unwrap();
-                    if (selectedChatId === chat._id) onChatDeleted?.();
-                  } catch (err) {
-                    console.error("Exit failed:", err);
-                    alert(err.data?.message || "Failed to exit");
-                  }
-                };
+                  const handleExit = async () => {
+                    setActiveMenu(null);
+                    try {
+                      await removeFromGroup({ chatId: chat._id, userId: myId }).unwrap();
+                      if (selectedChatId === chat._id) onChatDeleted?.();
+                    } catch (err) {
+                      console.error("Exit failed:", err);
+                      alert(err.data?.message || "Failed to exit");
+                    }
+                  };
 
-                return (
-                  <div ref={menuRef} className="absolute right-8 top-1/2 -translate-y-1/2 w-44 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl py-1.5 z-50 animate-scale-up">
-                    {/* Pin / Unpin */}
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); togglePinChat({ chatId: chat._id }); setActiveMenu(null); }}
-                      className="w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-white/5 flex items-center gap-2.5 transition-colors"
-                    >
-                      {isPinned ? <PinOff size={14} /> : <Pin size={14} />}
-                      {isPinned ? "Unpin chat" : "Pin chat"}
-                    </button>
-
-                    {/* --- 1-on-1 Chat: just Delete --- */}
-                    {!chat.isGroupChat && (
+                  return (
+                    <div ref={menuRef} className="absolute right-8 top-1/2 -translate-y-1/2 w-44 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl py-1.5 z-50 animate-scale-up">
+                      {/* Pin / Unpin */}
                       <button 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          setActiveMenu(null);
-                          openConfirmModal(
-                            "Delete Chat",
-                            "Are you sure you want to delete this entire conversation?",
-                            handleDelete
-                          );
-                        }}
-                        className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
+                        onClick={(e) => { e.stopPropagation(); togglePinChat({ chatId: chat._id }); setActiveMenu(null); }}
+                        className="w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-white/5 flex items-center gap-2.5 transition-colors"
                       >
-                        <Trash2 size={14} /> Delete chat
+                        {isPinned ? <PinOff size={14} /> : <Pin size={14} />}
+                        {isPinned ? "Unpin chat" : "Pin chat"}
                       </button>
-                    )}
 
-                    {/* --- Group (not community): Exit + Delete --- */}
-                    {chat.isGroupChat && !chat.isCommunity && (
-                      <>
+                      {/* --- 1-on-1 Chat: just Delete --- */}
+                      {!chat.isGroupChat && (
                         <button 
                           onClick={(e) => { 
                             e.stopPropagation(); 
                             setActiveMenu(null);
                             openConfirmModal(
-                              "Delete Group",
-                              "Are you sure you want to exit and permanently delete this group and all its messages?",
+                              "Delete Chat",
+                              "Are you sure you want to delete this entire conversation?",
                               handleDelete
                             );
                           }}
                           className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
                         >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                          Exit and delete group
+                          <Trash2 size={14} /> Delete chat
                         </button>
-                        {isGroupAdmin && (
-                          <button 
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              setActiveMenu(null);
-                              openConfirmModal(
-                                "Delete Group",
-                                "Permanently delete this group and all messages for everyone?",
-                                  handleDelete
-                              );
-                            }}
-                            className="w-full px-3 py-2 text-left text-sm text-red-500 font-semibold hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
-                          >
-                            <Trash2 size={14} /> Delete group
-                          </button>
-                        )}
-                      </>
-                    )}
+                      )}
 
-                    {/* --- Community: Exit + Delete --- */}
-                    {chat.isCommunity && (
-                      <>
-                        <button 
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            setActiveMenu(null);
-                            openConfirmModal(
-                              "Exit Community",
-                              "Are you sure you want to exit this community? You will be removed from all its sub-groups as well.",
-                              handleExit
-                            );
-                          }}
-                          className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
+                      {/* --- Group (not community): Leave or Delete --- */}
+                      {chat.isGroupChat && !chat.isCommunity && (
+                        <>
+                          {!(isCreator || isGroupAdmin) ? (
+                            <button 
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                setActiveMenu(null);
+                                openConfirmModal(
+                                  "Leave Group",
+                                  "Are you sure you want to leave this group?",
+                                  handleExit
+                                );
+                              }}
+                              className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors font-bold"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                              Leave group
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                setActiveMenu(null);
+                                openConfirmModal(
+                                  "Delete Group",
+                                  "Permanently delete this group and all messages for everyone?",
+                                  handleDelete
+                                );
+                              }}
+                              className="w-full px-3 py-2 text-left text-sm text-red-500 font-bold hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
+                            >
+                              <Trash2 size={14} /> Delete group
+                            </button>
+                          )}
+                        </>
+                      )}
+
+                      {/* --- Community: Exit + Delete --- */}
+                      {chat.isCommunity && (
+                        <>
+                          {isCommunityAdmin(chat) && (
+                            <button 
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                setActiveMenu(null);
+                                handleOpenAddGroup(chat._id, e);
+                              }}
+                              className="w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-[#55DEE8] hover:text-black flex items-center gap-2.5 transition-colors font-bold"
+                            >
+                              <Plus size={14} /> Add group
+                            </button>
+                          )}
+                          {isCommunityAdmin(chat) && (
+                            <button 
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                setActiveMenu(null);
+                                handleOpenManageAdmins(chat, e);
+                              }}
+                              className="w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-[#55DEE8] hover:text-black flex items-center gap-2.5 transition-colors font-bold"
+                            >
+                              <Crown size={14} /> Manage admins
+                            </button>
+                          )}
+                          {!isCreator ? (
+                            <button 
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                setActiveMenu(null);
+                                openConfirmModal(
+                                  "Leave Community",
+                                  "Are you sure you want to leave this community? You will be removed from all its sub-groups as well.",
+                                  handleExit
+                                );
+                              }}
+                              className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors font-bold"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                              Leave community
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                setActiveMenu(null);
+                                openConfirmModal(
+                                  "Delete Community",
+                                  "Permanently delete this community and ALL its groups and messages for everyone?",
+                                  handleDelete
+                                );
+                              }}
+                              className="w-full px-3 py-2 text-left text-sm text-red-500 font-bold hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
+                            >
+                              <Trash2 size={14} /> Delete community
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* Community Sub-groups Dropdown */}
+                {chat.isCommunity && isExpanded && (
+                  <div className="pl-4 pr-2 pb-2 mt-1 space-y-1 ml-6 border-l border-white/10 animate-fade-in">
+                    {childGroups.map((group) => {
+                      const isGroupSelected = selectedChatId === group._id;
+                      const isAnnouncement = group.isAnnouncementGroup || group.chatName === "Announcements";
+                      const childUnreadCount = unreadCounts[group._id] || 0;
+                      
+                      return (
+                        <button
+                          key={group._id}
+                          onClick={() => onSelectChat(group)}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all ${
+                            isGroupSelected
+                              ? 'bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20'
+                              : 'text-white/60 hover:text-white hover:bg-white/[0.03] border border-transparent'
+                          }`}
                         >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                          Exit community
+                          {isAnnouncement ? (
+                            <Megaphone size={13} className="text-[#55DEE8] shrink-0" />
+                          ) : (
+                            <Users size={13} className="text-white/40 shrink-0" />
+                          )}
+                          <span className="text-xs font-bold truncate flex-1 text-left">
+                            {group.chatName}
+                          </span>
+                          {childUnreadCount > 0 && (
+                            <div className="shrink-0 min-w-[16px] h-4 bg-[#55DEE8] text-black text-[9px] font-black rounded-full flex items-center justify-center px-1">
+                              {childUnreadCount}
+                            </div>
+                          )}
                         </button>
-                        {isCreator && (
-                          <button 
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              setActiveMenu(null);
-                              openConfirmModal(
-                                "Delete Community",
-                                "Permanently delete this community and ALL its groups and messages for everyone?",
-                                handleDelete
-                              );
-                            }}
-                            className="w-full px-3 py-2 text-left text-sm text-red-500 font-semibold hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
-                          >
-                            <Trash2 size={14} /> Delete community
-                          </button>
-                        )}
-                      </>
+                      );
+                    })}
+                    {isCommunityAdmin(chat) && (
+                      <button
+                        onClick={(e) => handleOpenAddGroup(chat._id, e)}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-white/10 hover:border-[#55DEE8]/30 hover:bg-[#55DEE8]/5 text-white/40 hover:text-[#55DEE8] transition-all text-xs font-bold mt-1"
+                      >
+                        <Plus size={14} className="shrink-0" />
+                        <span>Add more group</span>
+                      </button>
                     )}
                   </div>
-                );
-              })()}
-            </div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -659,6 +831,23 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
         confirmText="Delete"
         cancelText="Cancel"
         isDestructive={true}
+      />
+      <AddGroupToCommunityModal
+        isOpen={isAddGroupModalOpen}
+        onClose={() => {
+          setIsAddGroupModalOpen(false);
+          setSelectedCommunityId(null);
+        }}
+        communityId={selectedCommunityId}
+      />
+      <ManageCommunityAdminsModal
+        isOpen={isManageAdminsOpen}
+        onClose={() => {
+          setIsManageAdminsOpen(false);
+          setSelectedCommunityForAdmins(null);
+        }}
+        community={selectedCommunityForAdmins}
+        allChats={chats}
       />
     </div>
   );

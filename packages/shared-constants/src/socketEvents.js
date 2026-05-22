@@ -55,6 +55,10 @@ export const SOCKET = Object.freeze({
   COMMUNITY_POST_COMMENTED: 'community_post_commented',
   COMMUNITY_POST_DELETED: 'community_post_deleted',
 
+  // ── Notifications ───────────────────────────────────────────────────────────
+  NEW_NOTIFICATION: 'new_notification',
+  NOTIFICATION_COUNT: 'notification_count',
+
   // ── Media Processing ───────────────────────────────────────────────────────
   MEDIA_PROCESSING_PROGRESS: 'MEDIA_PROCESSING_PROGRESS',
   MEDIA_PROCESSING_COMPLETE: 'MEDIA_PROCESSING_COMPLETE',

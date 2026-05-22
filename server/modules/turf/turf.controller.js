@@ -1,11 +1,13 @@
+// Dummy comment to trigger nodemon restart after schema update
 import { prisma } from "../../config/prisma.js";
 import cloudinary from "../../utils/cloudinary.js";
 import { startOfDay, parseISO, addDays, format, parse } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 import { findNearby, updateGeoPoint } from "../../utils/geo.util.js";
-import { getOrSetCache, generateCacheKey } from "../../utils/cache.js";
+import { getOrSetCache, generateCacheKey, invalidateCache } from "../../utils/cache.js";
 import logger from "../../utils/logger.js";
+import { getGroundRecommendations } from "../../services/recommendation.service.js";
 
 // --- USER OPERATIONS ---
 
@@ -19,7 +21,8 @@ export const getAllTurfs = async (req, res) => {
       isActive: true
     };
 
-    if (isVal(city)) where.city = { contains: city, mode: 'insensitive' };
+    // We want to show venues from their city, but also other cities in the same state.
+    // So we don't strictly filter out other cities, we just sort by city match or distance later.
     if (isVal(state)) where.state = { contains: state, mode: 'insensitive' };
     
     if (isVal(searchTerm) && searchTerm !== "All") {
@@ -32,10 +35,14 @@ export const getAllTurfs = async (req, res) => {
     const cacheKey = generateCacheKey("turfs:list", { searchTerm, city, state, lat, lng, radius });
 
     const formattedTurfs = await getOrSetCache(cacheKey, async () => {
+      let resultTurfs = [];
+
       if (lat && lng) {
-        const r = radius ? parseFloat(radius) : 5000;
-        const nearbyTurfs = await findNearby('Turf', parseFloat(lat), parseFloat(lng), r, {
+        // Use a huge default radius (500km) to ensure we cover the whole state if no specific radius is passed
+        const r = radius ? parseFloat(radius) : 500000;
+        resultTurfs = await findNearby('Turf', parseFloat(lat), parseFloat(lng), r, {
           where,
+          take: 100, // fetch enough to show rest of state
           include: {
             owner: {
               include: {
@@ -47,12 +54,45 @@ export const getAllTurfs = async (req, res) => {
             reviews: { select: { rating: true } }
           }
         });
-        
-        return nearbyTurfs.map(t => {
-          const totalRating = t.reviews.reduce((acc, r) => acc + r.rating, 0);
+      } else {
+        resultTurfs = await prisma.turf.findMany({
+          where,
+          include: {
+            owner: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                    profilePicture: true
+                  }
+                }
+              }
+            },
+            reviews: { select: { rating: true } }
+          }
+        });
+
+        // If city is provided but no lat/lng, manually sort to put the requested city first
+        if (isVal(city)) {
+          const targetCity = city.toLowerCase().trim();
+          resultTurfs.sort((a, b) => {
+            const isACity = a.city?.toLowerCase().trim() === targetCity;
+            const isBCity = b.city?.toLowerCase().trim() === targetCity;
+            if (isACity && !isBCity) return -1;
+            if (!isACity && isBCity) return 1;
+            return 0;
+          });
+        }
+      }
+
+      return resultTurfs.map(t => {
+        const totalRating = t.reviews.reduce((acc, r) => acc + r.rating, 0);
           const avgRating = t.reviews.length > 0 ? (totalRating / t.reviews.length) : 0;
           return {
             ...t,
+            _id: t.id,
             avgRating,
             owner: t.owner ? {
               id: t.owner.id,
@@ -66,48 +106,6 @@ export const getAllTurfs = async (req, res) => {
             } : null
           };
         });
-      }
-
-      const turfs = await prisma.turf.findMany({
-        where,
-        include: {
-          owner: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  username: true,
-                  profilePicture: true
-                }
-              }
-            }
-          },
-          reviews: {
-            select: { rating: true }
-          }
-        }
-      });
-
-      return turfs.map(t => {
-        const totalRating = t.reviews.reduce((acc, r) => acc + r.rating, 0);
-        const avgRating = t.reviews.length > 0 ? (totalRating / t.reviews.length) : 0;
-        
-        return {
-          ...t,
-          avgRating,
-          owner: t.owner ? {
-            id: t.owner.id,
-            businessName: t.owner.businessName,
-            user: t.owner.user ? {
-              id: t.owner.user.id,
-              name: t.owner.user.name,
-              username: t.owner.user.username,
-              profilePicture: t.owner.user.profilePicture
-            } : null
-          } : null
-        };
-      });
     }, 900); // 15 minute TTL
 
     return res.status(200).json({ turfs: formattedTurfs });
@@ -166,13 +164,15 @@ export const getTurfById = async (req, res) => {
     const turf = await prisma.turf.findUnique({
       where: { id },
       include: {
-        ownerProfile: {
+        owner: {
           include: {
             user: {
               select: {
                 id: true,
                 name: true,
                 username: true,
+                email: true,
+                phone: true,
                 profilePicture: true
               }
             }
@@ -193,18 +193,19 @@ export const getTurfById = async (req, res) => {
 
     const formattedTurf = {
       ...turf,
+      _id: turf.id,
       avgRating,
-      owner: turf.ownerProfile ? {
-        id: turf.ownerProfile.id,
-        name: turf.ownerProfile.name,
-        email: turf.ownerProfile.email,
-        phone: turf.ownerProfile.phone,
-        profilePicture: turf.ownerProfile.profilePicture,
-        userId: turf.ownerProfile.user ? {
-          id: turf.ownerProfile.user.id,
-          name: turf.ownerProfile.user.name,
-          username: turf.ownerProfile.user.username,
-          profilePicture: turf.ownerProfile.user.profilePicture
+      owner: turf.owner ? {
+        id: turf.owner.id,
+        name: turf.owner.user?.name || '',
+        email: turf.owner.user?.email || '',
+        phone: turf.owner.user?.phone || '',
+        profilePicture: turf.owner.user?.profilePicture || null,
+        userId: turf.owner.user ? {
+          id: turf.owner.user.id,
+          name: turf.owner.user.name,
+          username: turf.owner.user.username,
+          profilePicture: turf.owner.user.profilePicture
         } : null
       } : null
     };
@@ -330,6 +331,12 @@ export const turfRegister = async (req, res) => {
     const imageUrls = await Promise.all(uploadPromises);
 
     const { 
+      name,
+      description,
+      location,
+      youtubeUrl,
+      openTime,
+      closeTime,
       availableDays, 
       offDays, 
       generatedSlots, 
@@ -343,7 +350,9 @@ export const turfRegister = async (req, res) => {
       slotsConfigDuration,
       slotsConfigWeeks,
       price,
-      ...otherData 
+      sportTypes,
+      groundTypes,
+      facilities,
     } = req.body;
 
     let configExpiry = null;
@@ -354,20 +363,28 @@ export const turfRegister = async (req, res) => {
 
     const newTurf = await prisma.turf.create({
       data: {
-        ...otherData,
+        name,
+        description,
+        location,
+        youtubeUrl,
+        openTime,
+        closeTime,
         image: imageUrls[0], 
         images: imageUrls,    
         ownerId: ownerProfile.id,
         status: "pending",
         city,
         state,
-        lat: latitude ? parseFloat(latitude) : null,
-        lng: longitude ? parseFloat(longitude) : null,
+        latitude: latitude ? parseFloat(latitude) : null,
+        longitude: longitude ? parseFloat(longitude) : null,
         slotDuration: Number(slotDuration) || 60,
         breakTime: Number(breakTime) || 0,
         pricePerHour: parseFloat(price) || 0,
         availableDays: Array.isArray(availableDays) ? availableDays : (availableDays ? [availableDays] : []),
         offDays: Array.isArray(offDays) ? offDays : (offDays ? [offDays] : []),
+        sportTypes: Array.isArray(sportTypes) ? sportTypes : (sportTypes ? [sportTypes] : []),
+        groundTypes: Array.isArray(groundTypes) ? groundTypes : (groundTypes ? [groundTypes] : []),
+        facilities: Array.isArray(facilities) ? facilities : (facilities ? [facilities] : []),
         generatedSlots: generatedSlots ? JSON.parse(generatedSlots) : [],
         managerContacts: managerContacts ? JSON.parse(managerContacts) : [],
         slotsConfigDuration: slotsConfigDuration || "Until Changed",
@@ -382,13 +399,16 @@ export const turfRegister = async (req, res) => {
       await updateGeoPoint('Turf', newTurf.id, parseFloat(latitude), parseFloat(longitude));
     }
 
+    await invalidateCache("turfs:list:*");
+
     return res.status(201).json({ 
       success: true, 
       message: "Turf registered and sent for admin approval",
-      turf: newTurf
+      turf: { ...newTurf, _id: newTurf.id }
     });
   } catch (err) {
-    logger.info("Error in turfRegister", err);
+    logger.error("Error in turfRegister", err);
+    logger.error(err.stack);
     return res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -425,6 +445,7 @@ export const getTurfByOwner = async (req, res) => {
       
       return {
         ...t,
+        _id: t.id,
         avgRating,
         numReviews: t.reviews.length
       };
@@ -510,8 +531,8 @@ export const editTurfById = async (req, res) => {
     if (req.body.city) updatedTurfData.city = req.body.city;
     if (req.body.state) updatedTurfData.state = req.body.state;
     if (req.body.latitude && req.body.longitude) {
-      updatedTurfData.lat = parseFloat(req.body.latitude);
-      updatedTurfData.lng = parseFloat(req.body.longitude);
+      updatedTurfData.latitude = parseFloat(req.body.latitude);
+      updatedTurfData.longitude = parseFloat(req.body.longitude);
     }
 
     if (req.body.slotsConfigDuration) updatedTurfData.slotsConfigDuration = req.body.slotsConfigDuration;
@@ -576,11 +597,14 @@ export const editTurfById = async (req, res) => {
       });
     }
 
+    await invalidateCache("turfs:list:*");
+
     const allTurfs = await prisma.turf.findMany({ where: { ownerId: ownerProfile.id } });
+    const formattedAllTurfs = allTurfs.map(t => ({ ...t, _id: t.id }));
     return res.status(200).json({ 
       success: true, 
       message: "Changes saved and sent for admin review", 
-      allTurfs
+      allTurfs: formattedAllTurfs
     });
   } catch (err) {
     logger.error("Error updating turf:", err.message);
@@ -703,7 +727,7 @@ export const getTurfDetailsWithSlots = async (req, res) => {
 
     return res.status(200).json({ 
       success: true, 
-      turf, 
+      turf: { ...turf, _id: turf.id }, 
       slots: allSlots, 
       stats 
     });
@@ -722,13 +746,16 @@ export const adminGetAllTurfs = async (req, res) => {
   try {
     const turfs = await prisma.turf.findMany({
       include: {
-        ownerProfile: {
+        owner: {
           include: {
             user: {
               select: {
                 id: true,
                 name: true,
-                username: true
+                username: true,
+                email: true,
+                phone: true,
+                profilePicture: true
               }
             }
           }
@@ -746,17 +773,18 @@ export const adminGetAllTurfs = async (req, res) => {
       
       return {
         ...t,
+        _id: t.id,
         avgRating,
-        owner: t.ownerProfile ? {
-          id: t.ownerProfile.id,
-          name: t.ownerProfile.name,
-          email: t.ownerProfile.email,
-          phoneNumber: t.ownerProfile.phone,
-          profileImage: t.ownerProfile.profilePicture,
-          userId: t.ownerProfile.user ? {
-            id: t.ownerProfile.user.id,
-            name: t.ownerProfile.user.name,
-            username: t.ownerProfile.user.username
+        owner: t.owner ? {
+          id: t.owner.id,
+          name: t.owner.user?.name || '',
+          email: t.owner.user?.email || '',
+          phoneNumber: t.owner.user?.phone || '',
+          profileImage: t.owner.user?.profilePicture || null,
+          userId: t.owner.user ? {
+            id: t.owner.user.id,
+            name: t.owner.user.name,
+            username: t.owner.user.username
           } : null
         } : null
       };
@@ -804,10 +832,12 @@ export const adminApproveTurf = async (req, res) => {
       data: updateData
     });
 
+    await invalidateCache("turfs:list:*");
+
     return res.status(200).json({ 
       success: true, 
       message: "Turf approved and changes merged", 
-      turf: updatedTurf 
+      turf: { ...updatedTurf, _id: updatedTurf.id } 
     });
   } catch (err) {
     logger.info("Error in adminApproveTurf", err);
@@ -833,10 +863,12 @@ export const adminRejectTurf = async (req, res) => {
       }
     });
 
+    await invalidateCache("turfs:list:*");
+
     return res.status(200).json({ 
       success: true, 
       message: "Turf rejected", 
-      turf: updatedTurf 
+      turf: { ...updatedTurf, _id: updatedTurf.id } 
     });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -861,10 +893,12 @@ export const adminDecommissionTurf = async (req, res) => {
       }
     });
 
+    await invalidateCache("turfs:list:*");
+
     return res.status(200).json({ 
       success: true, 
       message: "Venue decommissioned. Owner must re-apply for verification.", 
-      turf: updatedTurf 
+      turf: { ...updatedTurf, _id: updatedTurf.id } 
     });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -889,10 +923,12 @@ export const adminSoftDeleteTurf = async (req, res) => {
       }
     });
 
+    await invalidateCache("turfs:list:*");
+
     return res.status(200).json({ 
       success: true, 
       message: "Venue moved to deleted list.", 
-      turf: updatedTurf 
+      turf: { ...updatedTurf, _id: updatedTurf.id } 
     });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -908,6 +944,8 @@ export const adminHardDeleteTurf = async (req, res) => {
       prisma.review.deleteMany({ where: { turfId: id } }),
       prisma.turf.delete({ where: { id } })
     ]);
+
+    await invalidateCache("turfs:list:*");
 
     return res.status(200).json({ success: true, message: "Venue and all associated data permanently deleted" });
   } catch (err) {
@@ -945,6 +983,8 @@ export const toggleTurfVisibility = async (req, res) => {
       where: { id },
       data: { isActive: !turf.isActive }
     });
+
+    await invalidateCache("turfs:list:*");
     
     return res.status(200).json({ 
       success: true, 
@@ -988,9 +1028,119 @@ export const deleteTurf = async (req, res) => {
       prisma.review.deleteMany({ where: { turfId: id } }),
       prisma.turf.delete({ where: { id } })
     ]);
+
+    await invalidateCache("turfs:list:*");
     
     return res.status(200).json({ success: true, message: "Arena decommissioned successfully" });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+
+// Toggle turf like/wishlist
+export const toggleTurfLike = async (req, res) => {
+  const { turfId } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const existing = await prisma.turfLike.findUnique({
+      where: { userId_turfId: { userId, turfId } }
+    });
+
+    if (existing) {
+      await prisma.turfLike.delete({ where: { id: existing.id } });
+      return res.status(200).json({ success: true, message: "Unliked successfully", liked: false });
+    }
+
+    await prisma.turfLike.create({ data: { userId, turfId } });
+    return res.status(200).json({ success: true, message: "Liked successfully", liked: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Record turf share interaction
+export const recordTurfShare = async (req, res) => {
+  const { turfId } = req.body;
+  const userId = req.user?.id || null;
+
+  try {
+    await prisma.turfInteraction.create({
+      data: { userId, turfId, interactionType: "SHARE" }
+    });
+    return res.status(200).json({ success: true, message: "Share recorded successfully" });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Record general turf interaction (VIEW, CLICK, etc.)
+export const recordTurfInteraction = async (req, res) => {
+  const { turfId, type, duration } = req.body;
+  const userId = req.user?.id || null;
+
+  try {
+    await prisma.turfInteraction.create({
+      data: { 
+        userId, 
+        turfId, 
+        interactionType: type || "VIEW", 
+        duration: duration || 0 
+      }
+    });
+    return res.status(200).json({ success: true, message: "Interaction recorded successfully" });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Fetch personalized turf recommendations feed
+export const getTurfRecommendations = async (req, res) => {
+  const userId = req.user?.id || null;
+  const { lat, lng, limit } = req.query;
+
+  try {
+    const data = await getGroundRecommendations(userId, lat, lng, limit || 15);
+    return res.status(200).json({ success: true, count: data.length, data });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Fetch similar turf recommendations based on turf details and location proximity
+export const getSimilarTurfs = async (req, res) => {
+  const { id } = req.params;
+  const { limit = 4 } = req.query;
+  const userId = req.user?.id || null;
+
+  try {
+    const currentTurf = await prisma.turf.findUnique({
+      where: { id }
+    });
+
+    if (!currentTurf) {
+      return res.status(404).json({ success: false, message: "Turf not found" });
+    }
+
+    // Call recommendation service with current turf coordinates as baseline
+    const recommendations = await getGroundRecommendations(
+      userId,
+      currentTurf.latitude,
+      currentTurf.longitude,
+      parseInt(limit) + 1
+    );
+
+    // Filter out the current turf itself from recommendation results
+    const filteredRecs = recommendations.filter(t => t.id !== id).slice(0, parseInt(limit));
+
+    return res.status(200).json({
+      success: true,
+      count: filteredRecs.length,
+      data: filteredRecs
+    });
+  } catch (err) {
+    logger.error("[RECS] Failed to fetch similar recommendations:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+

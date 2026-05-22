@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -21,7 +21,7 @@ import CountUp from "react-countup";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
-import { handlePayment, createOrder, loadRazorpay } from "../../../infrastructure/razorpay";
+import { handlePayment, createOrder, loadRazorpay } from "@infrastructure/razorpay";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -190,7 +190,7 @@ const CoinDeductionModal = ({
           name: user?.name,
           email: user?.email,
         },
-        theme: { color: "#CCFF00" }
+        theme: { color: "#55DEE8" }
       };
       
       const isLoaded = await loadRazorpay();
@@ -234,7 +234,7 @@ const CoinDeductionModal = ({
             >
               {/* Header */}
               <div className="p-8 pb-4">
-                <p className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest mb-1">Secure Checkout</p>
+                <p className="text-[10px] font-bold text-[#55DEE8] uppercase tracking-widest mb-1">Secure Checkout</p>
                 <h3 className="text-2xl font-black text-white uppercase tracking-tight">{title}</h3>
                 <p className="text-zinc-500 text-xs font-medium mt-1">{description}</p>
               </div>
@@ -247,7 +247,7 @@ const CoinDeductionModal = ({
                       <div className="space-y-1">
                         <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{turfName}</p>
                         <div className="flex items-center gap-2 text-white">
-                          <Clock size={14} className="text-[#CCFF00]" />
+                          <Clock size={14} className="text-[#55DEE8]" />
                           <span className="text-sm font-bold">{startTime} ({duration} hr)</span>
                         </div>
                         <p className="text-[10px] font-medium text-zinc-500">{format(new Date(selectedDate), "EEEE, d MMM yyyy")}</p>
@@ -257,21 +257,21 @@ const CoinDeductionModal = ({
                     <div className="pt-4 border-t border-[#2D2D2D] space-y-2">
                       <div className="flex justify-between text-[11px] font-medium">
                         <span className="text-zinc-500 uppercase tracking-wider">Venue Charges</span>
-                        <span className="text-zinc-300">â‚¹{venueCharges}</span>
+                        <span className="text-zinc-300">+�G��-�{venueCharges}</span>
                       </div>
                       <div className="flex justify-between text-[11px] font-medium">
                         <span className="text-zinc-500 uppercase tracking-wider">Platform Fee</span>
-                        <span className="text-zinc-300">â‚¹{platformFee}</span>
+                        <span className="text-zinc-300">+�G��-�{platformFee}</span>
                       </div>
                       {appliedCoupon && (
-                        <div className="flex justify-between text-[11px] font-medium text-[#CCFF00]">
+                        <div className="flex justify-between text-[11px] font-medium text-[#55DEE8]">
                           <span className="uppercase tracking-wider">Coupon Discount ({appliedCoupon.code})</span>
-                          <span>-â‚¹{discount}</span>
+                          <span>-+�G��-�{discount}</span>
                         </div>
                       )}
                       <div className="flex justify-between text-base font-black pt-2">
                         <span className="text-white uppercase tracking-tighter">Total Payable</span>
-                        <span className="text-[#CCFF00]">â‚¹{total}</span>
+                        <span className="text-[#55DEE8]">+�G��-�{total}</span>
                       </div>
                     </div>
                   </div>
@@ -280,7 +280,7 @@ const CoinDeductionModal = ({
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Select Payment Plan</p>
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#CCFF00] uppercase">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#55DEE8] uppercase">
                         <ShieldCheck size={12} />
                         <span>Flexible Secure Pay</span>
                       </div>
@@ -293,20 +293,20 @@ const CoinDeductionModal = ({
                           onClick={() => setPaymentPercentage(pct)}
                           className={`relative py-4 px-2 rounded-[8px] border-2 transition-all flex flex-col items-center gap-1 group ${
                             paymentPercentage === pct 
-                            ? "bg-[#CCFF00]/10 border-[#CCFF00] text-[#CCFF00]" 
+                            ? "bg-[#55DEE8]/10 border-[#55DEE8] text-[#55DEE8]" 
                             : "bg-[#000000] border-[#2D2D2D] text-white hover:border-white/20"
                           }`}
                         >
-                          <span className={`text-sm font-black ${paymentPercentage === pct ? "text-[#CCFF00]" : "text-white"}`}>
+                          <span className={`text-sm font-black ${paymentPercentage === pct ? "text-[#55DEE8]" : "text-white"}`}>
                             {pct}%
                           </span>
-                          <span className={`text-[8px] font-bold uppercase tracking-tighter ${paymentPercentage === pct ? "text-[#CCFF00]/60" : "text-zinc-500"}`}>
+                          <span className={`text-[8px] font-bold uppercase tracking-tighter ${paymentPercentage === pct ? "text-[#55DEE8]/60" : "text-zinc-500"}`}>
                             {pct === 100 ? "Full Pay" : "Advance"}
                           </span>
                           {paymentPercentage === pct && (
                             <motion.div 
                               layoutId="pct-active"
-                              className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#CCFF00] rounded-full flex items-center justify-center text-black shadow-lg"
+                              className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#55DEE8] rounded-full flex items-center justify-center text-black shadow-lg"
                             >
                               <Check size={10} strokeWidth={4} />
                             </motion.div>
@@ -320,18 +320,18 @@ const CoinDeductionModal = ({
                   <div className="space-y-2 p-4 bg-[#000000] rounded-[8px] border border-[#2D2D2D]">
                     <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-zinc-400">
                       <span>Total Booking Value</span>
-                      <span className="text-white">â‚¹{total}</span>
+                      <span className="text-white">+�G��-�{total}</span>
                     </div>
                     {paymentPercentage < 100 && (
-                      <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-[#CCFF00]">
+                      <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-[#55DEE8]">
                         <span>Payable Now ({paymentPercentage}%)</span>
-                        <span className="font-black text-sm">â‚¹{Math.round(total * (paymentPercentage / 100))}</span>
+                        <span className="font-black text-sm">+�G��-�{Math.round(total * (paymentPercentage / 100))}</span>
                       </div>
                     )}
                     {paymentPercentage < 100 && (
                       <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-orange-400">
                         <span>Balance at Venue</span>
-                        <span className="font-black">â‚¹{total - Math.round(total * (paymentPercentage / 100))}</span>
+                        <span className="font-black">+�G��-�{total - Math.round(total * (paymentPercentage / 100))}</span>
                       </div>
                     )}
                   </div>
@@ -341,9 +341,9 @@ const CoinDeductionModal = ({
                     <div className="flex items-center justify-between px-1">
                         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Select Payment Mode</p>
                         {paymentMode === "WALLET" && (
-                            <div className="flex items-center gap-1.5 px-2 py-1 bg-[#CCFF00]/10 rounded-full">
-                                <Zap size={10} className="text-[#CCFF00] fill-[#CCFF00]" />
-                                <span className="text-[8px] font-black text-[#CCFF00] uppercase">5% Cashback</span>
+                            <div className="flex items-center gap-1.5 px-2 py-1 bg-[#55DEE8]/10 rounded-full">
+                                <Zap size={10} className="text-[#55DEE8] fill-[#55DEE8]" />
+                                <span className="text-[8px] font-black text-[#55DEE8] uppercase">5% Cashback</span>
                             </div>
                         )}
                     </div>
@@ -352,27 +352,27 @@ const CoinDeductionModal = ({
                       {/* Wallet Option */}
                       <button 
                         onClick={() => setPaymentMode("WALLET")}
-                        className={`group relative flex items-center justify-between p-4 rounded-[8px] border transition-all ${paymentMode === "WALLET" ? "bg-[#CCFF00]/10 border-[#CCFF00]" : "bg-[#000000] border-[#2D2D2D] hover:border-white/20"}`}
+                        className={`group relative flex items-center justify-between p-4 rounded-[8px] border transition-all ${paymentMode === "WALLET" ? "bg-[#55DEE8]/10 border-[#55DEE8]" : "bg-[#000000] border-[#2D2D2D] hover:border-white/20"}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-[6px] ${paymentMode === "WALLET" ? "bg-[#CCFF00] text-black" : "bg-[#000000] text-zinc-500"}`}>
+                          <div className={`p-3 rounded-[6px] ${paymentMode === "WALLET" ? "bg-[#55DEE8] text-black" : "bg-[#000000] text-zinc-500"}`}>
                             <Wallet size={20} />
                           </div>
                           <div className="text-left">
                             <p className={`text-xs font-bold uppercase tracking-tight ${paymentMode === "WALLET" ? "text-white" : "text-zinc-400"}`}>Kridaz Wallet</p>
-                            <p className="text-[10px] font-medium text-zinc-500">Balance: â‚¹{currentBalance}</p>
+                            <p className="text-[10px] font-medium text-zinc-500">Balance: +�G��-�{currentBalance}</p>
                           </div>
                         </div>
-                        {paymentMode === "WALLET" && <Check size={16} className="text-[#CCFF00]" />}
+                        {paymentMode === "WALLET" && <Check size={16} className="text-[#55DEE8]" />}
                       </button>
 
                       {/* UPI Option */}
                       <button 
                         onClick={() => setPaymentMode("UPI")}
-                        className={`flex items-center justify-between p-4 rounded-[8px] border transition-all ${paymentMode === "UPI" ? "bg-[#CCFF00]/10 border-[#CCFF00]" : "bg-[#000000] border-[#2D2D2D] hover:border-white/20"}`}
+                        className={`flex items-center justify-between p-4 rounded-[8px] border transition-all ${paymentMode === "UPI" ? "bg-[#55DEE8]/10 border-[#55DEE8]" : "bg-[#000000] border-[#2D2D2D] hover:border-white/20"}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-[6px] ${paymentMode === "UPI" ? "bg-[#CCFF00] text-black" : "bg-[#000000] text-zinc-500"}`}>
+                          <div className={`p-3 rounded-[6px] ${paymentMode === "UPI" ? "bg-[#55DEE8] text-black" : "bg-[#000000] text-zinc-500"}`}>
                             <Smartphone size={20} />
                           </div>
                           <div className="text-left">
@@ -380,16 +380,16 @@ const CoinDeductionModal = ({
                             <p className="text-[10px] font-medium text-zinc-500">G-Pay, PhonePe, Paytm</p>
                           </div>
                         </div>
-                        {paymentMode === "UPI" && <Check size={16} className="text-[#CCFF00]" />}
+                        {paymentMode === "UPI" && <Check size={16} className="text-[#55DEE8]" />}
                       </button>
 
                       {/* Card Option */}
                       <button 
                         onClick={() => setPaymentMode("CARD")}
-                        className={`flex items-center justify-between p-4 rounded-[8px] border transition-all ${paymentMode === "CARD" ? "bg-[#CCFF00]/10 border-[#CCFF00]" : "bg-[#000000] border-[#2D2D2D] hover:border-white/20"}`}
+                        className={`flex items-center justify-between p-4 rounded-[8px] border transition-all ${paymentMode === "CARD" ? "bg-[#55DEE8]/10 border-[#55DEE8]" : "bg-[#000000] border-[#2D2D2D] hover:border-white/20"}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-[6px] ${paymentMode === "CARD" ? "bg-[#CCFF00] text-black" : "bg-[#000000] text-zinc-500"}`}>
+                          <div className={`p-3 rounded-[6px] ${paymentMode === "CARD" ? "bg-[#55DEE8] text-black" : "bg-[#000000] text-zinc-500"}`}>
                             <CreditCard size={20} />
                           </div>
                           <div className="text-left">
@@ -397,15 +397,15 @@ const CoinDeductionModal = ({
                             <p className="text-[10px] font-medium text-zinc-500">Visa, Mastercard, RuPay</p>
                           </div>
                         </div>
-                        {paymentMode === "CARD" && <Check size={16} className="text-[#CCFF00]" />}
+                        {paymentMode === "CARD" && <Check size={16} className="text-[#55DEE8]" />}
                       </button>
 
                       <button 
                         onClick={() => setPaymentMode("UPI")}
-                        className={`flex items-center justify-between p-4 rounded-[8px] border transition-all ${paymentMode === "UPI" ? "bg-[#CCFF00]/10 border-[#CCFF00]" : "bg-[#000000] border-[#2D2D2D] hover:border-white/20"}`}
+                        className={`flex items-center justify-between p-4 rounded-[8px] border transition-all ${paymentMode === "UPI" ? "bg-[#55DEE8]/10 border-[#55DEE8]" : "bg-[#000000] border-[#2D2D2D] hover:border-white/20"}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-[6px] ${paymentMode === "UPI" ? "bg-[#CCFF00] text-black" : "bg-[#000000] text-zinc-500"}`}>
+                          <div className={`p-3 rounded-[6px] ${paymentMode === "UPI" ? "bg-[#55DEE8] text-black" : "bg-[#000000] text-zinc-500"}`}>
                             <Smartphone size={20} />
                           </div>
                           <div className="text-left">
@@ -413,7 +413,7 @@ const CoinDeductionModal = ({
                             <p className="text-[10px] font-medium text-zinc-500">Google Pay, PhonePe, Paytm</p>
                           </div>
                         </div>
-                        {paymentMode === "UPI" && <Check size={16} className="text-[#CCFF00]" />}
+                        {paymentMode === "UPI" && <Check size={16} className="text-[#55DEE8]" />}
                       </button>
                     </div>
                   </div>
@@ -423,11 +423,11 @@ const CoinDeductionModal = ({
                       <div className="space-y-3">
                         <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-[8px]">
                             <p className="text-[10px] font-bold text-red-500 uppercase text-center tracking-widest">Insufficient Wallet Balance</p>
-                            <p className="text-[9px] text-red-500/60 text-center uppercase tracking-tighter mt-1">Required: â‚¹{Math.round(total * (paymentPercentage / 100))}</p>
+                            <p className="text-[9px] text-red-500/60 text-center uppercase tracking-tighter mt-1">Required: +�G��-�{Math.round(total * (paymentPercentage / 100))}</p>
                         </div>
                         <button
                             onClick={() => setStep(2)}
-                            className="w-full bg-[#CCFF00] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            className="w-full bg-[#55DEE8] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
                         >
                             <PlusCircle size={18} />
                             Instant Recharge Wallet
@@ -438,11 +438,11 @@ const CoinDeductionModal = ({
                       <button
                         onClick={handleConfirm}
                         disabled={isProcessing}
-                        className="w-full bg-[#CCFF00] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                        className="w-full bg-[#55DEE8] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                       >
                         {isProcessing ? <Loader2 className="animate-spin" /> : (
                           <>
-                            Confirm & Pay â‚¹{Math.round(total * (paymentPercentage / 100))}
+                            Confirm & Pay +�G��-�{Math.round(total * (paymentPercentage / 100))}
                             <ArrowRight size={16} />
                           </>
                         )}
@@ -454,8 +454,8 @@ const CoinDeductionModal = ({
 
               {step === 2 && (
                 <div className="p-8 pt-0 space-y-6">
-                  <div className="bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-[8px] p-6 text-center">
-                    <div className="w-12 h-12 bg-[#CCFF00] text-black rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-[8px] p-6 text-center">
+                    <div className="w-12 h-12 bg-[#55DEE8] text-black rounded-full flex items-center justify-center mx-auto mb-4">
                         <Wallet size={24} />
                     </div>
                     <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest mb-1">Instant Recharge</p>
@@ -466,9 +466,9 @@ const CoinDeductionModal = ({
                         <button
                           key={amt}
                           onClick={() => setRechargeAmount(amt)}
-                          className={`py-3 rounded-[6px] border text-xs font-black transition-all ${rechargeAmount === amt ? "bg-[#CCFF00] text-black border-[#CCFF00]" : "bg-[#000000] border-[#2D2D2D] text-zinc-400 hover:border-white/20"}`}
+                          className={`py-3 rounded-[6px] border text-xs font-black transition-all ${rechargeAmount === amt ? "bg-[#55DEE8] text-black border-[#55DEE8]" : "bg-[#000000] border-[#2D2D2D] text-zinc-400 hover:border-white/20"}`}
                         >
-                          â‚¹{amt}
+                          +�G��-�{amt}
                         </button>
                       ))}
                     </div>
@@ -480,12 +480,12 @@ const CoinDeductionModal = ({
                         placeholder="Custom amount"
                         value={rechargeAmount}
                         onChange={(e) => setRechargeAmount(parseInt(e.target.value) || 0)}
-                        className="w-full bg-black border border-[#2D2D2D] rounded-[6px] py-4 pl-10 pr-4 text-white text-sm font-bold focus:border-[#CCFF00]/50 outline-none transition-colors"
+                        className="w-full bg-black border border-[#2D2D2D] rounded-[6px] py-4 pl-10 pr-4 text-white text-sm font-bold focus:border-[#55DEE8]/50 outline-none transition-colors"
                       />
                     </div>
 
                     <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-4 mb-6">
-                        <div className="flex items-center justify-center gap-2 text-[#CCFF00]">
+                        <div className="flex items-center justify-center gap-2 text-[#55DEE8]">
                             <Tag size={14} />
                             <span className="text-[10px] font-black uppercase tracking-widest italic">Wallet Exclusive Offer</span>
                         </div>
@@ -496,7 +496,7 @@ const CoinDeductionModal = ({
                       <button
                         onClick={handleInstantRecharge}
                         disabled={isRecharging || rechargeAmount < 100}
-                        className="w-full bg-[#CCFF00] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                        className="w-full bg-[#55DEE8] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-wider flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                       >
                         {isRecharging ? <Loader2 className="animate-spin" /> : "Confirm Recharge"}
                       </button>
@@ -518,22 +518,22 @@ const CoinDeductionModal = ({
               animate={{ opacity: 1, scale: 1 }}
               className="p-8 text-center"
             >
-              <div className="w-20 h-20 bg-[#CCFF00] rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(132,204,22,0.4)]">
+              <div className="w-20 h-20 bg-[#55DEE8] rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(85,222,232,0.4)]">
                 <Check size={40} className="text-black" />
               </div>
               <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-2">Booking Successful!</h3>
               <p className="text-zinc-500 text-[11px] mb-8 font-bold uppercase tracking-wider">Your entry pass is ready for download.</p>
               
               {paymentMode === "WALLET" && (
-                <div className="bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-[8px] p-5 mb-8 relative overflow-hidden group">
-                  <div className="absolute -right-4 -top-4 w-16 h-16 bg-[#CCFF00]/20 rounded-full blur-xl transition-all group-hover:scale-150" />
+                <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-[8px] p-5 mb-8 relative overflow-hidden group">
+                  <div className="absolute -right-4 -top-4 w-16 h-16 bg-[#55DEE8]/20 rounded-full blur-xl transition-all group-hover:scale-150" />
                   <div className="flex items-center justify-center gap-4 relative z-10">
-                    <div className="p-3 bg-[#CCFF00] rounded-[6px] text-black">
+                    <div className="p-3 bg-[#55DEE8] rounded-[6px] text-black">
                         <Zap size={20} fill="currentColor" />
                     </div>
                     <div className="text-left">
-                        <p className="text-[10px] font-black text-[#CCFF00] uppercase tracking-[0.2em]">Cashback Reward</p>
-                        <p className="text-white text-sm font-black">â‚¹{Math.round(total * 0.05)} added to wallet</p>
+                        <p className="text-[10px] font-black text-[#55DEE8] uppercase tracking-[0.2em]">Cashback Reward</p>
+                        <p className="text-white text-sm font-black">+�G��-�{Math.round(total * 0.05)} added to wallet</p>
                     </div>
                   </div>
                 </div>
@@ -542,7 +542,7 @@ const CoinDeductionModal = ({
               <div className="space-y-3">
                 <Link 
                   to={`/booking-pass/${bookingId}`}
-                  className="w-full bg-[#CCFF00] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
+                  className="w-full bg-[#55DEE8] text-black h-14 rounded-[8px] font-bold uppercase text-xs tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
                 >
                   Download Digital Pass
                 </Link>
@@ -550,7 +550,7 @@ const CoinDeductionModal = ({
                   onClick={onClose}
                   className="w-full bg-[#000000] text-zinc-400 h-14 rounded-[8px] font-bold uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all"
                 >
-                  Back to Turf Details
+                  Back to Venue Details
                 </button>
               </div>
             </motion.div>

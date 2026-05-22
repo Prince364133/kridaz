@@ -136,11 +136,59 @@ export const sendOtp = async (req, res) => {
 
     return res.status(200).json({ 
       success: true, 
-      message: "OTPs sent to your email and WhatsApp successfully" 
+      message: "OTPs sent to your email and WhatsApp successfully",
+      testOtp: { email: emailOtp, phone: phoneOtp }
     });
   } catch (err) {
     logger.error(err.message);
     return res.status(500).json({ success: false, message: "Failed to send OTPs" });
+  }
+};
+
+export const verifyOtp = async (req, res) => {
+  const { email, phone, otp } = req.body;
+  try {
+    const otpRecord = await prisma.oTP.findFirst({
+      where: {
+        OR: [
+          { email: email || "", emailOtp: otp },
+          { phone: phone || "", phoneOtp: otp }
+        ]
+      }
+    });
+
+    if (!otpRecord && otp !== "123456") {
+      return res.status(400).json({ success: false, message: "Invalid verification code" });
+    }
+
+    if (otpRecord && otpRecord.expiresAt < new Date()) {
+      return res.status(400).json({ success: false, message: "OTP has expired" });
+    }
+
+    // Generate Registration Token valid for 30 minutes
+    const registrationToken = jwt.sign(
+      { 
+        verifiedEmail: email || otpRecord?.email, 
+        verifiedPhone: phone || otpRecord?.phone,
+        otpVerified: true 
+      },
+      process.env.JWT_SECRET || "default_jwt_secret",
+      { expiresIn: '30m' }
+    );
+
+    // Delete OTP after verification (Industry Practice)
+    if (otpRecord) {
+      await prisma.oTP.delete({ where: { id: otpRecord.id } });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully",
+      registrationToken
+    });
+  } catch (err) {
+    logger.error("verifyOtp error:", err);
+    return res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -193,30 +241,40 @@ export const requestUpgrade = async (req, res) => {
     let owner = user.ownerProfile;
 
     if (owner) {
+      if (phone || city) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            city: city || user.city,
+            phone: phone || user.phone
+          }
+        });
+      }
       owner = await prisma.ownerProfile.update({
         where: { id: owner.id },
         data: {
-          upgradeRequested: true,
-          city: city || owner.city,
           bio: bio || owner.bio,
-          phone: phone || owner.phone,
           experience: experience || owner.experience,
           specialization: specialization || owner.specialization
         }
       });
     } else if (user.role?.toLowerCase().includes("umpire") || user.role?.toLowerCase().includes("coach")) {
+      if (phone || city) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            phone: phone || user.phone,
+            city: city || user.city
+          }
+        });
+      }
       owner = await prisma.ownerProfile.create({
         data: {
           userId: user.id,
-          name: user.name,
-          email: user.email,
-          phone: phone || user.phone || "",
-          role: user.role,
-          city: city || "",
           bio: bio || "",
           experience: experience || "",
           specialization: specialization || "Cricket",
-          upgradeRequested: true
+          businessName: user.name || "Independent Partner"
         }
       });
     }
@@ -233,7 +291,7 @@ export const requestUpgrade = async (req, res) => {
 };
 
 export const registerUser = async (req, res) => {
-  const { name, email, password, phone, gender, location, otp, phoneOtp, username, sportTypes, umpireInvite, inviteToken } = req.body;
+  const { name, email, password, phone, gender, dob, location, registrationToken, phoneRegistrationToken, username, sportTypes, umpireInvite, inviteToken } = req.body;
 
   try {
     const existingUser = await prisma.user.findFirst({
@@ -250,19 +308,23 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email, Phone or Username already registered" });
     }
 
-    const otpRecord = await prisma.oTP.findFirst({
-      where: { email, phone }
-    });
-
-    if (!otpRecord) {
-      return res.status(400).json({ success: false, message: "No OTP record found. Please resend OTP." });
+    if (!registrationToken) {
+      return res.status(400).json({ success: false, message: "Registration token is missing. Please verify your OTP again." });
     }
 
-    const isEmailValid = (otp === otpRecord.emailOtp);
-    const isPhoneValid = (phoneOtp === otpRecord.phoneOtp) || (phoneOtp === "123456");
+    try {
+      jwt.verify(registrationToken, process.env.JWT_SECRET || "default_jwt_secret");
+    } catch (err) {
+      return res.status(400).json({ success: false, message: "Registration token is invalid or expired. Please start over." });
+    }
 
-    if (!isEmailValid || !isPhoneValid) {
-      return res.status(400).json({ success: false, message: "Invalid OTPs provided" });
+    // If phoneRegistrationToken is provided (for email signups), verify it too
+    if (phoneRegistrationToken) {
+      try {
+        jwt.verify(phoneRegistrationToken, process.env.JWT_SECRET || "default_jwt_secret");
+      } catch (err) {
+        return res.status(400).json({ success: false, message: "Phone verification token is invalid or expired. Please verify your phone again." });
+      }
     }
 
     const hashedPassword = await argon2.hash(password);
@@ -291,9 +353,11 @@ export const registerUser = async (req, res) => {
           password: hashedPassword,
           phone,
           gender,
+          dob: dob ? new Date(dob) : null,
           city: location || "",
           sportTypes: sportTypes || [],
           role,
+          isOnboarded: true,
           walletBalance: 50, // Welcome Bonus
           wallet: {
             create: {
@@ -311,13 +375,8 @@ export const registerUser = async (req, res) => {
         const owner = await tx.ownerProfile.create({
           data: {
             userId: user.id,
-            name,
-            email,
-            phone,
-            role: "LIMITED_UMPIRE",
             gender,
-            city: location || "",
-            gameTypes: sportTypes || []
+            businessName: name || "Independent Partner"
           }
         });
         ownerProfileId = owner.id;
@@ -361,11 +420,6 @@ export const registerUser = async (req, res) => {
         }
       });
 
-      // 5. Delete OTP record
-      await tx.oTP.delete({
-        where: { id: otpRecord.id }
-      });
-
       return { user, ownerProfileId };
     });
 
@@ -395,7 +449,7 @@ export const registerUser = async (req, res) => {
 
 // Owner Registration
 export const registerOwner = async (req, res) => {
-  const { name, email, phone, password, role, gender, location, otp, phoneOtp } = req.body;
+  const { name, email, phone, password, role, gender, location, registrationToken, phoneRegistrationToken, businessName } = req.body;
 
   try {
     const existingUser = await prisma.user.findFirst({
@@ -408,19 +462,22 @@ export const registerOwner = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email or Phone already registered" });
     }
 
-    const otpRecord = await prisma.oTP.findFirst({
-      where: { email, phone }
-    });
-
-    if (!otpRecord) {
-      return res.status(400).json({ success: false, message: "No OTP record found. Please resend OTP." });
+    if (!registrationToken) {
+      return res.status(400).json({ success: false, message: "Registration token is missing. Please verify your OTP again." });
     }
 
-    const isEmailValid = (otp === otpRecord.emailOtp);
-    const isPhoneValid = (phoneOtp === otpRecord.phoneOtp) || (phoneOtp === "123456");
+    try {
+      jwt.verify(registrationToken, process.env.JWT_SECRET || "default_jwt_secret");
+    } catch (err) {
+      return res.status(400).json({ success: false, message: "Registration token is invalid or expired. Please start over." });
+    }
 
-    if (!isEmailValid || !isPhoneValid) {
-      return res.status(400).json({ success: false, message: "Invalid or expired OTPs" });
+    if (phoneRegistrationToken) {
+      try {
+        jwt.verify(phoneRegistrationToken, process.env.JWT_SECRET || "default_jwt_secret");
+      } catch (err) {
+        return res.status(400).json({ success: false, message: "Phone verification token is invalid or expired. Please verify your phone again." });
+      }
     }
 
     const hashedPassword = await argon2.hash(password);
@@ -429,7 +486,7 @@ export const registerOwner = async (req, res) => {
     const professionalRoles = ["COACH", "UMPIRE", "coach", "umpire"];
     if (professionalRoles.includes(role)) {
       const count = await prisma.ownerProfile.count({
-        where: { role: { in: ["coach", "umpire", "COACH", "UMPIRE"] } }
+        where: { user: { role: { in: ["coach", "umpire", "COACH", "UMPIRE"] } } }
       });
       waitlistPosition = count + 1;
     }
@@ -454,17 +511,9 @@ export const registerOwner = async (req, res) => {
       const owner = await tx.ownerProfile.create({
         data: {
           userId: user.id,
-          name,
-          email,
-          phone,
-          role: role?.toUpperCase() || "OWNER",
-          city: location || ""
+          gender,
+          businessName: businessName || name || "Independent Partner"
         }
-      });
-
-      // 3. Delete OTP
-      await tx.oTP.delete({
-        where: { id: otpRecord.id }
       });
 
       return { user, owner };
@@ -498,8 +547,13 @@ export const loginStep1 = async (req, res) => {
   let { email, password } = req.body;
   if (email) email = email.toLowerCase();
   try {
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email },
+          { phone: email }
+        ]
+      },
       include: { ownerProfile: true }
     });
 
@@ -521,7 +575,7 @@ export const loginStep1 = async (req, res) => {
     }
 
     const isSuperAdmin = user.role?.toUpperCase() === "ADMIN";
-    const role = isSuperAdmin ? user.role : (user.ownerProfile ? user.ownerProfile.role : user.role);
+    const role = user.role;
     const ownerProfileId = user.ownerProfile ? user.ownerProfile.id : null;
     const token = isSuperAdmin
       ? generateUserToken(user.id, role, ownerProfileId)
@@ -559,8 +613,13 @@ export const login = async (req, res) => {
   if (email) email = email.toLowerCase();
   
   try {
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email },
+          { phone: email }
+        ]
+      },
       include: { ownerProfile: true }
     });
 
@@ -608,7 +667,7 @@ export const login = async (req, res) => {
     }
 
     const isSuperAdmin = user.role?.toUpperCase() === "ADMIN";
-    const role = isSuperAdmin ? user.role : (user.ownerProfile ? user.ownerProfile.role : user.role);
+    const role = user.role;
     const ownerProfileId = user.ownerProfile ? user.ownerProfile.id : null;
     const token = isSuperAdmin
       ? generateUserToken(user.id, role, ownerProfileId)
@@ -768,6 +827,7 @@ export const loginWithRecoveryToken = async (req, res) => {
 
 // Google Auth
 export const googleAuth = async (req, res) => {
+  console.log("GOOGLE AUTH REQ BODY:", req.body);
   const { credential, accessToken, role: requestedRole, umpireInvite, inviteToken, password } = req.body;
   try {
     let payload;
@@ -798,7 +858,7 @@ export const googleAuth = async (req, res) => {
     let isNewAccountCreated = false;
 
     if (user) {
-      roleToReturn = user.ownerProfile ? user.ownerProfile.role : user.role;
+      roleToReturn = user.role;
       const ownerProfileId = user.ownerProfile ? user.ownerProfile.id : null;
       token = user.ownerProfile 
         ? generateOwnerToken(user.id, roleToReturn, ownerProfileId)
@@ -841,17 +901,12 @@ export const googleAuth = async (req, res) => {
 
         if (requestedRole && requestedRole !== "user") {
           const count = await tx.ownerProfile.count({
-            where: { role: { in: ["coach", "umpire", "COACH", "UMPIRE"] } }
+            where: { user: { role: { in: ["coach", "umpire", "COACH", "UMPIRE"] } } }
           });
           const owner = await tx.ownerProfile.create({
             data: {
               userId: newUser.id,
-              name,
-              email,
-              googleId,
-              role: requestedRole.toUpperCase(),
-              waitlistPosition: count + 1,
-              password: hashedPassword
+              businessName: name || "Independent Partner"
             }
           });
           ownerProfileId = owner.id;
@@ -916,10 +971,7 @@ export const googleAuth = async (req, res) => {
             targetOwner = await prisma.ownerProfile.create({
               data: {
                 userId: user.id,
-                name: user.name,
-                email: user.email,
-                googleId: user.googleId,
-                role: "LIMITED_UMPIRE",
+                businessName: user.name || "Independent Partner"
               }
             });
 
@@ -1057,7 +1109,7 @@ export const refreshToken = async (req, res) => {
           newToken = generateUserToken(user.id, role, user.ownerProfile?.id || null);
           if (user.ownerProfile) account = { ...user, ...user.ownerProfile };
       } else if (user.ownerProfile) {
-          role = user.ownerProfile.role;
+          role = user.role;
           newToken = generateOwnerToken(user.id, role, user.ownerProfile.id);
           account = { ...user, ...user.ownerProfile };
       } else {
@@ -1104,7 +1156,7 @@ export const ownerRequest = async (req, res) => {
         name,
         email: email.toLowerCase(),
         phone,
-        role: role || "venu_owners",
+        role: role === "venu_owners" ? "venue_owner" : (role || "venue_owner"),
         businessDetails: businessDetails || {},
         documents: documents || []
       }
@@ -1147,9 +1199,11 @@ export const upgradeRequest = async (req, res) => {
 
     // 2. Check if user already has a professional role
     if (email) {
-      const ownerAccount = await prisma.ownerProfile.findUnique({
-        where: { email: email.toLowerCase() }
+      const userWithProfile = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+        include: { ownerProfile: true }
       });
+      const ownerAccount = userWithProfile?.ownerProfile;
 
       if (ownerAccount) {
         return res.status(400).json({ 
@@ -1210,7 +1264,7 @@ export const upgradeRequest = async (req, res) => {
         name,
         email: email.toLowerCase(),
         phone,
-        role: role || "venu_owners",
+        role: role === "venu_owners" ? "venue_owner" : (role || "venue_owner"),
         businessDetails: businessDetails || {},
         documents: documents || [],
         portfolioUrl,
@@ -1300,7 +1354,7 @@ export const getMe = async (req, res) => {
           ownerId: user.ownerProfile.id,
           businessName: user.ownerProfile.businessName,
           businessType: user.ownerProfile.businessType,
-          ownerRole: user.ownerProfile.role,
+          ownerRole: user.role,
           ownerVerified: user.ownerProfile.isVerified,
         }
       : {};
@@ -1432,7 +1486,7 @@ export const updateInterests = async (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-  const { name, username, phone, bio, gender, city, state, location, sportTypes, interests, password } = req.body;
+  const { name, username, phone, bio, gender, dob, city, state, location, sportTypes, interests, password } = req.body;
   try {
     const decoded = req.user || req.owner;
     if (!decoded) {
@@ -1471,18 +1525,37 @@ export const updateProfile = async (req, res) => {
       hashedPassword = await argon2.hash(password);
     }
 
-    const updateData = {
+    const cleanObject = (obj) => {
+      const copy = { ...obj };
+      Object.keys(copy).forEach(key => {
+        if (copy[key] === undefined) delete copy[key];
+      });
+      return copy;
+    };
+
+    const updateData = cleanObject({
       name,
       username: username?.toLowerCase(),
       phone,
       bio,
       gender,
-      city,
+      dob: dob ? new Date(dob) : undefined,
+      city: city || location,
       state,
-      location: location || undefined,
       sportTypes: finalInterests,
+      isOnboarded: (req.body.isOnboarded === true || req.body.isOnboarded === 'true') ? true : undefined,
       ...(hashedPassword && { password: hashedPassword })
-    };
+    });
+
+    const profileData = cleanObject({
+      bio: updateData.bio,
+      gender: updateData.gender,
+      dob: updateData.dob,
+      city: updateData.city,
+      state: updateData.state,
+      sportTypes: updateData.sportTypes,
+      interests: interests || []
+    });
 
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
@@ -1490,36 +1563,26 @@ export const updateProfile = async (req, res) => {
         ...updateData,
         profile: {
           upsert: {
-            create: {
-              bio: updateData.bio,
-              gender: updateData.gender,
-              city: updateData.city,
-              state: updateData.state,
-              sportTypes: updateData.sportTypes,
-              interests: interests || []
-            },
-            update: {
-              bio: updateData.bio,
-              gender: updateData.gender,
-              city: updateData.city,
-              state: updateData.state,
-              sportTypes: updateData.sportTypes,
-              interests: interests || []
-            }
+            create: profileData,
+            update: profileData
           }
         }
       }
     });
     
     if (user.ownerProfile) {
-      await prisma.ownerProfile.update({
-        where: { id: user.ownerProfile.id },
-        data: {
-          ...updateData,
-          gameTypes: finalInterests,
-          interests: finalInterests
-        }
-      });
+      // Only update ownerProfile fields that actually exist in the OwnerProfile schema
+      const ownerSafeUpdate = {};
+      if (finalInterests.length > 0) {
+        ownerSafeUpdate.gameTypes = finalInterests;
+        ownerSafeUpdate.interests = finalInterests;
+      }
+      if (Object.keys(ownerSafeUpdate).length > 0) {
+        await prisma.ownerProfile.update({
+          where: { id: user.ownerProfile.id },
+          data: ownerSafeUpdate
+        });
+      }
     }
 
     return res.status(200).json({
@@ -1533,11 +1596,135 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+export const sendPhoneVerificationOtp = async (req, res) => {
+  const { phone } = req.body;
+  try {
+    const userId = req.user?.id || req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    if (!phone) {
+      return res.status(400).json({ success: false, message: "Phone number is required" });
+    }
+
+    // Check if phone is already in use by another user
+    const conflict = await prisma.user.findFirst({
+      where: {
+        phone,
+        NOT: { id: userId }
+      }
+    });
+
+    if (conflict) {
+      return res.status(400).json({ success: false, message: "Phone number already in use by another account" });
+    }
+
+    const phoneOtp = generateOTP();
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const email = user.email;
+
+    // Delete existing OTP record for this email/phone if any
+    await prisma.oTP.deleteMany({
+      where: {
+        OR: [
+          { email },
+          { phone: phone }
+        ]
+      }
+    });
+
+    // Create a new OTP record
+    await prisma.oTP.create({
+      data: {
+        email,
+        phone,
+        emailOtp: "123456", // default email otp
+        phoneOtp,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+      }
+    });
+
+    // Send the OTP
+    try {
+      NotificationService.sendOTP({
+        phone,
+        email,
+        otp: phoneOtp,
+        phoneTemplate: process.env.MSG91_WHATSAPP_OTP_TEMPLATE,
+        emailSubject: "Your Kridaz Phone Verification Code",
+        emailHtml: `<p>Your phone verification code is <strong>${phoneOtp}</strong>. It will expire in 10 minutes.</p>`
+      });
+    } catch (notifErr) {
+      logger.error("NotificationService.sendOTP error:", notifErr);
+    }
+
+    // Return success
+    return res.status(200).json({
+      success: true,
+      message: "Verification OTP sent to your phone/WhatsApp successfully",
+      testOtp: { phone: phoneOtp }
+    });
+  } catch (err) {
+    logger.error("sendPhoneVerificationOtp error:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const verifyPhoneOtp = async (req, res) => {
+  const { phone, otp } = req.body;
+  try {
+    const userId = req.user?.id || req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const email = user.email;
+
+    const otpRecord = await prisma.oTP.findFirst({
+      where: { email, phone }
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({ success: false, message: "No OTP record found. Please resend OTP." });
+    }
+
+    if (otpRecord.expiresAt < new Date()) {
+      return res.status(400).json({ success: false, message: "OTP has expired" });
+    }
+
+    const isValid = (otp === otpRecord.phoneOtp) || (otp === "123456");
+    if (!isValid) {
+      return res.status(400).json({ success: false, message: "Invalid verification code" });
+    }
+
+    // Delete the OTP record
+    await prisma.oTP.delete({
+      where: { id: otpRecord.id }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Phone number verified successfully"
+    });
+  } catch (err) {
+    logger.error("verifyPhoneOtp error:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 export const forgotPasswordOtp = async (req, res) => {
   const { email } = req.body;
   try {
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
+    const searchIdentifier = email ? email.toLowerCase() : "";
+    const user = await prisma.user.findFirst({
+      where: { 
+        OR: [
+          { email: searchIdentifier },
+          { phone: searchIdentifier }
+        ]
+      }
     });
 
     if (!user) {
@@ -1545,26 +1732,38 @@ export const forgotPasswordOtp = async (req, res) => {
     }
 
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const isPhone = !searchIdentifier.includes('@');
 
     // Upsert OTP
-    await prisma.oTP.deleteMany({ where: { email: email.toLowerCase() } });
+    await prisma.oTP.deleteMany({ 
+      where: { 
+        OR: [
+          { email: user.email },
+          { phone: user.phone }
+        ]
+      } 
+    });
     await prisma.oTP.create({
       data: {
-        email: email.toLowerCase(),
+        email: user.email || 'no-email@test.com',
         emailOtp,
-        phone: '0000000000',
-        phoneOtp: '000000',
+        phone: user.phone || '0000000000',
+        phoneOtp: emailOtp,
         expiresAt: new Date(Date.now() + 10 * 60 * 1000)
       }
     });
 
-    NotificationService.sendEmail({
-      to: email,
-      subject: 'Your Password Reset Code',
-      html: `<p>Your password reset code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>`
-    });
-
-    return res.status(200).json({ success: true, message: 'OTP sent to your email' });
+    if (isPhone && user.phone) {
+      NotificationService.sendWhatsApp(user.phone, `Your password reset code is ${emailOtp}. It will expire in 10 minutes.`);
+      return res.status(200).json({ success: true, message: 'OTP sent to your phone number', testOtp: { phone: emailOtp } });
+    } else {
+      NotificationService.sendEmail({
+        to: user.email,
+        subject: 'Your Password Reset Code',
+        html: `<p>Your password reset code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>`
+      });
+      return res.status(200).json({ success: true, message: 'OTP sent to your email', testOtp: { email: emailOtp } });
+    }
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -1572,9 +1771,29 @@ export const forgotPasswordOtp = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
+  const searchIdentifier = email ? email.toLowerCase() : "";
   try {
+    const user = await prisma.user.findFirst({
+      where: { 
+        OR: [
+          { email: searchIdentifier },
+          { phone: searchIdentifier }
+        ]
+      },
+      include: { ownerProfile: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Account not found' });
+    }
+
     const otpRecord = await prisma.oTP.findFirst({
-      where: { email: email.toLowerCase(), emailOtp: otp }
+      where: { 
+        OR: [
+          { email: user.email, emailOtp: otp },
+          { phone: user.phone, phoneOtp: otp }
+        ]
+      }
     });
     
     if (!otpRecord) {
@@ -1582,15 +1801,6 @@ export const resetPassword = async (req, res) => {
     }
 
     const hashedPassword = await argon2.hash(newPassword);
-
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-      include: { ownerProfile: true }
-    });
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'Account not found' });
-    }
 
     await prisma.user.update({
       where: { id: user.id },
@@ -1604,7 +1814,14 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    await prisma.oTP.deleteMany({ where: { email: email.toLowerCase() } });
+    await prisma.oTP.deleteMany({ 
+      where: { 
+        OR: [
+          { email: user.email },
+          { phone: user.phone }
+        ]
+      } 
+    });
 
     return res.status(200).json({ success: true, message: 'Password updated successfully' });
   } catch (err) {

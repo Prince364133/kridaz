@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
 /**
- * ExtraRunsModal — P1.4 & P1.5
+ * ExtraRunsModal ΓÇö P1.4 & P1.5
  *
  * Shown when Wide, No-Ball, Bye, or Leg Bye is pressed.
  * Lets the umpire specify how many runs were scored off the delivery.
  */
 
-const THEME_COLOR = '#CCFF00';
+const THEME_COLOR = '#55DEE8';
 
 const EXTRA_META = {
   WIDE:    { label: 'Wide',     color: THEME_COLOR, note: '1 wide penalty already included' },
   NO_BALL: { label: 'No-Ball',  color: THEME_COLOR, note: '1 no-ball penalty already included' },
-  BYE:     { label: 'Bye',      color: THEME_COLOR, note: 'Runs scored — not credited to batsman' },
-  LEG_BYE: { label: 'Leg Bye',  color: THEME_COLOR, note: 'Runs scored — not credited to batsman' },
+  BYE:     { label: 'Bye',      color: THEME_COLOR, note: 'Runs scored ΓÇö not credited to batsman' },
+  LEG_BYE: { label: 'Leg Bye',  color: THEME_COLOR, note: 'Runs scored ΓÇö not credited to batsman' },
 };
 
 const QUICK_RUNS = [0, 1, 2, 3, 4];

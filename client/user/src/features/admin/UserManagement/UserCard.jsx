@@ -7,13 +7,13 @@ import { useNavigate } from "react-router-dom";
 const UserCard = ({ user, onToggleStatus, onDelete, isSelected, onSelect }) => {
   const navigate = useNavigate();
   const joinDate = user.createdAt ? format(new Date(user.createdAt), "dd MMM yyyy") : "N/A";
-  const userId = (user.id || user._id)?.slice(-8).toUpperCase() || "N/A";
+  const userId = user._id?.slice(-8).toUpperCase() || "N/A";
   const isBlocked = user.status === "blocked";
 
   const handleRowClick = (e) => {
     // Don't navigate if clicking an action button or checkbox
     if (e.target.closest('button') || e.target.closest('input[type="checkbox"]')) return;
-    navigate(`/profile/${user.id || user._id}`);
+    navigate(`/profile/${user._id}`);
   };
 
   const handleDelete = (e) => {
@@ -23,12 +23,12 @@ const UserCard = ({ user, onToggleStatus, onDelete, isSelected, onSelect }) => {
 
   const handleToggleStatus = async (e) => {
     e.stopPropagation();
-    await onToggleStatus(user.id || user._id, user.status || "active");
+    await onToggleStatus(user._id, user.status || "active");
   };
 
   const handleCheckboxChange = (e) => {
     e.stopPropagation();
-    onSelect(user.id || user._id);
+    onSelect(user._id);
   };
 
   return (
@@ -148,7 +148,7 @@ const UserCard = ({ user, onToggleStatus, onDelete, isSelected, onSelect }) => {
           </button>
 
           <button 
-            onClick={() => navigate(`/profile/${user.id || user._id}`)}
+            onClick={() => navigate(`/profile/${user._id}`)}
             title="View Full Profile"
             className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:bg-[#CCFF00] hover:text-black hover:border-[#CCFF00] transition-all"
           >

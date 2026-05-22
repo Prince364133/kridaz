@@ -21,7 +21,7 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
         const allTurfs = response.data.turfs || [];
         
         const filteredGrounds = allTurfs.filter(turf => 
-          (turf.owner?._id === request.userId) || 
+          (turf.owner?.id === request.userId) || 
           (turf.owner?.email === request.email)
         );
         
@@ -66,7 +66,7 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
                 <ExternalLink size={14} className="text-[#CCFF00] opacity-0 group-hover/header:opacity-100 transition-opacity" />
               </div>
               <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
-                <Zap size={10} className="text-[#CCFF00]" /> PARTNER VERIFICATION DOSSIER #{request._id?.slice(-8)}
+                <Zap size={10} className="text-[#CCFF00]" /> PARTNER VERIFICATION DOSSIER #{request.id?.slice(-8)}
               </p>
             </div>
           </div>
@@ -203,7 +203,7 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
                 ) : grounds.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {grounds.map((ground) => (
-                      <GroundCard key={ground._id} ground={ground} />
+                      <GroundCard key={ground.id} ground={ground} />
                     ))}
                   </div>
                 ) : (
@@ -228,7 +228,7 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
            <div className="flex items-center gap-4">
              {isRejected ? (
                 <button 
-                  onClick={() => onAccept(request._id)}
+                  onClick={() => onAccept(request.id)}
                   disabled={isProcessing}
                   className="px-8 py-3 bg-[#CCFF00] text-black text-[12px] font-black uppercase tracking-[0.2em] rounded-[6px] hover:bg-[#DFFF00] transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(204,255,0,0.2)] disabled:opacity-50"
                 >
@@ -237,14 +237,14 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
              ) : (
                <>
                 <button 
-                  onClick={() => onReject(request._id)}
+                  onClick={() => onReject(request.id)}
                   disabled={isProcessing}
                   className="px-8 py-3 bg-transparent border border-red-500/30 text-red-500 text-[12px] font-black uppercase tracking-[0.2em] rounded-[6px] hover:bg-red-500/5 hover:border-red-500 transition-all disabled:opacity-50"
                 >
                   Decline
                 </button>
                 <button 
-                  onClick={() => onAccept(request._id)}
+                  onClick={() => onAccept(request.id)}
                   disabled={isProcessing}
                   className="px-8 py-3 bg-[#CCFF00] text-black text-[12px] font-black uppercase tracking-[0.2em] rounded-[6px] hover:bg-[#DFFF00] transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(204,255,0,0.2)] disabled:opacity-50"
                 >

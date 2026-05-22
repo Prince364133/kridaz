@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { PackageOpen, User, Mail, Phone, Calendar, Building2, TrendingUp, ShieldCheck, ArrowLeft, Trash2 } from "lucide-react";
 import useTurfData from "@hooks/admin/useTurfData";
 import useOwners from "@hooks/admin/useOwners";
-import ConfirmationModal from "../../shared/ConfirmationModal";
+import ConfirmationModal from "@components/shared/ConfirmationModal";
 
 import Turf from "./Turf";
 import TurfSkeleton from "./TurfSkeleton";

@@ -67,19 +67,25 @@ export const trackQueue = (name, queueInstance) => {
 };
 
 // Poller to update queue metrics every 30 seconds
-setInterval(async () => {
-  for (const [name, queue] of Object.entries(queues)) {
-    try {
-      const counts = await queue.getJobCounts();
-      queueDepth.set({ queue_name: name, status: "active" }, counts.active);
-      queueDepth.set({ queue_name: name, status: "waiting" }, counts.waiting);
-      queueDepth.set({ queue_name: name, status: "delayed" }, counts.delayed);
-      queueDepth.set({ queue_name: name, status: "failed" }, counts.failed);
-    } catch (error) {
-      logger.error(`[METRICS] Error fetching counts for queue ${name}:`, error);
+let metricsInterval;
+if (process.env.NODE_ENV !== "test") {
+  metricsInterval = setInterval(async () => {
+    for (const [name, queue] of Object.entries(queues)) {
+      try {
+        const counts = await queue.getJobCounts();
+        queueDepth.set({ queue_name: name, status: "active" }, counts.active);
+        queueDepth.set({ queue_name: name, status: "waiting" }, counts.waiting);
+        queueDepth.set({ queue_name: name, status: "delayed" }, counts.delayed);
+        queueDepth.set({ queue_name: name, status: "failed" }, counts.failed);
+      } catch (error) {
+        logger.error(`[METRICS] Error fetching counts for queue ${name}:`, error);
+      }
     }
+  }, 30000);
+  if (metricsInterval && typeof metricsInterval.unref === "function") {
+    metricsInterval.unref();
   }
-}, 30000);
+}
 
-export { register };
+export { register, metricsInterval };
 export default client;

@@ -21,7 +21,9 @@ model User {
   latitude                Decimal?              @db.Decimal(10, 8)
   longitude               Decimal?              @db.Decimal(11, 8)
   isVerified              Boolean               @default(false)
+  isOnboarded             Boolean               @default(false)
   gender                  String?
+  dob                     DateTime?
   bio                     String?
   interests               String[]
   sportTypes              String[]
@@ -86,6 +88,9 @@ model User {
   likedPosts              Post[]                @relation("PostLikes")
   studentSessions         ProfessionalSession[] @relation("SessionStudents")
   viewedStories           Story[]               @relation("StoryViewers")
+  turfLikes               TurfLike[]
+  turfInteractions        TurfInteraction[]
+  professionalCustomers   ProfessionalCustomer[]
 
   @@index([role])
 }
@@ -95,6 +100,7 @@ model UserProfile {
   userId     String   @unique
   bio        String?
   gender     String?
+  dob        DateTime?
   interests  String[] @default([])
   sportTypes String[] @default([])
   city       String?
@@ -199,6 +205,7 @@ model OwnerProfile {
   notificationPrefs   Json?
   createdAt           DateTime                   @default(now())
   updatedAt           DateTime                   @updatedAt
+  workingHours        Json?
   createdChats        Chat[]                     @relation("ChatCreatorOwner")
   chatMemberships     ChatParticipant[]          @relation("OwnerChatMemberships")
   coupons             Coupon[]
@@ -212,6 +219,8 @@ model OwnerProfile {
   reviews             Review[]                   @relation("ProfessionalReview")
   turfs               Turf[]
   withdrawalRequests  WithdrawalRequest[]
+  customers           ProfessionalCustomer[]
+  tasks               ProfessionalTask[]
 }
 
 model WithdrawalRequest {
@@ -263,6 +272,7 @@ model Turf {
   mapUrl              String?
   policies            String?      @default("")
   managerContacts     Json?
+  generatedSlots      Json?
   verificationData    Json?
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @default(now()) @updatedAt
@@ -271,6 +281,8 @@ model Turf {
   hostedGames         HostedGame[]
   reviews             Review[]
   timeSlots           TimeSlot[]
+  turfLikes           TurfLike[]
+  turfInteractions    TurfInteraction[]
   owner               OwnerProfile @relation(fields: [ownerId], references: [id])
 
   @@index([ownerId])
@@ -417,10 +429,20 @@ model HostedGame {
   lastCommentaryAt  DateTime?
   liveScoreSnapshot Json?
   oversPerInnings   Int                  @default(20)
-  tickerTheme       String               @default("classic")
+  tickerTheme       String               @default("neon_classic")
   customUmpire      Json?
   customScorer      Json?
   customStreamer    Json?
+  
+  // New fields for Scoring Match
+  name              String?
+  format            String?
+  ballType          String?
+  groundType        String?
+  scoringPassword   String?
+  youtubeLiveUrl    String?
+  maxMembers        Int                  @default(11)
+  
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
   broadcasts        Broadcast[]
@@ -1117,4 +1139,66 @@ enum RevenueStatus {
   SETTLED
   FROZEN
   REFUNDED
+}
+
+model TurfLike {
+  id        String   @id @default(uuid())
+  userId    String
+  turfId    String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  turf      Turf     @relation(fields: [turfId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, turfId])
+  @@index([userId])
+  @@index([turfId])
+}
+
+model TurfInteraction {
+  id              String   @id @default(uuid())
+  userId          String?
+  turfId          String
+  interactionType String   // 'VIEW', 'SHARE', 'CLICK', 'SEARCH'
+  duration        Int      @default(0) // Dwell time in seconds (for views)
+  createdAt       DateTime @default(now())
+
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  turf            Turf     @relation(fields: [turfId], references: [id], onDelete: Cascade)
+
+  @@index([userId, interactionType])
+  @@index([turfId, interactionType])
+  @@index([createdAt])
+}
+
+model ProfessionalCustomer {
+  id              String       @id @default(uuid())
+  professionalId  String
+  userId          String?
+  name            String
+  email           String?
+  phone           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  professional    OwnerProfile @relation(fields: [professionalId], references: [id])
+  user            User?        @relation(fields: [userId], references: [id])
+  tasks           ProfessionalTask[]
+}
+
+model ProfessionalTask {
+  id              String       @id @default(uuid())
+  professionalId  String
+  customerId      String?
+  title           String
+  description     String?
+  date            DateTime
+  startTime       String
+  endTime         String
+  reminderMinutes Int          @default(30)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  professional    OwnerProfile @relation(fields: [professionalId], references: [id])
+  customer        ProfessionalCustomer? @relation(fields: [customerId], references: [id])
 }

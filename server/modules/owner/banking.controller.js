@@ -5,7 +5,7 @@ export const getBankingDetails = async (req, res) => {
   const { id: ownerId } = req.owner;
   try {
     const owner = await prisma.ownerProfile.findUnique({
-      where: { id: ownerId },
+      where: { userId: ownerId },
       select: { bankingDetails: true, walletBalance: true }
     });
       
@@ -26,7 +26,7 @@ export const updateBankingDetails = async (req, res) => {
   const { id: ownerId } = req.owner;
   const { accountName, accountNumber, ifscCode, bankName, upiId, payoutMode, cancelledCheckUrl } = req.body;
   try {
-    const owner = await prisma.ownerProfile.findUnique({ where: { id: ownerId } });
+    const owner = await prisma.ownerProfile.findUnique({ where: { userId: ownerId } });
     if (!owner) return res.status(404).json({ message: "Owner not found" });
 
     const currentDetails = (owner.bankingDetails || {});
@@ -43,7 +43,7 @@ export const updateBankingDetails = async (req, res) => {
     };
 
     const updatedOwner = await prisma.ownerProfile.update({
-      where: { id: ownerId },
+      where: { userId: ownerId },
       data: { bankingDetails: updatedBankingDetails }
     });
 
@@ -71,7 +71,7 @@ export const requestPayout = async (req, res) => {
   const { amount, password } = req.body;
 
   try {
-    const owner = await prisma.ownerProfile.findUnique({ where: { id: ownerId } });
+    const owner = await prisma.ownerProfile.findUnique({ where: { userId: ownerId } });
     if (!owner) return res.status(404).json({ message: "Owner not found" });
 
     // Verify password
@@ -128,7 +128,7 @@ export const requestPayout = async (req, res) => {
     await prisma.$transaction(async (tx) => {
       // Re-verify balance within transaction
       const currentOwner = await tx.ownerProfile.findUnique({
-        where: { id: ownerId },
+        where: { userId: ownerId },
         select: { walletBalance: true }
       });
 
@@ -137,7 +137,7 @@ export const requestPayout = async (req, res) => {
       }
 
       await tx.ownerProfile.update({
-        where: { id: ownerId },
+        where: { userId: ownerId },
         data: { walletBalance: { decrement: amount } }
       });
 

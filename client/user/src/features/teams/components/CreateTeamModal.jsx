@@ -1,241 +1,608 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { X, Trophy, Upload, Sparkles, Loader2, Info } from 'lucide-react';
+import React, { useState, useRef } from 'react';
 import { useCreateTeamMutation } from '@redux/api/teamApi';
-import toast from 'react-hot-toast';
+import { useUploadFileMutation } from '@redux/api/uploadApi';
+import { X, Camera, Loader2, Users, Upload, Trash2, MapPin, Map, Shield, Phone, MessageSquare, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 
-const CITIES = ['Haldwani', 'Lalkuan', 'Nainital', 'Rampur', 'Rudrapur', 'Dehradun', 'Delhi', 'Noida', 'Gurugram'];
-const SPORT_TYPES = ['CRICKET', 'FOOTBALL', 'BASKETBALL', 'BADMINTON', 'VOLLEYBALL', 'TENNIS'];
+const STATE_CITIES_MAP = {
+  'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane'],
+  'Karnataka': ['Bengaluru', 'Mysore', 'Hubli', 'Mangalore'],
+  'Delhi': ['New Delhi', 'Noida', 'Gurgaon', 'Faridabad'],
+  'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Trichy'],
+  'Telangana': ['Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar']
+};
 
-const CreateTeamModal = ({ isOpen, onClose }) => {
-  const [createTeam, { isLoading }] = useCreateTeamMutation();
+const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
+  const [createTeam, { isLoading: isCreating }] = useCreateTeamMutation();
+  const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation();
+  const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
+
   const [formData, setFormData] = useState({
     name: '',
-    sportType: 'CRICKET',
-    city: 'Haldwani',
     description: '',
+    sport: 'CRICKET',
+    state: '',
+    city: '',
     captainName: '',
-    captainContact: '',
+    captainPhone: '',
+    image: ''
   });
-  const [imagePreview, setImagePreview] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image must be under 5MB');
-        return;
+  const [preview, setPreview] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isGeneratingEmblem, setIsGeneratingEmblem] = useState(false);
+  const [citiesList, setCitiesList] = useState([]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleStateChange = (e) => {
+    const selectedState = e.target.value;
+    const cities = STATE_CITIES_MAP[selectedState] || [];
+    setCitiesList(cities);
+    setFormData(prev => ({
+      ...prev,
+      state: selectedState,
+      city: cities[0] || ''
+    }));
+  };
+
+  const handleTextareaChange = (e) => {
+    handleChange(e);
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  };
+
+  const uploadFileHelper = async (file) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size exceeds 5MB limit');
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const response = await uploadFile(file).unwrap();
+      if (response.success) {
+        setFormData(prev => ({ ...prev, image: response.url }));
+        toast.success('Logo uploaded successfully');
       }
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+    } catch (err) {
+      toast.error('Failed to upload logo');
+      setPreview(null);
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    await uploadFileHelper(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      await uploadFileHelper(file);
+    }
+  };
+
+  const handleRemoveLogo = (e) => {
+    e.stopPropagation();
+    setPreview(null);
+    setFormData(prev => ({ ...prev, image: '' }));
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    toast.success('Logo removed');
+  };
+
+  const generateEsportsEmblem = async (e) => {
+    e.stopPropagation();
+    if (!formData.name) {
+      toast.error('Please type a Team Name first to generate an emblem');
+      return;
+    }
+
+    setIsGeneratingEmblem(true);
+    const loadingToast = toast.loading('Forging Emblem...');
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+
+      // 1. Cyberpunk backdrop glow
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(0, 0, 512, 512);
+
+      const radialGlow = ctx.createRadialGradient(256, 256, 40, 256, 256, 240);
+      radialGlow.addColorStop(0, 'rgba(85, 222, 232, 0.18)');
+      radialGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = radialGlow;
+      ctx.fillRect(0, 0, 512, 512);
+
+      // 2. Shield Polygon
+      ctx.beginPath();
+      ctx.moveTo(256, 40);
+      ctx.lineTo(440, 120);
+      ctx.lineTo(400, 360);
+      ctx.lineTo(256, 470);
+      ctx.lineTo(112, 360);
+      ctx.lineTo(72, 120);
+      ctx.closePath();
+
+      ctx.fillStyle = '#121212';
+      ctx.fill();
+
+      // Carbon texture lines
+      ctx.save();
+      ctx.clip();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.015)';
+      ctx.lineWidth = 3;
+      for (let y = 0; y < 512; y += 12) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(512, y);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // 3. Cyber Gradient border
+      const gradient = ctx.createLinearGradient(0, 40, 512, 470);
+      gradient.addColorStop(0, '#55DEE8');
+      gradient.addColorStop(1, '#BFF367');
+
+      ctx.beginPath();
+      ctx.moveTo(256, 40);
+      ctx.lineTo(440, 120);
+      ctx.lineTo(400, 360);
+      ctx.lineTo(256, 470);
+      ctx.lineTo(112, 360);
+      ctx.lineTo(72, 120);
+      ctx.closePath();
+
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 10;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // Target decals
+      ctx.strokeStyle = 'rgba(85, 222, 232, 0.3)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(256, 20);
+      ctx.lineTo(256, 48);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(40, 256);
+      ctx.lineTo(65, 256);
+      ctx.moveTo(447, 256);
+      ctx.lineTo(472, 256);
+      ctx.stroke();
+
+      // 4. Draw Initials
+      const words = formData.name.trim().split(/\s+/);
+      const initials = words.slice(0, 3).map(w => w[0]).join('').toUpperCase();
+
+      ctx.shadowColor = '#55DEE8';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'italic 900 110px "Space Mono", "Bebas Neue", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(initials || 'K', 256, 230);
+
+      // Reset shadow
+      ctx.shadowBlur = 0;
+
+      // Draw active sport name banner
+      ctx.fillStyle = gradient;
+      ctx.font = 'black 22px "Inter", sans-serif';
+      ctx.fillText(formData.sport || 'TEAM', 256, 310);
+
+      // Draw bottom squads label
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillRect(140, 355, 232, 36);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.strokeRect(140, 355, 232, 36);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px "Inter", sans-serif';
+      const cityLabel = formData.city ? formData.city.toUpperCase().slice(0, 16) : 'SQUAD';
+      ctx.fillText(cityLabel, 256, 373);
+
+      // 5. Convert & Upload
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], `${formData.name.toLowerCase().replace(/\s+/g, '_')}_logo.png`, { type: 'image/png' });
+        await uploadFileHelper(file);
+        setIsGeneratingEmblem(false);
+        toast.dismiss(loadingToast);
+        toast.success('Dynamic Esports Emblem generated successfully!');
+      }, 'image/png');
+
+    } catch (err) {
+      console.error(err);
+      setIsGeneratingEmblem(false);
+      toast.dismiss(loadingToast);
+      toast.error('Failed to generate emblem');
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim()) return toast.error('Team Name is required');
-
+    if (!formData.name) return toast.error('Team name is required');
+    
     try {
-      const data = new FormData();
-      Object.keys(formData).forEach(key => {
-        data.append(key, formData[key]);
+      const response = await createTeam({
+        ...formData,
+        type: 'MY_TEAM'
+      }).unwrap();
+      toast.success('Team created successfully!');
+      if (onSuccess) onSuccess(response.team);
+      onClose();
+      setFormData({
+        name: '',
+        description: '',
+        sport: 'CRICKET',
+        state: '',
+        city: '',
+        captainName: '',
+        captainPhone: '',
+        image: ''
       });
-      if (imageFile) {
-        data.append('image', imageFile);
-      }
-
-      const result = await createTeam(data).unwrap();
-      if (result.success) {
-        toast.success('Team created successfully!');
-        onClose();
-        resetForm();
-      }
+      setPreview(null);
     } catch (err) {
       toast.error(err.data?.message || 'Failed to create team');
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      sportType: 'CRICKET',
-      city: 'Haldwani',
-      description: '',
-      captainName: '',
-      captainContact: '',
-    });
-    setImagePreview(null);
-    setImageFile(null);
-  };
-
-  if (!isOpen) return null;
+  const isSubmitDisabled = !formData.name || isCreating || isUploading || isGeneratingEmblem;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
-      
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="relative w-full max-w-2xl bg-[#0d0d0d] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl"
-      >
-        {/* Header */}
-        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#CCFF00]/10 flex items-center justify-center text-[#CCFF00]">
-              <Trophy size={20} />
-            </div>
-            <div>
-              <h2 className="text-xl font-black text-white italic uppercase tracking-tight">Create New Squad</h2>
-              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">Form your ultimate sports team</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl transition-colors">
-            <X size={20} className="text-white/40" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
-          {/* Top Row: Logo & Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Logo Upload */}
-            <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-white/10 rounded-3xl bg-white/[0.01] hover:bg-white/[0.02] hover:border-[#CCFF00]/30 transition-all group relative cursor-pointer">
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={handleImageChange}
-                className="absolute inset-0 opacity-0 cursor-pointer z-10"
-              />
-              {imagePreview ? (
-                <div className="relative w-24 h-24 rounded-2xl overflow-hidden border border-white/10">
-                  <img src={imagePreview} alt="Logo" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Upload size={16} className="text-white" />
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 group-hover:text-[#CCFF00] group-hover:border-[#CCFF00]/30 transition-all mb-3">
-                    <Upload size={20} />
-                  </div>
-                  <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Upload Badge</span>
-                  <span className="text-[8px] text-white/20 mt-1 uppercase">Under 5MB</span>
-                </>
-              )}
-            </div>
-
-            {/* Basic fields */}
-            <div className="md:col-span-2 space-y-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Squad Name</label>
-                <input 
-                  type="text"
-                  placeholder="EX: HALDWANI WARRIORS"
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 px-4 text-white text-sm font-bold placeholder-white/20 focus:outline-none focus:border-[#CCFF00]/50 uppercase transition-all"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Sport Category</label>
-                  <select 
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 px-4 text-white text-sm font-bold focus:outline-none focus:border-[#CCFF00]/50 outline-none"
-                    value={formData.sportType}
-                    onChange={(e) => setFormData({ ...formData, sportType: e.target.value })}
-                  >
-                    {SPORT_TYPES.map(sport => (
-                      <option key={sport} value={sport} className="bg-[#131313]">{sport}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Home Town / City</label>
-                  <select 
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 px-4 text-white text-sm font-bold focus:outline-none focus:border-[#CCFF00]/50 outline-none"
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  >
-                    {CITIES.map(city => (
-                      <option key={city} value={city} className="bg-[#131313]">{city}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Captain Info (Optional but recommended) */}
-          <div className="border-t border-white/5 pt-6 space-y-4">
-            <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
-              <span className="w-1.5 h-3 bg-[#CCFF00] rounded-full" />
-              Captain Details
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Captain Name</label>
-                <input 
-                  type="text"
-                  placeholder="Captain Full Name"
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 px-4 text-white text-sm font-bold placeholder-white/20 focus:outline-none focus:border-[#CCFF00]/50 transition-all"
-                  value={formData.captainName}
-                  onChange={(e) => setFormData({ ...formData, captainName: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Captain Phone (Optional)</label>
-                <input 
-                  type="tel"
-                  placeholder="10-digit number"
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 px-4 text-white text-sm font-bold placeholder-white/20 focus:outline-none focus:border-[#CCFF00]/50 transition-all"
-                  value={formData.captainContact}
-                  onChange={(e) => setFormData({ ...formData, captainContact: e.target.value })}
-                  maxLength={10}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">About the Squad</label>
-            <textarea 
-              placeholder="Tell your opponents what they're up against..."
-              rows={3}
-              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 px-4 text-white text-sm font-medium placeholder-white/20 focus:outline-none focus:border-[#CCFF00]/50 transition-all resize-none"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            />
-          </div>
-
-          {/* Notice/Alert */}
-          <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex gap-3">
-            <Info size={18} className="text-[#CCFF00] shrink-0 mt-0.5" />
-            <p className="text-[10px] text-white/40 leading-relaxed font-medium uppercase tracking-wider">
-              By creating this team, you will be designated as the <strong className="text-white">Squad Captain (Owner)</strong>. You can search & invite players, build a roster, and challenge other teams using the Unique Team ID.
-            </p>
-          </div>
-
-          {/* Submit */}
-          <button 
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-4 bg-[#CCFF00] hover:bg-[#b8e600] disabled:bg-white/5 disabled:text-white/20 text-black font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-[#CCFF00]/10 hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto">
+          {/* Backdrop */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/85 backdrop-blur-md"
+          />
+          
+          {/* Modal Container */}
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0, y: 15 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 15 }}
+            transition={{ type: "spring", duration: 0.5, bounce: 0.2 }}
+            className="relative w-full max-w-lg bg-[#0a0a0a]/90 border border-white/10 rounded-[15px] overflow-hidden shadow-[0_0_50px_rgba(85,222,232,0.1)] backdrop-blur-2xl z-10 my-4"
           >
-            {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={16} />}
-            Form My Squad
-          </button>
-        </form>
-      </motion.div>
-    </div>
+            {/* Header */}
+            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+              <div>
+                <h3 className="text-lg font-bold text-white tracking-tight" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+                  Create Team
+                </h3>
+                <p className="text-[11px] text-white/40 font-medium tracking-wide mt-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  Build your squad and compete with others
+                </p>
+              </div>
+              <button 
+                onClick={onClose} 
+                className="w-9 h-9 rounded-[15px] bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 border border-white/5 transition-all hover:shadow-[0_0_15px_rgba(85,222,232,0.3)] hover:border-[#55DEE8]/30 duration-300"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
+              {/* Integrated Logo Upload Area */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center px-1">
+                  <label className="text-[9px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Team Logo
+                  </label>
+                  {formData.name && (
+                    <button
+                      type="button"
+                      disabled={isGeneratingEmblem || isUploading}
+                      onClick={generateEsportsEmblem}
+                      className="text-[9px] font-black text-[#55DEE8] hover:text-[#BFF367] disabled:text-white/20 uppercase tracking-wider flex items-center gap-1 transition-all duration-200 hover:scale-105 active:scale-95 disabled:pointer-events-none hover:shadow-[0_0_8px_rgba(85,222,232,0.4)]"
+                    >
+                      <Sparkles size={10} className="animate-pulse" /> Generate Esports Emblem
+                    </button>
+                  )}
+                </div>
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`relative h-24 rounded-[15px] bg-white/[0.02] border border-dashed flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all duration-300 group ${
+                    isDragging 
+                      ? 'border-[#55DEE8] bg-[#55DEE8]/5 shadow-[0_0_20px_rgba(85,222,232,0.15)]' 
+                      : 'border-white/10 hover:border-[#55DEE8]/40 hover:bg-white/[0.04] hover:shadow-[0_0_15px_rgba(85,222,232,0.05)]'
+                  }`}
+                >
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+
+                  {preview ? (
+                    <div className="w-full h-full relative group/preview flex items-center justify-center">
+                      <img src={preview} alt="Team logo" className="w-full h-full object-contain p-2" />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center duration-300">
+                        <button 
+                          type="button"
+                          onClick={handleRemoveLogo}
+                          className="p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-[15px] shadow-lg transition-transform hover:scale-105 active:scale-95 duration-200"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ) : isUploading || isGeneratingEmblem ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <Loader2 className="text-[#55DEE8] animate-spin" size={24} />
+                      <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider animate-pulse" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        {isGeneratingEmblem ? 'Forging Emblem...' : 'Uploading Logo...'}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center text-center p-3">
+                      <div className="w-8 h-8 rounded-[15px] bg-white/5 flex items-center justify-center mb-1 group-hover:scale-105 group-hover:bg-[#55DEE8]/10 group-hover:text-[#55DEE8] transition-all duration-300">
+                        <Upload size={14} className="text-white/40 group-hover:text-[#55DEE8] transition-colors" />
+                      </div>
+                      <span className="text-[11px] font-bold text-white/80 tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Upload Team Logo
+                      </span>
+                      <span className="text-[8px] text-white/30 font-medium uppercase tracking-widest mt-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        PNG, JPG up to 5MB
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* ROW 1: Team Name & Sport */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Team Name */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center px-1">
+                    <label className="text-[9px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Team Name *
+                    </label>
+                    <span className="text-[8px] font-bold text-white/30 tracking-wider">
+                      {formData.name.length} / 30
+                    </span>
+                  </div>
+                  <div className="relative group">
+                    <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
+                    <input 
+                      type="text" 
+                      name="name"
+                      placeholder="e.g. Royal Strikers"
+                      maxLength={30}
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                      className="w-full bg-white/[0.02] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Sport */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center px-1">
+                    <label className="text-[9px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Sport
+                    </label>
+                    <span className="text-[8px] font-bold text-transparent select-none">
+                      spacer
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <select 
+                      name="sport"
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                      className="w-full bg-[#111] border border-white/10 rounded-[15px] py-2.5 px-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer"
+                      value={formData.sport}
+                      onChange={handleChange}
+                    >
+                      <option value="CRICKET">Cricket</option>
+                      <option value="FOOTBALL">Football</option>
+                      <option value="BADMINTON">Badminton</option>
+                      <option value="VOLLEYBALL">Volleyball</option>
+                      <option value="BASKETBALL">Basketball</option>
+                    </select>
+                    <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex items-center text-white/40">
+                      <Users size={12} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ROW 2: State & City */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* State */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center px-1">
+                    <label className="text-[9px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      State
+                    </label>
+                  </div>
+                  <div className="relative group">
+                    <Map className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
+                    <select 
+                      name="state"
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                      className="w-full bg-[#111] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-8 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer"
+                      value={formData.state}
+                      onChange={handleStateChange}
+                    >
+                      <option value="">Select State</option>
+                      {Object.keys(STATE_CITIES_MAP).map(st => (
+                        <option key={st} value={st}>{st}</option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex items-center text-white/40">
+                      <Users size={12} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* City */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center px-1">
+                    <label className="text-[9px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      City
+                    </label>
+                  </div>
+                  <div className="relative group">
+                    <MapPin className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
+                    <select 
+                      name="city"
+                      disabled={!formData.state}
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                      className="w-full bg-[#111] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-8 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      value={formData.city}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select City</option>
+                      {citiesList.map(ct => (
+                        <option key={ct} value={ct}>{ct}</option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 flex items-center text-white/40">
+                      <Users size={12} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ROW 3: Description */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center px-1">
+                  <label className="text-[9px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Description
+                  </label>
+                  <span className="text-[8px] font-bold text-white/30 tracking-wider">
+                    {formData.description.length} / 200
+                  </span>
+                </div>
+                <div className="relative group">
+                  <MessageSquare className="absolute left-4 top-3 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
+                  <textarea 
+                    name="description"
+                    ref={textareaRef}
+                    placeholder="Tell something about your team, playstyle, achievements, or goals..."
+                    maxLength={200}
+                    rows={2}
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                    className="w-full bg-white/[0.02] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 resize-none min-h-[64px] leading-relaxed"
+                    value={formData.description}
+                    onChange={handleTextareaChange}
+                  />
+                </div>
+              </div>
+
+              {/* ROW 4: Captain Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black text-white/40 uppercase tracking-widest px-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Captain Name
+                  </label>
+                  <div className="relative group">
+                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
+                    <input 
+                      type="text" 
+                      name="captainName"
+                      placeholder="Name"
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                      className="w-full bg-white/[0.02] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
+                      value={formData.captainName}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black text-white/40 uppercase tracking-widest px-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Captain Phone (Optional)
+                  </label>
+                  <div className="relative group">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
+                    <input 
+                      type="text" 
+                      name="captainPhone"
+                      placeholder="Phone number"
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                      className="w-full bg-white/[0.02] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
+                      value={formData.captainPhone}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3 pt-3 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  style={{ fontFamily: "'Inter', sans-serif" }}
+                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white font-bold rounded-[15px] border border-white/5 hover:border-white/10 transition-all duration-300 text-xs"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={isSubmitDisabled}
+                  style={{ fontFamily: "'Inter', sans-serif" }}
+                  className="flex-[2] py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:brightness-[1.04] text-black font-black uppercase tracking-wider rounded-[15px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0 text-xs"
+                >
+                  {isCreating ? (
+                    <>
+                      <Loader2 className="animate-spin" size={14} />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Team'
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };
 

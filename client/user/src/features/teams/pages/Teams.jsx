@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import TeamSidebar from '../components/TeamSidebar';
-import TeamDetails from '../components/TeamDetails';
-import CreateTeamModal from '../components/CreateTeamModal';
-import InviteMemberModal from '../components/InviteMemberModal';
+import { useState, useEffect } from 'react';
+import TeamSidebar from '@features/teams/components/TeamSidebar';
+import TeamDetails from '@features/teams/components/TeamDetails';
+import CreateTeamModal from '@features/teams/components/CreateTeamModal';
+import InviteMemberModal from '@features/teams/components/InviteMemberModal';
 import { useSearchParams } from 'react-router-dom';
 import { useGetMyTeamsQuery } from '@redux/api/teamApi';
 
-const Teams = () => {
+const MyTeams = () => {
   const [searchParams] = useSearchParams();
   const teamIdParam = searchParams.get('teamId');
   
@@ -75,4 +75,4 @@ const Teams = () => {
   );
 };
 
-export default Teams;
+export default MyTeams;

@@ -4,7 +4,7 @@ import { Menu } from "lucide-react";
 import { OwnerSidebar, AuthenticatedNavbar } from "@components/layout";
 import ScrollToTop from "@components/common/ScrollToTop";
 import MobileBottomNav from "@user/components/layout/MobileBottomNav";
-import ErrorBoundary from "@components/common/ErrorBoundary";
+import RootErrorBoundary from "@components/common/RootErrorBoundary";
 
 const PartnerLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,9 +44,9 @@ const PartnerLayout = () => {
         `}
         >
           <div className="w-full pt-0 px-4 pb-24 lg:pt-0 lg:px-8 lg:pb-10">
-            <ErrorBoundary>
+            <RootErrorBoundary>
               <Outlet />
-            </ErrorBoundary>
+            </RootErrorBoundary>
           </div>
         </main>
       </div>

@@ -17,18 +17,11 @@ const ReelItem = ({ reel, isVisible }) => {
   const [commentText, setCommentText] = useState('');
   const [addComment] = useAddCommentMutation();
 
-  const isCreator = user?.id === reel.creatorId?._id || user?.id === reel.creatorId;
-
-  const stats = reel.stats || {
-    views: reel.views || 0,
-    likes: reel.likes || 0,
-    comments: reel.comments || 0,
-    shares: reel.shares || 0
-  };
+  const isCreator = user?.id === (reel.creatorId?.id || reel.creatorId?._id) || user?.id === reel.creatorId;
 
   const handleLike = () => {
     setIsLiked(!isLiked);
-    interact({ reelId: reel.id, type: 'like' });
+    interact({ reelId: reel.id || reel._id, type: 'like' });
     if (!isLiked) {
       setShowHeartAnim(true);
       setTimeout(() => setShowHeartAnim(false), 800);
@@ -48,7 +41,7 @@ const ReelItem = ({ reel, isVisible }) => {
     const shareData = {
       title: 'Kridaz Shorts',
       text: reel.caption,
-      url: `${window.location.origin}/shorts/${reel.id}`
+      url: `${window.location.origin}/shorts/${reel.id || reel._id}`
     };
 
     try {
@@ -58,7 +51,7 @@ const ReelItem = ({ reel, isVisible }) => {
         await navigator.clipboard.writeText(shareData.url);
         toast.success('Link copied to clipboard!');
       }
-      interact({ reelId: reel.id, type: 'share' });
+      interact({ reelId: reel.id || reel._id, type: 'share' });
     } catch (err) {
       console.error('Share failed:', err);
     }
@@ -67,7 +60,7 @@ const ReelItem = ({ reel, isVisible }) => {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this short?')) {
       try {
-        await deleteReel(reel.id).unwrap();
+        await deleteReel(reel.id || reel._id).unwrap();
         toast.success('Short deleted');
       } catch (err) {
         toast.error('Failed to delete short');
@@ -80,7 +73,7 @@ const ReelItem = ({ reel, isVisible }) => {
     if (!commentText.trim()) return;
 
     try {
-      await addComment({ reelId: reel.id, text: commentText }).unwrap();
+      await addComment({ reelId: reel.id || reel._id, text: commentText }).unwrap();
       setCommentText('');
       toast.success('Comment added');
     } catch (err) {
@@ -95,6 +88,7 @@ const ReelItem = ({ reel, isVisible }) => {
       <div className="h-full w-full" onDoubleClick={!isProcessing ? handleDoubleTap : undefined}>
         {isProcessing ? (
           <div className="relative w-full h-full flex items-center justify-center">
+            {/* Blurred Placeholder */}
             {reel.thumbnailUrl ? (
               <img 
                 src={reel.thumbnailUrl} 
@@ -105,26 +99,25 @@ const ReelItem = ({ reel, isVisible }) => {
               <div className="w-full h-full bg-zinc-900" />
             )}
             
+            {/* Processing Overlay */}
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm">
-              <div className="w-16 h-16 border-4 border-[#84CC16] border-t-transparent rounded-full animate-spin mb-4" />
-              <p className="text-[#84CC16] font-bold text-lg">
-                {reel.processingStatus || 'Optimizing Reel...'}
-              </p>
+              <div className="w-16 h-16 border-4 border-[#55DEE8] border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-[#55DEE8] font-bold text-lg">Optimizing Reel...</p>
               <p className="text-white/60 text-sm mt-2">{reel.processingProgress || 0}% Complete</p>
               
+              {/* Progress Bar */}
               <div className="w-48 h-1 bg-white/10 rounded-full mt-6 overflow-hidden">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${reel.processingProgress || 0}%` }}
-                  transition={{ ease: 'easeOut', duration: 0.5 }}
-                  className="h-full bg-[#84CC16]"
+                  className="h-full bg-[#55DEE8]"
                 />
               </div>
             </div>
           </div>
         ) : (
           <ReelPlayer 
-            reelId={reel._id}
+            reelId={reel.id || reel._id}
             hlsUrl={reel.hlsUrl || reel.rawVideoUrl} 
             isVisible={isVisible} 
             poster={reel.thumbnailUrl}
@@ -132,6 +125,7 @@ const ReelItem = ({ reel, isVisible }) => {
         )}
       </div>
 
+      {/* Double Tap Heart Animation */}
       <AnimatePresence>
         {showHeartAnim && (
           <motion.div 
@@ -145,12 +139,13 @@ const ReelItem = ({ reel, isVisible }) => {
         )}
       </AnimatePresence>
 
+      {/* Right Side Actions */}
       <div className="absolute right-3 bottom-24 flex flex-col items-center gap-6 z-20">
         <div className="flex flex-col items-center gap-1.5" onClick={handleLike}>
           <button className={`p-2.5 transition-all duration-300 active:scale-150 ${isLiked ? 'text-red-500 scale-110' : 'text-white'}`}>
             <Heart size={40} fill={isLiked ? "currentColor" : "none"} strokeWidth={2.5} className="drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" />
           </button>
-          <span className="text-white text-sm font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{stats.likes || 0}</span>
+          <span className="text-white text-sm font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{reel.stats.likes || 0}</span>
         </div>
         
         <div className="flex flex-col items-center gap-1.5">
@@ -160,7 +155,7 @@ const ReelItem = ({ reel, isVisible }) => {
           >
             <MessageCircle size={40} strokeWidth={2.5} className="drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" />
           </button>
-          <span className="text-white text-sm font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{stats.comments || 0}</span>
+          <span className="text-white text-sm font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{reel.stats.comments || 0}</span>
         </div>
 
         <div className="flex flex-col items-center gap-1.5">
@@ -227,11 +222,12 @@ const ReelItem = ({ reel, isVisible }) => {
         </div>
       </div>
 
+      {/* Bottom Info Overlay */}
       <div className="absolute bottom-0 left-0 right-12 p-5 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full border-2 border-white/80 overflow-hidden shadow-lg">
             <img 
-              src={reel.creatorId?.profilePicture || `https://avatar.vercel.sh/${reel.creatorId?._id || 'kridaz'}`} 
+              src={reel.creatorId?.profilePicture || `https://avatar.vercel.sh/${reel.creatorId?.id || reel.creatorId?._id || 'kridaz'}`} 
               alt={reel.creatorId?.username} 
               className="w-full h-full object-cover"
             />
@@ -239,7 +235,7 @@ const ReelItem = ({ reel, isVisible }) => {
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <h3 className="text-white font-bold text-[15px]">@{reel.creatorId?.username || 'kridaz_user'}</h3>
-              <span className="text-white/40 text-xs">•</span>
+              <span className="text-white/40 text-xs">G��</span>
               <button className="text-white border border-white/40 px-3 py-0.5 rounded-md text-[11px] font-bold hover:bg-white/10 transition-colors">
                 Follow
               </button>
@@ -258,12 +254,13 @@ const ReelItem = ({ reel, isVisible }) => {
           <Music size={12} className="text-white animate-spin-slow" />
           <div className="overflow-hidden w-32">
             <p className="text-white text-[11px] font-semibold whitespace-nowrap animate-marquee">
-              Original Audio • {reel.creatorId?.name || 'Kridaz Audio'}
+              Original Audio G�� {reel.creatorId?.name || 'Kridaz Audio'}
             </p>
           </div>
         </div>
       </div>
 
+      {/* Comments Overlay */}
       <AnimatePresence>
         {showComments && (
           <>
@@ -282,10 +279,11 @@ const ReelItem = ({ reel, isVisible }) => {
               
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-white font-bold text-xl">Comments</h3>
-                <span className="text-white/60 text-sm font-medium">{stats.comments || 0}</span>
+                <span className="text-white/60 text-sm font-medium">{reel.stats.comments || 0}</span>
               </div>
 
               <div className="flex-1 overflow-y-auto mb-6 pr-2 scrollbar-hide">
+                {/* Simplified comment list - in real app would fetch comments */}
                 <div className="flex flex-col gap-6">
                   <div className="text-white/40 text-center py-10">
                     <MessageCircle size={40} className="mx-auto mb-3 opacity-20" />
@@ -300,12 +298,12 @@ const ReelItem = ({ reel, isVisible }) => {
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Add a comment..."
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#84CC16] transition-colors pr-14"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#55DEE8] transition-colors pr-14"
                 />
                 <button 
                   type="submit"
                   disabled={!commentText.trim()}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#84CC16] font-bold text-sm px-3 py-2 disabled:opacity-30 transition-opacity"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#55DEE8] font-bold text-sm px-3 py-2 disabled:opacity-30 transition-opacity"
                 >
                   Post
                 </button>

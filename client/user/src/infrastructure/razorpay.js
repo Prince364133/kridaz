@@ -24,7 +24,7 @@ export const createOrder = async (totalPrice) => {
   const response = await axiosInstance.post("/api/user/booking/create-order", {
     totalPrice,
   });
-  return response.data;
+    return response.data;
 };
 
 export const handlePayment = async (order, user) => {
@@ -56,7 +56,7 @@ export const handlePayment = async (order, user) => {
         contact: user?.phone || "",
       },
       theme: {
-        color: "#84CC16",
+        color: "#55DEE8",
       },
     };
     const rzp1 = new window.Razorpay(options);

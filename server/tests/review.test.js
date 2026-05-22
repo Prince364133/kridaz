@@ -1,6 +1,8 @@
+import { jest } from '@jest/globals';
 import request from "supertest";
 import app from "../app.js";
 import { prisma } from "../config/prisma.js";
+import cloudinary from "../utils/cloudinary.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -33,14 +35,24 @@ const seedOtp = async (email, phone) => {
 };
 
 const getTestImageBuffer = () => {
-  return Buffer.from([
-    0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01,
-    0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xff, 0xd9,
-  ]);
+  return Buffer.from(
+    "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+    "base64"
+  );
 };
 
 describe("Review Module API Integration", () => {
+  let cloudinarySpy;
+
   beforeAll(async () => {
+    cloudinarySpy = jest.spyOn(cloudinary.uploader, "upload_stream").mockImplementation((options, callback) => {
+      return {
+        end: () => {
+          callback(null, { secure_url: "https://mock.cloudinary.com/image.jpg" });
+        }
+      };
+    });
+
     console.log("DB URL inside beforeAll:", process.env.DATABASE_URL);
     // 1. Cleanup old records if any exist
     await prisma.review.deleteMany({
@@ -138,18 +150,12 @@ describe("Review Module API Integration", () => {
     });
     console.log("Owner User in DB:", JSON.stringify(ownerUserInDb));
 
-    // Force role: "VENUE_OWNER" in database and owner profile just in case!
+    // Force role: "VENUE_OWNER" in database just in case!
     if (ownerUserInDb) {
       await prisma.user.update({
         where: { id: ownerUserInDb.id },
         data: { role: "VENUE_OWNER" }
       });
-      if (ownerUserInDb.ownerProfile) {
-        await prisma.ownerProfile.update({
-          where: { id: ownerUserInDb.ownerProfile.id },
-          data: { role: "VENUE_OWNER" }
-        });
-      }
       console.log("Forced role update to VENUE_OWNER in database");
     }
 
@@ -183,6 +189,9 @@ describe("Review Module API Integration", () => {
   }, 40000);
 
   afterAll(async () => {
+    if (cloudinarySpy) {
+      cloudinarySpy.mockRestore();
+    }
     // Cleanup created reviews
     await prisma.review.deleteMany({
       where: { turfId: createdTurfId }

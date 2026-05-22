@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useGetCreatorAnalyticsQuery } from '@redux/api/reelsApi';
 import { ChevronLeft, TrendingUp, Users, Play, Heart, MessageCircle, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -31,7 +31,7 @@ const ReelAnalytics = () => {
       <div className="bg-white/5 rounded-2xl p-6 mb-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold">Recent Reels</h2>
-          <TrendingUp size={20} className="text-[#84CC16]" />
+          <TrendingUp size={20} className="text-[#55DEE8]" />
         </div>
         
         <div className="flex flex-col gap-4">
@@ -44,7 +44,7 @@ const ReelAnalytics = () => {
                 <p className="text-sm font-semibold truncate">{reel.caption || 'No caption'}</p>
                 <p className="text-xs text-gray-400">{new Date(reel.createdAt).toLocaleDateString()}</p>
               </div>
-              <div className="flex items-center gap-2 text-xs font-bold text-[#84CC16]">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#55DEE8]">
                 <Play size={12} />
                 {reel.stats?.views || 0}
               </div>

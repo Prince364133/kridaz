@@ -10,12 +10,12 @@
  * @type {Readonly<Record<string, string>>}
  */
 export const BOOKING_STATUS = Object.freeze({
-  PENDING: 'pending',
-  CONFIRMED: 'confirmed',
-  CANCELLED: 'cancelled',
-  COMPLETED: 'completed',
-  REFUNDED: 'refunded',
-  NO_SHOW: 'no_show',
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  CANCELLED: 'CANCELLED',
+  COMPLETED: 'COMPLETED',
+  REFUNDED: 'REFUNDED',
+  NO_SHOW: 'NO_SHOW',
 });
 
 /**

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { Star, MessageSquare, Send, User, Loader2, Calendar, Reply, X, BadgeCheck } from "lucide-react";
@@ -7,14 +7,14 @@ import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
 /**
- * ProfessionalReviews — High-fidelity feedback management.
+ * ProfessionalReviews ΓÇö High-fidelity feedback management.
  * Fully rebranded for the Scorer Portal with Teal Green (#00C187) and Inter font.
  */
 
 export default function ProfessionalReviews() {
   const { role, user: authUser } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#CCFF00";
+  const themeColor = isScorer ? "#00C187" : "#55DEE8";
 
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);

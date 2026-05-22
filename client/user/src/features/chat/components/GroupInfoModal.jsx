@@ -7,8 +7,9 @@ import {
   useGetFollowersFollowingQuery, 
   useMakeGroupAdminMutation, 
   useDismissGroupAdminMutation,
-  useGetChatsQuery 
-} from '../../../redux/api/chatApi';
+  useGetChatsQuery,
+  useDeleteChatMutation
+} from '@redux/api/chatApi';
 
 const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  const { user } = useSelector((state) => state.auth);
@@ -21,6 +22,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  const [addToGroup] = useAddToGroupMutation();
  const [makeAdmin] = useMakeGroupAdminMutation();
  const [dismissAdmin] = useDismissGroupAdminMutation();
+ const [deleteChat] = useDeleteChatMutation();
  const { data: networkData } = useGetFollowersFollowingQuery();
 
  if (!isOpen || !chat) return null;
@@ -29,7 +31,10 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
   const isAdmin = chat.groupAdmins?.some(admin => {
     const adminId = (admin.user?._id || admin.user)?.toString();
     return myIds.includes(adminId);
-  }) || myIds.includes((chat.groupAdmin?._id || chat.groupAdmin?.user?._id || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy)?.toString());
+  }) || 
+  myIds.includes(chat.createdByUserId?.toString()) ||
+  myIds.includes(chat.createdByOwnerId?.toString()) ||
+  myIds.includes((chat.groupAdmin?._id || chat.groupAdmin?.user?._id || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy)?.toString());
 
  const handleRename = async () => {
  if (!groupName || groupName === chat.chatName) {
@@ -54,18 +59,33 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  }
  };
 
- const handleLeaveGroup = async () => {
- if (window.confirm("Are you sure you want to leave this group?")) {
- try {
- const myIdToSend = user?._id || user?.id || user?.userId;
- await removeFromGroup({ chatId: chat._id, userId: myIdToSend }).unwrap();
- onClose(); // Close modal after leaving, ChatWindow might unmount because chat is no longer selected
- window.location.reload(); // Simple refresh to clear chat state
- } catch (err) {
- console.error("Failed to leave group", err);
- }
- }
- };
+  const createdById = (chat.createdBy?._id || chat.createdBy?.id || chat.createdByUserId || chat.createdByOwnerId)?.toString();
+  const isCreator = myIds.includes(createdById);
+
+  const handleDeleteCommunity = async () => {
+    if (window.confirm("Are you sure you want to delete this community? This will permanently delete all associated groups and messages under this community.")) {
+      try {
+        await deleteChat(chat._id).unwrap();
+        onClose();
+        window.location.reload();
+      } catch (err) {
+        console.error("Failed to delete community", err);
+      }
+    }
+  };
+
+  const handleLeaveGroup = async () => {
+    if (window.confirm(chat.isCommunity ? "Are you sure you want to leave this community?" : "Are you sure you want to leave this group?")) {
+      try {
+        const myIdToSend = user?._id || user?.id || user?.userId;
+        await removeFromGroup({ chatId: chat._id, userId: myIdToSend }).unwrap();
+        onClose(); // Close modal after leaving, ChatWindow might unmount because chat is no longer selected
+        window.location.reload(); // Simple refresh to clear chat state
+      } catch (err) {
+        console.error("Failed to leave group", err);
+      }
+    }
+  };
 
   const handleAddUser = async (userId) => {
     try {
@@ -103,7 +123,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
 
  // Users not currently in the group
  const availableUsers = connections.filter(c => 
- !chat.users.some(u => (u.user?._id || u.user) === c._id) &&
+ !chat.users?.some(u => (u.user?._id || u.user) === c._id) &&
  !chat.pendingMembers?.some(p => (p.user?._id || p.user) === c._id)
  );
 
@@ -130,18 +150,18 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
  </svg>
  </button>
-         <h2 className="text-base font-bold text-white tracking-wide">{chat.isCommunity ? "Community info" : "Group info"}</h2>
+        <h2 className="text-base font-bold text-white tracking-wide">{chat.isCommunity ? "Community info" : "Group info"}</h2>
  </div>
 
  <div className="flex-1 overflow-y-auto custom-scrollbar">
  
  {/* Main Info Section (Avatar + Name) */}
  <div className="bg-[#111111] py-8 px-6 flex flex-col items-center mb-2 shadow-sm">
- <div className="w-40 h-40 rounded-full border border-white/5 bg-[#84CC16]/10 flex items-center justify-center mb-6 overflow-hidden">
+ <div className="w-40 h-40 rounded-full border border-white/5 bg-[#55DEE8]/10 flex items-center justify-center mb-6 overflow-hidden">
  {chat.groupImage ? (
  <img src={chat.groupImage} className="w-full h-full object-cover" alt="" />
  ) : (
- <svg className="w-20 h-20 text-[#84CC16] opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <svg className="w-20 h-20 text-[#55DEE8] opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
  </svg>
  )}
@@ -149,7 +169,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  
  {isEditingName ? (
  <div className="flex flex-col gap-2 w-full">
- <div className="flex items-center gap-2 border-b-2 border-[#84CC16] pb-1">
+ <div className="flex items-center gap-2 border-b-2 border-[#55DEE8] pb-1">
  <input
  type="text"
  value={groupName}
@@ -161,7 +181,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  </div>
  <div className="flex justify-end gap-3 mt-2">
  <button onClick={() => setIsEditingName(false)} className="text-white/40 hover:text-white/80 text-sm font-medium">Cancel</button>
- <button onClick={handleRename} className="bg-[#84CC16] text-black px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">Save</button>
+ <button onClick={handleRename} className="bg-[#55DEE8] text-black px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">Save</button>
  </div>
  </div>
  ) : (
@@ -169,7 +189,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  <div className="flex items-center gap-3">
  <h3 className="text-xl font-medium text-white">{chat.chatName}</h3>
  {isAdmin && (
- <button onClick={() => setIsEditingName(true)} className="text-white/20 group-hover/edit:text-white/60 hover:!text-[#84CC16] transition-colors">
+ <button onClick={() => setIsEditingName(true)} className="text-white/20 group-hover/edit:text-white/60 hover:!text-[#55DEE8] transition-colors">
  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
  </svg>
@@ -189,7 +209,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
   {/* Groups in this community */}
   {chat.isCommunity && childGroups?.length > 0 && (
     <div className="bg-[#111111] py-4 px-6 mb-2 shadow-sm space-y-4">
-      <h4 className="text-[13px] font-medium text-[#84CC16]">Groups in this community</h4>
+      <h4 className="text-[13px] font-medium text-[#55DEE8]">Groups in this community</h4>
       <div className="space-y-3">
         {childGroups.map(group => (
           <div key={group._id} className="flex items-center gap-3 p-2 hover:bg-white/[0.03] rounded-lg transition-colors cursor-pointer">
@@ -217,8 +237,8 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
     <div className="bg-[#111111] py-4 px-6 mb-2 shadow-sm">
       <h4 className="text-[13px] font-medium text-white/50 mb-3">Parent Community</h4>
       <div className="flex items-center gap-3 bg-[#1A1A1A] p-3 rounded-xl border border-white/5">
-        <div className="w-10 h-10 rounded-full bg-[#84CC16]/10 flex items-center justify-center shrink-0">
-          <svg className="w-5 h-5 text-[#84CC16]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-10 h-10 rounded-full bg-[#55DEE8]/10 flex items-center justify-center shrink-0">
+          <svg className="w-5 h-5 text-[#55DEE8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
         </div>
@@ -233,7 +253,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  {/* Add Members Section (Admin only) */}
  {isAdmin && availableUsers.length > 0 && (
  <div className="bg-[#111111] py-4 px-6 mb-2 shadow-sm space-y-4">
- <h4 className="text-[13px] font-medium text-[#84CC16]">{chat.isCommunity ? "Add Members" : "Add Participants"}</h4>
+ <h4 className="text-[13px] font-medium text-[#55DEE8]">{chat.isCommunity ? "Add Members" : "Add Participants"}</h4>
  <div className="relative">
  <input
  type="text"
@@ -258,7 +278,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  </div>
  <button 
  onClick={() => handleAddUser(user._id)}
- className="text-[#84CC16] opacity-0 group-hover:opacity-100 p-1.5 rounded-full hover:bg-[#84CC16]/10 transition-all"
+ className="text-[#55DEE8] opacity-0 group-hover:opacity-100 p-1.5 rounded-full hover:bg-[#55DEE8]/10 transition-all"
  title="Add"
  >
  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,7 +286,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  </svg>
  </button>
  </div>
-  ))}
+ ))}
  </div>
  </div>
  )}
@@ -307,7 +327,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  
  <div className="flex items-center gap-3">
  {isThisAdmin && (
- <span className="border border-[#84CC16]/40 text-[#84CC16] text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-sm">
+ <span className="border border-[#55DEE8]/40 text-[#55DEE8] text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-sm">
  {chat.isCommunity ? "Community Admin" : "Group Admin"}
  </span>
  )}
@@ -315,7 +335,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
                   <div className="flex items-center gap-1 opacity-0 group-hover/member:opacity-100 transition-opacity">
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleMakeAdmin(uid); }}
-                      className="text-[#84CC16] hover:bg-[#84CC16]/10 p-1.5 rounded-full transition-all"
+                      className="text-[#55DEE8] hover:bg-[#55DEE8]/10 p-1.5 rounded-full transition-all"
                       title="Make Admin"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -384,18 +404,32 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  </div>
  </div>
 
- {/* Action Footer (Leave Group) */}
- <div className="bg-[#111111] py-2 shadow-sm mb-10">
- <button 
- onClick={handleLeaveGroup}
- className="w-full flex items-center gap-4 px-6 py-4 hover:bg-white/[0.03] text-[#EF4444] transition-colors"
- >
- <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
- </svg>
- <span className="text-[15px] font-medium tracking-wide">Exit group</span>
- </button>
- </div>
+  {/* Action Footer */}
+  <div className="bg-[#111111] py-2 shadow-sm mb-10">
+    {chat.isCommunity && isCreator ? (
+      <button 
+        onClick={handleDeleteCommunity}
+        className="w-full flex items-center gap-4 px-6 py-4 hover:bg-white/[0.03] text-[#EF4444] transition-colors"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+        <span className="text-[15px] font-medium tracking-wide">Delete Community</span>
+      </button>
+    ) : (
+      <button 
+        onClick={handleLeaveGroup}
+        className="w-full flex items-center gap-4 px-6 py-4 hover:bg-white/[0.03] text-[#EF4444] transition-colors"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        <span className="text-[15px] font-medium tracking-wide">
+          {chat.isCommunity ? "Leave Community" : "Exit group"}
+        </span>
+      </button>
+    )}
+  </div>
  </div>
  </div>
  </>

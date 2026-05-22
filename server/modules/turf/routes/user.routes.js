@@ -3,10 +3,23 @@ import {
   getAllTurfs, 
   getTurfById, 
   getTimeSlotByTurfId,
-  getTurfLocations
+  getTurfLocations,
+  toggleTurfLike,
+  recordTurfShare,
+  recordTurfInteraction,
+  getTurfRecommendations,
+  getSimilarTurfs
 } from "../turf.controller.js";
+import { protect, optionalProtect } from "../../../middleware/auth.middleware.js";
 
 const router = express.Router();
+
+router.post("/like", protect, toggleTurfLike);
+router.post("/share", optionalProtect, recordTurfShare);
+router.post("/interaction", optionalProtect, recordTurfInteraction);
+router.get("/recommendations", optionalProtect, getTurfRecommendations);
+router.get("/:id/similar", optionalProtect, getSimilarTurfs);
+
 
 /**
  * @swagger
