@@ -626,6 +626,180 @@ export const advanceToNextInnings = async (scoringId, battingTeamId) => {
 };
 
 /**
+ * Updates the match status (e.g. LIVE, RAIN_DELAY, BAD_LIGHT).
+ */
+export const updateMatchStatus = async (scoringId, newStatus) => {
+  const scoring = await prisma.cricketMatch.update({
+    where: { id: scoringId },
+    data: { status: newStatus }
+  });
+
+  const hostedGame = await prisma.hostedGame.findUnique({
+    where: { id: scoring.gameId },
+    include: HOSTED_GAME_SCORING_INCLUDE
+  });
+
+  const updatedScoring = await prisma.cricketMatch.findUnique({
+    where: { id: scoringId },
+    include: { innings: true, playerStats: true, timeline: { orderBy: { timestamp: 'desc' } } }
+  });
+
+  const liveData = computeScoreSnapshot(updatedScoring, mapHostedGame(hostedGame));
+  await liveStateService.setLiveScore(scoring.gameId, liveData);
+  
+  const io = getIO();
+  if (io) io.to(scoring.gameId).emit(SOCKET.SCORE_UPDATED, liveData);
+
+  return scoring;
+};
+
+/**
+ * Revise match target and overs (DLS / Rain Rule).
+ */
+export const reviseTargetAndOvers = async (scoringId, revisedTarget, revisedOvers) => {
+  const scoring = await prisma.cricketMatch.update({
+    where: { id: scoringId },
+    data: { revisedTarget, revisedOvers }
+  });
+
+  const hostedGame = await prisma.hostedGame.findUnique({
+    where: { id: scoring.gameId },
+    include: HOSTED_GAME_SCORING_INCLUDE
+  });
+
+  const updatedScoring = await prisma.cricketMatch.findUnique({
+    where: { id: scoringId },
+    include: { innings: true, playerStats: true, timeline: { orderBy: { timestamp: 'desc' } } }
+  });
+
+  const liveData = computeScoreSnapshot(updatedScoring, mapHostedGame(hostedGame));
+  await liveStateService.setLiveScore(scoring.gameId, liveData);
+  
+  const io = getIO();
+  if (io) io.to(scoring.gameId).emit(SOCKET.SCORE_UPDATED, liveData);
+
+  return scoring;
+};
+
+/**
+ * Set Match Officials (Umpires, Referees).
+ */
+export const setMatchOfficials = async (scoringId, officials) => {
+  const scoring = await prisma.cricketMatch.update({
+    where: { id: scoringId },
+    data: { matchOfficials: officials }
+  });
+
+  const hostedGame = await prisma.hostedGame.findUnique({
+    where: { id: scoring.gameId },
+    include: HOSTED_GAME_SCORING_INCLUDE
+  });
+
+  const updatedScoring = await prisma.cricketMatch.findUnique({
+    where: { id: scoringId },
+    include: { innings: true, playerStats: true, timeline: { orderBy: { timestamp: 'desc' } } }
+  });
+
+  const liveData = computeScoreSnapshot(updatedScoring, mapHostedGame(hostedGame));
+  await liveStateService.setLiveScore(scoring.gameId, liveData);
+  
+  const io = getIO();
+  if (io) io.to(scoring.gameId).emit(SOCKET.SCORE_UPDATED, liveData);
+
+  return scoring;
+};
+
+/**
+ * Substitute an on-field player.
+ */
+export const substitutePlayer = async (scoringId, userId, substituteForId, inningsIndex) => {
+  // Add the substitute to the player stats for the match/innings
+  const stat = await prisma.matchPlayerStat.upsert({
+    where: {
+      matchId_userId_inningsIndex: { matchId: scoringId, userId, inningsIndex }
+    },
+    update: {
+      isSubstitute: true,
+      substituteForId: substituteForId
+    },
+    create: {
+      matchId: scoringId,
+      userId,
+      inningsIndex,
+      isSubstitute: true,
+      substituteForId: substituteForId
+    }
+  });
+
+  return stat;
+};
+
+/**
+ * Use a team review (DRS).
+ * @param {string} team - 'batting' or 'fielding'
+ * @param {boolean} isSuccessful - if true, review is retained.
+ */
+export const useReview = async (scoringId, inningsIndex, team, isSuccessful) => {
+  const scoring = await prisma.cricketMatch.findUnique({
+    where: { id: scoringId },
+    include: { innings: true }
+  });
+  const innings = scoring.innings.find(i => i.inningsIndex === inningsIndex);
+  if (!innings) throw new Error("Innings not found");
+
+  const field = team === 'batting' ? 'battingTeamReviews' : 'fieldingTeamReviews';
+  const currentReviews = innings[field];
+
+  if (currentReviews <= 0) {
+    throw new Error("No reviews remaining for this team");
+  }
+
+  if (!isSuccessful) {
+    await prisma.innings.update({
+      where: { id: innings.id },
+      data: { [field]: currentReviews - 1 }
+    });
+  }
+
+  // Refresh live score
+  const hostedGame = await prisma.hostedGame.findUnique({
+    where: { id: scoring.gameId },
+    include: HOSTED_GAME_SCORING_INCLUDE
+  });
+  const updatedScoring = await prisma.cricketMatch.findUnique({
+    where: { id: scoringId },
+    include: { innings: true, playerStats: true, timeline: { orderBy: { timestamp: 'desc' } } }
+  });
+
+  const liveData = computeScoreSnapshot(updatedScoring, mapHostedGame(hostedGame));
+  await liveStateService.setLiveScore(scoring.gameId, liveData);
+  const io = getIO();
+  if (io) io.to(scoring.gameId).emit(SOCKET.SCORE_UPDATED, liveData);
+
+  return updatedScoring;
+};
+
+/**
+ * Set Powerplay overs for the current innings.
+ */
+export const setPowerplayOvers = async (scoringId, inningsIndex, overs) => {
+  const scoring = await prisma.cricketMatch.findUnique({
+    where: { id: scoringId },
+    include: { innings: true }
+  });
+  const innings = scoring.innings.find(i => i.inningsIndex === inningsIndex);
+  
+  if (innings) {
+    await prisma.innings.update({
+      where: { id: innings.id },
+      data: { powerplayOvers: overs }
+    });
+  }
+
+  return scoring;
+};
+
+/**
  * Updates toss winner and decision state details.
  */
 export const updateTossResult = async (scoringId, winnerTeam, decision) => {
@@ -704,21 +878,45 @@ export const revertLastBall = async (scoringId) => {
     throw error;
   }
 
-  const isLegalBall = !lastBall.isExtra || lastBall.extraType === "BYE" || lastBall.extraType === "LEG_BYE";
+  const isLegalBall = !lastBall.isExtra || lastBall.extraType === "BYE" || lastBall.extraType === "LEG_BYE" || lastBall.extraType === "PENALTY";
   const runs = lastBall.runs ?? 0;
+  const extraRuns = lastBall.extraRuns ?? (lastBall.isExtra ? 1 : 0);
 
   const newExtras = { ...currentInnings.extras };
-  if (lastBall.extraType === "WIDE") newExtras.wides = Math.max(0, newExtras.wides - runs);
-  else if (lastBall.extraType === "NO_BALL") newExtras.noBalls = Math.max(0, newExtras.noBalls - 1);
-  else if (lastBall.extraType === "BYE") newExtras.byes = Math.max(0, newExtras.byes - runs);
-  else if (lastBall.extraType === "LEG_BYE") newExtras.legByes = Math.max(0, newExtras.legByes - runs);
+  if (lastBall.extraType === "WIDE") newExtras.wides = Math.max(0, newExtras.wides - extraRuns);
+  else if (lastBall.extraType === "NO_BALL") newExtras.noBalls = Math.max(0, newExtras.noBalls - extraRuns);
+  else if (lastBall.extraType === "BYE") newExtras.byes = Math.max(0, newExtras.byes - extraRuns);
+  else if (lastBall.extraType === "LEG_BYE") newExtras.legByes = Math.max(0, newExtras.legByes - extraRuns);
+  else if (lastBall.extraType === "PENALTY") newExtras.penalty = Math.max(0, newExtras.penalty - extraRuns);
+
+  let wasMaiden = false;
+  if (isLegalBall && lastBall.ballInOver === 5) {
+    const overBalls = await prisma.matchBall.findMany({
+      where: {
+        matchId: scoring.id,
+        inningsIndex: lastBall.inningsIndex,
+        over: lastBall.over,
+        bowlerId: lastBall.bowlerId
+      }
+    });
+
+    let totalBowlerRuns = 0;
+    for (const b of overBalls) {
+      if (!["BYE", "LEG_BYE", "PENALTY"].includes(b.extraType)) {
+        totalBowlerRuns += (b.runs || 0) + (b.extraRuns || 0);
+      }
+    }
+    if (totalBowlerRuns === 0) {
+      wasMaiden = true;
+    }
+  }
 
   await prisma.$transaction([
     prisma.matchBall.delete({ where: { id: lastBall.id } }),
     prisma.innings.update({
       where: { id: currentInnings.id },
       data: {
-        totalRuns: { decrement: runs },
+        totalRuns: { decrement: runs + extraRuns },
         totalBalls: isLegalBall ? { decrement: 1 } : undefined,
         totalWickets: lastBall.isWicket ? { decrement: 1 } : undefined,
         extras: newExtras
@@ -727,20 +925,29 @@ export const revertLastBall = async (scoringId) => {
     prisma.matchPlayerStat.updateMany({
       where: { matchId: scoring.id, userId: lastBall.batterId, inningsIndex: lastBall.inningsIndex },
       data: {
-        battingRuns: { decrement: !["WIDE", "BYE", "LEG_BYE"].includes(lastBall.extraType) ? runs : 0 },
-        battingBalls: { decrement: lastBall.extraType !== "WIDE" ? 1 : 0 },
-        battingFours: { decrement: (lastBall.isBoundary && runs === 4) ? 1 : 0 },
-        battingSixes: { decrement: (lastBall.isBoundary && runs === 6) ? 1 : 0 }
+        battingRuns: { decrement: runs },
+        battingBalls: { decrement: (!["WIDE", "PENALTY"].includes(lastBall.extraType)) ? 1 : 0 },
+        battingFours: { decrement: lastBall.isFour ? 1 : 0 },
+        battingSixes: { decrement: lastBall.isSix ? 1 : 0 }
       }
     }),
     prisma.matchPlayerStat.updateMany({
       where: { matchId: scoring.id, userId: lastBall.bowlerId, inningsIndex: lastBall.inningsIndex },
       data: {
-        bowlingRuns: { decrement: !["BYE", "LEG_BYE"].includes(lastBall.extraType) ? runs : 0 },
+        bowlingRuns: { decrement: (!["BYE", "LEG_BYE", "PENALTY"].includes(lastBall.extraType)) ? (runs + extraRuns) : 0 },
         bowlingBalls: { decrement: isLegalBall ? 1 : 0 },
-        bowlingWickets: { decrement: (lastBall.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "OBSTRUCTING", "TIMED_OUT"].includes(lastBall.wicketType)) ? 1 : 0 }
+        bowlingMaidens: { decrement: wasMaiden ? 1 : 0 },
+        bowlingWickets: { decrement: (lastBall.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "OBSTRUCTING", "TIMED_OUT", "OBSTRUCTING_FIELD", "HIT_BALL_TWICE", "HANDLED_BALL"].includes(lastBall.wicketType)) ? 1 : 0 }
       }
-    })
+    }),
+    ...(lastBall.isWicket ? [
+      prisma.matchPlayerStat.updateMany({
+        where: { matchId: scoring.id, userId: lastBall.playerOutId || lastBall.batterId, inningsIndex: lastBall.inningsIndex },
+        data: {
+          outStatus: "NOT_OUT"
+        }
+      })
+    ] : [])
   ]);
 
   return await prisma.cricketMatch.findUnique({
@@ -774,7 +981,9 @@ export const processScoreUpdate = async (scoringId, ballData) => {
   const isNoBall = ballData.extraType === "NO_BALL";
   const isBye = ballData.extraType === "BYE";
   const isLegBye = ballData.extraType === "LEG_BYE";
+  const isPenalty = ballData.extraType === "PENALTY";
   const runs = ballData.runs ?? 0;
+  const extraRuns = ballData.extraRuns ?? (ballData.isExtra ? 1 : 0);
 
   const strikerId = ballData.batterId || ballData.batsmanId || scoring.strikerId;
   const bowlerId = ballData.bowlerId || scoring.bowlerId;
@@ -783,28 +992,53 @@ export const processScoreUpdate = async (scoringId, ballData) => {
   const overNumber = Math.floor(currentInnings.totalBalls / 6);
   const ballInOver = currentInnings.totalBalls % 6;
 
-  const isLegalBall = !isWide && !isNoBall;
+  const isLegalBall = !isWide && !isNoBall && !isPenalty;
   const newExtras = { ...currentInnings.extras };
-  if (isWide) newExtras.wides += runs;
-  else if (isNoBall) newExtras.noBalls += 1;
-  else if (isBye) newExtras.byes += runs;
-  else if (isLegBye) newExtras.legByes += runs;
+  if (isWide) newExtras.wides += extraRuns;
+  else if (isNoBall) newExtras.noBalls += extraRuns;
+  else if (isBye) newExtras.byes += extraRuns;
+  else if (isLegBye) newExtras.legByes += extraRuns;
+  else if (isPenalty) newExtras.penalty = (newExtras.penalty || 0) + extraRuns;
 
   // Strike Rotation Logic
   let newStrikerId = strikerId;
   let newNonStrikerId = nonStrikerId;
   const isOverComplete = isLegalBall && (ballInOver === 5);
 
-  if (!ballData.isWicket && !isWide) {
-    if (runs % 2 !== 0) {
+  const physicalRunsRan = runs + (isBye || isLegBye ? extraRuns : 0) + ((isWide || isNoBall) && extraRuns > 1 ? extraRuns - 1 : 0);
+  const pOutId = ballData.isWicket ? (ballData.playerOutId || strikerId) : null;
+  
+  if (ballData.isWicket) {
+    const isRunOutOrRetired = ["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT"].includes(ballData.wicketType);
+
+    if (isRunOutOrRetired) {
+      let currentStrikerEndId = strikerId;
+      let currentNonStrikerEndId = nonStrikerId;
+
+      if (physicalRunsRan % 2 !== 0) {
+        currentStrikerEndId = nonStrikerId;
+        currentNonStrikerEndId = strikerId;
+      }
+
+      if (pOutId === currentStrikerEndId) {
+        newStrikerId = ballData.nextBatterId || currentStrikerEndId;
+        newNonStrikerId = currentNonStrikerEndId;
+      } else {
+        newNonStrikerId = ballData.nextBatterId || currentNonStrikerEndId;
+        newStrikerId = currentStrikerEndId;
+      }
+    } else {
+      newStrikerId = ballData.nextBatterId || strikerId;
+      newNonStrikerId = nonStrikerId;
+    }
+  } else {
+    if (!isPenalty && physicalRunsRan % 2 !== 0) {
       [newStrikerId, newNonStrikerId] = [newNonStrikerId, newStrikerId];
     }
   }
-  if (isOverComplete && !ballData.isWicket) {
+
+  if (isOverComplete) {
     [newStrikerId, newNonStrikerId] = [newNonStrikerId, newStrikerId];
-  }
-  if (ballData.isWicket && ballData.nextBatterId) {
-    newStrikerId = ballData.nextBatterId;
   }
 
   await prisma.$transaction([
@@ -819,18 +1053,25 @@ export const processScoreUpdate = async (scoringId, ballData) => {
         runs: runs,
         isExtra: ballData.isExtra || false,
         extraType: ballData.extraType || "NONE",
+        extraRuns: extraRuns,
         isBoundary: ballData.isBoundary || false,
+        isFour: ballData.isFour || false,
+        isSix: ballData.isSix || false,
         isWicket: ballData.isWicket || false,
         wicketType: ballData.wicketType,
-        fielderId: ballData.fielderId
+        playerOutId: ballData.playerOutId,
+        wicketTakerId: ballData.wicketTakerId,
+        fielderId: ballData.fielderId,
+        fieldingPosition: ballData.fieldingPosition,
+        distance: ballData.distance
       }
     }),
     prisma.innings.update({
       where: { id: currentInnings.id },
       data: {
-        totalRuns: { increment: runs },
+        totalRuns: { increment: runs + extraRuns },
         totalBalls: isLegalBall ? { increment: 1 } : undefined,
-        totalWickets: ballData.isWicket ? { increment: 1 } : undefined,
+        totalWickets: (ballData.isWicket && ballData.wicketType !== 'RETIRED_HURT') ? { increment: 1 } : undefined,
         extras: newExtras
       }
     }),
@@ -844,19 +1085,45 @@ export const processScoreUpdate = async (scoringId, ballData) => {
           }
         },
         update: {
-          battingRuns: { increment: (!isWide && !isBye && !isLegBye) ? runs : 0 },
-          battingBalls: { increment: !isWide ? 1 : 0 },
-          battingFours: { increment: (ballData.isBoundary && runs === 4) ? 1 : 0 },
-          battingSixes: { increment: (ballData.isBoundary && runs === 6) ? 1 : 0 }
+          battingRuns: { increment: runs },
+          battingBalls: { increment: (!isWide && !isPenalty) ? 1 : 0 },
+          battingFours: { increment: ballData.isFour ? 1 : 0 },
+          battingSixes: { increment: ballData.isSix ? 1 : 0 },
+          outStatus: (ballData.isWicket && pOutId === strikerId) ? ballData.wicketType : undefined
         },
         create: {
           matchId: scoring.id,
           userId: strikerId,
           inningsIndex: scoring.currentInningsIndex,
-          battingRuns: (!isWide && !isBye && !isLegBye) ? runs : 0,
-          battingBalls: !isWide ? 1 : 0,
-          battingFours: (ballData.isBoundary && runs === 4) ? 1 : 0,
-          battingSixes: (ballData.isBoundary && runs === 6) ? 1 : 0
+          battingRuns: runs,
+          battingBalls: (!isWide && !isPenalty) ? 1 : 0,
+          battingFours: ballData.isFour ? 1 : 0,
+          battingSixes: ballData.isSix ? 1 : 0,
+          outStatus: (ballData.isWicket && pOutId === strikerId) ? ballData.wicketType : "NOT_OUT"
+        }
+      })
+    ] : []),
+    ...((ballData.isWicket && pOutId === nonStrikerId) ? [
+      prisma.matchPlayerStat.upsert({
+        where: {
+          matchId_userId_inningsIndex: {
+            matchId: scoring.id,
+            userId: nonStrikerId,
+            inningsIndex: scoring.currentInningsIndex
+          }
+        },
+        update: {
+          outStatus: ballData.wicketType
+        },
+        create: {
+          matchId: scoring.id,
+          userId: nonStrikerId,
+          inningsIndex: scoring.currentInningsIndex,
+          battingRuns: 0,
+          battingBalls: 0,
+          battingFours: 0,
+          battingSixes: 0,
+          outStatus: ballData.wicketType
         }
       })
     ] : []),
@@ -870,17 +1137,17 @@ export const processScoreUpdate = async (scoringId, ballData) => {
           }
         },
         update: {
-          bowlingRuns: { increment: (!isBye && !isLegBye) ? runs : 0 },
+          bowlingRuns: { increment: (!isBye && !isLegBye && !isPenalty) ? (runs + extraRuns) : 0 },
           bowlingBalls: { increment: isLegalBall ? 1 : 0 },
-          bowlingWickets: { increment: (ballData.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "OBSTRUCTING", "TIMED_OUT"].includes(ballData.wicketType)) ? 1 : 0 }
+          bowlingWickets: { increment: (ballData.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "OBSTRUCTING", "TIMED_OUT", "OBSTRUCTING_FIELD", "HIT_BALL_TWICE", "HANDLED_BALL"].includes(ballData.wicketType)) ? 1 : 0 }
         },
         create: {
           matchId: scoring.id,
           userId: bowlerId,
           inningsIndex: scoring.currentInningsIndex,
-          bowlingRuns: (!isBye && !isLegBye) ? runs : 0,
+          bowlingRuns: (!isBye && !isLegBye && !isPenalty) ? (runs + extraRuns) : 0,
           bowlingBalls: isLegalBall ? 1 : 0,
-          bowlingWickets: (ballData.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "OBSTRUCTING", "TIMED_OUT"].includes(ballData.wicketType)) ? 1 : 0
+          bowlingWickets: (ballData.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "OBSTRUCTING", "TIMED_OUT", "OBSTRUCTING_FIELD", "HIT_BALL_TWICE", "HANDLED_BALL"].includes(ballData.wicketType)) ? 1 : 0
         }
       })
     ] : []),
@@ -892,6 +1159,31 @@ export const processScoreUpdate = async (scoringId, ballData) => {
       }
     })
   ]);
+
+  if (isOverComplete && bowlerId) {
+    const overBalls = await prisma.matchBall.findMany({
+      where: {
+        matchId: scoring.id,
+        inningsIndex: scoring.currentInningsIndex,
+        over: overNumber,
+        bowlerId: bowlerId
+      }
+    });
+
+    let totalBowlerRuns = 0;
+    for (const b of overBalls) {
+      if (!["BYE", "LEG_BYE", "PENALTY"].includes(b.extraType)) {
+        totalBowlerRuns += (b.runs || 0) + (b.extraRuns || 0);
+      }
+    }
+
+    if (totalBowlerRuns === 0) {
+      await prisma.matchPlayerStat.updateMany({
+        where: { matchId: scoring.id, userId: bowlerId, inningsIndex: scoring.currentInningsIndex },
+        data: { bowlingMaidens: { increment: 1 } }
+      });
+    }
+  }
 
   const [updatedScoring, hostedGame] = await Promise.all([
     prisma.cricketMatch.findUnique({
@@ -912,6 +1204,17 @@ export const processScoreUpdate = async (scoringId, ballData) => {
   if (io) {
     io.to(scoring.gameId).emit(SOCKET.SCORE_UPDATED, liveData);
   }
+
+  // AI Commentary (Async Background Job)
+  import('../commentary/commentary.service.js')
+    .then(({ commentaryQueue }) => {
+      commentaryQueue.add('generate', {
+        matchId: scoring.gameId,
+        liveData,
+        ballEvent: ballData
+      });
+    })
+    .catch(err => logger.error("[Scoring] Failed to load commentary queue:", err));
 
   return { scoring: updatedScoring, liveData };
 };
@@ -1470,3 +1773,4 @@ export const deleteScoringMatch = async (matchId, userId) => {
   await prisma.hostedGame.delete({ where: { id: matchId } });
   return true;
 };
+// Trigger restart

@@ -77,11 +77,14 @@ const LiveOverlay = () => {
 
   const [score, setScore] = useState(null);
   const [badge, setBadge] = useState(null); // current animated badge
+  const [aiCommentary, setAiCommentary] = useState(null);
   const [connected, setConnected] = useState(false);
   const badgeTimer = useRef(null);
+  const commentaryTimer = useRef(null);
   const socketRef = useRef(null);
 
   injectCSS(GLOBAL_CSS);
+
 
   // ── HTTP fallback ────────────────────────────────────────────────────────────
   const fetchScore = useCallback(async () => {
@@ -164,8 +167,29 @@ const LiveOverlay = () => {
       setScore(prev => prev ? { ...prev, tickerTheme: newTheme } : prev);
     });
 
+    socket.on('COMMENTARY_GENERATED', (data) => {
+      clearTimeout(commentaryTimer.current);
+      setAiCommentary(data);
+      
+      // Auto-hide after 15 seconds
+      commentaryTimer.current = setTimeout(() => {
+        setAiCommentary(null);
+      }, 15000);
+
+      if (data.audioUrl) {
+        const audio = new Audio(`${API_BASE}${data.audioUrl}`);
+        audio.play().catch(e => console.warn('Overlay audio play failed:', e));
+      } else {
+        const utterance = new SpeechSynthesisUtterance(data.text);
+        utterance.lang = data.language === 'hi' ? 'hi-IN' : 'en-US';
+        window.speechSynthesis.speak(utterance);
+      }
+    });
+
     return () => {
       clearTimeout(badgeTimer.current);
+      clearTimeout(commentaryTimer.current);
+      socket.removeAllListeners();
       socket.disconnect();
     };
   }, [matchId, token, fetchScore, showBadge]);
@@ -199,6 +223,33 @@ const LiveOverlay = () => {
       
       {/* Dynamic Animated Ticker Component */}
       <ActiveTicker score={score} connected={connected} badge={badge} />
+
+      {/* AI Commentary Overlay Toast */}
+      {aiCommentary?.text && (
+        <div style={{
+          position: 'absolute',
+          top: '40px',
+          right: '40px',
+          maxWidth: '400px',
+          background: 'rgba(5, 5, 5, 0.9)',
+          border: '1px solid rgba(163, 230, 53, 0.3)',
+          borderRadius: '16px',
+          padding: '20px',
+          color: 'white',
+          fontFamily: "'Inter', sans-serif",
+          boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+          animation: 'tickerIn 0.5s cubic-bezier(0.16,1,0.3,1) both',
+          zIndex: 1000,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#a3e635', animation: 'pulse 2s infinite' }} />
+            <span style={{ fontSize: '12px', fontWeight: 900, color: '#a3e635', textTransform: 'uppercase', letterSpacing: '1px' }}>AI Commentary</span>
+          </div>
+          <p style={{ fontSize: '15px', lineHeight: '1.5', fontStyle: 'italic', color: '#e5e7eb', margin: 0 }}>
+            "{aiCommentary.text}"
+          </p>
+        </div>
+      )}
 
       {/* Match-ended banner overlay */}
       {(score._ended || score.status === 'COMPLETED') && (

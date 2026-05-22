@@ -23,6 +23,11 @@ app.use(express.json({
 }));
 app.use(cookieParser());
 
+// Serve static files from the public directory
+import path from "path";
+app.use(express.static(path.join(process.cwd(), "public")));
+
+
 
 const allowedOrigins = process.env.CLIENT_URLS
   ? process.env.CLIENT_URLS.split(",").map((url) => url.trim())

@@ -1805,7 +1805,10 @@ export const updateTickerTheme = async (req, res) => {
     if (!game) throw new Error("Game not found");
 
     // Authorization: Only Host, assigned Streamer, or Scorer
-    if (game.hostId !== userId && game.streamerId !== userId && game.scorerId !== userId) {
+    const isAuthorizedUser = (game.hostId === userId || game.streamerId === userId || game.scorerId === userId) && userId !== undefined;
+    const isAuthorizedScorer = req.user.role === 'SCORER' && req.user.gameId === id;
+    
+    if (!isAuthorizedUser && !isAuthorizedScorer) {
       return res.status(403).json({ success: false, message: "Unauthorized to update ticker theme" });
     }
 

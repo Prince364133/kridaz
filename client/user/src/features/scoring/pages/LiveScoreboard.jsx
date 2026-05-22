@@ -156,11 +156,13 @@ const LiveScoreboard = () => {
  const { matchId } = useParams();
  const navigate = useNavigate();
 
- const [score, setScore] = useState(null);
- const [connected, setConnected] = useState(false);
- const [toast_, setToast] = useState(null);
- const [ended, setEnded] = useState(false);
- const toastTimer = useRef(null);
+  const [score, setScore] = useState(null);
+  const [connected, setConnected] = useState(false);
+  const [toast_, setToast] = useState(null);
+  const [ended, setEnded] = useState(false);
+  const [aiCommentary, setAiCommentary] = useState(null);
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const toastTimer = useRef(null);
 
  // ── HTTP initial load ────────────────────────────────────────────────────────
  const fetchScore = useCallback(async () => {
@@ -196,27 +198,48 @@ const LiveScoreboard = () => {
  socket.on('disconnect', () => setConnected(false));
  socket.on('reconnect', () => { setConnected(true); joinRoom(); fetchScore(); });
 
- socket.on(SOCKET.SCORE_UPDATED, (data) => {
- setScore(data);
- // Derive toast from lastBallRaw
- const lb = data?.lastBallRaw;
- if (lb) {
- if (lb.isWicket) showToast({ type: 'wicket', strikerName: data?.batters?.[0]?.name });
- else if (lb.isBoundary && lb.runs===6) showToast({ type: 'six', strikerName: data?.batters?.[0]?.name });
- else if (lb.isBoundary && lb.runs===4) showToast({ type: 'four', strikerName: data?.batters?.[0]?.name });
- else if (lb.extraType==='WIDE') showToast({ type: 'wide' });
- else if (lb.extraType==='NO_BALL') showToast({ type: 'no_ball' });
- }
- });
+    socket.on(SOCKET.SCORE_UPDATED, (data) => {
+      setScore(data);
+      // Derive toast from lastBallRaw
+      const lb = data?.lastBallRaw;
+      if (lb) {
+        if (lb.isWicket) showToast({ type: 'wicket', strikerName: data?.batters?.[0]?.name });
+        else if (lb.isBoundary && lb.runs===6) showToast({ type: 'six', strikerName: data?.batters?.[0]?.name });
+        else if (lb.isBoundary && lb.runs===4) showToast({ type: 'four', strikerName: data?.batters?.[0]?.name });
+        else if (lb.extraType==='WIDE') showToast({ type: 'wide' });
+        else if (lb.extraType==='NO_BALL') showToast({ type: 'no_ball' });
+      }
+    });
 
- socket.on(SOCKET.BALL_EVENT, (ev) => showToast(ev));
+    socket.on('COMMENTARY_GENERATED', (data) => {
+      setAiCommentary(data);
+      if (!audioEnabled) return;
+
+      if (data.audioUrl) {
+        // Play generated audio via Piper
+        const audio = new Audio(`${API_BASE}${data.audioUrl}`);
+        audio.play().catch(e => console.warn('Audio play failed:', e));
+      } else {
+        // Fallback to Browser TTS
+        const utterance = new SpeechSynthesisUtterance(data.text);
+        if (data.language === 'hi') {
+          utterance.lang = 'hi-IN';
+        } else {
+          utterance.lang = 'en-US';
+        }
+        window.speechSynthesis.speak(utterance);
+      }
+    });
+
+    socket.on(SOCKET.BALL_EVENT, (ev) => showToast(ev));
  socket.on(SOCKET.MATCH_ENDED, () => setEnded(true));
 
  return () => {
  clearTimeout(toastTimer.current);
+ socket.removeAllListeners();
  socket.disconnect();
  };
- }, [matchId, fetchScore, showToast]);
+ }, [matchId, fetchScore, showToast, audioEnabled]);
 
  // ── Share handler ─────────────────────────────────────────────────────────────
  const handleShare = () => {
@@ -365,6 +388,14 @@ const LiveScoreboard = () => {
  </div>
  </div>
  <div className="flex items-center gap-2">
+ {/* Audio Toggle */}
+ <button
+   onClick={() => setAudioEnabled(prev => !prev)}
+   className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${audioEnabled ? 'bg-primary/20 text-primary' : 'bg-white/5 text-gray-500 hover:bg-white/10'}`}
+   title={audioEnabled ? "Disable Audio Commentary" : "Enable Audio Commentary"}
+ >
+   <Radio size={16} />
+ </button>
  {/* Connection indicator */}
  <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${connected ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
  {connected ? <Wifi size={10} /> : <WifiOff size={10} />}
@@ -548,7 +579,7 @@ const LiveScoreboard = () => {
  )}
 
  {/* ── 5. AI Commentary ───────────────────────────────────────────────── */}
- {score.commentary?.text && (
+ {aiCommentary?.text && (
  <motion.div
  initial={{ opacity: 0, x: -20 }}
  animate={{ opacity: 1, x: 0 }}
@@ -558,11 +589,11 @@ const LiveScoreboard = () => {
  <Activity size={15} className="text-primary" />
  </div>
  <div>
- <p className="text-[9px] font-black text-primary uppercase tracking-widest mb-2">
- AI Commentary · Over {score.commentary.ballIndex !== undefined ? Math.floor(score.commentary.ballIndex / 6) : ''}
+ <p className="text-[9px] font-black text-primary uppercase tracking-widest mb-2 flex items-center gap-2">
+ AI Commentary {audioEnabled && <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />}
  </p>
  <p className="text-[13px] text-gray-200 italic leading-relaxed">
- "{score.commentary.text}"
+ "{aiCommentary.text}"
  </p>
  </div>
  </motion.div>
