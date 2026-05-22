@@ -67,8 +67,19 @@ export const computeScoreSnapshot = (scoring, match) => {
       ...(match.teamA?.slots || []),
       ...(match.teamB?.slots || [])
     ];
-    const slot = allSlots.find(s => s.userId === userId);
-    return slot?.user?.name || "Player";
+    const slot = allSlots.find(s => s.userId === userId || s.customPlayerId === userId || s.id === userId);
+    return slot?.user?.name || slot?.customPlayer?.name || "Player";
+  };
+
+  // Resolver for player profile pictures using slots
+  const getPlayerImage = (userId) => {
+    if (!userId) return null;
+    const allSlots = [
+      ...(match.teamA?.slots || []),
+      ...(match.teamB?.slots || [])
+    ];
+    const slot = allSlots.find(s => s.userId === userId || s.customPlayerId === userId || s.id === userId);
+    return slot?.user?.profilePicture || null;
   };
 
   // Active Batters
@@ -77,6 +88,7 @@ export const computeScoreSnapshot = (scoring, match) => {
     return {
       id: id,
       name: getPlayerName(id),
+      profilePicture: getPlayerImage(id),
       runs: stat?.battingRuns || 0,
       balls: stat?.battingBalls || 0,
       fours: stat?.battingFours || 0,
@@ -92,6 +104,7 @@ export const computeScoreSnapshot = (scoring, match) => {
     currentBowler = {
       id: scoring.bowlerId,
       name: getPlayerName(scoring.bowlerId),
+      profilePicture: getPlayerImage(scoring.bowlerId),
       overs: bStat ? Math.floor(bStat.bowlingBalls / 6) : 0,
       balls: bStat ? (bStat.bowlingBalls % 6) : 0,
       runs: bStat?.bowlingRuns || 0,
@@ -100,9 +113,12 @@ export const computeScoreSnapshot = (scoring, match) => {
     };
   }
 
+  const battingTeamImage = isTeamABatting ? match.teamA?.image : match.teamB?.image;
+
   return {
     matchId: scoring.gameId,
     battingTeamName,
+    battingTeamImage,
     totalRuns,
     totalWickets,
     runs: totalRuns,

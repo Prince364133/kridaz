@@ -7,6 +7,19 @@ import logger from "../../utils/logger.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 import { computeScoreSnapshot } from "./scoring.utils.js";
 
+const HOSTED_GAME_SCORING_INCLUDE = {
+  teams: {
+    include: {
+      slots: {
+        include: {
+          user: { select: { id: true, name: true, profilePicture: true } },
+          customPlayer: true
+        }
+      }
+    }
+  }
+};
+
 /**
  * Mapper helper to structure team A/B and ground details in HostedGame.
  */
@@ -254,17 +267,7 @@ export const goLiveSession = async (matchId) => {
   try {
     const updatedHostedGame = await prisma.hostedGame.findUnique({
       where: { id: finalMatchId },
-      include: {
-        teams: {
-          include: {
-            slots: {
-              include: {
-                user: { select: { name: true } }
-              }
-            }
-          }
-        }
-      }
+      include: HOSTED_GAME_SCORING_INCLUDE
     });
     const mappedMatch = mapHostedGame(updatedHostedGame);
 
@@ -356,17 +359,7 @@ export const endLiveSession = async (matchId) => {
   try {
     const updatedHostedGame = await prisma.hostedGame.findUnique({
       where: { id: finalMatchId },
-      include: {
-        teams: {
-          include: {
-            slots: {
-              include: {
-                user: { select: { name: true } }
-              }
-            }
-          }
-        }
-      }
+      include: HOSTED_GAME_SCORING_INCLUDE
     });
     const mappedMatch = mapHostedGame(updatedHostedGame);
 
@@ -619,8 +612,11 @@ export const advanceToNextInnings = async (scoringId, battingTeamId) => {
     include: { innings: true, playerStats: true, timeline: { orderBy: { timestamp: 'desc' } } }
   });
 
-  const match = await prisma.hostedGame.findUnique({ where: { id: scoring.gameId } });
-  const liveData = computeScoreSnapshot(updatedScoring, match);
+  const match = await prisma.hostedGame.findUnique({
+    where: { id: scoring.gameId },
+    include: HOSTED_GAME_SCORING_INCLUDE
+  });
+  const liveData = computeScoreSnapshot(updatedScoring, mapHostedGame(match));
   await liveStateService.setLiveScore(scoring.gameId, liveData);
   
   const io = getIO();
@@ -904,13 +900,7 @@ export const processScoreUpdate = async (scoringId, ballData) => {
 
   const hostedGame = await prisma.hostedGame.findUnique({ 
     where: { id: scoring.gameId },
-    include: {
-      teams: {
-        include: {
-          slots: true
-        }
-      }
-    }
+    include: HOSTED_GAME_SCORING_INCLUDE
   });
 
   const mappedHostedGame = mapHostedGame(hostedGame);
@@ -963,18 +953,7 @@ export const fetchMatchStatus = async (matchId) => {
 
     const hostedGame = await prisma.hostedGame.findUnique({
       where: { id: scoring.gameId },
-      include: {
-        teams: {
-          include: {
-            slots: {
-              include: {
-                user: { select: { name: true, profilePicture: true } },
-                customPlayer: true
-              }
-            }
-          }
-        }
-      }
+      include: HOSTED_GAME_SCORING_INCLUDE
     });
 
     const mappedHostedGame = mapHostedGame(hostedGame);
@@ -988,16 +967,7 @@ export const fetchMatchStatus = async (matchId) => {
     include: {
       host: { select: { name: true, profilePicture: true } },
       turf: true,
-      teams: {
-        include: {
-          slots: {
-            include: {
-              user: { select: { name: true, profilePicture: true } },
-              customPlayer: true
-            }
-          }
-        }
-      }
+      teams: HOSTED_GAME_SCORING_INCLUDE.teams
     }
   });
 
@@ -1106,17 +1076,7 @@ export const fetchLiveScoreSnapshot = async (matchId) => {
 
   const match = await prisma.hostedGame.findUnique({
     where: { id: matchId },
-    include: {
-      teams: {
-        include: {
-          slots: {
-            include: {
-              user: { select: { name: true } }
-            }
-          }
-        }
-      }
-    }
+    include: HOSTED_GAME_SCORING_INCLUDE
   });
 
   if (!match) {
@@ -1371,7 +1331,8 @@ export const createScoringMatch = async (userId, matchData) => {
         include: {
           slots: {
             include: {
-              user: { select: { id: true, name: true, profilePicture: true } }
+              user: { select: { id: true, name: true, profilePicture: true } },
+              customPlayer: true
             }
           }
         }
@@ -1396,7 +1357,12 @@ export const getUserScoringGames = async (userId) => {
     include: {
       teams: {
         include: {
-          slots: { include: { user: { select: { id: true, name: true, profilePicture: true } } } }
+          slots: {
+            include: {
+              user: { select: { id: true, name: true, profilePicture: true } },
+              customPlayer: true
+            }
+          }
         }
       }
     },
@@ -1417,7 +1383,8 @@ export const getScoringGameById = async (gameId) => {
         include: {
           slots: {
             include: {
-              user: { select: { id: true, name: true, profilePicture: true, username: true } }
+              user: { select: { id: true, name: true, profilePicture: true, username: true } },
+              customPlayer: true
             }
           }
         }
