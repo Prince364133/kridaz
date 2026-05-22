@@ -57,6 +57,18 @@ const socketConfig = (server) => {
 
     socket.on(SOCKET.JOIN_CHAT, (room) => socket.join(room));
 
+    socket.on(SOCKET.JOIN_MATCH, (matchId) => {
+      if (!matchId) return;
+      socket.join(matchId);
+      logger.info(`[Socket] Socket ${socket.id} joined match room: ${matchId}`);
+    });
+
+    socket.on(SOCKET.OVERLAY_JOIN, ({ matchId, token }) => {
+      if (!matchId) return;
+      socket.join(matchId);
+      logger.info(`[Socket] Socket ${socket.id} joined overlay match room: ${matchId} (token: ${token})`);
+    });
+
     socket.on("typing", (room) => socket.in(room).emit("typing", room));
     socket.on("stop typing", (room) => socket.in(room).emit("stop typing", room));
 

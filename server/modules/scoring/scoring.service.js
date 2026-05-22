@@ -893,15 +893,16 @@ export const processScoreUpdate = async (scoringId, ballData) => {
     })
   ]);
 
-  const updatedScoring = await prisma.cricketMatch.findUnique({
-    where: { id: scoring.id },
-    include: { innings: true, playerStats: true, timeline: { orderBy: { timestamp: 'desc' } } }
-  });
-
-  const hostedGame = await prisma.hostedGame.findUnique({ 
-    where: { id: scoring.gameId },
-    include: HOSTED_GAME_SCORING_INCLUDE
-  });
+  const [updatedScoring, hostedGame] = await Promise.all([
+    prisma.cricketMatch.findUnique({
+      where: { id: scoring.id },
+      include: { innings: true, playerStats: true, timeline: { orderBy: { timestamp: 'desc' } } }
+    }),
+    prisma.hostedGame.findUnique({ 
+      where: { id: scoring.gameId },
+      include: HOSTED_GAME_SCORING_INCLUDE
+    })
+  ]);
 
   const mappedHostedGame = mapHostedGame(hostedGame);
   const liveData = computeScoreSnapshot(updatedScoring, mappedHostedGame);
