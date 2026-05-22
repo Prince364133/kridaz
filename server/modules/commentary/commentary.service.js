@@ -141,6 +141,15 @@ const generateOpenAIAudio = async (text, voiceModel = "alloy") => {
     const buffer = Buffer.from(await response.arrayBuffer());
     await fs.promises.writeFile(outputPath, buffer);
     
+    // Auto-delete the file after 30 seconds (fallback if it wasn't deleted by the client player)
+    setTimeout(() => {
+      fs.unlink(outputPath, (err) => {
+        if (err && err.code !== 'ENOENT') {
+          // Ignore ENOENT (file already deleted)
+        }
+      });
+    }, 30 * 1000);
+
     // Return the URL path
     return `/audio/${outputFileName}`;
   } catch (error) {
@@ -176,28 +185,13 @@ const worker = new Worker('commentary-generation', async (job) => {
       return; // Commentary disabled
     }
 
-    // 2. Concurrently Generate English Display Text AND Regional Audio Text to save time
-    let text = "";
-    let spokenText = "";
-    
-    if (hostedGame.commentaryLanguage === 'en') {
-      text = await generateCommentaryText(
-        liveData, ballEvent, 'en', hostedGame.commentaryStyle, io, matchId
-      );
-      spokenText = text;
-    } else {
-      // Fire both LLM calls at the exact same time
-      const englishPromise = generateCommentaryText(
-        liveData, ballEvent, 'en', hostedGame.commentaryStyle, io, matchId // streams to UI
-      );
-      const regionalPromise = generateCommentaryText(
-        liveData, ballEvent, hostedGame.commentaryLanguage, hostedGame.commentaryStyle, null, null // silent generation
-      );
-      
-      const results = await Promise.all([englishPromise, regionalPromise]);
-      text = results[0];
-      spokenText = results[1];
-    }
+    // 2. Generate Text Commentary
+    // To reduce latency, we generate directly in the selected language.
+    // The UI will display the text in the selected language, and the TTS will also use this exact text.
+    let text = await generateCommentaryText(
+      liveData, ballEvent, hostedGame.commentaryLanguage, hostedGame.commentaryStyle, io, matchId
+    );
+    let spokenText = text;
 
     // 3. Generate Audio with OpenAI TTS using the regional spokenText
     let audioUrl = null;

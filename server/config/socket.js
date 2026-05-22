@@ -98,6 +98,23 @@ const socketConfig = (server) => {
       socket.in(chatId).emit("message deleted", { chatId, messageIds });
     });
 
+    // Delete audio file immediately after it finishes playing on the client
+    socket.on('COMMENTARY_AUDIO_PLAYED', async (data) => {
+      if (data && data.audioUrl) {
+        try {
+          const fs = await import('fs');
+          const path = await import('path');
+          // audioUrl is typically '/audio/filename.mp3'
+          const filePath = path.join(process.cwd(), 'public', data.audioUrl);
+          fs.unlink(filePath, (err) => {
+            // Ignore ENOENT (already deleted)
+          });
+        } catch (e) {
+          // Ignore
+        }
+      }
+    });
+
     socket.on("location:update", async (data) => {
       const { lat, lng } = data;
       if (!socket.userId || isNaN(lat) || isNaN(lng)) return;

@@ -163,6 +163,7 @@ const LiveScoreboard = () => {
   const [aiCommentary, setAiCommentary] = useState(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
   const toastTimer = useRef(null);
+  const commentaryTimer = useRef(null);
 
  // ── HTTP initial load ────────────────────────────────────────────────────────
  const fetchScore = useCallback(async () => {
@@ -211,22 +212,46 @@ const LiveScoreboard = () => {
       }
     });
 
-    socket.on('COMMENTARY_GENERATED', (data) => {
-      setAiCommentary(data);
+    // Handle Streaming Text Chunks
+    socket.on('COMMENTARY_CHUNK', (data) => {
+      clearTimeout(commentaryTimer.current);
+      setAiCommentary(prev => {
+        if (!prev) return { text: data.chunk, language: data.language };
+        return { ...prev, text: prev.text + data.chunk };
+      });
+      
+      // Auto-hide after stream finishes if no audio comes (fallback timer)
+      if (data.isFinished) {
+        commentaryTimer.current = setTimeout(() => {
+          setAiCommentary(null);
+        }, 15000);
+      }
+    });
+
+    socket.on('COMMENTARY_AUDIO_READY', (data) => {
+      clearTimeout(commentaryTimer.current);
+      
+      // Auto-hide 15 seconds after audio is ready
+      commentaryTimer.current = setTimeout(() => {
+        setAiCommentary(null);
+      }, 15000);
+
       if (!audioEnabled) return;
 
       if (data.audioUrl) {
-        // Play generated audio via Piper
+        // Play generated audio
         const audio = new Audio(`${API_BASE}${data.audioUrl}`);
-        audio.play().catch(e => console.warn('Audio play failed:', e));
+        audio.play().catch(e => {
+          console.warn('Scoreboard audio play failed:', e);
+          socket.emit('COMMENTARY_AUDIO_PLAYED', { audioUrl: data.audioUrl });
+        });
+        audio.onended = () => {
+          socket.emit('COMMENTARY_AUDIO_PLAYED', { audioUrl: data.audioUrl });
+        };
       } else {
         // Fallback to Browser TTS
         const utterance = new SpeechSynthesisUtterance(data.text);
-        if (data.language === 'hi') {
-          utterance.lang = 'hi-IN';
-        } else {
-          utterance.lang = 'en-US';
-        }
+        utterance.lang = data.language === 'hi' ? 'hi-IN' : 'en-US';
         window.speechSynthesis.speak(utterance);
       }
     });
