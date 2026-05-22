@@ -367,16 +367,16 @@ export default function Home() {
  </div>
 
  <div className="absolute inset-0 opacity-[0.03] z-1"
- style={{ backgroundImage: `radial-gradient(#84CC16 1px, transparent 1px)`, backgroundSize: "48px 48px" }} />
+ style={{ backgroundImage: `radial-gradient(#55DEE8 1px, transparent 1px)`, backgroundSize: "48px 48px" }} />
 
  <div className="relative w-full px-4 lg:px-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center pt-4 md:pt-0">
  <div className="space-y-4 lg:space-y-6 relative z-10">
  <div>
  <h1 className="uppercase" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700", fontSize: "clamp(40px, 6vw, 51.74px)", lineHeight: "1.14", letterSpacing: "0" }}>
- More Than <span style={{ color: "#84CC16" }}>Booking.</span><br />
+ More Than <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Booking.</span><br />
  Where Players<br />Belong.
  </h1>
- <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ color: "#84CC16" }}>where champions play</p>
+ <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>where champions play</p>
  </div>
  <p className="opacity-70 max-w-xl mb-4 lg:mb-10" style={{ fontFamily: "'Inter', sans-serif", fontWeight: "300", fontSize: "20.04px", lineHeight: "119%", letterSpacing: "1.5%" }}>
  Discover premium sports venues, book your slot instantly, and connect with players across India.
@@ -386,7 +386,7 @@ export default function Home() {
  to={isLoggedIn ? "/venues" : "/signup"}
  className="block w-fit group mb-4 lg:mb-12"
  >
- <div className="inline-flex items-center gap-2 bg-[#84CC16] text-black px-8 py-3.5 rounded-full font-bold group-hover:scale-105 transition-all text-sm lg:text-base shadow-[0_0_20px_rgba(132,204,22,0.4)]">
+ <div className="inline-flex items-center gap-2 text-black px-8 py-3.5 rounded-full font-bold group-hover:scale-105 transition-all text-sm lg:text-base shadow-[0_0_20px_rgba(85,222,232,0.4)]" style={{ background: GRAD }}>
  Book Now <ArrowRight size={18} />
  </div>
  </Link>
@@ -415,8 +415,8 @@ export default function Home() {
 
  {/* 1M+ Bookings Card - Moved to Top Right Corner */}
  <div className="absolute top-12 right-12 rounded-2xl p-4 border z-20"
- style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", borderColor: "rgba(132,204,22,0.25)" }}>
- <p className="font-display text-2xl text-primary leading-none" style={{ color: "#84CC16" }}>1M+</p>
+ style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", borderColor: "rgba(85,222,232,0.25)" }}>
+ <p className="font-display text-2xl leading-none" style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>1M+</p>
  <p className="text-[10px] uppercase tracking-wider mt-1 opacity-60" style={{ color: "#fff" }}>Bookings Made</p>
  </div>
  </div>
@@ -458,11 +458,11 @@ export default function Home() {
  <section className="py-6 lg:py-12 px-4 lg:px-12 w-full">
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16 border-b border-white/5 pb-10">
  <div className="relative">
- <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#55DEE8] rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block"></div>
- <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- Find Your <span className="text-[#55DEE8]">Arena</span>
+ <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block" style={{ background: GRAD }}></div>
+ <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+ Find Your <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Arena</span>
  </h2>
- <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.4em] mt-4 font-inter">
+ <p className="font-bold text-white/40 uppercase tracking-[0.15em] mt-4" style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}>
  Premium Venue Discovery • Elite Sports Infrastructure
  </p>
  </div>
@@ -487,7 +487,7 @@ export default function Home() {
  <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
  <Search size={32} className="text-gray-600" />
  </div>
- <p className="font-display text-3xl mb-3 uppercase tracking-tight">Venues Not Found</p>
+ <p className="text-3xl mb-3 uppercase tracking-tighter font-black" style={{ fontFamily: "'Open Sans', sans-serif" }}>Venues Not Found</p>
  <p className="text-gray-500 text-sm uppercase tracking-wider mb-8">Try adjusting your search or filters</p>
  <button
  onClick={() => setTurfFilters({ searchTerm: "", city: "", state: "" })}
@@ -525,11 +525,11 @@ export default function Home() {
  {/* Refined Section Header */}
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-8">
  <div className="relative">
- <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#55DEE8] rounded-full shadow-[0_0_20px_rgba(85,222,232,0.4)] hidden md:block"></div>
- <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- Find Players <span className="text-[#55DEE8]">Near You</span>
+ <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-full shadow-[0_0_20px_rgba(85,222,232,0.4)] hidden md:block" style={{ background: GRAD }}></div>
+ <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+ Find Players <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Near You</span>
  </h2>
- <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-3 font-inter">
+ <p className="font-bold text-white/40 uppercase tracking-[0.3em] mt-3" style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}>
  Global Talent Network • Skill-Matched Athletes
  </p>
  </div>
@@ -559,8 +559,9 @@ export default function Home() {
  
  return (
  <div key={p.id || p._id} className="shrink-0 w-[160px] md:w-[190px] group">
- <div className="relative bg-[#121212] rounded-[28px] p-2.5 border border-white/5 transition-all duration-500 hover:border-[#55DEE8]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
+ <div className="relative rounded-[28px] p-[1px] bg-white/5 transition-all duration-500 group-hover:bg-gradient-to-r group-hover:from-[#55DEE8] group-hover:to-[#BFF367] group-hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
  {/* Profile Image */}
+ <div className="relative bg-[#121212] rounded-[27px] p-2.5 h-full">
  <Link to={`/profile/${p.id || p._id}`} className="relative aspect-[1/1.1] rounded-[20px] overflow-hidden block mb-4">
  <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
  {(p.profilePicture || p.profileImage) ? (
@@ -621,6 +622,7 @@ export default function Home() {
  </div>
  </div>
  </div>
+ </div>
  );
  })}
  </div>
@@ -647,11 +649,11 @@ export default function Home() {
  <div className="w-full">
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-10">
  <div className="relative">
- <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#55DEE8] rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block"></div>
- <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- JOIN <span className="text-[#55DEE8]">GAMES</span>
+ <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block" style={{ background: GRAD }}></div>
+ <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+ JOIN <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>GAMES</span>
  </h2>
- <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-4 font-inter">
+ <p className="font-bold text-white/40 uppercase tracking-[0.3em] mt-4" style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}>
  Community Matchmaking • No Team? No Problem.
  </p>
  </div>
@@ -908,11 +910,11 @@ export default function Home() {
  <div className="w-full">
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-10">
  <div className="relative">
- <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-[#55DEE8] rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block"></div>
- <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
- PRO <span className="text-[#55DEE8]">EXPERTS</span>
+ <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block" style={{ background: GRAD }}></div>
+ <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+ PRO <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>EXPERTS</span>
  </h2>
- <p className="text-[10px] md:text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-4 font-inter">
+ <p className="font-bold text-white/40 uppercase tracking-[0.3em] mt-4" style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}>
  Certified Coaching • Professional Officiating
  </p>
  </div>
@@ -1048,7 +1050,7 @@ export default function Home() {
  {/* ── BENTO GRID ── */}
  <section className="pt-10 lg:pt-20 pb-4 lg:pb-6 px-4 lg:px-12 w-full">
  <div className="text-center mb-8 lg:mb-14">
- <h2 className="font-display text-4xl md:text-5xl lg:text-6xl uppercase leading-[0.9]">
+ <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
  ALL IN ONE <span className="text-gray-500">SPORTS</span><br />
  EXPERIENCE <span className="inline-block px-4 py-2 ml-2 align-middle rounded-full font-script text-3xl md:text-4xl text-black shadow-[0_0_25px_rgba(85,222,232,0.4)]" style={{ background: GRAD }}>Powered by AI ✨</span>
  </h2>
@@ -1062,7 +1064,7 @@ export default function Home() {
  </div>
  <div className="absolute right-0 top-0 w-3/4 h-3/4 bg-no-repeat bg-contain bg-right-top z-10" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&q=80')", opacity: 0.3 }} />
  <div className="relative z-20">
- <h3 className="font-display text-5xl mb-2 leading-none">BOOK VENUES</h3>
+ <h3 className="text-3xl md:text-5xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-none mb-2" style={{ fontFamily: "'Open Sans', sans-serif" }}>BOOK VENUES</h3>
  <p className="text-gray-400 mb-6 max-w-sm">Find the perfect spot for Cricket, Football, Swimming, and more.</p>
  <div className="flex flex-wrap gap-2 mb-6">
  {["Cricket", "Football", "Swimming", "Badminton"].map(t => (
@@ -1085,7 +1087,7 @@ export default function Home() {
  <span className="text-[#55DEE8] font-bold text-xs uppercase tracking-widest flex items-center gap-1"><Trophy size={14} /> COMPETITIVE</span>
  </div>
  <div>
- <h3 className="font-display text-4xl mb-1 leading-none">CHALLENGE<br />PLAYERS</h3>
+ <h3 className="text-2xl md:text-4xl lg:text-4xl font-black text-white uppercase tracking-tighter leading-none mb-1" style={{ fontFamily: "'Open Sans', sans-serif" }}>CHALLENGE<br />PLAYERS</h3>
  <p className="text-gray-400 text-sm mb-4">Skill-matched opponents.</p>
  </div>
  </div>
@@ -1105,7 +1107,7 @@ export default function Home() {
  <div className="w-8 h-8 rounded-lg flex items-center justify-center border transition-colors group-hover:border-[#55DEE8]/30 group-hover:bg-[#55DEE8]/10" style={{ borderColor: "rgba(255,255,255,0.1)", backgroundColor: "rgba(255,255,255,0.05)" }}>
  <Users size={14} className="text-[#55DEE8]" />
  </div>
- <h3 className="font-display text-xl uppercase group-hover:text-[#55DEE8] transition-colors">JOIN GAMES</h3>
+ <h3 className="text-xl font-black text-white uppercase tracking-tighter group-hover:text-[#55DEE8] transition-colors" style={{ fontFamily: "'Open Sans', sans-serif" }}>JOIN GAMES</h3>
  </div>
  <ChevronRight size={20} className="text-gray-500 group-hover:text-[#55DEE8] transition-all duration-300 group-hover:translate-x-1" />
  </div>
@@ -1139,7 +1141,7 @@ export default function Home() {
  </div>
  <div>
  <span className="text-[8px] font-bold text-[#55DEE8] uppercase tracking-widest mb-1 block">Trending Now</span>
- <h3 className="font-display text-xl mb-1 leading-tight uppercase truncate">{realSocialPosts[0]?.title || "SOCIAL ARENA"}</h3>
+ <h3 className="text-xl font-black text-white uppercase tracking-tighter leading-tight truncate mb-1" style={{ fontFamily: "'Open Sans', sans-serif" }}>{realSocialPosts[0]?.title || "SOCIAL ARENA"}</h3>
  <p className="text-gray-400 text-[10px] mb-4 line-clamp-1">{realSocialPosts[0]?.content || "Check out what's happening in the field."}</p>
  
  </div>
@@ -1155,7 +1157,7 @@ export default function Home() {
  <Award size={20} style={{ color: "#000" }} />
  </div>
  <div>
- <h3 className="font-display text-2xl mb-1 leading-none uppercase">PRO COACHES</h3>
+ <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-none mb-1" style={{ fontFamily: "'Open Sans', sans-serif" }}>PRO COACHES</h3>
  <p className="text-gray-400 text-xs mb-4">Expert training.</p>
  <Link to="/professionals" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#55DEE8] transition-colors">Find Coach <ArrowRight size={14} /></Link>
  </div>
@@ -1171,7 +1173,7 @@ export default function Home() {
  <Shield size={20} style={{ color: "#000" }} />
  </div>
  <div>
- <h3 className="font-display text-2xl mb-1 leading-none uppercase">OFFICIALS</h3>
+ <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-none mb-1" style={{ fontFamily: "'Open Sans', sans-serif" }}>OFFICIALS</h3>
  <p className="text-gray-400 text-[10px] mb-4 uppercase tracking-tighter">Umpires • Scorers • Streamers</p>
  <Link to="/professionals" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#55DEE8] transition-colors">Hire Now <ArrowRight size={14} /></Link>
  </div>
@@ -1187,10 +1189,10 @@ export default function Home() {
  <div className="w-full px-4 lg:px-12">
  <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 lg:mb-10 gap-4">
  <div>
- <h2 className="font-display text-2xl sm:text-3xl md:text-5xl uppercase flex items-center gap-2 md:gap-3">
+ <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none flex items-center gap-2 md:gap-3" style={{ fontFamily: "'Open Sans', sans-serif" }}>
  Your <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Social Arena</span> <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
  </h2>
- <p className="text-gray-400 mt-2 text-sm md:text-base">Swipe to see what's happening in the field</p>
+ <p className="text-gray-400 mt-2" style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}>Swipe to see what's happening in the field</p>
  </div>
  
  </div>
@@ -1321,9 +1323,9 @@ export default function Home() {
 
 
  {/* ── APP DOWNLOAD SECTION ── */}
- <section className="pt-6 lg:pt-10 pb-12 lg:pb-24 relative overflow-hidden px-4 lg:px-12">
+ <section className="pt-4 lg:pt-8 pb-8 lg:pb-16 relative overflow-hidden px-4 lg:px-12">
  <div className="max-w-full mx-auto">
- <div className="bg-gradient-to-br from-[#0D0D0D] to-black border-y lg:border lg:rounded-[3rem] p-8 md:p-24 overflow-hidden relative" style={{ borderColor: BDR }}>
+ <div className="bg-gradient-to-br from-[#0D0D0D] to-black border-y lg:border lg:rounded-[3rem] p-6 md:p-12 lg:p-16 overflow-hidden relative" style={{ borderColor: BDR }}>
  <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-16 relative z-10">
 
  {/* Left Side: Mockup */}
@@ -1345,11 +1347,11 @@ export default function Home() {
  <span className="text-[10px] font-bold tracking-widest text-black uppercase">Mobile App Coming Soon</span>
  </div>
 
- <h2 className="text-5xl md:text-7xl font-bold uppercase leading-[0.9] mb-8 tracking-tight">
+ <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-6xl font-bold uppercase leading-[0.9] mb-6 tracking-tight whitespace-nowrap" style={{ fontFamily: "'Open Sans', sans-serif" }}>
  BOOK <span className="text-white/20">•</span> PLAY <span className="text-white/20">•</span> <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>WIN</span>
  </h2>
 
- <p className="text-gray-400 text-base md:text-xl mb-12 max-w-xl mx-auto lg:mx-0">
+ <p className="text-gray-400 mb-12 max-w-xl mx-auto lg:mx-0" style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}>
  Take the ecosystem anywhere. Book slots, join matches, and track your stats.
  </p>
 
@@ -1403,12 +1405,12 @@ export default function Home() {
  <section className="w-full">
  <div className="border-t border-b grid grid-cols-4 lg:flex lg:flex-nowrap items-stretch p-2 lg:p-4 divide-x" style={{ borderColor: BDR, backgroundColor: "#0A0A0A" }}>
  {[
- { title: "LIST VENUE", sub: "EARN NOW", icon: Store },
- { title: "HOST GAME", sub: "START HOSTING", icon: Ticket },
- { title: "GET APP", sub: "ANDROID & IOS", icon: Download },
- { title: "BOOKINGS", sub: "YOUR PAST", icon: CalendarDays }
+ { title: "LIST VENUE", sub: "EARN NOW", icon: Store, link: "/venues" },
+ { title: "HOST GAME", sub: "START HOSTING", icon: Ticket, link: "/join-games" },
+ { title: "GET APP", sub: "ANDROID & IOS", icon: Download, link: "#" },
+ { title: "BOOKINGS", sub: "YOUR PAST", icon: CalendarDays, link: "/profile" }
  ].map(item => (
- <div key={item.title} className="flex-1 flex flex-col lg:flex-row items-center justify-center lg:justify-start text-center lg:text-left gap-2 lg:gap-4 px-1 lg:px-6 py-4 lg:py-2" style={{ borderColor: BDR }}>
+ <Link to={item.link} key={item.title} className="flex-1 flex flex-col lg:flex-row items-center justify-center lg:justify-start text-center lg:text-left gap-2 lg:gap-4 px-1 lg:px-6 py-4 lg:py-2 hover:bg-white/5 transition-colors cursor-pointer" style={{ borderColor: BDR }}>
  <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-full flex items-center justify-center border shrink-0" style={{ borderColor: "transparent", background: GRAD }}>
  <item.icon className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: "#000" }} />
  </div>
@@ -1416,7 +1418,7 @@ export default function Home() {
  <h4 className="font-display text-[9px] sm:text-xs lg:text-xl leading-tight lg:leading-none mb-0.5 lg:mb-1 text-white">{item.title}</h4>
  <p className="text-[6px] sm:text-[8px] lg:text-[10px] font-bold text-gray-500 uppercase tracking-wider lg:tracking-widest hidden sm:block">{item.sub}</p>
  </div>
- </div>
+ </Link>
  ))}
  </div>
  </section>
