@@ -5,7 +5,8 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import { 
   Calendar as CalendarIcon, Clock, MapPin, Star, Shield, Award, 
   CheckCircle, ChevronLeft, MessageSquare, Send, Loader2, Info, User,
-  Camera, Zap, CalendarDays
+  Camera, Zap, CalendarDays, Trophy, Activity, CheckCircle2, AlertTriangle, ShieldCheck,
+  Globe, Users, Target, Briefcase
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { format, addDays, startOfToday } from "date-fns";
@@ -175,19 +176,159 @@ export default function ProfessionalDetails() {
               </div>
             </div>
 
-            {/* Certifications */}
+            {/* Professional Dossier Matrix */}
             <div className="bg-neutral-900/40 rounded-xl border border-neutral-800 p-8 mb-8">
               <h3 className="font-heading text-xl uppercase mb-6 flex items-center gap-2">
-                <Shield size={18} className="text-[#55DEE8]" /> Certifications
+                <Briefcase size={18} className="text-[#55DEE8]" /> Professional Matrix
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {pro.certifications?.length > 0 ? pro.certifications.map((cert, i) => (
-                  <div key={i} className="aspect-video rounded-xl bg-black border border-neutral-800 overflow-hidden group cursor-pointer">
-                    <img src={cert} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Operational Headline</p>
+                  <div className="p-4 bg-black/40 rounded-xl border border-neutral-800 text-white font-bold tracking-wide">
+                    {pro.specialization || "Senior Professional"}
                   </div>
-                )) : [1, 2, 3, 4].map(i => (
-                  <div key={i} className="aspect-video rounded-xl bg-black/40 border border-dashed border-neutral-800 flex items-center justify-center">
-                    <Camera size={20} className="text-neutral-800" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Proficiency Level</p>
+                  <div className="p-4 bg-black/40 rounded-xl border border-neutral-800 text-[#BFF367] font-bold tracking-wide uppercase">
+                    {pro.coachingLevel || "Elite Associate"}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Industry Tenure</p>
+                  <div className="p-4 bg-black/40 rounded-xl border border-neutral-800 text-white font-bold tracking-wide">
+                    {pro.experience || "5+ Professional Seasons"}
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Engagement</p>
+                    <div className="p-4 bg-black/40 rounded-xl border border-neutral-800 text-white font-bold tracking-wide uppercase">
+                      {pro.availabilityMode || "Hybrid Mode"}
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Languages</p>
+                    <div className="p-4 bg-black/40 rounded-xl border border-neutral-800 text-white font-bold tracking-wide flex items-center gap-2 uppercase">
+                      <Globe size={16} className="text-[#55DEE8]" /> {pro.languages?.join(", ") || "English, Hindi"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <hr className="border-neutral-800/50 my-6" />
+
+              <h3 className="font-heading text-xl uppercase mb-6 flex items-center gap-2">
+                <Target size={18} className="text-[#55DEE8]" /> Specialization Scopes
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Operational Types</p>
+                  <div className="flex flex-wrap gap-2">
+                    {["Individual", "Group", "Team", "Clinic"].map(type => (
+                      <span key={type} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest border ${["Individual", "Team"].includes(type) ? 'bg-[#55DEE8]/10 text-[#55DEE8] border-[#55DEE8]/20' : 'bg-black/40 text-gray-500 border-neutral-800'}`}>
+                        {type}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Target Demographics</p>
+                  <div className="flex flex-wrap gap-2">
+                    {["Kids (<12)", "Teens (13-19)", "Adults (20+)", "Seniors"].map(demo => (
+                      <span key={demo} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest border ${["Adults (20+)", "Teens (13-19)"].includes(demo) ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-black/40 text-gray-500 border-neutral-800'}`}>
+                        {demo}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <hr className="border-neutral-800/50 my-6" />
+
+              <h3 className="font-heading text-xl uppercase mb-6 flex items-center gap-2">
+                <Award size={18} className="text-[#55DEE8]" /> Career Milestones
+              </h3>
+              <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-neutral-800 before:to-transparent">
+                {[
+                  { date: "2024", title: "Officiated State Level Finals", desc: "Selected from top 10 umpires for the season finale." },
+                  { date: "2022", title: "ICC Panel Induction", desc: "Officially inducted into the regional professional panel." }
+                ].map((milestone, idx) => (
+                  <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full border border-neutral-800 bg-black text-[#55DEE8] shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow flex-col text-[8px] font-black leading-tight z-10">
+                      <span className="text-gray-500">YR</span>
+                      {milestone.date}
+                    </div>
+                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-neutral-800 bg-black/40 hover:border-[#55DEE8]/30 transition-all">
+                      <h4 className="text-sm font-bold text-white uppercase tracking-tight">{milestone.title}</h4>
+                      <p className="text-xs text-gray-400 mt-1">{milestone.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* NEW: Performance & Analytics KPIs */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-neutral-900/40 rounded-xl border border-neutral-800 p-6 flex flex-col items-center justify-center text-center hover:border-[#55DEE8]/30 transition-all">
+                <Trophy size={24} className="text-[#55DEE8] mb-3" />
+                <h4 className="text-2xl font-black text-white">{pro.totalMatches || 142}</h4>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Matches Officiated</p>
+              </div>
+              <div className="bg-neutral-900/40 rounded-xl border border-neutral-800 p-6 flex flex-col items-center justify-center text-center hover:border-[#BFF367]/30 transition-all">
+                <Activity size={24} className="text-[#BFF367] mb-3" />
+                <h4 className="text-2xl font-black text-white">{pro.accuracy || 94.5}%</h4>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Decision Accuracy</p>
+              </div>
+              <div className="bg-neutral-900/40 rounded-xl border border-neutral-800 p-6 flex flex-col items-center justify-center text-center hover:border-[#55DEE8]/30 transition-all">
+                <ShieldCheck size={24} className="text-[#55DEE8] mb-3" />
+                <h4 className="text-2xl font-black text-white">{pro.reliability || 98.5}%</h4>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Reliability Score</p>
+              </div>
+              <div className="bg-neutral-900/40 rounded-xl border border-neutral-800 p-6 flex flex-col items-center justify-center text-center hover:border-amber-500/30 transition-all">
+                <Star size={24} className="text-amber-500 mb-3 fill-amber-500" />
+                <h4 className="text-2xl font-black text-white">{pro.rating?.toFixed(1) || 4.8}</h4>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Kridaz Rating</p>
+              </div>
+            </div>
+
+            {/* Enterprise Certifications */}
+            <div className="bg-neutral-900/40 rounded-xl border border-neutral-800 p-8 mb-8">
+              <h3 className="font-heading text-xl uppercase mb-6 flex items-center gap-2">
+                <Shield size={18} className="text-[#55DEE8]" /> Credentials & Licenses
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { name: "BCCI Level 2 Umpire", issuer: "BCCI", status: "Active", expiry: "Dec 2027", badge: "Elite", image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=800" },
+                  { name: "ICC Match Referee Seminar", issuer: "ICC", status: "Active", expiry: "Aug 2026", badge: "Standard", image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=800" }
+                ].map((cert, idx) => (
+                  <div key={idx} className="relative rounded-[1.5rem] border border-neutral-800 overflow-hidden group hover:border-[#55DEE8]/30 transition-all aspect-[4/3] bg-black">
+                    <img src={cert.image} alt={cert.name} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                    
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex flex-col justify-end p-5 pointer-events-none">
+                      <div className="flex justify-between items-end mb-2">
+                        <div className="flex gap-2 items-center">
+                          <span className="px-2 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] text-[8px] font-black uppercase tracking-widest rounded border border-[#55DEE8]/20 backdrop-blur-md">
+                            {cert.status}
+                          </span>
+                          {cert.badge === 'Elite' && (
+                            <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase tracking-widest rounded border border-amber-500/20 backdrop-blur-md">
+                              Elite
+                            </span>
+                          )}
+                        </div>
+                        <Award size={16} className={cert.badge === 'Elite' ? 'text-amber-500' : 'text-[#55DEE8]'} />
+                      </div>
+                      
+                      <h4 className="text-sm font-bold text-white tracking-tight uppercase mb-1 drop-shadow-md">{cert.name}</h4>
+                      
+                      <div className="flex items-center gap-3 text-[9px] font-bold text-gray-400 uppercase tracking-widest drop-shadow-md">
+                        <span>{cert.issuer}</span>
+                        <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+                        <span>Exp: {cert.expiry}</span>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>

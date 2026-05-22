@@ -100,11 +100,15 @@ const MODULE_MANIFEST = [
     description: "Cricket match scoring engine & ball-by-ball events",
   },
   {
-    // scorer.routes.js lives inside the scoring module (same domain)
     module: "scoring",
     routeFile: "scorer.routes.js",
     mountPath: "/scorer",
     description: "Scorer role assignment, acceptance & scoring actions",
+  },
+  {
+    module: "umpire",
+    mountPath: "/umpire",
+    description: "Umpire profile, KPI stats & assignments",
   },
 ];
 
