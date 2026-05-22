@@ -6,6 +6,8 @@ import { runInTransaction } from "../../utils/transaction.js";
 import { generateUserToken } from "../../utils/generateJwtToken.js";
 import WalletService from "../../services/wallet.service.js";
 import logger from "../../utils/logger.js";
+import { getIO } from "../../config/socket.js";
+import { liveStateService } from "../../services/liveState.service.js";
 
 const fullGameInclude = {
   host: { select: { id: true, name: true, profilePicture: true } },
@@ -1802,8 +1804,8 @@ export const updateTickerTheme = async (req, res) => {
     const game = await prisma.hostedGame.findUnique({ where: { id } });
     if (!game) throw new Error("Game not found");
 
-    // Authorization: Only Host or assigned Streamer
-    if (game.hostId !== userId && game.streamerId !== userId) {
+    // Authorization: Only Host, assigned Streamer, or Scorer
+    if (game.hostId !== userId && game.streamerId !== userId && game.scorerId !== userId) {
       return res.status(403).json({ success: false, message: "Unauthorized to update ticker theme" });
     }
 
@@ -1811,6 +1813,30 @@ export const updateTickerTheme = async (req, res) => {
       where: { id },
       data: { tickerTheme }
     });
+
+    // Update Redis cache live score theme if it exists
+    try {
+      const cachedScore = await liveStateService.getLiveScore(id);
+      if (cachedScore) {
+        cachedScore.tickerTheme = tickerTheme;
+        await liveStateService.setLiveScore(id, cachedScore);
+        
+        // Broadcast theme & score updates via Socket.IO
+        const io = getIO();
+        if (io) {
+          io.to(id).emit("scoreUpdated", cachedScore);
+          io.to(id).emit("themeUpdated", tickerTheme);
+        }
+      } else {
+        // Even if no score is cached, still broadcast theme update
+        const io = getIO();
+        if (io) {
+          io.to(id).emit("themeUpdated", tickerTheme);
+        }
+      }
+    } catch (cacheErr) {
+      logger.error("[Scoring] Redis/Socket error on ticker theme update:", cacheErr);
+    }
     
     return res.status(200).json({ success: true, game: updatedGame });
   } catch (error) {

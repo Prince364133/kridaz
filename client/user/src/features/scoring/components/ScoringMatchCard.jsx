@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Clock, Tv, ExternalLink, Activity, Play, Star, Eye, Trash2 } from 'lucide-react';
+import { Trophy, Clock, Tv, ExternalLink, Activity, Play, Star, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import DeleteMatchModal from './DeleteMatchModal';
 
-const ScoringMatchCard = ({ match, onDeleteSuccess }) => {
+const ScoringMatchCard = ({ match }) => {
   const navigate = useNavigate();
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const isLive = match.status === 'LIVE';
   const isUpcoming = match.status === 'SCHEDULED' || match.status === 'SETUP';
@@ -41,13 +39,6 @@ const ScoringMatchCard = ({ match, onDeleteSuccess }) => {
               <span className="flex items-center gap-1.5"><Activity size={10} /> Live</span>
             ) : match.status}
           </div>
-          <button 
-            onClick={() => setShowDeleteModal(true)}
-            className="ml-2 p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors border border-red-500/20"
-            title="Delete Match"
-          >
-            <Trash2 size={14} />
-          </button>
         </div>
 
         {/* Teams */}
@@ -110,17 +101,6 @@ const ScoringMatchCard = ({ match, onDeleteSuccess }) => {
           </button>
         </div>
       </div>
-
-      {showDeleteModal && (
-        <DeleteMatchModal
-          matchId={match.id || match._id}
-          onClose={() => setShowDeleteModal(false)}
-          onSuccess={() => {
-            setShowDeleteModal(false);
-            if (onDeleteSuccess) onDeleteSuccess();
-          }}
-        />
-      )}
     </motion.div>
   );
 };

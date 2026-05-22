@@ -145,7 +145,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
         if (res.data.registrationToken) {
           setPhoneRegistrationToken(res.data.registrationToken);
         }
-        toast.success("Phone verified successfully!");
+        toast.success("Phone number verified successfully!");
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Invalid OTP");

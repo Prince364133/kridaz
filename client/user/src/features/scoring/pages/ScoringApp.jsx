@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play } from 'lucide-react';
+import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import useCricketScoring from '../hooks/useCricketScoring';
@@ -12,6 +12,7 @@ import SelectBowlerModal from '@features/scoring/components/SelectBowlerModal';
 import TossModal from '@features/scoring/components/TossModal';
 import { io } from 'socket.io-client';
 import ScoringPasswordModal from '../components/ScoringPasswordModal';
+import TickerThemeStoreModal from '@features/scoring/components/TickerThemeStoreModal';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6001';
 /**
@@ -199,6 +200,7 @@ const ScoringApp = () => {
   const [showWicketModal, setShowWicketModal] = useState(false);
   const [showBowlerModal, setShowBowlerModal] = useState(false);
   const [showTossModal, setShowTossModal] = useState(false);
+  const [showThemeStore, setShowThemeStore] = useState(false);
   const [extraModal, setExtraModal] = useState(null);
 
   const score = (() => {
@@ -245,7 +247,7 @@ const ScoringApp = () => {
   );
 
   const needsInningsSetup = (matchData?.id || matchData?._id) && matchData?.innings?.length > 0 && !matchData?.strikerId;
-  const needsMatchStart = (matchData?.id || matchData?._id) && (!matchData?.innings || matchData?.innings?.length === 0);
+  const needsMatchStart = !matchData?.id && !matchData?._id;
   const isFirstInnings = matchData?.currentInningsIndex === 0;
   const isFirstInningsComplete = isFirstInnings && (currentInnings?.totalWickets >= 10 || currentInnings?.totalBalls >= (matchData?.matchId?.oversPerInnings * 6));
 
@@ -759,6 +761,14 @@ const ScoringApp = () => {
                             <input readOnly value={liveUrls.obsOverlay} className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[9px] text-neutral-400 font-bold truncate outline-none" />
                             <button onClick={() => { navigator.clipboard.writeText(liveUrls.obsOverlay); toast.success('Copied!'); }} className="px-4 py-2 bg-[#00C187]/10 text-[#00C187] text-[8px] font-black uppercase rounded-xl border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
                           </div>
+                          <button 
+                            type="button"
+                            onClick={() => setShowThemeStore(true)}
+                            className="w-full mt-2 py-2.5 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-xl border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
+                          >
+                            <Sparkles size={12} />
+                            Change Ticker Theme
+                          </button>
                         </div>
                         <div className="space-y-1.5">
                           <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Public Scoreboard</p>
@@ -915,6 +925,20 @@ const ScoringApp = () => {
               completeMatch();
               navigate('/');
             }
+          }}
+        />
+      )}
+
+      {showThemeStore && (
+        <TickerThemeStoreModal
+          activeTheme={matchData?.hostedGameId?.tickerTheme || 'neon_classic'}
+          matchId={matchId}
+          onClose={() => setShowThemeStore(false)}
+          onThemeApplied={(newTheme) => {
+            if (matchData?.hostedGameId) {
+              matchData.hostedGameId.tickerTheme = newTheme;
+            }
+            refresh();
           }}
         />
       )}

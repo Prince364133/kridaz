@@ -1036,6 +1036,7 @@ export const fetchLiveScoreSnapshot = async (matchId) => {
       tossWinner: null,
       tossDecision: null,
       message: 'Match starts soon',
+      tickerTheme: match.tickerTheme || 'classic',
     };
   }
 
@@ -1366,59 +1367,4 @@ export const verifyScoringPassword = async (gameId, password) => {
     { expiresIn: '8h' }
   );
   return { token };
-};
-
-/**
- * Delete a match permanently after verifying scoring password
- */
-export const deleteMatch = async (matchId, password, userId) => {
-  const game = await prisma.hostedGame.findUnique({
-    where: { id: matchId },
-    select: { id: true, hostId: true, scoringPassword: true }
-  });
-
-  if (!game) {
-    const err = new Error("GAME_NOT_FOUND");
-    err.statusCode = 404;
-    throw err;
-  }
-
-  if (game.hostId !== userId) {
-    const err = new Error("UNAUTHORIZED");
-    err.statusCode = 403;
-    throw err;
-  }
-
-  if (game.scoringPassword) {
-    const argon2 = await import('argon2');
-    const isValid = await argon2.verify(game.scoringPassword, password);
-    if (!isValid) {
-      const err = new Error("INVALID_PASSWORD");
-      err.statusCode = 401;
-      throw err;
-    }
-  }
-
-  // Find the cricket match to delete related records if any
-  const cricketMatch = await prisma.cricketMatch.findUnique({
-    where: { gameId: matchId },
-    select: { id: true }
-  });
-
-  if (cricketMatch) {
-    await prisma.$transaction([
-      prisma.matchBall.deleteMany({ where: { matchId: cricketMatch.id } }),
-      prisma.innings.deleteMany({ where: { matchId: cricketMatch.id } }),
-      prisma.matchPlayerStat.deleteMany({ where: { matchId: cricketMatch.id } }),
-      prisma.cricketMatch.delete({ where: { id: cricketMatch.id } })
-    ]);
-  }
-
-  await prisma.$transaction([
-    prisma.gameSlot.deleteMany({ where: { gameId: matchId } }),
-    prisma.customPlayerInvite.deleteMany({ where: { gameId: matchId } }),
-    prisma.hostedGame.delete({ where: { id: matchId } })
-  ]);
-
-  return true;
 };

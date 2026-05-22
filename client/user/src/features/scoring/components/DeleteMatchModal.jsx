@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Trash2, Loader2, X } from 'lucide-react';
+import { Lock, Loader2, X } from 'lucide-react';
 
-const DeleteMatchModal = ({ matchId, onClose, onSuccess }) => {
+const ScoringPasswordModal = ({ matchId, actionLabel = 'Unlock Scoring App', onClose, onSuccess }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const THEME_COLOR = '#EF4444'; // Red for delete
+  const THEME_COLOR = '#00C187';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,8 +20,8 @@ const DeleteMatchModal = ({ matchId, onClose, onSuccess }) => {
 
     try {
       const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:6001';
-      const response = await fetch(`${apiBase}/api/scoring/match/${matchId}`, {
-        method: 'DELETE',
+      const response = await fetch(`${apiBase}/api/scoring/auth/${matchId}`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -31,7 +31,9 @@ const DeleteMatchModal = ({ matchId, onClose, onSuccess }) => {
       
       const data = await response.json();
       if (data.success) {
-        onSuccess();
+        // Store verification success in session storage so they don't get prompted repeatedly on refresh
+        sessionStorage.setItem(`scoringAuth_${matchId}`, 'true');
+        onSuccess(data.token);
       } else {
         setError(data.message || 'Incorrect password');
       }
@@ -45,11 +47,11 @@ const DeleteMatchModal = ({ matchId, onClose, onSuccess }) => {
   return (
     <div className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-6 animate-in fade-in duration-500">
       <div className="w-full max-w-sm bg-[#000] border border-white/10 rounded-[3rem] p-10 space-y-8 relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/10 blur-3xl pointer-events-none" />
         
         <div className="flex justify-between items-center relative z-10">
           <h3 className="text-2xl font-black uppercase tracking-tighter text-white flex items-center gap-3">
-            <Trash2 size={24} style={{ color: THEME_COLOR }} /> Delete
+            <Lock size={24} style={{ color: THEME_COLOR }} /> Auth
           </h3>
           {onClose && (
             <button onClick={onClose} className="p-3 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all text-neutral-400 hover:text-white">
@@ -59,9 +61,9 @@ const DeleteMatchModal = ({ matchId, onClose, onSuccess }) => {
         </div>
 
         <div className="space-y-2 relative z-10">
-          <p className="text-xs font-black uppercase text-neutral-500 tracking-[0.2em]">Permanently Delete Match</p>
+          <p className="text-xs font-black uppercase text-neutral-500 tracking-[0.2em]">{actionLabel}</p>
           <p className="text-[10px] text-neutral-600 font-bold uppercase tracking-widest leading-relaxed">
-            This action cannot be undone. Enter the scoring password to confirm deletion.
+            This match is protected. Enter the scoring password to proceed.
           </p>
         </div>
 
@@ -72,7 +74,7 @@ const DeleteMatchModal = ({ matchId, onClose, onSuccess }) => {
               placeholder="Enter Password..."
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-white/[0.02] border border-white/10 rounded-2xl px-6 py-5 text-sm focus:border-red-500 outline-none text-white font-bold tracking-widest transition-all"
+              className="w-full bg-white/[0.02] border border-white/10 rounded-2xl px-6 py-5 text-sm focus:border-[#00C187] outline-none text-white font-bold tracking-widest transition-all"
             />
             {error && (
               <p className="text-[10px] text-red-500 font-black uppercase tracking-widest pl-2 animate-in slide-in-from-top-1">
@@ -86,12 +88,12 @@ const DeleteMatchModal = ({ matchId, onClose, onSuccess }) => {
             disabled={loading}
             className="w-full py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] transition-all transform active:scale-95 shadow-xl flex items-center justify-center gap-2"
             style={{ 
-              backgroundColor: loading ? '#EF444480' : THEME_COLOR, 
-              color: '#fff', 
+              backgroundColor: loading ? '#00C18780' : THEME_COLOR, 
+              color: '#000', 
               boxShadow: `0 10px 30px ${THEME_COLOR}33` 
             }}
           >
-            {loading ? <Loader2 size={16} className="animate-spin" /> : 'Delete Match'}
+            {loading ? <Loader2 size={16} className="animate-spin" /> : 'Authenticate'}
           </button>
         </form>
       </div>
@@ -99,4 +101,4 @@ const DeleteMatchModal = ({ matchId, onClose, onSuccess }) => {
   );
 };
 
-export default DeleteMatchModal;
+export default ScoringPasswordModal;

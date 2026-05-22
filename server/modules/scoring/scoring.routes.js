@@ -25,7 +25,7 @@ import {
 } from "./scoring.controller.js";
 import verifyAuth from "../../middleware/jwt/auth.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
-import { startScoringSchema, updateScoreSchema, tossSchema, setupScoringGameSchema } from "./scoring.validator.js";
+import { startScoringSchema, updateScoreSchema, tossSchema, setupScoringGameSchema, undoLastBallSchema, completeMatchSchema, startNextInningsSchema, setPlayersSchema } from "./scoring.validator.js";
 
 const router = Router();
 
@@ -243,7 +243,7 @@ router.put("/update", validate(updateScoreSchema), updateScore);
  *       200:
  *         description: Match completed
  */
-router.post("/complete", completeMatch);
+router.post("/complete", validate(completeMatchSchema), completeMatch);
 
 /**
  * @swagger
@@ -328,7 +328,7 @@ router.post("/:matchId/stream-config", updateStreamConfig);
  *       200:
  *         description: Innings started
  */
-router.post("/next-innings", startNextInnings);
+router.post("/next-innings", validate(startNextInningsSchema), startNextInnings);
 
 /**
  * @swagger
@@ -367,7 +367,7 @@ router.post("/toss", validate(tossSchema), setToss);
  *       200:
  *         description: Players assigned
  */
-router.post("/set-players", setPlayers);
+router.post("/set-players", validate(setPlayersSchema), setPlayers);
 
 /**
  * @swagger
@@ -391,7 +391,7 @@ router.post("/set-players", setPlayers);
  *       200:
  *         description: Action reverted
  */
-router.post("/undo", undoLastBall);
+router.post("/undo", validate(undoLastBallSchema), undoLastBall);
 
 /**
  * @swagger

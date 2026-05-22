@@ -53,7 +53,7 @@ const TeamProfile = () => {
 
   const { data: teamData, isLoading, error } = useGetTeamByIdQuery(id);
   const { data: myTeamsData } = useGetMyTeamsQuery(undefined, { skip: !isLoggedIn });
-  const { data: scoringGamesData, refetch: refetchScoringGames } = useGetMyScoringGamesQuery(undefined, { skip: !isLoggedIn });
+  const { data: scoringGamesData } = useGetMyScoringGamesQuery(undefined, { skip: !isLoggedIn });
   const [requestJoin, { isLoading: isJoining }] = useRequestToJoinMutation();
   const [requestOpponent, { isLoading: isChallenging }] = useRequestOpponentMutation();
 
@@ -467,7 +467,6 @@ const TeamProfile = () => {
                       <ScoringMatchCard 
                         key={game.id} 
                         match={mappedMatch} 
-                        onDeleteSuccess={refetchScoringGames}
                       />
                     );
                   })}
