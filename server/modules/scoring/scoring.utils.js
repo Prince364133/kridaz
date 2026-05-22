@@ -196,6 +196,7 @@ export const computeScoreSnapshot = (scoring, match) => {
     ballsRemaining,
     rrr: (runsNeeded && ballsRemaining) ? ((runsNeeded / ballsRemaining) * 6).toFixed(2) : null,
     last6Balls: lastBalls,
+    lastBallRaw: scoring.timeline && scoring.timeline.length > 0 ? scoring.timeline[0] : null,
     batters: activeBatters,
     bowler: currentBowler,
     result: scoring.status === "COMPLETED" ? "Match Ended" : null,

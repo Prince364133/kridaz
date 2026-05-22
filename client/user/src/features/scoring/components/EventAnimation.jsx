@@ -1,11 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const SFX_URLS = {
-  six: 'https://cdn.pixabay.com/audio/2022/03/15/audio_e0ea43ccaf.mp3', // Big Cheer
-  four: 'https://cdn.pixabay.com/audio/2022/05/16/audio_f5f6bd55cd.mp3', // Applause
-  wicket: 'https://cdn.pixabay.com/audio/2022/10/30/audio_55a2ee0920.mp3', // Gasp/Shock
-};
+const SFX_URLS = {}; // Disabled due to 403 Forbidden hotlinking block from Pixabay
 
 const THEME_STYLES = {
   neon_classic: {
