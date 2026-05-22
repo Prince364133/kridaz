@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { CoachDashboard } from "@features/coach";
 import { UmpireDashboard } from "@features/umpire";
 import { StreamerDashboard } from "@features/streamer";
+import { CommentatorDashboard } from "@features/commentator";
 
 const ProfessionalDashboard = () => {
   const { role } = useParams();
@@ -15,7 +16,7 @@ const ProfessionalDashboard = () => {
     case "streamer":
       return <StreamerDashboard />;
     case "commentator":
-      return <div className="text-white p-8">Commentator Dashboard (Coming Soon)</div>;
+      return <CommentatorDashboard />;
     default:
       return <div className="text-white p-8">Unified Professional Dashboard</div>;
   }

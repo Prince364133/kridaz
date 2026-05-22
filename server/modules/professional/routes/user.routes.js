@@ -9,7 +9,12 @@ import {
   handleBookingRequest, 
   addProfessionalReview, 
   replyToReview,
-  updateProfessionalProfile
+  updateProfessionalProfile,
+  getProfessionalTasks,
+  createProfessionalTask,
+  getProfessionalCustomers,
+  createProfessionalCustomer,
+  updateWorkingHours
 } from "../professional.controller.js";
 import protect from "../../../middleware/jwt/auth.middleware.js";
 
@@ -197,5 +202,75 @@ router.post("/review/reply", protect, replyToReview);
  *         description: Profile updated
  */
 router.put("/update-profile", protect, updateProfessionalProfile);
+
+/**
+ * @swagger
+ * /professional/tasks:
+ *   get:
+ *     summary: Get professional tasks for calendar
+ *     tags: [Professional]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of tasks
+ */
+router.get("/tasks", protect, getProfessionalTasks);
+
+/**
+ * @swagger
+ * /professional/tasks:
+ *   post:
+ *     summary: Create professional task
+ *     tags: [Professional]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Task created
+ */
+router.post("/tasks", protect, createProfessionalTask);
+
+/**
+ * @swagger
+ * /professional/customers:
+ *   get:
+ *     summary: Get professional's customers
+ *     tags: [Professional]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of customers
+ */
+router.get("/customers", protect, getProfessionalCustomers);
+
+/**
+ * @swagger
+ * /professional/customers:
+ *   post:
+ *     summary: Add manual customer
+ *     tags: [Professional]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Customer created
+ */
+router.post("/customers", protect, createProfessionalCustomer);
+
+/**
+ * @swagger
+ * /professional/working-hours:
+ *   put:
+ *     summary: Update professional working hours
+ *     tags: [Professional]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Working hours updated
+ */
+router.put("/working-hours", protect, updateWorkingHours);
 
 export default router;

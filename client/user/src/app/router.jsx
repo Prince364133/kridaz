@@ -127,6 +127,8 @@ const ProfessionalAvailability = lazy(() => import("@features/networking").then(
 const ProfessionalBookings     = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalBookings })));
 const ProfessionalReviews      = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalReviews })));
 const ProfessionalProfile      = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalProfile })));
+const PracticeScheduling       = lazy(() => import("@features/networking").then(m => ({ default: m.PracticeScheduling })));
+const ProfessionalCustomers    = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalCustomers })));
 const DashboardProfile         = lazy(() => import("@features/partner-profile").then(m => ({ default: m.DashboardProfile })));
 
 // ΓöÇΓöÇ Lazy: Admin Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
@@ -245,6 +247,8 @@ const router = createBrowserRouter([
       { path: "create-stream",              element: <S><CreateStream /></S> },
       // Common
       { path: "availability",               element: <S><ProfessionalAvailability /></S> },
+      { path: "practice-scheduling",        element: <S><PracticeScheduling /></S> },
+      { path: "customers",                  element: <S><ProfessionalCustomers /></S> },
       { path: "bookings",                   element: <S><ProfessionalBookings /></S> },
       { path: "reviews",                    element: <S><ProfessionalReviews /></S> },
       { path: "revenue",                    element: <S><OwnerRevenue /></S> },
