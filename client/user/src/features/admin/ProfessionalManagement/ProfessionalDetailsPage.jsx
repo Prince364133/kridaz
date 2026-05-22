@@ -273,7 +273,7 @@ const ProfessionalDetailsPage = () => {
                   </div>
                   <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6">
                     <p className="text-gray-400 text-xs uppercase tracking-widest font-bold mb-3">Pending</p>
-                    <p className="text-3xl font-bold text-yellow-400">₹{profile?.pendingBalance?.toFixed(2) || "0.00"}</p>
+                    <p className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">₹{profile?.pendingBalance?.toFixed(2) || "0.00"}</p>
                   </div>
                   <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6">
                     <p className="text-gray-400 text-xs uppercase tracking-widest font-bold mb-3">Total Withdrawn</p>
@@ -293,12 +293,12 @@ const ProfessionalDetailsPage = () => {
                         <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border ${
                           profile?.bankingDetails?.kycStatus === "VERIFIED" ? "bg-green-500/10 text-green-400 border-green-500/30" :
                           profile?.bankingDetails?.kycStatus === "REJECTED" ? "bg-red-500/10 text-red-400 border-red-500/30" :
-                          "bg-yellow-500/10 text-yellow-400 border-yellow-500/30"
+                          "bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border-[#55DEE8]/30"
                         }`}>
                           <div className={`w-2 h-2 rounded-full ${
                             profile?.bankingDetails?.kycStatus === "VERIFIED" ? "bg-green-400" :
                             profile?.bankingDetails?.kycStatus === "REJECTED" ? "bg-red-400" :
-                            "bg-yellow-400 animate-pulse"
+                            "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] animate-pulse"
                           }`}></div>
                           {profile?.bankingDetails?.kycStatus || "NOT SUBMITTED"}
                         </div>

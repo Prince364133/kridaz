@@ -57,7 +57,7 @@ const MyJoinedGames = () => {
             <Trophy size={48} className="mx-auto mb-4 text-neutral-700" />
             <h3 className="text-xl font-bold">No matches joined yet</h3>
             <p className="text-neutral-500 mb-6">Explore games hosted by the community and join one!</p>
-            <button onClick={() => window.location.href='/join-games'} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-xl">
+            <button onClick={() => window.location.href='/join-games'} className="px-8 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-bold rounded-xl">
               Find Games
             </button>
           </div>
@@ -75,7 +75,7 @@ const MyJoinedGames = () => {
               <div className="p-6 border-b border-neutral-800">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    <span className="bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
                       {game.gameType}
                     </span>
                     <h2 className="text-2xl font-black mt-1 uppercase italic tracking-tighter">
@@ -97,13 +97,13 @@ const MyJoinedGames = () => {
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex flex-wrap gap-4 text-xs font-medium text-neutral-400">
                     <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-full">
-                      <Calendar size={14} className="text-yellow-500" /> {new Date(game.date).toLocaleDateString()}
+                      <Calendar size={14} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" /> {new Date(game.date).toLocaleDateString()}
                     </div>
                     <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-full">
-                      <Clock size={14} className="text-yellow-500" /> {game.time}
+                      <Clock size={14} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" /> {game.time}
                     </div>
                     <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-full">
-                      <MapPin size={14} className="text-yellow-500" /> {game.ground?.name || 'Self-Arranged'}
+                      <MapPin size={14} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" /> {game.ground?.name || 'Self-Arranged'}
                     </div>
                   </div>
                   
@@ -143,7 +143,7 @@ const MyJoinedGames = () => {
                       <p className="font-black uppercase tracking-tighter">{game.host?.name}</p>
                    </div>
                 </div>
-                <div className="flex items-center gap-1 text-yellow-500 font-black">
+                <div className="flex items-center gap-1 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black">
                   <Coins size={14} /> {game.perPlayerCharge}
                 </div>
               </div>

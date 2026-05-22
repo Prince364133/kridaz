@@ -108,14 +108,14 @@ const InningsSetupModal = ({
               <button
                 key={player.userId}
                 onClick={() => handleSelect(player)}
-                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl border border-white/8 bg-white/4 hover:border-yellow-500/50 hover:bg-yellow-500/8 transition-all group text-left"
+                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl border border-white/8 bg-white/4 hover:border-[#55DEE8]/50 hover:bg-gradient-to-r from-[#55DEE8]/8 to-[#BFF367]/8 transition-all group text-left"
               >
                 {/* Avatar */}
-                <div className="w-10 h-10 rounded-xl bg-neutral-800 flex items-center justify-center text-sm font-black text-yellow-500 shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-neutral-800 flex items-center justify-center text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] shrink-0">
                   {player.name?.charAt(0)?.toUpperCase() || '?'}
                 </div>
                 <span className="flex-1 font-bold text-white text-sm">{player.name || 'Unnamed'}</span>
-                <ChevronRight size={16} className="text-neutral-600 group-hover:text-yellow-500 transition-colors" />
+                <ChevronRight size={16} className="text-neutral-600 group-hover:text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] transition-colors" />
               </button>
             ))}
           </div>
@@ -124,8 +124,8 @@ const InningsSetupModal = ({
           {(striker || nonStriker) && (
             <div className="px-6 py-4 border-t border-white/10 flex gap-3">
               {striker && (
-                <div className="flex-1 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl px-3 py-2 text-center">
-                  <p className="text-[9px] font-black text-yellow-500 uppercase tracking-widest mb-0.5">Striker</p>
+                <div className="flex-1 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/20 rounded-2xl px-3 py-2 text-center">
+                  <p className="text-[9px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] uppercase tracking-widest mb-0.5">Striker</p>
                   <p className="text-xs font-black text-white truncate">{striker.name}</p>
                 </div>
               )}

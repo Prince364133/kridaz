@@ -79,7 +79,7 @@ const EditTurf = () => {
   if (fetching) return <DashboardSkeleton />;
 
   const FieldStatus = ({ isPending }) => isPending ? (
-    <span className="ml-2 px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[7px] font-bold uppercase tracking-widest rounded-[2px] animate-pulse">
+    <span className="ml-2 px-1.5 py-0.5 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/20 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[7px] font-bold uppercase tracking-widest rounded-[2px] animate-pulse">
       Pending Review
     </span>
   ) : null;
@@ -126,7 +126,7 @@ const EditTurf = () => {
               <input
                 {...register("name")}
                 type="text"
-                className={`w-full bg-[#111111] border ${pendingUpdates?.name ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none transition-all text-sm font-medium placeholder-[#333]`}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.name ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none transition-all text-sm font-medium placeholder-[#333]`}
                 placeholder="Enter arena identity..."
               />
               {errors.name && <p className="text-[#55DEE8] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.name.message}</p>}
@@ -140,7 +140,7 @@ const EditTurf = () => {
               </label>
               <textarea
                 {...register("description")}
-                className={`w-full bg-[#111111] border ${pendingUpdates?.description ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white focus:border-[#55DEE8]/60 focus:outline-none text-sm h-32 rounded-[8px] p-4 transition-all resize-none`}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.description ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white focus:border-[#55DEE8]/60 focus:outline-none text-sm h-32 rounded-[8px] p-4 transition-all resize-none`}
                 placeholder="Describe your facility's features and amenities..."
               ></textarea>
               {errors.description && (
@@ -159,7 +159,7 @@ const EditTurf = () => {
               <textarea
                 {...register("policies")}
                 maxLength={1000}
-                className={`w-full bg-[#111111] border ${pendingUpdates?.policies ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white focus:border-[#55DEE8]/60 focus:outline-none text-sm h-48 rounded-[8px] p-4 transition-all resize-none`}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.policies ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white focus:border-[#55DEE8]/60 focus:outline-none text-sm h-48 rounded-[8px] p-4 transition-all resize-none`}
                 placeholder="Define your facility's rules, cancellation policies, and safety guidelines (Minimum 200 characters)..."
               ></textarea>
               <div className="flex justify-between mt-2 ml-1">
@@ -183,7 +183,7 @@ const EditTurf = () => {
                 {...register("location")}
                 type="text"
                 placeholder="Full Street Address..."
-                className={`w-full bg-[#111111] border ${pendingUpdates?.location ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium placeholder-[#333]`}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.location ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium placeholder-[#333]`}
               />
               {errors.location && <p className="text-[#55DEE8] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.location.message}</p>}
             </div>
@@ -255,7 +255,7 @@ const EditTurf = () => {
                 <input
                   {...register("pricePerHour")}
                   type="number"
-                  className={`w-full bg-[#111111] border ${pendingUpdates?.pricePerHour ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white pl-10 pr-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium`}
+                  className={`w-full bg-[#111111] border ${pendingUpdates?.pricePerHour ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white pl-10 pr-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium`}
                 />
               </div>
               {errors.pricePerHour && <p className="text-[#55DEE8] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.pricePerHour.message}</p>}
@@ -272,7 +272,7 @@ const EditTurf = () => {
               <input
                 {...register("youtubeUrl")}
                 type="text"
-                className={`w-full bg-[#111111] border ${pendingUpdates?.youtubeUrl ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium placeholder-[#333]`}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.youtubeUrl ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium placeholder-[#333]`}
                 placeholder="https://www.youtube.com/watch?v=..."
               />
             </div>
@@ -395,7 +395,7 @@ const EditTurf = () => {
                 {...register("mapUrl")}
                 type="text"
                 placeholder="https://maps.app.goo.gl/..."
-                className={`w-full bg-[#111111] border ${pendingUpdates?.mapUrl ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium`}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.mapUrl ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium`}
               />
             </div>
 

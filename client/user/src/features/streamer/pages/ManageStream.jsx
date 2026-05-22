@@ -74,7 +74,7 @@ export default function ManageStream() {
                 <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Match Status</p>
                 <p className="text-xs font-black text-white uppercase">{match?.status}</p>
              </div>
-             <div className={`w-3 h-3 rounded-full ${match?.status === 'LIVE' ? 'bg-red-500 animate-pulse' : 'bg-yellow-500'}`} />
+             <div className={`w-3 h-3 rounded-full ${match?.status === 'LIVE' ? 'bg-red-500 animate-pulse' : 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367]'}`} />
           </div>
         </div>
 
@@ -166,7 +166,7 @@ export default function ManageStream() {
                                 <CheckCircle2 size={12} /> Verified
                              </div>
                            ) : (
-                             <div className="flex items-center gap-1 text-[10px] font-black text-amber-500 uppercase tracking-widest">
+                             <div className="flex items-center gap-1 text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] uppercase tracking-widest">
                                 <AlertCircle size={12} /> Missing
                              </div>
                            )}
@@ -176,8 +176,8 @@ export default function ManageStream() {
                 </div>
 
                 {!allConnected && (
-                  <div className="p-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-2">
-                     <div className="flex items-center gap-2 text-amber-500">
+                  <div className="p-6 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/20 rounded-2xl space-y-2">
+                     <div className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">
                         <Info size={16} />
                         <p className="text-[10px] font-black uppercase tracking-widest">Action Required</p>
                      </div>

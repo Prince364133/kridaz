@@ -113,7 +113,7 @@ const BookingPass = () => {
     CONFIRMED: { label: "Active Pass",    color: ACCENT,     bg: `${ACCENT}15`,  border: `${ACCENT}30`  },
     CANCELLED: { label: "Cancelled",      color: "#EF4444",  bg: "#EF444415",    border: "#EF444430"    },
     COMPLETED: { label: "Completed",      color: "#10B981",  bg: "#10B98115",    border: "#10B98130"    },
-    DISPUTED:  { label: "Under Review",   color: "#F59E0B",  bg: "#F59E0B15",    border: "#F59E0B30"    },
+    DISPUTED:  { label: "Under Review",   color: "#55DEE8",  bg: "#55DEE815",    border: "#55DEE830"    },
     PLAYING:   { label: "In Progress",    color: "#3B82F6",  bg: "#3B82F615",    border: "#3B82F630"    },
   };
   const sm = statusMeta[status] || statusMeta.CONFIRMED;
@@ -434,7 +434,7 @@ const BookingPass = () => {
                 onClick={() => setShowDisputeModal(true)}
                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[8px] text-[13px] font-normal uppercase tracking-widest transition-all"
                 style={{ border: `1px solid ${BORDER}`, color: MUTED2 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "#F59E0B50"; e.currentTarget.style.color = "#F59E0B"; }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#55DEE850"; e.currentTarget.style.color = "#55DEE8"; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED2; }}
               >
                 <AlertOctagon size={16} />
@@ -446,7 +446,7 @@ const BookingPass = () => {
             {status === "DISPUTED" && (
               <div
                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[8px] text-[13px] font-normal uppercase tracking-widest"
-                style={{ backgroundColor: "#F59E0B10", border: "1px solid #F59E0B30", color: "#F59E0B" }}
+                style={{ backgroundColor: "#55DEE810", border: "1px solid #55DEE830", color: "#55DEE8" }}
               >
                 <ShieldCheck size={16} />
                 Dispute Under Review

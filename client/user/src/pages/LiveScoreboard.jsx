@@ -36,7 +36,7 @@ function getBallCls(ball) {
   const lbl = ball.label || '';
   if (lbl === '6' || ball.type === 'six')        return 'bg-purple-600 text-white';
   if (lbl === '4' || ball.type === 'four')       return 'bg-blue-600 text-white';
-  if (lbl === 'wd' || ball.type === 'wide')      return 'bg-yellow-500 text-black';
+  if (lbl === 'wd' || ball.type === 'wide')      return 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black';
   if (lbl === 'nb' || ball.type === 'no_ball')   return 'bg-orange-500 text-white';
   if (lbl === '0' || ball.type === 'dot')        return 'bg-gray-700 text-gray-400';
   return 'bg-white/10 text-white';
@@ -293,7 +293,7 @@ const LiveScoreboard = () => {
               </div>
               <div>
                 <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Need</p>
-                <p className="text-2xl font-black text-yellow-400">{runsNeeded}</p>
+                <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">{runsNeeded}</p>
                 <p className="text-[8px] text-gray-600 font-bold">from {ballsLeft} balls</p>
               </div>
               <div>

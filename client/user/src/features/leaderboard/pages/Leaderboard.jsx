@@ -74,9 +74,9 @@ const Leaderboard = () => {
   }, [category, selectedSport]);
 
   const getRankIcon = (rank) => {
-    if (rank === 1) return <div className="w-8 h-10 bg-gradient-to-b from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.4)] border border-yellow-300/30 text-black font-black">1</div>;
+    if (rank === 1) return <div className="w-8 h-10 bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(85,222,232,0.4)] border border-[#55DEE8]/30 text-black font-black">1</div>;
     if (rank === 2) return <div className="w-8 h-10 bg-gradient-to-b from-gray-300 to-gray-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(148,163,184,0.4)] border border-gray-200/30 text-black font-black">2</div>;
-    if (rank === 3) return <div className="w-8 h-10 bg-gradient-to-b from-amber-600 to-amber-800 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(180,83,9,0.4)] border border-amber-500/30 text-black font-black">3</div>;
+    if (rank === 3) return <div className="w-8 h-10 bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(180,83,9,0.4)] border border-[#55DEE8]/30 text-black font-black">3</div>;
     return <span className="text-gray-500 font-bold ml-3">{rank}</span>;
   };
 

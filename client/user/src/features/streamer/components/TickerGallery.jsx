@@ -39,7 +39,7 @@ export default function TickerGallery() {
       id: "premium", 
       name: "Gold Premium", 
       description: "The ultimate luxury broadcast experience with gold textures.",
-      color: "bg-amber-500",
+      color: "bg-gradient-to-r from-[#55DEE8] to-[#BFF367]",
       preview: "https://images.unsplash.com/photo-1593341646782-e0b495cff86d?q=80&w=800&auto=format&fit=crop",
       features: ["Metallic Textures", "3D Icons", "Shadow Depth", "Sponsor Priority"]
     }

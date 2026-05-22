@@ -433,8 +433,8 @@ export default function Home() {
  </Link>
 
  <Link to="/join-games" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-lg py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
- <Trophy size={16} className="text-[#F59E0B] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
- <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-[#F59E0B] whitespace-nowrap font-inter">JOIN TOURNAMENTS</span>
+ <Trophy size={16} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
+ <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] whitespace-nowrap font-inter">JOIN TOURNAMENTS</span>
  </Link>
 
  <Link to="/players" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-lg py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">

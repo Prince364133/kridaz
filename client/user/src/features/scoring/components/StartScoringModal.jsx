@@ -679,7 +679,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
             {/* Coin */}
             <div className="flex justify-center">
               <div
-                className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-2xl cursor-pointer select-none"
+                className="w-24 h-24 rounded-full bg-gradient-to-br from-[#55DEE8] to-[#BFF367] flex items-center justify-center shadow-2xl cursor-pointer select-none"
                 style={{ transform: `rotateY(${tossFlipDeg}deg)`, transition: isTossFlipping ? 'transform 0.06s linear' : 'none' }}
                 onClick={!isTossFlipping && !formData.tossWinner ? doToss : undefined}
               >
@@ -688,7 +688,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
             {!formData.tossWinner && !isTossFlipping && (
               <button onClick={doToss}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-black uppercase tracking-wider text-sm">
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-wider text-sm">
                 Flip Coin
               </button>
             )}
@@ -929,7 +929,7 @@ const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, on
       </div>
 
       {players.length > 0 && players.length < maxMembers && (
-        <p className="text-[10px] uppercase tracking-wider text-yellow-400/80 bg-yellow-400/10 border border-yellow-400/20 rounded-xl p-3 flex-shrink-0 text-center font-bold">
+        <p className="text-[10px] uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/80 to-[#BFF367]/80 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/20 rounded-xl p-3 flex-shrink-0 text-center font-bold">
           Needs {maxMembers - players.length} more player(s) for a full XI
         </p>
       )}

@@ -61,7 +61,7 @@ export default function CoachBookings() {
     <div className="h-full custom-scrollbar bg-[#000000]">
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative font-['Open_Sans']">
         
-        {/* Header Section GÇö Exact Copy of Dashboard Design */}
+        {/* Header Section Gï¿½ï¿½ Exact Copy of Dashboard Design */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 pb-2 border-b border-white/5">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
@@ -85,7 +85,7 @@ export default function CoachBookings() {
                   {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
                 </p>
                 <p className="text-[#55DEE8] text-[10px] font-semibold uppercase tracking-widest opacity-80">
-                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} GÇó{" "}
+                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} Gï¿½ï¿½{" "}
                   {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
                 </p>
               </div>
@@ -130,13 +130,13 @@ export default function CoachBookings() {
                   {/* Booking Details */}
                   <div className="flex flex-col md:items-end gap-2">
                     <div className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border font-inter ${
-                      booking.status === 'PENDING' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
+                      booking.status === 'PENDING' ? 'bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border-[#55DEE8]/20 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]' :
                       booking.status === 'ACCEPTED' ? 'bg-[#55DEE8]/10 border-[#55DEE8]/20 text-[#55DEE8]' :
                       'bg-red-500/10 border-red-500/20 text-red-500'
                     }`}>
                       {booking.status}
                     </div>
-                    <p className="text-2xl font-bold text-white mt-2 font-inter tracking-tight">Gé¦{booking.totalAmount}</p>
+                    <p className="text-2xl font-bold text-white mt-2 font-inter tracking-tight">Gï¿½{booking.totalAmount}</p>
                     <p className="text-[10px] font-medium text-[#878C9F] uppercase tracking-wider font-inter">Reserved in wallet</p>
                   </div>
                 </div>

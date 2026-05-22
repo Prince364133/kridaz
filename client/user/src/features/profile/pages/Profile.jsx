@@ -46,7 +46,7 @@ const QuickStatCard = ({ icon: Icon, label, value, showDivider }) => (
 const AchievementCard = ({ icon: Icon, title, rarity, year }) => {
   const rarityColors = {
     platinum: 'from-cyan-400 to-blue-400',
-    gold: 'from-yellow-400 to-orange-400',
+    gold: 'from-[#55DEE8] to-[#BFF367]',
     silver: 'from-gray-300 to-gray-400',
   };
   return (
@@ -740,7 +740,7 @@ export default function Profile() {
                     { icon: Award, label: 'Tournaments', value: '18', color: '#BFF367' },
                     { icon: Medal, label: 'MOTM Awards', value: '34', color: '#BFF367' },
                     { icon: AlertTriangle, label: 'Red Cards', value: '2', color: '#ff4444' },
-                    { icon: AlertTriangle, label: 'Yellow Cards', value: '23', color: '#ffaa00' },
+                    { icon: AlertTriangle, label: 'Yellow Cards', value: '23', color: '#55DEE8' },
                     { icon: BarChart3, label: 'Win Ratio', value: '69%', color: '#BFF367' },
                     { icon: Target, label: 'Pass Accuracy', value: '87%', color: '#BFF367' },
                     { icon: BarChart3, label: 'Season Goals', value: '28', color: '#BFF367' },

@@ -373,7 +373,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  {chat.pendingMembers?.length > 0 && (
  <>
  <div className="w-full h-px bg-white/5 my-2"></div>
- <h4 className="text-[13px] font-medium text-yellow-500/80 px-6 my-2">{chat.pendingMembers.length} pending invites</h4>
+ <h4 className="text-[13px] font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/80 to-[#BFF367]/80 px-6 my-2">{chat.pendingMembers.length} pending invites</h4>
  {chat.pendingMembers.map((u, i) => {
  const uid = u.user?._id || u.user;
  return (
@@ -384,7 +384,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  </div>
  <div className="flex flex-col justify-center">
  <p className="text-white/80 text-[15px] leading-tight">{u.user?.name || "Pending User"}</p>
- <p className="text-yellow-500/60 text-[11px] leading-tight mt-0.5">Invite sent</p>
+ <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/60 to-[#BFF367]/60 text-[11px] leading-tight mt-0.5">Invite sent</p>
  </div>
  </div>
  {isAdmin && (

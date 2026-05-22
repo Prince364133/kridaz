@@ -320,7 +320,7 @@ export default function ProfessionalDetails() {
                     <span className="text-xl font-bold text-white">Advance Pay</span>
                     <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">₹ {selectedSlots.length * (pro.price || 0)}</span>
                   </div>
-                  <p className="text-xs text-yellow-500/80 font-medium">( Pay remaining at venue )</p>
+                  <p className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/80 to-[#BFF367]/80 font-medium">( Pay remaining at venue )</p>
                 </div>
 
                 <button 

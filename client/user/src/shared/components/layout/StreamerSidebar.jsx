@@ -159,11 +159,11 @@ const StreamerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         {/* Status Section */}
         <div className={`px-4 py-6 border-b border-white/5 transition-all duration-300 ${isMinimized ? "items-center" : ""}`}>
           <div className="flex items-center gap-3">
-             <div className={`flex-shrink-0 w-2 h-2 rounded-full ${isLimitedStreamer ? "bg-amber-500 animate-pulse" : "bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]"}`} />
+             <div className={`flex-shrink-0 w-2 h-2 rounded-full ${isLimitedStreamer ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] animate-pulse" : "bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]"}`} />
              {!isMinimized && (
                <div className="animate-in fade-in slide-in-from-left-2 duration-300">
                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 leading-none mb-1">Status</p>
-                  <p className={`text-[10px] font-black uppercase tracking-tight ${isLimitedStreamer ? "text-amber-500" : "text-violet-500"}`}>
+                  <p className={`text-[10px] font-black uppercase tracking-tight ${isLimitedStreamer ? "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" : "text-violet-500"}`}>
                     {isLimitedStreamer ? "Unverified" : "Verified"}
                   </p>
                </div>

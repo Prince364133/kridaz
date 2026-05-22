@@ -12,7 +12,7 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete, onViewDetai
       case 'rejected': return { color: 'red', icon: 'bg-red-500', border: 'border-red-500/20', bg: 'bg-red-500/10' };
       case 'decommissioned': return { color: 'orange', icon: 'bg-orange-500', border: 'border-orange-500/20', bg: 'bg-orange-500/10' };
       case 'deleted': return { color: 'gray', icon: 'bg-gray-500', border: 'border-gray-500/20', bg: 'bg-gray-500/10' };
-      default: return { color: 'yellow', icon: 'bg-yellow-500', border: 'border-yellow-500/20', bg: 'bg-yellow-500/10' };
+      default: return { color: 'yellow', icon: 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367]', border: 'border-[#55DEE8]/20', bg: 'bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10' };
     }
   };
 

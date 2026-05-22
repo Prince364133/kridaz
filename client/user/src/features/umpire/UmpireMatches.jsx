@@ -25,7 +25,7 @@ export default function UmpireMatches() {
     specialization: "Cricket"
   });
 
-  // Global search effect GÇö fires after typing KRZ- prefix (4+ chars)
+  // Global search effect Gï¿½ï¿½ fires after typing KRZ- prefix (4+ chars)
   React.useEffect(() => {
     if (searchId.length >= 4) {
       const fetchGlobal = async () => {
@@ -101,7 +101,7 @@ export default function UmpireMatches() {
                 <>
                   <h3 className="text-xl font-black text-white uppercase tracking-tight">Application Pending Review</h3>
                   <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                    Your umpire application is <span className="text-yellow-400">under admin review</span>.<br />
+                    Your umpire application is <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">under admin review</span>.<br />
                     You'll be notified once your full access is approved.
                   </p>
                 </>
@@ -117,7 +117,7 @@ export default function UmpireMatches() {
             </div>
           </div>
           {upgradeRequested ? (
-            <div className="w-full md:w-auto h-14 px-10 bg-yellow-500/10 text-yellow-400 font-black uppercase text-xs tracking-widest rounded-2xl border border-yellow-500/20 flex items-center justify-center gap-3">
+            <div className="w-full md:w-auto h-14 px-10 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black uppercase text-xs tracking-widest rounded-2xl border border-[#55DEE8]/20 flex items-center justify-center gap-3">
               <Clock size={16} /> Awaiting Approval
             </div>
           ) : (
@@ -275,7 +275,7 @@ export default function UmpireMatches() {
                     FOUND MATCH: {globalMatch.shortId}
                   </span>
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                    {new Date(globalMatch.date).toLocaleDateString()} GÇó {globalMatch.time}
+                    {new Date(globalMatch.date).toLocaleDateString()} Gï¿½ï¿½ {globalMatch.time}
                   </span>
                 </div>
                 <h3 className="text-2xl font-black text-white uppercase tracking-tight">
@@ -350,7 +350,7 @@ export default function UmpireMatches() {
                         <CheckCircle2 size={10} /> Umpire Hired
                       </span>
                       <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                        {new Date(match.date).toLocaleDateString()} GÇó {match.time}
+                        {new Date(match.date).toLocaleDateString()} Gï¿½ï¿½ {match.time}
                       </span>
                     </div>
 
@@ -403,7 +403,7 @@ export default function UmpireMatches() {
             >
                <div className="space-y-1">
                  <h4 className="text-sm font-bold text-white uppercase">{match.name}</h4>
-                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{match.venue} GÇó {new Date(match.date).toLocaleDateString()}</p>
+                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{match.venue} Gï¿½ï¿½ {new Date(match.date).toLocaleDateString()}</p>
                </div>
                <div className="text-right">
                   <p className="text-[10px] font-black text-primary uppercase tracking-widest">Completed</p>

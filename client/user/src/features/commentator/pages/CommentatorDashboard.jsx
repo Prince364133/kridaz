@@ -2,7 +2,7 @@ import React from "react";
 import { Mic, Radio, Users, IndianRupee, PlayCircle, Settings, Activity } from "lucide-react";
 
 export default function CommentatorDashboard() {
-  const themeColor = "#FFB020"; // A unique color for Commentator, e.g. gold/yellow
+  const themeColor = "#55DEE8"; // A unique color for Commentator, e.g. gold/yellow
 
   return (
     <div className="space-y-8 animate-fade-in font-inter pb-20">

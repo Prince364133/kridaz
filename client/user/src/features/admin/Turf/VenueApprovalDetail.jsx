@@ -89,7 +89,7 @@ const VenueApprovalDetail = () => {
               <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
                 turf.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
                 turf.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                'bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border-[#55DEE8]/20'
               }`}>
                 {turf.status}
               </span>

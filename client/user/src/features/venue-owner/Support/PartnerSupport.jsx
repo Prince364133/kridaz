@@ -360,7 +360,7 @@ const PartnerSupport = () => {
                       <div className="flex items-center gap-3">
                         <span className={`text-[10px] font-bold px-3 py-1 rounded-[4px] uppercase tracking-widest border ${ticket.status === 'RESOLVED' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
                             ticket.status === 'IN_PROGRESS' || ticket.status === 'OPEN' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                              'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                              'bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border-[#55DEE8]/20'
                           }`}>
                           {ticket.status}
                         </span>

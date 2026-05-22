@@ -35,7 +35,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
                      turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
                      turf.status === 'decommissioned' ? 'bg-orange-500/10 border-orange-500/20 text-orange-500' :
                      turf.status === 'deleted' ? 'bg-zinc-800 border-zinc-700 text-zinc-500' :
-                     'bg-[#1A1A1A] border-[#2D2D2D] text-yellow-500'
+                     'bg-[#1A1A1A] border-[#2D2D2D] text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]'
                   }`}>
                      {turf.status}
                   </div>

@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
 /**
- * OwnerRevenue GÇö Financial intelligence and earnings portal.
+ * OwnerRevenue Gï¿½ï¿½ Financial intelligence and earnings portal.
  * Fully rebranded for the Scorer Portal with Teal Green (#00C187) and Inter font.
  * Layout optimized: 6 cards in one line.
  */
@@ -40,7 +40,7 @@ export default function OwnerRevenue() {
   const handleWithdrawSubmit = async (e) => {
     e.preventDefault();
     if (!withdrawAmount || parseFloat(withdrawAmount) < 500) {
-      toast.error("Minimum withdrawal threshold is Gé¦500", {
+      toast.error("Minimum withdrawal threshold is Gï¿½500", {
         style: { background: "#000", color: "#fff", border: `1px solid ${themeColor}`, fontSize: "10px", fontWeight: "black" }
       });
       return;
@@ -98,16 +98,16 @@ export default function OwnerRevenue() {
              <CheckCircle2 size={18} />
           </div>
           <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Usable Assets</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter" style={{ color: themeColor }}>Gé¦{(balances?.usable || 0).toLocaleString()}</h3>
+          <h3 className="text-2xl font-black font-inter tracking-tighter" style={{ color: themeColor }}>Gï¿½{(balances?.usable || 0).toLocaleString()}</h3>
           <p className="text-[7px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Liquid / Available</p>
         </div>
 
-        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-5 flex flex-col relative overflow-hidden shadow-2xl hover:border-amber-500/20 transition-all duration-500 group">
-          <div className="w-10 h-10 bg-amber-500/10 rounded-lg flex items-center justify-center mb-5 border border-white/10 group-hover:border-amber-500/30 transition-all text-amber-500 shadow-inner">
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-5 flex flex-col relative overflow-hidden shadow-2xl hover:border-[#55DEE8]/20 transition-all duration-500 group">
+          <div className="w-10 h-10 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 rounded-lg flex items-center justify-center mb-5 border border-white/10 group-hover:border-[#55DEE8]/30 transition-all text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] shadow-inner">
              <Hourglass size={18} />
           </div>
           <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Review Pipeline</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-amber-500">Gé¦{(balances?.inProgress || 0).toLocaleString()}</h3>
+          <h3 className="text-2xl font-black font-inter tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">Gï¿½{(balances?.inProgress || 0).toLocaleString()}</h3>
           <p className="text-[7px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Escrow Window</p>
         </div>
 
@@ -116,7 +116,7 @@ export default function OwnerRevenue() {
              <AlertOctagon size={18} />
           </div>
           <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Disputed Assets</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-red-500">Gé¦{(balances?.dispute || 0).toLocaleString()}</h3>
+          <h3 className="text-2xl font-black font-inter tracking-tighter text-red-500">Gï¿½{(balances?.dispute || 0).toLocaleString()}</h3>
           <p className="text-[7px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Frozen Assets</p>
         </div>
 
@@ -125,7 +125,7 @@ export default function OwnerRevenue() {
              <TrendingUp size={18} />
           </div>
           <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Lifetime Total</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Gé¦{(balances?.totalRevenue || 0).toLocaleString()}</h3>
+          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Gï¿½{(balances?.totalRevenue || 0).toLocaleString()}</h3>
         </div>
 
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-5 flex flex-col relative overflow-hidden shadow-2xl transition-all duration-500 hover:border-white/10 group">
@@ -133,7 +133,7 @@ export default function OwnerRevenue() {
              <Landmark size={18} />
           </div>
           <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Total Dispatched</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Gé¦{(balances?.withdrawn || 0).toLocaleString()}</h3>
+          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Gï¿½{(balances?.withdrawn || 0).toLocaleString()}</h3>
         </div>
 
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-5 flex flex-col relative overflow-hidden shadow-2xl transition-all duration-500 group hover:border-blue-500/20">
@@ -141,7 +141,7 @@ export default function OwnerRevenue() {
              <Calendar size={18} />
           </div>
           <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Future Total</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Gé¦{(balances?.pendingSettlements || 0).toLocaleString()}</h3>
+          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Gï¿½{(balances?.pendingSettlements || 0).toLocaleString()}</h3>
         </div>
 
       </div>
@@ -152,30 +152,30 @@ export default function OwnerRevenue() {
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-8 lg:p-10 shadow-2xl flex flex-col max-h-[600px] group overflow-hidden relative">
            <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6 relative z-10">
               <div className="flex items-center gap-4">
-                 <div className="w-1.5 h-8 bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.3)]" />
+                 <div className="w-1.5 h-8 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full shadow-[0_0_10px_rgba(85,222,232,0.3)]" />
                  <h2 className="text-[12px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
                     Escrow Pipeline
                  </h2>
               </div>
-              <span className="text-[10px] font-black text-amber-500/60 uppercase tracking-widest">Active Reviews</span>
+              <span className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/60 to-[#BFF367]/60 uppercase tracking-widest">Active Reviews</span>
            </div>
            
            <div className="overflow-y-auto no-scrollbar flex-1 pr-2 relative z-10">
               <div className="space-y-6">
                  {inProgressBookings && inProgressBookings.length > 0 ? (
                    inProgressBookings.map((booking) => (
-                     <div key={booking._id} className="p-6 bg-white/[0.02] rounded-lg border border-white/5 flex items-center justify-between hover:border-amber-500/20 transition-all shadow-lg group/item">
+                     <div key={booking._id} className="p-6 bg-white/[0.02] rounded-lg border border-white/5 flex items-center justify-between hover:border-[#55DEE8]/20 transition-all shadow-lg group/item">
                         <div className="space-y-1.5">
                            <p className="text-[14px] font-black text-white uppercase tracking-tight">{booking.turf?.name || 'Arena Node'}</p>
                            <div className="flex items-center gap-2">
-                             <Clock size={12} className="text-amber-500/50" />
-                             <p className="text-[10px] text-amber-500/80 font-black uppercase tracking-widest">
+                             <Clock size={12} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/50 to-[#BFF367]/50" />
+                             <p className="text-[10px] text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/80 to-[#BFF367]/80 font-black uppercase tracking-widest">
                                Release: {new Date(booking.reviewWindowEndsAt).toLocaleDateString()}
                              </p>
                            </div>
                         </div>
                         <div className="text-right">
-                           <p className="text-2xl font-black text-white tracking-tighter">Gé¦{booking.ownerRevenue}</p>
+                           <p className="text-2xl font-black text-white tracking-tighter">Gï¿½{booking.ownerRevenue}</p>
                         </div>
                      </div>
                    ))
@@ -221,7 +221,7 @@ export default function OwnerRevenue() {
                         sign = "-";
                         icon = <ArrowDownLeft size={14} />;
                       } else if (tx.type === "DISPUTE_FREEZE") {
-                        colorClass = "text-amber-500";
+                        colorClass = "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]";
                         sign = "";
                         icon = <AlertOctagon size={14} />;
                       }
@@ -238,7 +238,7 @@ export default function OwnerRevenue() {
                              </p>
                           </div>
                            <div className="text-right">
-                              <p className={`text-2xl font-black tracking-tighter ${colorClass}`} style={colorStyle || {}}>{sign} Gé¦{tx.amount}</p>
+                              <p className={`text-2xl font-black tracking-tighter ${colorClass}`} style={colorStyle || {}}>{sign} Gï¿½{tx.amount}</p>
                            </div>
                        </div>
                      );
@@ -278,10 +278,10 @@ export default function OwnerRevenue() {
                     </div>
                     <div className="space-y-1">
                        <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: themeColor }}>Available Capital</p>
-                       <p className="text-4xl font-black tracking-tighter text-white font-inter">Gé¦{(balances?.usable || 0).toLocaleString()}</p>
+                       <p className="text-4xl font-black tracking-tighter text-white font-inter">Gï¿½{(balances?.usable || 0).toLocaleString()}</p>
                        <div className="flex items-center gap-2 mt-2 text-[8px] text-neutral-500 font-black uppercase tracking-widest font-inter">
                           <ShieldCheck size={12} style={{ color: themeColor }} />
-                          Min: Gé¦500
+                          Min: Gï¿½500
                        </div>
                     </div>
                   </div>

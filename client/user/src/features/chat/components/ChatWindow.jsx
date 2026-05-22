@@ -284,8 +284,8 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
  </svg>
  </div>
- <p className="text-sm font-bold uppercase tracking-widest text-white/20">Select a conversation</p>
- <p className="text-xs text-white/10 mt-1">to start chatting</p>
+ <p className="chat-heading text-sm font-bold uppercase text-white/20">Select a conversation</p>
+ <p className="chat-subheading text-white/10 mt-1">to start chatting</p>
  </div>
  );
  }
@@ -363,8 +363,8 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  }
  }}
  >
- <h3 className="text-white font-bold text-sm truncate hover:underline">{getChatName()}</h3>
- <p className={`text-[11px] transition-colors ${
+ <h3 className="chat-heading text-white font-bold text-xl truncate hover:underline">{getChatName()}</h3>
+ <p className={`chat-header-status transition-colors ${
  showTypingIndicator 
  ? 'text-[#55DEE8] font-medium' 
  : otherOnline 
@@ -554,7 +554,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  >
  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
  </button>
- <span className="text-white font-medium text-lg">{selectedMessages.length} selected</span>
+ <span className="chat-subheading text-white font-medium">{selectedMessages.length} selected</span>
  </div>
  {selectedMessages.length > 0 && (
  <button 
@@ -631,20 +631,20 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  const canMessage = !chat.adminOnlyMessages || isActuallyAdmin;
 
  return (
- <div className="flex-1 flex flex-col p-6 animate-fade-in">
+ <div className="flex-1 flex flex-col px-6 pt-5 pb-8 animate-fade-in">
  {/* Dashboard Header */}
- <div className="flex flex-col items-center text-center mb-10">
- <div className="w-24 h-24 rounded-3xl bg-[#55DEE8]/10 flex items-center justify-center mb-4 border border-[#55DEE8]/20 shadow-[0_0_40px_-10px_rgba(85,222,232,0.2)]">
- <Globe size={48} className="text-[#55DEE8]" />
+ <div className="flex flex-col items-center text-center mb-6">
+ <div className="w-16 h-16 rounded-2xl bg-[#55DEE8]/10 flex items-center justify-center mb-3 border border-[#55DEE8]/20 shadow-[0_0_28px_-14px_rgba(85,222,232,0.25)]">
+ <Globe size={34} className="text-[#55DEE8]" />
  </div>
- <h2 className="text-2xl font-black text-white uppercase tracking-tight">{chat.chatName}</h2>
- <p className="text-white/40 text-sm mt-2 max-w-md">{chat.description || "Welcome to our community! Add groups below to get started."}</p>
+ <h2 className="text-xl font-black text-white uppercase tracking-tight">{chat.chatName}</h2>
+ <p className="community-copy text-white/40 mt-1.5 max-w-md">{chat.description || "Welcome to our community! Add groups below to get started."}</p>
  </div>
 
  {/* Groups Section */}
- <div className="max-w-2xl mx-auto w-full space-y-6">
+ <div className="max-w-2xl mx-auto w-full space-y-3">
  <div className="flex items-center justify-between px-2">
- <h3 className="text-[10px] font-black text-[#55DEE8] uppercase tracking-[0.3em]">Groups in this community</h3>
+ <h3 className="text-[10px] font-black text-[#55DEE8] uppercase">Groups in this community</h3>
  <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{childGroups.length} Groups</span>
  </div>
 
@@ -652,14 +652,14 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {/* Add Group Action */}
  <button 
  onClick={() => setIsAddGroupToCommunityOpen(true)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-[#55DEE8]/10 hover:border-[#55DEE8]/30 transition-all group"
+ className="w-full flex items-center gap-3 p-3 bg-white/[0.03] border border-white/5 rounded-xl hover:bg-[#55DEE8]/10 hover:border-[#55DEE8]/30 transition-all group"
  >
- <div className="w-12 h-12 rounded-xl bg-[#55DEE8] text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
- <Plus size={24} />
+ <div className="w-10 h-10 rounded-lg bg-[#55DEE8] text-black flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+ <Plus size={21} />
  </div>
  <div className="text-left">
- <p className="text-white font-bold text-sm">Add group</p>
- <p className="text-white/40 text-xs mt-0.5">Create or add existing groups to this community</p>
+ <p className="chat-heading text-white font-bold text-sm">Add group</p>
+ <p className="community-copy text-white/40 mt-0.5">Create or add existing groups to this community</p>
  </div>
  </button>
 
@@ -667,30 +667,30 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {announcementGroup ? (
  <button 
  onClick={() => onSelectChat && onSelectChat(announcementGroup)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-white/[0.05] transition-all"
+ className="w-full flex items-center gap-3 p-3 bg-white/[0.03] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-all"
  >
- <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
- <MessageSquare size={20} className="text-[#55DEE8]" />
+ <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+ <MessageSquare size={18} className="text-[#55DEE8]" />
  </div>
  <div className="text-left flex-1">
  <div className="flex justify-between">
- <p className="text-white font-bold text-sm">Announcements</p>
+ <p className="chat-heading text-white font-bold text-sm">Announcements</p>
  <span className="text-[10px] bg-[#55DEE8]/20 text-[#55DEE8] px-2 py-0.5 rounded font-black uppercase">System</span>
  </div>
- <p className="text-white/40 text-xs mt-0.5">Only admins can post messages here</p>
+ <p className="community-copy text-white/40 mt-0.5">Only admins can post messages here</p>
  </div>
  </button>
  ) : (
- <div className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-2xl cursor-default opacity-80">
- <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
- <MessageSquare size={20} className="text-[#55DEE8]" />
+ <div className="w-full flex items-center gap-3 p-3 bg-white/[0.03] border border-white/5 rounded-xl cursor-default opacity-80">
+ <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+ <MessageSquare size={18} className="text-[#55DEE8]" />
  </div>
  <div className="text-left flex-1">
  <div className="flex justify-between">
- <p className="text-white font-bold text-sm">Announcements</p>
+ <p className="chat-heading text-white font-bold text-sm">Announcements</p>
  <span className="text-[10px] bg-[#55DEE8]/20 text-[#55DEE8] px-2 py-0.5 rounded font-black uppercase">System</span>
  </div>
- <p className="text-white/40 text-xs mt-0.5">Only admins can post messages here</p>
+ <p className="community-copy text-white/40 mt-0.5">Only admins can post messages here</p>
  </div>
  </div>
  )}
@@ -700,29 +700,29 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  <button 
  key={group._id}
  onClick={() => onSelectChat && onSelectChat(group)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.02] border border-transparent hover:border-white/10 hover:bg-white/[0.04] rounded-2xl transition-all"
+ className="w-full flex items-center gap-3 p-3 bg-white/[0.02] border border-transparent hover:border-white/10 hover:bg-white/[0.04] rounded-xl transition-all"
  >
- <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
- <Users size={20} className="text-white/20" />
+ <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+ <Users size={18} className="text-white/20" />
  </div>
  <div className="text-left">
- <p className="text-white font-bold text-sm">{group.chatName}</p>
- <p className="text-white/40 text-xs mt-0.5">{group.users?.length || 0} Members</p>
+ <p className="chat-heading text-white font-bold text-sm">{group.chatName}</p>
+ <p className="community-copy text-white/40 mt-0.5">{group.users?.length || 0} Members</p>
  </div>
  </button>
  ))}
  </div>
 
- <div className="pt-10 text-center">
- <p className="text-white/10 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+ <div className="pt-4 text-center">
+ <p className="community-copy text-white/10 font-bold uppercase leading-relaxed">
  Groups added to the community will appear here.<br/>Community members can join these groups.
  </p>
  </div>
 
  {/* Community Members Section */}
- <div className="max-w-2xl mx-auto w-full pt-12 pb-20 space-y-6">
+ <div className="max-w-2xl mx-auto w-full pt-7 pb-16 space-y-4">
  <div className="flex items-center justify-between px-2">
- <h3 className="text-[10px] font-black text-[#55DEE8] uppercase tracking-[0.3em]">Community Members</h3>
+ <h3 className="text-[10px] font-black text-[#55DEE8] uppercase">Community Members</h3>
  <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{chat.users?.length || 0} Members</span>
  </div>
  
@@ -741,9 +741,9 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  alt="" 
  />
  <div className="flex-1 min-w-0">
- <p className="text-white font-bold text-sm truncate">{member.name}</p>
+ <p className="chat-heading text-white font-bold text-sm truncate">{member.name}</p>
  <div className="flex items-center gap-2">
- <p className="text-white/30 text-[10px] truncate">@{member.username || "user"}</p>
+ <p className="chat-subheading text-white/30 truncate">@{member.username || "user"}</p>
  {isMemberAdmin && (
  <span className="text-[8px] bg-[#55DEE8]/20 text-[#55DEE8] px-1.5 py-0.5 rounded font-black uppercase tracking-wider">Admin</span>
  )}
@@ -763,7 +763,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  return (
  <div className="flex flex-col items-center justify-center h-full text-white/40 mt-10">
  <svg className="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
- <p className="text-sm">No messages found for "{messageSearchQuery}"</p>
+ <p className="chat-subheading">No messages found for "{messageSearchQuery}"</p>
  </div>
  );
  }
@@ -962,7 +962,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
       </form>
     ) : (
       <div className="p-6 bg-black/60 border-t border-white/10 text-center relative z-10">
-        <p className="text-xs text-[#55DEE8]/60 font-bold uppercase tracking-widest ">
+        <p className="chat-subheading text-[#55DEE8]/60 font-bold uppercase">
           Only admins can send messages to this group
         </p>
       </div>
@@ -991,7 +991,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDeleteOptions(false)} />
  <div className="bg-[#1e1e1e] border border-white/10 rounded-2xl p-6 w-full max-w-sm relative z-10 shadow-2xl">
  <h3 className="text-white text-lg font-bold mb-4">Delete messages?</h3>
- <p className="text-white/60 text-sm mb-6">
+ <p className="chat-subheading text-white/60 mb-6">
  Delete {selectedMessages.length} selected message{selectedMessages.length > 1 ? 's' : ''}?
  </p>
  

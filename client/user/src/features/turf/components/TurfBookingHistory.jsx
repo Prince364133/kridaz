@@ -26,7 +26,7 @@ const STATUS_META = {
  CONFIRMED: { label: "Confirmed", color: ACCENT, bg: `${ACCENT}15`, border: `${ACCENT}30` },
  CANCELLED: { label: "Cancelled", color: "#EF4444", bg: "#EF444415", border: "#EF444430" },
  COMPLETED: { label: "Completed", color: "#10B981", bg: "#10B98115", border: "#10B98130" },
- DISPUTED: { label: "Under Review", color: "#F59E0B", bg: "#F59E0B15", border: "#F59E0B30" },
+ DISPUTED: { label: "Under Review", color: "#55DEE8", bg: "#55DEE815", border: "#55DEE830" },
  PLAYING: { label: "In Progress", color: "#3B82F6", bg: "#3B82F615", border: "#3B82F630" },
 };
 
@@ -123,7 +123,7 @@ const TurfBookingHistory = () => {
                   </button>
                 )}
                 {booking.status !== "CANCELLED" && booking.status !== "DISPUTED" && (
-                  <button onClick={() => setSelectedDisputeBooking(booking)} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-yellow-500/50 hover:text-yellow-500 text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                  <button onClick={() => setSelectedDisputeBooking(booking)} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-[#55DEE8]/50 hover:text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                     Dispute
                   </button>
                 )}
@@ -141,7 +141,7 @@ const TurfBookingHistory = () => {
                 <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Paid</span>
                 <div className="text-2xl font-black text-white">₹{booking.advanceAmount || booking.totalPrice || '1,500'}</div>
                 {booking.paymentType === "PARTIAL" && (
-                  <div className="text-[9px] font-bold text-yellow-500 uppercase tracking-widest mt-1">Bal: ₹{booking.balanceAmount}</div>
+                  <div className="text-[9px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] uppercase tracking-widest mt-1">Bal: ₹{booking.balanceAmount}</div>
                 )}
               </div>
               

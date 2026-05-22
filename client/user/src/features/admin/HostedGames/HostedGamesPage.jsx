@@ -321,13 +321,13 @@ const HostedGamesPage = () => {
                   <div className="lg:col-span-1">
                     <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${
                       game.status === "ACTIVE" ? "bg-green-500/10 border-green-500/20 text-green-400" :
-                      game.status === "PENDING" ? "bg-yellow-500/10 border-yellow-500/20 text-yellow-400" :
+                      game.status === "PENDING" ? "bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border-[#55DEE8]/20 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" :
                       game.status === "CANCELLED" ? "bg-red-500/10 border-red-500/20 text-red-400" :
                       "bg-blue-500/10 border-blue-500/20 text-blue-400"
                     }`}>
                       <div className={`w-1 h-1 rounded-full ${
                         game.status === "ACTIVE" ? "bg-green-400 shadow-[0_0_8px_#4ade80]" :
-                        game.status === "PENDING" ? "bg-yellow-400" :
+                        game.status === "PENDING" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" :
                         game.status === "CANCELLED" ? "bg-red-400" :
                         "bg-blue-400"
                       }`} />

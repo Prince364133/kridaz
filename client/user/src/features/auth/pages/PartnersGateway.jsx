@@ -35,7 +35,7 @@ const partners = [
     icon: Shield,
     stat: "Verified Official",
     id: "UMPIRE-03",
-    accent: "#F59E0B",
+    accent: "#55DEE8",
     status: "Coming Soon",
   },
   {
@@ -104,7 +104,7 @@ export default function PartnersGateway() {
               <Link to="/signup/coach" className="bg-blue-500 hover:bg-blue-400 text-white h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
                 <Award className="w-4 h-4" /> Coach
               </Link>
-              <Link to="/signup/official" className="bg-amber-500 hover:bg-amber-400 text-black h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
+              <Link to="/signup/official" className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
                 <Shield className="w-4 h-4" /> Umpire
               </Link>
               <Link to="/signup/streamer" className="bg-red-500 hover:bg-red-400 text-white h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">

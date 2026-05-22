@@ -9,11 +9,11 @@ import {
 } from 'lucide-react';
 
 const SPORT_COLORS = {
-  Cricket: 'from-amber-500 to-orange-600',
+  Cricket: 'from-[#55DEE8] to-[#BFF367]',
   Football: 'from-emerald-500 to-teal-600',
   Basketball: 'from-orange-500 to-red-600',
   Volleyball: 'from-blue-500 to-indigo-600',
-  Badminton: 'from-yellow-400 to-amber-500',
+  Badminton: 'from-[#55DEE8] to-[#BFF367]',
   Tennis: 'from-lime-500 to-emerald-600',
   'Table Tennis': 'from-rose-500 to-pink-600',
   Pickleball: 'from-violet-500 to-purple-600',
@@ -53,7 +53,7 @@ const GameCard = ({ game, onSelect, actionButton }) => {
             </span>
             <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${
               game.gameMode === 'QUICK' 
-                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
+                ? 'bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border border-[#55DEE8]/20' 
                 : 'bg-violet-500/10 text-violet-400 border border-violet-500/20'
             }`}>
               {game.gameMode}

@@ -853,7 +853,7 @@ const HostGame = () => {
                       }}
                       className={`p-5 rounded-[15px] border-2 transition-all cursor-pointer group ${
                         selectedGround?._id === g._id 
-                        ? 'border-yellow-500 bg-yellow-500/10' 
+                        ? 'border-[#55DEE8] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10' 
                         : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
                       }`}
                     >
@@ -865,8 +865,8 @@ const HostGame = () => {
                             <MapPin size={12} /> {g.location}
                           </p>
                           <div className="flex items-center justify-between">
-                            <span className="text-yellow-500 font-black text-sm">₹{g.pricePerHour}/hr</span>
-                            {selectedGround?._id === g._id && <CheckCircle2 className="text-yellow-500" size={20} />}
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black text-sm">₹{g.pricePerHour}/hr</span>
+                            {selectedGround?._id === g._id && <CheckCircle2 className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" size={20} />}
                           </div>
                         </div>
                       </div>
@@ -898,10 +898,10 @@ const HostGame = () => {
                 <div className="space-y-6 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
                   {customUmpireData.name && (
                     <div 
-                      className="p-5 rounded-[15px] border-2 border-yellow-500 bg-yellow-500/10 transition-all cursor-default"
+                      className="p-5 rounded-[15px] border-2 border-[#55DEE8] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 transition-all cursor-default"
                     >
                       <div className="flex gap-5 items-center">
-                        <div className="w-14 h-14 rounded-full bg-neutral-800 flex items-center justify-center text-yellow-500 border border-yellow-500/30">
+                        <div className="w-14 h-14 rounded-full bg-neutral-800 flex items-center justify-center text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border border-[#55DEE8]/30">
                           <Plus size={24} />
                         </div>
                         <div className="flex-1">
@@ -917,7 +917,7 @@ const HostGame = () => {
                           <p className="text-[11px] text-neutral-400 font-medium flex items-center gap-2">
                             <Mail size={10} /> {customUmpireData.email}
                           </p>
-                          <span className="inline-block mt-2 px-2 py-0.5 bg-yellow-500 text-[8px] font-black text-black rounded uppercase tracking-widest">Custom Invite</span>
+                          <span className="inline-block mt-2 px-2 py-0.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[8px] font-black text-black rounded uppercase tracking-widest">Custom Invite</span>
                         </div>
                       </div>
                     </div>
@@ -936,7 +936,7 @@ const HostGame = () => {
                       }}
                       className={`p-5 rounded-[15px] border-2 transition-all cursor-pointer group ${
                         selectedUmpire?._id === u._id 
-                        ? 'border-yellow-500 bg-yellow-500/10' 
+                        ? 'border-[#55DEE8] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10' 
                         : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
                       }`}
                     >
@@ -945,7 +945,7 @@ const HostGame = () => {
                         <div className="flex-1">
                           <h3 className="font-black text-base mb-1 tracking-tight">{u.name}</h3>
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-yellow-500 font-black text-sm">₹{u.price}</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black text-sm">₹{u.price}</span>
                             <div className="flex gap-1">
                               {u.gameTypes?.slice(0, 2).map(t => (
                                 <span key={t} className="text-[8px] px-2 py-0.5 bg-neutral-800 text-neutral-500 rounded-full font-black uppercase tracking-tighter">{t}</span>
@@ -953,7 +953,7 @@ const HostGame = () => {
                             </div>
                           </div>
                         </div>
-                        {selectedUmpire?._id === u._id && <CheckCircle2 className="text-yellow-500" size={24} />}
+                        {selectedUmpire?._id === u._id && <CheckCircle2 className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" size={24} />}
                       </div>
                     </div>
                   )) : (
@@ -989,7 +989,7 @@ const HostGame = () => {
                       }}
                       className={`p-5 rounded-[15px] border-2 transition-all cursor-pointer group ${
                         selectedStreamer?._id === s._id 
-                        ? 'border-yellow-500 bg-yellow-500/10' 
+                        ? 'border-[#55DEE8] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10' 
                         : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
                       }`}
                     >
@@ -998,7 +998,7 @@ const HostGame = () => {
                         <div className="flex-1">
                           <h3 className="font-black text-base mb-1 tracking-tight">{s.name}</h3>
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-yellow-500 font-black text-sm">₹{s.price}</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black text-sm">₹{s.price}</span>
                             <div className="flex gap-1">
                               {s.gameTypes?.slice(0, 2).map(t => (
                                 <span key={t} className="text-[8px] px-2 py-0.5 bg-neutral-800 text-neutral-500 rounded-full font-black uppercase tracking-tighter">{t}</span>
@@ -1006,7 +1006,7 @@ const HostGame = () => {
                             </div>
                           </div>
                         </div>
-                        {selectedStreamer?._id === s._id && <CheckCircle2 className="text-yellow-500" size={24} />}
+                        {selectedStreamer?._id === s._id && <CheckCircle2 className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" size={24} />}
                       </div>
                     </div>
                   )) : (
@@ -1042,7 +1042,7 @@ const HostGame = () => {
                       }}
                       className={`p-5 rounded-[15px] border-2 transition-all cursor-pointer group ${
                         selectedScorer?._id === s._id 
-                        ? 'border-yellow-500 bg-yellow-500/10' 
+                        ? 'border-[#55DEE8] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10' 
                         : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
                       }`}
                     >
@@ -1051,7 +1051,7 @@ const HostGame = () => {
                         <div className="flex-1">
                           <h3 className="font-black text-base mb-1 tracking-tight">{s.name}</h3>
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-yellow-500 font-black text-sm">₹{s.price}</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black text-sm">₹{s.price}</span>
                             <div className="flex gap-1">
                               {s.gameTypes?.slice(0, 2).map(t => (
                                 <span key={t} className="text-[8px] px-2 py-0.5 bg-neutral-800 text-neutral-500 rounded-full font-black uppercase tracking-tighter">{t}</span>
@@ -1059,7 +1059,7 @@ const HostGame = () => {
                             </div>
                           </div>
                         </div>
-                        {selectedScorer?._id === s._id && <CheckCircle2 className="text-yellow-500" size={24} />}
+                        {selectedScorer?._id === s._id && <CheckCircle2 className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" size={24} />}
                       </div>
                     </div>
                   )) : (
@@ -1394,8 +1394,8 @@ const HostGame = () => {
                 <p className="text-[11px] text-neutral-500 font-medium italic">Recommended: Total Cost ({totalCost}) / Total Players</p>
               </div>
               <div className="flex items-center gap-4 bg-black p-2 rounded-2xl border border-neutral-800">
-                <div className="w-12 h-12 bg-yellow-500/10 rounded-xl flex items-center justify-center">
-                  <Coins className="text-yellow-500" size={24} />
+                <div className="w-12 h-12 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 rounded-xl flex items-center justify-center">
+                  <Coins className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" size={24} />
                 </div>
                 <input 
                   type="number"
@@ -1549,11 +1549,11 @@ const HostGame = () => {
           <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowTeamFillModal(false)} className="absolute inset-0 bg-black/90 backdrop-blur-md" />
             <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 30 }} className="relative bg-[#0a0a0a] border border-neutral-800 p-8 rounded-[40px] max-w-md w-full shadow-2xl overflow-hidden">
-              <div className="absolute -top-24 -right-24 w-48 h-48 bg-yellow-500/10 blur-[100px] rounded-full" />
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 blur-[100px] rounded-full" />
               
               <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center">
-                  <ShieldCheck size={24} className="text-yellow-500" />
+                <div className="w-12 h-12 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 rounded-2xl flex items-center justify-center">
+                  <ShieldCheck size={24} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-black tracking-tight text-white">Fill from Team</h2>
@@ -1566,18 +1566,18 @@ const HostGame = () => {
                   <div 
                     key={team._id}
                     onClick={() => handleFillFromTeam(team)}
-                    className="p-4 bg-neutral-900 border border-white/5 rounded-2xl flex items-center justify-between group hover:border-yellow-500/50 transition-all cursor-pointer"
+                    className="p-4 bg-neutral-900 border border-white/5 rounded-2xl flex items-center justify-between group hover:border-[#55DEE8]/50 transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-neutral-800 border border-white/5 overflow-hidden">
                         <img src={team.logo || `https://api.dicebear.com/7.x/initials/svg?seed=${team.name}`} alt={team.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <h4 className="font-black text-sm group-hover:text-yellow-500 transition-colors">{team.name}</h4>
+                        <h4 className="font-black text-sm group-hover:text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] transition-colors">{team.name}</h4>
                         <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest">{team.members?.length || 0} Members</p>
                       </div>
                     </div>
-                    <div className="p-2 bg-yellow-500/10 rounded-lg text-yellow-500 group-hover:bg-yellow-500 group-hover:text-black transition-all">
+                    <div className="p-2 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 rounded-lg text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] group-hover:bg-gradient-to-r from-[#55DEE8] to-[#BFF367] group-hover:text-black transition-all">
                       <Plus size={16} />
                     </div>
                   </div>
@@ -1634,11 +1634,11 @@ const HostGame = () => {
               exit={{ scale: 0.9, y: 30 }} 
               className="relative bg-[#0a0a0a] border border-neutral-800 p-8 rounded-[40px] max-w-md w-full shadow-2xl overflow-hidden"
             >
-              <div className="absolute -top-24 -right-24 w-48 h-48 bg-yellow-500/10 blur-[100px] rounded-full" />
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 blur-[100px] rounded-full" />
               
               <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center">
-                  <UserCheck size={24} className="text-yellow-500" />
+                <div className="w-12 h-12 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 rounded-2xl flex items-center justify-center">
+                  <UserCheck size={24} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-black tracking-tight text-white">Add Custom Umpire</h2>
@@ -1654,7 +1654,7 @@ const HostGame = () => {
                     placeholder="Enter umpire name"
                     value={customUmpireData.name}
                     onChange={(e) => setCustomUmpireData({ ...customUmpireData, name: e.target.value })}
-                    className="w-full bg-neutral-900 border-2 border-neutral-800 rounded-2xl py-4 px-6 text-sm text-white focus:border-yellow-500 outline-none transition-all font-bold"
+                    className="w-full bg-neutral-900 border-2 border-neutral-800 rounded-2xl py-4 px-6 text-sm text-white focus:border-[#55DEE8] outline-none transition-all font-bold"
                   />
                 </div>
 
@@ -1665,7 +1665,7 @@ const HostGame = () => {
                     placeholder="name@example.com"
                     value={customUmpireData.email}
                     onChange={(e) => setCustomUmpireData({ ...customUmpireData, email: e.target.value })}
-                    className="w-full bg-neutral-900 border-2 border-neutral-800 rounded-2xl py-4 px-6 text-sm text-white focus:border-yellow-500 outline-none transition-all font-bold"
+                    className="w-full bg-neutral-900 border-2 border-neutral-800 rounded-2xl py-4 px-6 text-sm text-white focus:border-[#55DEE8] outline-none transition-all font-bold"
                   />
                 </div>
 
@@ -1676,7 +1676,7 @@ const HostGame = () => {
                     placeholder="Enter phone number"
                     value={customUmpireData.phone}
                     onChange={(e) => setCustomUmpireData({ ...customUmpireData, phone: e.target.value })}
-                    className="w-full bg-neutral-900 border-2 border-neutral-800 rounded-2xl py-4 px-6 text-sm text-white focus:border-yellow-500 outline-none transition-all font-bold"
+                    className="w-full bg-neutral-900 border-2 border-neutral-800 rounded-2xl py-4 px-6 text-sm text-white focus:border-[#55DEE8] outline-none transition-all font-bold"
                   />
                 </div>
               </div>
@@ -1696,7 +1696,7 @@ const HostGame = () => {
                     setShowCustomUmpireModal(false);
                     toast.success(`Custom umpire ${customUmpireData.name} added!`);
                   }}
-                  className="flex-[2] py-4 bg-yellow-500 text-black font-black rounded-2xl text-[10px] uppercase tracking-widest hover:bg-yellow-400 transition-all disabled:opacity-50 disabled:grayscale"
+                  className="flex-[2] py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-2xl text-[10px] uppercase tracking-widest hover:bg-gradient-to-r from-[#55DEE8] to-[#BFF367] transition-all disabled:opacity-50 disabled:grayscale"
                 >
                   Confirm Umpire
                 </button>
@@ -1711,11 +1711,11 @@ const HostGame = () => {
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowConfirm(false)} className="absolute inset-0 bg-black/90 backdrop-blur-md" />
             <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 30 }} className="relative bg-neutral-900 border border-neutral-800 p-10 rounded-[40px] max-w-sm w-full text-center shadow-2xl">
-              <div className="w-24 h-24 bg-yellow-500/10 rounded-[32px] flex items-center justify-center mx-auto mb-8">
-                <Coins size={48} className="text-yellow-500" />
+              <div className="w-24 h-24 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 rounded-[32px] flex items-center justify-center mx-auto mb-8">
+                <Coins size={48} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />
               </div>
-              <h2 className="text-3xl font-black mb-3 tracking-tight">Reserve Coins</h2>
-              <p className="text-neutral-500 font-medium mb-10 leading-relaxed text-sm">
+              <h2 className="text-3xl font-black mb-3 tracking-tight font-open-sans uppercase">Reserve Coins</h2>
+              <p className="text-neutral-500 font-medium mb-10 leading-relaxed text-[20px] font-inter">
                 Hosting this game will reserve <span className="text-white font-black">{totalCost} coins</span> from your wallet. It will be deducted only when the match is confirmed.
               </p>
               <div className="flex gap-4">
@@ -1725,7 +1725,7 @@ const HostGame = () => {
                     setShowConfirm(false);
                     handleCreateGame();
                   }}
-                  className="flex-1 py-4 bg-yellow-500 text-black font-black rounded-2xl shadow-lg shadow-yellow-500/20 text-xs uppercase tracking-widest"
+                  className="flex-1 py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-2xl shadow-lg shadow-[#55DEE8]/20 text-xs uppercase tracking-widest"
                 >
                   Confirm
                 </button>
@@ -1749,10 +1749,10 @@ const HostGame = () => {
         <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center">
           <div className="flex flex-col items-center gap-6">
             <div className="relative w-20 h-20">
-              <div className="absolute inset-0 border-4 border-yellow-500/20 rounded-full" />
-              <div className="absolute inset-0 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+              <div className="absolute inset-0 border-4 border-[#55DEE8]/20 rounded-full" />
+              <div className="absolute inset-0 border-4 border-[#55DEE8] border-t-transparent rounded-full animate-spin" />
             </div>
-            <p className="text-yellow-500 font-black uppercase tracking-[0.3em] text-xs">Reserving Coins...</p>
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black uppercase tracking-[0.3em] text-xs">Reserving Coins...</p>
           </div>
         </div>
       )}

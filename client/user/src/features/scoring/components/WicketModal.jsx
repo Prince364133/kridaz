@@ -154,13 +154,13 @@ const WicketModal = ({
                     <button
                       key={player.userId}
                       onClick={() => handleNextBatterSelect(player.userId)}
-                      className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl border border-white/8 bg-white/4 hover:border-yellow-500/40 hover:bg-yellow-500/8 transition-all group"
+                      className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl border border-white/8 bg-white/4 hover:border-[#55DEE8]/40 hover:bg-gradient-to-r from-[#55DEE8]/8 to-[#BFF367]/8 transition-all group"
                     >
-                      <div className="w-9 h-9 rounded-xl bg-neutral-800 flex items-center justify-center text-sm font-black text-yellow-400 shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-neutral-800 flex items-center justify-center text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] shrink-0">
                         {player.name?.charAt(0)?.toUpperCase()}
                       </div>
                       <span className="flex-1 font-bold text-white text-sm">{player.name}</span>
-                      <ChevronRight size={14} className="text-neutral-600 group-hover:text-yellow-400 transition-colors" />
+                      <ChevronRight size={14} className="text-neutral-600 group-hover:text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] transition-colors" />
                     </button>
                   ))
                 )}

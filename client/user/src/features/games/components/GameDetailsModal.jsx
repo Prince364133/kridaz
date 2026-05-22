@@ -40,15 +40,15 @@ const GameDetailsModal = ({ game, onClose, onJoinSlot, currentUserId }) => {
 
     if (slot.status === 'HELD') {
       return (
-        <div className="flex items-center justify-between p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/20 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">
           <div className="flex items-center gap-2">
             <Lock className="h-4.5 w-4.5 shrink-0 animate-pulse" />
             <div>
               <span className="font-semibold text-sm block">{slot.name || 'Reserved Spot'}</span>
-              <span className="text-[10px] text-amber-400/80 uppercase tracking-wider">{slot.role}</span>
+              <span className="text-[10px] text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/80 to-[#BFF367]/80 uppercase tracking-wider">{slot.role}</span>
             </div>
           </div>
-          <span className="text-[10px] font-bold uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded">
+          <span className="text-[10px] font-bold uppercase bg-gradient-to-r from-[#55DEE8]/20 to-[#BFF367]/20 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border border-[#55DEE8]/30 px-2 py-0.5 rounded">
             Pending
           </span>
         </div>

@@ -185,7 +185,7 @@ const BackgroundUploadManager = () => {
             </div>
             
             {status !== 'success' && status !== 'error' && (
-              <p className="text-[10px] text-yellow-500 mt-2 flex items-center gap-1">
+              <p className="text-[10px] text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mt-2 flex items-center gap-1">
                 <AlertTriangle size={10} />
                 Do not close or refresh the app
               </p>

@@ -119,7 +119,7 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
           </div>
         </div>
         <div className="bg-[#121212] p-4 rounded-[15px] border border-white/5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-[15px] bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+          <div className="w-12 h-12 rounded-[15px] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 flex items-center justify-center text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">
             <Trophy size={20} />
           </div>
           <div>
@@ -252,13 +252,13 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
             {/* Custom Members */}
             <div>
               <h3 className="text-white font-bold text-lg tracking-tight mb-4 flex items-center gap-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                <span className="w-1 h-5 bg-yellow-500 rounded-full" />
+                <span className="w-1 h-5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full" />
                 Custom Players ({customMembers.length})
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {customMembers.map((member, index) => (
-                  <div key={index} className="bg-white/[0.02] p-4 rounded-[15px] border border-white/5 border-l-4 border-l-yellow-500/50 flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-[15px] bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+                  <div key={index} className="bg-white/[0.02] p-4 rounded-[15px] border border-white/5 border-l-4 border-l-[#55DEE8]/50 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-[15px] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 flex items-center justify-center text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">
                       <span className="text-lg font-black uppercase">{member.name.charAt(0)}</span>
                     </div>
                     <div className="flex-1 min-w-0">

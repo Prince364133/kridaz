@@ -127,13 +127,13 @@ const MyHostedGames = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      <span className="bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
                         {game.gameType}
                       </span>
                       {game.shortId && (
                         <button
                           onClick={() => { navigator.clipboard?.writeText(game.shortId); toast.success('Game ID copied!'); }}
-                          className="bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-yellow-500 hover:border-yellow-500/40 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider transition-all flex items-center gap-1"
+                          className="bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:border-[#55DEE8]/40 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider transition-all flex items-center gap-1"
                           title="Click to copy Game ID"
                         >
                           <Info size={10} />
@@ -147,20 +147,20 @@ const MyHostedGames = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-neutral-500 font-bold uppercase tracking-widest">Total Reserved</p>
-                    <p className="text-xl font-black text-yellow-500">{game.totalCost} Coins</p>
+                    <p className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">{game.totalCost} Coins</p>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex flex-wrap gap-4 text-xs font-medium text-neutral-400">
                     <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-full">
-                      <Calendar size={14} className="text-yellow-500" /> {new Date(game.date).toLocaleDateString()}
+                      <Calendar size={14} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" /> {new Date(game.date).toLocaleDateString()}
                     </div>
                     <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-full">
-                      <Clock size={14} className="text-yellow-500" /> {game.time}
+                      <Clock size={14} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" /> {game.time}
                     </div>
                     <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-full">
-                      <MapPin size={14} className="text-yellow-500" /> {game.ground?.name || 'Self-Arranged'}
+                      <MapPin size={14} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" /> {game.ground?.name || 'Self-Arranged'}
                     </div>
                   </div>
                   
@@ -180,7 +180,7 @@ const MyHostedGames = () => {
                              el?.scrollIntoView({ behavior: 'smooth' });
                              toast("Venue, Umpire, Scorer & Streamer required!", { icon: '⚠️' });
                            }}
-                           className="px-4 py-1.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-black rounded-full hover:bg-amber-500/20 transition-all uppercase tracking-wider flex items-center gap-1"
+                           className="px-4 py-1.5 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border border-[#55DEE8]/20 text-[10px] font-black rounded-full hover:bg-gradient-to-r from-[#55DEE8]/20 to-[#BFF367]/20 transition-all uppercase tracking-wider flex items-center gap-1"
                          >
                            <AlertCircle size={14} /> Setup Incomplete
                          </button>
@@ -212,7 +212,7 @@ const MyHostedGames = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Team A Slots */}
                   <div className="space-y-3">
-                    <h4 className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-2 px-2">TEAM A SLOTS</h4>
+                    <h4 className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] uppercase tracking-[0.2em] mb-2 px-2">TEAM A SLOTS</h4>
                     {game.teams?.teamA?.slots?.map((slot, index) => (
                       <div key={`A-${index}`} className="flex items-center justify-between p-3 bg-neutral-900 rounded-2xl border border-neutral-800/50">
                         <div className="flex items-center gap-3">
@@ -228,7 +228,7 @@ const MyHostedGames = () => {
                               {slot.user?.name || "OPEN SLOT"}
                             </p>
                             <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase ${
-                              slot.status === 'RESERVED' ? 'bg-amber-500/10 text-amber-500' : 
+                              slot.status === 'RESERVED' ? 'bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]' : 
                               slot.status === 'JOINED' ? 'bg-green-500/10 text-green-500' : 'text-neutral-600'
                             }`}>
                               {slot.status || 'EMPTY'}
@@ -245,7 +245,7 @@ const MyHostedGames = () => {
                             </button>
                             <button 
                               onClick={() => handleApprove(game._id, 'teamA', index)}
-                              className="p-1.5 bg-yellow-500 text-black rounded-lg hover:scale-105 transition-all"
+                              className="p-1.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-lg hover:scale-105 transition-all"
                             >
                               <Check size={14} />
                             </button>
@@ -257,7 +257,7 @@ const MyHostedGames = () => {
 
                   {/* Team B Slots */}
                   <div className="space-y-3">
-                    <h4 className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-2 px-2">TEAM B SLOTS</h4>
+                    <h4 className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] uppercase tracking-[0.2em] mb-2 px-2">TEAM B SLOTS</h4>
                     {game.teams?.teamB?.slots?.map((slot, index) => (
                       <div key={`B-${index}`} className="flex items-center justify-between p-3 bg-neutral-900 rounded-2xl border border-neutral-800/50">
                         <div className="flex items-center gap-3">
@@ -273,7 +273,7 @@ const MyHostedGames = () => {
                               {slot.user?.name || "OPEN SLOT"}
                             </p>
                             <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase ${
-                              slot.status === 'RESERVED' ? 'bg-amber-500/10 text-amber-500' : 
+                              slot.status === 'RESERVED' ? 'bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]' : 
                               slot.status === 'JOINED' ? 'bg-green-500/10 text-green-500' : 'text-neutral-600'
                             }`}>
                               {slot.status || 'EMPTY'}
@@ -290,7 +290,7 @@ const MyHostedGames = () => {
                             </button>
                             <button 
                               onClick={() => handleApprove(game._id, 'teamB', index)}
-                              className="p-1.5 bg-yellow-500 text-black rounded-lg hover:scale-105 transition-all"
+                              className="p-1.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-lg hover:scale-105 transition-all"
                             >
                               <Check size={14} />
                             </button>
@@ -321,7 +321,7 @@ const MyHostedGames = () => {
                         ) : (
                           <button 
                             onClick={() => setVenueModal({ open: true, gameId: game._id })}
-                            className="px-2 py-0.5 bg-yellow-500 text-black text-[10px] font-black rounded-full uppercase hover:scale-105 transition-all"
+                            className="px-2 py-0.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black rounded-full uppercase hover:scale-105 transition-all"
                           >
                             Assign
                           </button>
@@ -349,7 +349,7 @@ const MyHostedGames = () => {
                       ) : (
                         <button 
                           onClick={() => setHireModal({ open: true, gameId: game._id, role: 'umpire' })}
-                          className="px-2 py-0.5 bg-yellow-500 text-black text-[10px] font-black rounded-full uppercase hover:scale-105 transition-all"
+                          className="px-2 py-0.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black rounded-full uppercase hover:scale-105 transition-all"
                         >
                           Hire
                         </button>
@@ -366,12 +366,12 @@ const MyHostedGames = () => {
                     ) : game.umpireRequest?.status === 'PENDING' ? (
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center text-[10px] font-bold text-yellow-500 border border-yellow-500/20">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 flex items-center justify-center text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border border-[#55DEE8]/20">
                             {game.umpireRequest?.user?.name?.[0] || 'U'}
                           </div>
                           <div>
                             <p className="text-xs font-black uppercase tracking-tighter text-white">{game.umpireRequest?.user?.name}</p>
-                            <p className="text-[8px] text-yellow-500 font-bold uppercase tracking-widest leading-tight">Requested Assignment</p>
+                            <p className="text-[8px] text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-bold uppercase tracking-widest leading-tight">Requested Assignment</p>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -383,7 +383,7 @@ const MyHostedGames = () => {
                           </button>
                           <button 
                             onClick={() => handleProfessionalRequest(game._id, 'umpire', 'APPROVE')}
-                            className="flex-1 py-1.5 bg-yellow-500 text-black text-[8px] font-black rounded-lg uppercase hover:scale-105 transition-all"
+                            className="flex-1 py-1.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[8px] font-black rounded-lg uppercase hover:scale-105 transition-all"
                           >
                             Approve
                           </button>
@@ -406,7 +406,7 @@ const MyHostedGames = () => {
                       ) : (
                         <button 
                           onClick={() => setHireModal({ open: true, gameId: game._id, role: 'scorer' })}
-                          className="px-2 py-0.5 bg-yellow-500 text-black text-[10px] font-black rounded-full uppercase hover:scale-105 transition-all"
+                          className="px-2 py-0.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black rounded-full uppercase hover:scale-105 transition-all"
                         >
                           Hire
                         </button>
@@ -423,12 +423,12 @@ const MyHostedGames = () => {
                     ) : game.scorerRequest?.status === 'PENDING' ? (
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center text-[10px] font-bold text-yellow-500 border border-yellow-500/20">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 flex items-center justify-center text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border border-[#55DEE8]/20">
                             {game.scorerRequest?.user?.name?.[0] || 'S'}
                           </div>
                           <div>
                             <p className="text-xs font-black uppercase tracking-tighter text-white">{game.scorerRequest?.user?.name}</p>
-                            <p className="text-[8px] text-yellow-500 font-bold uppercase tracking-widest leading-tight">Requested Assignment</p>
+                            <p className="text-[8px] text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-bold uppercase tracking-widest leading-tight">Requested Assignment</p>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -440,7 +440,7 @@ const MyHostedGames = () => {
                           </button>
                           <button 
                             onClick={() => handleProfessionalRequest(game._id, 'scorer', 'APPROVE')}
-                            className="flex-1 py-1.5 bg-yellow-500 text-black text-[8px] font-black rounded-lg uppercase hover:scale-105 transition-all"
+                            className="flex-1 py-1.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[8px] font-black rounded-lg uppercase hover:scale-105 transition-all"
                           >
                             Approve
                           </button>
@@ -463,7 +463,7 @@ const MyHostedGames = () => {
                       ) : (
                         <button 
                           onClick={() => setHireModal({ open: true, gameId: game._id, role: 'streamer' })}
-                          className="px-2 py-0.5 bg-yellow-500 text-black text-[10px] font-black rounded-full uppercase hover:scale-105 transition-all"
+                          className="px-2 py-0.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black rounded-full uppercase hover:scale-105 transition-all"
                         >
                           Hire
                         </button>
@@ -489,12 +489,12 @@ const MyHostedGames = () => {
                     ) : game.streamerRequest?.status === 'PENDING' ? (
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center text-[10px] font-bold text-yellow-500 border border-yellow-500/20">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 flex items-center justify-center text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border border-[#55DEE8]/20">
                             {game.streamerRequest?.user?.name?.[0] || 'S'}
                           </div>
                           <div>
                             <p className="text-xs font-black uppercase tracking-tighter text-white">{game.streamerRequest?.user?.name}</p>
-                            <p className="text-[8px] text-yellow-500 font-bold uppercase tracking-widest leading-tight">Requested Assignment</p>
+                            <p className="text-[8px] text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-bold uppercase tracking-widest leading-tight">Requested Assignment</p>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -506,7 +506,7 @@ const MyHostedGames = () => {
                           </button>
                           <button 
                             onClick={() => handleProfessionalRequest(game._id, 'streamer', 'APPROVE')}
-                            className="flex-1 py-1.5 bg-yellow-500 text-black text-[8px] font-black rounded-lg uppercase hover:scale-105 transition-all"
+                            className="flex-1 py-1.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[8px] font-black rounded-lg uppercase hover:scale-105 transition-all"
                           >
                             Approve
                           </button>

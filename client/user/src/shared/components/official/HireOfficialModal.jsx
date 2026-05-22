@@ -91,7 +91,7 @@ const HireOfficialModal = ({ isOpen, onClose, gameId, role, onInviteSent }) => {
                   placeholder="Type 3+ characters to search..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="w-full bg-neutral-800 border border-neutral-700 rounded-2xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-yellow-500 transition-all"
+                  className="w-full bg-neutral-800 border border-neutral-700 rounded-2xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-[#55DEE8] transition-all"
                   autoFocus
                 />
               </div>
@@ -99,7 +99,7 @@ const HireOfficialModal = ({ isOpen, onClose, gameId, role, onInviteSent }) => {
               <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 no-scrollbar">
                 {loading ? (
                   <div className="py-10 text-center">
-                    <Loader2 className="mx-auto mb-2 animate-spin text-yellow-500" size={24} />
+                    <Loader2 className="mx-auto mb-2 animate-spin text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" size={24} />
                     <p className="text-xs text-neutral-500 uppercase font-black">Searching officials...</p>
                   </div>
                 ) : results.length > 0 ? (
@@ -123,7 +123,7 @@ const HireOfficialModal = ({ isOpen, onClose, gameId, role, onInviteSent }) => {
                       <button
                         onClick={() => handleInvite(user._id)}
                         disabled={invitingId === user._id}
-                        className="px-4 py-2 bg-yellow-500 text-black text-[10px] font-black rounded-xl uppercase hover:scale-105 transition-all disabled:opacity-50 disabled:scale-100"
+                        className="px-4 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black rounded-xl uppercase hover:scale-105 transition-all disabled:opacity-50 disabled:scale-100"
                       >
                         {invitingId === user._id ? (
                           <Loader2 size={14} className="animate-spin" />

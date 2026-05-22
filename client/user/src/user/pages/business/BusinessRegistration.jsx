@@ -264,12 +264,12 @@ export default function BusinessRegistration() {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center space-y-8 p-12 rounded-[8px] border border-[#2D2D2D] bg-[#000000] relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-[#F59E0B]" />
-          <div className="w-16 h-16 bg-[#F59E0B]/10 rounded-[8px] flex items-center justify-center mx-auto mb-6">
-            <ShieldAlert size={40} className="text-[#F59E0B]" />
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />
+          <div className="w-16 h-16 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 rounded-[8px] flex items-center justify-center mx-auto mb-6">
+            <ShieldAlert size={40} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />
           </div>
           <h2 className="text-4xl font-black uppercase tracking-tight">
-            Role <span className="text-[#F59E0B]">Conflict</span>
+            Role <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">Conflict</span>
           </h2>
           <p className="text-gray-400 leading-relaxed">
             Your account already holds the <span className="text-white capitalize font-semibold">{existingRole}</span> role. 
@@ -285,7 +285,7 @@ export default function BusinessRegistration() {
               else if (["admin", "bmsp_admin"].includes(existingRole?.toLowerCase())) navigate("/admin");
               else navigate("/");
             }}
-            className="w-full py-4 rounded-[8px] border border-[#2D2D2D] hover:border-[#F59E0B]/30 hover:text-[#F59E0B] transition-all font-normal uppercase tracking-widest text-[12px]"
+            className="w-full py-4 rounded-[8px] border border-[#2D2D2D] hover:border-[#55DEE8]/30 hover:text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] transition-all font-normal uppercase tracking-widest text-[12px]"
           >
             Go to Dashboard
           </button>

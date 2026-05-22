@@ -5,7 +5,7 @@ const BALL_STYLES = {
   boundary: { bg: 'linear-gradient(135deg, #10b981, #047857)', color: '#fff', border: '1px solid rgba(16,185,129,0.4)' },
   six: { bg: 'linear-gradient(135deg, #d946ef, #701a75)', color: '#fff', border: '1px solid rgba(217,70,239,0.4)' },
   four: { bg: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', color: '#fff', border: '1px solid rgba(59,130,246,0.4)' },
-  wide: { bg: 'linear-gradient(135deg, #fbbf24, #b45309)', color: '#000', border: '1px solid rgba(251,191,36,0.4)' },
+  wide: { bg: 'linear-gradient(135deg, #55DEE8, #b45309)', color: '#000', border: '1px solid rgba(251,191,36,0.4)' },
   no_ball: { bg: 'linear-gradient(135deg, #f97316, #c2410c)', color: '#fff', border: '1px solid rgba(249,115,22,0.4)' },
   dot: { bg: 'rgba(255, 255, 255, 0.05)', color: 'rgba(255, 255, 255, 0.4)', border: '1px solid rgba(255,255,255,0.08)' },
   run: { bg: 'rgba(255, 255, 255, 0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' },
@@ -312,7 +312,7 @@ export default function PremiumGlassTicker({ score, connected, badge }) {
                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
               }}>
                 <div style={{ fontSize: 'clamp(6px, 0.55vw, 9px)', color: 'rgba(255,255,255,0.4)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>TARGET</div>
-                <div style={{ fontSize: 'clamp(11px, 1.4vw, 22px)', fontWeight: 800, color: '#fbbf24' }}>{score.target}</div>
+                <div style={{ fontSize: 'clamp(11px, 1.4vw, 22px)', fontWeight: 800, color: '#55DEE8' }}>{score.target}</div>
               </div>
             )}
           </div>

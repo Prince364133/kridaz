@@ -97,7 +97,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
       case 'PAYMENT': return <CreditCard size={14} className="text-green-500" />;
       case 'SUPPORT': return <MessageSquare size={14} className="text-blue-500" />;
       case 'WITHDRAWAL': return <AlertTriangle size={14} className="text-orange-500" />;
-      case 'REVIEW': return <ShieldAlert size={14} className="text-yellow-500" />;
+      case 'REVIEW': return <ShieldAlert size={14} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />;
       default: return <Bell size={14} style={{ color: themeColor }} />;
     }
   };
