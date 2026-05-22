@@ -49,30 +49,27 @@ const SignUp = () => {
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (!identifier) return toast.error("Email or Phone number required");
+    if (!identifier) return toast.error("Phone number required");
 
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
     const isPhone = /^\d{10}$/.test(identifier);
 
-    if (!isEmail && !isPhone) {
-      return toast.error("Please enter a valid email or 10-digit phone number");
+    if (!isPhone) {
+      return toast.error("Please enter a valid 10-digit phone number");
     }
 
-    const mode = isEmail ? 'email' : 'phone';
-    setAuthMode(mode);
+    setAuthMode('phone');
     
     const formattedPhone = countryCode + identifier;
 
-    if (isEmail) setEmail(identifier);
-    else setPhone(formattedPhone);
+    setPhone(formattedPhone);
     
     setLoading(true);
     try {
-      const payload = isEmail ? { email: identifier } : { phone: formattedPhone };
+      const payload = { phone: formattedPhone };
       const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
       toast.success(res.data.message);
       if (res.data.testOtp) {
-         toast(isEmail ? `Test OTP: ${res.data.testOtp.email}` : `Test OTP: ${res.data.testOtp.phone}`, { icon: '🧑‍💻', duration: 10000 });
+         toast(`Test OTP: ${res.data.testOtp.phone}`, { icon: '🧑‍💻', duration: 10000 });
       }
       setStep(2);
     } catch (err) {
@@ -215,37 +212,31 @@ const SignUp = () => {
                   {step === 1 && (
                     <div className="space-y-4">
                       <label className="text-sm font-medium text-white/60 ml-1">
-                        Email Address or Phone Number
+                        Phone Number
                       </label>
                       <div className="relative group/field flex gap-2">
-                        {(!identifier || /^\d/.test(identifier)) && (
-                          <select
-                            value={countryCode}
-                            onChange={(e) => setCountryCode(e.target.value)}
-                            className="bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 px-2 text-white text-sm outline-none transition-all cursor-pointer w-20 appearance-none text-center"
-                          >
-                            <option value="+91" className="text-black">+91 🇮🇳</option>
-                            <option value="+1" className="text-black">+1 🇺🇸</option>
-                            <option value="+44" className="text-black">+44 🇬🇧</option>
-                            <option value="+61" className="text-black">+61 🇦🇺</option>
-                            <option value="+971" className="text-black">+971 🇦🇪</option>
-                          </select>
-                        )}
+                        <select
+                          value={countryCode}
+                          onChange={(e) => setCountryCode(e.target.value)}
+                          className="bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 px-2 text-white text-sm outline-none transition-all cursor-pointer w-20 appearance-none text-center"
+                        >
+                          <option value="+91" className="text-black">+91 🇮🇳</option>
+                          <option value="+1" className="text-black">+1 🇺🇸</option>
+                          <option value="+44" className="text-black">+44 🇬🇧</option>
+                          <option value="+61" className="text-black">+61 🇦🇺</option>
+                          <option value="+971" className="text-black">+971 🇦🇪</option>
+                        </select>
                         <div className="relative flex-1">
                           <UserIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                           <input 
-                            type="text"
+                            type="tel"
                             required
                             value={identifier}
                             onChange={(e) => {
-                              const val = e.target.value;
-                              if (/^\d+$/.test(val)) {
-                                setIdentifier(val.slice(0, 10));
-                              } else {
-                                setIdentifier(val);
-                              }
+                              const val = e.target.value.replace(/\D/g, '');
+                              setIdentifier(val.slice(0, 10));
                             }}
-                            placeholder="name@example.com or 9876543210"
+                            placeholder="9876543210"
                             className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
