@@ -426,16 +426,56 @@ export const configureStream = async (matchId, { youtubeVideoId, youtubeLiveChat
     where: { id: finalMatchId },
     data: {
       streamConfig: {
-        upsert: {
-          create: { youtubeVideoId, youtubeLiveChatId },
-          update: { youtubeVideoId, youtubeLiveChatId }
-        }
+        ...(typeof hostedGame.streamConfig === 'object' && hostedGame.streamConfig !== null ? hostedGame.streamConfig : {}),
+        youtubeVideoId,
+        youtubeLiveChatId
       },
       streamStatus: streamStatus
     }
   });
 
   await liveStateService.setStreamStatus(finalMatchId, streamStatus);
+
+  // Broadcast updated live score so YouTube embed appears immediately
+  try {
+    const updatedHostedGame = await prisma.hostedGame.findUnique({
+      where: { id: finalMatchId },
+      include: HOSTED_GAME_SCORING_INCLUDE
+    });
+    const mappedMatch = mapHostedGame(updatedHostedGame);
+
+    const scoring = await prisma.cricketMatch.findUnique({
+      where: { gameId: finalMatchId },
+      include: {
+        innings: true,
+        playerStats: true,
+        timeline: { take: 6, orderBy: { timestamp: 'desc' } }
+      }
+    });
+
+    let snapshot = null;
+    if (scoring) {
+      snapshot = computeScoreSnapshot(scoring, mappedMatch);
+    } else {
+      snapshot = {
+        matchId: finalMatchId,
+        status: 'NOT_STARTED',
+        matchName: mappedMatch.name,
+        teamA: mappedMatch.teamA,
+        teamB: mappedMatch.teamB,
+        tickerTheme: mappedMatch.tickerTheme || 'neon_classic',
+        youtubeVideoId: updatedHostedGame.streamConfig?.youtubeVideoId || null,
+        isLive: updatedHostedGame.isLive,
+      };
+    }
+
+    await liveStateService.setLiveScore(finalMatchId, snapshot);
+    const io = getIO();
+    if (io) io.to(finalMatchId).emit(SOCKET.SCORE_UPDATED, snapshot);
+  } catch (err) {
+    logger.error("Error caching/broadcasting live snapshot in configureStream:", err);
+  }
+
   return { streamStatus };
 };
 

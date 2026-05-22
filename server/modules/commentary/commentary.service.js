@@ -25,8 +25,9 @@ const openai = new OpenAI({
 
 /**
  * Generate commentary text using OpenAI or templates
+ * Streams the response chunk-by-chunk to the websocket room for zero-latency UI updates
  */
-const generateCommentaryText = async (liveData, ballEvent, language = 'en', style = 'professional') => {
+const generateCommentaryText = async (liveData, ballEvent, language = 'en', style = 'professional', io = null, matchId = null) => {
   const isBoundary = ballEvent.runs >= 4;
   const isWicket = ballEvent.isWicket;
   
@@ -38,13 +39,18 @@ const generateCommentaryText = async (liveData, ballEvent, language = 'en', styl
       `They take ${ballEvent.runs} runs comfortably.`,
       `That's ${ballEvent.runs} runs added to the total.`
     ];
+    let selectedTemplate = templates[Math.floor(Math.random() * templates.length)];
     if (ballEvent.runs === 0 && !ballEvent.isExtra) {
-      return "Solid defense. No run taken.";
+      selectedTemplate = "Solid defense. No run taken.";
+    } else if (ballEvent.isExtra) {
+      selectedTemplate = `That's an extra, given as ${ballEvent.extraType}.`;
     }
-    if (ballEvent.isExtra) {
-      return `That's an extra, given as ${ballEvent.extraType}.`;
+    
+    // Simulate streaming for standard templates to keep UI consistent
+    if (io && matchId) {
+      io.to(matchId).emit('COMMENTARY_CHUNK', { chunk: selectedTemplate, isFinished: true, language });
     }
-    return templates[Math.floor(Math.random() * templates.length)];
+    return selectedTemplate;
   }
 
   // LEVEL 2: AI Generation for Boundaries, Wickets, and Non-English Languages
@@ -59,7 +65,7 @@ const generateCommentaryText = async (liveData, ballEvent, language = 'en', styl
       'te': 'Telugu (in Telugu script)',
       'gu': 'Gujarati (in Gujarati script)'
     };
-    const targetLanguage = languageMap[language] || 'English';
+    const targetLanguage = languageMap[language] || language || 'English'; 
 
     let styleInstruction = "Professional, Energetic TV Broadcast Style.";
     if (style === 'natural') styleInstruction = "Natural, conversational, like a fan watching the game with friends.";
@@ -81,14 +87,30 @@ Match Situation:
 CRITICAL INSTRUCTION: You MUST generate the commentary text EXCLUSIVELY in the following language/script: ${targetLanguage}. Do not use English words if you are asked to speak in a regional language.
 Return ONLY the commentary text. Nothing else. No quotes, no intro.`;
 
-    const response = await openai.chat.completions.create({
+    const stream = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [{ role: "user", content: prompt }],
       max_tokens: 60,
       temperature: 0.8,
+      stream: true, // Industry standard: STREAMING
     });
     
-    return response.choices[0].message.content.trim();
+    let fullText = "";
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content || "";
+      if (content) {
+        fullText += content;
+        if (io && matchId) {
+          io.to(matchId).emit('COMMENTARY_CHUNK', { chunk: content, isFinished: false, language });
+        }
+      }
+    }
+    
+    if (io && matchId) {
+      io.to(matchId).emit('COMMENTARY_CHUNK', { chunk: "", isFinished: true, language });
+    }
+    
+    return fullText.trim();
   } catch (error) {
     logger.error("[Commentary] OpenAI Error:", error);
     if (isWicket) return "And that's a brilliant wicket! Huge moment in the match!";
@@ -130,31 +152,62 @@ const generateOpenAIAudio = async (text, voiceModel = "alloy") => {
 // Background Worker Processor
 const worker = new Worker('commentary-generation', async (job) => {
   const { matchId, liveData, ballEvent } = job.data;
+  const io = getIO();
   
   try {
-    // 1. Check if AI commentary is enabled for this match
-    const hostedGame = await prisma.hostedGame.findUnique({
-      where: { id: matchId },
-      select: { isAiCommentaryEnabled: true, commentaryVoice: true, commentaryLanguage: true, commentaryStyle: true }
-    });
+    // 1. Check if AI commentary is enabled for this match using REDIS CACHE
+    const cacheKey = `hostedGame_settings_${matchId}`;
+    let hostedGameStr = await connection.get(cacheKey);
+    let hostedGame;
+    
+    if (hostedGameStr) {
+      hostedGame = JSON.parse(hostedGameStr);
+    } else {
+      hostedGame = await prisma.hostedGame.findUnique({
+        where: { id: matchId },
+        select: { isAiCommentaryEnabled: true, commentaryVoice: true, commentaryLanguage: true, commentaryStyle: true }
+      });
+      if (hostedGame) {
+        await connection.setex(cacheKey, 60, JSON.stringify(hostedGame)); // Cache for 60 seconds
+      }
+    }
 
     if (!hostedGame || !hostedGame.isAiCommentaryEnabled) {
       return; // Commentary disabled
     }
 
-    // 2. Generate Text Commentary
-    const text = await generateCommentaryText(liveData, ballEvent, hostedGame.commentaryLanguage, hostedGame.commentaryStyle);
-
-    // 3. Optional: Generate Audio with OpenAI TTS
-    let audioUrl = null;
-    if (hostedGame.commentaryVoice !== 'BROWSER_TTS') {
-      audioUrl = await generateOpenAIAudio(text, hostedGame.commentaryVoice);
+    // 2. Concurrently Generate English Display Text AND Regional Audio Text to save time
+    let text = "";
+    let spokenText = "";
+    
+    if (hostedGame.commentaryLanguage === 'en') {
+      text = await generateCommentaryText(
+        liveData, ballEvent, 'en', hostedGame.commentaryStyle, io, matchId
+      );
+      spokenText = text;
+    } else {
+      // Fire both LLM calls at the exact same time
+      const englishPromise = generateCommentaryText(
+        liveData, ballEvent, 'en', hostedGame.commentaryStyle, io, matchId // streams to UI
+      );
+      const regionalPromise = generateCommentaryText(
+        liveData, ballEvent, hostedGame.commentaryLanguage, hostedGame.commentaryStyle, null, null // silent generation
+      );
+      
+      const results = await Promise.all([englishPromise, regionalPromise]);
+      text = results[0];
+      spokenText = results[1];
     }
 
-    // 4. Broadcast the Commentary to Public Views
-    const io = getIO();
+    // 3. Generate Audio with OpenAI TTS using the regional spokenText
+    let audioUrl = null;
+    if (hostedGame.commentaryVoice !== 'BROWSER_TTS') {
+      audioUrl = await generateOpenAIAudio(spokenText, hostedGame.commentaryVoice);
+    }
+
+    // 4. Broadcast final audio readiness
     if (io) {
-      io.to(matchId).emit('COMMENTARY_GENERATED', {
+      io.to(matchId).emit('COMMENTARY_AUDIO_READY', {
         text,
         audioUrl,
         voice: hostedGame.commentaryVoice,

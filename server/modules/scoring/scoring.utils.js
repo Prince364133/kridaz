@@ -205,7 +205,7 @@ export const computeScoreSnapshot = (scoring, match) => {
     teamA: match.teamA,
     teamB: match.teamB,
     tickerTheme: match.tickerTheme || "neon_classic",
-    youtubeVideoId: match.youtubeLiveUrl ? extractYouTubeId(match.youtubeLiveUrl) : (match.streamConfig?.youtubeVideoId || null),
+    youtubeVideoId: match.youtubeLiveUrl ? extractYouTubeId(match.youtubeLiveUrl) : (match.streamConfig?.youtubeVideoId ? extractYouTubeId(match.streamConfig.youtubeVideoId) || match.streamConfig.youtubeVideoId : null),
     wormData,
     nrrEffectiveOvers,
     mvpLeaderboard,

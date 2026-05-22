@@ -765,14 +765,24 @@ const ScoringApp = () => {
                               Change Ticker Theme
                             </button>
                           </div>
-                          <div className="space-y-1.5">
+                  <div className="space-y-1.5">
                             <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Public Scoreboard</p>
                             <div className="flex gap-2">
                               <input readOnly value={liveUrls.publicScoreboard} className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[9px] text-neutral-400 font-bold truncate outline-none" />
                               <button onClick={() => { navigator.clipboard.writeText(liveUrls.publicScoreboard); toast.success('Copied!'); }} className="px-4 py-2 bg-[#00C187]/10 text-[#00C187] text-[8px] font-black uppercase rounded-xl border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
                             </div>
+                            <div className="flex gap-2 w-full mt-2">
+                              <a
+                                href={`/live-overlay/${matchId}/preview?theme=${matchData?.hostedGameId?.tickerTheme || 'neon_classic'}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="w-full bg-[#00C187]/20 text-[#00C187] border border-[#00C187]/50 rounded-xl px-4 py-2 text-xs font-bold text-center hover:bg-[#00C187]/30 transition-colors"
+                              >
+                                Preview Theme
+                              </a>
+                            </div>
                           </div>
-                        </div>
+                      </div>
                       )}
 
                       <div className="space-y-4 pt-4 border-t border-white/5">

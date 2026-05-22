@@ -156,9 +156,13 @@ const socketConfig = (server) => {
       
       let isStale = false;
       if (currentLock && currentLock !== socket.id) {
-        const sockets = await io.in(currentLock).fetchSockets();
-        if (sockets.length === 0) {
-          isStale = true; // The socket that held the lock is no longer connected
+        try {
+          const sockets = await io.in(currentLock).fetchSockets();
+          if (sockets.length === 0) {
+            isStale = true; // The socket that held the lock is no longer connected
+          }
+        } catch (err) {
+          isStale = true; // Assume stale if we can't verify across redis nodes
         }
       }
       

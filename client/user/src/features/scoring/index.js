@@ -2,6 +2,7 @@
 export { default as ScoringApp } from './pages/ScoringApp';
 export { default as LiveScoreboard } from './pages/LiveScoreboard';
 export { default as LiveOverlay } from './pages/LiveOverlay';
+export { default as ThemePreview } from './pages/ThemePreview';
 export { default as MatchDetails } from './pages/MatchDetails';
 export { default as MatchAnalytics } from './pages/MatchAnalytics';
 
