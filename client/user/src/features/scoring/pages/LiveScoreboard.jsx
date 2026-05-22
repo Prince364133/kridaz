@@ -180,7 +180,7 @@ const LiveScoreboard = () => {
  </div>
  );
 
- if (score.status === 'NOT_STARTED') {
+ if (score.status === 'NOT_STARTED' || !score.isLive) {
     return (
       <div className="min-h-screen bg-[#050505] text-white flex flex-col font-inter">
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center gap-6">

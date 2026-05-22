@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { X, Check, Eye, Sparkles, Tv, Layers, Palette, RefreshCw } from 'lucide-react';
+import { X, Check, Eye, Sparkles, Tv, Layers, Palette, RefreshCw, Circle } from 'lucide-react';
 import toast from 'react-hot-toast';
-
 const THEMES = [
   {
     id: 'neon_classic',

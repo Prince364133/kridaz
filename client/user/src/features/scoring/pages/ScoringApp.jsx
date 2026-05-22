@@ -114,7 +114,6 @@ const ScoringApp = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [liveEnabled, setLiveEnabled] = useState(false);
   const [liveUrls, setLiveUrls] = useState(null);
-  const [liveLoading, setLiveLoading] = useState(false);
   const [passwordVerified, setPasswordVerified] = useState(sessionStorage.getItem(`scoringAuth_${matchId}`) === 'true');
   const [authAction, setAuthAction] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -170,19 +169,47 @@ const ScoringApp = () => {
   }, [matchId, passwordVerified]);
 
   React.useEffect(() => {
+    if (!passwordVerified || !matchId) return;
     const hostedGame = matchData?.hostedGameId;
-    if (hostedGame?.isLive && !liveEnabled) {
-      setLiveEnabled(true);
-      const appBase = import.meta['env']?.VITE_APP_URL || window.location.origin;
-      setLiveUrls({
-        obsOverlay: `${appBase}/live-overlay/${matchId}?token=${hostedGame.overlayToken || ''}`,
-        publicScoreboard: `${appBase}/live-score/${matchId}`,
-      });
-    } else if (!hostedGame?.isLive && liveEnabled) {
-      setLiveEnabled(false);
-      setLiveUrls(null);
+    if (!hostedGame) return;
+
+    if (hostedGame.isLive) {
+      if (!liveEnabled) {
+        setLiveEnabled(true);
+        const appBase = import.meta['env']?.VITE_APP_URL || window.location.origin;
+        setLiveUrls({
+          obsOverlay: `${appBase}/live-overlay/${matchId}?token=${hostedGame.overlayToken || ''}`,
+          publicScoreboard: `${appBase}/live-score/${matchId}`,
+        });
+      }
+    } else {
+      const autoGoLive = async () => {
+        try {
+          const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:6001';
+          const response = await fetch(`${apiBase}/api/scoring/${matchId}/go-live`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token')}`
+            }
+          });
+          const data = await response.json();
+          if (data.success) {
+            setLiveEnabled(true);
+            const appBase = import.meta['env']?.VITE_APP_URL || window.location.origin;
+            setLiveUrls({
+              obsOverlay: `${appBase}/live-overlay/${matchId}?token=${data.overlayToken || data.urls?.overlayToken || ''}`,
+              publicScoreboard: `${appBase}/live-score/${matchId}`,
+            });
+            refresh();
+          }
+        } catch (err) {
+          console.error("Auto go-live error:", err);
+        }
+      };
+      autoGoLive();
     }
-  }, [matchData?.hostedGameId?.isLive, liveEnabled, matchId]);
+  }, [matchData?.hostedGameId?.isLive, liveEnabled, matchId, passwordVerified, refresh]);
 
   React.useEffect(() => {
     const handleMessage = (e) => {
@@ -381,7 +408,7 @@ const ScoringApp = () => {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token')}`
                       },
                       body: JSON.stringify({ 
                         scoringId: matchData._id, 
@@ -650,70 +677,7 @@ const ScoringApp = () => {
             </div>
 
             <div className="space-y-6">
-                <div className="flex items-center justify-between p-6 bg-white/[0.02] rounded-3xl border border-white/5">
-                  <div className="space-y-1">
-                    <p className="text-xs font-black uppercase text-white tracking-tight">Sync Global Node</p>
-                    <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">External Overlay Sync</p>
-                  </div>
-                  <button 
-                    onClick={async () => {
-                      if (liveLoading) return;
-                      setLiveLoading(true);
-                      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:6001';
-                      if (!liveEnabled) {
-                        try {
-                          const response = await fetch(`${apiBase}/api/scoring/${matchId}/go-live`, {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                              'Authorization': `Bearer ${localStorage.getItem('token')}`
-                            }
-                          });
-                          const data = await response.json();
-                          if (data.success) {
-                            setLiveEnabled(true);
-                            setLiveUrls(data.urls);
-                            toast.success('Sync Established!');
-                          } else {
-                            toast.error(data.message || 'Sync failed');
-                          }
-                        } catch (err) {
-                          toast.error('Network node failure');
-                        } finally {
-                          setLiveLoading(false);
-                        }
-                      } else {
-                        try {
-                          const response = await fetch(`${apiBase}/api/scoring/${matchId}/end-live`, {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                              'Authorization': `Bearer ${localStorage.getItem('token')}`
-                            }
-                          });
-                          const data = await response.json();
-                          if (data.success) {
-                            setLiveEnabled(false);
-                            setLiveUrls(null);
-                            toast.success('Sync Disconnected');
-                          } else {
-                            toast.error(data.message || 'Termination failed');
-                          }
-                        } catch (err) {
-                          toast.error('Network node failure');
-                        } finally {
-                          setLiveLoading(false);
-                        }
-                      }
-                    }}
-                    disabled={liveLoading}
-                    className={`w-14 h-7 rounded-full relative transition-all duration-500 ${liveEnabled ? 'bg-[#00C187] shadow-[0_0_20px_rgba(0,193,135,0.4)]' : 'bg-neutral-800'} ${liveLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-lg transition-all duration-500 ${liveEnabled ? 'left-8' : 'left-1'}`} />
-                  </button>
-                </div>
-
-                {liveEnabled && (
+                {liveEnabled ? (
                   <div className="p-6 bg-white/[0.02] rounded-3xl border border-white/5 space-y-6 animate-in slide-in-from-top duration-500">
                     <p className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] text-center">Broadcast Credentials</p>
                     <div className="space-y-3">
@@ -732,7 +696,7 @@ const ScoringApp = () => {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token')}`
                               },
                               body: JSON.stringify({ youtubeVideoId: vidId })
                             });
@@ -779,6 +743,11 @@ const ScoringApp = () => {
                         </div>
                       </div>
                     )}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center bg-white/[0.02] rounded-3xl border border-dashed border-white/10">
+                    <div className="w-8 h-8 border-2 border-[#00C187] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">Establishing Sync...</p>
                   </div>
                 )}
 
@@ -888,7 +857,7 @@ const ScoringApp = () => {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token')}`
                   },
                   body: JSON.stringify({ matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, battingTeamId })
                 });

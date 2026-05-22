@@ -224,14 +224,16 @@ export const goLiveSession = async (matchId) => {
     throw error;
   }
 
+  const finalMatchId = hostedGame.id;
+
   const overlayToken = jwt.sign(
-    { matchId: hostedGame.id, type: 'OBS_OVERLAY' }, 
+    { matchId: finalMatchId, type: 'OBS_OVERLAY' }, 
     process.env.OVERLAY_TOKEN_SECRET, 
     { expiresIn: '12h' }
   );
 
   await prisma.hostedGame.update({
-    where: { id: matchId },
+    where: { id: finalMatchId },
     data: {
       isLive: true,
       overlayToken: overlayToken,
@@ -242,10 +244,67 @@ export const goLiveSession = async (matchId) => {
 
   const overlayConfig = hostedGame.overlayConfig || { showScoreboard: true, showCommentary: true };
   try {
-    await liveStateService.setStreamStatus(matchId, 'starting');
-    await liveStateService.setOverlayConfig(matchId, overlayConfig);
+    await liveStateService.setStreamStatus(finalMatchId, 'starting');
+    await liveStateService.setOverlayConfig(finalMatchId, overlayConfig);
   } catch (redisErr) {
     logger.warn("[Scoring] Redis state init failed (non-fatal):", redisErr.message);
+  }
+
+  // Fetch updated game & scoring session to cache and broadcast the live snapshot
+  try {
+    const updatedHostedGame = await prisma.hostedGame.findUnique({
+      where: { id: finalMatchId },
+      include: {
+        teams: {
+          include: {
+            slots: {
+              include: {
+                user: { select: { name: true } }
+              }
+            }
+          }
+        }
+      }
+    });
+    const mappedMatch = mapHostedGame(updatedHostedGame);
+
+    const scoring = await prisma.cricketMatch.findUnique({
+      where: { gameId: finalMatchId },
+      include: {
+        innings: true,
+        playerStats: true,
+        timeline: { take: 6, orderBy: { timestamp: 'desc' } }
+      }
+    });
+
+    let snapshot = null;
+    if (scoring) {
+      snapshot = computeScoreSnapshot(scoring, mappedMatch);
+    }
+
+    if (!snapshot) {
+      snapshot = {
+        matchId: finalMatchId,
+        status: 'NOT_STARTED',
+        matchName: mappedMatch.name,
+        teamA: mappedMatch.teamA,
+        teamB: mappedMatch.teamB,
+        tossWinner: null,
+        tossDecision: null,
+        message: 'Match starts soon',
+        tickerTheme: mappedMatch.tickerTheme || 'neon_classic',
+        isLive: true,
+      };
+    }
+
+    await liveStateService.setLiveScore(finalMatchId, snapshot);
+
+    const io = getIO();
+    if (io) {
+      io.to(finalMatchId).emit(SOCKET.SCORE_UPDATED, snapshot);
+    }
+  } catch (err) {
+    logger.error("Error caching/broadcasting live snapshot in goLiveSession:", err);
   }
 
   const appBase = process.env.USER_URL || process.env.CLIENT_URLS?.split(",")[0] || "https://kridaz.com";
@@ -254,8 +313,8 @@ export const goLiveSession = async (matchId) => {
     streamStatus: 'starting',
     youtubeVideoId: hostedGame.youtubeVideoId,
     urls: {
-      obsOverlay: `${appBase}/live-overlay/${hostedGame.id}?token=${overlayToken}`,
-      publicScoreboard: `${appBase}/live-score/${hostedGame.id}`
+      obsOverlay: `${appBase}/live-overlay/${finalMatchId}?token=${overlayToken}`,
+      publicScoreboard: `${appBase}/live-score/${finalMatchId}`
     }
   };
 };
@@ -291,6 +350,63 @@ export const endLiveSession = async (matchId) => {
     await liveStateService.setStreamStatus(finalMatchId, 'ended');
   } catch (redisErr) {
     logger.warn("[Scoring] Redis cleanup failed (non-fatal):", redisErr.message);
+  }
+
+  // Fetch updated game & scoring session to cache and broadcast the live snapshot (sync off)
+  try {
+    const updatedHostedGame = await prisma.hostedGame.findUnique({
+      where: { id: finalMatchId },
+      include: {
+        teams: {
+          include: {
+            slots: {
+              include: {
+                user: { select: { name: true } }
+              }
+            }
+          }
+        }
+      }
+    });
+    const mappedMatch = mapHostedGame(updatedHostedGame);
+
+    const scoring = await prisma.cricketMatch.findUnique({
+      where: { gameId: finalMatchId },
+      include: {
+        innings: true,
+        playerStats: true,
+        timeline: { take: 6, orderBy: { timestamp: 'desc' } }
+      }
+    });
+
+    let snapshot = null;
+    if (scoring) {
+      snapshot = computeScoreSnapshot(scoring, mappedMatch);
+    }
+
+    if (!snapshot) {
+      snapshot = {
+        matchId: finalMatchId,
+        status: 'NOT_STARTED',
+        matchName: mappedMatch.name,
+        teamA: mappedMatch.teamA,
+        teamB: mappedMatch.teamB,
+        tossWinner: null,
+        tossDecision: null,
+        message: 'Match starts soon',
+        tickerTheme: mappedMatch.tickerTheme || 'neon_classic',
+        isLive: false,
+      };
+    }
+
+    await liveStateService.setLiveScore(finalMatchId, snapshot);
+
+    const io = getIO();
+    if (io) {
+      io.to(finalMatchId).emit(SOCKET.SCORE_UPDATED, snapshot);
+    }
+  } catch (err) {
+    logger.error("Error caching/broadcasting live snapshot in endLiveSession:", err);
   }
 };
 
@@ -1036,7 +1152,8 @@ export const fetchLiveScoreSnapshot = async (matchId) => {
       tossWinner: null,
       tossDecision: null,
       message: 'Match starts soon',
-      tickerTheme: match.tickerTheme || 'classic',
+      tickerTheme: match.tickerTheme || 'neon_classic',
+      isLive: match.isLive ?? false,
     };
   }
 
@@ -1367,4 +1484,21 @@ export const verifyScoringPassword = async (gameId, password) => {
     { expiresIn: '8h' }
   );
   return { token };
+};
+
+/**
+ * Delete match permanently (placeholder for actual implementation)
+ */
+export const deleteScoringMatch = async (matchId, userId) => {
+  // Add appropriate validation
+  const game = await prisma.hostedGame.findUnique({ where: { id: matchId } });
+  if (!game) {
+    const err = new Error("MATCH_NOT_FOUND");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  // Delete the match
+  await prisma.hostedGame.delete({ where: { id: matchId } });
+  return true;
 };

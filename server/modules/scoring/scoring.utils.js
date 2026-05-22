@@ -120,7 +120,11 @@ export const computeScoreSnapshot = (scoring, match) => {
     bowler: currentBowler,
     result: scoring.status === "COMPLETED" ? "Match Ended" : null,
     status: match.status,
-    tickerTheme: match.tickerTheme || "classic",
+    isLive: match.isLive ?? false,
+    matchName: match.name,
+    teamA: match.teamA,
+    teamB: match.teamB,
+    tickerTheme: match.tickerTheme || "neon_classic",
     youtubeVideoId: match.youtubeLiveUrl ? extractYouTubeId(match.youtubeLiveUrl) : (match.streamConfig?.youtubeVideoId || null)
   };
 };

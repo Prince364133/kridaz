@@ -30,6 +30,7 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6001';
 
 const THEME_MAP = {
   neon_classic: NeonClassicTicker,
+  classic: NeonClassicTicker, // legacy alias for old DB records
   premium_glass: PremiumGlassTicker,
   retro_arcade: RetroArcadeTicker,
   sports_network: SportsNetworkTicker,
@@ -158,6 +159,11 @@ const LiveOverlay = () => {
       setScore(prev => prev ? { ...prev, _ended: true } : prev);
     });
 
+    // Theme-only update (fired when no cached score exists on backend)
+    socket.on('themeUpdated', (newTheme) => {
+      setScore(prev => prev ? { ...prev, tickerTheme: newTheme } : prev);
+    });
+
     return () => {
       clearTimeout(badgeTimer.current);
       socket.disconnect();
@@ -167,7 +173,7 @@ const LiveOverlay = () => {
   // ─── Nothing to render until first data ─────────────────────────────────────
   if (!score) return null;
 
-  if (score.status === 'NOT_STARTED') {
+  if (score.status === 'NOT_STARTED' || !score.isLive) {
     return (
       <div style={{ width: '100vw', height: '100vh', background: 'transparent', position: 'relative', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
         <div style={{
@@ -195,7 +201,7 @@ const LiveOverlay = () => {
       <ActiveTicker score={score} connected={connected} badge={badge} />
 
       {/* Match-ended banner overlay */}
-      {score._ended && (
+      {(score._ended || score.status === 'COMPLETED') && (
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -215,61 +221,6 @@ const LiveOverlay = () => {
       )}
     </div>
   );
-};
-
-export default LiveOverlay;�───────────────────────────────────────────── */}
- {bowler && (
- <div style={{
- padding: '0 clamp(6px, 1.4vw, 24px)',
- display: 'flex', flexDirection: 'column', justifyContent: 'center',
- borderRight: '1px solid rgba(255,255,255,0.06)',
- minWidth: 'clamp(80px, 12vw, 200px)',
- overflow: 'hidden',
- }}>
- <div style={{ fontSize: 'clamp(6px, 0.55vw, 9px)', color: '#6b7280', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 2 }}>BOWLING</div>
- <div style={{ fontSize: 'clamp(8px, 0.85vw, 13px)', fontWeight: 900, color: '#fff', textTransform: 'uppercase', marginBottom: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
- {bowler.name}
- </div>
- <div style={{ fontSize: 'clamp(7px, 0.75vw, 12px)', color: '#9ca3af', fontWeight: 700, whiteSpace: 'nowrap' }}>
- {bowler.overs}.{bowler.balls} – {bowler.wickets}/{bowler.runs}
- {bowler.economy > 0 && <span style={{ color: '#6b7280', marginLeft: 4 }}>Eco {bowler.economy}</span>}
- </div>
- </div>
- )}
-
- {/* ── LAST 6 BALLS ────────────────────────────────────────────────── */}
- <div style={{
- padding: '0 clamp(6px, 1.2vw, 20px)',
- display: 'flex', alignItems: 'center', gap: 'clamp(4px, 0.6vw, 10px)',
- flex: 1,
- overflow: 'hidden',
- }}>
- <div style={{ fontSize: 'clamp(6px, 0.55vw, 9px)', color: '#4b5563', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginRight: 2, whiteSpace: 'nowrap' }}>OVER</div>
- <div style={{ display: 'flex', gap: 'clamp(3px, 0.5vw, 8px)', alignItems: 'center', flexWrap: 'nowrap' }}>
- {(score.last6Balls || []).slice(-6).map((b, i) => (
- <BallPill key={i} ball={b} size='clamp(22px, 2.8vw, 36px)' />
- ))}
- {Array.from({ length: Math.max(0, 6 - (score.last6Balls?.length || 0)) }).map((_, i) => (
- <div key={`ph-${i}`} style={{
- width: 'clamp(22px, 2.8vw, 36px)', height: 'clamp(22px, 2.8vw, 36px)', borderRadius: '50%',
- border: '2px dashed rgba(255,255,255,0.08)',
- flexShrink: 0,
- }} />
- ))}
- </div>
- </div>
-
- {/* ── CONNECTION DOT ──────────────────────────────────────────────── */}
- <div style={{ padding: '0 clamp(6px, 1vw, 16px)', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
- <div style={{
- width: 8, height: 8, borderRadius: '50%',
- background: connected ? '#22c55e' : '#ef4444',
- animation: connected ? 'pulseRed 2s infinite' : 'none',
- }} />
- </div>
- </div>
- </div>
- );
 };
 
 export default LiveOverlay;

@@ -425,7 +425,7 @@ model HostedGame {
   lastCommentaryAt  DateTime?
   liveScoreSnapshot Json?
   oversPerInnings   Int                  @default(20)
-  tickerTheme       String               @default("classic")
+  tickerTheme       String               @default("neon_classic")
   customUmpire      Json?
   customScorer      Json?
   customStreamer    Json?
