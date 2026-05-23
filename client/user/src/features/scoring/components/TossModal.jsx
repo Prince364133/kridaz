@@ -94,12 +94,20 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                 </div>
                 
                 {step === 'FLIP_IDLE' && (
-                  <button
-                    onClick={handleFlip}
-                    className="px-8 py-4 bg-[#00C187] text-black font-black uppercase tracking-widest rounded-2xl hover:bg-[#00e39f] hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,193,135,0.4)]"
-                  >
-                    Flip Coin
-                  </button>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={handleFlip}
+                      className="px-8 py-4 bg-[#00C187] text-black font-black uppercase tracking-widest rounded-2xl hover:bg-[#00e39f] hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,193,135,0.4)]"
+                    >
+                      Flip Coin
+                    </button>
+                    <button
+                      onClick={() => setStep('WINNER_SELECT')}
+                      className="px-8 py-3 bg-white/5 border border-white/10 text-neutral-400 font-bold uppercase tracking-widest rounded-2xl hover:bg-white/10 hover:text-white transition-all text-xs"
+                    >
+                      Skip & Enter Manually
+                    </button>
+                  </div>
                 )}
                 
                 {step === 'FLIPPING' && (

@@ -265,7 +265,7 @@ const useCricketScoring = (matchId) => {
   const setToss = async ({ winnerTeam, decision }) => {
     try {
       const response = await axiosInstance.post('/api/scoring/toss', {
-        scoringId: matchData?.id || matchData?._id,
+        scoringId: matchData?.id || matchData?._id || matchId,
         wonByTeamId: winnerTeam,
         decision,
       }, { headers: getHeaders() });
