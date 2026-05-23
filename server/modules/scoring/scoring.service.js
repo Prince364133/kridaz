@@ -542,7 +542,7 @@ export const lookupMatchByShortId = async (shortId) => {
 /**
  * Initializes a live scoring session if one doesn't exist, validating permissions.
  */
-export const initializeScoringSession = async (finalMatchId, finalBattingTeam, umpireId, userRole) => {
+export const initializeScoringSession = async (finalMatchId, finalBattingTeam, umpireId, userRole, tossWinner, tossDecision) => {
   const hostedGame = await prisma.hostedGame.findUnique({
     where: { id: finalMatchId },
     include: {
@@ -584,6 +584,8 @@ export const initializeScoringSession = async (finalMatchId, finalBattingTeam, u
         gameId: finalMatchId,
         status: "LIVE",
         oversPerInnings: hostedGame.oversPerInnings,
+        tossWinner: tossWinner,
+        tossDecision: tossDecision,
         innings: {
           create: {
             inningsIndex: 0,
@@ -602,6 +604,19 @@ export const initializeScoringSession = async (finalMatchId, finalBattingTeam, u
     await prisma.hostedGame.update({
       where: { id: finalMatchId },
       data: { scoringStatus: "IN_PROGRESS" }
+    });
+  } else if (tossWinner || tossDecision) {
+    scoring = await prisma.cricketMatch.update({
+      where: { gameId: finalMatchId },
+      data: {
+        tossWinner: tossWinner || scoring.tossWinner,
+        tossDecision: tossDecision || scoring.tossDecision
+      },
+      include: {
+        innings: true,
+        playerStats: true,
+        timeline: { take: 5, orderBy: { timestamp: 'desc' } }
+      }
     });
   }
 

@@ -1214,10 +1214,7 @@ const ScoringApp = () => {
               teamA={matchData?.teamA || matchData?.hostedGameId?.teamA || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamA') : null)}
               teamB={matchData?.teamB || matchData?.hostedGameId?.teamB || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamB') : null)}
               onConfirm={async ({ winnerTeam, decision }) => {
-                const res = await setToss({ winnerTeam, decision });
-                if (res.success) {
-                  toast.success('Toss recorded! Starting match...');
-
+                try {
                   // Determine batting team
                   const isTeamAWinner = winnerTeam === (matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id);
                   let battingTeamId = matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id;
@@ -1227,27 +1224,26 @@ const ScoringApp = () => {
                     battingTeamId = matchData?.teamB?.id || matchData?.hostedGameId?.teamB?.id;
                   }
 
-                  try {
-                    const response = await axiosInstance.post(`/api/scoring/start`, {
-                      matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, battingTeamId
-                    }, {
-                      headers: {
-                        'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
-                      }
-                    });
-                    const data = response.data;
-                    if (data.success) {
-                      toast.success('Match started successfully!');
-                      setShowTossModal(false);
-                      refresh();
-                    } else {
-                      toast.error('Failed to start match');
+                  const response = await axiosInstance.post(`/api/scoring/start`, {
+                    matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, 
+                    battingTeamId,
+                    tossWinner: winnerTeam,
+                    tossDecision: decision
+                  }, {
+                    headers: {
+                      'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
                     }
-                  } catch (e) {
-                    toast.error('Error starting match');
+                  });
+                  const data = response.data;
+                  if (data.success) {
+                    toast.success('Match started successfully!');
+                    setShowTossModal(false);
+                    refresh();
+                  } else {
+                    toast.error('Failed to start match');
                   }
-                } else {
-                  toast.error(res.error || 'Failed to record toss');
+                } catch (e) {
+                  toast.error('Error starting match');
                 }
               }}
             />

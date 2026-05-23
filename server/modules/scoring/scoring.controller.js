@@ -209,7 +209,9 @@ export const startScoring = async (req, res) => {
       finalMatchId, 
       finalBattingTeam, 
       umpireId, 
-      req.user?.role
+      req.user?.role,
+      req.body.tossWinner,
+      req.body.tossDecision
     );
 
     res.status(200).json({ success: true, scoring });
