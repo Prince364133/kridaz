@@ -91,6 +91,8 @@ model User {
   turfLikes               TurfLike[]
   turfInteractions        TurfInteraction[]
   professionalCustomers   ProfessionalCustomer[]
+  careerStats             PlayerCareerStats[]
+  earnedBadges            UserBadge[]
 
   @@index([role])
 }
@@ -1232,3 +1234,54 @@ model ProfessionalTask {
   professional    OwnerProfile @relation(fields: [professionalId], references: [id])
   customer        ProfessionalCustomer? @relation(fields: [customerId], references: [id])
 }
+
+model UserBadge {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  description String
+  sportType   String
+  category    String
+  badgeIcon   String
+  earnedAt    DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, sportType])
+}
+
+model PlayerCareerStats {
+  id                 String   @id @default(uuid())
+  userId             String
+  sportType          String   @default("CRICKET")
+  
+  matchesPlayed      Int      @default(0)
+  matchesWon         Int      @default(0)
+  matchesLost        Int      @default(0)
+  winPercentage      Float    @default(0.0)
+  
+  totalRuns          Int      @default(0)
+  ballsFaced         Int      @default(0)
+  fours              Int      @default(0)
+  sixes              Int      @default(0)
+  centuries          Int      @default(0)
+  halfCenturies      Int      @default(0)
+  highestScore       Int      @default(0)
+  battingAverage     Float    @default(0.0)
+  battingStrikeRate  Float    @default(0.0)
+  
+  ballsBowled        Int      @default(0)
+  runsConceded       Int      @default(0)
+  wickets            Int      @default(0)
+  fiveWicketHauls    Int      @default(0)
+  bestBowlingRuns    Int      @default(0)
+  bestBowlingWickets  Int      @default(0)
+  bowlingAverage     Float    @default(0.0)
+  bowlingEconomy     Float    @default(0.0)
+
+  updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sportType])
+  @@index([userId])
+}
+

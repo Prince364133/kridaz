@@ -1,5 +1,6 @@
 import { prisma } from "../../config/prisma.js";
 import StatsService from "../../services/stats.service.js";
+import CareerStatsService from "../../services/careerStats.service.js";
 import { liveStateService } from "../../services/liveState.service.js";
 import { getIO } from "../../config/socket.js";
 import jwt from "jsonwebtoken";
@@ -157,6 +158,13 @@ export const aggregatePlayerStats = async (matchScoring, hostedGame) => {
 
     if (badgeBatchUpdates.length > 0) {
       await StatsService.addBatchBadges(badgeBatchUpdates);
+    }
+
+    // Trigger the new LinkedIn-style Career Stats & Gamification Aggregator
+    try {
+      await CareerStatsService.aggregateMatchCareerStats(matchScoring, hostedGame);
+    } catch (careerErr) {
+      logger.error("Error aggregating career stats in aggregatePlayerStats:", careerErr);
     }
 
     logger.info(`Successfully aggregated normalized stats for match ${matchScoring.id}`);

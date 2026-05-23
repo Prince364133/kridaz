@@ -73,6 +73,214 @@ const AchievementCard = ({ icon: Icon, title, rarity, year }) => {
       </div>
     </div>
   );
+const MatchDetailModal = ({ isOpen, onClose, match, userId }) => {
+  const [activeSubTab, setActiveSubTab] = useState("impact");
+  if (!isOpen || !match) return null;
+
+  // Find player's stat in this match
+  const playerStat = match.cricketMatch?.playerStats?.find(s => s.userId === userId) || {};
+  const isBatting = playerStat.battingBalls > 0 || playerStat.battingRuns > 0;
+  const isBowling = playerStat.bowlingOvers > 0 || playerStat.bowlingBalls > 0;
+
+  // Determine user's team
+  const userTeamSlot = match.teams?.find(t => t.slots?.some(s => s.userId === userId));
+  const userTeamName = userTeamSlot ? userTeamSlot.name : "My Team";
+  const userTeamKey = userTeamSlot ? userTeamSlot.teamKey : "";
+
+  // Determine opponent team
+  const opponentTeamSlot = match.teams?.find(t => t.teamKey !== userTeamKey);
+  const opponentTeamName = opponentTeamSlot ? opponentTeamSlot.name : "Opponents";
+
+  // Determine outcome
+  const inningsUser = match.cricketMatch?.innings?.find(i => i.battingTeam === userTeamKey);
+  const inningsOpponent = match.cricketMatch?.innings?.find(i => i.battingTeam !== userTeamKey);
+
+  const userRuns = inningsUser ? inningsUser.totalRuns : 0;
+  const userWickets = inningsUser ? inningsUser.totalWickets : 0;
+  const opponentRuns = inningsOpponent ? inningsOpponent.totalRuns : 0;
+  const opponentWickets = inningsOpponent ? inningsOpponent.totalWickets : 0;
+
+  let outcomeText = "Match Tied";
+  let won = false;
+  if (userRuns > opponentRuns) {
+    outcomeText = "Won";
+    won = true;
+  } else if (opponentRuns > userRuns) {
+    outcomeText = "Lost";
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-8 overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-2xl font-black uppercase tracking-tight text-white">{match.name || "Match Details"}</h2>
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{match.turf?.name || match.customVenue || "Local Ground"} • {new Date(match.date).toLocaleDateString('en-GB')}</p>
+          </div>
+          <button onClick={onClose} className="px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-[15px] font-black uppercase tracking-wider text-[9px] transition-all">
+            Close
+          </button>
+        </div>
+
+        {/* Sub-Tabs */}
+        <div className="flex border-b border-white/5 mb-6">
+          <button 
+            onClick={() => setActiveSubTab("impact")}
+            className={`flex-1 py-3 text-center font-black uppercase tracking-widest text-[11px] border-b-2 transition-all ${activeSubTab === "impact" ? 'text-[#BFF367] border-[#BFF367]' : 'text-gray-400 border-transparent'}`}
+          >
+            My Impact
+          </button>
+          <button 
+            onClick={() => setActiveSubTab("scorecard")}
+            className={`flex-1 py-3 text-center font-black uppercase tracking-widest text-[11px] border-b-2 transition-all ${activeSubTab === "scorecard" ? 'text-[#BFF367] border-[#BFF367]' : 'text-gray-400 border-transparent'}`}
+          >
+            Match Scorecard
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        <div className="max-h-[380px] overflow-y-auto pr-2 custom-scrollbar">
+          {activeSubTab === "impact" ? (
+            <div className="space-y-6">
+              {/* Highlight Banner */}
+              <div className={`p-6 rounded-[1.5rem] border ${won ? 'bg-[#55DEE8]/5 border-[#55DEE8]/10 text-[#55DEE8]' : 'bg-red-500/5 border-red-500/10 text-red-400'} flex items-center justify-between`}>
+                <div>
+                  <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Result</p>
+                  <p className="text-xl font-black uppercase tracking-tight">{outcomeText}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Contribution</p>
+                  <p className="text-sm font-bold text-white">
+                    {isBatting ? `${playerStat.battingRuns} Runs ` : ""}
+                    {isBowling ? `& ${playerStat.bowlingWickets} Wkts` : ""}
+                    {!isBatting && !isBowling ? "Fielded / DNP" : ""}
+                  </p>
+                </div>
+              </div>
+
+              {/* Milestones celebrations */}
+              {playerStat.battingRuns >= 100 && (
+                <div className="p-4 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 border border-yellow-400/20 rounded-[1.5rem] flex items-center gap-3">
+                  <Crown className="text-yellow-400 animate-bounce" size={24} />
+                  <div>
+                    <h4 className="text-xs font-black uppercase text-yellow-400">Magnificent Century!</h4>
+                    <p className="text-[10px] text-gray-400">Played a sensational innings of {playerStat.battingRuns} runs.</p>
+                  </div>
+                </div>
+              )}
+              {playerStat.bowlingWickets >= 5 && (
+                <div className="p-4 bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-[1.5rem] flex items-center gap-3">
+                  <Zap className="text-red-500 animate-pulse" size={24} />
+                  <div>
+                    <h4 className="text-xs font-black uppercase text-red-500">Five-Wicket Haul!</h4>
+                    <p className="text-[10px] text-gray-400">Sensational bowling display taking {playerStat.bowlingWickets} wickets.</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Batting Card */}
+              {isBatting && (
+                <div className="bg-white/[0.02] border border-white/5 rounded-[1.5rem] p-5">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Batting Performance</h3>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Runs</p>
+                      <p className="text-lg font-black text-white">{playerStat.battingRuns}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Balls</p>
+                      <p className="text-lg font-black text-white">{playerStat.battingBalls}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Strike Rate</p>
+                      <p className="text-lg font-black text-[#BFF367]">
+                        {playerStat.battingBalls > 0 ? ((playerStat.battingRuns / playerStat.battingBalls) * 100).toFixed(1) : "0.0"}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Boundaries</p>
+                      <p className="text-lg font-black text-white">{playerStat.battingFours}x4 / {playerStat.battingSixes}x6</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Bowling Card */}
+              {isBowling && (
+                <div className="bg-white/[0.02] border border-white/5 rounded-[1.5rem] p-5">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Bowling Performance</h3>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Overs</p>
+                      <p className="text-lg font-black text-white">{playerStat.bowlingOvers || (playerStat.bowlingBalls / 6).toFixed(1)}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Runs</p>
+                      <p className="text-lg font-black text-white">{playerStat.bowlingRuns}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Wickets</p>
+                      <p className="text-lg font-black text-[#55DEE8]">{playerStat.bowlingWickets}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Economy</p>
+                      <p className="text-lg font-black text-white">
+                        {playerStat.bowlingBalls > 0 ? ((playerStat.bowlingRuns / playerStat.bowlingBalls) * 6).toFixed(2) : "0.00"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Scoreboard Overall */}
+              <div className="grid grid-cols-2 gap-4 bg-white/[0.02] border border-white/5 rounded-[1.5rem] p-6 text-center relative overflow-hidden">
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{userTeamName}</p>
+                  <p className="text-3xl font-black text-white">{userRuns}/{userWickets}</p>
+                </div>
+                <div className="border-l border-white/5">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{opponentTeamName}</p>
+                  <p className="text-3xl font-black text-white">{opponentRuns}/{opponentWickets}</p>
+                </div>
+              </div>
+
+              {/* Roster & Performances */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-black uppercase tracking-widest text-gray-400">Team Lineup & Performance</h4>
+                <div className="space-y-2">
+                  {match.teams?.flatMap(t => t.slots || []).map((slot, index) => {
+                    if (!slot.user) return null;
+                    return (
+                      <div key={index} className="flex items-center justify-between p-3.5 bg-black/40 border border-white/5 rounded-[15px] hover:border-white/10 transition-all">
+                        <div className="flex items-center gap-3">
+                          <img src={slot.user.profilePicture || "https://ui-avatars.com/api/?name=" + slot.user.name} className="w-8 h-8 rounded-full object-cover border border-white/10" />
+                          <div>
+                            <p className="text-xs font-bold text-white tracking-tight">{slot.user.name}</p>
+                            <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Player</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-bold text-white">
+                            {match.cricketMatch?.playerStats?.find(s => s.userId === slot.userId)
+                              ? `${match.cricketMatch.playerStats.find(s => s.userId === slot.userId).battingRuns} Runs` 
+                              : "DNP"}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default function Profile() {
@@ -82,6 +290,8 @@ export default function Profile() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState(null);
+  const [sportFilter, setSportFilter] = useState("CRICKET");
   
   const isOwnProfile = !userId || (currentUser && userId === currentUser._id);
   const targetUserId = isOwnProfile ? currentUser?._id : userId;
@@ -582,320 +792,227 @@ export default function Profile() {
 
         {activeTab === 'overview' && (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              <div className="lg:col-span-2 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] p-6 border border-white/10">
-                <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                  <User className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
-                  Personal Details
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {[
-                    { icon: Calendar, label: 'Age', value: '26 Years' },
-                    { icon: Activity, label: 'Main Sport', value: profileUser?.interests?.[0] || 'Football' },
-                    { icon: Activity, label: 'Secondary Sport', value: 'Futsal' },
-                    { icon: Shield, label: 'Preferred Foot', value: 'Right' },
-                    { icon: MapPin, label: 'Position', value: 'Striker / Forward' },
-                    { icon: ShieldCheck, label: 'Current Team', value: 'Manchester United' },
-                  ].map((item, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3.5 rounded-[15px] bg-black/40 border border-white/5 hover:border-[#55DEE8]/30 transition-all group">
-                      <div className="w-9 h-9 rounded-[15px] bg-[#55DEE8]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                        <item.icon className="w-4 h-4" stroke="url(#cyan-lime-gradient)" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-0.5">{item.label}</p>
-                        <p className="text-xs font-bold text-white tracking-tight truncate">{item.value}</p>
-                      </div>
-                    </div>
-                  ))}
+            {/* Sports Filter & Resume Header */}
+            <div className="flex items-center justify-between mb-8 bg-white/[0.02] border border-white/5 p-5 rounded-[1.5rem] backdrop-blur-md">
+              <div className="flex items-center gap-3">
+                <Medal className="text-[#BFF367]" size={22} />
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-white" style={HEADING_STYLE}>Sports Resumé</h3>
+                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Verified athlete resume & credentials</p>
                 </div>
               </div>
-
-              <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] p-6 border border-white/10">
-                <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                  <Activity className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
-                  Recent Activity
-                </h2>
-                <div className="space-y-3">
-                  {[
-                    { icon: Trophy, title: 'Won Premier League Match', desc: 'Man Utd vs Chelsea (3-1)', time: '2 hours ago' },
-                    { icon: Medal, title: 'Achievement Unlocked', desc: 'Scored hat-trick in match', time: '5 hours ago' },
-                    { icon: Upload, title: 'Training Session Uploaded', desc: 'HIIT training completed', time: '1 day ago' },
-                    { icon: Users, title: 'Joined Tournament', desc: 'UEFA Champions League', time: '2 days ago' },
-                  ].map((activity, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3.5 bg-black/40 rounded-[15px] border border-white/10 hover:border-[#55DEE8]/40 transition-all group">
-                      <div className="w-9 h-9 rounded-[15px] bg-[#55DEE8]/10 flex items-center justify-center flex-shrink-0 group-hover:shadow-[0_0_10px_rgba(85,222,232,0.15)] transition-all">
-                        <activity.icon className="w-4 h-4" stroke="url(#cyan-lime-gradient)" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-white font-bold text-[11px] mb-0.5" style={HEADING_STYLE}>{activity.title}</h3>
-                        <p className="text-[10px] text-gray-500 mb-1.5">{activity.desc}</p>
-                        <p className="text-[8px] text-gray-600 font-bold uppercase tracking-widest flex items-center gap-1">
-                          <Clock className="w-2.5 h-2.5" />
-                          {activity.time}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <select 
+                value={sportFilter} 
+                onChange={(e) => setSportFilter(e.target.value)} 
+                className="bg-black border border-white/10 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-[15px] focus:outline-none focus:border-[#55DEE8] transition-all cursor-pointer"
+              >
+                <option value="CRICKET">Cricket Stats</option>
+                <option value="FOOTBALL">Football (Coming Soon)</option>
+              </select>
             </div>
 
-            <div className="space-y-6 mb-8">
-              <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                <TrendingUp className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
-                Performance Analytics
-              </h2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] p-6 border border-white/10">
-                  <h3 className="text-xs font-black text-white mb-4 uppercase tracking-widest" style={HEADING_STYLE}>Skill Radar</h3>
-                  <ResponsiveContainer width="100%" height={280}>
-                    <RadarChart data={[
-                      { stat: 'Speed', value: 92 }, { stat: 'Strength', value: 88 }, { stat: 'Agility', value: 95 },
-                      { stat: 'Stamina', value: 90 }, { stat: 'Dribbling', value: 94 }, { stat: 'Passing', value: 87 },
-                    ]}>
-                      <defs>
-                        <linearGradient id="radar-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#55DEE8" stopOpacity={0.55} />
-                          <stop offset="100%" stopColor="#BFF367" stopOpacity={0.15} />
-                        </linearGradient>
-                      </defs>
-                      <PolarGrid stroke="#222" />
-                      <PolarAngleAxis dataKey="stat" tick={{ fill: '#888', fontSize: 10, fontWeight: '900' }} />
-                      <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} />
-                      <Radar name="Performance" dataKey="value" stroke="url(#cyan-lime-gradient)" strokeWidth={2.5} fill="url(#radar-gradient)" fillOpacity={1} />
-                    </RadarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] p-6 border border-white/10">
-                  <h3 className="text-xs font-black text-white mb-4 uppercase tracking-widest" style={HEADING_STYLE}>Monthly Performance</h3>
-                  <ResponsiveContainer width="100%" height={280}>
-                    <LineChart data={[
-                      { month: 'Jan', perf: 85 }, { month: 'Feb', perf: 88 }, { month: 'Mar', perf: 90 },
-                      { month: 'Apr', perf: 87 }, { month: 'May', perf: 92 }, { month: 'Jun', perf: 95 },
-                    ]}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                      <XAxis dataKey="month" tick={{ fill: '#666', fontSize: 9, fontWeight: 'bold' }} axisLine={false} />
-                      <YAxis domain={[80, 100]} tick={false} axisLine={false} />
-                      <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px', fontSize: '10px' }} />
-                      <Line type="monotone" dataKey="perf" stroke="url(#cyan-lime-gradient)" strokeWidth={3.5} dot={{ fill: '#BFF367', r: 4, strokeWidth: 2, stroke: '#000' }} activeDot={{ r: 6 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
+            {/* Career stats grid */}
+            {(() => {
+              const currentStats = profileUser?.careerStats?.find(s => s.sportType === sportFilter) || {
+                matchesPlayed: 0, matchesWon: 0, matchesLost: 0, winPercentage: 0,
+                totalRuns: 0, fours: 0, sixes: 0, centuries: 0, halfCenturies: 0, highestScore: 0, battingAverage: 0, battingStrikeRate: 0,
+                wickets: 0, economyRate: 0, bowlingAverage: 0, bestBowlingWickets: 0, bestBowlingRuns: 0, ballsBowled: 0, runsConceded: 0, fiveWicketHauls: 0
+              };
 
-            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] p-6 border border-white/10 mb-8">
-              <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                <Award className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
-                Certificates
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { title: 'UEFA Pro License', org: 'UEFA', date: 'March 2024', img: 'https://images.unsplash.com/photo-1547968483-0ea9e863caca?q=80&w=2070' },
-                  { title: 'Sports Science', org: 'ISA', date: 'Jan 2024', img: 'https://images.unsplash.com/photo-1755039466834-3322b29dc45e?q=80&w=2070' },
-                  { title: 'Elite Training', org: 'PL Academy', date: 'Nov 2023', img: 'https://images.unsplash.com/photo-1658504140972-7af3e80d35f1?q=80&w=2070' },
-                ].map((cert, idx) => (
-                  <div key={idx} className="group bg-black/40 rounded-[15px] overflow-hidden border border-white/10 hover:border-[#55DEE8]/30 transition-all">
-                    <div className="h-32 overflow-hidden">
-                      <img src={cert.img} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-white font-bold text-xs mb-0.5 truncate" style={HEADING_STYLE}>{cert.title}</h3>
-                      <p className="text-[10px] text-gray-500 mb-0.5">{cert.org}</p>
-                      <p className="text-[9px] text-[#BFF367] font-bold uppercase tracking-widest">{cert.date}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+              const formGuideData = (profileUser?.matchHistory || [])
+                .slice(0, 5)
+                .reverse()
+                .map((match, idx) => {
+                  const stat = match.cricketMatch?.playerStats?.find(s => s.userId === profileUser.id) || {};
+                  return {
+                    matchNum: `Match ${idx + 1}`,
+                    runs: stat.battingRuns || 0
+                  };
+                });
 
-            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] p-6 border border-white/10 mb-8">
-              <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                <Trophy className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
-                Achievements
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <AchievementCard icon={Crown} title="National Champion" rarity="platinum" year="2024" />
-                <AchievementCard icon={Trophy} title="MVP Winner" rarity="gold" year="2024" />
-                <AchievementCard icon={Award} title="Best Striker" rarity="gold" year="2023" />
-                <AchievementCard icon={Star} title="Golden Boot" rarity="gold" year="2023" />
-              </div>
-            </div>
-
-            <div className="space-y-6 mb-8">
-              <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                <BarChart3 className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
-                Career Summary
-              </h2>
-              
-              <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] p-6 border border-white/10 mb-6">
-                <h3 className="text-xs font-black text-white mb-4 uppercase tracking-widest" style={HEADING_STYLE}>Career Statistics</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                  {[
-                    { icon: Calendar, label: 'Years Active', value: '12', color: '#BFF367' },
-                    { icon: Target, label: 'Total Matches', value: '287', color: '#BFF367' },
-                    { icon: Building2, label: 'Total Clubs', value: '4', color: '#BFF367' },
-                    { icon: Zap, label: 'Total Goals', value: '145', color: '#BFF367' },
-                    { icon: Users, label: 'Assists', value: '89', color: '#BFF367' },
-                    { icon: Award, label: 'Tournaments', value: '18', color: '#BFF367' },
-                    { icon: Medal, label: 'MOTM Awards', value: '34', color: '#BFF367' },
-                    { icon: AlertTriangle, label: 'Red Cards', value: '2', color: '#ff4444' },
-                    { icon: AlertTriangle, label: 'Yellow Cards', value: '23', color: '#ffaa00' },
-                    { icon: BarChart3, label: 'Win Ratio', value: '69%', color: '#BFF367' },
-                    { icon: Target, label: 'Pass Accuracy', value: '87%', color: '#BFF367' },
-                    { icon: BarChart3, label: 'Season Goals', value: '28', color: '#BFF367' },
-                  ].map((stat, idx) => (
-                    <div key={idx} className="bg-black/40 rounded-[15px] p-4 border border-white/5 hover:border-[#55DEE8]/40 transition-all group">
-                      <div className="w-9 h-9 rounded-[15px] bg-[#55DEE8]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                        <stat.icon className="w-4 h-4" stroke="url(#cyan-lime-gradient)" />
-                      </div>
-                      <p className="text-xl font-black mb-0.5" style={{ color: stat.color }}>{stat.value}</p>
-                      <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] p-6 border border-white/10">
-                  <h3 className="text-xs font-black text-white mb-4 flex items-center gap-2 uppercase tracking-widest" style={HEADING_STYLE}>
-                    <Building2 className="w-4 h-4" stroke="url(#cyan-lime-gradient)" />
-                    Previous Clubs
-                  </h3>
-                  <div className="space-y-2">
-                    {[
-                      { name: 'Manchester United', years: '2022-Present', logo: '🔴' },
-                      { name: 'Chelsea FC', years: '2019-2022', logo: '🔵' },
-                      { name: 'Liverpool FC', years: '2016-2019', logo: '🔴' },
-                      { name: 'Arsenal Youth', years: '2012-2016', logo: '🔴' },
-                    ].map((club, idx) => (
-                      <div key={idx} className="flex items-center gap-3 p-3 rounded-[15px] bg-black/40 border border-white/5 hover:border-[#55DEE8]/30 transition-all">
-                        <div className="w-10 h-10 rounded-[15px] bg-gradient-to-br from-[#55DEE8]/15 to-transparent flex items-center justify-center text-lg border border-white/5">
-                          {club.logo}
-                        </div>
-                        <div>
-                          <p className="text-[11px] font-bold text-white tracking-tight">{club.name}</p>
-                          <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">{club.years}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] p-6 border border-white/10">
-                  <h3 className="text-xs font-black text-white mb-4 flex items-center gap-2 uppercase tracking-widest" style={HEADING_STYLE}>
-                    <Clock className="w-4 h-4" stroke="url(#cyan-lime-gradient)" />
-                    Career Milestones
-                  </h3>
-                  <div className="space-y-2">
-                    {[
-                      { year: '2024', event: 'National Championship Winner' },
-                      { year: '2023', event: 'Golden Boot Award' },
-                      { year: '2022', event: 'Signed with Manchester United' },
-                      { year: '2021', event: '100th Career Goal' },
-                      { year: '2019', event: 'First International Cap' },
-                    ].map((m, idx) => (
-                      <div key={idx} className="flex items-center gap-3 p-3 rounded-[15px] bg-black/40 border border-white/5">
-                        <div className="w-10 h-10 rounded-[15px] bg-[#55DEE8]/10 flex items-center justify-center flex-shrink-0 border border-[#55DEE8]/20">
-                          <span className="text-[#BFF367] font-black text-[10px]">{m.year}</span>
-                        </div>
-                        <p className="text-white font-bold text-[10px] tracking-tight">{m.event}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] p-6 border border-white/10">
-                <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                  <Calendar className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
-                  Next Match
-                </h2>
-                <div className="bg-black/40 rounded-[15px] p-6 border border-white/5">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="text-center space-y-1">
-                      <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center text-3xl border border-red-500/30">🔴</div>
-                      <p className="text-[9px] font-black text-white uppercase">Man Utd</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-3xl font-black text-[#BFF367] tracking-tighter mb-0.5 italic">VS</p>
-                      <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Premier League</p>
-                    </div>
-                    <div className="text-center space-y-1">
-                      <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center text-3xl border border-blue-500/30">🔵</div>
-                      <p className="text-[9px] font-black text-white uppercase">Chelsea</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2 mb-6">
-                    {Object.entries(timeLeft).map(([unit, val]) => (
-                      <div key={unit} className="bg-[#55DEE8]/10 rounded-[15px] p-3 text-center border border-[#55DEE8]/20">
-                        <p className="text-xl font-black text-[#55DEE8] leading-none mb-0.5">{val}</p>
-                        <p className="text-[7px] font-black text-gray-500 uppercase tracking-widest">{unit}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <button className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black py-3 rounded-[15px] font-black uppercase tracking-wider text-[10px] hover:scale-[1.02] transition-all shadow-[0_5px_15px_rgba(85,222,232,0.2)]">
-                    Watch Match Live
-                  </button>
-                </div>
-              </div>
-
-              {!isOwnProfile && (
-                <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] p-6 border border-white/10">
-                  <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                    <UserPlus className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
-                    Suggested Players
-                  </h2>
-                  <div className="space-y-3">
-                    {loadingRecs ? (
-                      <div className="text-center py-6 text-gray-500 font-bold uppercase tracking-wider text-[10px] flex items-center justify-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin text-[#55DEE8]" />
-                        Loading suggestions...
-                      </div>
-                    ) : userRecommendations && userRecommendations.length > 0 ? (
-                      userRecommendations.map((player) => {
-                        const isFollowing = followingIds.includes(player.id);
-                        return (
-                          <div key={player.id} className="flex items-center gap-3 p-3.5 bg-black/40 rounded-[15px] border border-white/10 hover:border-[#55DEE8]/40 transition-all group">
-                            <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
-                              <img 
-                                src={player.profilePicture || "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?q=80&w=150"} 
-                                alt="" 
-                                className="w-full h-full object-cover" 
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[11px] text-white font-bold tracking-tight truncate">@{player.username || 'player'}</p>
-                            </div>
-                            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#55DEE8]/10 rounded-full border border-[#55DEE8]/20">
-                              <Star size={10} stroke="url(#cyan-lime-gradient)" fill="url(#cyan-lime-gradient)" />
-                              <span className="text-[#BFF367] font-black text-[9px]">{player.sportTypes?.[0] || 'Athlete'}</span>
-                            </div>
-                            <button 
-                              onClick={() => gateInteraction(() => handlePlayerFollowToggle(player))}
-                              className={`p-2 rounded-[15px] border transition-all ${isFollowing ? 'bg-white/10 text-white/40 border-white/10' : 'bg-[#55DEE8]/10 text-[#55DEE8] border-[#55DEE8]/20 hover:bg-[#55DEE8]/20'}`}
-                            >
-                              <UserPlus size={14} />
-                            </button>
+              return (
+                <div className="space-y-8">
+                  {/* Grid layout for Stats Summary & Form Guide */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Career Statistics */}
+                    <div className="lg:col-span-2 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[1.5rem] p-6 border border-white/10">
+                      <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                        <BarChart3 className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
+                        Career Stats Summary
+                      </h2>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {[
+                          { label: 'Matches Played', value: currentStats.matchesPlayed, color: '#white' },
+                          { label: 'Win/Loss Spell', value: `${currentStats.matchesWon}W - ${currentStats.matchesLost}L`, color: '#55DEE8' },
+                          { label: 'Win Ratio', value: `${currentStats.winPercentage}%`, color: '#BFF367' },
+                          { label: 'Runs Scored', value: currentStats.totalRuns, color: '#white' },
+                          { label: 'Batting Avg', value: currentStats.battingAverage || "0.0", color: '#white' },
+                          { label: 'Strike Rate', value: currentStats.battingStrikeRate || "0.0", color: '#BFF367' },
+                          { label: 'High Score', value: currentStats.highestScore || "0", color: '#white' },
+                          { label: 'Centuries (100s)', value: currentStats.centuries, color: '#white' },
+                          { label: 'Wickets Taken', value: currentStats.wickets, color: '#55DEE8' },
+                          { label: 'Economy', value: currentStats.bowlingEconomy || currentStats.economyRate || "0.00", color: '#white' },
+                          { label: 'Bowling Avg', value: currentStats.bowlingAverage || "0.00", color: '#white' },
+                          { label: 'Best Bowling', value: currentStats.bestBowlingWickets ? `${currentStats.bestBowlingWickets}/${currentStats.bestBowlingRuns}` : "N/A", color: '#white' },
+                        ].map((stat, idx) => (
+                          <div key={idx} className="bg-black/40 rounded-[15px] p-4 border border-white/5 hover:border-[#55DEE8]/30 transition-all group">
+                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">{stat.label}</p>
+                            <p className="text-lg font-black tracking-tight" style={{ color: stat.color }}>{stat.value}</p>
                           </div>
-                        );
-                      })
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Form Guide */}
+                    <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[1.5rem] p-6 border border-white/10 flex flex-col justify-between">
+                      <div>
+                        <h2 className="text-xl font-black text-white mb-1 flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                          <TrendingUp className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
+                          Form Guide
+                        </h2>
+                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-6">Batting runs over last 5 matches</p>
+                      </div>
+                      
+                      {formGuideData.length > 0 ? (
+                        <div className="w-full h-48">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={formGuideData}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
+                              <XAxis dataKey="matchNum" tick={{ fill: '#666', fontSize: 9, fontWeight: 'bold' }} axisLine={false} />
+                              <YAxis tick={false} axisLine={false} />
+                              <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px', fontSize: '10px' }} />
+                              <Line type="monotone" dataKey="runs" stroke="url(#cyan-lime-gradient)" strokeWidth={3.5} dot={{ fill: '#BFF367', r: 4, strokeWidth: 2, stroke: '#000' }} activeDot={{ r: 6 }} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      ) : (
+                        <div className="flex-1 flex items-center justify-center bg-black/40 border border-white/5 rounded-[15px] py-12 text-center">
+                          <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">No match form data available</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bento Badge Showcase */}
+                  <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[1.5rem] p-6 border border-white/10">
+                    <div className="mb-6">
+                      <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                        <Award className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
+                        Earned Badges
+                      </h2>
+                      <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Prestigious dynamic sports career badges</p>
+                    </div>
+
+                    {profileUser?.badges && profileUser.badges.length > 0 ? (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {profileUser.badges.map((badge, idx) => (
+                          <div key={idx} className="group relative rounded-[15px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden shadow-lg hover:shadow-[#55DEE8]/10">
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[15px]" />
+                            <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[15px]" />
+                            <div className="relative bg-[#0d0d0d] rounded-[15px] p-5 h-full flex flex-col justify-between text-center min-h-[140px]">
+                              <div>
+                                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-zinc-950 border border-white/10 flex items-center justify-center">
+                                  <Medal className="w-6 h-6 text-[#BFF367]" />
+                                </div>
+                                <h3 className="text-white text-center mb-1 font-black text-xs uppercase tracking-tight">{badge.name}</h3>
+                                <p className="text-[10px] text-gray-500 leading-relaxed font-bold">{badge.description}</p>
+                              </div>
+                              <p className="text-[8px] text-[#55DEE8] font-black uppercase tracking-widest mt-3">{badge.category || 'MILESTONE'}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
-                      <div className="text-center py-6 text-gray-500 font-bold uppercase tracking-wider text-[10px]">
-                        No new player suggestions
+                      <div className="text-center py-10 bg-black/40 rounded-[15px] border border-white/5">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No career badges unlocked yet</p>
+                        <p className="text-[9px] text-gray-600 uppercase tracking-widest mt-1.5">Score centuries, claim five-wicket hauls, or hit boundaries to earn yours!</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Match History Feed */}
+                  <div className="space-y-6">
+                    <div className="mb-4">
+                      <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                        <Clock className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
+                        Match History Feed
+                      </h2>
+                      <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Complete score logs played in Kridaz</p>
+                    </div>
+
+                    {profileUser?.matchHistory && profileUser.matchHistory.length > 0 ? (
+                      <div className="space-y-4 max-w-4xl">
+                        {profileUser.matchHistory.map((match, idx) => {
+                          const stat = match.cricketMatch?.playerStats?.find(s => s.userId === profileUser.id) || {};
+                          const userTeamSlot = match.teams?.find(t => t.slots?.some(s => s.userId === profileUser.id));
+                          const userTeamKey = userTeamSlot ? userTeamSlot.teamKey : "";
+                          const userTeamName = userTeamSlot ? userTeamSlot.name : "My Team";
+                          const opponentTeamName = match.teams?.find(t => t.teamKey !== userTeamKey)?.name || "Opponent";
+
+                          const inningsUser = match.cricketMatch?.innings?.find(i => i.battingTeam === userTeamKey);
+                          const inningsOpponent = match.cricketMatch?.innings?.find(i => i.battingTeam !== userTeamKey);
+                          const won = (inningsUser?.totalRuns || 0) > (inningsOpponent?.totalRuns || 0);
+
+                          return (
+                            <div 
+                              key={idx} 
+                              onClick={() => setSelectedMatch(match)}
+                              className="group relative rounded-[15px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden hover:shadow-[#BFF367]/5"
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[15px]" />
+                              <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[15px]" />
+                              <div className="relative bg-[#0d0d0d] rounded-[15px] p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className={`px-2 py-0.5 rounded-[15px] text-[8px] font-black uppercase tracking-widest border ${won ? 'text-[#55DEE8] bg-[#55DEE8]/10 border-[#55DEE8]/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}`}>
+                                      {won ? 'WON' : 'LOST'}
+                                    </span>
+                                    <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">{new Date(match.date).toLocaleDateString('en-GB')}</span>
+                                  </div>
+                                  <h3 className="text-sm font-black text-white uppercase tracking-tight mb-1" style={HEADING_STYLE}>{userTeamName} vs {opponentTeamName}</h3>
+                                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
+                                    <MapPin size={10} className="text-[#BFF367]" /> {match.turf?.name || match.customVenue || "Local Ground"}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-3 shrink-0 self-end md:self-auto">
+                                  <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-[15px] text-right">
+                                    <p className="text-[7px] font-black text-gray-500 uppercase tracking-widest">Match Performance</p>
+                                    <p className="text-xs font-black text-[#BFF367]">
+                                      {stat.battingRuns > 0 ? `${stat.battingRuns} Runs ` : ""}
+                                      {stat.bowlingWickets > 0 ? `& ${stat.bowlingWickets} Wkts` : ""}
+                                      {stat.battingRuns === 0 && stat.bowlingWickets === 0 ? "Fielded" : ""}
+                                    </p>
+                                  </div>
+                                  <button className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[15px] text-white transition-all group-hover:scale-105">
+                                    <ArrowRight size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 bg-black/40 rounded-[15px] border border-white/10">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No match history available</p>
+                        <p className="text-[9px] text-gray-600 uppercase tracking-widest mt-1">Once matches are completed on Kridaz, your detailed resumes will display here!</p>
                       </div>
                     )}
                   </div>
                 </div>
-              )}
-            </div>
+              );
+            })()}
           </>
         )}
       </div>
 
       <EditProfileModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} user={currentUser} />
+      <MatchDetailModal 
+        isOpen={selectedMatch !== null} 
+        onClose={() => setSelectedMatch(null)} 
+        match={selectedMatch} 
+        userId={profileUser?.id || profileUser?._id} 
+      />
       {viewingStoryGroup && (
         <StoryViewer 
           storyGroup={viewingStoryGroup} 

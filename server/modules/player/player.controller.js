@@ -316,12 +316,53 @@ export const getPlayerProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
     
-    const [bookingCount, followerIds, followingIds, userStats, wallet] = await Promise.all([
+    const [bookingCount, followerIds, followingIds, userStats, wallet, careerStats, userBadges, matchHistory] = await Promise.all([
       prisma.booking.count({ where: { userId: user.id } }),
       SocialService.getFollowerIds(user.id),
       SocialService.getFollowingIds(user.id),
       prisma.userStats.findUnique({ where: { userId: user.id } }),
-      WalletService.getWallet(user.id, user.role || 'user')
+      WalletService.getWallet(user.id, user.role || 'user'),
+      prisma.playerCareerStats.findMany({ where: { userId: user.id } }),
+      prisma.userBadge.findMany({ where: { userId: user.id } }),
+      prisma.hostedGame.findMany({
+        where: {
+          scoringStatus: "COMPLETED",
+          teams: {
+            some: {
+              slots: {
+                some: {
+                  userId: user.id
+                }
+              }
+            }
+          }
+        },
+        include: {
+          teams: {
+            include: {
+              slots: {
+                include: {
+                  user: { select: { id: true, name: true, profilePicture: true } }
+                }
+              }
+            }
+          },
+          turf: true,
+          cricketMatch: {
+            include: {
+              innings: true,
+              playerStats: {
+                where: {
+                  userId: user.id
+                }
+              }
+            }
+          }
+        },
+        orderBy: {
+          date: 'desc'
+        }
+      })
     ]);
     
     // Check for active stories
@@ -372,7 +413,9 @@ export const getPlayerProfile = async (req, res) => {
         stats: {
           cricket: userStats?.cricket || { matches: 0, runs: 0, wickets: 0 }
         },
-        badges: userStats?.badges || [],
+        careerStats: careerStats,
+        badges: userBadges.length > 0 ? userBadges : (userStats?.badges || []),
+        matchHistory: matchHistory,
         wallet: wallet,
         createdAt: user.createdAt
       }
