@@ -4,6 +4,8 @@ import { redisClient as redis, pubClient, subClient } from "./redis.js";
 import { prisma } from "./prisma.js";
 import logger from "../utils/logger.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
+import fs from "fs";
+import path from "path";
 let io;
 
 const socketConfig = (server) => {
@@ -98,6 +100,17 @@ const socketConfig = (server) => {
       socket.in(chatId).emit("message deleted", { chatId, messageIds });
     });
 
+    socket.on("COMMENTARY_AUDIO_PLAYED", (data) => {
+      if (data && data.audioUrl) {
+        const filePath = path.join(process.cwd(), 'public', data.audioUrl);
+        fs.unlink(filePath, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            logger.error(`[Socket] Failed to delete audio file ${data.audioUrl}:`, err);
+          }
+        });
+      }
+    });
+
     socket.on("location:update", async (data) => {
       const { lat, lng } = data;
       if (!socket.userId || isNaN(lat) || isNaN(lng)) return;
@@ -156,9 +169,13 @@ const socketConfig = (server) => {
       
       let isStale = false;
       if (currentLock && currentLock !== socket.id) {
-        const sockets = await io.in(currentLock).fetchSockets();
-        if (sockets.length === 0) {
-          isStale = true; // The socket that held the lock is no longer connected
+        try {
+          const sockets = await io.in(currentLock).fetchSockets();
+          if (sockets.length === 0) {
+            isStale = true; // The socket that held the lock is no longer connected
+          }
+        } catch (err) {
+          isStale = true; // Assume stale if we can't verify across redis nodes
         }
       }
       

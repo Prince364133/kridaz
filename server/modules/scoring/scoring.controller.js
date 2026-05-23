@@ -1,5 +1,6 @@
 import * as scoringService from "./scoring.service.js";
 import logger from "../../utils/logger.js";
+import { prisma } from "../../config/prisma.js";
 
 /**
  * Standard utility to catch thrown errors from the service layer
@@ -234,6 +235,96 @@ export const startNextInnings = async (req, res) => {
 };
 
 /**
+ * Updates the match status (e.g. LIVE, RAIN_DELAY, BAD_LIGHT).
+ */
+export const updateMatchStatus = async (req, res) => {
+  try {
+    const { scoringId, status } = req.body;
+    const scoring = await scoringService.updateMatchStatus(scoringId, status);
+
+    res.status(200).json({ success: true, scoring });
+  } catch (error) {
+    logger.error("[Scoring] UpdateMatchStatus Controller Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+/**
+ * Revise match target and overs (DLS / Rain Rule).
+ */
+export const reviseTargetAndOvers = async (req, res) => {
+  try {
+    const { scoringId, revisedTarget, revisedOvers } = req.body;
+    const scoring = await scoringService.reviseTargetAndOvers(scoringId, revisedTarget, revisedOvers);
+
+    res.status(200).json({ success: true, scoring });
+  } catch (error) {
+    logger.error("[Scoring] ReviseTarget Controller Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+/**
+ * Set Match Officials.
+ */
+export const setMatchOfficials = async (req, res) => {
+  try {
+    const { scoringId, officials } = req.body;
+    const scoring = await scoringService.setMatchOfficials(scoringId, officials);
+
+    res.status(200).json({ success: true, scoring });
+  } catch (error) {
+    logger.error("[Scoring] SetMatchOfficials Controller Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+/**
+ * Substitute an on-field player.
+ */
+export const substitutePlayer = async (req, res) => {
+  try {
+    const { scoringId, userId, substituteForId, inningsIndex } = req.body;
+    const stat = await scoringService.substitutePlayer(scoringId, userId, substituteForId, inningsIndex);
+
+    res.status(200).json({ success: true, stat });
+  } catch (error) {
+    logger.error("[Scoring] SubstitutePlayer Controller Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+/**
+ * Use a team review (DRS).
+ */
+export const useReview = async (req, res) => {
+  try {
+    const { scoringId, inningsIndex, team, isSuccessful } = req.body;
+    const scoring = await scoringService.useReview(scoringId, inningsIndex, team, isSuccessful);
+
+    res.status(200).json({ success: true, scoring });
+  } catch (error) {
+    logger.error("[Scoring] UseReview Controller Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+/**
+ * Set Powerplay overs for the current innings.
+ */
+export const setPowerplayOvers = async (req, res) => {
+  try {
+    const { scoringId, inningsIndex, overs } = req.body;
+    const scoring = await scoringService.setPowerplayOvers(scoringId, inningsIndex, overs);
+
+    res.status(200).json({ success: true, scoring });
+  } catch (error) {
+    logger.error("[Scoring] SetPowerplayOvers Controller Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+/**
  * Set toss result details.
  */
 export const setToss = async (req, res) => {
@@ -376,6 +467,54 @@ export const deleteMatch = async (req, res) => {
     res.status(200).json({ success: true, message: "Match deleted successfully" });
   } catch (error) {
     logger.error("[Scoring] Delete Match Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+export const updateCommentarySettings = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const { isAiCommentaryEnabled, commentaryVoice, commentaryLanguage, commentaryStyle } = req.body;
+    const updatedGame = await prisma.hostedGame.update({
+      where: { id: matchId },
+      data: { isAiCommentaryEnabled, commentaryVoice, commentaryLanguage, commentaryStyle }
+    });
+    res.status(200).json({ success: true, data: updatedGame });
+  } catch (error) {
+    logger.error("[Scoring] Update Commentary Settings Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+export const toggleTimer = async (req, res) => {
+  try {
+    const { scoringId } = req.body;
+    const result = await scoringService.toggleMatchTimer(scoringId);
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    logger.error("[Scoring] Toggle Timer Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+export const addPenalty = async (req, res) => {
+  try {
+    const { scoringId, runs, teamId } = req.body;
+    const result = await scoringService.addPenaltyRuns(scoringId, runs, teamId);
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    logger.error("[Scoring] Add Penalty Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+export const getMatchReport = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const report = await scoringService.getMatchReport(matchId);
+    res.status(200).json({ success: true, report });
+  } catch (error) {
+    logger.error("[Scoring] Get Match Report Error:", error);
     handleControllerError(res, error);
   }
 };

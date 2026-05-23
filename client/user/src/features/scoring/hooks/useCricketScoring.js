@@ -111,29 +111,32 @@ const useCricketScoring = (matchId) => {
 
       if (current) {
         const runs = ballData.runs ?? 0;
+        const extraRuns = ballData.extraRuns ?? (ballData.isExtra ? 1 : 0);
         const isWide = ballData.extraType === 'WIDE';
         const isNoBall = ballData.extraType === 'NO_BALL';
         const isBye = ballData.extraType === 'BYE';
         const isLegBye = ballData.extraType === 'LEG_BYE';
-        const isLegalBall = !isWide && !isNoBall;
+        const isPenalty = ballData.extraType === 'PENALTY';
+        const isLegalBall = !isWide && !isNoBall && !isPenalty;
 
         // Update innings runs & wickets
-        current.totalRuns = (current.totalRuns ?? 0) + runs;
+        current.totalRuns = (current.totalRuns ?? 0) + runs + extraRuns;
         if (isLegalBall) {
           current.totalBalls = (current.totalBalls ?? 0) + 1;
         }
-        if (ballData.isWicket) {
+        if (ballData.isWicket && ballData.wicketType !== 'RETIRED_HURT') {
           current.totalWickets = (current.totalWickets ?? 0) + 1;
         }
 
         // Update extras object
         if (!current.extras) {
-          current.extras = { wides: 0, noBalls: 0, byes: 0, legByes: 0 };
+          current.extras = { wides: 0, noBalls: 0, byes: 0, legByes: 0, penalty: 0 };
         }
-        if (isWide) current.extras.wides = (current.extras.wides ?? 0) + runs;
-        else if (isNoBall) current.extras.noBalls = (current.extras.noBalls ?? 0) + 1;
-        else if (isBye) current.extras.byes = (current.extras.byes ?? 0) + runs;
-        else if (isLegBye) current.extras.legByes = (current.extras.legByes ?? 0) + runs;
+        if (isWide) current.extras.wides = (current.extras.wides ?? 0) + extraRuns;
+        else if (isNoBall) current.extras.noBalls = (current.extras.noBalls ?? 0) + extraRuns;
+        else if (isBye) current.extras.byes = (current.extras.byes ?? 0) + extraRuns;
+        else if (isLegBye) current.extras.legByes = (current.extras.legByes ?? 0) + extraRuns;
+        else if (isPenalty) current.extras.penalty = (current.extras.penalty ?? 0) + extraRuns;
 
         // Player statistics update
         const strikerId = cloned.strikerId;
@@ -147,10 +150,10 @@ const useCricketScoring = (matchId) => {
               sStat = { userId: strikerId, battingRuns: 0, battingBalls: 0, battingFours: 0, battingSixes: 0 };
               cloned.playerStats.push(sStat);
             }
-            sStat.battingRuns = (sStat.battingRuns ?? 0) + ((!isWide && !isBye && !isLegBye) ? runs : 0);
-            sStat.battingBalls = (sStat.battingBalls ?? 0) + (!isWide ? 1 : 0);
-            if (ballData.isBoundary && runs === 4) sStat.battingFours = (sStat.battingFours ?? 0) + 1;
-            if (ballData.isBoundary && runs === 6) sStat.battingSixes = (sStat.battingSixes ?? 0) + 1;
+            sStat.battingRuns = (sStat.battingRuns ?? 0) + runs;
+            sStat.battingBalls = (sStat.battingBalls ?? 0) + (!isWide && !isPenalty ? 1 : 0);
+            if (ballData.isFour) sStat.battingFours = (sStat.battingFours ?? 0) + 1;
+            if (ballData.isSix) sStat.battingSixes = (sStat.battingSixes ?? 0) + 1;
           }
 
           // Bowler stats
@@ -160,9 +163,12 @@ const useCricketScoring = (matchId) => {
               bStat = { userId: bowlerId, bowlingRuns: 0, bowlingBalls: 0, bowlingWickets: 0 };
               cloned.playerStats.push(bStat);
             }
-            bStat.bowlingRuns = (bStat.bowlingRuns ?? 0) + ((!isBye && !isLegBye) ? runs : 0);
+            const runsConceded = (!isBye && !isLegBye && !isPenalty) ? (runs + extraRuns) : 0;
+            bStat.bowlingRuns = (bStat.bowlingRuns ?? 0) + runsConceded;
             if (isLegalBall) bStat.bowlingBalls = (bStat.bowlingBalls ?? 0) + 1;
-            if (ballData.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "OBSTRUCTING", "TIMED_OUT"].includes(ballData.wicketType)) {
+            
+            const nonBowlerWickets = ["RUN_OUT", "RETIRED", "RETIRED_HURT", "TIMED_OUT", "OBSTRUCTING_FIELD", "HIT_BALL_TWICE", "HANDLED_BALL"];
+            if (ballData.isWicket && !nonBowlerWickets.includes(ballData.wicketType)) {
               bStat.bowlingWickets = (bStat.bowlingWickets ?? 0) + 1;
             }
           }
@@ -171,11 +177,11 @@ const useCricketScoring = (matchId) => {
         // Strike rotation projection
         let newStrikerId = cloned.strikerId;
         let newNonStrikerId = cloned.nonStrikerId;
-        const ballInOver = (current.totalBalls - 1) % 6; // current.totalBalls is already incremented
-        const isOverComplete = isLegalBall && (ballInOver === 5);
+        const isOverComplete = isLegalBall && current.totalBalls > 0 && (current.totalBalls % 6 === 0);
 
-        if (!ballData.isWicket && !isWide) {
-          if (runs % 2 !== 0) {
+        const physicalRunsRan = runs + (isBye || isLegBye ? extraRuns : 0) + ((isWide || isNoBall) && extraRuns > 1 ? extraRuns - 1 : 0);
+        if (!ballData.isWicket && !isPenalty) {
+          if (physicalRunsRan % 2 !== 0) {
             [newStrikerId, newNonStrikerId] = [newNonStrikerId, newStrikerId];
           }
         }
@@ -196,9 +202,14 @@ const useCricketScoring = (matchId) => {
             runs,
             isExtra: ballData.isExtra || false,
             extraType: ballData.extraType || "NONE",
+            extraRuns: ballData.extraRuns || 0,
             isBoundary: ballData.isBoundary || false,
+            isFour: ballData.isFour || false,
+            isSix: ballData.isSix || false,
             isWicket: ballData.isWicket || false,
             wicketType: ballData.wicketType || null,
+            fieldingPosition: ballData.fieldingPosition || null,
+            distance: ballData.distance || null,
             timestamp: new Date().toISOString()
           });
         }
@@ -312,6 +323,157 @@ const useCricketScoring = (matchId) => {
     }
   };
 
+  // ── Update match status (e.g., LIVE, RAIN_DELAY, BAD_LIGHT) ─────────────────
+  const updateMatchStatus = async (status) => {
+    try {
+      const response = await axiosInstance.post('/api/scoring/update-status', {
+        scoringId: matchData?.id || matchData?._id,
+        status,
+      }, { headers: getHeaders() });
+      if (response.data.success) {
+        setMatchData(prev => ({ ...prev, status }));
+        return { success: true };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  // ── Revise Target and Overs (DLS) ─────────────────────────────────────────────
+  const reviseTargetAndOvers = async (revisedTarget, revisedOvers) => {
+    try {
+      const response = await axiosInstance.post('/api/scoring/revise-target', {
+        scoringId: matchData?.id || matchData?._id,
+        revisedTarget,
+        revisedOvers,
+      }, { headers: getHeaders() });
+      if (response.data.success) {
+        setMatchData(prev => ({ ...prev, revisedTarget, revisedOvers }));
+        return { success: true };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  // ── Set Match Officials ───────────────────────────────────────────────────────
+  const setMatchOfficials = async (officials) => {
+    try {
+      const response = await axiosInstance.post('/api/scoring/officials', {
+        scoringId: matchData?.id || matchData?._id,
+        officials,
+      }, { headers: getHeaders() });
+      if (response.data.success) {
+        setMatchData(prev => ({ ...prev, matchOfficials: officials }));
+        return { success: true };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  // ── Substitute Player ─────────────────────────────────────────────────────────
+  const substitutePlayer = async (userId, substituteForId, inningsIndex) => {
+    try {
+      const response = await axiosInstance.post('/api/scoring/substitute', {
+        scoringId: matchData?.id || matchData?._id,
+        userId,
+        substituteForId,
+        inningsIndex: inningsIndex ?? matchData?.currentInningsIndex ?? 0,
+      }, { headers: getHeaders() });
+      if (response.data.success) {
+        return { success: true };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  // ── DRS Review ────────────────────────────────────────────────────────────────
+  const useReview = async (team, isSuccessful, inningsIndex) => {
+    try {
+      const response = await axiosInstance.post('/api/scoring/review', {
+        scoringId: matchData?.id || matchData?._id,
+        team,
+        isSuccessful,
+        inningsIndex: inningsIndex ?? matchData?.currentInningsIndex ?? 0,
+      }, { headers: getHeaders() });
+      if (response.data.success) {
+        return { success: true };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  // ── Powerplay ─────────────────────────────────────────────────────────────────
+  const setPowerplayOvers = async (overs, inningsIndex) => {
+    try {
+      const response = await axiosInstance.post('/api/scoring/powerplay', {
+        scoringId: matchData?.id || matchData?._id,
+        overs,
+        inningsIndex: inningsIndex ?? matchData?.currentInningsIndex ?? 0,
+      }, { headers: getHeaders() });
+      if (response.data.success) {
+        return { success: true };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  // ── Timers & Penalty ──────────────────────────────────────────────────────────
+  const toggleTimer = async () => {
+    try {
+      const response = await axiosInstance.put('/api/scoring/toggle-timer', {
+        scoringId: matchData?.id || matchData?._id,
+      }, { headers: getHeaders() });
+      if (response.data.success) {
+        // Will refresh the entire status to get new timer state
+        fetchMatchStatus();
+        return { success: true };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const addPenalty = async (teamId, runs) => {
+    try {
+      const response = await axiosInstance.put('/api/scoring/penalty', {
+        scoringId: matchData?.id || matchData?._id,
+        teamId,
+        runs,
+      }, { headers: getHeaders() });
+      if (response.data.success) {
+        fetchMatchStatus();
+        return { success: true };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const fetchMatchReport = async () => {
+    try {
+      const response = await axiosInstance.get(`/api/scoring/report/${matchId}`, { headers: getHeaders() });
+      if (response.data.success) {
+        return { success: true, report: response.data.report };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
   return {
     matchData,
     loading,
@@ -322,6 +484,15 @@ const useCricketScoring = (matchId) => {
     undoBall,
     startInnings,
     completeMatch,
+    updateMatchStatus,
+    reviseTargetAndOvers,
+    setMatchOfficials,
+    substitutePlayer,
+    useReview,
+    setPowerplayOvers,
+    toggleTimer,
+    addPenalty,
+    fetchMatchReport,
     fetchAnalytics,
     refresh: fetchMatchStatus,
   };

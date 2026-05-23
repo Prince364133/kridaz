@@ -434,6 +434,12 @@ model HostedGame {
   customScorer      Json?
   customStreamer    Json?
   
+  // AI Commentary Settings
+  isAiCommentaryEnabled Boolean @default(false)
+  commentaryVoice       String  @default("en_US-lessac-medium") // Piper TTS voice model name
+  commentaryLanguage    String  @default("en")
+  commentaryStyle       String  @default("professional")
+
   // New fields for Scoring Match
   name              String?
   format            String?
@@ -503,7 +509,10 @@ model CustomPlayerInvite {
 model CricketMatch {
   id                  String            @id @default(uuid())
   gameId              String            @unique
-  status              String            @default("LIVE")
+  status              String            @default("NOT_STARTED")
+  timerState          String            @default("NOT_STARTED") // NOT_STARTED, RUNNING, PAUSED, ENDED
+  timerLastStartedAt  DateTime?
+  totalDurationSeconds Int              @default(0)
   result              String?
   tossWinner          String?
   tossDecision        String?
@@ -512,6 +521,9 @@ model CricketMatch {
   strikerId           String?
   nonStrikerId        String?
   bowlerId            String?
+  revisedTarget       Int?
+  revisedOvers        Float?
+  matchOfficials      Json?
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
   game                HostedGame        @relation(fields: [gameId], references: [id], onDelete: Cascade)
@@ -527,10 +539,13 @@ model Innings {
   battingTeam  String
   totalRuns    Int          @default(0)
   totalWickets Int          @default(0)
-  totalBalls   Int          @default(0)
-  isCompleted  Boolean      @default(false)
-  extras       Json
-  createdAt    DateTime     @default(now())
+  totalBalls         Int          @default(0)
+  isCompleted        Boolean      @default(false)
+  extras             Json
+  battingTeamReviews Int          @default(2)
+  fieldingTeamReviews Int         @default(2)
+  powerplayOvers     Int          @default(0)
+  createdAt          DateTime     @default(now())
   match        CricketMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
 }
 
@@ -546,9 +561,16 @@ model MatchBall {
   runs         Int          @default(0)
   isExtra      Boolean      @default(false)
   extraType    String       @default("NONE")
+  extraRuns    Int          @default(0)
   isBoundary   Boolean      @default(false)
+  isFour       Boolean      @default(false)
+  isSix        Boolean      @default(false)
   isWicket     Boolean      @default(false)
   wicketType   String?
+  playerOutId  String?
+  wicketTakerId String?
+  fieldingPosition String?
+  distance     String?
   commentary   String?
   timestamp    DateTime     @default(now())
   match        CricketMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
@@ -573,6 +595,10 @@ model MatchPlayerStat {
   bowlingWickets Int          @default(0)
   bowlingWides   Int          @default(0)
   bowlingNoBalls Int          @default(0)
+  isSubstitute   Boolean      @default(false)
+  substituteForId String?
+  timeSpentSeconds Int        @default(0)
+  timerLastStartedAt DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   match          CricketMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)

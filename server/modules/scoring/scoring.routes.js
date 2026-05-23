@@ -9,6 +9,7 @@ import {
   goLive,
   endLive,
   updateStreamConfig,
+  updateCommentarySettings,
   startNextInnings,
   // Phase 1 additions
   setToss,
@@ -20,7 +21,16 @@ import {
   getMyScoringGames,
   getScoringGameById,
   authenticateScoringApp,
-  notifyPlayers
+  notifyPlayers,
+  updateMatchStatus,
+  reviseTargetAndOvers,
+  setMatchOfficials,
+  substitutePlayer,
+  useReview,
+  setPowerplayOvers,
+  toggleTimer,
+  addPenalty,
+  getMatchReport
 } from "./scoring.controller.js";
 import verifyAuth from "../../middleware/jwt/auth.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
@@ -317,6 +327,104 @@ router.post("/:matchId/stream-config", updateStreamConfig);
 
 /**
  * @swagger
+ * /scoring/{matchId}/commentary-settings:
+ *   post:
+ *     summary: Update AI commentary settings
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Commentary settings updated
+ */
+router.post("/:matchId/commentary-settings", updateCommentarySettings);
+
+/**
+ * @swagger
+ * /scoring/update-status:
+ *   post:
+ *     summary: Update match status
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Status updated
+ */
+router.post("/update-status", updateMatchStatus);
+
+/**
+ * @swagger
+ * /scoring/revise-target:
+ *   post:
+ *     summary: Revise match target and overs
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Target and overs revised
+ */
+router.post("/revise-target", reviseTargetAndOvers);
+
+/**
+ * @swagger
+ * /scoring/officials:
+ *   post:
+ *     summary: Set match officials
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Match officials updated
+ */
+router.post("/officials", setMatchOfficials);
+
+/**
+ * @swagger
+ * /scoring/substitute:
+ *   post:
+ *     summary: Substitute a player
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Player substituted
+ */
+router.post("/substitute", substitutePlayer);
+
+/**
+ * @swagger
+ * /scoring/review:
+ *   post:
+ *     summary: Use a team review (DRS)
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Review logged
+ */
+router.post("/review", useReview);
+
+/**
+ * @swagger
+ * /scoring/powerplay:
+ *   post:
+ *     summary: Set powerplay overs
+ *     tags: [Scoring]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Powerplay overs updated
+ */
+router.post("/powerplay", setPowerplayOvers);
+
+/**
+ * @swagger
  * /scoring/next-innings:
  *   post:
  *     summary: Transition to next innings
@@ -391,5 +499,32 @@ router.post("/set-players", validate(setPlayersSchema), setPlayers);
  *         description: Action reverted
  */
 router.post("/undo", validate(undoLastBallSchema), undoLastBall);
+
+/**
+ * @swagger
+ * /scoring/toggle-timer:
+ *   put:
+ *     summary: Toggle match timer
+ *     tags: [Scoring]
+ */
+router.put("/toggle-timer", verifyAuth, toggleTimer);
+
+/**
+ * @swagger
+ * /scoring/penalty:
+ *   put:
+ *     summary: Add penalty runs
+ *     tags: [Scoring]
+ */
+router.put("/penalty", verifyAuth, addPenalty);
+
+/**
+ * @swagger
+ * /scoring/report/{matchId}:
+ *   get:
+ *     summary: Get match report with timers
+ *     tags: [Scoring]
+ */
+router.get("/report/:matchId", verifyAuth, getMatchReport);
 
 export default router;

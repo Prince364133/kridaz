@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play, Sparkles } from 'lucide-react';
+import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play, Sparkles, X, Pause, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import useCricketScoring from '../hooks/useCricketScoring';
@@ -11,8 +11,12 @@ import ExtraRunsModal from '@features/scoring/components/ExtraRunsModal';
 import SelectBowlerModal from '@features/scoring/components/SelectBowlerModal';
 import TossModal from '@features/scoring/components/TossModal';
 import { io } from 'socket.io-client';
+import axiosInstance from '@hooks/useAxiosInstance';
 import ScoringPasswordModal from '../components/ScoringPasswordModal';
 import TickerThemeStoreModal from '@features/scoring/components/TickerThemeStoreModal';
+import VisualWagonWheelModal from '../components/VisualWagonWheelModal';
+import PenaltyModal from '../components/PenaltyModal';
+import MatchReportModal from '../components/MatchReportModal';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6001';
 /**
@@ -110,13 +114,6 @@ const ScoringApp = () => {
   const navigate = useNavigate();
   // @ts-ignore
   const { role } = useSelector((/** @type {any} */ state) => state.auth);
-  const [activeTab, setActiveTab] = useState('scoring');
-  const [showSettings, setShowSettings] = useState(false);
-  const [liveEnabled, setLiveEnabled] = useState(false);
-  const [liveUrls, setLiveUrls] = useState(null);
-  const [passwordVerified, setPasswordVerified] = useState(sessionStorage.getItem(`scoringAuth_${matchId}`) === 'true');
-  const [authAction, setAuthAction] = useState(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const {
     matchData,
@@ -127,8 +124,66 @@ const ScoringApp = () => {
     setToss,
     undoBall,
     completeMatch,
+    updateMatchStatus,
+    reviseTargetAndOvers,
+    setMatchOfficials,
+    substitutePlayer,
+    useReview,
+    setPowerplayOvers,
     refresh
   } = useCricketScoring(matchId);
+
+  const [activeTab, setActiveTab] = useState('scoring');
+  const [showSettings, setShowSettings] = useState(false);
+  const [liveEnabled, setLiveEnabled] = useState(false);
+
+  // Timers
+  const [localTimerSecs, setLocalTimerSecs] = useState(0);
+
+  useEffect(() => {
+    if (matchData?.timerState === 'RUNNING') {
+      const start = new Date(matchData.timerLastStartedAt).getTime();
+      const initialDuration = matchData.totalDurationSeconds || 0;
+      
+      setLocalTimerSecs(initialDuration + Math.floor((Date.now() - start) / 1000));
+      
+      const interval = setInterval(() => {
+        setLocalTimerSecs(initialDuration + Math.floor((Date.now() - start) / 1000));
+      }, 1000);
+      return () => clearInterval(interval);
+    } else {
+      setLocalTimerSecs(matchData?.totalDurationSeconds || 0);
+    }
+  }, [matchData?.timerState, matchData?.timerLastStartedAt, matchData?.totalDurationSeconds]);
+
+  const formatTimer = (secs) => {
+    if (!secs || isNaN(secs)) return '00:00';
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const [liveUrls, setLiveUrls] = useState(null);
+  const [passwordVerified, setPasswordVerified] = useState(sessionStorage.getItem(`scoringAuth_${matchId}`) === 'true');
+  const [authAction, setAuthAction] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showPenaltyModal, setShowPenaltyModal] = useState(false);
+  const [showMatchReport, setShowMatchReport] = useState(false);
+  const [wagonWheelData, setWagonWheelData] = useState(null);
+
+  const [isAiCommentaryEnabled, setIsAiCommentaryEnabled] = useState(false);
+  const [commentaryVoice, setCommentaryVoice] = useState('alloy');
+  const [commentaryLanguage, setCommentaryLanguage] = useState('en');
+  const [commentaryStyle, setCommentaryStyle] = useState('professional');
+
+  React.useEffect(() => {
+    if (matchData?.hostedGameId) {
+      setIsAiCommentaryEnabled(matchData.hostedGameId.isAiCommentaryEnabled || false);
+      setCommentaryVoice(matchData.hostedGameId.commentaryVoice || 'alloy');
+      setCommentaryLanguage(matchData.hostedGameId.commentaryLanguage || 'en');
+      setCommentaryStyle(matchData.hostedGameId.commentaryStyle || 'professional');
+    }
+  }, [matchData?.hostedGameId]);
 
   const [scoringLock, setScoringLock] = useState('PENDING'); // 'PENDING' | 'GRANTED' | 'DENIED'
 
@@ -186,14 +241,12 @@ const ScoringApp = () => {
       const autoGoLive = async () => {
         try {
           const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:6001';
-          const response = await fetch(`${apiBase}/api/scoring/${matchId}/go-live`, {
-            method: 'POST',
+          const response = await axiosInstance.post(`/api/scoring/${matchId}/go-live`, {}, {
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token')}`
+              'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
             }
           });
-          const data = await response.json();
+          const data = response.data;
           if (data.success) {
             setLiveEnabled(true);
             const appBase = import.meta['env']?.VITE_APP_URL || window.location.origin;
@@ -296,19 +349,22 @@ const ScoringApp = () => {
 
   const handleScore = async (payload) => {
     if (!matchData?.strikerId || !matchData?.bowlerId) {
-          toast.error("Please setup the next pair and bowler first.");
-        return {success: false, message: "Missing players" };
+      toast.error("Please setup the next pair and bowler first.");
+      return { success: false, message: "Missing players" };
     }
-        const fullPayload = {
-          ...payload,
-          batsmanId: matchData.strikerId,
-        bowlerId: matchData.bowlerId
+    const fullPayload = {
+      ...payload,
+      batsmanId: matchData.strikerId,
+      bowlerId: matchData.bowlerId
     };
-        const result = await recordBall(fullPayload);
-        if (result.success && result.overComplete) {
-          setShowBowlerModal(true);
+    const result = await recordBall(fullPayload);
+    if (!result.success) {
+      toast.error(result.error || "Failed to update score.");
     }
-        return result;
+    if (result.success && result.overComplete) {
+      setShowBowlerModal(true);
+    }
+    return result;
   };
 
         if (scoringLock === 'PENDING' && passwordVerified) return (
@@ -365,14 +421,7 @@ const ScoringApp = () => {
                 <p className="text-[11px] text-neutral-500 font-black uppercase tracking-widest mt-2">Initialize scoring</p>
               </div>
               <button
-                onClick={() => {
-                  if (hasPassword && !passwordVerified) {
-                    setAuthAction('start');
-                    setShowAuthModal(true);
-                  } else {
-                    setShowTossModal(true);
-                  }
-                }}
+                onClick={() => setShowTossModal(true)}
                 className="w-full py-5 bg-[#00C187]/10 border border-[#00C187]/30 rounded-[2rem] text-center text-[#00C187] text-[13px] font-black uppercase tracking-[0.2em] shadow-xl"
               >
                 ⚡ Start Match
@@ -404,18 +453,15 @@ const ScoringApp = () => {
               <button
                 onClick={async () => {
                   try {
-                    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/next-innings`, {
-                      method: 'POST',
+                    const response = await axiosInstance.post(`/api/scoring/next-innings`, {
+                      scoringId: matchData._id,
+                      battingTeamId: matchData.innings[0].battingTeam === "teamA" ? "teamB" : "teamA"
+                    }, {
                       headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token')}`
-                      },
-                      body: JSON.stringify({
-                        scoringId: matchData._id,
-                        battingTeamId: matchData.innings[0].battingTeam === "teamA" ? "teamB" : "teamA"
-                      })
+                        'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
+                      }
                     });
-                    const data = await response.json();
+                    const data = response.data;
                     if (data.success) {
                       toast.success('2nd Innings Initiated!');
                       refresh();
@@ -489,7 +535,13 @@ const ScoringApp = () => {
             <div className="grid grid-cols-4 gap-3.5">
               {[0, 1, 2, 3].map(run => (
                 <button key={run}
-                  onClick={() => handleScore({ runs: run, extraType: 'NONE' })}
+                  onClick={() => {
+                    if (run === 0) {
+                      handleScore({ runs: run, extraType: 'NONE' });
+                    } else {
+                      setWagonWheelData({ runs: run, isBoundary: false, isFour: false, isSix: false });
+                    }
+                  }}
                   className="h-16 bg-white/[0.03] border border-white/5 rounded-3xl flex items-center justify-center text-2xl font-black text-white hover:bg-[#00C187]/10 hover:border-[#00C187]/40 transition-all transform active:scale-90 shadow-lg">
                   {run}
                 </button>
@@ -498,7 +550,7 @@ const ScoringApp = () => {
             <div className="grid grid-cols-4 gap-3.5">
               {[4, 6].map(run => (
                 <button key={run}
-                  onClick={() => handleScore({ runs: run, isBoundary: true, extraType: 'NONE' })}
+                  onClick={() => setWagonWheelData({ runs: run, isBoundary: true, isFour: run === 4, isSix: run === 6 })}
                   className="h-16 rounded-3xl flex items-center justify-center text-2xl font-black text-black transform active:scale-95 shadow-xl transition-all"
                   style={{ backgroundColor: THEME_COLOR, boxShadow: `0 10px 25px ${THEME_COLOR}33` }}>
                   {run}
@@ -513,7 +565,7 @@ const ScoringApp = () => {
                 NB
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-3 gap-3.5">
               <button onClick={() => setExtraModal('BYE')}
                 className="h-14 bg-white/[0.03] border border-white/5 text-neutral-400 rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-white transition-all">
                 BYE
@@ -521,6 +573,10 @@ const ScoringApp = () => {
               <button onClick={() => setExtraModal('LEG_BYE')}
                 className="h-14 bg-white/[0.03] border border-white/5 text-neutral-400 rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-white transition-all">
                 LEG BYE
+              </button>
+              <button onClick={() => setShowPenaltyModal(true)}
+                className="h-14 bg-white/[0.03] border border-white/5 text-red-400 rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-red-300 transition-all">
+                PENALTY
               </button>
             </div>
             <button onClick={() => setShowWicketModal(true)}
@@ -571,6 +627,23 @@ const ScoringApp = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                {matchData?.status !== 'ENDED' && (
+                  <div className="flex items-center gap-2 bg-white/5 rounded-2xl p-1 border border-white/5">
+                    <div className="px-3 py-1 font-mono text-[13px] font-black tracking-widest" style={{ color: THEME_COLOR }}>
+                      {formatTimer(localTimerSecs)}
+                    </div>
+                    <button
+                      onClick={async () => {
+                        const res = await toggleTimer();
+                        if (res.success) toast.success(matchData.timerState === 'RUNNING' ? 'Match Paused' : 'Match Started');
+                        else toast.error(res.message || 'Failed to toggle timer');
+                      }}
+                      className="p-1.5 bg-[#00C187]/20 rounded-xl hover:bg-[#00C187]/40 transition-all text-[#00C187]"
+                    >
+                      {matchData?.timerState === 'RUNNING' ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
+                    </button>
+                  </div>
+                )}
                 <div className={`px-3 py-1.5 rounded-xl flex items-center gap-2 border transition-all ${liveEnabled ? 'bg-[#00C187]/10 border-[#00C187]/30 shadow-[0_0_15px_rgba(0,193,135,0.1)]' : 'bg-white/5 border-white/5'}`}>
                   <div className={`w-1.5 h-1.5 rounded-full ${liveEnabled ? 'bg-[#00C187] animate-pulse' : 'bg-neutral-700'}`} />
                   <span className={`text-[9px] font-black uppercase tracking-widest ${liveEnabled ? 'text-[#00C187]' : 'text-neutral-500'}`}>
@@ -692,15 +765,14 @@ const ScoringApp = () => {
                           onClick={async () => {
                             const vidId = document.getElementById('ytVideoId')?.['value'] || '';
                             try {
-                              const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/${matchId}/stream-config`, {
-                                method: 'POST',
+                              const response = await axiosInstance.post(`/api/scoring/${matchId}/stream-config`, {
+                                youtubeVideoId: vidId
+                              }, {
                                 headers: {
-                                  'Content-Type': 'application/json',
-                                  'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token')}`
-                                },
-                                body: JSON.stringify({ youtubeVideoId: vidId })
+                                  'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token') || ''}`
+                                }
                               });
-                              const data = await response.json();
+                              const data = response.data;
                               if (data.success) {
                                 toast.success('Broadcast Linked!');
                                 refresh();
@@ -734,15 +806,290 @@ const ScoringApp = () => {
                               Change Ticker Theme
                             </button>
                           </div>
-                          <div className="space-y-1.5">
+                  <div className="space-y-1.5">
                             <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Public Scoreboard</p>
                             <div className="flex gap-2">
                               <input readOnly value={liveUrls.publicScoreboard} className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[9px] text-neutral-400 font-bold truncate outline-none" />
                               <button onClick={() => { navigator.clipboard.writeText(liveUrls.publicScoreboard); toast.success('Copied!'); }} className="px-4 py-2 bg-[#00C187]/10 text-[#00C187] text-[8px] font-black uppercase rounded-xl border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
                             </div>
+                            <div className="flex gap-2 w-full mt-2">
+                              <a
+                                href={`/live-overlay/${matchId}/preview?theme=${matchData?.hostedGameId?.tickerTheme || 'neon_classic'}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="w-full bg-[#00C187]/20 text-[#00C187] border border-[#00C187]/50 rounded-xl px-4 py-2 text-xs font-bold text-center hover:bg-[#00C187]/30 transition-colors"
+                              >
+                                Preview Theme
+                              </a>
+                            </div>
                           </div>
-                        </div>
+                      </div>
                       )}
+
+                      <div className="space-y-4 pt-4 border-t border-white/5">
+                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match State</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          <button
+                            onClick={async () => {
+                              const res = await updateMatchStatus('LIVE');
+                              if (res.success) toast.success('Match Resumed!');
+                              else toast.error('Failed to update status');
+                            }}
+                            className={`py-2 rounded-xl text-[9px] font-black uppercase transition-all ${matchData?.status === 'LIVE' ? 'bg-[#00C187]/20 text-[#00C187] border border-[#00C187]/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
+                          >
+                            Live
+                          </button>
+                          <button
+                            onClick={async () => {
+                              const res = await updateMatchStatus('RAIN_DELAY');
+                              if (res.success) toast.success('Match Paused: Rain Delay');
+                              else toast.error('Failed to update status');
+                            }}
+                            className={`py-2 rounded-xl text-[9px] font-black uppercase transition-all ${matchData?.status === 'RAIN_DELAY' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
+                          >
+                            Rain Delay
+                          </button>
+                          <button
+                            onClick={async () => {
+                              const res = await updateMatchStatus('BAD_LIGHT');
+                              if (res.success) toast.success('Match Paused: Bad Light');
+                              else toast.error('Failed to update status');
+                            }}
+                            className={`py-2 rounded-xl text-[9px] font-black uppercase transition-all ${matchData?.status === 'BAD_LIGHT' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
+                          >
+                            Bad Light
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4 pt-4 border-t border-white/5">
+                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest flex items-center justify-between">
+                          <span>AI Commentator (OpenAI TTS)</span>
+                          <span className={`px-2 py-0.5 rounded text-[8px] ${isAiCommentaryEnabled ? 'bg-[#00C187]/20 text-[#00C187]' : 'bg-white/5 text-neutral-500'}`}>
+                            {isAiCommentaryEnabled ? 'ACTIVE' : 'OFF'}
+                          </span>
+                        </p>
+                        
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => setIsAiCommentaryEnabled(!isAiCommentaryEnabled)}
+                            className={`flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${isAiCommentaryEnabled ? 'bg-[#00C187] text-black shadow-[0_0_15px_rgba(0,193,135,0.3)]' : 'bg-white/5 border border-white/10 text-white'}`}
+                          >
+                            {isAiCommentaryEnabled ? 'Disable' : 'Enable Commentary'}
+                          </button>
+                        </div>
+
+                        {isAiCommentaryEnabled && (
+                          <div className="space-y-3 animate-in slide-in-from-top-2">
+                            <div className="flex gap-2">
+                              <select 
+                                value={commentaryLanguage}
+                                onChange={(e) => setCommentaryLanguage(e.target.value)}
+                                className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                              >
+                                <option value="en">English (Default)</option>
+                                <option value="hi">Hindi</option>
+                                <option value="pa">Punjabi</option>
+                                <option value="bn">Bengali</option>
+                                <option value="mr">Marathi</option>
+                                <option value="ta">Tamil</option>
+                                <option value="te">Telugu</option>
+                                <option value="gu">Gujarati</option>
+                              </select>
+                              
+                              <select 
+                                value={commentaryVoice}
+                                onChange={(e) => setCommentaryVoice(e.target.value)}
+                                className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                              >
+                                <option value="alloy">Alloy (Neutral)</option>
+                                <option value="echo">Echo (Male, Warm)</option>
+                                <option value="fable">Fable (Male, British)</option>
+                                <option value="onyx">Onyx (Male, Deep)</option>
+                                <option value="nova">Nova (Female, Professional)</option>
+                                <option value="shimmer">Shimmer (Female, Bright)</option>
+                              </select>
+                            </div>
+                            <div className="flex gap-2">
+                              <select 
+                                value={commentaryStyle}
+                                onChange={(e) => setCommentaryStyle(e.target.value)}
+                                className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                              >
+                                <option value="professional">Professional Broadcast</option>
+                                <option value="natural">Natural Human (Casual)</option>
+                                <option value="funny">Funny & Witty</option>
+                                <option value="dramatic">High Energy / Dramatic</option>
+                              </select>
+                            </div>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  const response = await axiosInstance.post(`/api/scoring/${matchId}/commentary-settings`, {
+                                    isAiCommentaryEnabled, commentaryVoice, commentaryLanguage, commentaryStyle
+                                  }, {
+                                    headers: {
+                                      'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
+                                    }
+                                  });
+                                  const data = response.data;
+                                  if (data.success) {
+                                    toast.success('Commentary settings saved!');
+                                  } else {
+                                    toast.error('Failed to save settings');
+                                  }
+                                } catch (err) {
+                                  toast.error('Network error saving settings');
+                                }
+                              }}
+                              className="w-full py-2 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-xl border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all"
+                            >
+                              Save Commentary Profile
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-4 pt-4 border-t border-white/5">
+                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">DLS / Target Revision</p>
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            id="revisedTarget"
+                            placeholder="Revised Target"
+                            defaultValue={matchData?.revisedTarget || ''}
+                            className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                          />
+                          <input
+                            type="number"
+                            step="0.1"
+                            id="revisedOvers"
+                            placeholder="Revised Overs"
+                            defaultValue={matchData?.revisedOvers || ''}
+                            className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                          />
+                        </div>
+                        <button
+                          onClick={async () => {
+                            const tgt = parseInt(document.getElementById('revisedTarget').value);
+                            const ovr = parseFloat(document.getElementById('revisedOvers').value);
+                            if (isNaN(tgt) || isNaN(ovr)) return toast.error('Enter valid target and overs');
+                            const res = await reviseTargetAndOvers(tgt, ovr);
+                            if (res.success) toast.success('Target Revised!');
+                            else toast.error('Failed to revise target');
+                          }}
+                          className="w-full py-2.5 bg-purple-500/10 text-purple-400 text-[9px] font-black uppercase tracking-widest rounded-xl border border-purple-500/20 hover:bg-purple-500 hover:text-white transition-all"
+                        >
+                          Apply DLS Revision
+                        </button>
+                      </div>
+
+                      <div className="space-y-4 pt-4 border-t border-white/5">
+                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match Officials</p>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            id="umpire1"
+                            placeholder="Umpire 1"
+                            defaultValue={matchData?.matchOfficials?.umpire1 || ''}
+                            className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                          />
+                          <input
+                            type="text"
+                            id="umpire2"
+                            placeholder="Umpire 2"
+                            defaultValue={matchData?.matchOfficials?.umpire2 || ''}
+                            className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            id="matchReferee"
+                            placeholder="Match Referee"
+                            defaultValue={matchData?.matchOfficials?.matchReferee || ''}
+                            className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                          />
+                          <button
+                            onClick={async () => {
+                              const umpire1 = document.getElementById('umpire1').value;
+                              const umpire2 = document.getElementById('umpire2').value;
+                              const matchReferee = document.getElementById('matchReferee').value;
+                              const res = await setMatchOfficials({ umpire1, umpire2, matchReferee });
+                              if (res.success) toast.success('Officials Updated!');
+                              else toast.error('Failed to update officials');
+                            }}
+                            className="px-6 py-2.5 bg-blue-500/10 text-blue-400 text-[9px] font-black uppercase tracking-widest rounded-xl border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all"
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4 pt-4 border-t border-white/5">
+                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match Rules (Phase 5)</p>
+                        
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            id="powerplayOvers"
+                            placeholder="Powerplay Overs"
+                            defaultValue={matchData?.powerplayOvers || 0}
+                            className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                          />
+                          <button
+                            onClick={async () => {
+                              const overs = parseInt(document.getElementById('powerplayOvers').value);
+                              if (isNaN(overs)) return toast.error('Enter valid overs');
+                              const res = await setPowerplayOvers(overs);
+                              if (res.success) toast.success('Powerplay Overs Updated!');
+                              else toast.error('Failed to update powerplay');
+                            }}
+                            className="px-6 py-2.5 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-xl border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all"
+                          >
+                            Set Powerplay
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={async () => {
+                              const isSuccess = window.confirm("Was the Batting Team's review successful? (Click OK for Yes, Cancel for No)");
+                              const res = await useReview('batting', isSuccess);
+                              if (res.success) toast.success(isSuccess ? 'Review Retained' : 'Review Lost');
+                              else toast.error('Failed to use review');
+                            }}
+                            className="w-full py-2.5 bg-yellow-500/10 text-yellow-400 text-[9px] font-black uppercase tracking-widest rounded-xl border border-yellow-500/20 hover:bg-yellow-500 hover:text-white transition-all"
+                          >
+                            Use Batting Review ({matchData?.reviews?.batting ?? 2})
+                          </button>
+                          
+                          <button
+                            onClick={async () => {
+                              const isSuccess = window.confirm("Was the Fielding Team's review successful? (Click OK for Yes, Cancel for No)");
+                              const res = await useReview('fielding', isSuccess);
+                              if (res.success) toast.success(isSuccess ? 'Review Retained' : 'Review Lost');
+                              else toast.error('Failed to use review');
+                            }}
+                            className="w-full py-2.5 bg-yellow-500/10 text-yellow-400 text-[9px] font-black uppercase tracking-widest rounded-xl border border-yellow-500/20 hover:bg-yellow-500 hover:text-white transition-all"
+                          >
+                            Use Fielding Review ({matchData?.reviews?.fielding ?? 2})
+                          </button>
+                        </div>
+                      </div>
+                      <div className="space-y-4 pt-4 border-t border-white/5">
+                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match Analysis</p>
+                        <button
+                          onClick={() => {
+                            setShowSettings(false);
+                            setShowMatchReport(true);
+                          }}
+                          className="w-full py-3 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-xl border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
+                        >
+                          <FileText size={14} />
+                          View Match Report
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <div className="py-12 text-center bg-white/[0.02] rounded-3xl border border-dashed border-white/10">
@@ -777,13 +1124,18 @@ const ScoringApp = () => {
             <WicketModal
               fieldingTeamSlots={bowlingSlots}
               battingTeamSlots={remainingBatters}
-              onConfirm={async ({ wicketType, fielderId, nextBatterId }) => {
+              activeBatters={[
+                strikerSlot ? { ...strikerSlot, role: 'Striker' } : null,
+                nonStrikerSlot ? { ...nonStrikerSlot, role: 'Non-Striker' } : null
+              ].filter(Boolean)}
+              onConfirm={async ({ wicketType, fielderId, nextBatterId, runs, playerOutId }) => {
                 const result = await handleScore({
-                  runs: 0,
+                  runs: runs || 0,
                   isWicket: true,
                   wicketType,
                   fielderId,
                   nextBatterId,
+                  playerOutId,
                   extraType: 'NONE',
                 });
                 if (result.success) {
@@ -794,6 +1146,26 @@ const ScoringApp = () => {
                 setShowWicketModal(false);
               }}
               onClose={() => setShowWicketModal(false)}
+            />
+          )}
+
+          {wagonWheelData && (
+            <VisualWagonWheelModal
+              runs={wagonWheelData.runs}
+              isBoundary={wagonWheelData.isBoundary}
+              onConfirm={(data) => {
+                handleScore({
+                  runs: wagonWheelData.runs,
+                  isBoundary: wagonWheelData.isBoundary,
+                  isFour: wagonWheelData.isFour,
+                  isSix: wagonWheelData.isSix,
+                  extraType: 'NONE',
+                  fieldingPosition: data.position,
+                  distance: data.distance
+                });
+                setWagonWheelData(null);
+              }}
+              onClose={() => setWagonWheelData(null)}
             />
           )}
 
@@ -853,15 +1225,14 @@ const ScoringApp = () => {
                   }
 
                   try {
-                    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/start`, {
-                      method: 'POST',
+                    const response = await axiosInstance.post(`/api/scoring/start`, {
+                      matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, battingTeamId
+                    }, {
                       headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token')}`
-                      },
-                      body: JSON.stringify({ matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, battingTeamId })
+                        'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
+                      }
                     });
-                    const data = await response.json();
+                    const data = response.data;
                     if (data.success) {
                       toast.success('Match started successfully!');
                       setShowTossModal(false);
@@ -911,10 +1282,242 @@ const ScoringApp = () => {
               }}
             />
           )}
+          {showPenaltyModal && (
+            <PenaltyModal
+              matchData={matchData}
+              onClose={() => setShowPenaltyModal(false)}
+              onConfirm={async (teamId, runs) => {
+                const res = await addPenalty(teamId, runs);
+                if (res.success) toast.success(`Added ${runs} penalty runs`);
+                else toast.error(res.message || 'Failed to add penalty');
+                setShowPenaltyModal(false);
+              }}
+            />
+          )}
+
+          {/* ── Phase 1 Modals ── */}
+          {(showInningsSetup || needsInningsSetup) && (
+            <InningsSetupModal
+              battingTeamSlots={battingSlots}
+              bowlingTeamSlots={bowlingSlots}
+              inningsLabel={matchData?.currentInningsIndex === 0 ? '1st Innings' : '2nd Innings'}
+              onConfirm={async (players) => {
+                const result = await setPlayers(players);
+                if (result.success) toast.success('Node established! Scoring ready.');
+                else toast.error(result.error || 'Player sync failed');
+                setShowInningsSetup(false);
+              }}
+              onClose={() => setShowInningsSetup(false)}
+            />
+          )}
+
+          {showWicketModal && (
+            <WicketModal
+              fieldingTeamSlots={bowlingSlots}
+              battingTeamSlots={remainingBatters}
+              activeBatters={[
+                strikerSlot ? { ...strikerSlot, role: 'Striker' } : null,
+                nonStrikerSlot ? { ...nonStrikerSlot, role: 'Non-Striker' } : null
+              ].filter(Boolean)}
+              onConfirm={async ({ wicketType, fielderId, nextBatterId, runs, playerOutId }) => {
+                const result = await handleScore({
+                  runs: runs || 0,
+                  isWicket: true,
+                  wicketType,
+                  fielderId,
+                  nextBatterId,
+                  playerOutId,
+                  extraType: 'NONE',
+                });
+                if (result.success) {
+                  toast.success(`Wicket Confirmed`);
+                } else {
+                  toast.error(result.error || 'Sync failure');
+                }
+                setShowWicketModal(false);
+              }}
+              onClose={() => setShowWicketModal(false)}
+            />
+          )}
+
+          {wagonWheelData && (
+            <VisualWagonWheelModal
+              runs={wagonWheelData.runs}
+              isBoundary={wagonWheelData.isBoundary}
+              onConfirm={(data) => {
+                handleScore({
+                  runs: wagonWheelData.runs,
+                  isBoundary: wagonWheelData.isBoundary,
+                  isFour: wagonWheelData.isFour,
+                  isSix: wagonWheelData.isSix,
+                  extraType: 'NONE',
+                  fieldingPosition: data.position,
+                  distance: data.distance
+                });
+                setWagonWheelData(null);
+              }}
+              onClose={() => setWagonWheelData(null)}
+            />
+          )}
+
+          {extraModal && (
+            <ExtraRunsModal
+              extraType={extraModal}
+              onConfirm={async (runs) => {
+                const isWide = extraModal === 'WIDE';
+                const isNoBall = extraModal === 'NO_BALL';
+                const totalRuns = (isWide || isNoBall) ? runs + 1 : runs;
+                const result = await handleScore({
+                  runs: totalRuns,
+                  isExtra: true,
+                  extraType: extraModal,
+                  isBoundary: false,
+                });
+                if (result.success) toast.success(`${extraModal} Event Recorded`);
+                else toast.error(result.error || 'Sync failure');
+                setExtraModal(null);
+              }}
+              onClose={() => setExtraModal(null)}
+            />
+          )}
+
+          {showBowlerModal && (
+            <SelectBowlerModal
+              pool={bowlingSlots}
+              currentBowlerId={matchData.bowlerId}
+              onConfirm={async (bowlerId) => {
+                const res = await setPlayers({ bowlerId });
+                if (res.success) {
+                  toast.success('Next bowler selected');
+                  setShowBowlerModal(false);
+                } else {
+                  toast.error(res.error || 'Failed to select bowler');
+                }
+              }}
+            />
+          )}
+
+          {showTossModal && (
+            <TossModal
+              teamA={matchData?.teamA || matchData?.hostedGameId?.teamA || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamA') : null)}
+              teamB={matchData?.teamB || matchData?.hostedGameId?.teamB || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamB') : null)}
+              hasPassword={hasPassword && !passwordVerified}
+              onCancel={() => setShowTossModal(false)}
+              onConfirm={async ({ winnerTeam, decision, password }) => {
+                
+                // If a password was provided, verify it first or store it
+                if (password) {
+                  // The backend might not have an endpoint just to "verify" the password in this sequence,
+                  // but we usually call /api/scoring/verify-password.
+                  // Wait, we have the /api/scoring/start endpoint which doesn't check password directly, 
+                  // but we do have a way to verify password via /api/scoring/:matchId/verify.
+                  // Let's verify it before proceeding.
+                  try {
+                    const authRes = await axiosInstance.post(`/api/scoring/${matchId}/verify`, { password });
+                    if (authRes.data.success) {
+                      localStorage.setItem(`scorer_token_${matchId}`, authRes.data.token);
+                      setPasswordVerified(true);
+                    } else {
+                      return toast.error('Invalid password');
+                    }
+                  } catch (e) {
+                    return toast.error('Error verifying password');
+                  }
+                }
+
+                const res = await setToss({ winnerTeam, decision });
+                if (res.success) {
+                  toast.success('Toss recorded! Starting match...');
+
+                  // Determine batting team
+                  const isTeamAWinner = winnerTeam === (matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id);
+                  let battingTeamId = matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id;
+                  if ((isTeamAWinner && decision === 'BAT') || (!isTeamAWinner && decision === 'BOWL')) {
+                    battingTeamId = matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id;
+                  } else {
+                    battingTeamId = matchData?.teamB?.id || matchData?.hostedGameId?.teamB?.id;
+                  }
+
+                  try {
+                    const response = await axiosInstance.post(`/api/scoring/start`, {
+                      matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, battingTeamId
+                    }, {
+                      headers: {
+                        'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
+                      }
+                    });
+                    const data = response.data;
+                    if (data.success) {
+                      toast.success('Match started successfully!');
+                      setShowTossModal(false);
+                      refresh();
+                    } else {
+                      toast.error('Failed to start match');
+                    }
+                  } catch (e) {
+                    toast.error('Error starting match');
+                  }
+                } else {
+                  toast.error(res.error || 'Failed to record toss');
+                }
+              }}
+            />
+          )}
+
+          {showAuthModal && (
+            <ScoringPasswordModal
+              matchId={matchId}
+              actionLabel={authAction === 'end' ? 'Confirm End Match' : 'Unlock Scoring Console'}
+              onClose={() => setShowAuthModal(false)}
+              onSuccess={(token) => {
+                localStorage.setItem(`scorer_token_${matchId}`, token);
+                setPasswordVerified(true);
+                setShowAuthModal(false);
+                if (authAction === 'start') {
+                  setShowTossModal(true);
+                } else if (authAction === 'end') {
+                  completeMatch();
+                  navigate('/');
+                }
+              }}
+            />
+          )}
+
+          {showThemeStore && (
+            <TickerThemeStoreModal
+              activeTheme={matchData?.hostedGameId?.tickerTheme || 'neon_classic'}
+              matchId={matchId}
+              onClose={() => setShowThemeStore(false)}
+              onThemeApplied={(newTheme) => {
+                if (matchData?.hostedGameId) {
+                  matchData.hostedGameId.tickerTheme = newTheme;
+                }
+                refresh();
+              }}
+            />
+          )}
+          {showPenaltyModal && (
+            <PenaltyModal
+              matchData={matchData}
+              onClose={() => setShowPenaltyModal(false)}
+              onConfirm={async (teamId, runs) => {
+                const res = await addPenalty(teamId, runs);
+                if (res.success) toast.success(`Added ${runs} penalty runs`);
+                else toast.error(res.message || 'Failed to add penalty');
+                setShowPenaltyModal(false);
+              }}
+            />
+          )}
+
+          {showMatchReport && (
+            <MatchReportModal
+              matchId={matchId}
+              fetchMatchReport={fetchMatchReport}
+              onClose={() => setShowMatchReport(false)}
+            />
+          )}
         </div>
         );
 };
 
-        const X = ({size, className}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>;
-
-        export default ScoringApp;
+export default ScoringApp;

@@ -81,7 +81,8 @@ const ReelItem = ({ reel, isVisible }) => {
     }
   };
 
-  const isProcessing = (reel.status === 'pending' || reel.status === 'processing') && !reel.temp;
+  // If we have a playable URL, just play it. Otherwise, show processing.
+  const isProcessing = (reel.status === 'pending' || reel.status === 'processing') && !reel.temp && !reel.hlsUrl && !reel.rawVideoUrl && !reel.mediaUrl;
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden flex items-center justify-center">
@@ -118,7 +119,7 @@ const ReelItem = ({ reel, isVisible }) => {
         ) : (
           <ReelPlayer 
             reelId={reel.id || reel._id}
-            hlsUrl={reel.hlsUrl || reel.rawVideoUrl} 
+            hlsUrl={reel.hlsUrl || reel.rawVideoUrl || reel.mediaUrl} 
             isVisible={isVisible} 
             poster={reel.thumbnailUrl}
           />

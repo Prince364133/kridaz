@@ -13,26 +13,6 @@ const THEMES = [
     features: ['High-contrast glow', 'Modern compact layouts', 'Clean readability']
   },
   {
-    id: 'premium_glass',
-    name: 'Premium Glass',
-    description: 'Ultramodern glassmorphism card with frosted backdrop blurs, sleek golden typography, and premium corporate broadcast depth.',
-    colors: ['#F6D365', '#FDA085'],
-    previewBg: 'bg-white/[0.03] backdrop-blur-md border border-white/10 shadow-2xl',
-    tag: 'Premium',
-    glow: 'rgba(253, 160, 133, 0.4)',
-    features: ['Frosted glass backdrop', 'Gold-mesh accents', 'Chroma-key optimization']
-  },
-  {
-    id: 'retro_arcade',
-    name: 'Retro Arcade',
-    description: 'Nostalgic 8-bit game console styling featuring pixelated corners, neon orange arcade accents, and retro video game vibe.',
-    colors: ['#F093FB', '#F5576C'],
-    previewBg: 'bg-stone-950 border-2 border-dashed border-orange-500/40 shadow-[0_0_12px_rgba(249,115,22,0.15)]',
-    tag: '8-Bit Retro',
-    glow: 'rgba(249, 115, 22, 0.35)',
-    features: ['Monospace pixel font', 'Dashed border accents', 'Nostalgic 80s arcade feel']
-  },
-  {
     id: 'sports_network',
     name: 'Sports Network',
     description: 'Professional high-density television broadcast design. Bold color block layout optimized for maximum data display.',
@@ -41,16 +21,6 @@ const THEMES = [
     tag: 'TV Broadcast',
     glow: 'rgba(0, 193, 135, 0.4)',
     features: ['Television block design', 'High data readability', 'Sponsor integrations']
-  },
-  {
-    id: 'cyber_pulse',
-    name: 'Cyber Pulse',
-    description: 'Futuristic cyberpunk setup with deep violet bases, glowing neon pink indicators, and high-tech glitch grids.',
-    colors: ['#FA709F', '#FEE140'],
-    previewBg: 'bg-[#0f0c1b] border border-pink-500/30 shadow-[0_0_20px_rgba(236,72,153,0.15)]',
-    tag: 'Sci-Fi Cyber',
-    glow: 'rgba(236, 72, 153, 0.4)',
-    features: ['Glitch indicator pulse', 'Tech grid lines', 'Vibrant magenta/pink alerts']
   }
 ];
 
@@ -68,7 +38,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('scorer_token_' + matchId) || localStorage.getItem('token')}`
         },
         body: JSON.stringify({ tickerTheme: selectedTheme })
       });

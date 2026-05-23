@@ -45,6 +45,7 @@ const MatchAnalytics         = lazy(() => import("@features/scoring").then(m => 
 const MatchDetails           = lazy(() => import("@features/scoring").then(m => ({ default: m.MatchDetails })));
 const Leaderboard            = lazy(() => import("@features/leaderboard").then(m => ({ default: m.Leaderboard })));
 const LiveOverlay            = lazy(() => import("@features/scoring").then(m => ({ default: m.LiveOverlay })));
+const ThemePreview           = lazy(() => import("@features/scoring").then(m => ({ default: m.ThemePreview })));
 const LiveScoreboard         = lazy(() => import("@features/scoring").then(m => ({ default: m.LiveScoreboard })));
 const TeamPass               = lazy(() => import("@features/teams").then(m => ({ default: m.TeamPass })));
 const TeamProfile            = lazy(() => import("@features/teams").then(m => ({ default: m.TeamProfile })));
@@ -280,6 +281,10 @@ const router = createBrowserRouter([
   {
     path: "/live-overlay/:matchId",
     element: <S><LiveOverlay /></S>,
+  },
+  {
+    path: "/live-overlay/:matchId/preview",
+    element: <S><ThemePreview /></S>,
   },
 
   // ΓöÇΓöÇ USER PORTAL (Fall-through Priority) ΓöÇΓöÇ
