@@ -72,17 +72,47 @@ const generateCommentaryText = async (liveData, ballEvent, language = 'en', styl
     if (style === 'funny') styleInstruction = "Humorous, witty, using funny analogies and slightly exaggerated reactions.";
     if (style === 'dramatic') styleInstruction = "Extremely dramatic, screaming at the top of your lungs, treating every moment as a life-or-death situation.";
 
+    let matchSituationStr = `- Total Score: ${liveData.runs}/${liveData.wickets} in ${liveData.overs} overs.`;
+    if (liveData.targetScore) {
+      const runsNeeded = liveData.targetScore - liveData.runs;
+      matchSituationStr += `\n- Chasing Target: ${liveData.targetScore} (Need ${runsNeeded} runs to win)`;
+    }
+
+    const batterName = ballEvent.batter?.name || "The batter";
+    const bowlerName = ballEvent.bowler?.name || "The bowler";
+    
+    let eventDetails = `- Bowler: ${bowlerName}\n- Batter on strike: ${batterName}\n- Runs scored on this ball: ${ballEvent.runs}`;
+    if (ballEvent.isExtra) {
+      eventDetails += ` (Extra: ${ballEvent.extraType})`;
+    }
+    if (ballEvent.fieldingPosition) {
+      eventDetails += `\n- Shot hit towards: ${ballEvent.fieldingPosition.replace(/_/g, ' ')}`;
+      if (ballEvent.distance) {
+        eventDetails += ` (Distance: ${ballEvent.distance})`;
+      }
+    }
+    if (isWicket) {
+      eventDetails += `\n- WICKET! Type: ${ballEvent.wicketType || 'Out'}`;
+    }
+
     const prompt = `
 You are a highly emotional, reactive human cricket commentator sitting right in the stadium.
 You have a distinct personality and style: ${styleInstruction}
 
 Generate ONE short, completely natural, human-like live commentary line for this exact event. 
-React authentically! If it's a wicket, act shocked or excited. If it's a boundary, act thrilled. Do not be robotic. Do not mention names if you don't know them.
+This text will be used directly for a live audio broadcast, so it must sound realistic.
+React authentically! If it's a wicket, act shocked or excited. If it's a boundary, act thrilled.
 
-Match Situation: 
-- Total Score: ${liveData.runs}/${liveData.wickets} in ${liveData.overs} overs.
+CRITICAL RULES:
+1. Do NOT use ANY emojis, hashtags, or special symbols in your output.
+2. You MUST use the actual Batter and Bowler names provided in the event data.
+
+MATCH CONTEXT: 
+${matchSituationStr}
 - Match format: T20.
-- Current Event: A batsman just hit ${ballEvent.runs} runs! Is it a wicket? ${isWicket ? "YES!" : "No"}.
+
+CURRENT BALL EVENT:
+${eventDetails}
 
 CRITICAL INSTRUCTION: You MUST generate the commentary text EXCLUSIVELY in the following language/script: ${targetLanguage}. Do not use English words if you are asked to speak in a regional language.
 Return ONLY the commentary text. Nothing else. No quotes, no intro.`;
