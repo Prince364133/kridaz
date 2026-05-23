@@ -27,7 +27,10 @@ import {
   setMatchOfficials,
   substitutePlayer,
   useReview,
-  setPowerplayOvers
+  setPowerplayOvers,
+  toggleTimer,
+  addPenalty,
+  getMatchReport
 } from "./scoring.controller.js";
 import verifyAuth from "../../middleware/jwt/auth.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
@@ -496,5 +499,32 @@ router.post("/set-players", validate(setPlayersSchema), setPlayers);
  *         description: Action reverted
  */
 router.post("/undo", validate(undoLastBallSchema), undoLastBall);
+
+/**
+ * @swagger
+ * /scoring/toggle-timer:
+ *   put:
+ *     summary: Toggle match timer
+ *     tags: [Scoring]
+ */
+router.put("/toggle-timer", verifyAuth, toggleTimer);
+
+/**
+ * @swagger
+ * /scoring/penalty:
+ *   put:
+ *     summary: Add penalty runs
+ *     tags: [Scoring]
+ */
+router.put("/penalty", verifyAuth, addPenalty);
+
+/**
+ * @swagger
+ * /scoring/report/{matchId}:
+ *   get:
+ *     summary: Get match report with timers
+ *     tags: [Scoring]
+ */
+router.get("/report/:matchId", verifyAuth, getMatchReport);
 
 export default router;

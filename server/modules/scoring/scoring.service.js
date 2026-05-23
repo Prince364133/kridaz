@@ -1813,4 +1813,134 @@ export const deleteScoringMatch = async (matchId, userId) => {
   await prisma.hostedGame.delete({ where: { id: matchId } });
   return true;
 };
-// Trigger restart
+export const toggleMatchTimer = async (scoringId) => {
+  const match = await prisma.cricketMatch.findUnique({
+    where: { id: scoringId },
+    include: { playerStats: true }
+  });
+
+  if (!match) throw new Error("Match not found");
+
+  const now = new Date();
+  let newTimerState;
+  let newTotalDuration = match.totalDurationSeconds;
+  let newTimerLastStartedAt = match.timerLastStartedAt;
+
+  if (match.timerState === "NOT_STARTED" || match.timerState === "PAUSED") {
+    newTimerState = "RUNNING";
+    newTimerLastStartedAt = now;
+  } else if (match.timerState === "RUNNING") {
+    newTimerState = "PAUSED";
+    if (match.timerLastStartedAt) {
+      const diffSecs = Math.floor((now.getTime() - match.timerLastStartedAt.getTime()) / 1000);
+      newTotalDuration += diffSecs;
+    }
+    newTimerLastStartedAt = null;
+  } else {
+    throw new Error("Match already ended");
+  }
+
+  const updatedMatch = await prisma.cricketMatch.update({
+    where: { id: scoringId },
+    data: {
+      timerState: newTimerState,
+      totalDurationSeconds: newTotalDuration,
+      timerLastStartedAt: newTimerLastStartedAt,
+      status: match.status === "NOT_STARTED" && newTimerState === "RUNNING" ? "LIVE" : undefined
+    }
+  });
+
+  const activeIds = [match.strikerId, match.nonStrikerId, match.bowlerId].filter(Boolean);
+  
+  for (const stat of match.playerStats) {
+    if (activeIds.includes(stat.userId)) {
+      if (newTimerState === "RUNNING") {
+        await prisma.matchPlayerStat.update({
+          where: { id: stat.id },
+          data: { timerLastStartedAt: now }
+        });
+      } else if (newTimerState === "PAUSED") {
+        const timeDiff = stat.timerLastStartedAt ? Math.floor((now.getTime() - stat.timerLastStartedAt.getTime()) / 1000) : 0;
+        await prisma.matchPlayerStat.update({
+          where: { id: stat.id },
+          data: {
+            timeSpentSeconds: stat.timeSpentSeconds + timeDiff,
+            timerLastStartedAt: null
+          }
+        });
+      }
+    }
+  }
+
+  return { updatedMatch };
+};
+
+export const addPenaltyRuns = async (scoringId, runs, teamId) => {
+  const match = await prisma.cricketMatch.findUnique({
+    where: { id: scoringId },
+    include: { innings: true }
+  });
+  
+  if (!match) throw new Error("Match not found");
+  
+  const currentInnings = match.innings.find(i => i.inningsIndex === match.currentInningsIndex);
+  if (!currentInnings) throw new Error("Innings not active");
+
+  const isBattingTeamPenalty = (teamId === currentInnings.battingTeam);
+
+  const over = Math.floor(currentInnings.totalBalls / 6);
+  const ballInOver = currentInnings.totalBalls % 6;
+
+  const newBall = await prisma.matchBall.create({
+    data: {
+      matchId: scoringId,
+      inningsIndex: currentInnings.inningsIndex,
+      over,
+      ballInOver,
+      batterId: match.strikerId || "PENALTY",
+      bowlerId: match.bowlerId || "PENALTY",
+      runs: 0,
+      isExtra: true,
+      extraType: "PENALTY",
+      extraRuns: parseInt(runs),
+      commentary: `Penalty of ${runs} runs awarded.`
+    }
+  });
+
+  let targetInnings = currentInnings;
+  if (!isBattingTeamPenalty) {
+    const otherInnings = match.innings.find(i => i.inningsIndex !== match.currentInningsIndex);
+    if (otherInnings) targetInnings = otherInnings;
+  }
+
+  const updatedInnings = await prisma.innings.update({
+    where: { id: targetInnings.id },
+    data: { totalRuns: targetInnings.totalRuns + parseInt(runs) }
+  });
+
+  const { getIo } = await import('../../config/socket.js');
+  const io = getIo();
+  io.to(match.gameId).emit('scoreUpdated', {
+    ballId: newBall.id,
+    type: 'penalty',
+    runs: parseInt(runs),
+    match: match
+  });
+
+  return { newBall, updatedInnings };
+};
+
+export const getMatchReport = async (matchId) => {
+  const match = await prisma.cricketMatch.findUnique({
+    where: { id: matchId },
+    include: {
+      innings: true,
+      playerStats: true,
+      timeline: true
+    }
+  });
+
+  if (!match) throw new Error("Match not found");
+
+  return match;
+};

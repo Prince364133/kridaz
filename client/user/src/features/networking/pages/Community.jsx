@@ -1142,21 +1142,30 @@ const Community = () => {
             {activeFilter === "Reels" ? (
               <div className="relative flex justify-center h-[calc(100vh-180px)] bg-black/40 rounded-[15px]">
                 {/* Back button & header */}
-                <div className="absolute top-3 left-3 right-3 z-30 flex items-center gap-3">
-                  <button
-                    onClick={() => handleSetActiveFilter("All")}
-                    className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 text-white px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-all"
-                  >
-                    <ArrowLeft size={14} strokeWidth={2.5} />
-                    <span>Community</span>
-                  </button>
-                  <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#55DEE8]/20 text-[#55DEE8] px-3 py-2 rounded-xl text-xs font-black uppercase tracking-widest">
-                    <PlaySquare size={13} />
-                    <span>Shots</span>
+                <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handleSetActiveFilter("All")}
+                      className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 text-white px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-all"
+                    >
+                      <ArrowLeft size={14} strokeWidth={2.5} />
+                      <span>Community</span>
+                    </button>
+                    <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#55DEE8]/20 text-[#55DEE8] px-3 py-2 rounded-xl text-xs font-black uppercase tracking-widest">
+                      <PlaySquare size={13} />
+                      <span>Shots</span>
+                    </div>
                   </div>
+                  <button
+                    onClick={() => gateInteraction(() => navigate('/reels/upload'))}
+                    className="flex items-center gap-1.5 bg-[#55DEE8] text-black px-3 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#BFF367] transition-colors shadow-lg shadow-[#55DEE8]/20"
+                  >
+                    <Plus size={14} strokeWidth={3} />
+                    <span>Upload</span>
+                  </button>
                 </div>
                 <div
-                  className="w-[380px] h-full overflow-y-scroll snap-y snap-mandatory no-scrollbar rounded-[15px]"
+                  className="h-full aspect-[9/16] overflow-y-scroll snap-y snap-mandatory no-scrollbar rounded-[15px] bg-black shadow-2xl mx-auto"
                   onScroll={(e) => {
                     const el = e.currentTarget;
                     const idx = Math.round(el.scrollTop / el.clientHeight);

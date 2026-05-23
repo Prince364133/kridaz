@@ -509,7 +509,10 @@ model CustomPlayerInvite {
 model CricketMatch {
   id                  String            @id @default(uuid())
   gameId              String            @unique
-  status              String            @default("LIVE")
+  status              String            @default("NOT_STARTED")
+  timerState          String            @default("NOT_STARTED") // NOT_STARTED, RUNNING, PAUSED, ENDED
+  timerLastStartedAt  DateTime?
+  totalDurationSeconds Int              @default(0)
   result              String?
   tossWinner          String?
   tossDecision        String?
@@ -594,6 +597,8 @@ model MatchPlayerStat {
   bowlingNoBalls Int          @default(0)
   isSubstitute   Boolean      @default(false)
   substituteForId String?
+  timeSpentSeconds Int        @default(0)
+  timerLastStartedAt DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   match          CricketMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)

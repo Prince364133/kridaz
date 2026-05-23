@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play, Sparkles, X } from 'lucide-react';
+import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play, Sparkles, X, Pause, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import useCricketScoring from '../hooks/useCricketScoring';
@@ -15,6 +15,8 @@ import axiosInstance from '@hooks/useAxiosInstance';
 import ScoringPasswordModal from '../components/ScoringPasswordModal';
 import TickerThemeStoreModal from '@features/scoring/components/TickerThemeStoreModal';
 import VisualWagonWheelModal from '../components/VisualWagonWheelModal';
+import PenaltyModal from '../components/PenaltyModal';
+import MatchReportModal from '../components/MatchReportModal';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6001';
 /**
@@ -112,14 +114,6 @@ const ScoringApp = () => {
   const navigate = useNavigate();
   // @ts-ignore
   const { role } = useSelector((/** @type {any} */ state) => state.auth);
-  const [activeTab, setActiveTab] = useState('scoring');
-  const [showSettings, setShowSettings] = useState(false);
-  const [liveEnabled, setLiveEnabled] = useState(false);
-  const [liveUrls, setLiveUrls] = useState(null);
-  const [passwordVerified, setPasswordVerified] = useState(sessionStorage.getItem(`scoringAuth_${matchId}`) === 'true');
-  const [authAction, setAuthAction] = useState(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [wagonWheelData, setWagonWheelData] = useState(null);
 
   const {
     matchData,
@@ -138,6 +132,44 @@ const ScoringApp = () => {
     setPowerplayOvers,
     refresh
   } = useCricketScoring(matchId);
+
+  const [activeTab, setActiveTab] = useState('scoring');
+  const [showSettings, setShowSettings] = useState(false);
+  const [liveEnabled, setLiveEnabled] = useState(false);
+
+  // Timers
+  const [localTimerSecs, setLocalTimerSecs] = useState(0);
+
+  useEffect(() => {
+    if (matchData?.timerState === 'RUNNING') {
+      const start = new Date(matchData.timerLastStartedAt).getTime();
+      const initialDuration = matchData.totalDurationSeconds || 0;
+      
+      setLocalTimerSecs(initialDuration + Math.floor((Date.now() - start) / 1000));
+      
+      const interval = setInterval(() => {
+        setLocalTimerSecs(initialDuration + Math.floor((Date.now() - start) / 1000));
+      }, 1000);
+      return () => clearInterval(interval);
+    } else {
+      setLocalTimerSecs(matchData?.totalDurationSeconds || 0);
+    }
+  }, [matchData?.timerState, matchData?.timerLastStartedAt, matchData?.totalDurationSeconds]);
+
+  const formatTimer = (secs) => {
+    if (!secs || isNaN(secs)) return '00:00';
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const [liveUrls, setLiveUrls] = useState(null);
+  const [passwordVerified, setPasswordVerified] = useState(sessionStorage.getItem(`scoringAuth_${matchId}`) === 'true');
+  const [authAction, setAuthAction] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showPenaltyModal, setShowPenaltyModal] = useState(false);
+  const [showMatchReport, setShowMatchReport] = useState(false);
+  const [wagonWheelData, setWagonWheelData] = useState(null);
 
   const [isAiCommentaryEnabled, setIsAiCommentaryEnabled] = useState(false);
   const [commentaryVoice, setCommentaryVoice] = useState('alloy');
@@ -389,14 +421,7 @@ const ScoringApp = () => {
                 <p className="text-[11px] text-neutral-500 font-black uppercase tracking-widest mt-2">Initialize scoring</p>
               </div>
               <button
-                onClick={() => {
-                  if (hasPassword && !passwordVerified) {
-                    setAuthAction('start');
-                    setShowAuthModal(true);
-                  } else {
-                    setShowTossModal(true);
-                  }
-                }}
+                onClick={() => setShowTossModal(true)}
                 className="w-full py-5 bg-[#00C187]/10 border border-[#00C187]/30 rounded-[2rem] text-center text-[#00C187] text-[13px] font-black uppercase tracking-[0.2em] shadow-xl"
               >
                 ⚡ Start Match
@@ -540,7 +565,7 @@ const ScoringApp = () => {
                 NB
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-3 gap-3.5">
               <button onClick={() => setExtraModal('BYE')}
                 className="h-14 bg-white/[0.03] border border-white/5 text-neutral-400 rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-white transition-all">
                 BYE
@@ -548,6 +573,10 @@ const ScoringApp = () => {
               <button onClick={() => setExtraModal('LEG_BYE')}
                 className="h-14 bg-white/[0.03] border border-white/5 text-neutral-400 rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-white transition-all">
                 LEG BYE
+              </button>
+              <button onClick={() => setShowPenaltyModal(true)}
+                className="h-14 bg-white/[0.03] border border-white/5 text-red-400 rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-red-300 transition-all">
+                PENALTY
               </button>
             </div>
             <button onClick={() => setShowWicketModal(true)}
@@ -598,6 +627,23 @@ const ScoringApp = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                {matchData?.status !== 'ENDED' && (
+                  <div className="flex items-center gap-2 bg-white/5 rounded-2xl p-1 border border-white/5">
+                    <div className="px-3 py-1 font-mono text-[13px] font-black tracking-widest" style={{ color: THEME_COLOR }}>
+                      {formatTimer(localTimerSecs)}
+                    </div>
+                    <button
+                      onClick={async () => {
+                        const res = await toggleTimer();
+                        if (res.success) toast.success(matchData.timerState === 'RUNNING' ? 'Match Paused' : 'Match Started');
+                        else toast.error(res.message || 'Failed to toggle timer');
+                      }}
+                      className="p-1.5 bg-[#00C187]/20 rounded-xl hover:bg-[#00C187]/40 transition-all text-[#00C187]"
+                    >
+                      {matchData?.timerState === 'RUNNING' ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
+                    </button>
+                  </div>
+                )}
                 <div className={`px-3 py-1.5 rounded-xl flex items-center gap-2 border transition-all ${liveEnabled ? 'bg-[#00C187]/10 border-[#00C187]/30 shadow-[0_0_15px_rgba(0,193,135,0.1)]' : 'bg-white/5 border-white/5'}`}>
                   <div className={`w-1.5 h-1.5 rounded-full ${liveEnabled ? 'bg-[#00C187] animate-pulse' : 'bg-neutral-700'}`} />
                   <span className={`text-[9px] font-black uppercase tracking-widest ${liveEnabled ? 'text-[#00C187]' : 'text-neutral-500'}`}>
@@ -1031,6 +1077,19 @@ const ScoringApp = () => {
                           </button>
                         </div>
                       </div>
+                      <div className="space-y-4 pt-4 border-t border-white/5">
+                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match Analysis</p>
+                        <button
+                          onClick={() => {
+                            setShowSettings(false);
+                            setShowMatchReport(true);
+                          }}
+                          className="w-full py-3 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-xl border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
+                        >
+                          <FileText size={14} />
+                          View Match Report
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <div className="py-12 text-center bg-white/[0.02] rounded-3xl border border-dashed border-white/10">
@@ -1221,6 +1280,240 @@ const ScoringApp = () => {
                 }
                 refresh();
               }}
+            />
+          )}
+          {showPenaltyModal && (
+            <PenaltyModal
+              matchData={matchData}
+              onClose={() => setShowPenaltyModal(false)}
+              onConfirm={async (teamId, runs) => {
+                const res = await addPenalty(teamId, runs);
+                if (res.success) toast.success(`Added ${runs} penalty runs`);
+                else toast.error(res.message || 'Failed to add penalty');
+                setShowPenaltyModal(false);
+              }}
+            />
+          )}
+
+          {/* ── Phase 1 Modals ── */}
+          {(showInningsSetup || needsInningsSetup) && (
+            <InningsSetupModal
+              battingTeamSlots={battingSlots}
+              bowlingTeamSlots={bowlingSlots}
+              inningsLabel={matchData?.currentInningsIndex === 0 ? '1st Innings' : '2nd Innings'}
+              onConfirm={async (players) => {
+                const result = await setPlayers(players);
+                if (result.success) toast.success('Node established! Scoring ready.');
+                else toast.error(result.error || 'Player sync failed');
+                setShowInningsSetup(false);
+              }}
+              onClose={() => setShowInningsSetup(false)}
+            />
+          )}
+
+          {showWicketModal && (
+            <WicketModal
+              fieldingTeamSlots={bowlingSlots}
+              battingTeamSlots={remainingBatters}
+              activeBatters={[
+                strikerSlot ? { ...strikerSlot, role: 'Striker' } : null,
+                nonStrikerSlot ? { ...nonStrikerSlot, role: 'Non-Striker' } : null
+              ].filter(Boolean)}
+              onConfirm={async ({ wicketType, fielderId, nextBatterId, runs, playerOutId }) => {
+                const result = await handleScore({
+                  runs: runs || 0,
+                  isWicket: true,
+                  wicketType,
+                  fielderId,
+                  nextBatterId,
+                  playerOutId,
+                  extraType: 'NONE',
+                });
+                if (result.success) {
+                  toast.success(`Wicket Confirmed`);
+                } else {
+                  toast.error(result.error || 'Sync failure');
+                }
+                setShowWicketModal(false);
+              }}
+              onClose={() => setShowWicketModal(false)}
+            />
+          )}
+
+          {wagonWheelData && (
+            <VisualWagonWheelModal
+              runs={wagonWheelData.runs}
+              isBoundary={wagonWheelData.isBoundary}
+              onConfirm={(data) => {
+                handleScore({
+                  runs: wagonWheelData.runs,
+                  isBoundary: wagonWheelData.isBoundary,
+                  isFour: wagonWheelData.isFour,
+                  isSix: wagonWheelData.isSix,
+                  extraType: 'NONE',
+                  fieldingPosition: data.position,
+                  distance: data.distance
+                });
+                setWagonWheelData(null);
+              }}
+              onClose={() => setWagonWheelData(null)}
+            />
+          )}
+
+          {extraModal && (
+            <ExtraRunsModal
+              extraType={extraModal}
+              onConfirm={async (runs) => {
+                const isWide = extraModal === 'WIDE';
+                const isNoBall = extraModal === 'NO_BALL';
+                const totalRuns = (isWide || isNoBall) ? runs + 1 : runs;
+                const result = await handleScore({
+                  runs: totalRuns,
+                  isExtra: true,
+                  extraType: extraModal,
+                  isBoundary: false,
+                });
+                if (result.success) toast.success(`${extraModal} Event Recorded`);
+                else toast.error(result.error || 'Sync failure');
+                setExtraModal(null);
+              }}
+              onClose={() => setExtraModal(null)}
+            />
+          )}
+
+          {showBowlerModal && (
+            <SelectBowlerModal
+              pool={bowlingSlots}
+              currentBowlerId={matchData.bowlerId}
+              onConfirm={async (bowlerId) => {
+                const res = await setPlayers({ bowlerId });
+                if (res.success) {
+                  toast.success('Next bowler selected');
+                  setShowBowlerModal(false);
+                } else {
+                  toast.error(res.error || 'Failed to select bowler');
+                }
+              }}
+            />
+          )}
+
+          {showTossModal && (
+            <TossModal
+              teamA={matchData?.teamA || matchData?.hostedGameId?.teamA || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamA') : null)}
+              teamB={matchData?.teamB || matchData?.hostedGameId?.teamB || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamB') : null)}
+              hasPassword={hasPassword && !passwordVerified}
+              onCancel={() => setShowTossModal(false)}
+              onConfirm={async ({ winnerTeam, decision, password }) => {
+                
+                // If a password was provided, verify it first or store it
+                if (password) {
+                  // The backend might not have an endpoint just to "verify" the password in this sequence,
+                  // but we usually call /api/scoring/verify-password.
+                  // Wait, we have the /api/scoring/start endpoint which doesn't check password directly, 
+                  // but we do have a way to verify password via /api/scoring/:matchId/verify.
+                  // Let's verify it before proceeding.
+                  try {
+                    const authRes = await axiosInstance.post(`/api/scoring/${matchId}/verify`, { password });
+                    if (authRes.data.success) {
+                      localStorage.setItem(`scorer_token_${matchId}`, authRes.data.token);
+                      setPasswordVerified(true);
+                    } else {
+                      return toast.error('Invalid password');
+                    }
+                  } catch (e) {
+                    return toast.error('Error verifying password');
+                  }
+                }
+
+                const res = await setToss({ winnerTeam, decision });
+                if (res.success) {
+                  toast.success('Toss recorded! Starting match...');
+
+                  // Determine batting team
+                  const isTeamAWinner = winnerTeam === (matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id);
+                  let battingTeamId = matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id;
+                  if ((isTeamAWinner && decision === 'BAT') || (!isTeamAWinner && decision === 'BOWL')) {
+                    battingTeamId = matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id;
+                  } else {
+                    battingTeamId = matchData?.teamB?.id || matchData?.hostedGameId?.teamB?.id;
+                  }
+
+                  try {
+                    const response = await axiosInstance.post(`/api/scoring/start`, {
+                      matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, battingTeamId
+                    }, {
+                      headers: {
+                        'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
+                      }
+                    });
+                    const data = response.data;
+                    if (data.success) {
+                      toast.success('Match started successfully!');
+                      setShowTossModal(false);
+                      refresh();
+                    } else {
+                      toast.error('Failed to start match');
+                    }
+                  } catch (e) {
+                    toast.error('Error starting match');
+                  }
+                } else {
+                  toast.error(res.error || 'Failed to record toss');
+                }
+              }}
+            />
+          )}
+
+          {showAuthModal && (
+            <ScoringPasswordModal
+              matchId={matchId}
+              actionLabel={authAction === 'end' ? 'Confirm End Match' : 'Unlock Scoring Console'}
+              onClose={() => setShowAuthModal(false)}
+              onSuccess={(token) => {
+                localStorage.setItem(`scorer_token_${matchId}`, token);
+                setPasswordVerified(true);
+                setShowAuthModal(false);
+                if (authAction === 'start') {
+                  setShowTossModal(true);
+                } else if (authAction === 'end') {
+                  completeMatch();
+                  navigate('/');
+                }
+              }}
+            />
+          )}
+
+          {showThemeStore && (
+            <TickerThemeStoreModal
+              activeTheme={matchData?.hostedGameId?.tickerTheme || 'neon_classic'}
+              matchId={matchId}
+              onClose={() => setShowThemeStore(false)}
+              onThemeApplied={(newTheme) => {
+                if (matchData?.hostedGameId) {
+                  matchData.hostedGameId.tickerTheme = newTheme;
+                }
+                refresh();
+              }}
+            />
+          )}
+          {showPenaltyModal && (
+            <PenaltyModal
+              matchData={matchData}
+              onClose={() => setShowPenaltyModal(false)}
+              onConfirm={async (teamId, runs) => {
+                const res = await addPenalty(teamId, runs);
+                if (res.success) toast.success(`Added ${runs} penalty runs`);
+                else toast.error(res.message || 'Failed to add penalty');
+                setShowPenaltyModal(false);
+              }}
+            />
+          )}
+
+          {showMatchReport && (
+            <MatchReportModal
+              matchId={matchId}
+              fetchMatchReport={fetchMatchReport}
+              onClose={() => setShowMatchReport(false)}
             />
           )}
         </div>

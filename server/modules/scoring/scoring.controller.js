@@ -485,3 +485,36 @@ export const updateCommentarySettings = async (req, res) => {
     handleControllerError(res, error);
   }
 };
+
+export const toggleTimer = async (req, res) => {
+  try {
+    const { scoringId } = req.body;
+    const result = await scoringService.toggleMatchTimer(scoringId);
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    logger.error("[Scoring] Toggle Timer Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+export const addPenalty = async (req, res) => {
+  try {
+    const { scoringId, runs, teamId } = req.body;
+    const result = await scoringService.addPenaltyRuns(scoringId, runs, teamId);
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    logger.error("[Scoring] Add Penalty Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+export const getMatchReport = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const report = await scoringService.getMatchReport(matchId);
+    res.status(200).json({ success: true, report });
+  } catch (error) {
+    logger.error("[Scoring] Get Match Report Error:", error);
+    handleControllerError(res, error);
+  }
+};

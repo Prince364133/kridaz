@@ -428,6 +428,52 @@ const useCricketScoring = (matchId) => {
     }
   };
 
+  // ── Timers & Penalty ──────────────────────────────────────────────────────────
+  const toggleTimer = async () => {
+    try {
+      const response = await axiosInstance.put('/api/scoring/toggle-timer', {
+        scoringId: matchData?.id || matchData?._id,
+      }, { headers: getHeaders() });
+      if (response.data.success) {
+        // Will refresh the entire status to get new timer state
+        fetchMatchStatus();
+        return { success: true };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const addPenalty = async (teamId, runs) => {
+    try {
+      const response = await axiosInstance.put('/api/scoring/penalty', {
+        scoringId: matchData?.id || matchData?._id,
+        teamId,
+        runs,
+      }, { headers: getHeaders() });
+      if (response.data.success) {
+        fetchMatchStatus();
+        return { success: true };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const fetchMatchReport = async () => {
+    try {
+      const response = await axiosInstance.get(`/api/scoring/report/${matchId}`, { headers: getHeaders() });
+      if (response.data.success) {
+        return { success: true, report: response.data.report };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
   return {
     matchData,
     loading,
@@ -444,6 +490,9 @@ const useCricketScoring = (matchId) => {
     substitutePlayer,
     useReview,
     setPowerplayOvers,
+    toggleTimer,
+    addPenalty,
+    fetchMatchReport,
     fetchAnalytics,
     refresh: fetchMatchStatus,
   };
