@@ -750,7 +750,14 @@ const ScoringApp = () => {
                 </div>
 
                 <div className="space-y-6">
-                  {liveEnabled ? (
+                  {matchData?.hostedGameId && !liveEnabled && (
+                    <div className="py-12 text-center bg-white/[0.02] rounded-3xl border border-dashed border-white/10">
+                      <div className="w-8 h-8 border-2 border-[#00C187] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                      <p className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">Establishing Sync...</p>
+                    </div>
+                  )}
+
+                  {matchData?.hostedGameId && liveEnabled && (
                     <div className="p-6 bg-white/[0.02] rounded-3xl border border-white/5 space-y-6 animate-in slide-in-from-top duration-500">
                       <p className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] text-center">Broadcast Credentials</p>
                       <div className="space-y-3">
@@ -824,9 +831,10 @@ const ScoringApp = () => {
                             </div>
                           </div>
                       </div>
-                      )}
+                    )}
 
-                      <div className="space-y-4 pt-4 border-t border-white/5">
+                    <div className="p-6 bg-white/[0.02] rounded-3xl border border-white/5 space-y-6">
+                      <div className="space-y-4">
                         <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match State</p>
                         <div className="grid grid-cols-3 gap-2">
                           <button
@@ -1090,13 +1098,8 @@ const ScoringApp = () => {
                           View Match Report
                         </button>
                       </div>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="py-12 text-center bg-white/[0.02] rounded-3xl border border-dashed border-white/10">
-                      <div className="w-8 h-8 border-2 border-[#00C187] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                      <p className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">Establishing Sync...</p>
-                    </div>
-                  )}
 
                   <button onClick={() => setShowSettings(false)} className="w-full py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] transition-all transform active:scale-95 shadow-xl" style={{ backgroundColor: THEME_COLOR, color: '#000', boxShadow: `0 10px 30px ${THEME_COLOR}33` }}>Save Parameters</button>
                 </div>

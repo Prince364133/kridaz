@@ -53,8 +53,7 @@ const STEPS = [
   { id: 3, label: 'Team A XI' },
   { id: 4, label: 'Team B XI' },
   { id: 5, label: 'Add-ons' },
-  { id: 6, label: 'Toss' },
-  { id: 7, label: 'Review & Confirm' },
+  { id: 6, label: 'Review & Confirm' },
 ];
 
 // ─── Field/Select components ─────────────────────────────────────────────────
@@ -256,9 +255,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
       case 2: return !!formData.teamAId && !!formData.teamBId && formData.teamAId !== formData.teamBId;
       case 3: return formData.teamAPlayers.length > 0;
       case 4: return formData.teamBPlayers.length > 0;
-      case 6: return !!formData.tossWinner;
-      // Password is optional: blank (no password) or minimum 4 characters
-      case 7: return formData.scoringPassword.trim() === '' || formData.scoringPassword.length >= 4;
+      case 6: return formData.scoringPassword.trim() === '' || formData.scoringPassword.length >= 4;
       default: return true;
     }
   };
@@ -668,67 +665,10 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
           </div>
         );
 
-      // ── Step 6: Toss ──────────────────────────────────────────────────────────
+      // ── Step 6: Final Review + Confirm ────────────────────────────────────────
       case 6: {
         const teamAName = getTeamName(formData.teamAId);
         const teamBName = getTeamName(formData.teamBId);
-        const winnerName = formData.tossWinner === formData.teamAId ? teamAName : formData.tossWinner === formData.teamBId ? teamBName : null;
-        return (
-          <div className="space-y-6 text-center">
-            <h3 className="text-lg font-black text-white uppercase tracking-wide">Toss</h3>
-            {/* Coin */}
-            <div className="flex justify-center">
-              <div
-                className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-2xl cursor-pointer select-none"
-                style={{ transform: `rotateY(${tossFlipDeg}deg)`, transition: isTossFlipping ? 'transform 0.06s linear' : 'none' }}
-                onClick={!isTossFlipping && !formData.tossWinner ? doToss : undefined}
-              >
-                <span className="text-3xl">{isTossFlipping ? '🪙' : formData.tossWinner ? '👑' : '🪙'}</span>
-              </div>
-            </div>
-            {!formData.tossWinner && !isTossFlipping && (
-              <button onClick={doToss}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-black uppercase tracking-wider text-sm">
-                Flip Coin
-              </button>
-            )}
-            {isTossFlipping && <p className="text-white/50 text-sm">Flipping...</p>}
-            {formData.tossWinner && !isTossFlipping && (
-              <div className="space-y-4">
-                <div className="text-[#BFF367] font-black text-xl">🏆 {winnerName} won the toss!</div>
-                <div>
-                  <label className={labelClass}>Choose to</label>
-                  <div className="flex gap-3">
-                    {['BAT', 'BOWL'].map(d => (
-                      <button key={d} type="button"
-                        onClick={() => setFormData(f => ({ ...f, tossDecision: d }))}
-                        className={`flex-1 py-3 rounded-xl border font-black text-sm uppercase tracking-widest transition-all ${formData.tossDecision === d ? 'bg-[#55DEE8] text-black border-[#55DEE8]' : 'border-white/20 text-white hover:bg-white/5'}`}>
-                        {d === 'BAT' ? '🏏 Bat' : '🎯 Bowl'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <p className="text-white/40 text-xs">Or override winner manually:</p>
-                <div className="flex gap-2">
-                  {[{ id: formData.teamAId, name: teamAName }, { id: formData.teamBId, name: teamBName }].map(({ id, name }) => (
-                    <button key={id} type="button"
-                      onClick={() => setFormData(f => ({ ...f, tossWinner: id }))}
-                      className={`flex-1 py-2 rounded-xl border text-xs font-bold transition-all ${formData.tossWinner === id ? 'border-[#BFF367] bg-[#BFF367]/10 text-[#BFF367]' : 'border-white/10 text-white/50 hover:text-white'}`}>
-                      {name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      }
-
-      // ── Step 7: Final Review + Confirm ────────────────────────────────────────
-      case 7: {
-        const teamAName = getTeamName(formData.teamAId);
-        const teamBName = getTeamName(formData.teamBId);
-        const winnerName = formData.tossWinner === formData.teamAId ? teamAName : teamBName;
         const formatLabel = CRICKET_FORMATS.find(f => f.value === formData.format)?.label || formData.format;
         const ballLabel = BALL_TYPES.find(b => b.value === formData.ballType)?.label || formData.ballType;
         const groundLabel = GROUND_TYPES.find(g => g.value === formData.groundType)?.label || formData.groundType;
@@ -759,11 +699,6 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
                   <div className="text-white text-xs font-bold">{formData.maxMembers} per side</div>
                 </div>
               </div>
-              {formData.tossWinner && (
-                <div className="text-xs text-[#BFF367] bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-xl px-3 py-2">
-                  🏆 {winnerName} won toss · Chose to {formData.tossDecision}
-                </div>
-              )}
               <div className="text-xs text-white/40">
                 Team A: {formData.teamAPlayers.length} players · Team B: {formData.teamBPlayers.length} players
               </div>
