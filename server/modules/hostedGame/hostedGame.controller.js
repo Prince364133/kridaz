@@ -149,7 +149,7 @@ export const getGroundsForHosting = async (req, res) => {
 
 export const getUmpiresForHosting = async (req, res) => {
   try {
-    const { city, state, gameType } = req.query;
+    const { city, state, gameType, query: searchTerm } = req.query;
     
     const umpires = await prisma.ownerProfile.findMany({
       where: {
@@ -157,6 +157,12 @@ export const getUmpiresForHosting = async (req, res) => {
           role: "UMPIRE",
           ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
           ...(state ? { state: { contains: state, mode: 'insensitive' } } : {}),
+          ...(searchTerm ? {
+            OR: [
+              { name: { contains: searchTerm, mode: 'insensitive' } },
+              { phone: { contains: searchTerm, mode: 'insensitive' } }
+            ]
+          } : {})
         }
       },
       select: {
@@ -197,7 +203,7 @@ export const getUmpiresForHosting = async (req, res) => {
 
 export const getStreamersForHosting = async (req, res) => {
   try {
-    const { city, state, gameType } = req.query;
+    const { city, state, gameType, query: searchTerm } = req.query;
     
     const streamers = await prisma.ownerProfile.findMany({
       where: {
@@ -205,6 +211,12 @@ export const getStreamersForHosting = async (req, res) => {
           role: "STREAMER",
           ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
           ...(state ? { state: { contains: state, mode: 'insensitive' } } : {}),
+          ...(searchTerm ? {
+            OR: [
+              { name: { contains: searchTerm, mode: 'insensitive' } },
+              { phone: { contains: searchTerm, mode: 'insensitive' } }
+            ]
+          } : {})
         }
       },
       select: {

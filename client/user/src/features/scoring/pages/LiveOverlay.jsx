@@ -287,6 +287,10 @@ const LiveOverlay = () => {
   if (!score) return null;
 
   if (score.status === 'NOT_STARTED' || !score.isLive) {
+    const venue = score.game?.customVenue || score.game?.turf?.name || 'Local Ground';
+    const loc = score.game?.city || score.game?.state || score.game?.location || 'Location Unspecified';
+    const professionals = score.game?.customProfessionals || [];
+    
     return (
       <div 
         style={{ width: '100vw', height: '100vh', background: 'transparent', position: 'relative', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}
@@ -297,14 +301,20 @@ const LiveOverlay = () => {
         }}
       >
         <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: 90,
-          background: 'rgba(5,5,5,0.88)', backdropFilter: 'blur(20px)',
-          borderTop: '2px solid #a3e635', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 120,
+          background: 'rgba(5,5,5,0.95)', backdropFilter: 'blur(20px)',
+          borderTop: '2px solid #a3e635', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           animation: 'tickerIn 0.6s cubic-bezier(0.16,1,0.3,1) both'
         }}>
-          <div style={{ fontSize: 24, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '2px' }}>
-            <span style={{ color: '#a3e635' }}>{score.teamA?.name}</span> <span style={{ opacity: 0.5, margin: '0 16px' }}>VS</span> <span style={{ color: '#a3e635' }}>{score.teamB?.name}</span>
-            <span style={{ marginLeft: 32, fontSize: 20, color: '#9ca3af' }}>MATCH STARTS SOON</span>
+          <div style={{ fontSize: 26, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '8px', display: 'flex', alignItems: 'center' }}>
+            <span style={{ color: '#a3e635' }}>{score.teamA?.name || 'Team A'}</span> 
+            <span style={{ opacity: 0.5, margin: '0 16px', fontSize: 20 }}>VS</span> 
+            <span style={{ color: '#a3e635' }}>{score.teamB?.name || 'Team B'}</span>
+            <span style={{ marginLeft: 32, fontSize: 20, color: '#9ca3af', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 12px', borderRadius: '8px' }}>MATCH STARTS SOON</span>
+          </div>
+          <div style={{ fontSize: 16, fontWeight: 600, color: '#cbd5e1', display: 'flex', gap: '24px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            <span>📍 {venue}, {loc}</span>
+            {professionals.length > 0 && <span>⭐ Featuring Pro Players</span>}
           </div>
         </div>
       </div>
@@ -339,6 +349,31 @@ const LiveOverlay = () => {
 
       {/* Boundary / Event Full-Screen Animations & SFX */}
       <ActiveAnimation badge={badge} />
+
+      {/* Break overlay */}
+      {score.timerState === 'PAUSED' && (
+        <div style={{
+          position: 'absolute', top: '20px', right: '20px',
+          padding: '8px 16px',
+          backgroundColor: 'rgba(239, 68, 68, 0.15)',
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          borderRadius: '9999px',
+          color: '#ef4444',
+          fontWeight: '900',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em',
+          fontSize: '14px',
+          animation: 'pulse 2s infinite',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          textShadow: '0 0 10px rgba(239,68,68,0.5)'
+        }}>
+          <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#ef4444' }} />
+          MATCH ON BREAK
+        </div>
+      )}
 
       {/* AI Commentary Overlay Toast */}
       {aiCommentary?.text && (

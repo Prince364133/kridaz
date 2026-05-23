@@ -179,6 +179,19 @@ export const computeScoreSnapshot = (scoring, match) => {
     };
   }).sort((a, b) => b.points - a.points).slice(0, 5); // Top 5 MVP candidates
 
+  // --- Innings & Match Completion Detection ---
+  const oversFinished = totalValidBalls >= (maxOvers * 6);
+  let isInningsComplete = isAllOut || oversFinished;
+  let isMatchComplete = false;
+
+  if (currentInningsIndex === 1) {
+    const targetReached = target !== null && totalRuns >= target;
+    if (targetReached) {
+      isInningsComplete = true;
+    }
+    isMatchComplete = isInningsComplete;
+  }
+
   return {
     matchId: scoring.gameId,
     battingTeamName,
@@ -201,6 +214,7 @@ export const computeScoreSnapshot = (scoring, match) => {
     bowler: currentBowler,
     result: scoring.status === "COMPLETED" ? "Match Ended" : null,
     status: match.status,
+    timerState: scoring.timerState,
     isLive: match.isLive ?? false,
     matchName: match.name,
     teamA: match.teamA,
@@ -214,7 +228,10 @@ export const computeScoreSnapshot = (scoring, match) => {
       batting: currentInnings.battingTeamReviews ?? 2,
       fielding: currentInnings.fieldingTeamReviews ?? 2
     },
-    powerplayOvers: currentInnings.powerplayOvers || 0
+    powerplayOvers: currentInnings.powerplayOvers || 0,
+    isInningsComplete,
+    isMatchComplete,
+    currentInningsIndex
   };
 };
 

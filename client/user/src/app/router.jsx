@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, useParams } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
 // ΓöÇΓöÇ Eager: Layouts (used on nearly every route ΓÇö small files, no split benefit) ΓöÇΓöÇ
@@ -12,6 +12,11 @@ import { NotFound, RootRedirect, ErrorBoundary } from "@components/common";
 
 // ΓöÇΓöÇ Spinner shown while any lazy chunk loads ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const PageLoader = () => null;
+
+const RedirectToAnalytics = () => {
+  const { matchId } = useParams();
+  return <Navigate to={`/analytics/${matchId}`} replace />;
+};
 
 const ProfessionalDashboard = lazy(() => import("@features/professional/pages/ProfessionalDashboard"));
 
@@ -46,7 +51,6 @@ const MatchDetails           = lazy(() => import("@features/scoring").then(m => 
 const Leaderboard            = lazy(() => import("@features/leaderboard").then(m => ({ default: m.Leaderboard })));
 const LiveOverlay            = lazy(() => import("@features/scoring").then(m => ({ default: m.LiveOverlay })));
 const ThemePreview           = lazy(() => import("@features/scoring").then(m => ({ default: m.ThemePreview })));
-const LiveScoreboard         = lazy(() => import("@features/scoring").then(m => ({ default: m.LiveScoreboard })));
 const TeamPass               = lazy(() => import("@features/teams").then(m => ({ default: m.TeamPass })));
 const TeamProfile            = lazy(() => import("@features/teams").then(m => ({ default: m.TeamProfile })));
 const ReelsFeed              = lazy(() => import("@features/reels").then(m => ({ default: m.ReelsFeed })));
@@ -349,8 +353,8 @@ const router = createBrowserRouter([
       { path: "reels/upload",        element: <ProtectedRoute><S><UploadReel /></S></ProtectedRoute> },
       { path: "reels/analytics",     element: <ProtectedRoute><S><ReelAnalytics /></S></ProtectedRoute> },
       { path: "leaderboard",         element: <S><Leaderboard /></S> },
-      { path: "live-score/:matchId",    element: <S><LiveScoreboard /></S> },
-      { path: "scoring/live/:matchId",  element: <S><LiveScoreboard /></S> },
+      { path: "live-score/:matchId",    element: <RedirectToAnalytics /> },
+      { path: "scoring/live/:matchId",  element: <RedirectToAnalytics /> },
       { path: "privacy-policy",              element: <S><PrivacyPolicy /></S> },
       { path: "terms-of-service",            element: <S><TermsOfService /></S> },
       { path: "data-deletion-instructions",  element: <S><DataDeletionInstructions /></S> },

@@ -138,6 +138,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
               const statusColors = {
                 'NOT_STARTED': { bg: 'bg-white/10', text: 'text-white/50' },
                 'LIVE':        { bg: 'bg-red-500/20', text: 'text-red-400' },
+                'PAUSED':      { bg: 'bg-yellow-500/20', text: 'text-yellow-400' },
                 'COMPLETED':   { bg: 'bg-[#BFF367]/10', text: 'text-[#BFF367]' },
               };
               const statusStyle = statusColors[item.scoringStatus] || statusColors['NOT_STARTED'];
@@ -168,7 +169,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                   </div>
                   <div className="flex gap-2 mt-auto">
                     <a href={`/scoring/${item.id}`} className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-[#55DEE8] border border-[#55DEE8]/30 rounded-lg py-1.5 hover:bg-[#55DEE8]/10 transition-colors">Launch App</a>
-                    <a href={`/live-score/${item.id}`} target="_blank" rel="noreferrer" className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-[#BFF367] border border-[#BFF367]/30 rounded-lg py-1.5 hover:bg-[#BFF367]/10 transition-colors">Watch Live</a>
+                    <a href={`/analytics/${item.shortId || item.id}`} target="_blank" rel="noreferrer" className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-[#BFF367] border border-[#BFF367]/30 rounded-lg py-1.5 hover:bg-[#BFF367]/10 transition-colors">Watch Live</a>
                   </div>
                 </div>
               );

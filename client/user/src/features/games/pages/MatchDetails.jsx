@@ -104,7 +104,7 @@ const MatchDetails = () => {
  <div className="flex flex-col gap-4 w-full md:w-auto">
  {isCompleted ? (
  <button 
- onClick={() => navigate(`/analytics/${game._id}`)}
+ onClick={() => navigate(`/analytics/${game.shortId || game._id}`)}
  className="h-16 px-10 bg-primary text-black font-black uppercase text-sm tracking-widest rounded-2xl shadow-[0_20px_50px_rgba(85,222,232,0.3)] hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
  >
  View Full Analytics <Activity size={20} />

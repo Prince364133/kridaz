@@ -1,16 +1,30 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import useAxiosInstance from '@hooks/useAxiosInstance';
 
 /**
  * Central hook for all cricket scoring operations.
  * Exposes: matchData, recordBall, setPlayers, setToss, undoBall,
- *          startInnings, completeMatch, fetchAnalytics, refresh
+ *          startInnings, completeMatch, fetchAnalytics, refresh, isMutating
  */
 const useCricketScoring = (matchId) => {
   const [matchData, setMatchData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isMutating, setIsMutatingState] = useState(false);
+  const isMutatingRef = useRef(false);
   const axiosInstance = useAxiosInstance;
+
+  const wrapMutation = (asyncFn) => async (...args) => {
+    if (isMutatingRef.current) return { success: false, error: "Action in progress. Please wait." };
+    isMutatingRef.current = true;
+    setIsMutatingState(true);
+    try {
+      return await asyncFn(...args);
+    } finally {
+      isMutatingRef.current = false;
+      setIsMutatingState(false);
+    }
+  };
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
   const normalise = (scoring) => {
@@ -190,6 +204,11 @@ const useCricketScoring = (matchId) => {
         }
         if (ballData.isWicket && ballData.nextBatterId) {
           newStrikerId = ballData.nextBatterId;
+        }
+
+        if (newStrikerId && newNonStrikerId && newStrikerId === newNonStrikerId) {
+          console.warn("Striker and Non-Striker projected to be identical. Skipping optimistic update.");
+          return { success: false, error: "Striker and Non-Striker cannot be the same player." };
         }
 
         cloned.strikerId = newStrikerId;
@@ -462,6 +481,22 @@ const useCricketScoring = (matchId) => {
     }
   };
 
+  const advanceToNextInnings = async (battingTeamId) => {
+    try {
+      const response = await axiosInstance.post('/api/scoring/next-innings', {
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
+        battingTeamId,
+      }, { headers: getHeaders() });
+      if (response.data.success) {
+        fetchMatchStatus();
+        return { success: true };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
   const fetchMatchReport = async () => {
     try {
       const response = await axiosInstance.get(`/api/scoring/report/${matchId}`, { headers: getHeaders() });
@@ -478,20 +513,22 @@ const useCricketScoring = (matchId) => {
     matchData,
     loading,
     error,
-    recordBall,
-    setPlayers,
-    setToss,
-    undoBall,
-    startInnings,
-    completeMatch,
-    updateMatchStatus,
-    reviseTargetAndOvers,
-    setMatchOfficials,
-    substitutePlayer,
-    useReview,
-    setPowerplayOvers,
-    toggleTimer,
-    addPenalty,
+    isMutating,
+    recordBall: wrapMutation(recordBall),
+    setPlayers: wrapMutation(setPlayers),
+    setToss: wrapMutation(setToss),
+    undoBall: wrapMutation(undoBall),
+    startInnings: wrapMutation(startInnings),
+    completeMatch: wrapMutation(completeMatch),
+    updateMatchStatus: wrapMutation(updateMatchStatus),
+    reviseTargetAndOvers: wrapMutation(reviseTargetAndOvers),
+    setMatchOfficials: wrapMutation(setMatchOfficials),
+    substitutePlayer: wrapMutation(substitutePlayer),
+    useReview: wrapMutation(useReview),
+    setPowerplayOvers: wrapMutation(setPowerplayOvers),
+    toggleTimer: wrapMutation(toggleTimer),
+    addPenalty: wrapMutation(addPenalty),
+    advanceToNextInnings: wrapMutation(advanceToNextInnings),
     fetchMatchReport,
     fetchAnalytics,
     refresh: fetchMatchStatus,

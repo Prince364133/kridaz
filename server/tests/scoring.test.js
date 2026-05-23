@@ -224,6 +224,22 @@ describe("Cricket Match Scoring Module Integration Tests", () => {
       expect(res.body.scoring.nonStrikerId).toBe(userPlayer2.id);
       expect(res.body.scoring.bowlerId).toBe(userBowler.id);
     });
+
+    it("should fail to set striker and non-striker to the same player", async () => {
+      const res = await request(app)
+        .post("/api/scoring/set-players")
+        .set("Authorization", `Bearer ${tokenHost}`)
+        .send({
+          scoringId,
+          strikerId: userPlayer1.id,
+          nonStrikerId: userPlayer1.id,
+          bowlerId: userBowler.id
+        });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toContain("Striker and Non-Striker cannot be the same player");
+    });
   });
 
   describe("2. Ball-by-Ball Scoring Engine", () => {

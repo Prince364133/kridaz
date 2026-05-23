@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { prisma } from "../config/prisma.js";
 import argon2 from "argon2";
 import dotenv from "dotenv";
@@ -25,7 +26,7 @@ const nukeAndSeed = async () => {
     console.log("Database cleared successfully.");
 
     const email = "admin@kridaz.com";
-    const password = "3641333"; // Changed to 3641333 as requested
+    const password = process.env.ADMIN_SEED_PASSWORD || crypto.randomBytes(8).toString('hex'); // Fallback to random if env not set // Changed to 3641333 as requested
     
     console.log(`Hashing password for ${email}...`);
     const hashedPassword = await argon2.hash(password);
@@ -53,7 +54,7 @@ const nukeAndSeed = async () => {
 
     console.log("SUCCESS: Database nuked and Admin seeded!");
     console.log(`Email: ${email}`);
-    console.log(`Password: ${password}`);
+    // console.log(`Password: ${password}`); // Removed for security
 
     await prisma.$disconnect();
     process.exit(0);

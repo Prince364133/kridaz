@@ -167,7 +167,8 @@ export const searchPlayers = async (req, res) => {
       where: {
         OR: [
           { name: { contains: query, mode: 'insensitive' } },
-          { username: { contains: query, mode: 'insensitive' } }
+          { username: { contains: query, mode: 'insensitive' } },
+          { phone: { contains: query } }
         ],
         ...(currentUserId ? { id: { not: currentUserId } } : {})
       },

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, Search, UserPlus, Phone, Loader2, Sparkles } from 'lucide-react';
+import { X, Search, UserPlus, Phone, Loader2, Sparkles, MessageCircle } from 'lucide-react';
 import { useSearchPlayersQuery, useInviteMemberMutation, useAddCustomMemberMutation } from '@redux/api/teamApi';
+import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 
 const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
@@ -11,6 +12,10 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
   // Custom Player Fields
   const [customName, setCustomName] = useState('');
   const [customPhone, setCustomPhone] = useState('');
+  const [customCountryCode, setCustomCountryCode] = useState('91');
+  const [customInviteData, setCustomInviteData] = useState(null);
+
+  const { user: currentUser } = useSelector((state) => state.auth);
 
   const { data: searchResults, isLoading: isSearching } = useSearchPlayersQuery(searchTerm, {
     skip: !searchTerm || activeTab !== 'search',
@@ -42,10 +47,28 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
       }).unwrap();
 
       if (result.success) {
-        toast.success('Custom player added to team!');
-        setCustomName('');
-        setCustomPhone('');
-        onClose();
+        const inviteResult = result.results?.[0];
+        
+        if (inviteResult?.status === "error" && inviteResult?.existingUserId) {
+           toast.success(`User exists (${inviteResult.existingUserName}). Inviting them now...`);
+           handleInvite(inviteResult.existingUserId);
+           return;
+        }
+
+        if (inviteResult?.status === "invited_custom") {
+           setCustomInviteData({
+              token: inviteResult.token,
+              phone: customPhone,
+              countryCode: customCountryCode,
+              name: customName
+           });
+           toast.success('Player added! Send them a WhatsApp invite.');
+        } else {
+           toast.success('Custom player added to team!');
+           setCustomName('');
+           setCustomPhone('');
+           onClose();
+        }
       }
     } catch (err) {
       toast.error(err.data?.message || 'Failed to add player');
@@ -144,6 +167,36 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
                 )}
               </div>
             </div>
+          ) : customInviteData ? (
+            <div className="space-y-6 text-center py-4">
+              <div className="w-16 h-16 bg-[#25D366]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#25D366]/20">
+                <MessageCircle size={32} className="text-[#25D366]" />
+              </div>
+              <h3 className="text-white text-lg font-black uppercase tracking-tight">Invite via WhatsApp</h3>
+              <p className="text-white/60 text-sm">Send an invite link to {customInviteData.name} ({customInviteData.phone}).</p>
+              
+              <button 
+                onClick={() => {
+                  const myName = currentUser?.name || currentUser?.username || 'Someone';
+                  const domain = window.location.origin;
+                  const link = `${domain}/signup?inviteToken=${customInviteData.token}&inviter=${encodeURIComponent(myName)}&teamId=${teamId}`;
+                  const message = `Hey ${customInviteData.name}, you are invited by ${myName} to join ${teamName} on Kridaz! Click here to join: ${link}`;
+                  window.open(`https://wa.me/${customInviteData.countryCode}${customInviteData.phone}?text=${encodeURIComponent(message)}`, '_blank');
+                  onClose();
+                  setCustomInviteData(null);
+                }}
+                className="w-full py-4 bg-[#25D366] hover:bg-[#20bd5a] text-black font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-[#25D366]/20 transition-all flex items-center justify-center gap-2 mt-6"
+              >
+                <MessageCircle size={18} />
+                Send WhatsApp Invite
+              </button>
+              <button 
+                onClick={() => setCustomInviteData(null)}
+                className="w-full py-2 mt-2 text-white/40 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors"
+              >
+                Back to form
+              </button>
+            </div>
           ) : (
             <form onSubmit={handleAddCustom} className="space-y-4">
               <div className="space-y-2">
@@ -160,16 +213,29 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Contact Number (Optional)</label>
-                <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-                  <input 
-                    type="tel"
-                    placeholder="10-digit number"
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-white text-sm font-bold focus:outline-none focus:border-[#CCFF00]/50 transition-all"
-                    value={customPhone}
-                    onChange={(e) => setCustomPhone(e.target.value)}
-                    maxLength={10}
-                  />
+                <div className="flex gap-2">
+                  <select
+                    value={customCountryCode}
+                    onChange={(e) => setCustomCountryCode(e.target.value)}
+                    className="bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 px-2 text-white text-sm font-bold focus:outline-none focus:border-[#CCFF00]/50 transition-all cursor-pointer w-24 appearance-none text-center"
+                  >
+                    <option value="91" className="text-black">+91 🇮🇳</option>
+                    <option value="1" className="text-black">+1 🇺🇸</option>
+                    <option value="44" className="text-black">+44 🇬🇧</option>
+                    <option value="61" className="text-black">+61 🇦🇺</option>
+                    <option value="971" className="text-black">+971 🇦🇪</option>
+                  </select>
+                  <div className="relative flex-1">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
+                    <input 
+                      type="tel"
+                      placeholder="10-digit number"
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-white text-sm font-bold focus:outline-none focus:border-[#CCFF00]/50 transition-all"
+                      value={customPhone}
+                      onChange={(e) => setCustomPhone(e.target.value)}
+                      maxLength={10}
+                    />
+                  </div>
                 </div>
               </div>
 

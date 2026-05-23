@@ -420,6 +420,7 @@ model HostedGame {
   scoringStatus     String               @default("NOT_STARTED")
   city              String?
   state             String?
+  customVenue       String?
   isLive            Boolean              @default(false)
   streamStatus      String               @default("offline")
   overlayConfig     Json?
@@ -433,6 +434,7 @@ model HostedGame {
   customUmpire      Json?
   customScorer      Json?
   customStreamer    Json?
+  customProfessionals Json?
   
   // AI Commentary Settings
   isAiCommentaryEnabled Boolean @default(false)
@@ -497,6 +499,8 @@ model CustomPlayerInvite {
   email        String
   phone        String?
   userId       String?
+  role         String     @default("PLAYER")
+  isProfessional Boolean  @default(false)
   inviteToken  String?    @unique
   inviteStatus String     @default("PENDING")
   mustPay      Boolean    @default(false)

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play, Sparkles, X, Pause, FileText } from 'lucide-react';
+import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play, Sparkles, X, Pause, FileText, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import useCricketScoring from '../hooks/useCricketScoring';
@@ -51,10 +51,25 @@ function MembersTab({ matchData }) {
   const teamB = game?.teamB || matchData?.teamB || (Array.isArray(game?.teams) ? game.teams.find(t => t.teamKey === 'teamB') : game?.teams?.teamB);
   const activeTeam = teamTab === 'teamA' ? teamA : teamB;
 
-  const getBattingStats = (userId) =>
-    matchData?.battingStats?.find(s => s.user?._id === userId || s.user === userId);
-  const getBowlingStats = (userId) =>
-    matchData?.bowlingStats?.find(s => s.user?._id === userId || s.user === userId);
+  const getBattingStats = (userId) => {
+    const s = matchData?.playerStats?.find(p => p.userId === userId || p.userId?.toString() === userId?.toString());
+    if (!s || (s.battingBalls === 0 && s.battingRuns === 0 && matchData?.strikerId !== userId && matchData?.nonStrikerId !== userId)) return null;
+    return {
+      ...s,
+      runs: s.battingRuns ?? 0,
+      balls: s.battingBalls ?? 0,
+    };
+  };
+
+  const getBowlingStats = (userId) => {
+    const s = matchData?.playerStats?.find(p => p.userId === userId || p.userId?.toString() === userId?.toString());
+    if (!s || (s.bowlingBalls === 0 && matchData?.bowlerId !== userId)) return null;
+    return {
+      ...s,
+      runs: s.bowlingRuns ?? 0,
+      wickets: s.bowlingWickets ?? 0,
+    };
+  };
 
   return (
     <div className="space-y-4 pb-4 font-inter">
@@ -119,6 +134,7 @@ const ScoringApp = () => {
     matchData,
     loading,
     error,
+    isMutating,
     recordBall,
     setPlayers,
     setToss,
@@ -130,6 +146,9 @@ const ScoringApp = () => {
     substitutePlayer,
     useReview,
     setPowerplayOvers,
+    toggleTimer,
+    addPenalty,
+    fetchMatchReport,
     refresh
   } = useCricketScoring(matchId);
 
@@ -157,10 +176,11 @@ const ScoringApp = () => {
   }, [matchData?.timerState, matchData?.timerLastStartedAt, matchData?.totalDurationSeconds]);
 
   const formatTimer = (secs) => {
-    if (!secs || isNaN(secs)) return '00:00';
-    const m = Math.floor(secs / 60);
+    if (!secs || isNaN(secs)) return '00:00:00';
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
     const s = secs % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
   const [liveUrls, setLiveUrls] = useState(null);
@@ -234,7 +254,7 @@ const ScoringApp = () => {
         const appBase = import.meta['env']?.VITE_APP_URL || window.location.origin;
         setLiveUrls({
           obsOverlay: `${appBase}/live-overlay/${matchId}?token=${hostedGame.overlayToken || ''}`,
-          publicScoreboard: `${appBase}/live-score/${matchId}`,
+          publicScoreboard: `${appBase}/analytics/${hostedGame.shortId || matchId}`,
         });
       }
     } else {
@@ -252,7 +272,7 @@ const ScoringApp = () => {
             const appBase = import.meta['env']?.VITE_APP_URL || window.location.origin;
             setLiveUrls({
               obsOverlay: `${appBase}/live-overlay/${matchId}?token=${data.overlayToken || data.urls?.overlayToken || ''}`,
-              publicScoreboard: `${appBase}/live-score/${matchId}`,
+              publicScoreboard: `${appBase}/analytics/${hostedGame?.shortId || matchId}`,
             });
             refresh();
           }
@@ -299,6 +319,7 @@ const ScoringApp = () => {
   const getTeamSlots = (teamKey) => {
     const game = matchData?.hostedGameId;
     const team = game?.[teamKey] || matchData?.[teamKey] || (Array.isArray(game?.teams) ? game.teams.find(t => t.teamKey === teamKey) : game?.teams?.[teamKey]);
+    console.log(`[getTeamSlots] teamKey=${teamKey}`, { game, team, slots: team?.slots });
     return (team?.slots || []).map(s => ({
       userId: s.user?._id || s.user?.id || s.userId || s.user || s.customPlayerId || s.id,
       name: s.user?.name || s.customPlayer?.name || 'Player',
@@ -312,14 +333,40 @@ const ScoringApp = () => {
   const battingSlots = getTeamSlots(battingTeamKey);
   const bowlingSlots = getTeamSlots(bowlingTeamKey);
 
-  const strikerStats = matchData?.battingStats?.find(b => b.user?._id === matchData?.strikerId || b.user === matchData?.strikerId);
-  const nonStrikerStats = matchData?.battingStats?.find(b => b.user?._id === matchData?.nonStrikerId || b.user === matchData?.nonStrikerId);
-  const bowlerStats = matchData?.bowlingStats?.find(b => b.user?._id === matchData?.bowlerId || b.user === matchData?.bowlerId);
+  const strikerStats = (() => {
+    const s = matchData?.playerStats?.find(p => p.userId === matchData?.strikerId || p.userId?.toString() === matchData?.strikerId?.toString());
+    if (!s) return { runs: 0, balls: 0 };
+    return {
+      ...s,
+      runs: s.battingRuns ?? 0,
+      balls: s.battingBalls ?? 0,
+    };
+  })();
+  const nonStrikerStats = (() => {
+    const s = matchData?.playerStats?.find(p => p.userId === matchData?.nonStrikerId || p.userId?.toString() === matchData?.nonStrikerId?.toString());
+    if (!s) return { runs: 0, balls: 0 };
+    return {
+      ...s,
+      runs: s.battingRuns ?? 0,
+      balls: s.battingBalls ?? 0,
+    };
+  })();
+  const bowlerStats = (() => {
+    const s = matchData?.playerStats?.find(p => p.userId === matchData?.bowlerId || p.userId?.toString() === matchData?.bowlerId?.toString());
+    if (!s) return { wickets: 0, runs: 0, overs: 0, balls: 0 };
+    return {
+      ...s,
+      runs: s.bowlingRuns ?? 0,
+      wickets: s.bowlingWickets ?? 0,
+      overs: Math.floor((s.bowlingBalls || 0) / 6),
+      balls: (s.bowlingBalls || 0) % 6,
+    };
+  })();
   const strikerSlot = battingSlots.find(p => p.userId === matchData?.strikerId?.toString?.() || p.userId === matchData?.strikerId);
   const nonStrikerSlot = battingSlots.find(p => p.userId === matchData?.nonStrikerId?.toString?.() || p.userId === matchData?.nonStrikerId);
   const bowlerSlot = bowlingSlots.find(p => p.userId === matchData?.bowlerId?.toString?.() || p.userId === matchData?.bowlerId);
 
-  const outBatterIds = new Set((matchData?.battingStats || []).filter(b => b.outStatus !== 'NOT_OUT').map(b => b.user?.toString?.() || b.user));
+  const outBatterIds = new Set((matchData?.playerStats || []).filter(b => b.outStatus && b.outStatus !== 'NOT_OUT').map(b => b.userId?.toString?.() || b.userId));
   const remainingBatters = battingSlots.filter(p =>
     p.userId !== matchData?.strikerId?.toString?.() &&
     p.userId !== matchData?.nonStrikerId?.toString?.() &&
@@ -328,9 +375,32 @@ const ScoringApp = () => {
 
   const needsInningsSetup = (matchData?.id || matchData?._id) && matchData?.innings?.length > 0 && !matchData?.strikerId;
   const needsMatchStart = !matchData?.id && !matchData?._id;
+  
   const isFirstInnings = matchData?.currentInningsIndex === 0;
-  const isFirstInningsComplete = isFirstInnings && (currentInnings?.totalWickets >= 10 || currentInnings?.totalBalls >= (matchData?.matchId?.oversPerInnings * 6));
+  const isSecondInnings = matchData?.currentInningsIndex === 1;
+  const oversPerInnings = matchData?.oversPerInnings || matchData?.hostedGameId?.oversPerInnings || 20;
+  const maxBalls = oversPerInnings * 6;
+  
+  const isInningsComplete = currentInnings && (
+    currentInnings.isCompleted ||
+    currentInnings.totalWickets >= 10 || 
+    currentInnings.totalBalls >= maxBalls ||
+    (isSecondInnings && currentInnings.totalRuns > (matchData?.innings?.[0]?.totalRuns || 9999))
+  );
 
+  const isFirstInningsComplete = isFirstInnings && isInningsComplete;
+
+  const [showInningsCompleteModal, setShowInningsCompleteModal] = useState(false);
+  const [hasAutoPausedTimer, setHasAutoPausedTimer] = useState(false);
+
+  useEffect(() => {
+    if (isInningsComplete && isFirstInnings && !needsInningsSetup) {
+      if (!showInningsCompleteModal) {
+        setShowInningsCompleteModal(true);
+        toast("Innings Complete! Timer automatically paused.", { icon: "⏸️" });
+      }
+    }
+  }, [isInningsComplete, isFirstInnings, needsInningsSetup, showInningsCompleteModal]);
   const hasPassword = !!(matchData?.hostedGameId?.scoringPassword || matchData?.scoringPassword);
   const isLocked = hasPassword && !passwordVerified && !needsMatchStart;
 
@@ -347,7 +417,17 @@ const ScoringApp = () => {
     );
   }
 
+  const checkTimerActive = () => {
+    if (matchData?.timerState === 'PAUSED') {
+      toast.error("Match is paused. Start the timer to score.");
+      return false;
+    }
+    return true;
+  };
+
   const handleScore = async (payload) => {
+    if (isMutating) return { success: false, message: "Action in progress" };
+    if (!checkTimerActive()) return { success: false, message: "Match is paused" };
     if (!matchData?.strikerId || !matchData?.bowlerId) {
       toast.error("Please setup the next pair and bowler first.");
       return { success: false, message: "Missing players" };
@@ -410,6 +490,15 @@ const ScoringApp = () => {
         case 'history': return <HistoryTab matchData={matchData} />;
         default: return (
         <div className="space-y-6 font-inter">
+          {matchData?.timerState === 'PAUSED' && (
+            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-3xl flex items-center gap-3.5 shadow-lg animate-pulse">
+              <AlertCircle className="text-red-500 shrink-0" size={20} />
+              <div className="text-left">
+                <p className="text-[10px] font-black uppercase tracking-widest text-red-500">Match is Paused</p>
+                <p className="text-xs text-neutral-400 font-medium mt-0.5">Resume the timer in the header to record deliveries and runs.</p>
+              </div>
+            </div>
+          )}
           {needsMatchStart && (
             <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] space-y-6 text-center relative overflow-hidden shadow-2xl">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
@@ -531,18 +620,21 @@ const ScoringApp = () => {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className={`space-y-4 ${matchData?.timerState === 'PAUSED' ? 'opacity-50' : ''}`}>
             <div className="grid grid-cols-4 gap-3.5">
               {[0, 1, 2, 3].map(run => (
                 <button key={run}
+                  disabled={isMutating}
                   onClick={() => {
+                    if (isMutating) return;
+                    if (!checkTimerActive()) return;
                     if (run === 0) {
                       handleScore({ runs: run, extraType: 'NONE' });
                     } else {
                       setWagonWheelData({ runs: run, isBoundary: false, isFour: false, isSix: false });
                     }
                   }}
-                  className="h-16 bg-white/[0.03] border border-white/5 rounded-3xl flex items-center justify-center text-2xl font-black text-white hover:bg-[#00C187]/10 hover:border-[#00C187]/40 transition-all transform active:scale-90 shadow-lg">
+                  className={`h-16 bg-white/[0.03] border border-white/5 rounded-3xl flex items-center justify-center text-2xl font-black text-white hover:bg-[#00C187]/10 hover:border-[#00C187]/40 transition-all transform active:scale-90 shadow-lg ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
                   {run}
                 </button>
               ))}
@@ -550,37 +642,42 @@ const ScoringApp = () => {
             <div className="grid grid-cols-4 gap-3.5">
               {[4, 6].map(run => (
                 <button key={run}
-                  onClick={() => setWagonWheelData({ runs: run, isBoundary: true, isFour: run === 4, isSix: run === 6 })}
-                  className="h-16 rounded-3xl flex items-center justify-center text-2xl font-black text-black transform active:scale-95 shadow-xl transition-all"
+                  disabled={isMutating}
+                  onClick={() => {
+                    if (isMutating) return;
+                    if (!checkTimerActive()) return;
+                    setWagonWheelData({ runs: run, isBoundary: true, isFour: run === 4, isSix: run === 6 });
+                  }}
+                  className={`h-16 rounded-3xl flex items-center justify-center text-2xl font-black text-black transform active:scale-95 shadow-xl transition-all ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}
                   style={{ backgroundColor: THEME_COLOR, boxShadow: `0 10px 25px ${THEME_COLOR}33` }}>
                   {run}
                 </button>
               ))}
-              <button onClick={() => setExtraModal('WIDE')}
-                className="h-16 bg-white/[0.03] border border-white/5 text-[#00C187] rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:bg-[#00C187]/10 transition-all border-[#00C187]/20">
+              <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('WIDE'); }}
+                className={`h-16 bg-white/[0.03] border border-white/5 text-[#00C187] rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:bg-[#00C187]/10 transition-all border-[#00C187]/20 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
                 WIDE
               </button>
-              <button onClick={() => setExtraModal('NO_BALL')}
-                className="h-16 bg-white/[0.03] border border-white/5 text-[#00C187] rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:bg-[#00C187]/10 transition-all border-[#00C187]/20">
+              <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('NO_BALL'); }}
+                className={`h-16 bg-white/[0.03] border border-white/5 text-[#00C187] rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:bg-[#00C187]/10 transition-all border-[#00C187]/20 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
                 NB
               </button>
             </div>
             <div className="grid grid-cols-3 gap-3.5">
-              <button onClick={() => setExtraModal('BYE')}
-                className="h-14 bg-white/[0.03] border border-white/5 text-neutral-400 rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-white transition-all">
+              <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('BYE'); }}
+                className={`h-14 bg-white/[0.03] border border-white/5 text-neutral-400 rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-white transition-all ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
                 BYE
               </button>
-              <button onClick={() => setExtraModal('LEG_BYE')}
-                className="h-14 bg-white/[0.03] border border-white/5 text-neutral-400 rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-white transition-all">
+              <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('LEG_BYE'); }}
+                className={`h-14 bg-white/[0.03] border border-white/5 text-neutral-400 rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-white transition-all ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
                 LEG BYE
               </button>
-              <button onClick={() => setShowPenaltyModal(true)}
-                className="h-14 bg-white/[0.03] border border-white/5 text-red-400 rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-red-300 transition-all">
+              <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setShowPenaltyModal(true); }}
+                className={`h-14 bg-white/[0.03] border border-white/5 text-red-400 rounded-3xl flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-red-300 transition-all ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
                 PENALTY
               </button>
             </div>
-            <button onClick={() => setShowWicketModal(true)}
-              className="w-full h-20 bg-red-600 text-white rounded-[2.5rem] flex items-center justify-center text-sm font-black uppercase tracking-[0.4em] shadow-[0_15px_40px_rgba(220,38,38,0.3)] hover:bg-red-700 transition-all transform active:scale-95">
+            <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setShowWicketModal(true); }}
+              className={`w-full h-20 bg-red-600 text-white rounded-[2.5rem] flex items-center justify-center text-sm font-black uppercase tracking-[0.4em] shadow-[0_15px_40px_rgba(220,38,38,0.3)] hover:bg-red-700 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
               ⚡ DISMISSAL
             </button>
           </div>
@@ -634,9 +731,20 @@ const ScoringApp = () => {
                     </div>
                     <button
                       onClick={async () => {
+                        const isRunning = matchData?.timerState === 'RUNNING';
+                        const isPaused = matchData?.timerState === 'PAUSED';
                         const res = await toggleTimer();
-                        if (res.success) toast.success(matchData.timerState === 'RUNNING' ? 'Match Paused' : 'Match Started');
-                        else toast.error(res.message || 'Failed to toggle timer');
+                        if (res.success) {
+                          if (isRunning) {
+                            toast.success('Match Paused');
+                          } else if (isPaused) {
+                            toast.success('Match Resumed');
+                          } else {
+                            toast.success('Match Started');
+                          }
+                        } else {
+                          toast.error(res.message || 'Failed to toggle timer');
+                        }
                       }}
                       className="p-1.5 bg-[#00C187]/20 rounded-xl hover:bg-[#00C187]/40 transition-all text-[#00C187]"
                     >
@@ -707,12 +815,15 @@ const ScoringApp = () => {
                   <Users size={16} /> <span className="mt-0.5">Players</span>
                 </button>
                 <button
+                  disabled={isMutating}
                   onClick={async () => {
+                    if (isMutating) return;
+                    if (!checkTimerActive()) return;
                     const result = await undoBall();
                     if (result.success) toast.success('Reverted last ball');
                     else toast.error(result.error || 'Undo limit reached');
                   }}
-                  className="h-16 bg-white/5 border border-white/10 rounded-3xl text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex flex-col items-center justify-center gap-1.5 text-white transform active:scale-95 shadow-xl"
+                  className={`h-16 bg-white/5 border border-white/10 rounded-3xl text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex flex-col items-center justify-center gap-1.5 text-white transform active:scale-95 shadow-xl ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}
                 >
                   <Undo2 size={16} /> <span className="mt-0.5">Undo</span>
                 </button>
@@ -814,7 +925,7 @@ const ScoringApp = () => {
                             </button>
                           </div>
                   <div className="space-y-1.5">
-                            <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Public Scoreboard</p>
+                            <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Public Match Analytics</p>
                             <div className="flex gap-2">
                               <input readOnly value={liveUrls.publicScoreboard} className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-[9px] text-neutral-400 font-bold truncate outline-none" />
                               <button onClick={() => { navigator.clipboard.writeText(liveUrls.publicScoreboard); toast.success('Copied!'); }} className="px-4 py-2 bg-[#00C187]/10 text-[#00C187] text-[8px] font-black uppercase rounded-xl border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
@@ -1089,16 +1200,28 @@ const ScoringApp = () => {
                       </div>
                       <div className="space-y-4 pt-4 border-t border-white/5">
                         <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match Analysis</p>
-                        <button
-                          onClick={() => {
-                            setShowSettings(false);
-                            setShowMatchReport(true);
-                          }}
-                          className="w-full py-3 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-xl border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
-                        >
-                          <FileText size={14} />
-                          View Match Report
-                        </button>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            onClick={() => {
+                              setShowSettings(false);
+                              setShowMatchReport(true);
+                            }}
+                            className="w-full py-3 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-xl border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
+                          >
+                            <FileText size={14} />
+                            Match Report
+                          </button>
+                          
+                          <button
+                            onClick={() => {
+                              window.open(`/analytics/${matchData?.hostedGameId?.shortId || matchId}`, '_blank');
+                            }}
+                            className="w-full py-3 bg-[#55DEE8]/10 text-[#55DEE8] text-[9px] font-black uppercase tracking-widest rounded-xl border border-[#55DEE8]/20 hover:bg-[#55DEE8] hover:text-black hover:shadow-[0_0_15px_rgba(85,222,232,0.15)] transition-all flex items-center justify-center gap-2"
+                          >
+                            <TrendingUp size={14} />
+                            Live Analytics
+                          </button>
+                        </div>
                       </div>
                     </div>
                   <button onClick={() => setShowSettings(false)} className="w-full py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] transition-all transform active:scale-95 shadow-xl" style={{ backgroundColor: THEME_COLOR, color: '#000', boxShadow: `0 10px 30px ${THEME_COLOR}33` }}>Save Parameters</button>
@@ -1115,8 +1238,14 @@ const ScoringApp = () => {
               inningsLabel={matchData?.currentInningsIndex === 0 ? '1st Innings' : '2nd Innings'}
               onConfirm={async (players) => {
                 const result = await setPlayers(players);
-                if (result.success) toast.success('Node established! Scoring ready.');
-                else toast.error(result.error || 'Player sync failed');
+                if (result.success) {
+                  toast.success('Node established! Scoring ready.');
+                  if (matchData?.timerState === 'PAUSED') {
+                    toggleTimer();
+                  }
+                } else {
+                  toast.error(result.error || 'Player sync failed');
+                }
                 setShowInningsSetup(false);
               }}
               onClose={() => setShowInningsSetup(false)}
@@ -1179,6 +1308,44 @@ const ScoringApp = () => {
             />
           )}
 
+          {/* Innings Complete Modal */}
+          {showInningsCompleteModal && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative w-full max-w-sm bg-[#111] rounded-[24px] border border-white/10 p-6 text-center shadow-2xl"
+              >
+                <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">🔄</span>
+                </div>
+                <h3 className="text-2xl font-black text-white uppercase tracking-wider mb-2">
+                  Innings Over
+                </h3>
+                <p className="text-sm text-white/60 mb-6 leading-relaxed">
+                  The {isFirstInnings ? 'first' : 'current'} innings has ended. The match timer has been paused. Set up the next innings to resume the match.
+                </p>
+                <button
+                  onClick={async () => {
+                    setShowInningsCompleteModal(false);
+                    const res = await advanceToNextInnings(bowlingTeamKey);
+                    if (res.success) {
+                      toast.success("Ready for 2nd Innings Setup!");
+                      // Force the UI to show the InningsSetupModal for the next innings
+                      setShowInningsSetup(true);
+                    } else {
+                      toast.error("Failed to advance innings: " + res.message);
+                    }
+                  }}
+                  className="w-full py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-sm uppercase tracking-wider rounded-xl hover:opacity-90 transition-opacity"
+                >
+                  Start Next Innings
+                </button>
+              </motion.div>
+            </div>
+          )}
+
           {/* ── Phase 1 Modals ── */}
           {(showInningsSetup || needsInningsSetup) && (
             <InningsSetupModal
@@ -1187,8 +1354,16 @@ const ScoringApp = () => {
               inningsLabel={matchData?.currentInningsIndex === 0 ? '1st Innings' : '2nd Innings'}
               onConfirm={async (players) => {
                 const result = await setPlayers(players);
-                if (result.success) toast.success('Node established! Scoring ready.');
-                else toast.error(result.error || 'Player sync failed');
+                if (result.success) {
+                  toast.success('Node established! Scoring ready.');
+                  if (matchData?.timerState === 'PAUSED' || hasAutoPausedTimer) {
+                    toggleTimer();
+                    setHasAutoPausedTimer(false);
+                    toast("Match Resumed", { icon: "▶️" });
+                  }
+                } else {
+                  toast.error(result.error || 'Player sync failed');
+                }
                 setShowInningsSetup(false);
               }}
               onClose={() => setShowInningsSetup(false)}
@@ -1307,16 +1482,16 @@ const ScoringApp = () => {
                 try {
                   // Determine batting team
                   const isTeamAWinner = winnerTeam === (matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id);
-                  let battingTeamId = matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id;
+                  let battingTeam = 'teamA';
                   if ((isTeamAWinner && decision === 'BAT') || (!isTeamAWinner && decision === 'BOWL')) {
-                    battingTeamId = matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id;
+                    battingTeam = 'teamA';
                   } else {
-                    battingTeamId = matchData?.teamB?.id || matchData?.hostedGameId?.teamB?.id;
+                    battingTeam = 'teamB';
                   }
 
                   const response = await axiosInstance.post(`/api/scoring/start`, {
                     matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, 
-                    battingTeamId,
+                    battingTeam,
                     tossWinner: winnerTeam,
                     tossDecision: decision
                   }, {
@@ -1328,7 +1503,7 @@ const ScoringApp = () => {
                   if (data.success) {
                     toast.success('Match started successfully!');
                     setShowTossModal(false);
-                    refresh();
+                    await refresh();
                   } else {
                     toast.error('Failed to start match');
                   }
@@ -1391,6 +1566,8 @@ const ScoringApp = () => {
               onClose={() => setShowMatchReport(false)}
             />
           )}
+
+
         </div>
         );
 };

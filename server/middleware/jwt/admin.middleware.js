@@ -24,7 +24,7 @@ const verifyAdminToken = async (req, res, next) => {
     const role = decoded.role || (decoded.user && decoded.user.role);
     
     if (role?.toUpperCase() !== "ADMIN") {
-      console.warn("Admin Access Denied. Token Role:", role, "Full Payload:", decoded);
+      console.warn("Admin Access Denied. Token Role:", role);
       return res.status(403).json({ success: false, message: "Unauthorized: Admin privileges required" });
     }
 
@@ -43,7 +43,7 @@ const verifyAdminToken = async (req, res, next) => {
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({ success: false, message: "TOKEN_EXPIRED" });
     }
-    return res.status(403).json({ success: false, message: "Session expired or invalid token", error: error.message });
+    return res.status(403).json({ success: false, message: "Session expired or invalid token", error: "Invalid or expired token" });
   }
 };
 

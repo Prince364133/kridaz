@@ -493,7 +493,7 @@ const JoinGames = () => {
    onClick={(e) => {
    if (game.isLive || game.scoringStatus === 'IN_PROGRESS') {
    e.stopPropagation();
-   navigate(`/live-score/${game._id}`);
+   navigate(`/analytics/${game.shortId || game._id}`);
    } else {
    setSelectedGame(game);
    }

@@ -34,7 +34,7 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
 
   const members = team.members?.filter(m => m.status === 'JOINED' || m.status === undefined) || [];
   const pendingMembers = team.members?.filter(m => m.status === 'PENDING') || [];
-  const customMembers = team.customMembers || [];
+  const customMembers = team.customMembers?.filter(m => m.status === 'PENDING') || [];
   const opponents = team.opponents || [];
   const pendingRequests = team.opponentRequests?.filter(r => r.status === 'PENDING') || [];
 
@@ -249,11 +249,11 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
               </div>
             </div>
 
-            {/* Custom Members */}
+            {/* Pending Invites */}
             <div>
               <h3 className="text-white font-bold text-lg tracking-tight mb-4 flex items-center gap-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                 <span className="w-1 h-5 bg-yellow-500 rounded-full" />
-                Custom Players ({customMembers.length})
+                Pending Invites ({customMembers.length})
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {customMembers.map((member, index) => (

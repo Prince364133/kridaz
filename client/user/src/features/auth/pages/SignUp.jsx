@@ -32,14 +32,24 @@ const SignUp = () => {
 
   useEffect(() => {
     setMounted(true);
-    const inviteToken = searchParams.get("invite");
+    const inviteToken = searchParams.get("inviteToken") || searchParams.get("invite");
+    const inviter = searchParams.get("inviter");
+    const teamId = searchParams.get("teamId");
+    
     const umpireToken = searchParams.get("umpireInvite");
 
     if (inviteToken) {
-      localStorage.setItem("pendingInvite", inviteToken);
+      localStorage.setItem("pendingTeamInvite", inviteToken);
+      if (teamId) localStorage.setItem("pendingTeamId", teamId);
+      
       const emailParam = searchParams.get("email");
       if (emailParam) setIdentifier(decodeURIComponent(emailParam));
+
+      if (inviter) {
+        toast.success(`You are invited by ${inviter} to join their team!`, { duration: 6000, icon: '👋' });
+      }
     }
+    
     if (umpireToken) {
       localStorage.setItem("umpireInvite", umpireToken);
       const emailParam = searchParams.get("email");
@@ -122,7 +132,7 @@ const SignUp = () => {
   };
 
   const handleGoogleSuccess = async (googleResponse) => {
-      console.log("GOOGLE RESPONSE:", googleResponse);
+      // console.log("GOOGLE RESPONSE received");
       setLoading(true);
       try {
         const inviteToken = localStorage.getItem("pendingInvite");
@@ -133,7 +143,7 @@ const SignUp = () => {
         } else if (googleResponse.access_token) {
           payload.accessToken = googleResponse.access_token;
         }
-        console.log("SENDING PAYLOAD:", payload);
+        // console.log("SENDING PAYLOAD");
   
         const response = await axiosInstance.post(`/api/user/auth/google-auth`, payload);
         const result = response.data;
@@ -151,6 +161,22 @@ const SignUp = () => {
           });
           setShowOnboarding(true);
         } else {
+          const teamInvite = localStorage.getItem("pendingTeamInvite");
+          if (teamInvite) {
+            try {
+               await axiosInstance.post(`/api/team/user/join/${teamInvite}`);
+               toast.success("Successfully joined the team!");
+               localStorage.removeItem("pendingTeamInvite");
+               const teamId = localStorage.getItem("pendingTeamId");
+               if (teamId) {
+                  localStorage.removeItem("pendingTeamId");
+                  return navigate(`/team/${teamId}`);
+               }
+            } catch (err) {
+               toast.error(err.response?.data?.message || "Failed to join team");
+            }
+          }
+
           const role = result.role?.toLowerCase() || "";
           if (role.includes("umpire")) navigate("/umpire");
           else navigate("/");
@@ -310,8 +336,25 @@ const SignUp = () => {
           isOpen={showOnboarding} 
           onClose={() => setShowOnboarding(false)}
           initialData={onboardingData}
-          onComplete={() => {
+          onComplete={async () => {
             const inviteToken = localStorage.getItem("pendingInvite");
+            const teamInvite = localStorage.getItem("pendingTeamInvite");
+            
+            if (teamInvite) {
+              try {
+                 await axiosInstance.post(`/api/team/user/join/${teamInvite}`);
+                 toast.success("Successfully joined the team!");
+                 localStorage.removeItem("pendingTeamInvite");
+                 const teamId = localStorage.getItem("pendingTeamId");
+                 if (teamId) {
+                    localStorage.removeItem("pendingTeamId");
+                    return navigate(`/team/${teamId}`);
+                 }
+              } catch (err) {
+                 toast.error(err.response?.data?.message || "Failed to join team");
+              }
+            }
+
             if (inviteToken) navigate(`/join-games?invite=${inviteToken}`);
             else navigate("/");
           }}

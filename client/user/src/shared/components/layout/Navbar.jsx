@@ -25,7 +25,7 @@ const NotificationBadge = () => {
 
 const Navbar = () => {
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);
-  console.log("Navbar Auth State:", { isLoggedIn, role, userRole: user?.role });
+  // Auth state log removed
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();

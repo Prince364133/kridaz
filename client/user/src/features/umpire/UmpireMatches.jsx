@@ -1,4 +1,4 @@
-import React from "react";
+锘縤mport React from "react";
 import { Trophy, Calendar, MapPin, Users, CheckCircle2, Zap, Search, Loader2, Hand, Clock, Shield, Activity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -25,7 +25,7 @@ export default function UmpireMatches() {
     specialization: "Cricket"
   });
 
-  // Global search effect G泅 fires after typing KRZ- prefix (4+ chars)
+  // Global search effect G脟枚 fires after typing KRZ- prefix (4+ chars)
   React.useEffect(() => {
     if (searchId.length >= 4) {
       const fetchGlobal = async () => {
@@ -275,7 +275,7 @@ export default function UmpireMatches() {
                     FOUND MATCH: {globalMatch.shortId}
                   </span>
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                    {new Date(globalMatch.date).toLocaleDateString()} G求 {globalMatch.time}
+                    {new Date(globalMatch.date).toLocaleDateString()} G脟贸 {globalMatch.time}
                   </span>
                 </div>
                 <h3 className="text-2xl font-black text-white uppercase tracking-tight">
@@ -297,7 +297,7 @@ export default function UmpireMatches() {
                        <Shield size={16} className="fill-primary/20" /> Umpire Hired
                      </div>
                      <button 
-                       onClick={() => navigate(`/analytics/${globalMatch._id}`)}
+                       onClick={() => navigate(`/analytics/${globalMatch.shortId || globalMatch._id}`)}
                        className="h-14 px-6 bg-white/5 border border-white/10 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                      >
                        Analytics <Activity size={14} />
@@ -350,7 +350,7 @@ export default function UmpireMatches() {
                         <CheckCircle2 size={10} /> Umpire Hired
                       </span>
                       <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                        {new Date(match.date).toLocaleDateString()} G求 {match.time}
+                        {new Date(match.date).toLocaleDateString()} G脟贸 {match.time}
                       </span>
                     </div>
 
@@ -368,7 +368,7 @@ export default function UmpireMatches() {
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/analytics/${match._id}`);
+                        navigate(`/analytics/${match.shortId || match._id}`);
                       }}
                       className="w-full sm:w-auto h-14 px-8 bg-white/5 border border-white/10 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                     >
@@ -403,7 +403,7 @@ export default function UmpireMatches() {
             >
                <div className="space-y-1">
                  <h4 className="text-sm font-bold text-white uppercase">{match.name}</h4>
-                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{match.venue} G求 {new Date(match.date).toLocaleDateString()}</p>
+                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{match.venue} G脟贸 {new Date(match.date).toLocaleDateString()}</p>
                </div>
                <div className="text-right">
                   <p className="text-[10px] font-black text-primary uppercase tracking-widest">Completed</p>

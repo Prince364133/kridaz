@@ -25,15 +25,17 @@ const InningsSetupModal = ({
   onConfirm,
   onClose,
 }) => {
-  const [step, setStep] = useState(1); // 1=striker 2=nonStriker 3=bowler
+  const [step, setStep] = useState(1); // 1=striker 2=nonStriker 3=bowler 4=wicketKeeper
   const [striker, setStriker] = useState(null);
   const [nonStriker, setNonStriker] = useState(null);
   const [bowler, setBowler] = useState(null);
+  const [wicketKeeper, setWicketKeeper] = useState(null);
 
   const STEPS = [
     { id: 1, label: 'Choose Opener (Striker)', icon: <Zap size={16} />, pool: battingTeamSlots, excludeId: null },
     { id: 2, label: 'Choose Opener (Non-Striker)', icon: <Users size={16} />, pool: battingTeamSlots, excludeId: striker?.userId },
     { id: 3, label: 'Choose Opening Bowler', icon: <Zap size={16} />, pool: bowlingTeamSlots, excludeId: null },
+    { id: 4, label: 'Choose Wicket Keeper', icon: <Users size={16} />, pool: bowlingTeamSlots.filter(p => p.role?.includes('WICKET_KEEPER')).length ? bowlingTeamSlots.filter(p => p.role?.includes('WICKET_KEEPER')) : bowlingTeamSlots, excludeId: bowler?.userId }
   ];
 
   const currentStep = STEPS[step - 1];
@@ -41,20 +43,22 @@ const InningsSetupModal = ({
   const handleSelect = (player) => {
     if (step === 1) { setStriker(player); setStep(2); }
     else if (step === 2) { setNonStriker(player); setStep(3); }
+    else if (step === 3) { setBowler(player); setStep(4); }
     else {
-      setBowler(player);
-      // Auto-confirm once all three are chosen
+      setWicketKeeper(player);
+      // Auto-confirm once all four are chosen
       onConfirm({
         strikerId: striker.userId,
         nonStrikerId: nonStriker.userId,
-        bowlerId: player.userId,
+        bowlerId: bowler.userId,
+        wicketKeeperId: player.userId,
       });
     }
   };
 
   const pool = (currentStep.pool || []).filter(p => p.userId !== currentStep.excludeId);
 
-  const stepColors = ['#EAB308', '#22D3EE', '#A78BFA'];
+  const stepColors = ['#EAB308', '#22D3EE', '#A78BFA', '#10B981'];
 
   return (
     <AnimatePresence>
