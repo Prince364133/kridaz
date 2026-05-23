@@ -1416,7 +1416,7 @@ const ScoringApp = () => {
                   // but we do have a way to verify password via /api/scoring/:matchId/verify.
                   // Let's verify it before proceeding.
                   try {
-                    const authRes = await axiosInstance.post(`/api/scoring/${matchId}/verify`, { password });
+                    const authRes = await axiosInstance.post(`/api/scoring/auth/${matchId}`, { password });
                     if (authRes.data.success) {
                       localStorage.setItem(`scorer_token_${matchId}`, authRes.data.token);
                       setPasswordVerified(true);
