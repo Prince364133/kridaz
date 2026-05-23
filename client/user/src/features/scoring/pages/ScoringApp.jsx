@@ -1152,121 +1152,6 @@ const ScoringApp = () => {
             />
           )}
 
-          {wagonWheelData && (
-            <VisualWagonWheelModal
-              runs={wagonWheelData.runs}
-              isBoundary={wagonWheelData.isBoundary}
-              onConfirm={(data) => {
-                handleScore({
-                  runs: wagonWheelData.runs,
-                  isBoundary: wagonWheelData.isBoundary,
-                  isFour: wagonWheelData.isFour,
-                  isSix: wagonWheelData.isSix,
-                  extraType: 'NONE',
-                  fieldingPosition: data.position,
-                  distance: data.distance
-                });
-                setWagonWheelData(null);
-              }}
-              onClose={() => setWagonWheelData(null)}
-            />
-          )}
-
-          {extraModal && (
-            <ExtraRunsModal
-              extraType={extraModal}
-              onConfirm={async (runs) => {
-                const isWide = extraModal === 'WIDE';
-                const isNoBall = extraModal === 'NO_BALL';
-                const totalRuns = (isWide || isNoBall) ? runs + 1 : runs;
-                const result = await handleScore({
-                  runs: totalRuns,
-                  isExtra: true,
-                  extraType: extraModal,
-                  isBoundary: false,
-                });
-                if (result.success) toast.success(`${extraModal} Event Recorded`);
-                else toast.error(result.error || 'Sync failure');
-                setExtraModal(null);
-              }}
-              onClose={() => setExtraModal(null)}
-            />
-          )}
-
-          {showBowlerModal && (
-            <SelectBowlerModal
-              pool={bowlingSlots}
-              currentBowlerId={matchData.bowlerId}
-              onConfirm={async (bowlerId) => {
-                const res = await setPlayers({ bowlerId });
-                if (res.success) {
-                  toast.success('Next bowler selected');
-                  setShowBowlerModal(false);
-                } else {
-                  toast.error(res.error || 'Failed to select bowler');
-                }
-              }}
-            />
-          )}
-
-          {showTossModal && (
-            <TossModal
-              teamA={matchData?.teamA || matchData?.hostedGameId?.teamA || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamA') : null)}
-              teamB={matchData?.teamB || matchData?.hostedGameId?.teamB || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamB') : null)}
-              onConfirm={async ({ winnerTeam, decision }) => {
-                try {
-                  // Determine batting team
-                  const isTeamAWinner = winnerTeam === (matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id);
-                  let battingTeamId = matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id;
-                  if ((isTeamAWinner && decision === 'BAT') || (!isTeamAWinner && decision === 'BOWL')) {
-                    battingTeamId = matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id;
-                  } else {
-                    battingTeamId = matchData?.teamB?.id || matchData?.hostedGameId?.teamB?.id;
-                  }
-
-                  const response = await axiosInstance.post(`/api/scoring/start`, {
-                    matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, 
-                    battingTeamId,
-                    tossWinner: winnerTeam,
-                    tossDecision: decision
-                  }, {
-                    headers: {
-                      'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
-                    }
-                  });
-                  const data = response.data;
-                  if (data.success) {
-                    toast.success('Match started successfully!');
-                    setShowTossModal(false);
-                    refresh();
-                  } else {
-                    toast.error('Failed to start match');
-                  }
-                } catch (e) {
-                  toast.error('Error starting match');
-                }
-              }}
-            />
-          )}
-
-          {showAuthModal && (
-            <ScoringPasswordModal
-              matchId={matchId}
-              actionLabel={authAction === 'end' ? 'Confirm End Match' : 'Unlock Scoring Console'}
-              onClose={() => setShowAuthModal(false)}
-              onSuccess={(token) => {
-                localStorage.setItem(`scorer_token_${matchId}`, token);
-                setPasswordVerified(true);
-                setShowAuthModal(false);
-                if (authAction === 'start') {
-                  setShowTossModal(true);
-                } else if (authAction === 'end') {
-                  completeMatch();
-                  navigate('/');
-                }
-              }}
-            />
-          )}
 
           {showThemeStore && (
             <TickerThemeStoreModal
@@ -1406,11 +1291,6 @@ const ScoringApp = () => {
                 
                 // If a password was provided, verify it first or store it
                 if (password) {
-                  // The backend might not have an endpoint just to "verify" the password in this sequence,
-                  // but we usually call /api/scoring/verify-password.
-                  // Wait, we have the /api/scoring/start endpoint which doesn't check password directly, 
-                  // but we do have a way to verify password via /api/scoring/:matchId/verify.
-                  // Let's verify it before proceeding.
                   try {
                     const authRes = await axiosInstance.post(`/api/scoring/auth/${matchId}`, { password });
                     if (authRes.data.success) {
@@ -1424,10 +1304,7 @@ const ScoringApp = () => {
                   }
                 }
 
-                const res = await setToss({ winnerTeam, decision });
-                if (res.success) {
-                  toast.success('Toss recorded! Starting match...');
-
+                try {
                   // Determine batting team
                   const isTeamAWinner = winnerTeam === (matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id);
                   let battingTeamId = matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id;
@@ -1437,27 +1314,26 @@ const ScoringApp = () => {
                     battingTeamId = matchData?.teamB?.id || matchData?.hostedGameId?.teamB?.id;
                   }
 
-                  try {
-                    const response = await axiosInstance.post(`/api/scoring/start`, {
-                      matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, battingTeamId
-                    }, {
-                      headers: {
-                        'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
-                      }
-                    });
-                    const data = response.data;
-                    if (data.success) {
-                      toast.success('Match started successfully!');
-                      setShowTossModal(false);
-                      refresh();
-                    } else {
-                      toast.error('Failed to start match');
+                  const response = await axiosInstance.post(`/api/scoring/start`, {
+                    matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, 
+                    battingTeamId,
+                    tossWinner: winnerTeam,
+                    tossDecision: decision
+                  }, {
+                    headers: {
+                      'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
                     }
-                  } catch (e) {
-                    toast.error('Error starting match');
+                  });
+                  const data = response.data;
+                  if (data.success) {
+                    toast.success('Match started successfully!');
+                    setShowTossModal(false);
+                    refresh();
+                  } else {
+                    toast.error('Failed to start match');
                   }
-                } else {
-                  toast.error(res.error || 'Failed to record toss');
+                } catch (e) {
+                  toast.error('Error starting match');
                 }
               }}
             />
