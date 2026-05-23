@@ -786,12 +786,16 @@ const MatchAnalytics = () => {
                   <div>
                     <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">Toss Winner</span>
                     <span className="text-sm font-bold text-[#00C187] uppercase">
-                      {scoring?.tossWinner === 'teamA' ? teamAName : scoring?.tossWinner === 'teamB' ? teamBName : 'No Toss Record'}
+                      {scoring?.game?.tossWinner === scoring?.game?.teamA?.id || scoring?.game?.tossWinner === 'teamA' 
+                        ? teamAName 
+                        : scoring?.game?.tossWinner === scoring?.game?.teamB?.id || scoring?.game?.tossWinner === 'teamB' 
+                          ? teamBName 
+                          : 'No Toss Record'}
                     </span>
                   </div>
                   <div>
                     <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">Decision</span>
-                    <span className="text-sm font-bold text-white uppercase">{scoring?.tossDecision ? `${scoring.tossDecision} First` : 'N/A'}</span>
+                    <span className="text-sm font-bold text-white uppercase">{scoring?.game?.tossDecision ? `${scoring.game.tossDecision} First` : 'N/A'}</span>
                   </div>
                   <div>
                     <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">Duration</span>
