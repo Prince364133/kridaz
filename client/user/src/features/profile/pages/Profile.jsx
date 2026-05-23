@@ -613,20 +613,7 @@ export default function Profile() {
           </button>
         </div>
 
-        <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] border border-white/10 mb-8 overflow-hidden">
-          <div className="flex flex-wrap md:flex-nowrap divide-x divide-white/10">
-            {[
-              { label: "Matches Played", value: profileUser?.stats?.cricket?.matches || "120", icon: Calendar },
-              { label: "Wins", value: "89", icon: Trophy },
-              { label: "Goals", value: profileUser?.stats?.cricket?.runs || "67", icon: Target },
-              { label: "Assists", value: "45", icon: Activity },
-              { label: "Accuracy", value: "92%", icon: ShieldCheck },
-              { label: "MVP Awards", value: "14", icon: Award },
-            ].map((stat, idx, arr) => (
-              <QuickStatCard key={idx} {...stat} showDivider={idx < arr.length - 1} />
-            ))}
-          </div>
-        </div>
+
 
         {activeTab === 'posts' && (
           <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
