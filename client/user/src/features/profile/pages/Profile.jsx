@@ -73,6 +73,7 @@ const AchievementCard = ({ icon: Icon, title, rarity, year }) => {
       </div>
     </div>
   );
+};
 const MatchDetailModal = ({ isOpen, onClose, match, userId }) => {
   const [activeSubTab, setActiveSubTab] = useState("impact");
   if (!isOpen || !match) return null;
