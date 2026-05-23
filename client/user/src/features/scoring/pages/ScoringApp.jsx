@@ -11,6 +11,7 @@ import ExtraRunsModal from '@features/scoring/components/ExtraRunsModal';
 import SelectBowlerModal from '@features/scoring/components/SelectBowlerModal';
 import TossModal from '@features/scoring/components/TossModal';
 import { io } from 'socket.io-client';
+import axiosInstance from '@hooks/useAxiosInstance';
 import ScoringPasswordModal from '../components/ScoringPasswordModal';
 import TickerThemeStoreModal from '@features/scoring/components/TickerThemeStoreModal';
 import VisualWagonWheelModal from '../components/VisualWagonWheelModal';
@@ -208,14 +209,12 @@ const ScoringApp = () => {
       const autoGoLive = async () => {
         try {
           const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:6001';
-          const response = await fetch(`${apiBase}/api/scoring/${matchId}/go-live`, {
-            method: 'POST',
+          const response = await axiosInstance.post(`/api/scoring/${matchId}/go-live`, {}, {
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token')}`
+              'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
             }
           });
-          const data = await response.json();
+          const data = response.data;
           if (data.success) {
             setLiveEnabled(true);
             const appBase = import.meta['env']?.VITE_APP_URL || window.location.origin;
@@ -429,18 +428,15 @@ const ScoringApp = () => {
               <button
                 onClick={async () => {
                   try {
-                    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/next-innings`, {
-                      method: 'POST',
+                    const response = await axiosInstance.post(`/api/scoring/next-innings`, {
+                      scoringId: matchData._id,
+                      battingTeamId: matchData.innings[0].battingTeam === "teamA" ? "teamB" : "teamA"
+                    }, {
                       headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token')}`
-                      },
-                      body: JSON.stringify({
-                        scoringId: matchData._id,
-                        battingTeamId: matchData.innings[0].battingTeam === "teamA" ? "teamB" : "teamA"
-                      })
+                        'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
+                      }
                     });
-                    const data = await response.json();
+                    const data = response.data;
                     if (data.success) {
                       toast.success('2nd Innings Initiated!');
                       refresh();
@@ -723,15 +719,14 @@ const ScoringApp = () => {
                           onClick={async () => {
                             const vidId = document.getElementById('ytVideoId')?.['value'] || '';
                             try {
-                              const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/${matchId}/stream-config`, {
-                                method: 'POST',
+                              const response = await axiosInstance.post(`/api/scoring/${matchId}/stream-config`, {
+                                youtubeVideoId: vidId
+                              }, {
                                 headers: {
-                                  'Content-Type': 'application/json',
-                                  'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token')}`
-                                },
-                                body: JSON.stringify({ youtubeVideoId: vidId })
+                                  'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token') || ''}`
+                                }
                               });
-                              const data = await response.json();
+                              const data = response.data;
                               if (data.success) {
                                 toast.success('Broadcast Linked!');
                                 refresh();
@@ -884,15 +879,14 @@ const ScoringApp = () => {
                             <button
                               onClick={async () => {
                                 try {
-                                  const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/${matchId}/commentary-settings`, {
-                                    method: 'POST',
+                                  const response = await axiosInstance.post(`/api/scoring/${matchId}/commentary-settings`, {
+                                    isAiCommentaryEnabled, commentaryVoice, commentaryLanguage, commentaryStyle
+                                  }, {
                                     headers: {
-                                      'Content-Type': 'application/json',
-                                      'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token')}`
-                                    },
-                                    body: JSON.stringify({ isAiCommentaryEnabled, commentaryVoice, commentaryLanguage, commentaryStyle })
+                                      'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
+                                    }
                                   });
-                                  const data = await response.json();
+                                  const data = response.data;
                                   if (data.success) {
                                     toast.success('Commentary settings saved!');
                                   } else {
@@ -1172,15 +1166,14 @@ const ScoringApp = () => {
                   }
 
                   try {
-                    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:6001'}/api/scoring/start`, {
-                      method: 'POST',
+                    const response = await axiosInstance.post(`/api/scoring/start`, {
+                      matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, battingTeamId
+                    }, {
                       headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || localStorage.getItem('token')}`
-                      },
-                      body: JSON.stringify({ matchId: matchData._id || matchData.id || matchData.hostedGameId?.id, battingTeamId })
+                        'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
+                      }
                     });
-                    const data = await response.json();
+                    const data = response.data;
                     if (data.success) {
                       toast.success('Match started successfully!');
                       setShowTossModal(false);

@@ -193,7 +193,8 @@ const LiveOverlay = () => {
       setScore(data);
       // Derive badge from lastBallRaw if no explicit ballEvent follows
       const lb = data?.lastBallRaw;
-      if (lb) {
+      if (lb && lb.id !== processedTracker.current.lastBallId) {
+        processedTracker.current.lastBallId = lb.id;
         let type = null;
         if (lb.isWicket) type = 'wicket';
         else if (lb.isBoundary && lb.runs === 6) type = 'six';
@@ -287,7 +288,14 @@ const LiveOverlay = () => {
 
   if (score.status === 'NOT_STARTED' || !score.isLive) {
     return (
-      <div style={{ width: '100vw', height: '100vh', background: 'transparent', position: 'relative', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
+      <div 
+        style={{ width: '100vw', height: '100vh', background: 'transparent', position: 'relative', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}
+        onClick={() => {
+          // Unlock browser autoplay policy
+          const unlockAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+          unlockAudio.play().catch(() => {});
+        }}
+      >
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0, height: 90,
           background: 'rgba(5,5,5,0.88)', backdropFilter: 'blur(20px)',
@@ -310,7 +318,14 @@ const LiveOverlay = () => {
   const ActiveAnimation = ActivePack.Animation;
 
   return (
-    <div style={{ width: '100vw', height: '100vh', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
+    <div 
+      style={{ width: '100vw', height: '100vh', background: 'transparent', position: 'relative', overflow: 'hidden' }}
+      onClick={() => {
+        // Unlock browser autoplay policy
+        const unlockAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+        unlockAudio.play().catch(() => {});
+      }}
+    >
       
 
 

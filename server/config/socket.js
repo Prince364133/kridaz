@@ -4,6 +4,8 @@ import { redisClient as redis, pubClient, subClient } from "./redis.js";
 import { prisma } from "./prisma.js";
 import logger from "../utils/logger.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
+import fs from "fs";
+import path from "path";
 let io;
 
 const socketConfig = (server) => {
@@ -98,20 +100,14 @@ const socketConfig = (server) => {
       socket.in(chatId).emit("message deleted", { chatId, messageIds });
     });
 
-    // Delete audio file immediately after it finishes playing on the client
-    socket.on('COMMENTARY_AUDIO_PLAYED', async (data) => {
+    socket.on("COMMENTARY_AUDIO_PLAYED", (data) => {
       if (data && data.audioUrl) {
-        try {
-          const fs = await import('fs');
-          const path = await import('path');
-          // audioUrl is typically '/audio/filename.mp3'
-          const filePath = path.join(process.cwd(), 'public', data.audioUrl);
-          fs.unlink(filePath, (err) => {
-            // Ignore ENOENT (already deleted)
-          });
-        } catch (e) {
-          // Ignore
-        }
+        const filePath = path.join(process.cwd(), 'public', data.audioUrl);
+        fs.unlink(filePath, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            logger.error(`[Socket] Failed to delete audio file ${data.audioUrl}:`, err);
+          }
+        });
       }
     });
 
