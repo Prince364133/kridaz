@@ -832,12 +832,14 @@ const ScoringApp = () => {
                           </div>
                       </div>
                     )}
+                    </div>
+                  )}
 
-                    <div className="p-6 bg-white/[0.02] rounded-3xl border border-white/5 space-y-6">
-                      <div className="space-y-4">
-                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match State</p>
-                        <div className="grid grid-cols-3 gap-2">
-                          <button
+                  <div className="p-6 bg-white/[0.02] rounded-3xl border border-white/5 space-y-6">
+                    <div className="space-y-4">
+                      <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match State</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
                             onClick={async () => {
                               const res = await updateMatchStatus('LIVE');
                               if (res.success) toast.success('Match Resumed!');
@@ -1098,9 +1100,7 @@ const ScoringApp = () => {
                           View Match Report
                         </button>
                       </div>
-                      </div>
                     </div>
-
                   <button onClick={() => setShowSettings(false)} className="w-full py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] transition-all transform active:scale-95 shadow-xl" style={{ backgroundColor: THEME_COLOR, color: '#000', boxShadow: `0 10px 30px ${THEME_COLOR}33` }}>Save Parameters</button>
                 </div>
               </div>
