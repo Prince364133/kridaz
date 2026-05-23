@@ -297,6 +297,28 @@ export default function Profile() {
   const isOwnProfile = !userId || (currentUser && userId === currentUser._id);
   const targetUserId = isOwnProfile ? currentUser?._id : userId;
 
+  const commonConnections = [];
+  if (!isOwnProfile && profileUser) {
+    const seenIds = new Set();
+    const myFollowingSet = new Set(followingIds || []);
+    if (profileUser.followersList) {
+      profileUser.followersList.forEach(p => {
+        if (p.id !== currentUser?._id && myFollowingSet.has(p.id) && !seenIds.has(p.id)) {
+          commonConnections.push(p);
+          seenIds.add(p.id);
+        }
+      });
+    }
+    if (profileUser.followingList) {
+      profileUser.followingList.forEach(p => {
+        if (p.id !== currentUser?._id && myFollowingSet.has(p.id) && !seenIds.has(p.id)) {
+          commonConnections.push(p);
+          seenIds.add(p.id);
+        }
+      });
+    }
+  }
+
   const [profileUser, setProfileUser] = useState(isOwnProfile ? currentUser : null);
   const [loadingProfile, setLoadingProfile] = useState(!isOwnProfile);
   const { loading, bookings } = useBookingHistory();
@@ -565,6 +587,13 @@ export default function Profile() {
               <Activity size={16} />
               Activity
             </button>
+            <button 
+              onClick={() => setActiveTab('connections')}
+              className={`px-5 py-3 rounded-t-[10px] font-black uppercase tracking-wider text-[12px] transition-all flex items-center gap-2 ${activeTab === 'connections' ? 'text-[#BFF367] border-b-2 border-[#BFF367] bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <Users size={16} />
+              Connections
+            </button>
             {isOwnProfile && (
               <button 
                 onClick={() => setActiveTab('bookings')}
@@ -788,6 +817,189 @@ export default function Profile() {
                 </>
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'connections' && (
+          <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500 space-y-12">
+            
+            {/* Teams Section */}
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                    <Building2 className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
+                    Squad Portfolio
+                  </h2>
+                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Teams owned or joined by this player</p>
+                </div>
+              </div>
+
+              {profileUser?.teams && profileUser.teams.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {profileUser.teams.map((team) => (
+                    <div 
+                      key={team.id} 
+                      className="group relative rounded-[15px] p-[1px] transition-all duration-300 overflow-hidden shadow-lg hover:shadow-[#55DEE8]/10"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[15px]" />
+                      <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[15px]" />
+                      <div className="relative bg-[#0d0d0d] rounded-[15px] p-5 flex items-center justify-between gap-4 h-full">
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className="relative shrink-0">
+                            <div className="w-14 h-14 rounded-[12px] bg-black border border-white/10 flex items-center justify-center text-[#55DEE8] font-bold overflow-hidden">
+                              {team.logo || team.image ? (
+                                <img src={team.logo || team.image} alt={team.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-xl">{team.name.charAt(0).toUpperCase()}</span>
+                              )}
+                            </div>
+                            <div className="absolute -bottom-1 -right-1 bg-zinc-950 text-[#BFF367] text-[7px] px-1.5 py-0.5 rounded-full border border-white/10 font-black uppercase">
+                              {team.sportType?.slice(0, 3) || "CRI"}
+                            </div>
+                          </div>
+                          <div className="min-w-0">
+                            <h3 className="font-black text-white text-sm uppercase tracking-tight truncate mb-1">{team.name}</h3>
+                            <div className="flex flex-col gap-0.5">
+                              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
+                                <User size={10} className="text-[#BFF367]" /> Captain: {team.captainName || "N/A"}
+                              </p>
+                              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
+                                <MapPin size={10} className="text-[#55DEE8]" /> {team.city || "Local Ground"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2 shrink-0">
+                          <span className="text-[8px] font-black text-white/40 uppercase bg-white/5 px-2 py-0.5 rounded border border-white/10">{team.teamCode}</span>
+                          <Link 
+                            to={`/team/${team.id}`}
+                            className="p-2 bg-white/5 hover:bg-gradient-to-r hover:from-[#55DEE8] hover:to-[#BFF367] hover:text-black border border-white/10 rounded-[12px] text-white transition-all hover:scale-105"
+                          >
+                            <ExternalLink size={12} />
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-10 bg-black/40 rounded-[15px] border border-white/5">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Not a member of any squad</p>
+                  <p className="text-[9px] text-gray-600 uppercase tracking-widest mt-1.5">Join a team using an invite code or create a new team to showcase it here!</p>
+                </div>
+              )}
+            </div>
+
+            {/* Common Connections Section */}
+            {!isOwnProfile && (
+              <div>
+                <h3 className="text-sm font-black text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Star className="w-4 h-4 text-[#55DEE8]" stroke="url(#cyan-lime-gradient)" fill="url(#cyan-lime-gradient)" />
+                  Common Connections ({commonConnections.length})
+                </h3>
+                {commonConnections.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {commonConnections.map((player) => (
+                      <div key={player.id} className="flex items-center justify-between p-3.5 bg-gradient-to-r from-white/[0.04] to-white/[0.01] border border-white/10 rounded-[15px] hover:border-[#55DEE8]/30 transition-all">
+                        <Link to={`/profile/${player.id}`} className="flex items-center gap-3 min-w-0 hover:opacity-80">
+                          <img 
+                            src={player.profilePicture || "https://ui-avatars.com/api/?name=" + player.name} 
+                            className="w-10 h-10 rounded-full object-cover border border-white/10" 
+                          />
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-white tracking-tight truncate">{player.name}</p>
+                            <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest truncate">@{player.username || "player"}</p>
+                          </div>
+                        </Link>
+                        <span className="px-2 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded-full border border-[#55DEE8]/20 text-[8px] font-black uppercase shrink-0">
+                          Mutual
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 bg-black/40 rounded-[15px] border border-white/5">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">No common connections yet</p>
+                    <p className="text-[8px] text-gray-600 uppercase tracking-widest mt-1">Connect with more players in the community to find mutual links!</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Network Connections (Followers & Following) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Following List */}
+              <div>
+                <h3 className="text-sm font-black text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-red-500" fill="currentColor" />
+                  Following ({profileUser?.followingList?.length || 0})
+                </h3>
+                {profileUser?.followingList && profileUser.followingList.length > 0 ? (
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    {profileUser.followingList.map((player) => (
+                      <div key={player.id} className="flex items-center justify-between p-3 bg-[#0d0d0d] border border-white/5 rounded-[15px] hover:border-white/10 transition-all">
+                        <Link to={`/profile/${player.id}`} className="flex items-center gap-3 min-w-0 hover:opacity-80">
+                          <img 
+                            src={player.profilePicture || "https://ui-avatars.com/api/?name=" + player.name} 
+                            className="w-10 h-10 rounded-full object-cover border border-white/10" 
+                          />
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-white tracking-tight truncate">{player.name}</p>
+                            <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest truncate">@{player.username || "player"}</p>
+                          </div>
+                        </Link>
+                        {player.sportTypes && player.sportTypes.length > 0 && (
+                          <span className="px-2 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded-full border border-[#55DEE8]/20 text-[8px] font-black uppercase">
+                            {player.sportTypes[0]}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-black/40 rounded-[15px] border border-white/5">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Not following anyone yet</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Followers List */}
+              <div>
+                <h3 className="text-sm font-black text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Users className="w-4 h-4 text-[#BFF367]" />
+                  Followers ({profileUser?.followersList?.length || 0})
+                </h3>
+                {profileUser?.followersList && profileUser.followersList.length > 0 ? (
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    {profileUser.followersList.map((player) => (
+                      <div key={player.id} className="flex items-center justify-between p-3 bg-[#0d0d0d] border border-white/5 rounded-[15px] hover:border-white/10 transition-all">
+                        <Link to={`/profile/${player.id}`} className="flex items-center gap-3 min-w-0 hover:opacity-80">
+                          <img 
+                            src={player.profilePicture || "https://ui-avatars.com/api/?name=" + player.name} 
+                            className="w-10 h-10 rounded-full object-cover border border-white/10" 
+                          />
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-white tracking-tight truncate">{player.name}</p>
+                            <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest truncate">@{player.username || "player"}</p>
+                          </div>
+                        </Link>
+                        {player.sportTypes && player.sportTypes.length > 0 && (
+                          <span className="px-2 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded-full border border-[#55DEE8]/20 text-[8px] font-black uppercase">
+                            {player.sportTypes[0]}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-black/40 rounded-[15px] border border-white/5">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">No followers yet</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
           </div>
         )}
 

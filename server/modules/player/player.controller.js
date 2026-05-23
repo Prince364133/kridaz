@@ -316,7 +316,7 @@ export const getPlayerProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
     
-    const [bookingCount, followerIds, followingIds, userStats, wallet, careerStats, userBadges, matchHistory] = await Promise.all([
+    const [bookingCount, followerIds, followingIds, userStats, wallet, careerStats, userBadges, matchHistory, teams, network] = await Promise.all([
       prisma.booking.count({ where: { userId: user.id } }),
       SocialService.getFollowerIds(user.id),
       SocialService.getFollowingIds(user.id),
@@ -362,7 +362,26 @@ export const getPlayerProfile = async (req, res) => {
         orderBy: {
           date: 'desc'
         }
-      })
+      }),
+      prisma.team.findMany({
+        where: {
+          OR: [
+            { ownerId: user.id },
+            { members: { some: { userId: user.id, status: "JOINED" } } }
+          ]
+        },
+        select: {
+          id: true,
+          name: true,
+          logo: true,
+          image: true,
+          teamCode: true,
+          sportType: true,
+          captainName: true,
+          city: true
+        }
+      }),
+      SocialService.getNetwork(user.id)
     ]);
     
     // Check for active stories
@@ -416,6 +435,9 @@ export const getPlayerProfile = async (req, res) => {
         careerStats: careerStats,
         badges: userBadges.length > 0 ? userBadges : (userStats?.badges || []),
         matchHistory: matchHistory,
+        teams: teams,
+        followersList: network?.followers || [],
+        followingList: network?.following || [],
         wallet: wallet,
         createdAt: user.createdAt
       }
