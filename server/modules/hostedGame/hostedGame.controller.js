@@ -1982,7 +1982,7 @@ export const claimInviteSlot = async (req, res) => {
 
     if (result.updatedRole && result.updatedRole !== req.user?.role) {
       const newToken = generateUserToken(req.user.id || req.user.user, result.updatedRole, result.updatedOwnerId);
-      const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT;
+      const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME || !!process.env.RAILWAY_PROJECT_ID;
       res.cookie("auth_token", newToken, {
         httpOnly: true,
         secure: isProd,

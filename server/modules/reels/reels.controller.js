@@ -12,7 +12,7 @@ import logger from "../../utils/logger.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 
 
-const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT;
+const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME || !!process.env.RAILWAY_PROJECT_ID;
 const COOKIE_SETTINGS = {
   httpOnly: true,
   secure: isProd,

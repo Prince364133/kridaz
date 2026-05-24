@@ -23,7 +23,7 @@ const issueTokens = async (res, userId, token) => {
     const clientIp = res.req.ip || res.req.headers['x-forwarded-for'] || res.req.socket?.remoteAddress || null;
     const refreshToken = await generateRefreshToken(userId, clientIp);
     
-    const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT;
+    const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME || !!process.env.RAILWAY_PROJECT_ID;
     
     res.cookie("auth_token", token, {
       httpOnly: true,
@@ -1032,7 +1032,7 @@ export const logout = async (req, res) => {
         });
     }
     
-    const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT;
+    const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME || !!process.env.RAILWAY_PROJECT_ID;
     res.clearCookie("auth_token", {
       httpOnly: true,
       secure: isProd,
