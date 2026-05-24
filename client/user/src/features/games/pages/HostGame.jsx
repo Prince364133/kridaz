@@ -250,6 +250,13 @@ const HostGame = () => {
     } else {
       // Professional mode
       const teamKey = fillingTeamKey;
+      const otherTeamKey = teamKey === 'teamA' ? 'teamB' : 'teamA';
+      
+      if (gameData[otherTeamKey].name === team.name) {
+        toast.error("You cannot select the same team for both sides");
+        return;
+      }
+
       const newSlots = [...gameData[teamKey].slots];
       let slotIdx = 0;
       
