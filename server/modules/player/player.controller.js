@@ -167,7 +167,8 @@ export const searchPlayers = async (req, res) => {
       where: {
         OR: [
           { name: { contains: query, mode: 'insensitive' } },
-          { username: { contains: query, mode: 'insensitive' } }
+          { username: { contains: query, mode: 'insensitive' } },
+          { phone: { contains: query } }
         ],
         ...(currentUserId ? { id: { not: currentUserId } } : {})
       },
@@ -315,12 +316,104 @@ export const getPlayerProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
     
-    const [bookingCount, followerIds, followingIds, userStats, wallet] = await Promise.all([
+    const [bookingCount, followerIds, followingIds, userStats, wallet, careerStats, userBadges, matchHistory, teams, network, liveMatches] = await Promise.all([
       prisma.booking.count({ where: { userId: user.id } }),
       SocialService.getFollowerIds(user.id),
       SocialService.getFollowingIds(user.id),
       prisma.userStats.findUnique({ where: { userId: user.id } }),
-      WalletService.getWallet(user.id, user.role || 'user')
+      WalletService.getWallet(user.id, user.role || 'user'),
+      prisma.playerCareerStats.findMany({ where: { userId: user.id } }),
+      prisma.userBadge.findMany({ where: { userId: user.id } }),
+      prisma.hostedGame.findMany({
+        where: {
+          scoringStatus: "COMPLETED",
+          teams: {
+            some: {
+              slots: {
+                some: {
+                  userId: user.id
+                }
+              }
+            }
+          }
+        },
+        include: {
+          teams: {
+            include: {
+              slots: {
+                include: {
+                  user: { select: { id: true, name: true, profilePicture: true } }
+                }
+              }
+            }
+          },
+          turf: true,
+          cricketMatch: {
+            include: {
+              innings: true,
+              playerStats: {
+                where: {
+                  userId: user.id
+                }
+              }
+            }
+          }
+        },
+        orderBy: {
+          date: 'desc'
+        }
+      }),
+      prisma.team.findMany({
+        where: {
+          OR: [
+            { ownerId: user.id },
+            { members: { some: { userId: user.id, status: "JOINED" } } }
+          ]
+        },
+        select: {
+          id: true,
+          name: true,
+          logo: true,
+          image: true,
+          teamCode: true,
+          sportType: true,
+          captainName: true,
+          city: true
+        }
+      }),
+      SocialService.getNetwork(user.id),
+      // Live matches: games currently in progress where the user is a participant
+      prisma.hostedGame.findMany({
+        where: {
+          isLive: true,
+          scoringStatus: { in: ["LIVE", "PAUSED"] },
+          teams: {
+            some: {
+              slots: {
+                some: { userId: user.id }
+              }
+            }
+          }
+        },
+        select: {
+          id: true,
+          gameType: true,
+          format: true,
+          city: true,
+          customVenue: true,
+          liveStartedAt: true,
+          teams: {
+            select: {
+              id: true,
+              name: true,
+              teamKey: true
+            }
+          },
+          turf: {
+            select: { name: true, city: true }
+          }
+        }
+      })
     ]);
     
     // Check for active stories
@@ -371,7 +464,13 @@ export const getPlayerProfile = async (req, res) => {
         stats: {
           cricket: userStats?.cricket || { matches: 0, runs: 0, wickets: 0 }
         },
-        badges: userStats?.badges || [],
+        careerStats: careerStats,
+        badges: userBadges.length > 0 ? userBadges : (userStats?.badges || []),
+        matchHistory: matchHistory,
+        teams: teams,
+        liveMatches: liveMatches,
+        followersList: network?.followers || [],
+        followingList: network?.following || [],
         wallet: wallet,
         createdAt: user.createdAt
       }

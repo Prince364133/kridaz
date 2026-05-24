@@ -1,9 +1,11 @@
-import express from "express";
+﻿import express from "express";
 import { 
   getAllHostedGames,
   deleteHostedGame,
   batchDeleteGames,
-  batchUpdateGameStatus
+  batchUpdateGameStatus,
+  getAllDisputes,
+  resolveDispute
 } from "../../admin/admin.controller.js";
 
 const router = express.Router();
@@ -72,3 +74,33 @@ router.post("/batch-delete", batchDeleteGames);
 router.put("/batch-status", batchUpdateGameStatus);
 
 export default router;
+
+
+
+/**
+ * @swagger
+ * /hosted-game/admin/disputes:
+ *   get:
+ *     summary: List all games with disputes
+ *     tags: [Admin GameManagement]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of disputes
+ */
+router.get("/disputes", getAllDisputes);
+
+/**
+ * @swagger
+ * /hosted-game/admin/resolve-dispute:
+ *   post:
+ *     summary: Resolve a dispute
+ *     tags: [Admin GameManagement]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dispute resolved
+ */
+router.post("/resolve-dispute", resolveDispute);

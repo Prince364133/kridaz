@@ -24,20 +24,22 @@ export const gamesApi = baseApi.injectEndpoints({
       query: (token) => `/api/hosted-game/verify-invite?token=${token}`,
     }),
     getGrounds: builder.query({
-      query: ({ city, state, sportType }) => {
+      query: ({ city, state, sportType, query }) => {
         let url = '/api/hosted-game/grounds?';
         if (city) url += `city=${city}&`;
         if (state) url += `state=${state}&`;
         if (sportType) url += `sportType=${sportType}&`;
+        if (query) url += `query=${query}&`;
         return url;
       },
     }),
     getUmpires: builder.query({
-      query: ({ city, state, gameType }) => {
+      query: ({ city, state, gameType, query }) => {
         let url = '/api/hosted-game/umpires?';
         if (city) url += `city=${city}&`;
         if (state) url += `state=${state}&`;
         if (gameType) url += `gameType=${gameType}&`;
+        if (query) url += `query=${query}&`;
         return url;
       },
     }),

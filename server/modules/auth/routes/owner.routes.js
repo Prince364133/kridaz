@@ -1,4 +1,4 @@
-import express from "express";
+﻿import express from "express";
 import { 
   registerOwner, 
   login,
@@ -23,7 +23,6 @@ import {
   authLimiter,
   otpLimiter,
 } from "../../../middleware/rateLimiter.middleware.js";
-import { verifyTurnstile } from "../../../middleware/turnstile.middleware.js";
 
 const router = express.Router();
 
@@ -34,7 +33,7 @@ const router = express.Router();
  *   description: Turf owner authentication and management
  */
 
-// ── Public Routes ─────────────────────────────────────────────────────────
+// â”€â”€ Public Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * @swagger
@@ -43,7 +42,7 @@ const router = express.Router();
  *     summary: Register as a turf owner
  *     tags: [Owner Auth]
  */
-router.post("/register", authLimiter, verifyTurnstile, validate(ownerRegisterSchema), registerOwner);
+router.post("/register", authLimiter, validate(ownerRegisterSchema), registerOwner);
 
 /**
  * @swagger
@@ -52,7 +51,7 @@ router.post("/register", authLimiter, verifyTurnstile, validate(ownerRegisterSch
  *     summary: Send OTP for owner
  *     tags: [Owner Auth]
  */
-router.post("/send-otp", otpLimiter, verifyTurnstile, validate(sendOtpSchema), sendOtp);
+router.post("/send-otp", otpLimiter, validate(sendOtpSchema), sendOtp);
 
 /**
  * @swagger
@@ -61,7 +60,7 @@ router.post("/send-otp", otpLimiter, verifyTurnstile, validate(sendOtpSchema), s
  *     summary: Owner Login Step 1
  *     tags: [Owner Auth]
  */
-router.post("/login-step1", otpLimiter, verifyTurnstile, validate(loginStep1Schema), loginStep1);
+router.post("/login-step1", otpLimiter, validate(loginStep1Schema), loginStep1);
 
 /**
  * @swagger
@@ -70,7 +69,7 @@ router.post("/login-step1", otpLimiter, verifyTurnstile, validate(loginStep1Sche
  *     summary: Owner login
  *     tags: [Owner Auth]
  */
-router.post("/login", authLimiter, verifyTurnstile, validate(userLoginSchema), login);
+router.post("/login", authLimiter, validate(userLoginSchema), login);
 
 /**
  * @swagger
@@ -99,7 +98,7 @@ router.post("/ownerRequest", validate(ownerRequestSchema), ownerRequest);
  */
 router.post("/refresh", refreshToken);
 
-// ── Authenticated Routes ──────────────────────────────────────────────────
+// â”€â”€ Authenticated Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * @swagger

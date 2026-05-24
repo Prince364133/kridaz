@@ -105,7 +105,7 @@ const TeamPass = () => {
               <div className="absolute inset-x-8 top-8 flex items-center justify-between z-10">
                 <div>
                   <h3 className="text-xl font-black tracking-tighter text-[#55DEE8]" style={HEADING_STYLE}>KRIDAZ</h3>
-                  <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white/40 mt-1">Team Invitation GÇó {team.teamCode || id.slice(-8).toUpperCase()}</p>
+                  <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white/40 mt-1">Team Invitation Rs ï¿½ {team.teamCode || id.slice(-8).toUpperCase()}</p>
                 </div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] border border-white/10 rounded-xl backdrop-blur-sm">
                   <Mail size={12} className="text-[#55DEE8]" />
@@ -129,7 +129,7 @@ const TeamPass = () => {
                 <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-1" style={HEADING_STYLE}>{team.name}</h1>
                 <div className="flex items-center gap-2 text-[#55DEE8]">
                   <Trophy size={16} />
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em]">{team.sportType || 'Cricket'} GÇó {team.members?.length || 0} Members</span>
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em]">{team.sportType || 'Cricket'} Rs ï¿½ {team.members?.length || 0} Members</span>
                 </div>
               </div>
             </div>

@@ -153,6 +153,20 @@ router.get("/followers-for-slot", verifyUser, controller.getFollowersForSlot); /
 
 /**
  * @swagger
+ * /hosted-game/validate-coupon:
+ *   post:
+ *     summary: Validate a coupon code
+ *     tags: [HostedGame]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Coupon validated
+ */
+router.post("/validate-coupon", verifyUser, controller.validateCoupon);
+
+/**
+ * @swagger
  * /hosted-game/create:
  *   post:
  *     summary: Create a hosted game
@@ -260,6 +274,34 @@ router.post("/reject", verifyUser, controller.rejectJoinRequest);
  *         description: Game cancelled
  */
 router.post("/cancel", verifyUser, controller.cancelHostedGame);
+
+/**
+ * @swagger
+ * /hosted-game/vote-started:
+ *   post:
+ *     summary: Vote that a game has started
+ *     tags: [HostedGame]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Vote recorded
+ */
+router.post("/vote-started", verifyUser, controller.voteGameStarted);
+
+/**
+ * @swagger
+ * /hosted-game/raise-dispute:
+ *   post:
+ *     summary: Raise a dispute for a game
+ *     tags: [HostedGame]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dispute raised
+ */
+router.post("/raise-dispute", verifyUser, controller.raiseDispute);
 
 // ── Quick Game slot management (Phase 2B & 2C) ─────────────────────────────
 

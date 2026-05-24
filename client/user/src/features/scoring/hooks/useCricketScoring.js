@@ -1,16 +1,30 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import useAxiosInstance from '@hooks/useAxiosInstance';
 
 /**
  * Central hook for all cricket scoring operations.
  * Exposes: matchData, recordBall, setPlayers, setToss, undoBall,
- *          startInnings, completeMatch, fetchAnalytics, refresh
+ *          startInnings, completeMatch, fetchAnalytics, refresh, isMutating
  */
 const useCricketScoring = (matchId) => {
   const [matchData, setMatchData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isMutating, setIsMutatingState] = useState(false);
+  const isMutatingRef = useRef(false);
   const axiosInstance = useAxiosInstance;
+
+  const wrapMutation = (asyncFn) => async (...args) => {
+    if (isMutatingRef.current) return { success: false, error: "Action in progress. Please wait." };
+    isMutatingRef.current = true;
+    setIsMutatingState(true);
+    try {
+      return await asyncFn(...args);
+    } finally {
+      isMutatingRef.current = false;
+      setIsMutatingState(false);
+    }
+  };
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
   const normalise = (scoring) => {
@@ -192,6 +206,11 @@ const useCricketScoring = (matchId) => {
           newStrikerId = ballData.nextBatterId;
         }
 
+        if (newStrikerId && newNonStrikerId && newStrikerId === newNonStrikerId) {
+          console.warn("Striker and Non-Striker projected to be identical. Skipping optimistic update.");
+          return { success: false, error: "Striker and Non-Striker cannot be the same player." };
+        }
+
         cloned.strikerId = newStrikerId;
         cloned.nonStrikerId = newNonStrikerId;
 
@@ -224,7 +243,7 @@ const useCricketScoring = (matchId) => {
     // 2. Perform background HTTP request
     try {
       const response = await axiosInstance.put('/api/scoring/update', {
-        scoringId: matchData?.id || matchData?._id,
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
         ballData,
       }, { headers: getHeaders() });
       
@@ -251,7 +270,7 @@ const useCricketScoring = (matchId) => {
   const setPlayers = async (players) => {
     try {
       const response = await axiosInstance.post('/api/scoring/set-players', {
-        scoringId: matchData?.id || matchData?._id,
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
         ...players,
       }, { headers: getHeaders() });
       updateMatchData(response.data.scoring);
@@ -265,7 +284,7 @@ const useCricketScoring = (matchId) => {
   const setToss = async ({ winnerTeam, decision }) => {
     try {
       const response = await axiosInstance.post('/api/scoring/toss', {
-        scoringId: matchData?.id || matchData?._id,
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id || matchId,
         wonByTeamId: winnerTeam,
         decision,
       }, { headers: getHeaders() });
@@ -280,7 +299,7 @@ const useCricketScoring = (matchId) => {
   const undoBall = async () => {
     try {
       const response = await axiosInstance.post('/api/scoring/undo', {
-        scoringId: matchData?.id || matchData?._id
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id
       }, {
         headers: getHeaders(),
       });
@@ -311,7 +330,7 @@ const useCricketScoring = (matchId) => {
   const completeMatch = async () => {
     try {
       const response = await axiosInstance.post('/api/scoring/complete', {
-        scoringId: matchData?.id || matchData?._id,
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
       }, { headers: getHeaders() });
       if (response.data.success) {
         setMatchData(prev => ({ ...prev, status: 'COMPLETED' }));
@@ -327,7 +346,7 @@ const useCricketScoring = (matchId) => {
   const updateMatchStatus = async (status) => {
     try {
       const response = await axiosInstance.post('/api/scoring/update-status', {
-        scoringId: matchData?.id || matchData?._id,
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
         status,
       }, { headers: getHeaders() });
       if (response.data.success) {
@@ -344,7 +363,7 @@ const useCricketScoring = (matchId) => {
   const reviseTargetAndOvers = async (revisedTarget, revisedOvers) => {
     try {
       const response = await axiosInstance.post('/api/scoring/revise-target', {
-        scoringId: matchData?.id || matchData?._id,
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
         revisedTarget,
         revisedOvers,
       }, { headers: getHeaders() });
@@ -362,7 +381,7 @@ const useCricketScoring = (matchId) => {
   const setMatchOfficials = async (officials) => {
     try {
       const response = await axiosInstance.post('/api/scoring/officials', {
-        scoringId: matchData?.id || matchData?._id,
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
         officials,
       }, { headers: getHeaders() });
       if (response.data.success) {
@@ -379,7 +398,7 @@ const useCricketScoring = (matchId) => {
   const substitutePlayer = async (userId, substituteForId, inningsIndex) => {
     try {
       const response = await axiosInstance.post('/api/scoring/substitute', {
-        scoringId: matchData?.id || matchData?._id,
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
         userId,
         substituteForId,
         inningsIndex: inningsIndex ?? matchData?.currentInningsIndex ?? 0,
@@ -397,7 +416,7 @@ const useCricketScoring = (matchId) => {
   const useReview = async (team, isSuccessful, inningsIndex) => {
     try {
       const response = await axiosInstance.post('/api/scoring/review', {
-        scoringId: matchData?.id || matchData?._id,
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
         team,
         isSuccessful,
         inningsIndex: inningsIndex ?? matchData?.currentInningsIndex ?? 0,
@@ -415,7 +434,7 @@ const useCricketScoring = (matchId) => {
   const setPowerplayOvers = async (overs, inningsIndex) => {
     try {
       const response = await axiosInstance.post('/api/scoring/powerplay', {
-        scoringId: matchData?.id || matchData?._id,
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
         overs,
         inningsIndex: inningsIndex ?? matchData?.currentInningsIndex ?? 0,
       }, { headers: getHeaders() });
@@ -432,7 +451,7 @@ const useCricketScoring = (matchId) => {
   const toggleTimer = async () => {
     try {
       const response = await axiosInstance.put('/api/scoring/toggle-timer', {
-        scoringId: matchData?.id || matchData?._id,
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
       }, { headers: getHeaders() });
       if (response.data.success) {
         // Will refresh the entire status to get new timer state
@@ -448,9 +467,25 @@ const useCricketScoring = (matchId) => {
   const addPenalty = async (teamId, runs) => {
     try {
       const response = await axiosInstance.put('/api/scoring/penalty', {
-        scoringId: matchData?.id || matchData?._id,
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
         teamId,
         runs,
+      }, { headers: getHeaders() });
+      if (response.data.success) {
+        fetchMatchStatus();
+        return { success: true };
+      }
+      return { success: false, message: response.data.message };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const advanceToNextInnings = async (battingTeamId) => {
+    try {
+      const response = await axiosInstance.post('/api/scoring/next-innings', {
+        scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
+        battingTeamId,
       }, { headers: getHeaders() });
       if (response.data.success) {
         fetchMatchStatus();
@@ -478,20 +513,22 @@ const useCricketScoring = (matchId) => {
     matchData,
     loading,
     error,
-    recordBall,
-    setPlayers,
-    setToss,
-    undoBall,
-    startInnings,
-    completeMatch,
-    updateMatchStatus,
-    reviseTargetAndOvers,
-    setMatchOfficials,
-    substitutePlayer,
-    useReview,
-    setPowerplayOvers,
-    toggleTimer,
-    addPenalty,
+    isMutating,
+    recordBall: wrapMutation(recordBall),
+    setPlayers: wrapMutation(setPlayers),
+    setToss: wrapMutation(setToss),
+    undoBall: wrapMutation(undoBall),
+    startInnings: wrapMutation(startInnings),
+    completeMatch: wrapMutation(completeMatch),
+    updateMatchStatus: wrapMutation(updateMatchStatus),
+    reviseTargetAndOvers: wrapMutation(reviseTargetAndOvers),
+    setMatchOfficials: wrapMutation(setMatchOfficials),
+    substitutePlayer: wrapMutation(substitutePlayer),
+    useReview: wrapMutation(useReview),
+    setPowerplayOvers: wrapMutation(setPowerplayOvers),
+    toggleTimer: wrapMutation(toggleTimer),
+    addPenalty: wrapMutation(addPenalty),
+    advanceToNextInnings: wrapMutation(advanceToNextInnings),
     fetchMatchReport,
     fetchAnalytics,
     refresh: fetchMatchStatus,

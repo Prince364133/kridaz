@@ -179,10 +179,26 @@ export const computeScoreSnapshot = (scoring, match) => {
     };
   }).sort((a, b) => b.points - a.points).slice(0, 5); // Top 5 MVP candidates
 
+  // --- Innings & Match Completion Detection ---
+  const oversFinished = totalValidBalls >= (maxOvers * 6);
+  let isInningsComplete = isAllOut || oversFinished;
+  let isMatchComplete = false;
+
+  if (currentInningsIndex === 1) {
+    const targetReached = target !== null && totalRuns >= target;
+    if (targetReached) {
+      isInningsComplete = true;
+    }
+    isMatchComplete = isInningsComplete;
+  }
+
   return {
     matchId: scoring.gameId,
     battingTeamName,
     battingTeamImage,
+    date: match.date,
+    time: match.time,
+    scheduledStartAt: match.scheduledStartAt,
     totalRuns,
     totalWickets,
     runs: totalRuns,
@@ -201,6 +217,7 @@ export const computeScoreSnapshot = (scoring, match) => {
     bowler: currentBowler,
     result: scoring.status === "COMPLETED" ? "Match Ended" : null,
     status: match.status,
+    timerState: scoring.timerState,
     isLive: match.isLive ?? false,
     matchName: match.name,
     teamA: match.teamA,
@@ -214,7 +231,33 @@ export const computeScoreSnapshot = (scoring, match) => {
       batting: currentInnings.battingTeamReviews ?? 2,
       fielding: currentInnings.fieldingTeamReviews ?? 2
     },
-    powerplayOvers: currentInnings.powerplayOvers || 0
+    powerplayOvers: currentInnings.powerplayOvers || 0,
+    isInningsComplete,
+    isMatchComplete,
+    currentInningsIndex,
+    location: match.city || match.state ? `${match.city || ''} ${match.state || ''}`.trim() : null,
+    venueId: match.turfId || null,
+    ground: match.ground || match.customVenue || null,
+    ballType: match.ballType || null,
+    format: match.format || match.gameType || null,
+    professionals: (() => {
+      const pros = [];
+      if (match.umpire?.name) pros.push({ id: match.umpire.id, name: match.umpire.name, role: 'Umpire', profilePicture: match.umpire.profilePicture });
+      else if (match.customUmpire?.name) pros.push({ name: match.customUmpire.name, role: 'Umpire' });
+
+      if (match.scorer?.name) pros.push({ id: match.scorer.id, name: match.scorer.name, role: 'Scorer', profilePicture: match.scorer.profilePicture });
+      else if (match.customScorer?.name) pros.push({ name: match.customScorer.name, role: 'Scorer' });
+
+      if (match.streamer?.name) pros.push({ id: match.streamer.id, name: match.streamer.name, role: 'Streamer', profilePicture: match.streamer.profilePicture });
+      else if (match.customStreamer?.name) pros.push({ name: match.customStreamer.name, role: 'Streamer' });
+
+      if (Array.isArray(match.customProfessionals)) {
+        match.customProfessionals.forEach(p => {
+          if (p?.name) pros.push({ name: p.name, role: p.role || 'Official' });
+        });
+      }
+      return pros;
+    })(),
   };
 };
 

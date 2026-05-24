@@ -43,14 +43,14 @@ export default function PenaltyModal({ matchData, onClose, onConfirm }) {
                 onClick={() => setSelectedTeam(teamA?.id || teamA?._id)}
                 className={`flex-1 py-3 px-2 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${selectedTeam === (teamA?.id || teamA?._id) ? 'bg-[#00C187]/20 border border-[#00C187]/50 text-[#00C187]' : 'bg-white/5 border border-white/5 text-neutral-400 hover:text-white'}`}
               >
-                {teamA?.name || 'Team A'}
+                {teamA?.name || 'TBD'}
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedTeam(teamB?.id || teamB?._id)}
                 className={`flex-1 py-3 px-2 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${selectedTeam === (teamB?.id || teamB?._id) ? 'bg-[#00C187]/20 border border-[#00C187]/50 text-[#00C187]' : 'bg-white/5 border border-white/5 text-neutral-400 hover:text-white'}`}
               >
-                {teamB?.name || 'Team B'}
+                {teamB?.name || 'TBD'}
               </button>
             </div>
           </div>

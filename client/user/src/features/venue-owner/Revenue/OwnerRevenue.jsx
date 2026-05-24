@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
 /**
- * OwnerRevenue GÇö Financial intelligence and earnings portal.
+ * OwnerRevenue Rs ï¿½ Financial intelligence and earnings portal.
  * Fully rebranded for the Scorer Portal with Teal Green (#00C187) and Inter font.
  * Layout optimized: 6 cards in one line.
  */
@@ -40,7 +40,7 @@ export default function OwnerRevenue() {
   const handleWithdrawSubmit = async (e) => {
     e.preventDefault();
     if (!withdrawAmount || parseFloat(withdrawAmount) < 500) {
-      toast.error("Minimum withdrawal threshold is Gé¦500", {
+      toast.error("Minimum withdrawal threshold is Rs 500", {
         style: { background: "#000", color: "#fff", border: `1px solid ${themeColor}`, fontSize: "10px", fontWeight: "black" }
       });
       return;
@@ -98,7 +98,7 @@ export default function OwnerRevenue() {
              <CheckCircle2 size={18} />
           </div>
           <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Usable Assets</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter" style={{ color: themeColor }}>Gé¦{(balances?.usable || 0).toLocaleString()}</h3>
+          <h3 className="text-2xl font-black font-inter tracking-tighter" style={{ color: themeColor }}>Rs {(balances?.usable || 0).toLocaleString()}</h3>
           <p className="text-[7px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Liquid / Available</p>
         </div>
 
@@ -107,7 +107,7 @@ export default function OwnerRevenue() {
              <Hourglass size={18} />
           </div>
           <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Review Pipeline</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-amber-500">Gé¦{(balances?.inProgress || 0).toLocaleString()}</h3>
+          <h3 className="text-2xl font-black font-inter tracking-tighter text-amber-500">Rs {(balances?.inProgress || 0).toLocaleString()}</h3>
           <p className="text-[7px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Escrow Window</p>
         </div>
 
@@ -116,7 +116,7 @@ export default function OwnerRevenue() {
              <AlertOctagon size={18} />
           </div>
           <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Disputed Assets</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-red-500">Gé¦{(balances?.dispute || 0).toLocaleString()}</h3>
+          <h3 className="text-2xl font-black font-inter tracking-tighter text-red-500">Rs {(balances?.dispute || 0).toLocaleString()}</h3>
           <p className="text-[7px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Frozen Assets</p>
         </div>
 
@@ -125,7 +125,7 @@ export default function OwnerRevenue() {
              <TrendingUp size={18} />
           </div>
           <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Lifetime Total</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Gé¦{(balances?.totalRevenue || 0).toLocaleString()}</h3>
+          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Rs {(balances?.totalRevenue || 0).toLocaleString()}</h3>
         </div>
 
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-5 flex flex-col relative overflow-hidden shadow-2xl transition-all duration-500 hover:border-white/10 group">
@@ -133,7 +133,7 @@ export default function OwnerRevenue() {
              <Landmark size={18} />
           </div>
           <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Total Dispatched</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Gé¦{(balances?.withdrawn || 0).toLocaleString()}</h3>
+          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Rs {(balances?.withdrawn || 0).toLocaleString()}</h3>
         </div>
 
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-5 flex flex-col relative overflow-hidden shadow-2xl transition-all duration-500 group hover:border-blue-500/20">
@@ -141,7 +141,7 @@ export default function OwnerRevenue() {
              <Calendar size={18} />
           </div>
           <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Future Total</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Gé¦{(balances?.pendingSettlements || 0).toLocaleString()}</h3>
+          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Rs {(balances?.pendingSettlements || 0).toLocaleString()}</h3>
         </div>
 
       </div>
@@ -175,7 +175,7 @@ export default function OwnerRevenue() {
                            </div>
                         </div>
                         <div className="text-right">
-                           <p className="text-2xl font-black text-white tracking-tighter">Gé¦{booking.ownerRevenue}</p>
+                           <p className="text-2xl font-black text-white tracking-tighter">Rs {booking.ownerRevenue}</p>
                         </div>
                      </div>
                    ))
@@ -238,7 +238,7 @@ export default function OwnerRevenue() {
                              </p>
                           </div>
                            <div className="text-right">
-                              <p className={`text-2xl font-black tracking-tighter ${colorClass}`} style={colorStyle || {}}>{sign} Gé¦{tx.amount}</p>
+                              <p className={`text-2xl font-black tracking-tighter ${colorClass}`} style={colorStyle || {}}>{sign} Rs {tx.amount}</p>
                            </div>
                        </div>
                      );
@@ -278,10 +278,10 @@ export default function OwnerRevenue() {
                     </div>
                     <div className="space-y-1">
                        <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: themeColor }}>Available Capital</p>
-                       <p className="text-4xl font-black tracking-tighter text-white font-inter">Gé¦{(balances?.usable || 0).toLocaleString()}</p>
+                       <p className="text-4xl font-black tracking-tighter text-white font-inter">Rs {(balances?.usable || 0).toLocaleString()}</p>
                        <div className="flex items-center gap-2 mt-2 text-[8px] text-neutral-500 font-black uppercase tracking-widest font-inter">
                           <ShieldCheck size={12} style={{ color: themeColor }} />
-                          Min: Gé¦500
+                          Min: Rs 500
                        </div>
                     </div>
                   </div>

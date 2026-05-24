@@ -828,9 +828,9 @@ export default function Home() {
  {isQuick ? (
  <>Casual {g.gameType} Match</>
  ) : (
- <>{g.teams?.teamA?.name || 'Team A'}{' '}
+ <>{g.teams?.teamA?.name || 'TBD'}{' '}
  <span className="text-[#55DEE8] ">VS</span>{' '}
- {g.teams?.teamB?.name || 'Team B'}</>
+ {g.teams?.teamB?.name || 'TBD'}</>
  )}
  </h3>
  <div className="flex items-center gap-1.5 mt-1.5">

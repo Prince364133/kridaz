@@ -18,6 +18,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
   const [winnerTeam, setWinnerTeam] = useState(null);
   const [decision, setDecision] = useState(null);
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const teams = [teamA, teamB].filter(Boolean);
 
@@ -29,9 +30,11 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
     }, 2000); // 2 second flip animation
   };
 
-  const handleStartMatch = () => {
+  const handleStartMatch = async () => {
     if (hasPassword && !password) return;
-    onConfirm({ winnerTeam, decision, password });
+    setIsSubmitting(true);
+    await onConfirm({ winnerTeam, decision, password });
+    setIsSubmitting(false);
   };
 
   return (
@@ -94,12 +97,20 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                 </div>
                 
                 {step === 'FLIP_IDLE' && (
-                  <button
-                    onClick={handleFlip}
-                    className="px-8 py-4 bg-[#00C187] text-black font-black uppercase tracking-widest rounded-2xl hover:bg-[#00e39f] hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,193,135,0.4)]"
-                  >
-                    Flip Coin
-                  </button>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={handleFlip}
+                      className="px-8 py-4 bg-[#00C187] text-black font-black uppercase tracking-widest rounded-2xl hover:bg-[#00e39f] hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,193,135,0.4)]"
+                    >
+                      Flip Coin
+                    </button>
+                    <button
+                      onClick={() => setStep('WINNER_SELECT')}
+                      className="px-8 py-3 bg-white/5 border border-white/10 text-neutral-400 font-bold uppercase tracking-widest rounded-2xl hover:bg-white/10 hover:text-white transition-all text-xs"
+                    >
+                      Skip & Enter Manually
+                    </button>
+                  </div>
                 )}
                 
                 {step === 'FLIPPING' && (
@@ -194,19 +205,27 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                 <div className="space-y-3 pt-2">
                   <button
                     onClick={handleStartMatch}
-                    disabled={hasPassword && !password}
-                    className="w-full py-4 bg-red-600 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-red-700 transition-all shadow-[0_0_20px_rgba(220,38,38,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={(hasPassword && !password) || isSubmitting}
+                    className="w-full py-4 bg-red-600 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-red-700 transition-all shadow-[0_0_20px_rgba(220,38,38,0.3)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    Start Match (00:00)
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        STARTING...
+                      </>
+                    ) : (
+                      'Start Match (00:00)'
+                    )}
                   </button>
                   <button
+                    disabled={isSubmitting}
                     onClick={() => {
                       setStep('FLIP_IDLE');
                       setWinnerTeam(null);
                       setDecision(null);
                       setCoinResult(null);
                     }}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-white/5 text-neutral-400 font-bold uppercase tracking-widest rounded-2xl hover:bg-white/10 hover:text-white transition-all text-[11px]"
+                    className={`w-full flex items-center justify-center gap-2 py-3 bg-white/5 text-neutral-400 font-bold uppercase tracking-widest rounded-2xl transition-all text-[11px] ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10 hover:text-white'}`}
                   >
                     <RotateCcw size={14} /> Re-Toss
                   </button>

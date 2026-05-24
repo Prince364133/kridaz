@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   X,
@@ -18,7 +18,8 @@ import {
   Shield,
   ShieldCheck,
   LogOut,
-  Trophy
+  Trophy,
+  Tag
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
@@ -69,11 +70,13 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       icon: HelpCircle,
       subItems: [
         { to: "/admin/support", label: "Tickets" },
-        { to: "/admin/disputes", label: "Disputes" },
+        { to: "/admin/disputes", label: "Booking Disputes" },
+        { to: "/admin/game-disputes", label: "Game Disputes" },
       ],
     },
     { to: "/admin/audit", label: "Audit Logs", icon: Shield },
     { to: "/admin/marketing", label: "Marketing", icon: Activity },
+    { to: "/admin/coupons", label: "Coupons", icon: Tag },
     { to: "/admin/blogs", label: "Blogs", icon: FileText },
     { to: "/admin/community", label: "Community", icon: Users },
     { to: "/admin/features", label: "Features", icon: ToggleRight },

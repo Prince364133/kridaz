@@ -51,7 +51,7 @@ const ScoringMatchCard = ({ match }) => {
                 <span className="text-white/40 font-black text-lg">{match.teamA?.name?.substring(0, 2)?.toUpperCase() || 'TA'}</span>
               )}
             </div>
-            <span className="text-white text-xs font-bold text-center">{match.teamA?.name || 'Team A'}</span>
+            <span className="text-white text-xs font-bold text-center">{match.teamA?.name || 'TBD'}</span>
           </div>
 
           <div className="flex flex-col items-center justify-center px-4">
@@ -66,7 +66,7 @@ const ScoringMatchCard = ({ match }) => {
                 <span className="text-white/40 font-black text-lg">{match.teamB?.name?.substring(0, 2)?.toUpperCase() || 'TB'}</span>
               )}
             </div>
-            <span className="text-white text-xs font-bold text-center">{match.teamB?.name || 'Team B'}</span>
+            <span className="text-white text-xs font-bold text-center">{match.teamB?.name || 'TBD'}</span>
           </div>
         </div>
 

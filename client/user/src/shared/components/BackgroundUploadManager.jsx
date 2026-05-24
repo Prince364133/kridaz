@@ -109,7 +109,8 @@ const BackgroundUploadManager = () => {
           storyId: dbId,
           key,
           mediaType: upload.file.type.startsWith('video') ? 'video' : 'image',
-          content: upload.metadata.content
+          content: upload.metadata.content,
+          durationDays: upload.metadata.durationDays
         }).unwrap();
       } else {
         await confirmReel({

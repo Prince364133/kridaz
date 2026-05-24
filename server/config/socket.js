@@ -12,8 +12,8 @@ const socketConfig = (server) => {
   io = new Server(server, {
     pingTimeout: 60000,
     cors: {
-      origin: process.env.CLIENT_URLS 
-        ? process.env.CLIENT_URLS.split(",").map((url) => url.trim()) 
+      origin: process.env.CLIENT_URLS
+        ? process.env.CLIENT_URLS.split(",").map((url) => url.trim())
         : ["https://kridaz.com", "https://owner.kridaz.com", "https://kridaz.vercel.app"],
     },
   });
@@ -26,7 +26,7 @@ const socketConfig = (server) => {
       const lockKey = 'kridaz:presence:broadcast:lock';
       // Attempt to set lock with a 1000ms expiration, only if it does not exist (NX)
       const acquired = await redis.set(lockKey, 'locked', 'PX', 1000, 'NX');
-      
+
       if (acquired) {
         const count = await redis.scard('kridaz:online:users');
         io.emit(SOCKET.ONLINE_USERS_COUNT, { count });
@@ -48,27 +48,39 @@ const socketConfig = (server) => {
       prisma.user.update({
         where: { id: userId },
         data: { lastSeen: new Date() }
-      }).catch(() => {});
+      }).catch(() => { });
 
       await redis.sadd('kridaz:online:users', userId.toString());
       await redis.expire('kridaz:online:users', 86400);
       schedulePresenceBroadcast();
-      
+
       socket.emit("connected");
     });
 
     socket.on(SOCKET.JOIN_CHAT, (room) => socket.join(room));
 
-    socket.on(SOCKET.JOIN_MATCH, (matchId) => {
+    socket.on(SOCKET.JOIN_MATCH, async (matchId) => {
       if (!matchId) return;
       socket.join(matchId);
       logger.info(`[Socket] Socket ${socket.id} joined match room: ${matchId}`);
+      try {
+        if (!matchId.includes("-")) {
+          const game = await prisma.hostedGame.findUnique({ where: { shortId: matchId }, select: { id: true } });
+          if (game) socket.join(game.id);
+        }
+      } catch (e) { }
     });
 
-    socket.on(SOCKET.OVERLAY_JOIN, ({ matchId, token }) => {
+    socket.on(SOCKET.OVERLAY_JOIN, async ({ matchId, token }) => {
       if (!matchId) return;
       socket.join(matchId);
       logger.info(`[Socket] Socket ${socket.id} joined overlay match room: ${matchId} (token: ${token})`);
+      try {
+        if (!matchId.includes("-")) {
+          const game = await prisma.hostedGame.findUnique({ where: { shortId: matchId }, select: { id: true } });
+          if (game) socket.join(game.id);
+        }
+      } catch (e) { }
     });
 
     socket.on("typing", (room) => socket.in(room).emit("typing", room));
@@ -128,21 +140,21 @@ const socketConfig = (server) => {
 
         if (!socket.lastDbLocationWrite || now - socket.lastDbLocationWrite > 30000) {
           // Update PostGIS location in Postgres
-            await prisma.$executeRaw`
+          await prisma.$executeRaw`
               UPDATE "User" 
               SET "geoPoint" = ST_GeomFromText(${`POINT(${lng} ${lat})`}, 4326)::geography,
                   latitude = ${lat},
                   longitude = ${lng}
               WHERE id = ${socket.userId}
             `;
-            // Sync with UserProfile
-            await prisma.$executeRaw`
+          // Sync with UserProfile
+          await prisma.$executeRaw`
               UPDATE "UserProfile" 
               SET latitude = ${lat}, 
                   longitude = ${lng}
               WHERE "userId" = ${socket.userId}
             `;
-            socket.lastDbLocationWrite = now;
+          socket.lastDbLocationWrite = now;
         }
 
         await redis.geoadd("kridaz:geo:online", lng, lat, socket.userId.toString());
@@ -163,10 +175,10 @@ const socketConfig = (server) => {
     socket.on("scoring:acquire_lock", async ({ matchId }) => {
       if (!matchId) return;
       socket.join(`scoring_wait_${matchId}`);
-      
+
       const lockKey = `kridaz:scoring_lock:${matchId}`;
       const currentLock = await redis.get(lockKey);
-      
+
       let isStale = false;
       if (currentLock && currentLock !== socket.id) {
         try {
@@ -178,7 +190,7 @@ const socketConfig = (server) => {
           isStale = true; // Assume stale if we can't verify across redis nodes
         }
       }
-      
+
       if (!currentLock || currentLock === socket.id || isStale) {
         // Grant lock
         await redis.set(lockKey, socket.id, 'EX', 10800); // 3 hours
@@ -194,7 +206,7 @@ const socketConfig = (server) => {
       if (!matchId) return;
       const lockKey = `kridaz:scoring_lock:${matchId}`;
       const currentLock = await redis.get(lockKey);
-      
+
       if (currentLock === socket.id) {
         await redis.del(lockKey);
         socket.scoringMatchId = null;
@@ -205,7 +217,7 @@ const socketConfig = (server) => {
 
     socket.on("disconnect", async () => {
       // TODO (Prometheus P4-2): Decrement socket_connections_total gauge here
-      
+
       if (socket.scoringMatchId) {
         const lockKey = `kridaz:scoring_lock:${socket.scoringMatchId}`;
         const currentLock = await redis.get(lockKey);
@@ -220,7 +232,7 @@ const socketConfig = (server) => {
         prisma.user.update({
           where: { id: socket.userId },
           data: { lastSeen }
-        }).catch(() => {});
+        }).catch(() => { });
 
         await redis.srem('kridaz:online:users', socket.userId.toString());
         schedulePresenceBroadcast();

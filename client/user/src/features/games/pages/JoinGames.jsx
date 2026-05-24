@@ -27,7 +27,7 @@ const CricketBallIcon = ({ size = 12, className = '' }) => (
 const JoinGames = () => {
  const navigate = useNavigate();
  const { gateInteraction } = useLoginOnDemand();
- const { isAuthenticated } = useSelector((/** @type {any} */ state) => state.auth);
+ const { isAuthenticated, user } = useSelector((/** @type {any} */ state) => state.auth);
  const [games, setGames] = useState([]);
  const [loading, setLoading] = useState(true);
  const [selectedGame, setSelectedGame] = useState(null);
@@ -69,41 +69,64 @@ const JoinGames = () => {
  }
  };
 
- useEffect(() => {
- const fetchUserAndGames = async () => {
- try {
- const userRes = await axiosInstance.get(`/api/user/auth/getMe`);
- const user = userRes.data.user;
- if (user?.city || user?.state) {
- setUserLocation({ city: user.city || '', state: user.state || '' });
- setSelectedState(user.state || '');
- setSelectedCity(user.city || '');
- fetchGames(user.city, user.state);
- } else {
- fetchGames();
- }
- } catch (err) {
- fetchGames();
- }
- };
- fetchUserAndGames();
+  const normalizeString = (str) => {
+    return str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
+  };
 
- // Load all Indian states for the dropdown
- const loadStates = async () => {
- setLoadingStates(true);
- const data = await fetchStates();
- setStates(data);
- setLoadingStates(false);
- };
- loadStates();
+  useEffect(() => {
+    const initializePage = async () => {
+      try {
+        setLoadingStates(true);
+        const statesData = await fetchStates();
+        setStates(statesData);
+        setLoadingStates(false);
 
- // Check for deep-link inviteToken
- const params = new URLSearchParams(window.location.search);
- const token = params.get('inviteToken');
- if (token) {
- handleVerifyInvite(token);
- }
- }, []);
+        let uCity = '';
+        let uState = '';
+        try {
+          const userRes = await axiosInstance.get(`/api/user/auth/getMe`);
+          const user = userRes.data.user;
+          if (user?.city || user?.state) {
+            uCity = user.city || '';
+            uState = user.state || '';
+          }
+        } catch (e) {
+          // ignore auth errors if user not logged in
+        }
+
+        let matchedState = '';
+        if (uState) {
+          matchedState = statesData.find(s => normalizeString(s) === normalizeString(uState)) || '';
+        }
+
+        let matchedCity = '';
+        if (matchedState && uCity) {
+          const citiesData = await fetchCities(matchedState);
+          setCities(citiesData);
+          matchedCity = citiesData.find(c => normalizeString(c) === normalizeString(uCity)) || '';
+        }
+
+        if (matchedCity || matchedState) {
+          setUserLocation({ city: matchedCity, state: matchedState });
+          setSelectedState(matchedState);
+          setSelectedCity(matchedCity);
+          fetchGames(matchedCity, matchedState);
+        } else {
+          fetchGames();
+        }
+      } catch (err) {
+        fetchGames();
+      }
+    };
+    initializePage();
+
+    // Check for deep-link inviteToken
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('inviteToken');
+    if (token) {
+      handleVerifyInvite(token);
+    }
+  }, []);
 
  const handleVerifyInvite = async (token) => {
  try {
@@ -193,12 +216,19 @@ const JoinGames = () => {
 
  const handleSearch = (e) => setSearch(e.target.value);
 
- const filteredGames = games.filter(game => {
+  const filteredGames = games.filter(game => {
+    if (!game) return false;
+    const currentUserId = user?.id || user?._id;
+    
+    if (matchTypeFilter === 'My Hosted Games') {
+      if (!currentUserId || (game.hostId !== currentUserId && game.host?._id !== currentUserId && game.host?.id !== currentUserId)) {
+        return false;
+      }
+    }
+
     if (matchTypeFilter === 'Live' && !game.isLive) return false;
     if (matchTypeFilter === 'Quick' && game.gameMode?.toUpperCase() !== 'QUICK') return false;
     if (matchTypeFilter === 'Professional' && game.gameMode?.toUpperCase() !== 'PROFESSIONAL') return false;
-
-    if (!game) return false;
 
     const searchLower = search ? search.toLowerCase() : '';
     if (!searchLower) return true;
@@ -217,7 +247,7 @@ const JoinGames = () => {
  gateInteraction(async () => {
  try {
  const res = await axiosInstance.post(`/api/hosted-game/join`, {
- gameId: selectedGame._id,
+ gameId: selectedGame.id,
  team: joiningSlot.team,
  slotIndex: joiningSlot.index,
  role: joiningSlot.role
@@ -366,6 +396,7 @@ const JoinGames = () => {
           onChange={(e) => setMatchTypeFilter(e.target.value)}
         >
           <option className="bg-[#0a0a0a] text-white" value="All Matches">All Matches</option>
+          <option className="bg-[#0a0a0a] text-white" value="My Hosted Games">My Hosted Games</option>
           <option className="bg-[#0a0a0a] text-white" value="Live">Live Matches</option>
           <option className="bg-[#0a0a0a] text-white" value="Quick">Quick Matches</option>
           <option className="bg-[#0a0a0a] text-white" value="Professional">Professional</option>
@@ -415,7 +446,7 @@ const JoinGames = () => {
 
   return (
    <motion.div
-   key={game._id}
+   key={game.id}
    initial={{ opacity: 0, y: 20 }}
    animate={{ opacity: 1, y: 0 }}
    whileHover={{ y: -6, scale: 1.01 }}
@@ -493,7 +524,7 @@ const JoinGames = () => {
    onClick={(e) => {
    if (game.isLive || game.scoringStatus === 'IN_PROGRESS') {
    e.stopPropagation();
-   navigate(`/live-score/${game._id}`);
+   navigate(`/analytics/${game.shortId || game._id}`);
    } else {
    setSelectedGame(game);
    }
@@ -632,8 +663,6 @@ const JoinGames = () => {
   { label: "Time", value: selectedGame.time },
   { label: "Fee", value: selectedGame.perPlayerCharge ? `${selectedGame.perPlayerCharge} Coins` : 'Free' },
   { label: "Umpire", value: selectedGame.umpire ? 'Verified' : 'Unmanaged' },
-  { label: "Streamer", value: selectedGame.streamer || 'None' },
-  { label: "Scorer", value: selectedGame.scorer || 'None' },
   ].map((stat, i, arr) => (
   <div key={i} className="flex items-center">
   <div className="px-4 py-1 text-center">
@@ -666,6 +695,12 @@ const JoinGames = () => {
   disabled={isJoined}
   onClick={() => {
   if (!isAuthenticated) { toast.error("Please login to join this game"); navigate('/login'); return; }
+  const currentUserId = user?.id || user?._id;
+  const hasAlreadyJoined = selectedGame.quickSlots?.some(s => s.userId === currentUserId || s.user?._id === currentUserId || s.user?.id === currentUserId);
+  if (hasAlreadyJoined) {
+    toast.error("You have already joined a slot in this game.");
+    return;
+  }
   setJoiningSlot({ team: 'QUICK', index: sIdx, role: slot.role });
   setShowConfirm(true);
   }}
@@ -675,14 +710,14 @@ const JoinGames = () => {
   {isJoined ? (
   slot.user?.profilePicture
   ? <img src={slot.user.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
-  : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[9px] md:text-[11px] font-bold text-white">{slot.user?.name?.[0]?.toUpperCase() || 'P'}</div>
+  : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[9px] md:text-[11px] font-bold text-white">{(slot.user?.name || slot.customPlayer?.name)?.[0]?.toUpperCase() || 'P'}</div>
   ) : <span className="text-white/25 text-lg font-bold">+</span>}
   <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#08080a] border border-white/10 flex items-center justify-center">
   <RoleIcon size={8} className="text-[#55DEE8]" />
   </div>
   </button>
   <span className="font-inter text-[8px] text-white/40 uppercase tracking-wide text-center truncate w-full">
-  {isJoined ? (slot.user?.name?.split(' ')[0] || 'Player') : ''}
+  {isJoined ? ((slot.user?.name || slot.customPlayer?.name)?.split(' ')[0] || 'Player') : ''}
   </span>
   </div>
   );
@@ -709,6 +744,13 @@ const JoinGames = () => {
   disabled={isJoined}
   onClick={() => {
   if (!isAuthenticated) { toast.error("Please login to join this game"); navigate('/login'); return; }
+  const currentUserId = user?.id || user?._id;
+  const hasAlreadyJoined = selectedGame.teams?.teamA?.slots?.some(s => s.userId === currentUserId || s.user?._id === currentUserId || s.user?.id === currentUserId) ||
+                           selectedGame.teams?.teamB?.slots?.some(s => s.userId === currentUserId || s.user?._id === currentUserId || s.user?.id === currentUserId);
+  if (hasAlreadyJoined) {
+    toast.error("You have already joined a slot in this game.");
+    return;
+  }
   setJoiningSlot({ team: teamKey === 'teamA' ? 'A' : 'B', index: sIdx, role: slot.role });
   setShowConfirm(true);
   }}
@@ -718,14 +760,14 @@ const JoinGames = () => {
   {isJoined ? (
   slot.user?.profilePicture
   ? <img src={slot.user.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
-  : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[10px] font-bold text-white">{slot.user?.name?.[0]?.toUpperCase() || 'P'}</div>
+  : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[10px] font-bold text-white">{(slot.user?.name || slot.customPlayer?.name)?.[0]?.toUpperCase() || 'P'}</div>
   ) : <span className="text-white/25 text-base font-bold">+</span>}
   <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#08080a] border border-white/10 flex items-center justify-center">
   <RoleIcon size={8} className="text-[#55DEE8]" />
   </div>
   </button>
   <span className="font-inter text-[8px] text-white/40 uppercase tracking-wide text-center truncate w-full">
-  {isJoined ? (slot.user?.name?.split(' ')[0] || 'Player') : ''}
+  {isJoined ? ((slot.user?.name || slot.customPlayer?.name)?.split(' ')[0] || 'Player') : ''}
   </span>
   </div>
   );

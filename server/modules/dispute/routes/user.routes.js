@@ -3,6 +3,7 @@ import { raiseDispute, replyToDispute, getUserDisputes, getDisputeById } from ".
 import verifyToken from "../../../middleware/jwt/user.middleware.js";
 import { validate } from "../../../middleware/validate.middleware.js";
 import { raiseDisputeSchema, replyToDisputeSchema } from "../dispute.validator.js";
+import upload from "../../../middleware/uploads/upload.middleware.js";
 
 const router = Router();
 
@@ -31,7 +32,7 @@ router.get("/", getUserDisputes);
  *     summary: Raise a new dispute
  *     tags: [Dispute]
  */
-router.post("/raise", validate(raiseDisputeSchema), raiseDispute);
+router.post("/raise", upload.array('disputeImages', 5), validate(raiseDisputeSchema), raiseDispute);
 
 /**
  * @swagger

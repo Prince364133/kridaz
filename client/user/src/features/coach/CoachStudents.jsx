@@ -29,7 +29,7 @@ export default function CoachStudents() {
     <div className="h-full custom-scrollbar bg-[#000000]">
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative font-['Open_Sans']">
         
-        {/* Header Section GÇö Exact Copy of Dashboard Design */}
+        {/* Header Section Rs ï¿½ Exact Copy of Dashboard Design */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 pb-2 border-b border-white/5">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
@@ -53,7 +53,7 @@ export default function CoachStudents() {
                   {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
                 </p>
                 <p className="text-[#55DEE8] text-[10px] font-semibold uppercase tracking-widest opacity-80">
-                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} GÇó{" "}
+                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} Rs ï¿½{" "}
                   {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
                 </p>
               </div>

@@ -278,7 +278,7 @@ export default function StreamerMatches() {
                   </span>
                 </div>
                 <h3 className="text-2xl font-black text-white uppercase tracking-tight">
-                  {globalMatch.teams?.teamA?.name || 'Team A'} VS {globalMatch.teams?.teamB?.name || 'Team B'}
+                  {globalMatch.teams?.teamA?.name || 'TBD'} VS {globalMatch.teams?.teamB?.name || 'TBD'}
                 </h3>
                 <div className="flex flex-wrap gap-6">
                    <div className="flex items-center gap-2 text-xs font-bold text-gray-400">

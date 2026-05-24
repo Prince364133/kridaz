@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React, { useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
   MapPin, 
@@ -20,11 +20,48 @@ import useBookingPass from "../hooks/useBookingPass";
 import { motion } from "framer-motion";
 import useSimilarRecommendations from "@hooks/useSimilarRecommendations";
 import { TurfCard } from "@features/turf";
+import html2canvas from "html2canvas";
+import toast from "react-hot-toast";
 
 const BookingPass = () => {
   const { id } = useParams();
   const { booking, loading } = useBookingPass(id);
-  
+  const passRef = useRef(null);
+
+  const handleDownload = async () => {
+    if (!passRef.current) return;
+    try {
+      const toastId = toast.loading("Generating pass...");
+      const canvas = await html2canvas(passRef.current, { scale: 2, useCORS: true, backgroundColor: "#0A0A0A" });
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = image;
+      link.download = `Booking_Pass_${booking?.turf?.name?.replace(/\s+/g, '_') || 'Kridaz'}.png`;
+      link.click();
+      toast.success("Pass downloaded successfully!", { id: toastId });
+    } catch (error) {
+      console.error("Error generating pass:", error);
+      toast.error("Failed to download pass.");
+    }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Kridaz Booking Pass: ${booking?.turf?.name}`,
+          text: `Check out my booking at ${booking?.turf?.name} on ${booking?.timeSlot?.date} at ${booking?.timeSlot?.formattedStartTime}!`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.error("Error sharing:", error);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copied to clipboard!");
+    }
+  };
+
   const turfId = booking?.turf?.id || booking?.turf?._id;
   const { similarTurfs, loading: similarLoading } = useSimilarRecommendations(turfId, { limit: 3 });
 
@@ -73,10 +110,10 @@ const BookingPass = () => {
             Back
           </Link>
           <div className="flex gap-3">
-            <button className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-[#84CC16] transition-all">
+            <button onClick={handleDownload} className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-[#84CC16] transition-all">
               <Download size={18} />
             </button>
-            <button className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-[#84CC16] transition-all">
+            <button onClick={handleShare} className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-[#84CC16] transition-all">
               <Share2 size={18} />
             </button>
           </div>
@@ -92,7 +129,7 @@ const BookingPass = () => {
           <div className="absolute -inset-4 bg-[#84CC16]/10 blur-3xl rounded-[40px] pointer-events-none" />
 
           {/* Pass Body */}
-          <div className="relative bg-[#0A0A0A] border border-white/10 rounded-[40px] overflow-hidden shadow-2xl">
+          <div ref={passRef} className="relative bg-[#0A0A0A] border border-white/10 rounded-[40px] overflow-hidden shadow-2xl">
             {/* Top Section: Venue Image & Basic Info */}
             <div className="relative h-48 sm:h-56">
               <img 
@@ -295,9 +332,9 @@ const BookingPass = () => {
 
         {/* Action Buttons */}
         <div className="mt-8 grid grid-cols-2 gap-4">
-           <button className="w-full bg-zinc-900 border border-zinc-800 text-white h-14 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-zinc-800 transition-all flex items-center justify-center gap-2">
+           <button onClick={handleDownload} className="w-full bg-zinc-900 border border-zinc-800 text-white h-14 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-zinc-800 transition-all flex items-center justify-center gap-2">
               <Download size={14} />
-              Save PDF
+              Save Pass Image
            </button>
            <button 
              onClick={() => window.print()}

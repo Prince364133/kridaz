@@ -239,12 +239,12 @@ export const getCoachDashboardData = async (req, res) => {
 
     const [revenueData, revenueOverTimeRaw] = await Promise.all([
       prisma.walletTransaction.aggregate({
-        where: { userId: userId, status: "SUCCESS", type: { not: "DEBIT" } },
+        where: { userId: userId, status: "SUCCESS", type: { notIn: ["DEBIT", "TOPUP", "REFUND", "WITHDRAWAL"] } },
         _sum: { amount: true }
       }),
       prisma.walletTransaction.groupBy({
         by: ['createdAt'],
-        where: { userId: userId, status: "SUCCESS", type: { not: "DEBIT" }, createdAt: { gte: sevenDaysAgo } },
+        where: { userId: userId, status: "SUCCESS", type: { notIn: ["DEBIT", "TOPUP", "REFUND", "WITHDRAWAL"] }, createdAt: { gte: sevenDaysAgo } },
         _sum: { amount: true },
         orderBy: { createdAt: 'asc' }
       })
@@ -348,12 +348,12 @@ export const getUmpireDashboardData = async (req, res) => {
 
     const [revenueData, revenueOverTimeRaw] = await Promise.all([
       prisma.walletTransaction.aggregate({
-        where: { userId: userId, status: "SUCCESS", type: { not: "DEBIT" } },
+        where: { userId: userId, status: "SUCCESS", type: { notIn: ["DEBIT", "TOPUP", "REFUND", "WITHDRAWAL"] } },
         _sum: { amount: true }
       }),
       prisma.walletTransaction.groupBy({
         by: ['createdAt'],
-        where: { userId: userId, status: "SUCCESS", type: { not: "DEBIT" }, createdAt: { gte: sevenDaysAgo } },
+        where: { userId: userId, status: "SUCCESS", type: { notIn: ["DEBIT", "TOPUP", "REFUND", "WITHDRAWAL"] }, createdAt: { gte: sevenDaysAgo } },
         _sum: { amount: true },
         orderBy: { createdAt: 'asc' }
       })
@@ -471,12 +471,12 @@ export const getStreamerDashboardData = async (req, res) => {
 
     const [revenueData, revenueOverTimeRaw] = await Promise.all([
       prisma.walletTransaction.aggregate({
-        where: { userId: userId, status: "SUCCESS", type: { not: "DEBIT" } },
+        where: { userId: userId, status: "SUCCESS", type: { notIn: ["DEBIT", "TOPUP", "REFUND", "WITHDRAWAL"] } },
         _sum: { amount: true }
       }),
       prisma.walletTransaction.groupBy({
         by: ['createdAt'],
-        where: { userId: userId, status: "SUCCESS", type: { not: "DEBIT" }, createdAt: { gte: sevenDaysAgo } },
+        where: { userId: userId, status: "SUCCESS", type: { notIn: ["DEBIT", "TOPUP", "REFUND", "WITHDRAWAL"] }, createdAt: { gte: sevenDaysAgo } },
         _sum: { amount: true },
         orderBy: { createdAt: 'asc' }
       })
@@ -619,7 +619,7 @@ export const getScorerDashboardData = async (req, res) => {
       where: {
         userId: scorerUserId,
         status: "SUCCESS",
-        type: { not: "DEBIT" }
+        type: { notIn: ["DEBIT", "TOPUP", "REFUND", "WITHDRAWAL"] }
       }
     });
 

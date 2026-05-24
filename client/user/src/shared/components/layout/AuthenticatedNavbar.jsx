@@ -26,7 +26,7 @@ import useNotifications from "@hooks/shared/useNotifications";
 import { formatDistanceToNow } from 'date-fns';
 
 /**
- * AuthenticatedNavbar G�� Role-aware top navigation.
+ * AuthenticatedNavbar Rs � Role-aware top navigation.
  * Fully rebranded for Scorer users with Teal Green (#00C187) and Inter typography.
  */
 

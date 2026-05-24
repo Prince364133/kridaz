@@ -236,7 +236,7 @@ const ReelItem = ({ reel, isVisible }) => {
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <h3 className="text-white font-bold text-[15px]">@{reel.creatorId?.username || 'kridaz_user'}</h3>
-              <span className="text-white/40 text-xs">G��</span>
+              <span className="text-white/40 text-xs">Rs �</span>
               <button className="text-white border border-white/40 px-3 py-0.5 rounded-md text-[11px] font-bold hover:bg-white/10 transition-colors">
                 Follow
               </button>
@@ -255,7 +255,7 @@ const ReelItem = ({ reel, isVisible }) => {
           <Music size={12} className="text-white animate-spin-slow" />
           <div className="overflow-hidden w-32">
             <p className="text-white text-[11px] font-semibold whitespace-nowrap animate-marquee">
-              Original Audio G�� {reel.creatorId?.name || 'Kridaz Audio'}
+              Original Audio Rs � {reel.creatorId?.name || 'Kridaz Audio'}
             </p>
           </div>
         </div>

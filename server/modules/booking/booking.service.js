@@ -584,7 +584,7 @@ export const processWalletBooking = async (userId, bookingData) => {
  * @returns {Promise<object|null>}
  */
 export const findBookingDetailsById = async (id) => {
-  return prisma.booking.findUnique({
+  const booking = await prisma.booking.findUnique({
     where: { id },
     include: {
       timeSlot: true,
@@ -598,6 +598,72 @@ export const findBookingDetailsById = async (id) => {
       user: { select: { id: true, name: true, profilePicture: true, email: true, phone: true } }
     }
   });
+
+  if (booking) return booking;
+
+  // Fallback: Check if the ID belongs to a HostedGame
+  const hostedGame = await prisma.hostedGame.findUnique({
+    where: { id },
+    include: {
+      turf: {
+        include: {
+          owner: {
+            include: { user: true }
+          }
+        }
+      },
+      host: { select: { id: true, name: true, profilePicture: true, email: true, phone: true } }
+    }
+  });
+
+  if (hostedGame && hostedGame.turf) {
+    let startTime;
+    if (hostedGame.time && hostedGame.time.includes(':')) {
+      const [startHour, startMinute] = hostedGame.time.split(':');
+      startTime = new Date(hostedGame.date);
+      startTime.setHours(parseInt(startHour, 10), parseInt(startMinute, 10), 0, 0);
+    } else {
+      startTime = new Date(hostedGame.date);
+    }
+
+    const endTime = new Date(startTime);
+    endTime.setHours(startTime.getHours() + 3);
+
+    const turfPrice = hostedGame.turf?.pricePerHour || 1500;
+    const finalPrice = Number(hostedGame.totalCost) || Number(hostedGame.groundCost) || turfPrice;
+    
+    const QRcode = await generateQRCode(`${process.env.USER_URL || 'https://kridaz.com'}/booking-pass/${hostedGame.id}`);
+
+    return {
+      id: hostedGame.id,
+      userId: hostedGame.hostId,
+      turfId: hostedGame.turfId,
+      playStartTime: startTime,
+      playEndTime: endTime,
+      totalPrice: finalPrice,
+      paidAmount: finalPrice,
+      balanceAmount: 0,
+      advanceAmount: finalPrice,
+      paymentType: "FULL",
+      paymentMethod: "WALLET",
+      paymentStatus: "SUCCESS",
+      status: "CONFIRMED",
+      createdAt: hostedGame.createdAt,
+      qrCode: QRcode,
+      timeSlot: {
+        id: "game_slot_" + hostedGame.id,
+        turfId: hostedGame.turfId,
+        startTime: startTime,
+        endTime: endTime,
+        price: finalPrice
+      },
+      turf: hostedGame.turf,
+      user: hostedGame.host,
+      isGameTicket: true
+    };
+  }
+
+  return null;
 };
 
 /**
@@ -606,14 +672,70 @@ export const findBookingDetailsById = async (id) => {
  * @returns {Promise<Array>}
  */
 export const findBookingsByUserDetailed = async (userId) => {
-  return prisma.booking.findMany({
+  const standardBookings = await prisma.booking.findMany({
     where: { userId },
-    orderBy: { createdAt: 'desc' },
     include: {
       timeSlot: true,
       turf: true
     }
   });
+
+  const hostedGames = await prisma.hostedGame.findMany({
+    where: { hostId: userId },
+    include: {
+      turf: true
+    }
+  });
+
+  const formattedHostedGames = hostedGames.map(game => {
+    let startTime;
+    if (game.time && game.time.includes(':')) {
+      const [startHour, startMinute] = game.time.split(':');
+      startTime = new Date(game.date);
+      startTime.setHours(parseInt(startHour, 10), parseInt(startMinute, 10), 0, 0);
+    } else {
+      startTime = new Date(game.date);
+    }
+
+    const endTime = new Date(startTime);
+    endTime.setHours(startTime.getHours() + 3);
+
+    const turfPrice = game.turf?.pricePerHour || 1500;
+    const finalPrice = Number(game.totalCost) || Number(game.groundCost) || turfPrice;
+
+    return {
+      id: game.id,
+      userId: game.hostId,
+      turfId: game.turfId,
+      playStartTime: startTime,
+      playEndTime: endTime,
+      totalPrice: finalPrice,
+      paidAmount: finalPrice,
+      balanceAmount: 0,
+      advanceAmount: finalPrice,
+      paymentType: "FULL",
+      paymentMethod: "WALLET",
+      paymentStatus: "SUCCESS",
+      status: "CONFIRMED",
+      createdAt: game.createdAt,
+      timeSlot: {
+        id: "game_slot_" + game.id,
+        turfId: game.turfId,
+        startTime: startTime,
+        endTime: endTime,
+        price: finalPrice
+      },
+      turf: game.turf,
+      isGameTicket: true
+    };
+  });
+
+  const allBookings = [...standardBookings, ...formattedHostedGames];
+  
+  // Sort descending by createdAt
+  allBookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  return allBookings;
 };
 
 /**

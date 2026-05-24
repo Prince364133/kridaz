@@ -102,7 +102,7 @@ export default function StreamSetup() {
         
         setFormData(prev => ({
           ...prev,
-          title: `${matchData.teams?.teamA?.name || 'Team A'} vs ${matchData.teams?.teamB?.name || 'Team B'} - Kridaz Live`
+          title: `${matchData.teams?.teamA?.name || 'TBD'} vs ${matchData.teams?.teamB?.name || 'TBD'} - Kridaz Live`
         }));
 
         // Fetch YouTube accounts
@@ -418,7 +418,7 @@ export default function StreamSetup() {
 
   const isStreamActive = match.isLive && (match.youtubeStreamKey || match.facebookStreamKey);
   const overlayUrl = `${window.location.origin}/live-overlay/${id}?token=${match.overlayToken || ''}`;
-  const scoreboardUrl = `${window.location.origin}/live-score/${id}`;
+  const scoreboardUrl = `${window.location.origin}/analytics/${id}`;
   
   const isOfficialsApproved = 
     (match.umpireRequest?.status === 'APPROVED' || match.umpire) && 
@@ -968,8 +968,8 @@ export default function StreamSetup() {
 
                  <div className="space-y-2">
                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4 flex justify-between">
-                     Viewer Scoreboard URL
-                     <button onClick={() => copyToClipboard(scoreboardUrl, "Scoreboard URL")} className="text-violet-400 hover:text-violet-300 flex items-center gap-1">
+                     Viewer Match Analytics URL
+                     <button onClick={() => copyToClipboard(scoreboardUrl, "Match Analytics URL")} className="text-violet-400 hover:text-violet-300 flex items-center gap-1">
                        <Copy size={12} /> Copy
                      </button>
                    </label>

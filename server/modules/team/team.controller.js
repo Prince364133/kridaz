@@ -191,6 +191,7 @@ export const getMyTeams = async (req, res) => {
             }
           }
         },
+        customMembers: true,
         owner: {
           select: { id: true, name: true, profilePicture: true }
         },
@@ -481,6 +482,7 @@ export const getTeamById = async (req, res) => {
             }
           }
         },
+        customMembers: true,
         Team_A: {
           select: {
             id: true,
@@ -843,21 +845,25 @@ export const inviteMembers = async (req, res) => {
         results.push({ user: invitee.userId, status: "invited" });
       } else {
         // Invite non-registered user
-        const existingUser = await prisma.user.findFirst({
-          where: {
-            OR: [
-              invitee.email ? { email: invitee.email } : {},
-              invitee.phone ? { phone: invitee.phone } : {}
-            ]
-          }
-        });
+        const orConditions = [];
+        if (invitee.email) orConditions.push({ email: invitee.email });
+        if (invitee.phone) orConditions.push({ phone: invitee.phone });
 
+        let existingUser = null;
+        if (orConditions.length > 0) {
+          existingUser = await prisma.user.findFirst({
+            where: { OR: orConditions }
+          });
+        }
+  
         if (existingUser) {
           results.push({ 
             email: invitee.email, 
             phone: invitee.phone, 
             status: "error", 
-            message: "User already registered. Invite by user ID instead." 
+            message: "User already registered. Invite by user ID instead.",
+            existingUserId: existingUser.id,
+            existingUserName: existingUser.name
           });
           continue;
         }

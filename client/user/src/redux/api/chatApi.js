@@ -153,7 +153,16 @@ export const chatApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getChats: builder.query({
       query: () => "/api/chat",
-      transformResponse: (response) => Array.isArray(response) ? response.map(transformChat) : response,
+      transformResponse: (response) => {
+        if (Array.isArray(response)) return response.map(transformChat);
+        if (response && response.chats) {
+          return {
+            chats: response.chats.map(transformChat),
+            invitations: response.invitations ? response.invitations.map(transformChat) : []
+          };
+        }
+        return response;
+      },
       providesTags: ["Chat"],
     }),
     getMessages: builder.query({

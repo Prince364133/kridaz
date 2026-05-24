@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
 /**
- * VenueBanking GÇö Secure banking, KYC, and settlement management.
+ * VenueBanking Rs ï¿½ Secure banking, KYC, and settlement management.
  * Fully standardized for the Console design language (Inter font, 8px radii, glassmorphism).
  */
 
@@ -228,20 +228,20 @@ const VenueBanking = () => {
                                <tr key={tx._id || idx} className="hover:bg-white/[0.02] transition-colors group">
                                   <td className="px-8 py-6">
                                      <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-lg bg-white/[0.02] flex items-center justify-center border border-white/5 transition-all" style={{ color: tx.type === 'DEBIT' ? '#ef4444' : themeColor, borderColor: tx.type === 'DEBIT' ? '#ef444433' : `${themeColor}33` }}>
-                                           {tx.type === 'DEBIT' ? <ArrowUpRight size={16} /> : <TrendingUp size={16} />}
+                                        <div className="w-10 h-10 rounded-lg bg-white/[0.02] flex items-center justify-center border border-white/5 transition-all" style={{ color: ['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? '#ef4444' : themeColor, borderColor: ['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? '#ef444433' : `${themeColor}33` }}>
+                                           {['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? <ArrowUpRight size={16} /> : <TrendingUp size={16} />}
                                         </div>
                                         <div>
                                            <p className="text-sm font-black uppercase tracking-tight text-white">{tx.description || `Log #${tx._id?.slice(-6).toUpperCase()}`}</p>
-                                           <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest mt-1">{tx.type} GÇó {tx.status}</p>
+                                           <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest mt-1">{tx.type} Rs ï¿½ {tx.status}</p>
                                         </div>
                                      </div>
                                   </td>
                                   <td className="px-8 py-6 text-[10px] text-neutral-500 font-black uppercase tracking-widest">
                                      {new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
                                   </td>
-                                  <td className={`px-8 py-6 text-right font-black tracking-tighter text-lg`} style={{ color: tx.type === 'DEBIT' ? '#ef4444' : themeColor }}>
-                                     {tx.type === 'DEBIT' ? '-' : '+'} Rs {Number(tx.amount).toLocaleString()}
+                                  <td className={`px-8 py-6 text-right font-black tracking-tighter text-lg`} style={{ color: ['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? '#ef4444' : themeColor }}>
+                                     {['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? '-' : '+'} Rs {Number(tx.amount).toLocaleString()}
                                   </td>
                                </tr>
                             ))
@@ -347,7 +347,7 @@ const VenueBanking = () => {
                           </div>
                           <div>
                              <p className="text-[15px] font-black text-white uppercase tracking-tight">{bankingDetails?.bankName || "HDFC Bank"}</p>
-                             <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mt-1">Ending in GÇóGÇóGÇóGÇó {bankingDetails?.accountNumber?.slice(-4) || "4920"}</p>
+                             <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mt-1">Ending in Rs ï¿½Rs ï¿½Rs ï¿½Rs ï¿½ {bankingDetails?.accountNumber?.slice(-4) || "4920"}</p>
                           </div>
                        </div>
 
@@ -462,7 +462,7 @@ const VenueBanking = () => {
                           <input 
                             type="password"
                             className="w-full bg-black border border-white/5 rounded-lg px-6 py-5 text-lg focus:outline-none focus:border-[#00C187]/30 text-white font-black"
-                            placeholder="GÇóGÇóGÇóGÇóGÇóGÇóGÇóGÇó"
+                            placeholder="Rs ï¿½Rs ï¿½Rs ï¿½Rs ï¿½Rs ï¿½Rs ï¿½Rs ï¿½Rs ï¿½"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                           />

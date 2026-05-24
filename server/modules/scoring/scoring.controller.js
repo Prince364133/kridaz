@@ -209,7 +209,9 @@ export const startScoring = async (req, res) => {
       finalMatchId, 
       finalBattingTeam, 
       umpireId, 
-      req.user?.role
+      req.user?.role,
+      req.body.tossWinner,
+      req.body.tossDecision
     );
 
     res.status(200).json({ success: true, scoring });
@@ -353,11 +355,12 @@ export const setToss = async (req, res) => {
  */
 export const setPlayers = async (req, res) => {
   try {
-    const { scoringId, strikerId, nonStrikerId, bowlerId } = req.body;
+    const { scoringId, strikerId, nonStrikerId, bowlerId, wicketKeeperId } = req.body;
     const scoring = await scoringService.updateActivePlayers(scoringId, { 
       strikerId, 
       nonStrikerId, 
-      bowlerId 
+      bowlerId,
+      wicketKeeperId
     });
 
     res.status(200).json({ success: true, scoring });

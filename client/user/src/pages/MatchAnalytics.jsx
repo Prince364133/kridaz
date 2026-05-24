@@ -38,7 +38,16 @@ const MatchAnalytics = () => {
       const runRate = legalBalls > 0
         ? ((innings0.totalRuns / legalBalls) * 6).toFixed(2)
         : '0.00';
-      const batters = scoring?.battingStats?.slice(0, 6) || [];
+      const batters = (scoring?.playerStats || [])
+        .filter(s => s.battingBalls > 0 || s.battingRuns > 0)
+        .slice(0, 6)
+        .map(s => ({
+          ...s,
+          runs: s.battingRuns ?? 0,
+          balls: s.battingBalls ?? 0,
+          fours: s.battingFours ?? 0,
+          sixes: s.battingSixes ?? 0,
+        }));
 
       // Canvas dimensions
       const W = 900;
@@ -418,17 +427,26 @@ const MatchAnalytics = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {scoring?.battingStats?.map((s, i) => (
-                  <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
-                    <td className="px-8 py-4 font-bold text-sm uppercase">{s.user?.name}</td>
-                    <td className="px-4 py-4 text-[10px] text-gray-500 font-bold uppercase">{s.outStatus || 'Not Out'}</td>
-                    <td className="px-4 py-4 text-right font-black text-[#55DEE8]">{s.runs}</td>
-                    <td className="px-4 py-4 text-right text-gray-400 text-sm">{s.balls}</td>
-                    <td className="px-4 py-4 text-right text-gray-400 text-sm">{s.fours}</td>
-                    <td className="px-4 py-4 text-right text-gray-400 text-sm">{s.sixes}</td>
-                    <td className="px-8 py-4 text-right font-bold text-sm">{s.strikeRate?.toFixed(2)}</td>
-                  </tr>
-                ))}
+                {(scoring?.playerStats || [])
+                  .filter(s => s.battingBalls > 0 || s.battingRuns > 0)
+                  .map((s, i) => {
+                    const runs = s.battingRuns ?? 0;
+                    const balls = s.battingBalls ?? 0;
+                    const fours = s.battingFours ?? 0;
+                    const sixes = s.battingSixes ?? 0;
+                    const sr = balls > 0 ? (runs / balls) * 100 : 0;
+                    return (
+                      <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
+                        <td className="px-8 py-4 font-bold text-sm uppercase">{s.user?.name}</td>
+                        <td className="px-4 py-4 text-[10px] text-gray-500 font-bold uppercase">{s.outStatus || 'Not Out'}</td>
+                        <td className="px-4 py-4 text-right font-black text-[#55DEE8]">{runs}</td>
+                        <td className="px-4 py-4 text-right text-gray-400 text-sm">{balls}</td>
+                        <td className="px-4 py-4 text-right text-gray-400 text-sm">{fours}</td>
+                        <td className="px-4 py-4 text-right text-gray-400 text-sm">{sixes}</td>
+                        <td className="px-8 py-4 text-right font-bold text-sm">{sr.toFixed(2)}</td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>

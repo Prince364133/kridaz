@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axiosInstance from '@hooks/useAxiosInstance';
 import { toast } from 'react-hot-toast';
@@ -158,41 +158,52 @@ const SPORT_DEFAULTS = {
 
 const HostGame = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const { user } = useSelector((/** @type {any} */ state) => state.auth);
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(parseInt(searchParams.get('step')) || 1);
   const [loading, setLoading] = useState(false);
   const [showCoinAnim, setShowCoinAnim] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [activeSlotPicker, setActiveSlotPicker] = useState(null);
 
+  // Coupon & Billing State
+  const [couponCode, setCouponCode] = useState('');
+  const [couponData, setCouponData] = useState(null);
+  const [couponError, setCouponError] = useState('');
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+
   // Form State
-  const [gameData, setGameData] = useState({
+  const initialGameData = JSON.parse(sessionStorage.getItem('hostGameData')) || {
     gameType: '',
+    gameMode: '', // QUICK or FULL
     date: '',
     time: '',
-    groundId: null,
-    umpireId: null,
-    streamerId: null,
-    scorerId: null,
-    perPlayerCharge: 0,
-    gameMode: 'PROFESSIONAL',
-    quickPlayerCount: 0,
     quickSlotsData: [],
     city: user?.city || '',
     state: user?.state || '',
-    teamA: { name: 'Team A', slots: [], image: MOCK_TEAM_IMAGES[0].url },
-    teamB: { name: 'Team B', slots: [], image: MOCK_TEAM_IMAGES[1].url }
-  });
+    teamA: { name: '', slots: [], image: MOCK_TEAM_IMAGES[0].url },
+    teamB: { name: '', slots: [], image: MOCK_TEAM_IMAGES[1].url }
+  };
+  const [gameData, setGameData] = useState(initialGameData);
+
+  useEffect(() => {
+    sessionStorage.setItem('hostGameData', JSON.stringify(gameData));
+  }, [gameData]);
+
+  // Persist step across reloads if coming from URL
+  useEffect(() => {
+    const urlStep = searchParams.get('step');
+    if (urlStep) {
+      setStep(parseInt(urlStep));
+    }
+  }, [searchParams]);
 
   const [grounds, setGrounds] = useState([]);
   const [umpires, setUmpires] = useState([]);
-  const [streamers, setStreamers] = useState([]);
-  const [scorers, setScorers] = useState([]);
   const [selectedGround, setSelectedGround] = useState(null);
   const [selectedUmpire, setSelectedUmpire] = useState(null);
-  const [selectedStreamer, setSelectedStreamer] = useState(null);
-  const [selectedScorer, setSelectedScorer] = useState(null);
 
   // Location dropdown state
   const [states, setStates] = useState([]);
@@ -239,20 +250,37 @@ const HostGame = () => {
     } else {
       // Professional mode
       const teamKey = fillingTeamKey;
+      const otherTeamKey = teamKey === 'teamA' ? 'teamB' : 'teamA';
+      
+      if (gameData[otherTeamKey].name === team.name) {
+        toast.error("You cannot select the same team for both sides");
+        return;
+      }
+
       const newSlots = [...gameData[teamKey].slots];
       let slotIdx = 0;
       
       team.members.forEach(member => {
-        if (slotIdx < newSlots.length) {
-          if (member.user) {
-            newSlots[slotIdx] = { ...newSlots[slotIdx], userId: member.user._id, name: member.user.name, status: 'HELD' };
-          } else {
-            newSlots[slotIdx] = { ...newSlots[slotIdx], customPlayer: { name: member.name, email: member.email }, status: 'HELD' };
-          }
-          slotIdx++;
+        if (slotIdx >= newSlots.length) {
+          newSlots.push({ role: 'Player', status: 'OPEN' });
         }
+        if (member.user) {
+          newSlots[slotIdx] = { ...newSlots[slotIdx], userId: member.user._id, name: member.user.name, status: 'HELD' };
+        } else {
+          newSlots[slotIdx] = { ...newSlots[slotIdx], customPlayer: { name: member.name, email: member.email }, status: 'HELD' };
+        }
+        slotIdx++;
       });
-      setGameData({ ...gameData, [teamKey]: { ...gameData[teamKey], slots: newSlots } });
+      setGameData({ 
+        ...gameData, 
+        [teamKey]: { 
+          ...gameData[teamKey], 
+          slots: newSlots,
+          name: team.name,
+          image: team.logo || gameData[teamKey].image,
+          imageName: team.logo ? 'Team Logo' : null
+        } 
+      });
     }
     setShowTeamFillModal(false);
     toast.success(`Slots filled from ${team.name}`);
@@ -267,26 +295,53 @@ const HostGame = () => {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} ${ampm}`;
   };
 
+  const normalizeString = (str) => {
+    return str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
+  };
+
   useEffect(() => {
     setMounted(true);
-    if (user?.city && user?.state) {
-      setGameData(prev => ({ ...prev, city: user.city, state: user.state }));
-    }
-
+    
     // Check for popup trigger in URL
     const params = new URLSearchParams(window.location.search);
     if (params.get('popup') === 'customUmpire') {
       setShowCustomUmpireModal(true);
     }
 
-    // Load Indian states on mount
-    const loadStates = async () => {
+    const initLocation = async () => {
       setLoadingStates(true);
-      const data = await fetchStates();
-      setStates(data);
+      const statesData = await fetchStates();
+      setStates(statesData);
       setLoadingStates(false);
+
+      if (user?.city || user?.state) {
+        const uState = user.state || '';
+        const uCity = user.city || '';
+        
+        let matchedState = '';
+        if (uState) {
+          matchedState = statesData.find(s => normalizeString(s) === normalizeString(uState)) || '';
+        }
+        
+        let matchedCity = '';
+        if (matchedState && uCity) {
+          const citiesData = await fetchCities(matchedState);
+          // Set cities early so it doesn't blink empty
+          setCities(citiesData); 
+          matchedCity = citiesData.find(c => normalizeString(c) === normalizeString(uCity)) || '';
+        }
+
+        if (matchedCity || matchedState) {
+          setGameData(prev => ({ 
+            ...prev, 
+            city: matchedCity || prev.city, 
+            state: matchedState || prev.state 
+          }));
+        }
+      }
     };
-    loadStates();
+    
+    initLocation();
   }, [user]);
 
   // When state changes, load its cities
@@ -319,34 +374,81 @@ const HostGame = () => {
     }
   };
 
-  const fetchStreamers = async () => {
-    try {
-      const res = await axiosInstance.get(`/api/hosted-game/streamers?city=${gameData.city}&state=${gameData.state}&gameType=${gameData.gameType}`);
-      setStreamers(res.data.streamers);
-    } catch (err) {
-      toast.error("Failed to fetch streamers");
-    }
-  };
-
-  const fetchScorers = async () => {
-    try {
-      const res = await axiosInstance.get(`/api/hosted-game/scorers?city=${gameData.city}&state=${gameData.state}&gameType=${gameData.gameType}`);
-      setScorers(res.data.scorers);
-    } catch (err) {
-      toast.error("Failed to fetch scorers");
-    }
-  };
-
   useEffect(() => {
     if (step === 3 && gameData.gameType) {
       fetchGrounds();
       fetchUmpires();
-      fetchStreamers();
-      fetchScorers();
     }
   }, [step, gameData.gameType, gameData.city, gameData.state]);
 
-  const totalCost = (selectedGround?.pricePerHour || 0) + (selectedUmpire?.price || 0) + (selectedStreamer?.price || 0) + (selectedScorer?.price || 0);
+  // Handle return from Venue/Professional selection
+  useEffect(() => {
+    if (step === 3) {
+      const urlGroundId = searchParams.get('groundId');
+      const urlUmpireId = searchParams.get('umpireId');
+      const urlDate = searchParams.get('date');
+      const urlTime = searchParams.get('time');
+
+      if (urlGroundId && (!selectedGround || selectedGround._id !== urlGroundId)) {
+        axiosInstance.get(`/api/user/turf/details/${urlGroundId}`)
+          .then(res => {
+            const turf = res.data.turf || res.data;
+            setSelectedGround(turf);
+            setGameData(prev => ({ 
+              ...prev, 
+              groundId: turf._id,
+              date: urlDate ? new Date(urlDate).toISOString().split('T')[0] : prev.date,
+              time: urlTime || prev.time,
+              groundPrice: searchParams.get('price') ? Number(searchParams.get('price')) : turf.pricePerHour
+            }));
+          })
+          .catch(err => console.error("Error fetching ground details:", err));
+      }
+
+      if (urlUmpireId && (!selectedUmpire || selectedUmpire._id !== urlUmpireId)) {
+        axiosInstance.get(`/api/professional/details/${urlUmpireId}?date=${urlDate || new Date().toISOString()}`)
+          .then(res => {
+            const pro = res.data.professional;
+            setSelectedUmpire(pro);
+            setGameData(prev => ({ 
+              ...prev, 
+              umpireId: pro._id,
+              date: urlDate ? new Date(urlDate).toISOString().split('T')[0] : prev.date,
+              time: urlTime || prev.time
+            }));
+          })
+          .catch(err => console.error("Error fetching professional details:", err));
+      }
+    }
+  }, [step, searchParams, selectedGround, selectedUmpire]);
+
+  const groundCost = gameData.groundPrice !== undefined ? gameData.groundPrice : (selectedGround?.pricePerHour || 0);
+  const subTotal = groundCost + (selectedUmpire?.price || 0);
+  const discountAmount = couponData?.discountAmount || 0;
+  const platformFee = couponData ? couponData.platformFee : ((subTotal - discountAmount) * 0.015);
+  const totalCost = couponData ? couponData.finalCost : ((subTotal - discountAmount) + platformFee);
+
+  const handleValidateCoupon = async () => {
+    if (!couponCode) return;
+    setApplyingCoupon(true);
+    setCouponError('');
+    try {
+      const res = await axiosInstance.post("/api/hosted-game/validate-coupon", {
+        code: couponCode,
+        groundCost: groundCost,
+        umpireCost: selectedUmpire?.price || 0
+      });
+      if (res.data.success) {
+        setCouponData(res.data.coupon);
+        toast.success("Coupon applied successfully");
+      }
+    } catch (err) {
+      setCouponError(err.response?.data?.message || "Invalid coupon code");
+      setCouponData(null);
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
 
   const initSlots = (sport) => {
     const defaults = SPORT_DEFAULTS[sport] || [{ role: "Player", count: 5 }];
@@ -408,6 +510,7 @@ const HostGame = () => {
     try {
       const payload = {
         ...gameData,
+        couponCode: couponData ? couponCode : undefined,
         customUmpireData: customUmpireData.name ? customUmpireData : undefined
       };
       const res = await axiosInstance.post("/api/hosted-game/create", payload);
@@ -839,237 +942,116 @@ const HostGame = () => {
               {/* Grounds */}
               <section className="space-y-6">
                 <div className="flex items-center justify-between gap-2">
-
                   <label className="text-xs font-black text-neutral-400 uppercase tracking-widest whitespace-nowrap">Select Ground</label>
                   <span className="text-[10px] text-neutral-500 font-black px-3 py-1 bg-neutral-800 rounded-full uppercase tracking-tighter">Optional</span>
                 </div>
-                <div className="space-y-6 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
-                  {grounds.length > 0 ? grounds.map(g => (
-                    <div 
-                      key={g._id}
-                      onClick={() => {
-                        setSelectedGround(g);
-                        setGameData({ ...gameData, groundId: g._id });
-                      }}
-                      className={`p-5 rounded-[15px] border-2 transition-all cursor-pointer group ${
-                        selectedGround?._id === g._id 
-                        ? 'border-yellow-500 bg-yellow-500/10' 
-                        : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
-                      }`}
-                    >
-                      <div className="flex gap-5">
-                        <img src={g.images[0]} className="w-24 h-24 rounded-2xl object-cover" />
-                        <div className="flex-1">
-                          <h3 className="font-black text-base mb-1 tracking-tight">{g.name}</h3>
-                          <p className="hidden sm:flex text-[11px] text-neutral-500 mb-3 items-center gap-1 font-medium">
-                            <MapPin size={12} /> {g.location}
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-yellow-500 font-black text-sm">₹{g.pricePerHour}/hr</span>
-                            {selectedGround?._id === g._id && <CheckCircle2 className="text-yellow-500" size={20} />}
-                          </div>
+                
+                {selectedGround ? (
+                  <div className="p-5 rounded-[15px] border-2 border-yellow-500 bg-yellow-500/10">
+                    <div className="flex gap-5">
+                      <img src={selectedGround.images?.[0] || 'https://via.placeholder.com/150'} className="w-24 h-24 rounded-2xl object-cover" />
+                      <div className="flex-1">
+                        <h3 className="font-black text-base mb-1 tracking-tight">{selectedGround.name}</h3>
+                        <p className="flex text-[11px] text-neutral-500 mb-3 items-center gap-1 font-medium">
+                          <MapPin size={12} /> {selectedGround.location}
+                        </p>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {gameData.date && (
+                            <span className="px-2 py-1 bg-neutral-800 rounded text-[10px] text-cyan-400 font-bold uppercase">
+                              {new Date(gameData.date).toLocaleDateString()}
+                            </span>
+                          )}
+                          {gameData.time && (
+                            <span className="px-2 py-1 bg-neutral-800 rounded text-[10px] text-lime-400 font-bold uppercase">
+                              {gameData.time}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between mt-4">
+                          <span className="text-yellow-500 font-black text-sm">₹{gameData.groundPrice !== undefined ? gameData.groundPrice : selectedGround.pricePerHour}</span>
+                          <button 
+                            onClick={() => {
+                              setSelectedGround(null);
+                              setGameData({ ...gameData, groundId: null });
+                            }}
+                            className="px-4 py-2 bg-neutral-800 text-white rounded-lg text-xs font-black uppercase tracking-widest hover:bg-neutral-700 transition-colors"
+                          >
+                            Remove
+                          </button>
                         </div>
                       </div>
                     </div>
-                  )) : (
-                    <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
-                      <p className="text-neutral-500 text-sm italic font-medium">
-                        <span>No {gameData.gameType} grounds found.</span>
-                      </p>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      sessionStorage.setItem('hostGameData', JSON.stringify(gameData));
+                      navigate(`/venues?returnTo=/host-game?step=3&city=${gameData.city}&state=${gameData.state}`);
+                    }}
+                    className="w-full py-6 rounded-[15px] border-2 border-dashed border-neutral-700 hover:border-cyan-400 bg-neutral-900/50 hover:bg-cyan-400/5 flex flex-col items-center justify-center gap-3 transition-all group"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-neutral-800 group-hover:bg-cyan-400/20 flex items-center justify-center text-neutral-400 group-hover:text-cyan-400 transition-colors">
+                      <MapPin size={24} />
                     </div>
-                  )}
-                </div>
+                    <span className="font-black text-sm uppercase tracking-widest text-neutral-300 group-hover:text-white">Book Venue</span>
+                  </button>
+                )}
               </section>
 
               {/* Umpires */}
               <section className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <label className="text-xs font-black text-neutral-400 uppercase tracking-widest whitespace-nowrap">Hire Umpire / Coach</label>
-                    <button 
-                      onClick={() => setShowCustomUmpireModal(true)}
-                      className="p-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-full hover:scale-105 transition-all shadow-[0_0_10px_rgba(85,222,232,0.3)]"
-                    >
-                      <Plus size={14} />
-                    </button>
-                  </div>
+                  <label className="text-xs font-black text-neutral-400 uppercase tracking-widest whitespace-nowrap">Hire Umpire / Coach</label>
                   <span className="text-[10px] text-neutral-500 font-black px-3 py-1 bg-neutral-800 rounded-full uppercase tracking-tighter">Optional</span>
                 </div>
-                <div className="space-y-6 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
-                  {customUmpireData.name && (
-                    <div 
-                      className="p-5 rounded-[15px] border-2 border-yellow-500 bg-yellow-500/10 transition-all cursor-default"
-                    >
-                      <div className="flex gap-5 items-center">
-                        <div className="w-14 h-14 rounded-full bg-neutral-800 flex items-center justify-center text-yellow-500 border border-yellow-500/30">
-                          <Plus size={24} />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-black text-base tracking-tight">{customUmpireData.name}</h3>
-                            <button 
-                              onClick={() => setCustomUmpireData({ name: '', email: '', phone: '' })}
-                              className="text-neutral-500 hover:text-red-500 transition-colors"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                          <p className="text-[11px] text-neutral-400 font-medium flex items-center gap-2">
-                            <Mail size={10} /> {customUmpireData.email}
-                          </p>
-                          <span className="inline-block mt-2 px-2 py-0.5 bg-yellow-500 text-[8px] font-black text-black rounded uppercase tracking-widest">Custom Invite</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {umpires.length > 0 ? umpires.map(u => (
-                    <div 
-                      key={u._id}
-                      onClick={() => {
-                        if (selectedUmpire?._id === u._id) {
-                          setSelectedUmpire(null);
-                          setGameData({ ...gameData, umpireId: null });
-                        } else {
-                          setSelectedUmpire(u);
-                          setGameData({ ...gameData, umpireId: u._id });
-                        }
-                      }}
-                      className={`p-5 rounded-[15px] border-2 transition-all cursor-pointer group ${
-                        selectedUmpire?._id === u._id 
-                        ? 'border-yellow-500 bg-yellow-500/10' 
-                        : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-5">
-                        <img src={u.profilePicture || "https://ui-avatars.com/api/?name="+u.name} className="w-16 h-16 rounded-full object-cover border-2 border-neutral-800" />
-                        <div className="flex-1">
-                          <h3 className="font-black text-base mb-1 tracking-tight">{u.name}</h3>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-yellow-500 font-black text-sm">₹{u.price}</span>
-                            <div className="flex gap-1">
-                              {u.gameTypes?.slice(0, 2).map(t => (
-                                <span key={t} className="text-[8px] px-2 py-0.5 bg-neutral-800 text-neutral-500 rounded-full font-black uppercase tracking-tighter">{t}</span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                        {selectedUmpire?._id === u._id && <CheckCircle2 className="text-yellow-500" size={24} />}
-                      </div>
-                    </div>
-                  )) : (
-                    <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
-                      <p className="text-neutral-500 text-sm italic font-medium">
-                        <span>No {gameData.gameType} experts available.</span>
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </section>
 
-              {/* Streamers */}
-              <section className="space-y-6">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-3">
-                    <label className="text-xs font-black text-neutral-400 uppercase tracking-widest whitespace-nowrap">Hire Streamer</label>
-                  </div>
-                  <span className="text-[10px] text-neutral-500 font-black px-3 py-1 bg-neutral-800 rounded-full uppercase tracking-tighter">Optional</span>
-                </div>
-                <div className="space-y-6 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
-                  {streamers.length > 0 ? streamers.map(s => (
-                    <div 
-                      key={s._id}
-                      onClick={() => {
-                        if (selectedStreamer?._id === s._id) {
-                          setSelectedStreamer(null);
-                          setGameData({ ...gameData, streamerId: null });
-                        } else {
-                          setSelectedStreamer(s);
-                          setGameData({ ...gameData, streamerId: s._id });
-                        }
-                      }}
-                      className={`p-5 rounded-[15px] border-2 transition-all cursor-pointer group ${
-                        selectedStreamer?._id === s._id 
-                        ? 'border-yellow-500 bg-yellow-500/10' 
-                        : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-5">
-                        <img src={s.profilePicture || "https://ui-avatars.com/api/?name="+s.name} className="w-16 h-16 rounded-full object-cover border-2 border-neutral-800" />
-                        <div className="flex-1">
-                          <h3 className="font-black text-base mb-1 tracking-tight">{s.name}</h3>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-yellow-500 font-black text-sm">₹{s.price}</span>
-                            <div className="flex gap-1">
-                              {s.gameTypes?.slice(0, 2).map(t => (
-                                <span key={t} className="text-[8px] px-2 py-0.5 bg-neutral-800 text-neutral-500 rounded-full font-black uppercase tracking-tighter">{t}</span>
-                              ))}
-                            </div>
-                          </div>
+                {selectedUmpire ? (
+                  <div className="p-5 rounded-[15px] border-2 border-yellow-500 bg-yellow-500/10">
+                    <div className="flex items-center gap-5">
+                      <img src={selectedUmpire.profilePicture || "https://ui-avatars.com/api/?name="+selectedUmpire.name} className="w-16 h-16 rounded-full object-cover border-2 border-neutral-800" />
+                      <div className="flex-1">
+                        <h3 className="font-black text-base mb-1 tracking-tight">{selectedUmpire.name}</h3>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {gameData.date && (
+                            <span className="px-2 py-1 bg-neutral-800 rounded text-[10px] text-cyan-400 font-bold uppercase">
+                              {new Date(gameData.date).toLocaleDateString()}
+                            </span>
+                          )}
+                          {gameData.time && (
+                            <span className="px-2 py-1 bg-neutral-800 rounded text-[10px] text-lime-400 font-bold uppercase">
+                              {gameData.time}
+                            </span>
+                          )}
                         </div>
-                        {selectedStreamer?._id === s._id && <CheckCircle2 className="text-yellow-500" size={24} />}
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-yellow-500 font-black text-sm">₹{selectedUmpire.price}</span>
+                          <button 
+                            onClick={() => {
+                              setSelectedUmpire(null);
+                              setGameData({ ...gameData, umpireId: null });
+                            }}
+                            className="px-4 py-2 bg-neutral-800 text-white rounded-lg text-xs font-black uppercase tracking-widest hover:bg-neutral-700 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  )) : (
-                    <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
-                      <p className="text-neutral-500 text-sm italic font-medium">
-                        <span>No {gameData.gameType} streamers available.</span>
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </section>
-
-              {/* Scorers */}
-              <section className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <label className="text-xs font-black text-neutral-400 uppercase tracking-widest whitespace-nowrap">Hire Scorer</label>
                   </div>
-                  <span className="text-[10px] text-neutral-500 font-black px-3 py-1 bg-neutral-800 rounded-full uppercase tracking-tighter">Optional</span>
-                </div>
-                <div className="space-y-6 max-h-[500px] overflow-y-auto pr-3 custom-scrollbar">
-                  {scorers.length > 0 ? scorers.map(s => (
-                    <div 
-                      key={s._id}
-                      onClick={() => {
-                        if (selectedScorer?._id === s._id) {
-                          setSelectedScorer(null);
-                          setGameData({ ...gameData, scorerId: null });
-                        } else {
-                          setSelectedScorer(s);
-                          setGameData({ ...gameData, scorerId: s._id });
-                        }
-                      }}
-                      className={`p-5 rounded-[15px] border-2 transition-all cursor-pointer group ${
-                        selectedScorer?._id === s._id 
-                        ? 'border-yellow-500 bg-yellow-500/10' 
-                        : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-5">
-                        <img src={s.profilePicture || "https://ui-avatars.com/api/?name="+s.name} className="w-16 h-16 rounded-full object-cover border-2 border-neutral-800" />
-                        <div className="flex-1">
-                          <h3 className="font-black text-base mb-1 tracking-tight">{s.name}</h3>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-yellow-500 font-black text-sm">₹{s.price}</span>
-                            <div className="flex gap-1">
-                              {s.gameTypes?.slice(0, 2).map(t => (
-                                <span key={t} className="text-[8px] px-2 py-0.5 bg-neutral-800 text-neutral-500 rounded-full font-black uppercase tracking-tighter">{t}</span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                        {selectedScorer?._id === s._id && <CheckCircle2 className="text-yellow-500" size={24} />}
-                      </div>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      sessionStorage.setItem('hostGameData', JSON.stringify(gameData));
+                      navigate(`/professionals?returnTo=/host-game?step=3&city=${gameData.city}&state=${gameData.state}`);
+                    }}
+                    className="w-full py-6 rounded-[15px] border-2 border-dashed border-neutral-700 hover:border-[#BFF367] bg-neutral-900/50 hover:bg-[#BFF367]/5 flex flex-col items-center justify-center gap-3 transition-all group"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-neutral-800 group-hover:bg-[#BFF367]/20 flex items-center justify-center text-neutral-400 group-hover:text-[#BFF367] transition-colors">
+                      <UserCheck size={24} />
                     </div>
-                  )) : (
-                    <div className="p-12 border-2 border-dashed border-neutral-800 rounded-3xl text-center bg-neutral-900/30">
-                      <p className="text-neutral-500 text-sm italic font-medium">
-                        <span>No {gameData.gameType} scorers available.</span>
-                      </p>
-                    </div>
-                  )}
-                </div>
+                    <span className="font-black text-sm uppercase tracking-widest text-neutral-300 group-hover:text-white">Hire Professional</span>
+                  </button>
+                )}
               </section>
             </div>
              <div className="flex gap-4">
@@ -1267,6 +1249,7 @@ const HostGame = () => {
                           <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest block mb-1">Team Name</label>
                           <input 
                             className="bg-transparent text-2xl font-black border-none outline-none focus:ring-0 w-full p-0 tracking-tight"
+                            placeholder={teamKey === 'teamA' ? 'Enter Home Team Name' : 'Enter Away Team Name'}
                             value={gameData[teamKey].name}
                             onChange={(e) => setGameData({
                               ...gameData,
@@ -1280,10 +1263,10 @@ const HostGame = () => {
                           setFillingTeamKey(teamKey);
                           setShowTeamFillModal(true);
                         }}
-                        className="p-3 bg-neutral-800 rounded-[15px] text-neutral-500 hover:text-[#55DEE8] transition-all border border-white/5 group"
-                        title="Fill from My Team"
+                        className="px-4 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-[15px] text-black font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-lg"
+                        title="Add Team"
                       >
-                        <ShieldCheck size={20} className="group-hover:text-[#55DEE8] transition-colors" />
+                        Add Team
                       </button>
                     </div>
 
@@ -1358,17 +1341,34 @@ const HostGame = () => {
                     <div className="space-y-3">
                       {gameData[teamKey].slots.map((slot, idx) => (
                         <div key={idx} className="flex items-center gap-3 group">
-                          <div className="flex-1 flex items-center gap-4 bg-neutral-900 border border-neutral-800 p-4 rounded-2xl group-hover:border-[#CCFF00]/30 transition-all">
+                          <div className={`flex-1 flex items-center gap-4 bg-neutral-900 border ${slot.userId || slot.customPlayer ? 'border-[#CCFF00]/50 bg-[#CCFF00]/5' : 'border-neutral-800'} p-4 rounded-2xl group-hover:border-[#CCFF00]/30 transition-all`}>
                             <input 
                               className="bg-transparent text-xs font-black uppercase tracking-widest outline-none w-full"
                               value={slot.role}
                               onChange={(e) => updateSlotRole(teamKey, idx, e.target.value)}
                             />
-                            <span className="text-[9px] font-black text-neutral-600 uppercase tracking-tighter bg-neutral-800 px-2 py-1 rounded">OPEN</span>
+                            {slot.userId || slot.customPlayer ? (
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] sm:text-xs font-bold text-white truncate max-w-[100px] sm:max-w-[150px]">
+                                      {slot.name || slot.customPlayer?.name || slot.customPlayer?.email}
+                                    </span>
+                                    <span className="text-[9px] font-black text-black uppercase tracking-tighter bg-[#CCFF00] px-2 py-1 rounded shrink-0">FILLED</span>
+                                </div>
+                            ) : (
+                                <span className="text-[9px] font-black text-neutral-600 uppercase tracking-tighter bg-neutral-800 px-2 py-1 rounded shrink-0">OPEN</span>
+                            )}
                           </div>
                           <button 
-                            onClick={() => removeSlot(teamKey, idx)}
-                            className="p-3 text-neutral-600 hover:text-red-500 transition-colors bg-neutral-900 rounded-xl border border-neutral-800"
+                            onClick={() => {
+                                if (slot.userId || slot.customPlayer) {
+                                    const newSlots = [...gameData[teamKey].slots];
+                                    newSlots[idx] = { role: slot.role, status: 'OPEN' };
+                                    setGameData({ ...gameData, [teamKey]: { ...gameData[teamKey], slots: newSlots } });
+                                } else {
+                                    removeSlot(teamKey, idx);
+                                }
+                            }}
+                            className="p-3 text-neutral-600 hover:text-red-500 transition-colors bg-neutral-900 rounded-xl border border-neutral-800 shrink-0"
                           >
                             <Trash2 size={16} />
                           </button>
@@ -1440,7 +1440,7 @@ const HostGame = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-2 sm:gap-6 mb-10">
+            <div className="grid grid-cols-2 gap-2 sm:gap-6 mb-10">
               {/* Venue */}
               <div className="bg-neutral-900/50 border border-neutral-800 p-2.5 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center gap-2 sm:gap-3">
                 <div className="w-10 h-10 sm:w-16 sm:h-16 bg-neutral-800 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
@@ -1465,29 +1465,6 @@ const HostGame = () => {
                 </div>
               </div>
 
-              {/* Streamer */}
-              <div className="bg-neutral-900/50 border border-neutral-800 p-2.5 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center gap-2 sm:gap-3">
-                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-neutral-800 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
-                  <Video className="text-[#55DEE8] w-5 h-5 sm:w-8 sm:h-8" />
-                </div>
-                <div className="min-w-0 w-full">
-                  <p className="text-[7px] sm:text-[10px] text-neutral-500 uppercase font-black tracking-wider sm:tracking-widest mb-0.5 sm:mb-1 font-inter">Streamer</p>
-                  <p className="font-black text-[10px] sm:text-lg truncate leading-none font-open-sans">{selectedStreamer?.name || 'No Streamer'}</p>
-                  <p className="text-[9px] sm:text-xs text-neutral-500 mt-0.5 sm:mt-1 font-medium italic font-inter truncate w-full">{selectedStreamer?.role || 'Live Streamer'}</p>
-                </div>
-              </div>
-
-              {/* Scorer */}
-              <div className="bg-neutral-900/50 border border-neutral-800 p-2.5 sm:p-6 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center gap-2 sm:gap-3">
-                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-neutral-800 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
-                  <Award className="text-[#BFF367] w-5 h-5 sm:w-8 sm:h-8" />
-                </div>
-                <div className="min-w-0 w-full">
-                  <p className="text-[7px] sm:text-[10px] text-neutral-500 uppercase font-black tracking-wider sm:tracking-widest mb-0.5 sm:mb-1 font-inter">Scorer</p>
-                  <p className="font-black text-[10px] sm:text-lg truncate leading-none font-open-sans">{selectedScorer?.name || 'No Scorer'}</p>
-                  <p className="text-[9px] sm:text-xs text-neutral-500 mt-0.5 sm:mt-1 font-medium italic font-inter truncate w-full">{selectedScorer?.role || 'Scorer'}</p>
-                </div>
-              </div>
             </div>
 
             {gameData.gameMode === 'QUICK' ? (
@@ -1529,6 +1506,65 @@ const HostGame = () => {
                 </div>
               </div>
             )}
+
+            {/* Billing Summary & Coupon */}
+            <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-[15px] space-y-4">
+              <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400">Billing Summary</h3>
+              
+              <div className="space-y-2 text-sm font-medium text-neutral-300 font-inter">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>{subTotal} coins</span>
+                </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-[#BFF367]">
+                    <span>Discount</span>
+                    <span>-{discountAmount} coins</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span>Platform Fee (1.5%)</span>
+                  <span>{platformFee.toFixed(2)} coins</span>
+                </div>
+                <div className="w-full h-[1px] bg-neutral-800 my-2" />
+                <div className="flex justify-between text-lg font-black text-white font-open-sans">
+                  <span>Total Cost</span>
+                  <span className="text-[#55DEE8]">{totalCost.toFixed(2)} coins</span>
+                </div>
+              </div>
+
+              {/* Coupon Input */}
+              <div className="mt-4 pt-4 border-t border-neutral-800">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter Coupon Code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    disabled={!!couponData}
+                    className="flex-1 bg-black border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white font-bold outline-none focus:border-[#55DEE8] uppercase tracking-wider disabled:opacity-50"
+                  />
+                  {!couponData ? (
+                    <button
+                      onClick={handleValidateCoupon}
+                      disabled={applyingCoupon || !couponCode}
+                      className="px-6 py-3 bg-neutral-800 text-white font-black rounded-xl text-xs uppercase tracking-widest hover:bg-neutral-700 disabled:opacity-50 transition-all"
+                    >
+                      {applyingCoupon ? '...' : 'Apply'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { setCouponData(null); setCouponCode(''); setCouponError(''); }}
+                      className="px-6 py-3 bg-red-500/20 text-red-500 font-black rounded-xl text-xs uppercase tracking-widest hover:bg-red-500/30 transition-all"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                {couponError && <p className="text-red-500 text-[10px] uppercase font-black tracking-widest mt-2">{couponError}</p>}
+                {couponData && <p className="text-[#BFF367] text-[10px] uppercase font-black tracking-widest mt-2">Coupon applied successfully!</p>}
+              </div>
+            </div>
 
             <div className="flex gap-4">
               <button onClick={() => setStep(gameData.gameMode === 'QUICK' ? 4.5 : 4)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-[15px] border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest font-open-sans">Back</button>

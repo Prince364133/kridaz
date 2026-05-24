@@ -672,3 +672,26 @@ export const updateWorkingHours = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+export const getUserProfessionalBookings = async (req, res) => {
+  const userId = (req.user.id || req.user.user).toString();
+  try {
+    const bookings = await prisma.professionalBooking.findMany({
+      where: { userId },
+      include: {
+        professional: {
+          include: {
+            user: {
+              select: { id: true, name: true, phone: true, email: true, profilePicture: true }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+    return res.status(200).json({ success: true, bookings });
+  } catch (error) {
+    logger.error("Error in getUserProfessionalBookings:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};

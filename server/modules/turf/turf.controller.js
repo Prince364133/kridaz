@@ -627,7 +627,7 @@ export const getTurfDetailsWithSlots = async (req, res) => {
                   select: {
                     name: true,
                     email: true,
-                    phoneNumber: true,
+                    phone: true,
                     profilePicture: true
                   }
                 }
@@ -654,7 +654,7 @@ export const getTurfDetailsWithSlots = async (req, res) => {
           user: booking.user ? {
             name: booking.user.name,
             email: booking.user.email,
-            phoneNumber: booking.user.phoneNumber,
+            phoneNumber: booking.user.phone,
             profileImage: booking.user.profilePicture
           } : {
             name: booking.guestName,

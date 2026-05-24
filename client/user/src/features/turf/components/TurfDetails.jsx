@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
 import useTurfData from "../hooks/useTurfData";
@@ -62,6 +62,7 @@ const TurfDetails = () => {
   const { isLoggedIn } = useSelector((/** @type {any} */ state) => state.auth);
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { loading, turfs } = useTurfData();
   const { averageRating, reviews } = useReviews(id);
   const { gateInteraction } = useLoginOnDemand();
@@ -148,16 +149,27 @@ const TurfDetails = () => {
 
   const handleBookingClick = () => {
     gateInteraction(() => {
-      navigate(`/checkout/${turf._id}`, {
-        state: {
-          turfName: turf.name,
-          selectedDate: selectedDate.toISOString(),
-          startTime: selectedStartTime,
-          duration: 1, // Default duration
-          amount: totalPrice,
-          location: turf.location
-        }
-      });
+      const returnTo = searchParams.get('returnTo');
+      if (returnTo) {
+        // Build return URL
+        const returnUrl = new URL(returnTo, window.location.origin);
+        returnUrl.searchParams.set('groundId', turf._id);
+        returnUrl.searchParams.set('date', selectedDate.toISOString());
+        returnUrl.searchParams.set('time', selectedStartTime);
+        returnUrl.searchParams.set('price', totalPrice || turf.pricePerHour);
+        navigate(returnUrl.pathname + returnUrl.search);
+      } else {
+        navigate(`/checkout/${turf._id}`, {
+          state: {
+            turfName: turf.name,
+            selectedDate: selectedDate.toISOString(),
+            startTime: selectedStartTime,
+            duration: 1, // Default duration
+            amount: totalPrice,
+            location: turf.location
+          }
+        });
+      }
     }, {
       title: "Confirm Your Slot",
       message: "Ready to dominate the pitch? Sign in to securely book your time slot and get instant confirmation."
@@ -315,7 +327,7 @@ const TurfDetails = () => {
           disabled={bookingLoading || !selectedStartTime}
           className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-8 h-12 rounded-[10px] font-bold text-[14px] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:grayscale shadow-[0_0_15px_rgba(85,222,232,0.3)] hover:shadow-[0_0_25px_rgba(191,243,103,0.5)]"
         >
-          {bookingLoading ? "..." : "Proceed"}
+          {bookingLoading ? "..." : (searchParams.get('returnTo') ? "Add this slot to my host game" : "Proceed")}
         </button>
       </div>
 

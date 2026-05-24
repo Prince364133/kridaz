@@ -47,38 +47,37 @@ app.use(
   })
 );
 
-// ── Rate Limiters ─────────────────────────────────────────────────────────────
-// Global — all /api routes (health check excluded via skip in the middleware)
+// â”€â”€ Rate Limiters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Global â€” all /api routes (health check excluded via skip in the middleware)
 app.use('/api', globalLimiter);
 
-import { verifyTurnstile } from "./middleware/turnstile.middleware.js";
 
-// Auth routes — user
-app.use('/api/user/auth/send-otp', otpLimiter, verifyTurnstile);
-app.use('/api/user/auth/login-step1', otpLimiter, verifyTurnstile);
-app.use('/api/user/auth/login', authLimiter, verifyTurnstile);
-app.use('/api/user/auth/register', authLimiter, verifyTurnstile);
+// Auth routes â€” user
+app.use('/api/user/auth/send-otp', otpLimiter);
+app.use('/api/user/auth/login-step1', otpLimiter);
+app.use('/api/user/auth/login', authLimiter);
+app.use('/api/user/auth/register', authLimiter);
 app.use('/api/user/auth/google-auth', authLimiter); // Google Auth usually handles its own bot protection
-app.use('/api/user/auth/forgot-password-otp', authLimiter, verifyTurnstile);
-app.use('/api/user/auth/reset-password', authLimiter, verifyTurnstile);
+app.use('/api/user/auth/forgot-password-otp', authLimiter);
+app.use('/api/user/auth/reset-password', authLimiter);
 
-// Auth routes — owner
-app.use('/api/owner/auth/send-otp', otpLimiter, verifyTurnstile);
-app.use('/api/owner/auth/login-step1', otpLimiter, verifyTurnstile);
-app.use('/api/owner/auth/login', authLimiter, verifyTurnstile);
-app.use('/api/owner/auth/register', authLimiter, verifyTurnstile);
+// Auth routes â€” owner
+app.use('/api/owner/auth/send-otp', otpLimiter);
+app.use('/api/owner/auth/login-step1', otpLimiter);
+app.use('/api/owner/auth/login', authLimiter);
+app.use('/api/owner/auth/register', authLimiter);
 app.use('/api/owner/auth/google-auth', authLimiter);
 
-// Payment routes — user bookings
+// Payment routes â€” user bookings
 app.use('/api/user/booking/create-order', paymentLimiter);
 app.use('/api/user/booking/verify-payment', paymentLimiter);
 app.use('/api/user/booking/book-with-wallet', paymentLimiter);
 
-// Payment routes — user wallet top-up
+// Payment routes â€” user wallet top-up
 app.use('/api/user/wallet/topup/create-order', paymentLimiter);
 app.use('/api/user/wallet/topup/verify', paymentLimiter);
 
-// Payment routes — owner banking & wallet
+// Payment routes â€” owner banking & wallet
 app.use('/api/owner/banking/payout', paymentLimiter);
 app.use('/api/owner/wallet/withdraw', paymentLimiter);
 

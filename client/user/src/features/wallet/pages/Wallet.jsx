@@ -221,13 +221,15 @@ const WalletPage = () => {
                 </div>
               ) : (
                 <div className="divide-y divide-zinc-800 font-inter">
-                  {transactions.map((tx) => (
-                    <div key={tx._id} className="p-6 flex items-center justify-between hover:bg-zinc-800/30 transition-colors">
+                  {transactions.map((tx) => {
+                    const isPositive = ['TOPUP', 'OFFER', 'REFUND', 'SLOT_INCOME', 'CREDIT'].includes(tx.type);
+                    return (
+                    <div key={tx._id || tx.id} className="p-6 flex items-center justify-between hover:bg-zinc-800/30 transition-colors">
                       <div className="flex items-center gap-4">
                         <div className={`p-3 rounded-xl ${
-                          tx.type === "TOPUP" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"
+                          isPositive ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"
                         }`}>
-                          {tx.type === "TOPUP" ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
+                          {isPositive ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
                         </div>
                         <div>
                           <p className="font-bold text-sm text-zinc-200 font-inter">
@@ -245,9 +247,9 @@ const WalletPage = () => {
                       </div>
                       <div className="text-right font-inter">
                         <p className={`font-black text-lg font-open-sans ${
-                          tx.type === "TOPUP" ? "text-emerald-500" : "text-zinc-200"
+                          isPositive ? "text-emerald-500" : "text-zinc-200"
                         }`}>
-                          {tx.type === "TOPUP" ? "+" : "-"}{tx.amount}
+                          {isPositive ? "+" : "-"}{tx.amount}
                         </p>
                         <div className="flex flex-col items-end gap-1 font-inter">
                           <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full font-inter ${
@@ -292,7 +294,8 @@ const WalletPage = () => {
                         </div>
                       </div>
                     </div>
-                  ))}
+                  );
+                })}
                 </div>
               )}
             </div>

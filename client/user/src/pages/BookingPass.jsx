@@ -10,7 +10,7 @@ import { format, parseISO } from "date-fns";
 import toast from "react-hot-toast";
 import RaiseDisputeModal from "@components/dispute/RaiseDisputeModal";
 
-// G��G�� Design tokens (exact match to OwnerDashboard) G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��
+// Rs �Rs � Design tokens (exact match to OwnerDashboard) Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �
 const BG      = "#000000";
 const CARD_BG = "#000000";
 const BORDER  = "#2D2D2D";
@@ -73,7 +73,7 @@ const BookingPass = () => {
     }
   };
 
-  // G��G�� Loading state G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��
+  // Rs �Rs � Loading state Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: BG }}>
@@ -85,7 +85,7 @@ const BookingPass = () => {
     );
   }
 
-  // G��G�� Error state G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��
+  // Rs �Rs � Error state Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �
   if (error || !booking) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-6" style={{ backgroundColor: BG }}>
@@ -122,7 +122,7 @@ const BookingPass = () => {
     <div className="min-h-screen pb-24 pt-6" style={{ backgroundColor: BG }}>
       <div className="mx-auto max-w-lg px-4">
 
-        {/* G��G�� Back Nav G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G�� */}
+        {/* Rs �Rs � Back Nav Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs � */}
         <Link
           to="/booking-history"
           className="inline-flex items-center gap-2 mb-8 text-[12px] font-normal uppercase tracking-[0.2em] transition-all"
@@ -134,7 +134,7 @@ const BookingPass = () => {
           Back to Bookings
         </Link>
 
-        {/* G��G�� Pass Card G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G�� */}
+        {/* Rs �Rs � Pass Card Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs � */}
         <div
           className="rounded-[8px] overflow-hidden relative"
           style={{ backgroundColor: CARD_BG, border: `1px solid ${BORDER}` }}
@@ -145,7 +145,7 @@ const BookingPass = () => {
             style={{ backgroundColor: `${ACCENT}08` }}
           />
 
-          {/* G��G�� Header Row G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G�� */}
+          {/* Rs �Rs � Header Row Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs � */}
           <div
             className="px-6 py-5 flex items-center justify-between"
             style={{ borderBottom: `1px solid ${BORDER}` }}
@@ -180,7 +180,7 @@ const BookingPass = () => {
             </div>
           </div>
 
-          {/* G��G�� Venue Name G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G�� */}
+          {/* Rs �Rs � Venue Name Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs � */}
           <div className="px-6 py-6" style={{ borderBottom: `1px solid ${BORDER}` }}>
             <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-none mb-2">
               {turf.name}
@@ -191,7 +191,7 @@ const BookingPass = () => {
             </div>
           </div>
 
-          {/* G��G�� Details Grid G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G�� */}
+          {/* Rs �Rs � Details Grid Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs � */}
           <div
             className="grid grid-cols-2 gap-px"
             style={{ backgroundColor: BORDER }}
@@ -205,7 +205,7 @@ const BookingPass = () => {
               {
                 label: "Time Slot",
                 icon: Clock,
-                value: `${format(parseISO(timeSlot.startTime), "hh:mm a")} G�� ${format(parseISO(timeSlot.endTime), "hh:mm a")}`,
+                value: `${format(parseISO(timeSlot.startTime), "hh:mm a")} Rs � ${format(parseISO(timeSlot.endTime), "hh:mm a")}`,
               },
               {
                 label: "Player",
@@ -229,7 +229,7 @@ const BookingPass = () => {
               </div>
             ))}
 
-            {/* Total Paid G�� full width */}
+            {/* Total Paid Rs � full width */}
             <div className="col-span-2 px-6 py-5" style={{ backgroundColor: CARD_BG }}>
               <p className="text-[10px] font-normal uppercase tracking-[0.3em] mb-2" style={{ color: MUTED }}>
                 Total Paid
@@ -241,13 +241,13 @@ const BookingPass = () => {
               {cashback > 0 && (
                 <p className="flex items-center gap-1 mt-1.5 text-[10px] font-normal uppercase tracking-wider" style={{ color: ACCENT }}>
                   <Zap size={10} className="fill-current" />
-                  G�{cashback} cashback applied
+                  Rs {cashback} cashback applied
                 </p>
               )}
             </div>
           </div>
 
-          {/* G��G�� Contact & Navigation G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G�� */}
+          {/* Rs �Rs � Contact & Navigation Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs � */}
           {(turf.managerContacts?.length > 0 || turf.mapUrl || turf.owner?.email) && (
             <div className="px-6 py-5 space-y-4" style={{ borderTop: `1px solid ${BORDER}` }}>
               <p className="text-[10px] font-normal uppercase tracking-[0.3em]" style={{ color: ACCENT }}>
@@ -335,7 +335,7 @@ const BookingPass = () => {
             </div>
           )}
 
-          {/* G��G�� QR Code G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G�� */}
+          {/* Rs �Rs � QR Code Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs � */}
           <div
             className="flex flex-col items-center gap-4 py-8"
             style={{ borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}
@@ -352,7 +352,7 @@ const BookingPass = () => {
             </div>
           </div>
 
-          {/* G��G�� Actions G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G�� */}
+          {/* Rs �Rs � Actions Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs � */}
           <div className="p-6 space-y-3">
 
             {/* Primary: View Invoice */}
@@ -455,7 +455,7 @@ const BookingPass = () => {
           </div>
         </div>
 
-        {/* G��G�� Security Badge G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G�� */}
+        {/* Rs �Rs � Security Badge Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs � */}
         <div className="mt-6 flex items-center justify-center gap-2" style={{ color: MUTED }}>
           <ShieldCheck size={14} />
           <span className="text-[10px] font-normal uppercase tracking-[0.3em]">Verified Digital Entry Pass</span>

@@ -74,6 +74,48 @@ const NOTIF_CONFIG = {
     bgColor: "rgba(249,115,22,0.08)",
     getRoute: (notif) => notif.link || "/wallet",
   },
+  GAME_JOIN_REQUEST: {
+    icon: Zap,
+    color: "#BFF367",
+    bgColor: "rgba(191,243,103,0.08)",
+    getRoute: (notif) => notif.link || "/booking-history?subTab=games",
+  },
+  TEAM_INVITE: {
+    icon: Users,
+    color: "#55DEE8",
+    bgColor: "rgba(85,222,232,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  TEAM_JOIN_REQUEST: {
+    icon: Users,
+    color: "#55DEE8",
+    bgColor: "rgba(85,222,232,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  TEAM_JOIN_ACCEPTED: {
+    icon: ShieldCheck,
+    color: "#BFF367",
+    bgColor: "rgba(191,243,103,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  TEAM_JOIN_REJECTED: {
+    icon: X,
+    color: "#EF4444",
+    bgColor: "rgba(239,68,68,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  OPPONENT_REQUEST: {
+    icon: Trophy,
+    color: "#F59E0B",
+    bgColor: "rgba(245,158,11,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  OPPONENT_ACCEPTED: {
+    icon: Trophy,
+    color: "#BFF367",
+    bgColor: "rgba(191,243,103,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
   SYSTEM: {
     icon: Zap,
     color: "#A78BFA",

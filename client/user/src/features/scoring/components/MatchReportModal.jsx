@@ -10,7 +10,7 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
       setLoading(true);
       const res = await fetchMatchReport(matchId);
       if (res.success) {
-        setReport(res.data);
+        setReport(res.report || res.data);
       }
       setLoading(false);
     };
@@ -18,10 +18,11 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
   }, [matchId, fetchMatchReport]);
 
   const formatTimer = (secs) => {
-    if (!secs) return '00:00';
-    const m = Math.floor(secs / 60);
+    if (!secs || isNaN(secs)) return '00:00:00';
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
     const s = secs % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -51,6 +52,34 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto pr-2 space-y-6 custom-scrollbar">
+
+            {/* Venue & Officials */}
+            {report?.game && (
+              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 mb-4">
+                <h4 className="text-xs font-black text-neutral-400 uppercase tracking-[0.2em] mb-3">Match Details</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {report.game.customVenue && (
+                    <div>
+                      <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest mb-1">Venue</p>
+                      <p className="text-sm font-black text-white">{report.game.customVenue}</p>
+                    </div>
+                  )}
+                  {report.game.customProfessionals && report.game.customProfessionals.length > 0 && (
+                    <div>
+                      <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest mb-1">Match Officials</p>
+                      <div className="flex flex-wrap gap-2">
+                        {report.game.customProfessionals.map((prof, idx) => (
+                          <div key={idx} className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 flex items-center gap-2">
+                            <span className="text-[10px] font-black text-[#00C187] uppercase">{prof.role}:</span>
+                            <span className="text-xs font-bold text-white">{prof.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Top Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -129,3 +158,4 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
     </div>
   );
 }
+

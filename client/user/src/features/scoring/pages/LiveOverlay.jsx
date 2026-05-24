@@ -76,12 +76,12 @@ const LiveOverlay = () => {
   const [connected, setConnected] = useState(false);
   const commentaryTimer = useRef(null);
   const socketRef = useRef(null);
-  
+
   // ── Queue Manager ────────────────────────────────────────────────────────────
   const [eventQueue, setEventQueue] = useState([]);
   const [isProcessingQueue, setIsProcessingQueue] = useState(false);
   const processedTracker = useRef({ over: -1, milestones: {} });
-  
+
   const enqueueEvent = useCallback((event) => {
     setEventQueue(prev => [...prev, event]);
   }, []);
@@ -90,23 +90,23 @@ const LiveOverlay = () => {
   useEffect(() => {
     if (!score) return;
     const events = [];
-    
+
     // Check for milestone
     const milestoneBatter = score.batters?.find(b => b.runs >= 50 && b.runs < 100 && !processedTracker.current.milestones[`${b.id}_50`]) ||
-                            score.batters?.find(b => b.runs >= 100 && !processedTracker.current.milestones[`${b.id}_100`]);
-                            
+      score.batters?.find(b => b.runs >= 100 && !processedTracker.current.milestones[`${b.id}_100`]);
+
     if (milestoneBatter) {
       const milestoneType = milestoneBatter.runs >= 100 ? 100 : 50;
       processedTracker.current.milestones[`${milestoneBatter.id}_${milestoneType}`] = true;
       events.push({ category: 'card', type: 'milestone', data: milestoneBatter, dur: 8000 });
     }
-    
+
     // Check for end of over
     if (score.balls === 0 && score.overs > 0 && processedTracker.current.over !== score.overs) {
       processedTracker.current.over = score.overs;
       events.push({ category: 'card', type: 'eoo', data: score, dur: 8000 });
     }
-    
+
     // Push auto-events to queue if they exist
     if (events.length > 0) {
       setEventQueue(prev => [...prev, ...events]);
@@ -116,11 +116,11 @@ const LiveOverlay = () => {
   // Process the queue
   useEffect(() => {
     if (isProcessingQueue || eventQueue.length === 0) return;
-    
+
     const processNextEvent = async () => {
       setIsProcessingQueue(true);
       const nextEvent = eventQueue[0];
-      
+
       if (nextEvent.category === 'animation') {
         setBadge(nextEvent);
         await new Promise(resolve => setTimeout(resolve, nextEvent.dur || 3000));
@@ -130,17 +130,17 @@ const LiveOverlay = () => {
         await new Promise(resolve => setTimeout(resolve, nextEvent.dur || 8000));
         setActiveCard(null);
       }
-      
+
       // Short delay between events
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       setEventQueue(prev => prev.slice(1));
       setIsProcessingQueue(false);
     };
-    
+
     processNextEvent();
   }, [eventQueue, isProcessingQueue]);
-  
+
   injectCSS(GLOBAL_CSS);
 
   // ── HTTP fallback ────────────────────────────────────────────────────────────
@@ -157,7 +157,7 @@ const LiveOverlay = () => {
   function buildDesc(type, data) {
     if (type === 'six') return `${data?.strikerName || ''} hits a MAXIMUM!`.trim();
     if (type === 'four') return `${data?.strikerName || ''} finds the boundary!`.trim();
-    if (type === 'wicket') return `OUT! ${data?.wicketType?.replace(/_/g,' ') || ''}`.trim();
+    if (type === 'wicket') return `OUT! ${data?.wicketType?.replace(/_/g, ' ') || ''}`.trim();
     if (type === 'wide') return 'Wide ball';
     if (type === 'no_ball') return 'No Ball!';
     return '';
@@ -202,7 +202,7 @@ const LiveOverlay = () => {
         else if (lb.extraType === 'WIDE') type = 'wide';
         else if (lb.extraType === 'NO_BALL') type = 'no_ball';
         else if (lb.runs === 0 && !lb.isExtra) type = 'dot';
-        
+
         if (type) {
           const dur = BADGE_CFG[type]?.dur || 3000;
           enqueueEvent({ category: 'animation', type, description: buildDesc(type, { strikerName: data?.batters?.[0]?.name, wicketType: lb.wicketType }), ...lb, dur });
@@ -241,7 +241,7 @@ const LiveOverlay = () => {
         if (!prev) return { text: data.chunk, language: data.language };
         return { ...prev, text: prev.text + data.chunk };
       });
-      
+
       // Auto-hide after stream finishes if no audio comes (fallback timer)
       if (data.isFinished) {
         commentaryTimer.current = setTimeout(() => {
@@ -253,7 +253,7 @@ const LiveOverlay = () => {
     // Handle Audio Readiness (arrives a few seconds after text stream finishes)
     socket.on('COMMENTARY_AUDIO_READY', (data) => {
       clearTimeout(commentaryTimer.current);
-      
+
       // Auto-hide 15 seconds after audio is ready
       commentaryTimer.current = setTimeout(() => {
         setAiCommentary(null);
@@ -287,24 +287,34 @@ const LiveOverlay = () => {
   if (!score) return null;
 
   if (score.status === 'NOT_STARTED' || !score.isLive) {
+    const venue = score.game?.customVenue || score.game?.turf?.name || 'Local Ground';
+    const loc = score.game?.city || score.game?.state || score.game?.location || 'Location Unspecified';
+    const professionals = score.game?.customProfessionals || [];
+
     return (
-      <div 
+      <div
         style={{ width: '100vw', height: '100vh', background: 'transparent', position: 'relative', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}
         onClick={() => {
           // Unlock browser autoplay policy
           const unlockAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
-          unlockAudio.play().catch(() => {});
+          unlockAudio.play().catch(() => { });
         }}
       >
         <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: 90,
-          background: 'rgba(5,5,5,0.88)', backdropFilter: 'blur(20px)',
-          borderTop: '2px solid #a3e635', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 120,
+          background: 'rgba(5,5,5,0.95)', backdropFilter: 'blur(20px)',
+          borderTop: '2px solid #a3e635', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           animation: 'tickerIn 0.6s cubic-bezier(0.16,1,0.3,1) both'
         }}>
-          <div style={{ fontSize: 24, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '2px' }}>
-            <span style={{ color: '#a3e635' }}>{score.teamA?.name}</span> <span style={{ opacity: 0.5, margin: '0 16px' }}>VS</span> <span style={{ color: '#a3e635' }}>{score.teamB?.name}</span>
-            <span style={{ marginLeft: 32, fontSize: 20, color: '#9ca3af' }}>MATCH STARTS SOON</span>
+          <div style={{ fontSize: 26, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '8px', display: 'flex', alignItems: 'center' }}>
+            <span style={{ color: '#a3e635' }}>{score.teamA?.name || 'TBD'}</span>
+            <span style={{ opacity: 0.5, margin: '0 16px', fontSize: 20 }}>VS</span>
+            <span style={{ color: '#a3e635' }}>{score.teamB?.name || 'TBD'}</span>
+            <span style={{ marginLeft: 32, fontSize: 20, color: '#9ca3af', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 12px', borderRadius: '8px' }}>MATCH STARTS SOON</span>
+          </div>
+          <div style={{ fontSize: 16, fontWeight: 600, color: '#cbd5e1', display: 'flex', gap: '24px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            <span>📍 {venue}, {loc}</span>
+            {professionals.length > 0 && <span>⭐ Featuring Pro Players</span>}
           </div>
         </div>
       </div>
@@ -318,15 +328,15 @@ const LiveOverlay = () => {
   const ActiveAnimation = ActivePack.Animation;
 
   return (
-    <div 
+    <div
       style={{ width: '100vw', height: '100vh', background: 'transparent', position: 'relative', overflow: 'hidden' }}
       onClick={() => {
         // Unlock browser autoplay policy
         const unlockAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
-        unlockAudio.play().catch(() => {});
+        unlockAudio.play().catch(() => { });
       }}
     >
-      
+
 
 
       {/* Dynamic Animated Ticker Component */}
@@ -339,6 +349,31 @@ const LiveOverlay = () => {
 
       {/* Boundary / Event Full-Screen Animations & SFX */}
       <ActiveAnimation badge={badge} />
+
+      {/* Break overlay */}
+      {score.timerState === 'PAUSED' && (
+        <div style={{
+          position: 'absolute', top: '20px', right: '20px',
+          padding: '8px 16px',
+          backgroundColor: 'rgba(239, 68, 68, 0.15)',
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          borderRadius: '9999px',
+          color: '#ef4444',
+          fontWeight: '900',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em',
+          fontSize: '14px',
+          animation: 'pulse 2s infinite',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          textShadow: '0 0 10px rgba(239,68,68,0.5)'
+        }}>
+          <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#ef4444' }} />
+          MATCH ON BREAK
+        </div>
+      )}
 
       {/* AI Commentary Overlay Toast */}
       {aiCommentary?.text && (

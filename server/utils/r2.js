@@ -119,4 +119,52 @@ export const deleteDirectoryFromR2 = async (prefix) => {
   }
 };
 
+export const deleteStoryFilesFromR2 = async (story) => {
+  if (!story) return;
+  const { id, mediaUrl, rawMediaUrl } = story;
+  try {
+    const cdnBase = process.env.REELS_CDN_URL?.replace(/\/$/, '');
+    
+    // Helper to get key from URL
+    const getKeyFromUrl = (url) => {
+      if (!url) return null;
+      if (cdnBase && url.startsWith(cdnBase)) {
+        return url.slice(cdnBase.length + 1);
+      }
+      try {
+        const u = new URL(url);
+        return u.pathname.replace(/^\//, '');
+      } catch (e) {
+        return null;
+      }
+    };
+
+    // 1. Delete raw/image files from R2
+    const urlsToDelete = [mediaUrl, rawMediaUrl];
+    for (const url of urlsToDelete) {
+      if (url && (url.includes('temp/stories') || url.includes('/stories/'))) {
+        if (url.endsWith('.m3u8')) continue; // HLS playlist handled by directory delete
+        const key = getKeyFromUrl(url);
+        if (key) {
+          logger.info(`[R2_CLEANUP] Deleting story file: ${key}`);
+          await deleteFromR2(key).catch(err => logger.warn(`Failed to delete key ${key}: ${err.message}`));
+        }
+      }
+    }
+
+    // 2. Delete HLS transcode directory (for videos)
+    const hlsPrefix = `stories/${id}`;
+    logger.info(`[R2_CLEANUP] Deleting story directory: ${hlsPrefix}`);
+    await deleteDirectoryFromR2(hlsPrefix).catch(err => logger.warn(`Failed to delete directory prefix ${hlsPrefix}: ${err.message}`));
+
+    // 3. Delete thumbnail
+    const thumbKey = `thumbnails/${id}.jpg`;
+    logger.info(`[R2_CLEANUP] Deleting story thumbnail: ${thumbKey}`);
+    await deleteFromR2(thumbKey).catch(err => logger.warn(`Failed to delete thumbnail ${thumbKey}: ${err.message}`));
+
+  } catch (error) {
+    logger.error(`Error deleting R2 files for story ${id}:`, error);
+  }
+};
+
 export default r2Client;

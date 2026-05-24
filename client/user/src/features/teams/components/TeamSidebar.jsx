@@ -5,12 +5,26 @@ import { Plus, Users, Search, ChevronRight, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AddOpponentModal from './AddOpponentModal';
 import StartScoringModal from '@features/scoring/components/StartScoringModal';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('myTeams'); // 'myTeams', 'opponentTeams', 'scoringMatches'
   const [isAddOpponentOpen, setIsAddOpponentOpen] = useState(false);
   const [isStartScoringOpen, setIsStartScoringOpen] = useState(false);
+  const [startScoringInitialData, setStartScoringInitialData] = useState(null);
+
+  React.useEffect(() => {
+    if (location.state?.openStartScoringModal) {
+      setIsStartScoringOpen(true);
+      if (location.state?.initialGameData) {
+        setStartScoringInitialData(location.state.initialGameData);
+      }
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, location.pathname]);
 
   const { data: myData, isLoading: isMyLoading } = useGetMyTeamsQuery();
   const { data: oppData, isLoading: isOppLoading } = useGetOpponentTeamsQuery(undefined, {
@@ -138,6 +152,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
               const statusColors = {
                 'NOT_STARTED': { bg: 'bg-white/10', text: 'text-white/50' },
                 'LIVE':        { bg: 'bg-red-500/20', text: 'text-red-400' },
+                'PAUSED':      { bg: 'bg-yellow-500/20', text: 'text-yellow-400' },
                 'COMPLETED':   { bg: 'bg-[#BFF367]/10', text: 'text-[#BFF367]' },
               };
               const statusStyle = statusColors[item.scoringStatus] || statusColors['NOT_STARTED'];
@@ -159,16 +174,16 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                   </div>
                   <div className="flex gap-2 mb-3">
                     <div className="flex-1 text-center bg-black/40 rounded-lg py-1 border border-white/5">
-                      <span className="text-xs text-white/80 font-bold">{item.teams?.[0]?.name || 'Team A'}</span>
+                      <span className="text-xs text-white/80 font-bold">{item.teams?.[0]?.name || 'TBD'}</span>
                     </div>
                     <div className="flex items-center justify-center text-[10px] text-white/40 font-black">VS</div>
                     <div className="flex-1 text-center bg-black/40 rounded-lg py-1 border border-white/5">
-                      <span className="text-xs text-white/80 font-bold">{item.teams?.[1]?.name || 'Team B'}</span>
+                      <span className="text-xs text-white/80 font-bold">{item.teams?.[1]?.name || 'TBD'}</span>
                     </div>
                   </div>
                   <div className="flex gap-2 mt-auto">
                     <a href={`/scoring/${item.id}`} className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-[#55DEE8] border border-[#55DEE8]/30 rounded-lg py-1.5 hover:bg-[#55DEE8]/10 transition-colors">Launch App</a>
-                    <a href={`/live-score/${item.id}`} target="_blank" rel="noreferrer" className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-[#BFF367] border border-[#BFF367]/30 rounded-lg py-1.5 hover:bg-[#BFF367]/10 transition-colors">Watch Live</a>
+                    <a href={`/analytics/${item.shortId || item.id}`} target="_blank" rel="noreferrer" className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-[#BFF367] border border-[#BFF367]/30 rounded-lg py-1.5 hover:bg-[#BFF367]/10 transition-colors">Watch Live</a>
                   </div>
                 </div>
               );
@@ -234,9 +249,14 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
 
       <StartScoringModal
         isOpen={isStartScoringOpen}
-        onClose={() => setIsStartScoringOpen(false)}
+        initialData={startScoringInitialData}
+        onClose={() => {
+          setIsStartScoringOpen(false);
+          setStartScoringInitialData(null);
+        }}
         onSuccess={() => {
           setIsStartScoringOpen(false);
+          setStartScoringInitialData(null);
           setActiveTab('scoringMatches');
         }}
       />

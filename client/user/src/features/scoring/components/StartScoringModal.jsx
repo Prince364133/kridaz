@@ -1,9 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, ChevronRight, ChevronLeft, Shield, Video, Users, Trophy,
   Search, Check, MapPin, UserCheck, SkipForward, Loader2,
-  Swords, Circle
+  Swords, Circle, Phone, MessageCircle, Sparkles, UserPlus, Plus
 } from 'lucide-react';
 import { useSetupScoringMatchMutation } from '@redux/api/scoringApi';
 import {
@@ -12,49 +13,61 @@ import {
   useLazyFindTeamByCodeQuery,
   useGetTeamByIdQuery,
   useLazySearchPlayersQuery,
+  useInviteMemberMutation,
+  useAddCustomMemberMutation,
 } from '@redux/api/teamApi';
 import { useGetGroundsQuery, useGetUmpiresQuery } from '@redux/api/gamesApi';
 import toast from 'react-hot-toast';
+import { fetchStates, fetchCities, searchLocations } from '../../../shared/utils/locationService';
 
 // ─── Static Data ─────────────────────────────────────────────────────────────
 
 const CRICKET_FORMATS = [
-  { value: 'T20',         label: 'T20',           sub: '20 Overs' },
-  { value: 'T10',         label: 'T10',           sub: '10 Overs' },
-  { value: 'ODI',         label: 'ODI',           sub: '50 Overs' },
-  { value: 'THE_HUNDRED', label: 'The Hundred',  sub: '100 Balls' },
-  { value: 'TEST',        label: 'Test Match',   sub: '5 Days' },
-  { value: '5_DAY',       label: '5 Day Match',  sub: '90 Overs/day' },
-  { value: '90_OVERS',    label: '90 Overs',     sub: '1 Day' },
-  { value: '1_WEEK',      label: 'One Week',     sub: 'Multi-day' },
-  { value: 'CUSTOM',      label: 'Custom',       sub: 'Set your own overs' },
+  { value: 'T20', label: 'T20', sub: '20 Overs' },
+  { value: 'T10', label: 'T10', sub: '10 Overs' },
+  { value: 'ODI', label: 'ODI', sub: '50 Overs' },
+  { value: 'THE_HUNDRED', label: 'The Hundred', sub: '100 Balls' },
+  { value: 'TEST', label: 'Test Match', sub: '5 Days' },
+  { value: '5_DAY', label: '5 Day Match', sub: '90 Overs/day' },
+  { value: '90_OVERS', label: '90 Overs', sub: '1 Day' },
+  { value: '1_WEEK', label: 'One Week', sub: 'Multi-day' },
+  { value: 'CUSTOM', label: 'Custom', sub: 'Set your own overs' },
 ];
 
 const BALL_TYPES = [
-  { value: 'TENNIS',  label: 'Tennis Ball',  emoji: '🎾' },
+  { value: 'TENNIS', label: 'Tennis Ball', emoji: '🎾' },
   { value: 'LEATHER', label: 'Leather Ball', emoji: '🏏' },
-  { value: 'WHITE',   label: 'White Ball',   emoji: '⚪' },
-  { value: 'PINK',    label: 'Pink Ball',    emoji: '🔴' },
-  { value: 'RUBBER',  label: 'Rubber Ball',  emoji: '⚫' },
+  { value: 'WHITE', label: 'White Ball', emoji: '⚪' },
+  { value: 'PINK', label: 'Pink Ball', emoji: '🔴' },
+  { value: 'RUBBER', label: 'Rubber Ball', emoji: '⚫' },
 ];
 
 const GROUND_TYPES = [
-  { value: 'OUTDOOR',  label: 'Outdoor Ground', emoji: '🌳' },
-  { value: 'INDOOR',   label: 'Indoor Ground',  emoji: '🏟️' },
-  { value: 'DAY',      label: 'Day Match',      emoji: '☀️' },
-  { value: 'NIGHT',    label: 'Night Match',    emoji: '🌙' },
-  { value: 'D_N',      label: 'Day/Night',      emoji: '🌅' },
-  { value: 'TURF',     label: 'Artificial Turf',emoji: '🟩' },
+  { value: 'OUTDOOR', label: 'Outdoor Ground', emoji: '🌳' },
+  { value: 'INDOOR', label: 'Indoor Ground', emoji: '🏟️' },
+  { value: 'TURF', label: 'Artificial Turf', emoji: '🟩' },
+];
+
+const MATCH_TIMINGS = [
+  { value: 'DAY', label: 'Day Match', emoji: '☀️' },
+  { value: 'NIGHT', label: 'Night Match', emoji: '🌙' },
+  { value: 'D_N', label: 'Day/Night', emoji: '🌅' },
+];
+
+const PITCH_TYPES = [
+  { value: 'ROUGH', label: 'Rough' },
+  { value: 'CEMENT', label: 'Cement' },
+  { value: 'TURF', label: 'Turf' },
+  { value: 'ASTRO_TURF', label: 'Astro Turf' },
+  { value: 'MATTING', label: 'Matting' },
 ];
 
 const STEPS = [
   { id: 1, label: 'Match Setup' },
   { id: 2, label: 'Select Teams' },
-  { id: 3, label: 'Team A XI' },
-  { id: 4, label: 'Team B XI' },
-  { id: 5, label: 'Add-ons' },
-  { id: 6, label: 'Toss' },
-  { id: 7, label: 'Review & Confirm' },
+  { id: 3, label: 'Playing XIs' },
+  { id: 4, label: 'Add-ons' },
+  { id: 5, label: 'Review & Confirm' },
 ];
 
 // ─── Field/Select components ─────────────────────────────────────────────────
@@ -67,7 +80,8 @@ const selectClass =
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
-const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
+const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
+  const { user } = useSelector((state) => state.auth);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     matchName: '',
@@ -78,15 +92,91 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
     maxMembers: 11,
     teamAId: '',
     teamBId: '',
+    teamAName: '',
+    teamBName: '',
     teamAPlayers: [],
     teamBPlayers: [],
     venueId: null,
+    customVenue: '',
     professionals: [],
+    customProfessionals: [],
     tossWinner: '',
     tossDecision: 'BAT',
     scoringPassword: '',
     youtubeLiveUrl: '',
+    customDays: 1,
+    customOversPerDay: 20,
+    powerPlayOvers: 6,
+    location: '',
+    matchDateTime: '',
+    pitchType: 'TURF',
+    matchTiming: 'DAY',
   });
+
+  useEffect(() => {
+    if (isOpen && initialData) {
+      const tA = initialData.teams?.teamA;
+      const tB = initialData.teams?.teamB;
+      const nameA = tA?.name || '';
+      const nameB = tB?.name || '';
+      const mName = (nameA && nameB) ? `${nameA} vs ${nameB}` : '';
+      const sType = initialData.gameType ? initialData.gameType.toUpperCase() : 'CRICKET';
+      
+      const loc = initialData.turf?.location || initialData.customVenue || '';
+      const vId = initialData.turf?._id || null;
+      let mDateTime = '';
+      if (initialData.date && initialData.time) {
+        try {
+          const d = new Date(initialData.date);
+          mDateTime = `${d.toISOString().split('T')[0]}T${initialData.time}`;
+        } catch(e) {}
+      }
+
+      const extractPlayers = (teamObj) => {
+        if (!teamObj || !Array.isArray(teamObj.slots)) return [];
+        return teamObj.slots
+          .filter(s => s.user || s.userId || s.customPlayerId || s.customPlayer)
+          .map(s => {
+            if (s.user || s.userId) {
+              return {
+                id: s.user?._id || s.user?.id || s.userId,
+                name: s.user?.name || s.user?.username || 'Player',
+                profilePicture: s.user?.profilePicture || null,
+                role: 'PLAYER',
+                isCustom: false,
+              };
+            } else {
+              return {
+                 id: s.customPlayerId || s.customPlayer?.id || Math.random().toString(),
+                 name: s.customPlayer?.name || 'Custom Player',
+                 profilePicture: null,
+                 role: 'PLAYER',
+                 isCustom: true,
+              };
+            }
+          });
+      };
+
+      const pA = extractPlayers(tA);
+      const pB = extractPlayers(tB);
+
+      setFormData(f => ({
+        ...f,
+        matchName: mName || f.matchName,
+        sportType: sType,
+        teamAId: tA?._id || tA?.id || tA?.teamId || f.teamAId,
+        teamBId: tB?._id || tB?.id || tB?.teamId || f.teamBId,
+        teamAName: nameA || f.teamAName,
+        teamBName: nameB || f.teamBName,
+        teamAPlayers: pA.length > 0 ? pA : f.teamAPlayers,
+        teamBPlayers: pB.length > 0 ? pB : f.teamBPlayers,
+        location: loc || f.location,
+        venueId: vId || f.venueId,
+        customVenue: initialData.customVenue || f.customVenue,
+        matchDateTime: mDateTime || f.matchDateTime,
+      }));
+    }
+  }, [isOpen, initialData]);
 
   // Team selector popup state
   const [selectingTeam, setSelectingTeam] = useState(null); // 'A' | 'B'
@@ -95,9 +185,111 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
 
   // Player selection popup state
   const [playerPopup, setPlayerPopup] = useState(null); // { teamKey: 'A' | 'B', action: 'ADD' | 'REPLACE', replaceId: null }
+  const [activePlayerTab, setActivePlayerTab] = useState('search'); // 'search' or 'custom'
   const [playerSearchQuery, setPlayerSearchQuery] = useState('');
   const [customPlayerName, setCustomPlayerName] = useState('');
+  const [customPlayerPhone, setCustomPlayerPhone] = useState('');
+  const [customPlayerCountryCode, setCustomPlayerCountryCode] = useState('91');
+  const [customInviteData, setCustomInviteData] = useState(null);
+
+  const [xiTab, setXiTab] = useState('A');
   const [addonsTab, setAddonsTab] = useState('VENUE');
+
+  // Venue & Professional Filters
+  const [venueSearchQuery, setVenueSearchQuery] = useState('');
+  const [proSearchQuery, setProSearchQuery] = useState('');
+  const [venueStateFilter, setVenueStateFilter] = useState('');
+  const [venueCityFilter, setVenueCityFilter] = useState('');
+  const [proRoleFilter, setProRoleFilter] = useState('');
+  const [proStateFilter, setProStateFilter] = useState('');
+  const [proCityFilter, setProCityFilter] = useState('');
+  const [states, setStates] = useState([]);
+  const [venueCities, setVenueCities] = useState([]);
+  const [proCities, setProCities] = useState([]);
+
+  const handleProStateChange = async (stateVal) => {
+    setProStateFilter(stateVal);
+    setProCityFilter('');
+    if (stateVal) {
+      const c = await fetchCities(stateVal);
+      setProCities(c);
+    } else {
+      setProCities([]);
+    }
+  };
+
+  // Custom Venue & Pro
+  const [customVenueInput, setCustomVenueInput] = useState('');
+  const [customProfessionalName, setCustomProfessionalName] = useState('');
+  const [customProfessionalPhone, setCustomProfessionalPhone] = useState('');
+  const [customProfessionalRole, setCustomProfessionalRole] = useState('UMPIRE');
+  const [showCustomProInvite, setShowCustomProInvite] = useState(false);
+  const [customProInviteData, setCustomProInviteData] = useState(null);
+
+  // Location state
+  const [locationInput, setLocationInput] = useState('');
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const locationRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (locationRef.current && !locationRef.current.contains(e.target)) {
+        setShowLocationSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const debounceTimeout = setTimeout(async () => {
+      if (locationInput.trim().length >= 2) {
+        try {
+          const results = await searchLocations(locationInput);
+          setLocationSuggestions(results || []);
+        } catch (error) {
+          console.error("Location search failed:", error);
+        }
+      } else {
+        setLocationSuggestions([]);
+      }
+    }, 500);
+    return () => clearTimeout(debounceTimeout);
+  }, [locationInput]);
+
+  // Fetch initial location (Auto-detect)
+  useEffect(() => {
+    let isMounted = true;
+    const initLocation = async () => {
+      try {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(async (pos) => {
+            try {
+              const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&addressdetails=1`);
+              const data = await res.json();
+              const userState = data.address?.state;
+              let userCity = data.address?.city || data.address?.town || data.address?.village || data.address?.suburb;
+
+              if (userState && isMounted) {
+                const locString = userCity ? `${userCity}, ${userState}` : userState;
+                setLocationInput(locString);
+                setFormData(f => ({ ...f, location: locString }));
+              }
+            } catch (err) {
+              console.log('Reverse geocoding failed', err);
+            }
+          }, () => {
+            console.log('Geolocation permission denied or failed');
+          });
+        }
+      } catch (err) {
+        console.error('Failed to init location', err);
+      }
+    };
+    initLocation();
+    return () => { isMounted = false; };
+  }, []);
 
   // Toss animation state
   const [isTossFlipping, setIsTossFlipping] = useState(false);
@@ -113,10 +305,28 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
   const { data: teamBDetails } = useGetTeamByIdQuery(formData.teamBId, { skip: !formData.teamBId });
 
   // Addons queries
-  const { data: groundsData, isLoading: isLoadingGrounds } = useGetGroundsQuery({}, { skip: step !== 5 });
-  const { data: umpiresData, isLoading: isLoadingUmpires } = useGetUmpiresQuery({ gameType: formData.sportType }, { skip: step !== 5 });
-  
+  const { data: groundsData, isLoading: isLoadingGrounds } = useGetGroundsQuery(
+    {
+      sportType: formData.sportType,
+      state: venueStateFilter || undefined,
+      city: venueCityFilter || undefined,
+      query: venueSearchQuery || undefined
+    },
+    { skip: step !== 4 && step !== 5 }
+  );
+  const { data: umpiresData, isLoading: isLoadingUmpires } = useGetUmpiresQuery(
+    {
+      gameType: formData.sportType,
+      state: proStateFilter || undefined,
+      city: proCityFilter || undefined,
+      query: proSearchQuery || undefined
+    },
+    { skip: step !== 4 && step !== 5 }
+  );
+
   const [searchPlayers, { data: searchPlayersData, isFetching: isSearchingPlayers }] = useLazySearchPlayersQuery();
+  const [invitePlayer, { isLoading: isInviting }] = useInviteMemberMutation();
+  const [addCustomPlayer, { isLoading: isAddingCustom }] = useAddCustomMemberMutation();
 
   const myTeams = myTeamsData?.teams || [];
   const oppTeams = oppTeamsData?.teams || [];
@@ -149,38 +359,222 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const getTeamName = (id) => {
+    if (!id) return 'Team Selected';
     const t = allTeams.find(t => (t._id || t.id) === id);
-    return t?.name || (searchedTeamData?.team && (searchedTeamData.team._id || searchedTeamData.team.id) === id ? searchedTeamData.team.name : 'Team Selected');
+    if (t?.name) return t.name;
+    if (searchedTeamData?.team && (searchedTeamData.team._id || searchedTeamData.team.id) === id) return searchedTeamData.team.name;
+    if (id === formData.teamAId && teamADetails?.team?.name) return teamADetails.team.name;
+    if (id === formData.teamBId && teamBDetails?.team?.name) return teamBDetails.team.name;
+    if (id === formData.teamAId && formData.teamAName) return formData.teamAName;
+    if (id === formData.teamBId && formData.teamBName) return formData.teamBName;
+    return 'Team Selected';
   };
 
   // ─── Playing XI ─────────────────────────────────────────────────────────────
   const initPlayersFromTeam = (teamKey) => {
     const details = teamKey === 'A' ? teamADetails : teamBDetails;
     if (!details?.team) return;
-    const members = (details.team.members || []).map(m => ({
+    const regularMembers = (details.team.members || []).map(m => ({
       id: m.user?.id || m.userId,
-      name: m.user?.name || 'Player',
+      name: m.user?.name || m.user?.username || 'Player',
       profilePicture: m.user?.profilePicture || null,
       role: m.role || 'PLAYER',
-    })).slice(0, formData.maxMembers);
+      isCustom: false,
+    }));
+    const customMembers = (details.team.customMembers || []).map(m => ({
+      id: m.id,
+      name: m.name || 'Custom Player',
+      profilePicture: null,
+      role: 'PLAYER',
+      isCustom: true,
+    }));
+    const allMembers = [...regularMembers, ...customMembers].slice(0, formData.maxMembers);
     const playerKey = teamKey === 'A' ? 'teamAPlayers' : 'teamBPlayers';
-    setFormData(f => ({ ...f, [playerKey]: members }));
+    setFormData(f => ({ ...f, [playerKey]: allMembers }));
   };
+
+  useEffect(() => {
+    if (step === 3) {
+      if (formData.teamAPlayers.length === 0 && teamADetails?.team) {
+        initPlayersFromTeam('A');
+      }
+      if (formData.teamBPlayers.length === 0 && teamBDetails?.team) {
+        initPlayersFromTeam('B');
+      }
+    }
+  }, [step, teamADetails, teamBDetails]);
 
   const removePlayer = (teamKey, playerId) => {
     const playerKey = teamKey === 'A' ? 'teamAPlayers' : 'teamBPlayers';
     setFormData(f => ({ ...f, [playerKey]: f[playerKey].filter(p => p.id !== playerId) }));
   };
 
-  const handlePlayerSearch = async () => {
-    if (playerSearchQuery.trim()) await searchPlayers(playerSearchQuery.trim());
+  const handleInviteAndAdd = async (player) => {
+    const teamId = playerPopup?.teamKey === 'A' ? formData.teamAId : formData.teamBId;
+    if (teamId && !initialData) {
+      try {
+        await invitePlayer({ teamId, userId: player._id || player.id }).unwrap();
+        toast.success('Invitation sent to player!');
+      } catch (err) {
+        toast.error(err.data?.message || 'Failed to send invitation');
+      }
+    }
+    selectPlayer(player);
   };
+
+  const handleAddCustomPlayerSubmit = async (e) => {
+    e?.preventDefault();
+    if (!customPlayerName.trim()) return toast.error('Player Name is required');
+
+    const teamId = playerPopup?.teamKey === 'A' ? formData.teamAId : formData.teamBId;
+    if (!teamId || initialData) {
+      selectPlayer({ id: Math.random().toString(), name: customPlayerName, isCustom: true, phone: customPlayerPhone });
+      setCustomPlayerName('');
+      setCustomPlayerPhone('');
+      toast.success('Custom player added to match!');
+      return;
+    }
+
+    try {
+      const result = await addCustomPlayer({
+        teamId,
+        name: customPlayerName,
+        phone: customPlayerPhone,
+      }).unwrap();
+
+      if (result.success) {
+        const inviteResult = result.results?.[0];
+
+        if (inviteResult?.status === "error" && inviteResult?.existingUserId) {
+          toast.success(`User exists (${inviteResult.existingUserName}). Inviting them...`);
+          await invitePlayer({ teamId, userId: inviteResult.existingUserId }).unwrap();
+          selectPlayer({ id: inviteResult.existingUserId, name: inviteResult.existingUserName, username: inviteResult.existingUserName });
+          setCustomPlayerName('');
+          setCustomPlayerPhone('');
+          return;
+        }
+
+        if (inviteResult?.status === "invited_custom") {
+          setCustomInviteData({
+            token: inviteResult.token,
+            phone: customPlayerPhone,
+            countryCode: customPlayerCountryCode,
+            name: customPlayerName
+          });
+          toast.success('Player added! Send them a WhatsApp invite.');
+          selectPlayer({ id: inviteResult.customMemberId || Math.random().toString(), name: customPlayerName, isCustom: true });
+        } else {
+          toast.success('Custom player added to team!');
+          selectPlayer({ id: inviteResult?.customMemberId || Math.random().toString(), name: customPlayerName, isCustom: true });
+          setCustomPlayerName('');
+          setCustomPlayerPhone('');
+        }
+      }
+    } catch (err) {
+      toast.error(err.data?.message || 'Failed to add player');
+    }
+  };
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (playerSearchQuery.trim()) {
+        searchPlayers(playerSearchQuery.trim());
+      }
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [playerSearchQuery, searchPlayers]);
+
+  //  Handlers 
+  
+  // Initialize location filters
+  useEffect(() => {
+    if (user) {
+      if (user.state) {
+        setVenueStateFilter(user.state);
+        setProStateFilter(user.state);
+      }
+      if (user.city) {
+        setVenueCityFilter(user.city);
+        setProCityFilter(user.city);
+      }
+    }
+  }, [user]);
+
+  // Validate state filters against loaded states
+  useEffect(() => {
+    if (states.length > 0) {
+      if (venueStateFilter && !states.includes(venueStateFilter)) {
+        setVenueStateFilter('');
+      }
+      if (proStateFilter && !states.includes(proStateFilter)) {
+        setProStateFilter('');
+      }
+    }
+  }, [states, venueStateFilter, proStateFilter]);
+
+  // Validate city filters against loaded cities
+  useEffect(() => {
+    if (venueCities.length > 0) {
+      if (venueCityFilter && !venueCities.includes(venueCityFilter)) {
+        setVenueCityFilter('');
+      }
+    } else if (venueStateFilter === '') {
+      setVenueCityFilter('');
+    }
+  }, [venueCities, venueCityFilter, venueStateFilter]);
+
+  useEffect(() => {
+    if (proCities.length > 0) {
+      if (proCityFilter && !proCities.includes(proCityFilter)) {
+        setProCityFilter('');
+      }
+    } else if (proStateFilter === '') {
+      setProCityFilter('');
+    }
+  }, [proCities, proCityFilter, proStateFilter]);
+
+  // Fetch all states
+  useEffect(() => {
+    const loadStates = async () => {
+      const fetchedStates = await fetchStates();
+      setStates(fetchedStates);
+    };
+    loadStates();
+  }, []);
+
+  // Fetch venue cities when state changes
+  useEffect(() => {
+    const loadCities = async () => {
+      if (venueStateFilter) {
+        const fetchedCities = await fetchCities(venueStateFilter);
+        setVenueCities(fetchedCities);
+      } else {
+        setVenueCities([]);
+        setVenueCityFilter('');
+      }
+    };
+    loadCities();
+  }, [venueStateFilter]);
+
+  // Fetch pro cities when state changes
+  useEffect(() => {
+    const loadCities = async () => {
+      if (proStateFilter) {
+        const fetchedCities = await fetchCities(proStateFilter);
+        setProCities(fetchedCities);
+      } else {
+        setProCities([]);
+        setProCityFilter('');
+      }
+    };
+    loadCities();
+  }, [proStateFilter]);
 
   const selectPlayer = (player) => {
     if (!playerPopup) return;
     const { teamKey, action, replaceId } = playerPopup;
     const playerKey = teamKey === 'A' ? 'teamAPlayers' : 'teamBPlayers';
-    
+
     setFormData(f => {
       let newList = [...f[playerKey]];
       const newPlayer = {
@@ -190,7 +584,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
         role: player.role || 'PLAYER',
         isCustom: !(player.id || player._id),
       };
-      
+
       if (action === 'REPLACE' && replaceId) {
         newList = newList.map(p => p.id === replaceId ? newPlayer : p);
       } else {
@@ -209,9 +603,26 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
       }
       return { ...f, [playerKey]: newList };
     });
-    setPlayerPopup(null);
+    if (action === 'REPLACE') {
+      setPlayerPopup(null);
+    }
     setPlayerSearchQuery('');
     setCustomPlayerName('');
+  };
+
+  const changePlayerRole = (teamKey, playerId, role) => {
+    const key = teamKey === 'A' ? 'teamAPlayers' : 'teamBPlayers';
+    setFormData(f => {
+      let players = [...f[key]];
+
+      // Enforce unique roles
+      if (role !== 'PLAYER') {
+        players = players.map(p => p.role === role ? { ...p, role: 'PLAYER' } : p);
+      }
+
+      players = players.map(p => p.id === playerId ? { ...p, role } : p);
+      return { ...f, [key]: players };
+    });
   };
 
   // ─── Toss ────────────────────────────────────────────────────────────────────
@@ -254,11 +665,8 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
     switch (step) {
       case 1: return formData.matchName.trim().length > 0;
       case 2: return !!formData.teamAId && !!formData.teamBId && formData.teamAId !== formData.teamBId;
-      case 3: return formData.teamAPlayers.length > 0;
-      case 4: return formData.teamBPlayers.length > 0;
-      case 6: return !!formData.tossWinner;
-      // Password is optional: blank (no password) or minimum 4 characters
-      case 7: return formData.scoringPassword.trim() === '' || formData.scoringPassword.length >= 4;
+      case 3: return formData.teamAPlayers.length > 0 && formData.teamBPlayers.length > 0;
+      case 5: return formData.scoringPassword.trim() === '' || formData.scoringPassword.length >= 4;
       default: return true;
     }
   };
@@ -366,9 +774,31 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
 
   // ─── Player Selection Popup ──────────────────────────────────────────────────
   if (playerPopup) {
+    const teamDetailsForPopup = playerPopup.teamKey === 'A' ? teamADetails : teamBDetails;
+    const rosterMembers = teamDetailsForPopup?.team ? [
+      ...(teamDetailsForPopup.team.members || []).map(m => ({
+        id: m.user?.id || m.userId,
+        name: m.user?.name || m.user?.username || 'Player',
+        username: m.user?.username,
+        profilePicture: m.user?.profilePicture || null,
+        role: m.role || 'PLAYER',
+        isCustom: false,
+      })),
+      ...(teamDetailsForPopup.team.customMembers || []).map(m => ({
+        id: m.id,
+        name: m.name || 'Custom Player',
+        profilePicture: null,
+        role: 'PLAYER',
+        isCustom: true,
+      }))
+    ] : [];
+
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setPlayerPopup(null)} />
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => {
+          setPlayerPopup(null);
+          setCustomInviteData(null);
+        }} />
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -378,62 +808,211 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
             <h3 className="text-lg font-black text-white uppercase tracking-wider">
               {playerPopup.action === 'REPLACE' ? 'Replace Player' : 'Add Player'}
             </h3>
-            <button onClick={() => setPlayerPopup(null)} className="p-1.5 text-white/40 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors">
+            <button onClick={() => {
+              setPlayerPopup(null);
+              setCustomInviteData(null);
+            }} className="p-1.5 text-white/40 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors">
               <X size={18} />
             </button>
           </div>
-          <div className="p-5 space-y-4 overflow-y-auto">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={playerSearchQuery}
-                onChange={e => setPlayerSearchQuery(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handlePlayerSearch()}
-                placeholder="Search by username or name..."
-                className={inputClass}
-              />
-              <button onClick={handlePlayerSearch} disabled={isSearchingPlayers}
-                className="px-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-white flex-shrink-0">
-                {isSearchingPlayers ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-              </button>
-            </div>
-            
-            <div className="space-y-1.5 pr-1">
-              {searchPlayersData?.players?.map(p => (
-                <button key={p._id} onClick={() => selectPlayer(p)}
-                  className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
-                  <div className="flex items-center gap-3">
-                    {p.profilePicture ? <img src={p.profilePicture} className="w-8 h-8 rounded-full object-cover" alt={p.username} /> : <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/40"><Users size={14} /></div>}
+
+          {/* Tabs */}
+          <div className="flex border-b border-white/10 flex-shrink-0">
+            <button
+              onClick={() => setActivePlayerTab('roster')}
+              className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider transition-colors ${activePlayerTab === 'roster' ? 'text-[#BFF367] border-b-2 border-[#BFF367]' : 'text-white/40 hover:text-white/80'}`}
+            >
+              Roster
+            </button>
+            <button
+              onClick={() => setActivePlayerTab('search')}
+              className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider transition-colors ${activePlayerTab === 'search' ? 'text-[#BFF367] border-b-2 border-[#BFF367]' : 'text-white/40 hover:text-white/80'}`}
+            >
+              Search
+            </button>
+            <button
+              onClick={() => setActivePlayerTab('custom')}
+              className={`flex-1 py-4 text-sm font-bold uppercase tracking-wider transition-colors ${activePlayerTab === 'custom' ? 'text-[#BFF367] border-b-2 border-[#BFF367]' : 'text-white/40 hover:text-white/80'}`}
+            >
+              Custom
+            </button>
+          </div>
+
+          <div className="p-5 overflow-y-auto space-y-4">
+            {activePlayerTab === 'roster' ? (
+              <div className="space-y-2">
+                {rosterMembers.length > 0 ? rosterMembers.map(p => {
+                  const currentList = playerPopup.teamKey === 'A' ? formData.teamAPlayers : formData.teamBPlayers;
+                  const isAdded = currentList.some(cp => cp.id === p.id);
+                  return (
+                    <button key={p.id} onClick={() => {
+                      if (isAdded) {
+                        setFormData(f => {
+                          const key = playerPopup.teamKey === 'A' ? 'teamAPlayers' : 'teamBPlayers';
+                          return { ...f, [key]: f[key].filter(cp => cp.id !== p.id) };
+                        });
+                      } else {
+                        selectPlayer(p);
+                      }
+                    }}
+                      className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left ${isAdded ? 'bg-[#BFF367]/10 border-[#BFF367]/30' : 'bg-white/5 hover:bg-white/10 border-transparent hover:border-white/10'}`}>
+                      <div className="flex items-center gap-3">
+                        {p.profilePicture ? <img src={p.profilePicture} className="w-10 h-10 rounded-full object-cover" alt={p.name} /> : <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/40"><Users size={16} /></div>}
+                        <div>
+                          <div className="font-bold text-white flex items-center gap-2">
+                            {p.username || p.name}
+                          </div>
+                          <div className="text-xs text-white/40">{p.isCustom ? 'Custom Player' : p.name}</div>
+                        </div>
+                      </div>
+                      <div className={`p-2 rounded-full ${isAdded ? 'bg-white/10 text-white/40' : 'bg-[#BFF367]/10 text-[#BFF367]'}`}>
+                        {isAdded ? <Check size={16} /> : <Plus size={16} />}
+                      </div>
+                    </button>
+                  );
+                }) : (
+                  <div className="text-center py-8 text-white/40">
+                    <Users size={32} className="mx-auto mb-3 opacity-50" />
+                    <div className="text-sm font-bold text-white mb-1">No players in roster</div>
+                    <div className="text-xs">Add players via Search or Custom</div>
+                  </div>
+                )}
+              </div>
+            ) : activePlayerTab === 'search' ? (
+              <div className="space-y-4">
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
+                    {isSearchingPlayers ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+                  </div>
+                  <input
+                    type="text"
+                    value={playerSearchQuery}
+                    onChange={e => setPlayerSearchQuery(e.target.value)}
+                    placeholder="Search by name, username, or phone..."
+                    className={`${inputClass} pl-10`}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  {searchPlayersData?.players?.map(p => (
+                    <button key={p._id} onClick={() => handleInviteAndAdd(p)}
+                      className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
+                      <div className="flex items-center gap-3">
+                        {p.profilePicture ? <img src={p.profilePicture} className="w-10 h-10 rounded-full object-cover" alt={p.username} /> : <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/40"><Users size={16} /></div>}
+                        <div>
+                          <div className="font-bold text-white flex items-center gap-2">
+                            {p.username}
+                          </div>
+                          <div className="text-xs text-white/40">{p.name}</div>
+                        </div>
+                      </div>
+                      <div className="bg-[#BFF367]/10 text-[#BFF367] p-2 rounded-full">
+                        <UserPlus size={16} />
+                      </div>
+                    </button>
+                  ))}
+
+                  {!isSearchingPlayers && playerSearchQuery && (!searchPlayersData?.players?.length) && (
+                    <div className="text-center py-8 text-white/40">
+                      <UserCheck size={32} className="mx-auto mb-3 opacity-50" />
+                      <div className="text-sm font-bold text-white mb-1">No players found</div>
+                      <div className="text-xs">Try searching by a different name or phone</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {!customInviteData ? (
+                  <form onSubmit={handleAddCustomPlayerSubmit} className="space-y-4">
+                    <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-xl p-4 flex gap-3">
+                      <Sparkles size={20} className="text-[#55DEE8] flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-[#55DEE8]">
+                        Create a custom player placeholder. If you add their phone number, they'll get an invite to join Kridaz!
+                      </div>
+                    </div>
                     <div>
-                      <div className="font-bold text-white text-sm">{p.username}</div>
-                      <div className="text-[10px] text-white/40">{p.name}</div>
+                      <label className={labelClass}>Player Name *</label>
+                      <input
+                        type="text"
+                        value={customPlayerName}
+                        onChange={e => setCustomPlayerName(e.target.value)}
+                        placeholder="E.g., Virat Kohli"
+                        className={inputClass}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Phone Number (Optional)</label>
+                      <div className="flex">
+                        <select
+                          value={customPlayerCountryCode}
+                          onChange={e => setCustomPlayerCountryCode(e.target.value)}
+                          className={`${selectClass} w-24 rounded-r-none border-r-0`}
+                        >
+                          <option value="91">+91</option>
+                          <option value="1">+1</option>
+                          <option value="44">+44</option>
+                          <option value="61">+61</option>
+                          <option value="971">+971</option>
+                        </select>
+                        <input
+                          type="tel"
+                          value={customPlayerPhone}
+                          onChange={e => setCustomPlayerPhone(e.target.value)}
+                          placeholder="9876543210"
+                          className={`${inputClass} rounded-l-none`}
+                        />
+                      </div>
+                      <p className="text-[10px] text-white/40 mt-1.5 ml-1 flex items-center gap-1">
+                        <Phone size={10} /> Add phone to send them a WhatsApp invite
+                      </p>
+                    </div>
+                    <button type="submit" disabled={isAddingCustom || !customPlayerName.trim()}
+                      className="w-full py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-xl uppercase tracking-wider text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 mt-2">
+                      {isAddingCustom ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                      Add Custom Player
+                    </button>
+                  </form>
+                ) : (
+                  <div className="text-center space-y-5 py-4">
+                    <div className="w-16 h-16 bg-[#25D366]/20 rounded-full flex items-center justify-center mx-auto border-2 border-[#25D366]/30">
+                      <MessageCircle size={32} className="text-[#25D366]" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-black text-white mb-2">Invite Ready!</h4>
+                      <p className="text-sm text-white/60 mb-6">
+                        {customInviteData.name} has been added to the team. Send them a WhatsApp invite so they can claim their profile.
+                      </p>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => {
+                            const message = `Hey ${customInviteData.name}! I've added you to our team on Kridaz. Click here to join: ${window.location.origin}/invite?token=${customInviteData.token}`;
+                            window.open(`https://wa.me/${customInviteData.countryCode}${customInviteData.phone}?text=${encodeURIComponent(message)}`, '_blank');
+                            setPlayerPopup(null);
+                            setCustomInviteData(null);
+                          }}
+                          className="flex-1 py-3 bg-[#25D366] text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-[#20bd5a] transition-colors"
+                        >
+                          <MessageCircle size={18} />
+                          Send WhatsApp
+                        </button>
+                        <button
+                          onClick={() => {
+                            setPlayerPopup(null);
+                            setCustomInviteData(null);
+                          }}
+                          className="py-3 px-6 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-colors"
+                        >
+                          Skip
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <Check size={16} className="text-[#BFF367]" opacity={0} />
-                </button>
-              ))}
-              
-              {!isSearchingPlayers && playerSearchQuery && (!searchPlayersData?.players?.length) && (
-                <div className="text-center py-4 text-white/40 text-sm">No players found.</div>
-              )}
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-white/10">
-              <label className={labelClass}>Or Add Custom Player</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={customPlayerName}
-                  onChange={e => setCustomPlayerName(e.target.value)}
-                  placeholder="Enter player name..."
-                  className={inputClass}
-                />
-                <button onClick={() => selectPlayer({ name: customPlayerName })} disabled={!customPlayerName.trim()}
-                  className="px-4 bg-[#BFF367] text-black font-bold rounded-xl transition-colors disabled:opacity-50">
-                  Add
-                </button>
+                )}
               </div>
-            </div>
+            )}
           </div>
         </motion.div>
       </div>
@@ -453,66 +1032,150 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
                 onChange={e => setFormData(f => ({ ...f, matchName: e.target.value }))}
                 className={inputClass} placeholder="e.g. Weekend Championship Final" />
             </div>
-            <div>
-              <label className={labelClass}>Sport Type</label>
-              <select value={formData.sportType}
-                onChange={e => setFormData(f => ({ ...f, sportType: e.target.value }))}
-                className={selectClass}>
-                <option value="CRICKET">🏏 Cricket</option>
-              </select>
-            </div>
-            <div>
-              <label className={labelClass}>Match Format</label>
-              <div className="grid grid-cols-3 gap-2">
-                {CRICKET_FORMATS.map(f => (
-                  <button key={f.value} type="button"
-                    onClick={() => setFormData(fd => ({ ...fd, format: f.value }))}
-                    className={`p-2.5 rounded-xl border text-left transition-all ${formData.format === f.value ? 'border-[#55DEE8] bg-[#55DEE8]/10' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}>
-                    <div className="text-white text-xs font-bold">{f.label}</div>
-                    <div className="text-white/40 text-[10px]">{f.sub}</div>
-                  </button>
-                ))}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Sport Type</label>
+                <select value={formData.sportType}
+                  onChange={e => setFormData(f => ({ ...f, sportType: e.target.value }))}
+                  className={selectClass}>
+                  <option value="CRICKET">🏏 Cricket</option>
+                </select>
+              </div>
+              <div>
+                <label className={labelClass}>Match Date & Time</label>
+                <input type="datetime-local" value={formData.matchDateTime}
+                  onChange={e => setFormData(f => ({ ...f, matchDateTime: e.target.value }))}
+                  className={inputClass} />
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Match Format</label>
+                <select value={formData.format}
+                  onChange={e => {
+                    const format = e.target.value;
+                    let defaultPowerPlay = 6;
+                    if (format === 'T10') defaultPowerPlay = 3;
+                    if (format === 'ODI') defaultPowerPlay = 10;
+                    setFormData(f => ({ ...f, format, powerPlayOvers: defaultPowerPlay }));
+                  }}
+                  className={selectClass}>
+                  {CRICKET_FORMATS.map(f => (
+                    <option key={f.value} value={f.value}>{f.label} ({f.sub})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={labelClass}>Power Play Overs</label>
+                <input type="number" min="0" max="100" value={formData.powerPlayOvers}
+                  onChange={e => setFormData(f => ({ ...f, powerPlayOvers: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) }))}
+                  className={inputClass} />
+              </div>
+            </div>
+
+            {formData.format === 'CUSTOM' && (
+              <div className="grid grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl border border-white/10">
+                <div>
+                  <label className={labelClass}>Days</label>
+                  <input type="number" min="1" max="10" value={formData.customDays}
+                    onChange={e => setFormData(f => ({ ...f, customDays: Math.min(10, Math.max(1, parseInt(e.target.value) || 1)) }))}
+                    className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>Overs per Day</label>
+                  <input type="number" min="1" max="100" value={formData.customOversPerDay}
+                    onChange={e => setFormData(f => ({ ...f, customOversPerDay: Math.min(100, Math.max(1, parseInt(e.target.value) || 1)) }))}
+                    className={inputClass} />
+                </div>
+              </div>
+            )}
+
+            <div className="relative z-[90]" ref={locationRef}>
+              <label className={labelClass}>Location</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={locationInput}
+                  onChange={(e) => {
+                    setLocationInput(e.target.value);
+                    setFormData(f => ({ ...f, location: e.target.value }));
+                    setShowLocationSuggestions(true);
+                  }}
+                  onFocus={() => locationInput.length >= 2 && setShowLocationSuggestions(true)}
+                  className={inputClass}
+                  placeholder="Search City or State"
+                />
+              </div>
+              {showLocationSuggestions && locationSuggestions.length > 0 && (
+                <div className="absolute top-full mt-2 w-full bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[100]">
+                  <div className="max-h-[200px] overflow-y-auto">
+                    {locationSuggestions.map((loc, idx) => (
+                      <button
+                        key={idx}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const displayName = typeof loc === 'object' ? loc.display_name : loc;
+                          setLocationInput(displayName);
+                          setFormData(f => ({ ...f, location: displayName }));
+                          setShowLocationSuggestions(false);
+                        }}
+                        className="w-full text-left px-4 py-3 text-xs font-bold text-gray-300 hover:bg-[#55DEE8] hover:text-black transition-colors"
+                      >
+                        {typeof loc === 'object' ? loc.display_name : loc}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={labelClass}>Ball Type</label>
-                <div className="space-y-1.5">
-                  {BALL_TYPES.map(b => (
-                    <button key={b.value} type="button"
-                      onClick={() => setFormData(f => ({ ...f, ballType: b.value }))}
-                      className={`w-full flex items-center gap-2 p-2.5 rounded-xl border text-sm transition-all ${formData.ballType === b.value ? 'border-[#55DEE8] bg-[#55DEE8]/10 text-white' : 'border-white/10 bg-white/5 hover:bg-white/10 text-white/70'}`}>
-                      <span>{b.emoji}</span> {b.label}
-                      {formData.ballType === b.value && <Check size={12} className="ml-auto text-[#55DEE8]" />}
-                    </button>
-                  ))}
-                </div>
+                <select value={formData.ballType}
+                  onChange={e => setFormData(f => ({ ...f, ballType: e.target.value }))}
+                  className={selectClass}>
+                  {BALL_TYPES.map(b => <option key={b.value} value={b.value}>{b.emoji} {b.label}</option>)}
+                </select>
               </div>
               <div>
                 <label className={labelClass}>Ground Type</label>
-                <div className="space-y-1.5">
-                  {GROUND_TYPES.map(g => (
-                    <button key={g.value} type="button"
-                      onClick={() => setFormData(f => ({ ...f, groundType: g.value }))}
-                      className={`w-full flex items-center gap-2 p-2.5 rounded-xl border text-sm transition-all ${formData.groundType === g.value ? 'border-[#BFF367] bg-[#BFF367]/10 text-white' : 'border-white/10 bg-white/5 hover:bg-white/10 text-white/70'}`}>
-                      <span>{g.emoji}</span> {g.label}
-                      {formData.groundType === g.value && <Check size={12} className="ml-auto text-[#BFF367]" />}
-                    </button>
-                  ))}
-                </div>
+                <select value={formData.groundType}
+                  onChange={e => setFormData(f => ({ ...f, groundType: e.target.value }))}
+                  className={selectClass}>
+                  {GROUND_TYPES.map(g => <option key={g.value} value={g.value}>{g.emoji} {g.label}</option>)}
+                </select>
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Pitch Type</label>
+                <select value={formData.pitchType}
+                  onChange={e => setFormData(f => ({ ...f, pitchType: e.target.value }))}
+                  className={selectClass}>
+                  {PITCH_TYPES.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className={labelClass}>Match Timing</label>
+                <select value={formData.matchTiming}
+                  onChange={e => setFormData(f => ({ ...f, matchTiming: e.target.value }))}
+                  className={selectClass}>
+                  {MATCH_TIMINGS.map(m => <option key={m.value} value={m.value}>{m.emoji} {m.label}</option>)}
+                </select>
+              </div>
+            </div>
+
             <div>
               <label className={labelClass}>Max Members per Team</label>
-              <div className="flex gap-2 items-center">
-                {[5, 6, 7, 8, 9, 10, 11, 12, 15].map(n => (
-                  <button key={n} type="button"
-                    onClick={() => setFormData(f => ({ ...f, maxMembers: n }))}
-                    className={`w-10 h-10 rounded-xl border text-sm font-bold transition-all ${formData.maxMembers === n ? 'border-[#55DEE8] bg-[#55DEE8] text-black' : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'}`}>
-                    {n}
-                  </button>
-                ))}
-              </div>
+              <select value={formData.maxMembers}
+                onChange={e => setFormData(f => ({ ...f, maxMembers: parseInt(e.target.value) || 11 }))}
+                className={selectClass}>
+                {[5, 6, 7, 8, 9, 10, 11, 12, 15].map(n => <option key={n} value={n}>{n} Players</option>)}
+              </select>
             </div>
           </div>
         );
@@ -552,47 +1215,75 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
           </div>
         );
 
-      // ── Step 3: Team A Playing XI ─────────────────────────────────────────────
+      // ── Step 3: Playing XIs ───────────────────────────────────────────────────
       case 3:
         return (
-          <PlayingXIStep
-            teamKey="A"
-            teamName={getTeamName(formData.teamAId)}
-            players={formData.teamAPlayers}
-            maxMembers={formData.maxMembers}
-            teamDetails={teamADetails?.team}
-            onInit={() => initPlayersFromTeam('A')}
-            onRemove={(id) => removePlayer('A', id)}
-            onAdd={() => setPlayerPopup({ teamKey: 'A', action: 'ADD', replaceId: null })}
-            onReplace={(id) => setPlayerPopup({ teamKey: 'A', action: 'REPLACE', replaceId: id })}
-          />
+          <div className="space-y-4 h-full flex flex-col">
+            <div className="flex border-b border-white/10 flex-shrink-0">
+              <button
+                onClick={() => setXiTab('A')}
+                className={`flex-1 py-3 text-sm font-bold uppercase tracking-wider transition-colors truncate px-2 ${xiTab === 'A' ? 'text-[#55DEE8] border-b-2 border-[#55DEE8]' : 'text-white/40 hover:text-white/80'}`}
+              >
+                {getTeamName(formData.teamAId) || 'TBD'}
+              </button>
+              <button
+                onClick={() => setXiTab('B')}
+                className={`flex-1 py-3 text-sm font-bold uppercase tracking-wider transition-colors truncate px-2 ${xiTab === 'B' ? 'text-[#BFF367] border-b-2 border-[#BFF367]' : 'text-white/40 hover:text-white/80'}`}
+              >
+                {getTeamName(formData.teamBId) || 'TBD'}
+              </button>
+            </div>
+            {xiTab === 'A' ? (
+              <PlayingXIStep
+                teamKey="A"
+                teamName={getTeamName(formData.teamAId)}
+                players={formData.teamAPlayers}
+                maxMembers={formData.maxMembers}
+                teamDetails={teamADetails?.team}
+                onInit={() => initPlayersFromTeam('A')}
+                onRemove={(id) => removePlayer('A', id)}
+                onAdd={() => {
+                  setPlayerPopup({ teamKey: 'A', action: 'ADD', replaceId: null });
+                  setActivePlayerTab('roster');
+                }}
+                onReplace={(id) => {
+                  setPlayerPopup({ teamKey: 'A', action: 'REPLACE', replaceId: id });
+                  setActivePlayerTab('roster');
+                }}
+                onRoleChange={(id, role) => changePlayerRole('A', id, role)}
+              />
+            ) : (
+              <PlayingXIStep
+                teamKey="B"
+                teamName={getTeamName(formData.teamBId)}
+                players={formData.teamBPlayers}
+                maxMembers={formData.maxMembers}
+                teamDetails={teamBDetails?.team}
+                onInit={() => initPlayersFromTeam('B')}
+                onRemove={(id) => removePlayer('B', id)}
+                onAdd={() => {
+                  setPlayerPopup({ teamKey: 'B', action: 'ADD', replaceId: null });
+                  setActivePlayerTab('roster');
+                }}
+                onReplace={(id) => {
+                  setPlayerPopup({ teamKey: 'B', action: 'REPLACE', replaceId: id });
+                  setActivePlayerTab('roster');
+                }}
+                onRoleChange={(id, role) => changePlayerRole('B', id, role)}
+              />
+            )}
+          </div>
         );
 
-      // ── Step 4: Team B Playing XI ─────────────────────────────────────────────
+      // ── Step 4: Add-ons (Venue + Professionals) ───────────────────────────────
       case 4:
-        return (
-          <PlayingXIStep
-            teamKey="B"
-            teamName={getTeamName(formData.teamBId)}
-            players={formData.teamBPlayers}
-            maxMembers={formData.maxMembers}
-            teamDetails={teamBDetails?.team}
-            onInit={() => initPlayersFromTeam('B')}
-            onRemove={(id) => removePlayer('B', id)}
-            onAdd={() => setPlayerPopup({ teamKey: 'B', action: 'ADD', replaceId: null })}
-            onReplace={(id) => setPlayerPopup({ teamKey: 'B', action: 'REPLACE', replaceId: id })}
-          />
-        );
-
-      // ── Step 5: Add-ons (Venue + Professionals) ───────────────────────────────
-      case 5:
         return (
           <div className="space-y-5 h-full flex flex-col">
             <div>
               <h3 className="text-lg font-black text-white uppercase tracking-wide">Add-ons</h3>
               <p className="text-sm text-white/40">Optionally hire a venue or professionals. You can skip this step.</p>
             </div>
-            
+
             <div className="flex gap-2 p-1 bg-white/[0.03] rounded-xl border border-white/5 flex-shrink-0">
               <button onClick={() => setAddonsTab('VENUE')}
                 className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${addonsTab === 'VENUE' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}>
@@ -606,132 +1297,332 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
 
             <div className="flex-1 overflow-y-auto">
               {addonsTab === 'VENUE' && (
-                <div className="space-y-2 pr-1">
-                  {isLoadingGrounds ? (
-                    <div className="flex justify-center p-4"><Loader2 className="animate-spin text-white/40" /></div>
-                  ) : groundsData?.turfs?.length > 0 ? (
-                    groundsData.turfs.map(g => (
-                      <button key={g._id} onClick={() => setFormData(f => ({ ...f, venueId: f.venueId === g._id ? null : g._id }))}
-                        className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left ${formData.venueId === g._id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
-                        <div className="flex items-center gap-3">
-                          <MapPin size={18} className={formData.venueId === g._id ? 'text-[#55DEE8]' : 'text-white/40'} />
-                          <div>
-                            <div className="font-bold text-white text-sm">{g.name}</div>
-                            <div className="text-[10px] text-white/40">{g.city} • ₹{g.hourlyRate}/hr</div>
-                          </div>
-                        </div>
-                        {formData.venueId === g._id && <Check size={16} className="text-[#55DEE8]" />}
-                      </button>
-                    ))
-                  ) : (
-                    <div className="text-center p-4 text-sm text-white/40">No venues available for your area.</div>
-                  )}
+                <div className="space-y-4 pr-1">
+                  {/* Venue Search & Filters */}
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
+                      <input
+                        type="text"
+                        placeholder="Search venues..."
+                        className={`${inputClass} pl-10 py-2 text-sm`}
+                        value={venueSearchQuery}
+                        onChange={e => setVenueSearchQuery(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <select 
+                        className={`${selectClass} py-2 text-sm w-1/2`} 
+                        value={venueStateFilter} 
+                        onChange={e => setVenueStateFilter(e.target.value)}
+                      >
+                        <option value="">All States</option>
+                        {states.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      <select 
+                        className={`${selectClass} py-2 text-sm w-1/2`} 
+                        value={venueCityFilter} 
+                        onChange={e => setVenueCityFilter(e.target.value)}
+                        disabled={!venueStateFilter}
+                      >
+                        <option value="">All Cities</option>
+                        {venueCities.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Venue List */}
+                  <div className="space-y-2">
+                    {isLoadingGrounds ? (
+                      <div className="flex justify-center p-4"><Loader2 className="animate-spin text-white/40" /></div>
+                    ) : (() => {
+                      const filteredVenues = groundsData?.grounds?.filter(g =>
+                        (!venueStateFilter || g.state === venueStateFilter) &&
+                        (!venueCityFilter || g.city === venueCityFilter) &&
+                        (!venueSearchQuery || g.name.toLowerCase().includes(venueSearchQuery.toLowerCase()))
+                      ) || [];
+
+                      return filteredVenues.length > 0 ? (
+                        filteredVenues.map(g => (
+                          <button key={g.id} onClick={() => setFormData(f => ({ ...f, venueId: f.venueId === g.id ? null : g.id, customVenue: '' }))}
+                            className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left ${formData.venueId === g.id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
+                            <div className="flex items-center gap-3">
+                              <MapPin size={18} className={formData.venueId === g.id ? 'text-[#55DEE8]' : 'text-white/40'} />
+                              <div>
+                                <div className="font-bold text-white text-sm">{g.name}</div>
+                                <div className="text-[10px] text-white/40">{g.city}</div>
+                              </div>
+                            </div>
+                            {formData.venueId === g.id && <Check size={16} className="text-[#55DEE8]" />}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="text-center p-4 text-sm text-white/40">No listed venues match your filters.</div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Custom Venue Input */}
+                  <div className="pt-4 border-t border-white/10">
+                    <label className={labelClass}>Add Custom Venue</label>
+                    <input
+                      type="text"
+                      placeholder="Enter custom venue name..."
+                      className={inputClass}
+                      value={formData.customVenue}
+                      onChange={e => {
+                        setFormData(f => ({ ...f, customVenue: e.target.value, venueId: null }));
+                      }}
+                    />
+                    {formData.customVenue && <div className="text-[#BFF367] text-[10px] mt-1 flex items-center gap-1"><Check size={12} /> Custom venue selected</div>}
+                  </div>
                 </div>
               )}
               {addonsTab === 'PROFESSIONALS' && (
-                <div className="space-y-2 pr-1">
-                  {isLoadingUmpires ? (
-                    <div className="flex justify-center p-4"><Loader2 className="animate-spin text-white/40" /></div>
-                  ) : umpiresData?.umpires?.length > 0 ? (
-                    umpiresData.umpires.map(u => {
-                      const isSelected = formData.professionals.includes(u._id);
-                      return (
-                        <button key={u._id} onClick={() => setFormData(f => ({ ...f, professionals: isSelected ? f.professionals.filter(id => id !== u._id) : [...f.professionals, u._id] }))}
-                          className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left ${isSelected ? 'bg-[#BFF367]/10 border-[#BFF367]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
-                          <div className="flex items-center gap-3">
-                            {u.user?.profilePicture ? <img src={u.user.profilePicture} className="w-8 h-8 rounded-full object-cover" alt={u.user.name} /> : <UserCheck size={18} className={isSelected ? 'text-[#BFF367]' : 'text-white/40'} />}
-                            <div>
-                              <div className="font-bold text-white text-sm">{u.user?.name || 'Professional'}</div>
-                              <div className="text-[10px] text-white/40">Umpire/Scorer • ₹{u.matchFee || 500}/match</div>
-                            </div>
+                <div className="space-y-4 pr-1">
+                  {/* Professionals Search & Filters */}
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
+                      <input
+                        type="text"
+                        placeholder="Search professionals (name, phone, email)..."
+                        className={`${inputClass} pl-10 py-2 text-sm`}
+                        value={proSearchQuery}
+                        onChange={e => setProSearchQuery(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <select 
+                        className={`${selectClass} py-2 text-sm w-1/3`} 
+                        value={proStateFilter} 
+                        onChange={e => handleProStateChange(e.target.value)}
+                      >
+                        <option value="">All States</option>
+                        {states.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      <select 
+                        className={`${selectClass} py-2 text-sm w-1/3`} 
+                        value={proCityFilter} 
+                        onChange={e => setProCityFilter(e.target.value)}
+                        disabled={!proStateFilter}
+                      >
+                        <option value="">All Cities</option>
+                        {proCities.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                      <select className={`${selectClass} py-2 text-sm w-1/3`} value={proRoleFilter} onChange={e => setProRoleFilter(e.target.value)}>
+                        <option value="">All Roles</option>
+                        <option value="UMPIRE">Umpire</option>
+                        <option value="SCORER">Scorer</option>
+                        <option value="COMMENTATOR">Commentator</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <button onClick={() => setShowCustomProInvite(true)} className="w-full py-3 rounded-xl border border-dashed border-[#55DEE8]/50 text-[#55DEE8] flex items-center justify-center gap-2 text-sm font-bold hover:bg-[#55DEE8]/10 transition-colors">
+                    <UserPlus size={16} />
+                    Invite Custom Professional
+                  </button>
+
+                  <div className="space-y-2">
+                    {/* List Custom Professionals already added */}
+                    {formData.customProfessionals?.map((cp, idx) => (
+                      <div key={`custom-${idx}`} className="w-full flex items-center justify-between p-3 rounded-xl border bg-[#BFF367]/10 border-[#BFF367]">
+                        <div className="flex items-center gap-3">
+                          <UserCheck size={18} className="text-[#BFF367]" />
+                          <div>
+                            <div className="font-bold text-white text-sm">{cp.name} <span className="text-[10px] text-[#BFF367] ml-1">(Custom)</span></div>
+                            <div className="text-[10px] text-white/40">{cp.role} • {cp.phone}</div>
                           </div>
-                          {isSelected && <Check size={16} className="text-[#BFF367]" />}
+                        </div>
+                        <button onClick={() => setFormData(f => ({ ...f, customProfessionals: f.customProfessionals.filter((_, i) => i !== idx) }))}>
+                          <X size={16} className="text-white/40 hover:text-red-400" />
                         </button>
+                      </div>
+                    ))}
+
+                    {isLoadingUmpires ? (
+                      <div className="flex justify-center p-4"><Loader2 className="animate-spin text-white/40" /></div>
+                    ) : (() => {
+                      const filteredPros = umpiresData?.umpires?.filter(u =>
+                        (!proRoleFilter || u.role === proRoleFilter)
+                      ) || [];
+
+                      return filteredPros.length > 0 ? (
+                        filteredPros.map(u => {
+                          const isSelected = formData.professionals.includes(u.id);
+                          return (
+                            <button key={u.id} onClick={() => setFormData(f => ({ ...f, professionals: isSelected ? f.professionals.filter(id => id !== u.id) : [...f.professionals, u.id] }))}
+                              className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left ${isSelected ? 'bg-[#BFF367]/10 border-[#BFF367]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
+                              <div className="flex items-center gap-3">
+                                {u.profilePicture ? <img src={u.profilePicture} className="w-8 h-8 rounded-full object-cover" alt={u.name} /> : <UserCheck size={18} className={isSelected ? 'text-[#BFF367]' : 'text-white/40'} />}
+                                <div>
+                                  <div className="font-bold text-white text-sm">{u.name || 'Professional'}</div>
+                                  <div className="text-[10px] text-white/40">{(u.role || 'Umpire').toLowerCase()}{u.city ? ` • ${u.city}` : ''}</div>
+                                </div>
+                              </div>
+                              {isSelected && <Check size={16} className="text-[#BFF367]" />}
+                            </button>
+                          );
+                        })
+                      ) : (
+                        formData.customProfessionals?.length === 0 && <div className="text-center p-4 text-sm text-white/40">No professionals match your search.</div>
                       );
-                    })
-                  ) : (
-                    <div className="text-center p-4 text-sm text-white/40">No professionals available for your area.</div>
-                  )}
+                    })()}
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className="bg-white/[0.03] rounded-xl p-4 border border-white/5 flex-shrink-0">
-              <div className="flex justify-between text-sm">
-                <span className="text-white/50">Total Estimated Add-ons Cost</span>
-                <span className="text-white font-bold">₹{
-                  (formData.venueId ? (groundsData?.turfs?.find(g => g._id === formData.venueId)?.hourlyRate || 0) : 0) + 
-                  (formData.professionals.reduce((sum, id) => sum + (umpiresData?.umpires?.find(u => u._id === id)?.matchFee || 500), 0))
-                }</span>
-              </div>
-            </div>
-          </div>
-        );
-
-      // ── Step 6: Toss ──────────────────────────────────────────────────────────
-      case 6: {
-        const teamAName = getTeamName(formData.teamAId);
-        const teamBName = getTeamName(formData.teamBId);
-        const winnerName = formData.tossWinner === formData.teamAId ? teamAName : formData.tossWinner === formData.teamBId ? teamBName : null;
-        return (
-          <div className="space-y-6 text-center">
-            <h3 className="text-lg font-black text-white uppercase tracking-wide">Toss</h3>
-            {/* Coin */}
-            <div className="flex justify-center">
-              <div
-                className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-2xl cursor-pointer select-none"
-                style={{ transform: `rotateY(${tossFlipDeg}deg)`, transition: isTossFlipping ? 'transform 0.06s linear' : 'none' }}
-                onClick={!isTossFlipping && !formData.tossWinner ? doToss : undefined}
-              >
-                <span className="text-3xl">{isTossFlipping ? '🪙' : formData.tossWinner ? '👑' : '🪙'}</span>
-              </div>
-            </div>
-            {!formData.tossWinner && !isTossFlipping && (
-              <button onClick={doToss}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-black uppercase tracking-wider text-sm">
-                Flip Coin
-              </button>
-            )}
-            {isTossFlipping && <p className="text-white/50 text-sm">Flipping...</p>}
-            {formData.tossWinner && !isTossFlipping && (
-              <div className="space-y-4">
-                <div className="text-[#BFF367] font-black text-xl">🏆 {winnerName} won the toss!</div>
-                <div>
-                  <label className={labelClass}>Choose to</label>
-                  <div className="flex gap-3">
-                    {['BAT', 'BOWL'].map(d => (
-                      <button key={d} type="button"
-                        onClick={() => setFormData(f => ({ ...f, tossDecision: d }))}
-                        className={`flex-1 py-3 rounded-xl border font-black text-sm uppercase tracking-widest transition-all ${formData.tossDecision === d ? 'bg-[#55DEE8] text-black border-[#55DEE8]' : 'border-white/20 text-white hover:bg-white/5'}`}>
-                        {d === 'BAT' ? '🏏 Bat' : '🎯 Bowl'}
+            {/* Custom Pro Invite Popup */}
+            <AnimatePresence>
+              {showCustomProInvite && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  className="absolute inset-0 z-50 bg-[#0a0a0a] flex flex-col p-4"
+                >
+                  {customProInviteData ? (
+                    <div className="flex flex-col h-full">
+                      <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-xl font-black text-white uppercase tracking-wider">Invite Sent</h3>
+                        <button onClick={() => { setShowCustomProInvite(false); setCustomProInviteData(null); }} className="p-2 bg-white/10 rounded-full text-white/60 hover:text-white">
+                          <X size={20} />
+                        </button>
+                      </div>
+                      <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
+                        <div className="w-16 h-16 bg-[#BFF367]/20 rounded-full flex items-center justify-center border border-[#BFF367]">
+                          <MessageCircle size={32} className="text-[#BFF367]" />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-bold text-white">Send WhatsApp Invite</h4>
+                          <p className="text-sm text-white/50 mt-1">
+                            {customProInviteData.name} has been added to the match setup. Send them a WhatsApp message to join and onboard as {customProInviteData.role}.
+                          </p>
+                        </div>
+                        <div className="bg-white/5 p-3 rounded-lg text-left w-full mt-4 border border-white/10">
+                          <p className="text-xs text-white/60 font-mono break-words">
+                            Hey {customProInviteData.name}, I've invited you to officiate as a {customProInviteData.role} for an upcoming match on Kridaz! Click here to join:
+                            https://kridaz.com/invite?token=CUSTOM&role={customProInviteData.role}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            const text = encodeURIComponent(`Hey ${customProInviteData.name}, I've invited you to officiate as a ${customProInviteData.role} for an upcoming match on Kridaz! Click here to join: https://kridaz.com/invite?token=CUSTOM&role=${customProInviteData.role}`);
+                            window.open(`https://wa.me/${customProInviteData.phone}?text=${text}`, '_blank');
+                            setShowCustomProInvite(false);
+                            setCustomProInviteData(null);
+                          }}
+                          className="w-full py-4 rounded-xl bg-[#BFF367] text-black font-black uppercase tracking-wider hover:bg-[#a5db4e] transition-colors mt-6"
+                        >
+                          Send via WhatsApp
+                        </button>
+                        <button onClick={() => { setShowCustomProInvite(false); setCustomProInviteData(null); }} className="text-sm text-white/40 hover:text-white uppercase font-bold tracking-wider mt-4">
+                          Skip for now
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col h-full">
+                      <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-xl font-black text-white uppercase tracking-wider">Invite Professional</h3>
+                        <button onClick={() => setShowCustomProInvite(false)} className="p-2 bg-white/10 rounded-full text-white/60 hover:text-white">
+                          <X size={20} />
+                        </button>
+                      </div>
+                      <div className="flex-1 space-y-4">
+                        <div>
+                          <label className={labelClass}>Professional's Name</label>
+                          <input
+                            type="text"
+                            className={inputClass}
+                            placeholder="e.g. John Doe"
+                            value={customProfessionalName}
+                            onChange={(e) => setCustomProfessionalName(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>WhatsApp Number</label>
+                          <div className="flex gap-2">
+                            <select
+                              className={`${selectClass} w-24`}
+                              value={customPlayerCountryCode}
+                              onChange={(e) => setCustomPlayerCountryCode(e.target.value)}
+                            >
+                              <option value="91">+91 (IN)</option>
+                              <option value="1">+1 (US)</option>
+                              <option value="44">+44 (UK)</option>
+                              <option value="61">+61 (AU)</option>
+                            </select>
+                            <input
+                              type="tel"
+                              className={`${inputClass} flex-1`}
+                              placeholder="9876543210"
+                              value={customProfessionalPhone}
+                              onChange={(e) => setCustomProfessionalPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className={labelClass}>Role</label>
+                          <select
+                            className={selectClass}
+                            value={customProfessionalRole}
+                            onChange={(e) => setCustomProfessionalRole(e.target.value)}
+                          >
+                            <option value="UMPIRE">Umpire</option>
+                            <option value="SCORER">Scorer</option>
+                            <option value="COMMENTATOR">Commentator</option>
+                            <option value="STREAMER">Streamer</option>
+                          </select>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (!customProfessionalName || !customProfessionalPhone) {
+                            toast.error('Please enter name and phone number');
+                            return;
+                          }
+                          const newPro = {
+                            name: customProfessionalName,
+                            phone: `+${customPlayerCountryCode}${customProfessionalPhone}`,
+                            role: customProfessionalRole
+                          };
+                          setFormData(f => ({ ...f, customProfessionals: [...(f.customProfessionals || []), newPro] }));
+                          setCustomProInviteData(newPro);
+                          setCustomProfessionalName('');
+                          setCustomProfessionalPhone('');
+                        }}
+                        disabled={!customProfessionalName || !customProfessionalPhone}
+                        className="w-full py-4 rounded-xl bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-wider disabled:opacity-50 mt-auto hover:opacity-90 transition-opacity shadow-lg shadow-[#55DEE8]/20"
+                      >
+                        Add to Match & Invite
                       </button>
-                    ))}
-                  </div>
-                </div>
-                <p className="text-white/40 text-xs">Or override winner manually:</p>
-                <div className="flex gap-2">
-                  {[{ id: formData.teamAId, name: teamAName }, { id: formData.teamBId, name: teamBName }].map(({ id, name }) => (
-                    <button key={id} type="button"
-                      onClick={() => setFormData(f => ({ ...f, tossWinner: id }))}
-                      className={`flex-1 py-2 rounded-xl border text-xs font-bold transition-all ${formData.tossWinner === id ? 'border-[#BFF367] bg-[#BFF367]/10 text-[#BFF367]' : 'border-white/10 text-white/50 hover:text-white'}`}>
-                      {name}
-                    </button>
-                  ))}
-                </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-xl p-4 flex gap-3 flex-shrink-0">
+              <Sparkles size={20} className="text-[#55DEE8] flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-[#55DEE8]">
+                Venues and professionals selected here are added to your scoring match directly. No payment or coin transaction is required.
               </div>
-            )}
+            </div>
           </div>
         );
-      }
 
-      // ── Step 7: Final Review + Confirm ────────────────────────────────────────
-      case 7: {
+      // ── Step 5: Final Review + Confirm ─────────────────────────────────────────
+      case 5: {
         const teamAName = getTeamName(formData.teamAId);
         const teamBName = getTeamName(formData.teamBId);
-        const winnerName = formData.tossWinner === formData.teamAId ? teamAName : teamBName;
         const formatLabel = CRICKET_FORMATS.find(f => f.value === formData.format)?.label || formData.format;
         const ballLabel = BALL_TYPES.find(b => b.value === formData.ballType)?.label || formData.ballType;
         const groundLabel = GROUND_TYPES.find(g => g.value === formData.groundType)?.label || formData.groundType;
+        const timingLabel = MATCH_TIMINGS.find(t => t.value === formData.matchTiming)?.label || formData.matchTiming;
+        const selectedVenueName = formData.venueId ? groundsData?.grounds?.find(g => g.id === formData.venueId)?.name : null;
         return (
           <div className="space-y-5">
             {/* Match Summary */}
@@ -752,18 +1643,15 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
                 </div>
                 <div className="bg-white/5 rounded-xl p-2">
                   <div className="text-[10px] text-white/40 uppercase">Ground</div>
-                  <div className="text-white text-xs font-bold">{groundLabel}</div>
+                  <div className="text-white text-xs font-bold truncate" title={selectedVenueName || groundLabel}>
+                    {selectedVenueName || groundLabel}
+                  </div>
                 </div>
                 <div className="bg-white/5 rounded-xl p-2">
                   <div className="text-[10px] text-white/40 uppercase">Players</div>
                   <div className="text-white text-xs font-bold">{formData.maxMembers} per side</div>
                 </div>
               </div>
-              {formData.tossWinner && (
-                <div className="text-xs text-[#BFF367] bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-xl px-3 py-2">
-                  🏆 {winnerName} won toss · Chose to {formData.tossDecision}
-                </div>
-              )}
               <div className="text-xs text-white/40">
                 Team A: {formData.teamAPlayers.length} players · Team B: {formData.teamBPlayers.length} players
               </div>
@@ -844,7 +1732,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
               <ChevronLeft size={14} /> Back
             </button>
           )}
-          {step === 5 && (
+          {step === 4 && (
             <button onClick={handleNext}
               className="px-5 py-3 rounded-xl border border-white/10 text-white/50 hover:text-white font-bold hover:bg-white/5 transition-all flex items-center gap-2 text-sm uppercase tracking-wider">
               <SkipForward size={14} /> Skip
@@ -871,7 +1759,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
 
 // ─── Playing XI Sub-component ─────────────────────────────────────────────────
 
-const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, onInit, onRemove, onAdd, onReplace }) => {
+const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, onInit, onRemove, onAdd, onReplace, onRoleChange }) => {
   const color = teamKey === 'A' ? '#55DEE8' : '#BFF367';
   const hasAutoLoaded = players.length > 0;
 
@@ -879,8 +1767,9 @@ const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, on
     <div className="space-y-4 h-full flex flex-col">
       <div className="flex items-center justify-between flex-shrink-0">
         <div>
-          <h3 className="text-lg font-black text-white uppercase tracking-wide">Team {teamKey} Playing XI</h3>
-          <p className="text-xs text-white/40">{teamName}</p>
+          <h3 className="text-lg font-black text-white uppercase tracking-wide max-w-[200px] truncate" title={teamName ? `${teamName} Playing XI` : `Team ${teamKey} Playing XI`}>
+            {teamName ? `${teamName} Playing XI` : `Team ${teamKey} Playing XI`}
+          </h3>
         </div>
         <span className="text-sm font-bold bg-white/5 px-3 py-1 rounded-full border border-white/10" style={{ color }}>
           {players.length}/{maxMembers}
@@ -916,6 +1805,16 @@ const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, on
               : <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/40 text-xs font-bold border border-white/10">{p.name?.[0]?.toUpperCase()}</div>
             }
             <span className="text-white text-sm font-medium flex-1 truncate">{p.name}</span>
+            <select
+              value={p.role || 'PLAYER'}
+              onChange={(e) => onRoleChange && onRoleChange(p.id, e.target.value)}
+              className="bg-black/50 border border-white/10 text-[10px] text-white rounded p-1 focus:outline-none"
+            >
+              <option value="PLAYER">Player</option>
+              <option value="CAPTAIN">Captain</option>
+              <option value="WICKET_KEEPER_1">Wicket Keeper</option>
+              <option value="WICKET_KEEPER_2">2nd Wicket Keeper</option>
+            </select>
             <div className="flex items-center gap-1">
               <button onClick={() => onReplace(p.id)} className="px-2 py-1 bg-white/5 hover:bg-white/10 text-white/50 hover:text-white rounded text-[10px] uppercase font-bold tracking-wider transition-colors">
                 Replace
