@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
@@ -10,6 +10,9 @@ import {
 const MyJoinedGames = () => {
   const [joinedGames, setJoinedGames] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [disputeModal, setDisputeModal] = useState({ isOpen: false, gameId: null, reason: "" });
+  const [actionLoading, setActionLoading] = useState(false);
 
   const fetchJoinedGames = async () => {
     try {
@@ -39,6 +42,47 @@ const MyJoinedGames = () => {
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to leave game");
+    }
+  };
+
+  const handleVoteStarted = async (gameId) => {
+    if (!window.confirm("Confirm that this game has started? This will eventually release coins to the host once majority is reached.")) return;
+    try {
+      setActionLoading(true);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/hosted-game/vote-started`, {
+        gameId
+      }, { withCredentials: true });
+      if (res.data.success) {
+        toast.success(res.data.message);
+        fetchJoinedGames();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to vote game started");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRaiseDispute = async (e) => {
+    e.preventDefault();
+    if (!disputeModal.reason.trim()) {
+      return toast.error("Please provide a reason for the dispute.");
+    }
+    try {
+      setActionLoading(true);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/hosted-game/raise-dispute`, {
+        gameId: disputeModal.gameId,
+        reason: disputeModal.reason
+      }, { withCredentials: true });
+      if (res.data.success) {
+        toast.success(res.data.message);
+        setDisputeModal({ isOpen: false, gameId: null, reason: "" });
+        fetchJoinedGames();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to raise dispute");
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -107,14 +151,52 @@ const MyJoinedGames = () => {
                     </div>
                   </div>
                   
-                  {game.status !== 'CANCELLED' && (
-                    <button 
-                      onClick={() => handleLeave(game._id)}
-                      className="flex items-center gap-2 px-4 py-1.5 bg-neutral-800 text-neutral-400 text-[10px] font-black rounded-full hover:bg-red-500 hover:text-white transition-all uppercase tracking-wider"
-                    >
-                      <LogOut size={12} /> Leave Match
-                    </button>
-                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {game.status !== 'CANCELLED' && game.mySlotStatus === 'JOINED' && game.perPlayerCharge > 0 && game.coinTransferStatus === 'PENDING' && (
+                      <>
+                        {!game.myVote ? (
+                          <button 
+                            onClick={() => handleVoteStarted(game._id)}
+                            disabled={actionLoading}
+                            className="flex items-center gap-2 px-4 py-1.5 bg-green-500/20 text-green-500 text-[10px] font-black rounded-full hover:bg-green-500 hover:text-white transition-all uppercase tracking-wider disabled:opacity-50"
+                          >
+                            <Trophy size={12} /> Game Started
+                          </button>
+                        ) : (
+                          <span className="flex items-center gap-2 px-4 py-1.5 bg-green-500/10 border border-green-500/30 text-green-500 text-[10px] font-black rounded-full uppercase tracking-wider">
+                            Voted Started
+                          </span>
+                        )}
+                        <button 
+                          onClick={() => setDisputeModal({ isOpen: true, gameId: game._id, reason: "" })}
+                          disabled={actionLoading}
+                          className="flex items-center gap-2 px-4 py-1.5 bg-orange-500/20 text-orange-500 text-[10px] font-black rounded-full hover:bg-orange-500 hover:text-black transition-all uppercase tracking-wider disabled:opacity-50"
+                        >
+                          <Info size={12} /> Raise Dispute
+                        </button>
+                      </>
+                    )}
+                    {game.coinTransferStatus === 'DISPUTED' && (
+                      <span className="flex items-center gap-2 px-4 py-1.5 bg-orange-500/20 text-orange-500 text-[10px] font-black rounded-full uppercase tracking-wider">
+                        Dispute Active
+                      </span>
+                    )}
+                    {game.coinTransferStatus === 'COMPLETED' && (
+                      <span className="flex items-center gap-2 px-4 py-1.5 bg-green-500/20 text-green-500 text-[10px] font-black rounded-full uppercase tracking-wider">
+                        Settled
+                      </span>
+                    )}
+                    
+                    {game.status !== 'CANCELLED' && (
+                      <button 
+                        onClick={() => handleLeave(game._id)}
+                        disabled={actionLoading}
+                        className="flex items-center gap-2 px-4 py-1.5 bg-neutral-800 text-neutral-400 text-[10px] font-black rounded-full hover:bg-red-500 hover:text-white transition-all uppercase tracking-wider disabled:opacity-50"
+                      >
+                        <LogOut size={12} /> Leave Match
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -151,6 +233,46 @@ const MyJoinedGames = () => {
           ))
         )}
       </div>
+
+      {/* Dispute Modal */}
+      {disputeModal.isOpen && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#111] border border-neutral-800 p-8 rounded-[2rem] w-full max-w-md animate-slide-up shadow-2xl">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white">Raise Dispute</h2>
+                <p className="text-xs text-neutral-400 font-bold uppercase mt-2">Team will review your issue</p>
+              </div>
+              <button 
+                onClick={() => setDisputeModal({ isOpen: false, gameId: null, reason: "" })}
+                className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleRaiseDispute} className="space-y-6">
+              <div>
+                <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest block mb-2">
+                  Reason for Dispute
+                </label>
+                <textarea 
+                  value={disputeModal.reason}
+                  onChange={(e) => setDisputeModal({ ...disputeModal, reason: e.target.value })}
+                  placeholder="Host didn't show up, match didn't happen, etc."
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-2xl p-4 text-white focus:outline-none focus:border-orange-500 transition-colors h-32 resize-none font-medium"
+                />
+              </div>
+              <button 
+                type="submit" 
+                disabled={actionLoading || !disputeModal.reason.trim()}
+                className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-black uppercase italic tracking-tighter text-lg rounded-2xl transition-all shadow-[0_0_20px_rgba(249,115,22,0.3)]"
+              >
+                {actionLoading ? "Submitting..." : "Submit Dispute"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

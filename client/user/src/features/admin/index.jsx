@@ -1,4 +1,4 @@
-// Public API boundary for features/admin
+﻿// Public API boundary for features/admin
 export { default as UserManagement } from "./UserManagement/UserPage";
 export { default as VerificationCenter } from "./OwnerRequests/VerificationCenter";
 export { default as AdminDashboard } from "./Dashboard/AdminDashboard";
@@ -14,6 +14,7 @@ export { default as CommunityManagement } from "./Community/CommunityManagement"
 export { default as ProfessionalManagement } from "./ProfessionalManagement/ProfessionalManagement";
 export { default as SupportCenter } from "./Resolution/SupportCenter";
 export { default as DisputeManager } from "./Resolution/DisputeManager";
+export { default as GameDisputeManager } from "./Resolution/GameDisputeManager";
 export { default as AuditLogs } from "./Audit/AuditLogs";
 export { default as ProfessionalDetailsPage } from "./ProfessionalManagement/ProfessionalDetailsPage";
 export { default as FinancialMissionControl } from "./Finance/FinancialMissionControl";

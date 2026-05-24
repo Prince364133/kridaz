@@ -261,6 +261,34 @@ router.post("/reject", verifyUser, controller.rejectJoinRequest);
  */
 router.post("/cancel", verifyUser, controller.cancelHostedGame);
 
+/**
+ * @swagger
+ * /hosted-game/vote-started:
+ *   post:
+ *     summary: Vote that a game has started
+ *     tags: [HostedGame]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Vote recorded
+ */
+router.post("/vote-started", verifyUser, controller.voteGameStarted);
+
+/**
+ * @swagger
+ * /hosted-game/raise-dispute:
+ *   post:
+ *     summary: Raise a dispute for a game
+ *     tags: [HostedGame]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dispute raised
+ */
+router.post("/raise-dispute", verifyUser, controller.raiseDispute);
+
 // ── Quick Game slot management (Phase 2B & 2C) ─────────────────────────────
 
 /**

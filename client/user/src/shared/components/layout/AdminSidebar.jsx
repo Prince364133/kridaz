@@ -69,7 +69,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       icon: HelpCircle,
       subItems: [
         { to: "/admin/support", label: "Tickets" },
-        { to: "/admin/disputes", label: "Disputes" },
+        { to: "/admin/disputes", label: "Booking Disputes" },`r`n        { to: "/admin/game-disputes", label: "Game Disputes" },
       ],
     },
     { to: "/admin/audit", label: "Audit Logs", icon: Shield },

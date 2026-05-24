@@ -55,6 +55,7 @@ model User {
   chatMemberships         ChatParticipant[]     @relation("UserChatMemberships")
   comments                Comment[]
   disputes                Dispute[]             @relation("DisputeRaiser")
+  gameDisputes            GameDispute[]
   gameSlots               GameSlot[]
   hostedGames             HostedGame[]          @relation("HostRelation")
   scoredGames             HostedGame[]          @relation("ScorerRelation")
@@ -462,6 +463,10 @@ model HostedGame {
   invites           CustomPlayerInvite[]
   slots             GameSlot[]
   teams             GameTeam[]
+  gameDisputes      GameDispute[]
+  coinTransferStatus String               @default("PENDING")
+  votedStartedBy     String[]             @default([])
+  scheduledStartAt   DateTime?
   host              User                 @relation("HostRelation", fields: [hostId], references: [id])
   scorer            User?                @relation("ScorerRelation", fields: [scorerId], references: [id])
   streamer          User?                @relation("StreamerRelation", fields: [streamerId], references: [id])
@@ -476,8 +481,24 @@ model GameTeam {
   image     String?
   teamKey   String
   createdAt DateTime   @default(now())
-  slots     GameSlot[]
-  game      HostedGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  slots      GameSlot[]
+  game       HostedGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  linkedTeamId String?
+  linkedTeam   Team?      @relation(fields: [linkedTeamId], references: [id])
+}
+
+model GameDispute {
+  id          String     @id @default(uuid())
+  gameId      String
+  raisedById  String
+  reason      String?
+  status      String     @default("OPEN")
+  adminNote   String?
+  resolvedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  game        HostedGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  raisedBy    User       @relation(fields: [raisedById], references: [id])
 }
 
 model GameSlot {
@@ -653,6 +674,7 @@ model Team {
   owner                    User                  @relation("TeamOwner", fields: [ownerId], references: [id])
   customMembers            TeamCustomMember[]
   members                  TeamMember[]
+  linkedGameTeams          GameTeam[]
   opponentRequestsSent     TeamOpponentRequest[] @relation("RequestFrom")
   opponentRequestsReceived TeamOpponentRequest[] @relation("RequestTo")
   Team_A                   Team[]                @relation("TeamOpponents")

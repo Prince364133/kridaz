@@ -1,4 +1,4 @@
-import nodeCron from "node-cron";
+﻿import nodeCron from "node-cron";
 import { prisma } from "../config/prisma.js";
 import logger from "./logger.js";
 
@@ -6,13 +6,13 @@ import logger from "./logger.js";
  * Initializes all recurring maintenance cron jobs.
  *
  * Schedule overview:
- *  - 00:00 — Purge expired/revoked refresh tokens
- *  - 00:05 — Delete expired Stories (expiresAt < now)
- *  - 03:00 — Delete media records stuck in "failed" state for > 24 h
+ *  - 00:00 â€” Purge expired/revoked refresh tokens
+ *  - 00:05 â€” Delete expired Stories (expiresAt < now)
+ *  - 03:00 â€” Delete media records stuck in "failed" state for > 24 h
  */
 export const initCronJobs = () => {
 
-  // ── Midnight: Expired & revoked refresh token cleanup ──────────────────────
+  // â”€â”€ Midnight: Expired & revoked refresh token cleanup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   nodeCron.schedule("0 0 * * *", async () => {
     logger.info("[CRON] Purging expired/revoked refresh tokens...");
     try {
@@ -24,14 +24,14 @@ export const initCronJobs = () => {
           ]
         }
       });
-      logger.info(`[CRON] Token cleanup complete — removed ${result.count} tokens.`);
+      logger.info(`[CRON] Token cleanup complete â€” removed ${result.count} tokens.`);
     } catch (error) {
       logger.error("[CRON] Token cleanup error:", error);
     }
   });
 
-  // ── 00:05: Expired Story deletion ─────────────────────────────────────────
-  // Stories have a 1–7 day TTL controlled by `expiresAt`. Without this job
+  // â”€â”€ 00:05: Expired Story deletion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Stories have a 1â€“7 day TTL controlled by `expiresAt`. Without this job
   // expired stories would accumulate indefinitely in the DB and in the feed.
   nodeCron.schedule("5 0 * * *", async () => {
     logger.info("[CRON] Purging expired stories...");
@@ -51,7 +51,7 @@ export const initCronJobs = () => {
         const result = await prisma.story.deleteMany({
           where: { id: { in: expiredStories.map(s => s.id) } }
         });
-        logger.info(`[CRON] Story cleanup complete — removed ${result.count} expired stories.`);
+        logger.info(`[CRON] Story cleanup complete â€” removed ${result.count} expired stories.`);
       } else {
         logger.info("[CRON] No expired stories to purge.");
       }
@@ -60,7 +60,7 @@ export const initCronJobs = () => {
     }
   });
  
-  // ── 03:00: Failed media record cleanup ────────────────────────────────────
+  // â”€â”€ 03:00: Failed media record cleanup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Reels, Stories, and Posts stuck in `status: "failed"` for more than 24 hours
   // should be purged so users can re-upload without being blocked by ghost records.
   nodeCron.schedule("0 3 * * *", async () => {
@@ -92,14 +92,14 @@ export const initCronJobs = () => {
         }),
       ]);
       logger.info(
-        `[CRON] Failed media cleanup — reels: ${reels.count}, stories: ${stories.count}, posts: ${posts.count}`
+        `[CRON] Failed media cleanup â€” reels: ${reels.count}, stories: ${stories.count}, posts: ${posts.count}`
       );
     } catch (error) {
       logger.error("[CRON] Failed media cleanup error:", error);
     }
   });
 
-  // ── Every Hour: Auto-end matches exceeding duration limit ─────────────────
+  // â”€â”€ Every Hour: Auto-end matches exceeding duration limit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   nodeCron.schedule("0 * * * *", async () => {
     await autoEndExpiredMatches();
   });
@@ -151,7 +151,7 @@ export const autoEndExpiredMatches = async () => {
     }
 
     if (endCount > 0) {
-      logger.info(`[CRON] Expired match cleanup complete — auto-ended ${endCount} matches.`);
+      logger.info(`[CRON] Expired match cleanup complete â€” auto-ended ${endCount} matches.`);
     } else {
       logger.info("[CRON] No matches needed auto-ending.");
     }
@@ -160,3 +160,67 @@ export const autoEndExpiredMatches = async () => {
   }
 };
 
+
+export const autoSettleHostedGames = async () => {
+  logger.info("[CRON] Checking for pending hosted games to auto-settle...");
+  try {
+    const pendingGames = await prisma.hostedGame.findMany({
+      where: {
+        coinTransferStatus: "PENDING",
+        perPlayerCharge: { gt: 0 }
+      },
+      include: {
+        slots: true
+      }
+    });
+
+    let settledCount = 0;
+    const { default: WalletService } = await import("../services/wallet.service.js");
+    const now = new Date();
+
+    for (const game of pendingGames) {
+      const [hours, minutes] = (game.time || "00:00").split(':').map(Number);
+      const scheduledStart = new Date(game.date);
+      scheduledStart.setHours(hours || 0, minutes || 0, 0, 0);
+
+      const cutoffTime = new Date(scheduledStart.getTime() + 24 * 60 * 60 * 1000);
+
+      if (now > cutoffTime) {
+        logger.info(\[CRON] Auto-settling game \. 24 hours passed since scheduled start.\);
+        try {
+          await prisma.\(async (tx) => {
+            await tx.hostedGame.update({
+              where: { id: game.id },
+              data: { coinTransferStatus: "COMPLETED" }
+            });
+
+            const totalPaidSlots = game.slots.filter(s => s.status === "JOINED" && s.userId).length;
+            const totalAmount = Number(game.perPlayerCharge) * totalPaidSlots;
+            
+            if (totalAmount > 0) {
+              await WalletService.credit(game.hostId, 'user', totalAmount, tx);
+              await tx.walletTransaction.create({
+                data: {
+                  userId: game.hostId,
+                  amount: totalAmount,
+                  type: "SLOT_INCOME",
+                  status: "SUCCESS",
+                  description: \Received payment from players for \ game (Auto-settled)\
+                }
+              });
+            }
+          });
+          settledCount++;
+        } catch (err) {
+          logger.error(\[CRON] Error auto-settling game \:\, err);
+        }
+      }
+    }
+
+    if (settledCount > 0) {
+      logger.info(\[CRON] Auto-settlement complete — settled \ games.\);
+    }
+  } catch (error) {
+    logger.error("[CRON] Error during auto-settlement:", error);
+  }
+};

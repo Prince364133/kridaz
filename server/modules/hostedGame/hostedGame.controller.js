@@ -1,4 +1,4 @@
-import { prisma } from "../../config/prisma.js";
+﻿import { prisma } from "../../config/prisma.js";
 import { randomUUID } from "crypto";
 import NotificationService from "../../services/notification.service.js";
 import { generateShortId } from "../scoring/scoring.utils.js";
@@ -105,7 +105,7 @@ const getUsableBalance = async (userId) => {
 const sanitizeImage = (img) => {
   if (!img) return null;
   if (img.startsWith('data:')) {
-    // base64 — truncate if > 200KB to avoid extreme database payloads
+    // base64 â€” truncate if > 200KB to avoid extreme database payloads
     return img.length > 200000 ? img.substring(0, 200000) : img;
   }
   return img; // plain URL
@@ -306,7 +306,7 @@ export const createHostedGame = async (req, res) => {
       // 2. Check Balance
       const usableBalance = await WalletService.getUsableBalance(hostId, 'user', tx);
       if (usableBalance < totalCost) {
-        const error = new Error(`Insufficient coins. Total cost is ${totalCost}, you have ${usableBalance}. Please top up minimum ₹500.`);
+        const error = new Error(`Insufficient coins. Total cost is ${totalCost}, you have ${usableBalance}. Please top up minimum â‚¹500.`);
         error.status = 400;
         throw error;
       }
@@ -412,7 +412,8 @@ export const createHostedGame = async (req, res) => {
               gameId: hostedGame.id,
               name: t.data?.name || t.defaultName,
               teamKey: t.key,
-              image: sanitizeImage(t.data?.image)
+              image: sanitizeImage(t.data?.image),
+              linkedTeamId: t.data?.id || null
             }
           });
 
@@ -600,14 +601,18 @@ export const approveJoinRequest = async (req, res) => {
       });
       if (!game || game.hostId !== hostId) throw new Error("Unauthorized or game not found");
 
+      let targetTeam = null;
       let targetSlot;
       if (slotId) {
         targetSlot = await tx.gameSlot.findUnique({ where: { id: slotId } });
+        if (targetSlot?.teamId) {
+          targetTeam = game.teams.find(t => t.id === targetSlot.teamId);
+        }
       } else if (game.gameMode === "QUICK") {
         targetSlot = game.slots[slotIndex];
       } else {
         const teamKey = (team === "A" || team === "teamA") ? "teamA" : "teamB";
-        const targetTeam = game.teams.find(t => t.teamKey === teamKey);
+        targetTeam = game.teams.find(t => t.teamKey === teamKey);
         if (!targetTeam) throw new Error("Team not found");
         targetSlot = targetTeam.slots[slotIndex];
       }
@@ -618,39 +623,66 @@ export const approveJoinRequest = async (req, res) => {
       const perPlayerCharge = Number(game.perPlayerCharge || 0);
 
       // Deduct coins from player (Release reserved + Debit)
-      await WalletService.release(playerUserId, 'user', perPlayerCharge, true, tx);
+      if (perPlayerCharge > 0) {
+        await WalletService.release(playerUserId, 'user', perPlayerCharge, true, tx);
 
-      // Update player transaction to SUCCESS
-      const latestReservedTx = await tx.walletTransaction.findFirst({
-        where: { userId: playerUserId, amount: perPlayerCharge, status: "RESERVED", type: "JOIN_GAME" },
-        orderBy: { createdAt: 'desc' }
-      });
-      
-      if (latestReservedTx) {
-        await tx.walletTransaction.update({
-          where: { id: latestReservedTx.id },
-          data: { status: "SUCCESS", description: `Joined ${game.gameType} game successfully` }
+        // Update player transaction to SUCCESS
+        const latestReservedTx = await tx.walletTransaction.findFirst({
+          where: { userId: playerUserId, amount: perPlayerCharge, status: "RESERVED", type: "JOIN_GAME" },
+          orderBy: { createdAt: 'desc' }
         });
-      }
-
-      // Transfer coins to Host (to offset hosting cost)
-      await WalletService.credit(hostId, 'user', perPlayerCharge, tx);
-
-      // Add Host transaction record
-      await tx.walletTransaction.create({
-        data: {
-          userId: hostId,
-          amount: perPlayerCharge,
-          type: "SLOT_INCOME",
-          status: "SUCCESS",
-          description: `Received payment from player for slot in ${game.gameType} game`
+        
+        if (latestReservedTx) {
+          await tx.walletTransaction.update({
+            where: { id: latestReservedTx.id },
+            data: { status: "SUCCESS", description: `Joined ${game.gameType} game successfully` }
+          });
         }
-      });
+      }
 
       await tx.gameSlot.update({
         where: { id: targetSlot.id },
         data: { status: "JOINED" }
       });
+
+      // Auto-create/link team for Cricket games
+      if (game.gameType.toLowerCase() === "cricket" && targetTeam) {
+        let currentLinkedTeamId = targetTeam.linkedTeamId;
+
+        if (!currentLinkedTeamId) {
+          const hostProfile = await tx.user.findUnique({ where: { id: hostId }});
+          const teamName = targetTeam.name || `${hostProfile?.name || 'Host'}'s Team`;
+          const newTeam = await tx.team.create({
+            data: {
+              name: teamName,
+              visibility: "PRIVATE",
+              sportType: "CRICKET",
+              ownerId: hostId,
+            }
+          });
+          currentLinkedTeamId = newTeam.id;
+          await tx.gameTeam.update({
+            where: { id: targetTeam.id },
+            data: { linkedTeamId: currentLinkedTeamId }
+          });
+        }
+        
+        if (playerUserId) {
+          const existingMember = await tx.teamMember.findFirst({
+            where: { teamId: currentLinkedTeamId, userId: playerUserId }
+          });
+          if (!existingMember) {
+            await tx.teamMember.create({
+              data: {
+                teamId: currentLinkedTeamId,
+                userId: playerUserId,
+                role: targetSlot.role || "PLAYER",
+                status: "JOINED"
+              }
+            });
+          }
+        }
+      }
     });
 
     return res.status(200).json({ success: true, message: "Player approved and coins deducted." });
@@ -1301,7 +1333,7 @@ export const respondToOfficialInvitation = async (req, res) => {
       });
     }
 
-    // ── Notify Host ──────────────────────────────────────────────────────────
+    // â”€â”€ Notify Host â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       const responder = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
       const statusMsg = action === "APPROVE" ? "accepted" : "rejected";
@@ -1474,9 +1506,9 @@ export const getHostedGameById = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Phase 2B — Assign a Quick Game slot to an existing registered user (host only)
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Phase 2B â€” Assign a Quick Game slot to an existing registered user (host only)
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const assignQuickSlot = async (req, res) => {
   try {
     const hostId = req.user.id || req.user.user;
@@ -1510,9 +1542,9 @@ export const assignQuickSlot = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Phase 2C — Invite an off-platform custom player to a Quick Game slot
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Phase 2C â€” Invite an off-platform custom player to a Quick Game slot
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const inviteCustomPlayer = async (req, res) => {
   try {
     const hostId = req.user.id || req.user.user;
@@ -1567,9 +1599,9 @@ export const inviteCustomPlayer = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Phase 2D — Verify an invitation token (for the invite page)
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Phase 2D â€” Verify an invitation token (for the invite page)
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const verifyInviteToken = async (req, res) => {
   try {
     const { token } = req.query;
@@ -1627,9 +1659,9 @@ export const verifyInviteToken = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Phase 2E — Return followers + following for the slot picker popup
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Phase 2E â€” Return followers + following for the slot picker popup
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const getFollowersForSlot = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -1655,7 +1687,7 @@ export const getFollowersForSlot = async (req, res) => {
 };
 
 // -----------------------------------------------------------------------------
-// Phase 2F — Claim an invited slot (called by the invited user)
+// Phase 2F â€” Claim an invited slot (called by the invited user)
 // -----------------------------------------------------------------------------
 export const claimInviteSlot = async (req, res) => {
   let updatedRole = null;
@@ -1856,5 +1888,114 @@ export const updateTickerTheme = async (req, res) => {
     return res.status(200).json({ success: true, game: updatedGame });
   } catch (error) {
     return res.status(500).json({ message: error.message });
+  }
+};
+
+export const voteGameStarted = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { gameId } = req.body;
+
+    await runInTransaction(async ({ tx }) => {
+      const game = await tx.hostedGame.findUnique({
+        where: { id: gameId },
+        include: { slots: true }
+      });
+      if (!game) throw new Error("Game not found");
+      
+      if (game.coinTransferStatus !== "PENDING") {
+        throw new Error("Game is already settled or in dispute");
+      }
+
+      if (game.perPlayerCharge <= 0) {
+        throw new Error("Voting is only applicable for paid games");
+      }
+
+      const userSlot = game.slots.find(s => s.userId === userId && s.status === "JOINED");
+      if (!userSlot) throw new Error("Only joined users can vote");
+
+      if (game.votedStartedBy.includes(userId)) {
+        throw new Error("You have already voted");
+      }
+
+      const updatedVotes = [...game.votedStartedBy, userId];
+      
+      const totalPaidSlots = game.slots.filter(s => s.status === "JOINED" && s.userId).length;
+      const majorityRequired = Math.floor(totalPaidSlots / 2) + 1;
+
+      let newStatus = "PENDING";
+      if (updatedVotes.length >= majorityRequired) {
+        newStatus = "COMPLETED";
+      }
+
+      await tx.hostedGame.update({
+        where: { id: gameId },
+        data: { 
+          votedStartedBy: updatedVotes,
+          coinTransferStatus: newStatus 
+        }
+      });
+
+      if (newStatus === "COMPLETED") {
+        const totalAmount = Number(game.perPlayerCharge) * totalPaidSlots;
+        await WalletService.credit(game.hostId, 'user', totalAmount, tx);
+
+        await tx.walletTransaction.create({
+          data: {
+            userId: game.hostId,
+            amount: totalAmount,
+            type: "SLOT_INCOME",
+            status: "SUCCESS",
+            description: \Received payment from players for \ game (Majority Voted)\
+          }
+        });
+      }
+    });
+
+    return res.status(200).json({ success: true, message: "Vote recorded successfully" });
+  } catch (error) {
+    logger.error("Error in voteGameStarted:", error);
+    return res.status(error.status || 500).json({ message: error.message });
+  }
+};
+
+export const raiseDispute = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { gameId, reason } = req.body;
+
+    await runInTransaction(async ({ tx }) => {
+      const game = await tx.hostedGame.findUnique({
+        where: { id: gameId },
+        include: { slots: true }
+      });
+      if (!game) throw new Error("Game not found");
+      
+      if (game.coinTransferStatus === "COMPLETED") {
+        throw new Error("Cannot raise dispute after coins have been transferred");
+      }
+
+      const userSlot = game.slots.find(s => s.userId === userId && s.status === "JOINED");
+      if (!userSlot) throw new Error("Only joined users can raise a dispute");
+
+      await tx.hostedGame.update({
+        where: { id: gameId },
+        data: { coinTransferStatus: "DISPUTED" }
+      });
+
+      await tx.gameDispute.create({
+        data: {
+          gameId,
+          raisedById: userId,
+          reason: reason || "No reason provided",
+          status: "OPEN"
+        }
+      });
+    });
+
+    return res.status(200).json({ success: true, message: "Dispute raised successfully" });
+  } catch (error) {
+    logger.error("Error in raiseDispute:", error);
+    return res.status(error.status || 500).json({ message: error.message });
   }
 };

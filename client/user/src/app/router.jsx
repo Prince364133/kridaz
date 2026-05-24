@@ -1,16 +1,16 @@
-import { createBrowserRouter, Navigate, useParams } from "react-router-dom";
+﻿import { createBrowserRouter, Navigate, useParams } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
-// ΓöÇΓöÇ Eager: Layouts (used on nearly every route ΓÇö small files, no split benefit) ΓöÇΓöÇ
+// Î“Ã¶Ã‡Î“Ã¶Ã‡ Eager: Layouts (used on nearly every route Î“Ã‡Ã¶ small files, no split benefit) Î“Ã¶Ã‡Î“Ã¶Ã‡
 import { AdminLayout, PartnerLayout, GuestLayout, CoachLayout, UmpireLayout, StreamerLayout, ScorerLayout, ProfessionalLayout } from "@layouts";
 import UserRoot from "@user/layouts/Root";
 
-// ΓöÇΓöÇ Eager: Route guards & error utilities (must be synchronous) ΓöÇΓöÇ
+// Î“Ã¶Ã‡Î“Ã¶Ã‡ Eager: Route guards & error utilities (must be synchronous) Î“Ã¶Ã‡Î“Ã¶Ã‡
 import ProtectedRoute from "@components/ProtectedRoute/ProtectedRoute";
 import PublicRoute from "@components/ProtectedRoute/PublicRoute";
 import { NotFound, RootRedirect, ErrorBoundary } from "@components/common";
 
-// ΓöÇΓöÇ Spinner shown while any lazy chunk loads ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// Î“Ã¶Ã‡Î“Ã¶Ã‡ Spinner shown while any lazy chunk loads Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const PageLoader = () => null;
 
 const RedirectToAnalytics = () => {
@@ -20,7 +20,7 @@ const RedirectToAnalytics = () => {
 
 const ProfessionalDashboard = lazy(() => import("@features/professional/pages/ProfessionalDashboard"));
 
-// ΓöÇΓöÇ Lazy: User Portal Pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: User Portal Pages Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const UserHome               = lazy(() => import("@user/pages/Home"));
 const UserLogin              = lazy(() => import("@features/auth").then(m => ({ default: m.Login })));
 const UserSignUp             = lazy(() => import("@features/auth").then(m => ({ default: m.SignUp })));
@@ -60,13 +60,13 @@ const NotificationsPage      = lazy(() => import("@features/notifications").then
 
 
 
-// ── Lazy: Business Landing Pages ───────────────────────────────────────────────────
+// â”€â”€ Lazy: Business Landing Pages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const UserVenueOwnerLanding  = lazy(() => import("@features/business").then(m => ({ default: m.VenueOwnerLanding })));
 const ProfessionalLanding    = lazy(() => import("@features/business").then(m => ({ default: m.ProfessionalLanding })));
 const BusinessRegistration   = lazy(() => import("@features/business").then(m => ({ default: m.BusinessRegistration })));
 
 
-// ── Lazy: Legal Pages ─────────────────────────────────────────────────────────────
+// â”€â”€ Lazy: Legal Pages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const PrivacyPolicy              = lazy(() => import("@features/legal").then(m => ({ default: m.PrivacyPolicy })));
 const TermsOfService             = lazy(() => import("@features/legal").then(m => ({ default: m.TermsOfService })));
 const DataDeletionInstructions   = lazy(() => import("@features/legal").then(m => ({ default: m.DataDeletionInstructions })));
@@ -74,23 +74,23 @@ const ContactUs                  = lazy(() => import("@features/legal").then(m =
 const FAQ                        = lazy(() => import("@features/legal").then(m => ({ default: m.FAQ })));
 
 
-// ΓöÇΓöÇ Lazy: Owner / Venue Owner Portal Pages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: Owner / Venue Owner Portal Pages Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 
 
 
-// ── Lazy: Streamer Components ────────────────────────────────────────────────────────────────────────────────
+// â”€â”€ Lazy: Streamer Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const StreamSetup    = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamSetup })));
 const ManageStream   = lazy(() => import("@features/streamer").then(m => ({ default: m.ManageStream })));
 const TickerGallery  = lazy(() => import("@features/streamer").then(m => ({ default: m.TickerGallery })));
 
-// ── Lazy: YouTube / Facebook Auth Status ─────────────────────────────────────────────────────────────────────
-// Named exports — use .then() to map to default for lazy()
+// â”€â”€ Lazy: YouTube / Facebook Auth Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Named exports â€” use .then() to map to default for lazy()
 const YouTubeConnected  = lazy(() => import("@features/streamer").then(m => ({ default: m.YouTubeConnected })));
 const YouTubeError      = lazy(() => import("@features/streamer").then(m => ({ default: m.YouTubeError })));
 const FacebookConnected = lazy(() => import("@features/streamer").then(m => ({ default: m.FacebookConnected })));
 const FacebookError     = lazy(() => import("@features/streamer").then(m => ({ default: m.FacebookError })));
 
-// ΓöÇΓöÇ Lazy: Owner (Partner) Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: Owner (Partner) Portal Components Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const AddTurf            = lazy(() => import("@features/venue-owner").then(m => ({ default: m.AddTurf })));
 const EditTurf           = lazy(() => import("@features/venue-owner").then(m => ({ default: m.EditTurf })));
 const TurfManagement     = lazy(() => import("@features/venue-owner").then(m => ({ default: m.TurfManagement })));
@@ -105,29 +105,29 @@ const OwnerPromotions    = lazy(() => import("@features/venue-owner").then(m => 
 const VenueBanking       = lazy(() => import("@features/venue-owner").then(m => ({ default: m.VenueBanking })));
 const PartnerSupport     = lazy(() => import("@features/venue-owner").then(m => ({ default: m.PartnerSupport })));
 
-// ΓöÇΓöÇ Lazy: Coach Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: Coach Portal Components Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const CoachDashboard   = lazy(() => import("@features/coach").then(m => ({ default: m.CoachDashboard })));
 const CoachStudents    = lazy(() => import("@features/coach").then(m => ({ default: m.CoachStudents })));
 const CoachSessions    = lazy(() => import("@features/coach").then(m => ({ default: m.CoachSessions })));
 const CoachMasterclass = lazy(() => import("@features/coach").then(m => ({ default: m.CoachMasterclass })));
 
-// ΓöÇΓöÇ Lazy: Umpire Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: Umpire Portal Components Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const UmpireDashboard = lazy(() => import("@features/umpire").then(m => ({ default: m.UmpireDashboard })));
 const UmpireMatches   = lazy(() => import("@features/umpire").then(m => ({ default: m.UmpireMatches })));
 const UmpireSchedule  = lazy(() => import("@features/umpire").then(m => ({ default: m.UmpireSchedule })));
 const UmpireFeedback  = lazy(() => import("@features/umpire").then(m => ({ default: m.UmpireFeedback })));
 
-// ── Lazy: Streamer Portal Components ─────────────────────────────────────────────────────────────────────────
+// â”€â”€ Lazy: Streamer Portal Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const StreamerDashboard = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamerDashboard })));
 const StreamerMatches   = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamerMatches })));
 const StreamerSchedule= lazy(() => import("@features/streamer").then(m => ({ default: m.StreamerSchedule })));
 const CreateStream    = lazy(() => import("@features/streamer/pages/CreateStream"));
 
-// ΓöÇΓöÇ Lazy: Scorer Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: Scorer Portal Components Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const ScorerDashboard = lazy(() => import("@features/scorer").then(m => ({ default: m.ScorerDashboard })));
 const ScorerMatches   = lazy(() => import("@features/scorer").then(m => ({ default: m.ScorerMatches })));
 
-// ΓöÇΓöÇ Lazy: Shared Professional Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: Shared Professional Components Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const ProfessionalAvailability = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalAvailability })));
 const ProfessionalBookings     = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalBookings })));
 const ProfessionalReviews      = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalReviews })));
@@ -136,7 +136,7 @@ const PracticeScheduling       = lazy(() => import("@features/networking").then(
 const ProfessionalCustomers    = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalCustomers })));
 const DashboardProfile         = lazy(() => import("@features/partner-profile").then(m => ({ default: m.DashboardProfile })));
 
-// ΓöÇΓöÇ Lazy: Admin Portal Components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: Admin Portal Components Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const UserManagement         = lazy(() => import("@features/admin").then(m => ({ default: m.UserManagement })));
 const VerificationCenter     = lazy(() => import("@features/admin").then(m => ({ default: m.VerificationCenter })));
 const AdminDashboard         = lazy(() => import("@features/admin").then(m => ({ default: m.AdminDashboard })));
@@ -152,16 +152,17 @@ const CommunityManagement    = lazy(() => import("@features/admin").then(m => ({
 const ProfessionalManagement = lazy(() => import("@features/admin").then(m => ({ default: m.ProfessionalManagement })));
 const SupportCenter          = lazy(() => import("@features/admin").then(m => ({ default: m.SupportCenter })));
 const DisputeManager         = lazy(() => import("@features/admin").then(m => ({ default: m.DisputeManager })));
+const GameDisputeManager         = lazy(() => import("@features/admin").then(m => ({ default: m.GameDisputeManager })));
 const AuditLogs              = lazy(() => import("@features/admin").then(m => ({ default: m.AuditLogs })));
 const FinancialMissionControl = lazy(() => import("@features/admin").then(m => ({ default: m.FinancialMissionControl })));
 const ProfessionalDetailsPage = lazy(() => import("@features/admin").then(m => ({ default: m.ProfessionalDetailsPage })));
 const HostedGamesPage         = lazy(() => import("@features/admin").then(m => ({ default: m.HostedGamesPage })));
 
-// ΓöÇΓöÇ Shorthand wrapper ΓÇö keeps route definitions terse ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// Î“Ã¶Ã‡Î“Ã¶Ã‡ Shorthand wrapper Î“Ã‡Ã¶ keeps route definitions terse Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const S = ({ children }) => <Suspense fallback={<PageLoader />}>{children}</Suspense>;
 
 const router = createBrowserRouter([
-  // ΓöÇΓöÇ ADMIN PORTAL (High Priority) ΓöÇΓöÇ
+  // Î“Ã¶Ã‡Î“Ã¶Ã‡ ADMIN PORTAL (High Priority) Î“Ã¶Ã‡Î“Ã¶Ã‡
   {
     path: "/admin",
     element: (
@@ -195,6 +196,7 @@ const router = createBrowserRouter([
       { path: "transactions", element: <S><TransactionSection /></S> },
       { path: "support",      element: <S><SupportCenter /></S> },
       { path: "disputes",     element: <S><DisputeManager /></S> },
+      { path: "game-disputes",     element: <S><GameDisputeManager /></S> },
       { path: "audit",        element: <S><AuditLogs /></S> },
       { path: "finance",      element: <S><FinancialMissionControl /></S> },
       { path: "features",     element: <S><FeatureFlags /></S> },
@@ -206,7 +208,7 @@ const router = createBrowserRouter([
     ],
   },
 
-  // ── Venue Owner Portal (High Priority) ──
+  // â”€â”€ Venue Owner Portal (High Priority) â”€â”€
   {
     path: "/venue-owner",
     element: (
@@ -233,7 +235,7 @@ const router = createBrowserRouter([
     ],
   },
 
-  // ─── PROFESSIONAL PORTAL (UNIFIED) ───
+  // â”€â”€â”€ PROFESSIONAL PORTAL (UNIFIED) â”€â”€â”€
   {
     path: "/professional/:role",
     element: (
@@ -291,7 +293,7 @@ const router = createBrowserRouter([
     element: <S><ThemePreview /></S>,
   },
 
-  // ΓöÇΓöÇ USER PORTAL (Fall-through Priority) ΓöÇΓöÇ
+  // Î“Ã¶Ã‡Î“Ã¶Ã‡ USER PORTAL (Fall-through Priority) Î“Ã¶Ã‡Î“Ã¶Ã‡
   {
     path: "/",
     element: <UserRoot />,
@@ -364,7 +366,7 @@ const router = createBrowserRouter([
     ],
   },
 
-  // ── LEGACY & REDIRECTS ──
+  // â”€â”€ LEGACY & REDIRECTS â”€â”€
   { path: "/owner",          element: <Navigate to="/venue-owner" replace /> },
   { path: "/partner",        element: <Navigate to="/venue-owner" replace /> },
   { path: "/coach-landing",  element: <Navigate to="/business/professional" replace /> },
