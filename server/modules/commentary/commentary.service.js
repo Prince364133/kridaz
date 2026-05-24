@@ -156,10 +156,13 @@ const generateOpenAIAudio = async (text, voiceModel = "alloy") => {
     if (!fs.existsSync(audioDir)) {
       fs.mkdirSync(audioDir, { recursive: true });
     }
+    // Ensure the voice model is a valid OpenAI voice, fallback to 'alloy' if it is a Piper TTS default
+    const validOpenAIVoices = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
+    const safeVoice = validOpenAIVoices.includes(voiceModel) ? voiceModel : 'alloy';
 
     const response = await openai.audio.speech.create({
       model: "tts-1",
-      voice: voiceModel,
+      voice: safeVoice,
       input: text,
     });
 
@@ -178,7 +181,7 @@ const generateOpenAIAudio = async (text, voiceModel = "alloy") => {
     // Return the URL path
     return `/audio/${outputFileName}`;
   } catch (error) {
-    logger.error("[Commentary] OpenAI TTS failed, falling back to Browser TTS", error.message);
+    logger.error(`[Commentary] OpenAI TTS failed, falling back to Browser TTS: ${error.message}`);
     return null;
   }
 };
