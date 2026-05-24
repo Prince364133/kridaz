@@ -48,7 +48,7 @@ export default function RaiseDisputeModal({ booking, onClose, onSuccess }) {
     
     // Create FormData for file upload
     const formData = new FormData();
-    formData.append("bookingId", booking._id);
+    formData.append("bookingId", booking.id || booking._id);
     formData.append("reason", reason);
     formData.append("customReason", customReason);
     formData.append("description", description);
