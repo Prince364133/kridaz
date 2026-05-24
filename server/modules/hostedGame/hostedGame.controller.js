@@ -1982,11 +1982,12 @@ export const claimInviteSlot = async (req, res) => {
 
     if (result.updatedRole && result.updatedRole !== req.user?.role) {
       const newToken = generateUserToken(req.user.id || req.user.user, result.updatedRole, result.updatedOwnerId);
+      const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT;
       res.cookie("auth_token", newToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 30 * 24 * 60 * 60 * 1000
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
+        maxAge: 15 * 60 * 1000, 
       });
       return res.status(200).json({ success: true, message: "Slot claimed successfully!", newToken, updatedRole: result.updatedRole });
     }

@@ -12,12 +12,13 @@ import logger from "../../utils/logger.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 
 
+const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT;
 const COOKIE_SETTINGS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-  domain: process.env.COOKIE_DOMAIN || (process.env.NODE_ENV === 'production' ? '.kridaz.com' : 'localhost'),
-  maxAge: 7200 * 1000
+  secure: isProd,
+  sameSite: isProd ? "none" : "strict",
+  domain: process.env.COOKIE_DOMAIN || (isProd ? '.kridaz.com' : 'localhost'),
+  maxAge: 7 * 24 * 60 * 60 * 1000
 };
 
 /**
