@@ -1057,13 +1057,13 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
                 onClick={() => setXiTab('A')}
                 className={`flex-1 py-3 text-sm font-bold uppercase tracking-wider transition-colors truncate px-2 ${xiTab === 'A' ? 'text-[#55DEE8] border-b-2 border-[#55DEE8]' : 'text-white/40 hover:text-white/80'}`}
               >
-                {getTeamName(formData.teamAId) || 'Team A'}
+                {getTeamName(formData.teamAId) || 'TBD'}
               </button>
               <button
                 onClick={() => setXiTab('B')}
                 className={`flex-1 py-3 text-sm font-bold uppercase tracking-wider transition-colors truncate px-2 ${xiTab === 'B' ? 'text-[#BFF367] border-b-2 border-[#BFF367]' : 'text-white/40 hover:text-white/80'}`}
               >
-                {getTeamName(formData.teamBId) || 'Team B'}
+                {getTeamName(formData.teamBId) || 'TBD'}
               </button>
             </div>
             {xiTab === 'A' ? (

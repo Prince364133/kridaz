@@ -125,8 +125,7 @@ export const getRevenueTransactions = async (req, res) => {
       skip,
       take: limit,
       include: {
-        booking: { select: { playStartTime: true, turf: { select: { name: true } } } },
-        dispute: { select: { status: true, resolution: true } }
+        booking: { select: { playStartTime: true, turf: { select: { name: true } } } }
       }
     });
 

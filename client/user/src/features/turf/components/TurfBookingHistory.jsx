@@ -178,7 +178,7 @@ const TurfBookingHistory = () => {
                         
                         {/* Left Image */}
                         <div className="w-full md:w-64 h-40 shrink-0 rounded-2xl overflow-hidden bg-[#222]">
-                          <img src={booking.turf?.images?.[0] || 'https://images.unsplash.com/photo-1518605368461-1ee7111d4e7a?auto=format&fit=crop&q=80'} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" alt="Turf" />
+                          <img src={booking.turf?.images?.[0] || 'https://images.unsplash.com/photo-1518605368461-1ee7111d4e7a?auto=format&fit=crop&q=80'} className="w-full h-full object-cover transition-all duration-500" alt="Turf" />
                         </div>
 
                         {/* Content */}
@@ -469,7 +469,7 @@ const TurfBookingHistory = () => {
                       <div className="relative bg-[#0d0d0d] rounded-[15px] p-4 flex flex-col md:flex-row gap-6 w-full">
                         <div className="w-full md:w-32 h-32 shrink-0 rounded-[15px] overflow-hidden bg-white/5 flex items-center justify-center border border-white/5 relative">
                           {profPic ? (
-                            <img src={profPic} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" alt="" />
+                            <img src={profPic} className="w-full h-full object-cover transition-all duration-500" alt="" />
                           ) : (
                             <User className="w-12 h-12 text-gray-600" />
                           )}

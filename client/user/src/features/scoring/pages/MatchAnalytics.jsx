@@ -442,8 +442,8 @@ const MatchAnalytics = () => {
     const teamAObj = liveScore.teams?.find(t => t.teamKey === 'teamA') || liveScore.teams?.[0];
     const teamBObj = liveScore.teams?.find(t => t.teamKey === 'teamB') || liveScore.teams?.[1];
     
-    const teamA = teamAObj?.name || 'Team A';
-    const teamB = teamBObj?.name || 'Team B';
+    const teamA = teamAObj?.name || 'TBD';
+    const teamB = teamBObj?.name || 'TBD';
     const loc = liveScore.city || liveScore.state || liveScore.location || 'Location Unspecified';
     const ground = liveScore.customVenue || liveScore.turf?.name || liveScore.ground || 'Local Ground';
     const professionals = liveScore.professionals || liveScore.customProfessionals || [];
@@ -526,8 +526,8 @@ const MatchAnalytics = () => {
   const mvp = stats?.mvp;
 
   // Extract unique team names
-  const teamAName = scoring?.game?.teamA?.name || 'Team A';
-  const teamBName = scoring?.game?.teamB?.name || 'Team B';
+  const teamAName = scoring?.game?.teamA?.name || 'TBD';
+  const teamBName = scoring?.game?.teamB?.name || 'TBD';
 
   // Compute Worm Chart Over-by-Over progression
   let wormData = [];

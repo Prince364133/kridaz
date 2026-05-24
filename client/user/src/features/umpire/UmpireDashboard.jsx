@@ -48,12 +48,12 @@ export default function UmpireDashboard() {
     <div className="h-full custom-scrollbar">
       <div className="p-4 md:p-10 space-y-6 md:space-y-12 animate-fade-in pt-2 pb-24 md:pb-12 max-w-[1600px] mx-auto">
 
-        {/* Primary Stats GÇö all real data, 0 when empty */}
+        {/* Primary Stats Rs ï¿½ all real data, 0 when empty */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           <StatCard title="Matches Officiated" value={matchesOfficiated} icon={Trophy} />
           <StatCard title="Upcoming Matches" value={upcomingMatches} icon={Calendar} />
           <StatCard title="Official Rating" value={officialRating} icon={Star} />
-          <StatCard title="Earnings" value={earnings} icon={DollarSign} prefix="Gé¦" />
+          <StatCard title="Earnings" value={earnings} icon={DollarSign} prefix="Rs " />
         </div>
 
         {/* Scoring Center */}
@@ -70,7 +70,7 @@ export default function UmpireDashboard() {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Cricket Scoring GÇö navigates to matches list */}
+              {/* Cricket Scoring Rs ï¿½ navigates to matches list */}
               <div
                 className="p-6 bg-white/[0.03] rounded-3xl border border-white/5 hover:border-primary/30 transition-all group/app cursor-pointer"
                 onClick={() => navigate("/umpire/matches")}

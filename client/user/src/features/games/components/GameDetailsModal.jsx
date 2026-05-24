@@ -170,7 +170,7 @@ const GameDetailsModal = ({ game, onClose, onJoinSlot, currentUserId }) => {
                     className="h-10 w-10 rounded-xl object-cover"
                   />
                   <div>
-                    <h4 className="font-bold text-slate-200">{game.teamA?.name || 'Team A'}</h4>
+                    <h4 className="font-bold text-slate-200">{game.teamA?.name || 'TBD'}</h4>
                     <span className="text-[10px] uppercase font-bold text-violet-400 tracking-wider">Professional Squad</span>
                   </div>
                 </div>
@@ -192,7 +192,7 @@ const GameDetailsModal = ({ game, onClose, onJoinSlot, currentUserId }) => {
                     className="h-10 w-10 rounded-xl object-cover"
                   />
                   <div>
-                    <h4 className="font-bold text-slate-200">{game.teamB?.name || 'Team B'}</h4>
+                    <h4 className="font-bold text-slate-200">{game.teamB?.name || 'TBD'}</h4>
                     <span className="text-[10px] uppercase font-bold text-pink-400 tracking-wider">Professional Squad</span>
                   </div>
                 </div>

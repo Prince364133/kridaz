@@ -790,8 +790,8 @@ export default function Profile() {
 
                 <div className="space-y-3 relative z-10">
                   {profileUser.liveMatches.map((match) => {
-                    const teamA = match.teams?.[0]?.name || "Team A";
-                    const teamB = match.teams?.[1]?.name || "Team B";
+                    const teamA = match.teams?.[0]?.name || 'TBD';
+                    const teamB = match.teams?.[1]?.name || 'TBD';
                     const matchFormat = match.format || match.gameType || "T20";
                     const location = match.turf?.name || match.turf?.city || match.customVenue || match.city || "Local Ground";
                     const minutesLive = match.liveStartedAt

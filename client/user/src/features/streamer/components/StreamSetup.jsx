@@ -102,7 +102,7 @@ export default function StreamSetup() {
         
         setFormData(prev => ({
           ...prev,
-          title: `${matchData.teams?.teamA?.name || 'Team A'} vs ${matchData.teams?.teamB?.name || 'Team B'} - Kridaz Live`
+          title: `${matchData.teams?.teamA?.name || 'TBD'} vs ${matchData.teams?.teamB?.name || 'TBD'} - Kridaz Live`
         }));
 
         // Fetch YouTube accounts

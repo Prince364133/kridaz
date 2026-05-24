@@ -1,4 +1,4 @@
-﻿import { createBrowserRouter, Navigate, useParams } from "react-router-dom";
+import { createBrowserRouter, Navigate, useParams } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Eager: Layouts (used on nearly every route Î“Ã‡Ã¶ small files, no split benefit) Î“Ã¶Ã‡Î“Ã¶Ã‡
@@ -157,6 +157,7 @@ const AuditLogs              = lazy(() => import("@features/admin").then(m => ({
 const FinancialMissionControl = lazy(() => import("@features/admin").then(m => ({ default: m.FinancialMissionControl })));
 const ProfessionalDetailsPage = lazy(() => import("@features/admin").then(m => ({ default: m.ProfessionalDetailsPage })));
 const HostedGamesPage         = lazy(() => import("@features/admin").then(m => ({ default: m.HostedGamesPage })));
+const CouponManagement        = lazy(() => import("@features/admin").then(m => ({ default: m.CouponManagement })));
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Shorthand wrapper Î“Ã‡Ã¶ keeps route definitions terse Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const S = ({ children }) => <Suspense fallback={<PageLoader />}>{children}</Suspense>;
@@ -204,6 +205,7 @@ const router = createBrowserRouter([
       { path: "blogs",        element: <S><BlogManagement /></S> },
       { path: "community",    element: <S><CommunityManagement /></S> },
       { path: "games",        element: <S><HostedGamesPage /></S> },
+      { path: "coupons",      element: <S><CouponManagement /></S> },
       { path: "*",            element: <NotFound /> },
     ],
   },

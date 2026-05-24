@@ -42,7 +42,7 @@ const ShareTurfModal = ({ isOpen, onClose, turf }) => {
     
     // Construct the message content with ground details and URL
     const turfUrl = `${window.location.origin}/turf/${turf._id}`;
-    const content = `Check out this ground: ${turf.name}\n=ƒôì ${turf.city || turf.location || 'Location'}\n=ƒÆ¦ Starting Gé¦${turf.pricePerHour || 800}/hr\n\nLink: ${turfUrl}`;
+    const content = `Check out this ground: ${turf.name}\n=ï¿½ï¿½ï¿½ ${turf.city || turf.location || 'Location'}\n=ï¿½Æ¦ Starting Rs ${turf.pricePerHour || 800}/hr\n\nLink: ${turfUrl}`;
     const media = turf.images?.[0] || turf.image ? [{ url: turf.images?.[0] || turf.image, type: 'image' }] : [];
 
     try {

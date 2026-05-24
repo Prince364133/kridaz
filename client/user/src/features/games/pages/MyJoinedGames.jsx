@@ -125,7 +125,7 @@ const MyJoinedGames = () => {
                     <h2 className="text-2xl font-black mt-1 uppercase italic tracking-tighter">
                       {game.gameMode === 'QUICK' 
                         ? `${game.gameType} Quick Match` 
-                        : `${game.teams?.teamA?.name || 'Team A'} vs ${game.teams?.teamB?.name || 'Team B'}`}
+                        : `${game.teams?.teamA?.name || 'TBD'} vs ${game.teams?.teamB?.name || 'TBD'}`}
                     </h2>
                   </div>
                   <div className="text-right">

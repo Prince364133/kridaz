@@ -98,8 +98,8 @@ export default function ManageStream() {
                   </div>
 
                   <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-tight">
-                    {match?.teams?.teamA?.name || 'TEAM A'} <br />
-                    <span className="text-violet-500">VS</span> {match?.teams?.teamB?.name || 'TEAM B'}
+                    {match?.teams?.teamA?.name || 'TBD'} <br />
+                    <span className="text-violet-500">VS</span> {match?.teams?.teamB?.name || 'TBD'}
                   </h2>
 
                   <div className="flex flex-wrap gap-8 pt-4">

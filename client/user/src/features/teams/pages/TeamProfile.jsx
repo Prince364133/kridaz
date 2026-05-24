@@ -454,11 +454,11 @@ const TeamProfile = () => {
                       sportType: game.sportType || 'Cricket',
                       matchName: game.name || game.title || 'Scoring Match',
                       teamA: {
-                        name: game.teams?.find(t => t.teamKey === 'teamA')?.name || 'Team A',
+                        name: game.teams?.find(t => t.teamKey === 'teamA')?.name || 'TBD',
                         logo: game.teams?.find(t => t.teamKey === 'teamA')?.image || null
                       },
                       teamB: {
-                        name: game.teams?.find(t => t.teamKey === 'teamB')?.name || 'Team B',
+                        name: game.teams?.find(t => t.teamKey === 'teamB')?.name || 'TBD',
                         logo: game.teams?.find(t => t.teamKey === 'teamB')?.image || null
                       },
                       youtubeStreamUrl: game.youtubeStreamUrl || null

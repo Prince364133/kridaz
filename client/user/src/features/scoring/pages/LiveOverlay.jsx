@@ -307,9 +307,9 @@ const LiveOverlay = () => {
           animation: 'tickerIn 0.6s cubic-bezier(0.16,1,0.3,1) both'
         }}>
           <div style={{ fontSize: 26, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '8px', display: 'flex', alignItems: 'center' }}>
-            <span style={{ color: '#a3e635' }}>{score.teamA?.name || 'Team A'}</span> 
+            <span style={{ color: '#a3e635' }}>{score.teamA?.name || 'TBD'}</span> 
             <span style={{ opacity: 0.5, margin: '0 16px', fontSize: 20 }}>VS</span> 
-            <span style={{ color: '#a3e635' }}>{score.teamB?.name || 'Team B'}</span>
+            <span style={{ color: '#a3e635' }}>{score.teamB?.name || 'TBD'}</span>
             <span style={{ marginLeft: 32, fontSize: 20, color: '#9ca3af', backgroundColor: 'rgba(255,255,255,0.1)', padding: '4px 12px', borderRadius: '8px' }}>MATCH STARTS SOON</span>
           </div>
           <div style={{ fontSize: 16, fontWeight: 600, color: '#cbd5e1', display: 'flex', gap: '24px', textTransform: 'uppercase', letterSpacing: '1px' }}>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { 
@@ -16,6 +16,7 @@ const PRI = "#84CC16";
 export default function ProfessionalDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isLoggedIn, user } = useSelector((state) => state.auth);
   const { gateInteraction } = useLoginOnDemand();
   const [pro, setPro] = useState(null);
@@ -59,6 +60,14 @@ export default function ProfessionalDetails() {
 
   const handleBooking = async () => {
     gateInteraction(async () => {
+      const returnTo = searchParams.get('returnTo');
+      if (returnTo) {
+        const returnUrl = new URL(returnTo, window.location.origin);
+        returnUrl.searchParams.set('umpireId', id);
+        navigate(returnUrl.pathname + returnUrl.search);
+        return;
+      }
+
       if (selectedSlots.length === 0) {
         toast.error("Please select at least one slot");
         return;
@@ -325,10 +334,10 @@ export default function ProfessionalDetails() {
 
                 <button 
                   onClick={handleBooking}
-                  disabled={bookingLoading || selectedSlots.length === 0}
+                  disabled={searchParams.get('returnTo') ? false : (bookingLoading || selectedSlots.length === 0)}
                   className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black py-4 rounded-lg font-bold hover:opacity-90 transition-all disabled:opacity-50 disabled:grayscale shadow-lg active:scale-95"
                 >
-                  {bookingLoading ? <Loader2 className="animate-spin mx-auto text-black" size={20} /> : "PAY NOW"}
+                  {bookingLoading ? <Loader2 className="animate-spin mx-auto text-black" size={20} /> : (searchParams.get('returnTo') ? "SELECT PROFESSIONAL" : "PAY NOW")}
                 </button>
               </div>
 

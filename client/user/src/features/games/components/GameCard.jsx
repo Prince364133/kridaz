@@ -103,24 +103,38 @@ const GameCard = ({ game, onSelect, actionButton }) => {
             </div>
           </div>
 
-          {/* Roster & Slot Progress */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-400 flex items-center gap-1">
-                <Users className="h-3.5 w-3.5" />
-                Roster Spots
-              </span>
-              <span className="font-semibold text-slate-200">
-                {filledSlots} / {totalSlots} Filled
-              </span>
+          {/* Roster & Slot Progress or Teams */}
+          {game.gameMode === 'PROFESSIONAL' ? (
+            <div className="flex items-center justify-between mt-2 pt-3 border-t border-white/5">
+              <div className="flex items-center gap-2 max-w-[40%]">
+                <img src={game.teamA?.image || "https://ui-avatars.com/api/?name=A&background=random"} className="w-8 h-8 rounded-full border border-white/10 shrink-0 object-cover" alt="Team A" />
+                <span className="text-xs font-bold text-white truncate">{game.teamA?.name || 'TBD'}</span>
+              </div>
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest shrink-0 px-2">VS</span>
+              <div className="flex items-center gap-2 max-w-[40%] flex-row-reverse">
+                <img src={game.teamB?.image || "https://ui-avatars.com/api/?name=B&background=random"} className="w-8 h-8 rounded-full border border-white/10 shrink-0 object-cover" alt="Team B" />
+                <span className="text-xs font-bold text-white truncate text-right">{game.teamB?.name || 'TBD'}</span>
+              </div>
             </div>
-            <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-              <div 
-                className={`h-full bg-gradient-to-r ${getSportColor(game.gameType)} transition-all duration-500`}
-                style={{ width: `${fillPercentage}%` }}
-              />
+          ) : (
+            <div className="space-y-2 mt-2 pt-1">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-400 flex items-center gap-1">
+                  <Users className="h-3.5 w-3.5" />
+                  Roster Spots
+                </span>
+                <span className="font-semibold text-slate-200">
+                  {filledSlots} / {totalSlots} Filled
+                </span>
+              </div>
+              <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full bg-gradient-to-r ${getSportColor(game.gameType)} transition-all duration-500`}
+                  style={{ width: `${fillPercentage}%` }}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Professional Assets requested */}
           <div className="flex gap-2">

@@ -83,8 +83,8 @@ const useHostGameForm = () => {
     quickSlotsData: [],
     city: user?.city || '',
     state: user?.state || '',
-    teamA: { name: 'Team A', slots: [], image: MOCK_TEAM_IMAGES[0].url },
-    teamB: { name: 'Team B', slots: [], image: MOCK_TEAM_IMAGES[1].url }
+    teamA: { name: '', slots: [], image: MOCK_TEAM_IMAGES[0].url },
+    teamB: { name: '', slots: [], image: MOCK_TEAM_IMAGES[1].url }
   });
 
   const [grounds, setGrounds] = useState([]);
@@ -341,7 +341,7 @@ const useHostGameForm = () => {
         ...gameData,
         [teamKey]: { ...gameData[teamKey], image: uploadEvent.target.result }
       });
-      toast.success(`${teamKey === 'teamA' ? 'Team A' : 'Team B'} logo uploaded!`);
+      toast.success(`${teamKey === 'teamA' ? 'Team 1' : 'Team 2'} logo uploaded!`);
     };
     reader.readAsDataURL(file);
   };

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import GoogleAuthButton from "../components/GoogleAuthButton";
-import Turnstile from "react-turnstile";
 import OnboardingModal from "@components/modals/OnboardingModal";
 import { ArrowRight, ChevronLeft, User as UserIcon, Lock, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -20,9 +19,7 @@ const SignUp = () => {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState("");
-  
+  const [loading, setLoading] = useState(false);  
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingData, setOnboardingData] = useState(null);
   
@@ -46,7 +43,7 @@ const SignUp = () => {
       if (emailParam) setIdentifier(decodeURIComponent(emailParam));
 
       if (inviter) {
-        toast.success(`You are invited by ${inviter} to join their team!`, { duration: 6000, icon: '👋' });
+        toast.success(`You are invited by ${inviter} to join their team!`, { duration: 6000, icon: 'ðŸ‘‹' });
       }
     }
     
@@ -79,7 +76,7 @@ const SignUp = () => {
       const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
       toast.success(res.data.message);
       if (res.data.testOtp) {
-         toast(`Test OTP: ${res.data.testOtp.phone}`, { icon: '🧑‍💻', duration: 10000 });
+         toast(`Test OTP: ${res.data.testOtp.phone}`, { icon: 'ðŸ§‘â€ðŸ’»', duration: 10000 });
       }
       setStep(2);
     } catch (err) {
@@ -246,11 +243,11 @@ const SignUp = () => {
                           onChange={(e) => setCountryCode(e.target.value)}
                           className="bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 px-2 text-white text-sm outline-none transition-all cursor-pointer w-20 appearance-none text-center"
                         >
-                          <option value="+91" className="text-black">+91 🇮🇳</option>
-                          <option value="+1" className="text-black">+1 🇺🇸</option>
-                          <option value="+44" className="text-black">+44 🇬🇧</option>
-                          <option value="+61" className="text-black">+61 🇦🇺</option>
-                          <option value="+971" className="text-black">+971 🇦🇪</option>
+                          <option value="+91" className="text-black">+91 ðŸ‡®ðŸ‡³</option>
+                          <option value="+1" className="text-black">+1 ðŸ‡ºðŸ‡¸</option>
+                          <option value="+44" className="text-black">+44 ðŸ‡¬ðŸ‡§</option>
+                          <option value="+61" className="text-black">+61 ðŸ‡¦ðŸ‡º</option>
+                          <option value="+971" className="text-black">+971 ðŸ‡¦ðŸ‡ª</option>
                         </select>
                         <div className="relative flex-1">
                           <UserIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
@@ -292,17 +289,10 @@ const SignUp = () => {
 
 
 
-                  <div className="flex justify-center my-4">
-                    <Turnstile
-                      sitekey={import.meta.env.DEV ? "1x00000000000000000000AA" : import.meta.env.VITE_TURNSTILE_SITE_KEY}
-                      onVerify={(token) => setTurnstileToken(token)}
-                      theme="dark"
-                    />
-                  </div>
 
                   <button 
                     type="submit" 
-                    disabled={loading || !turnstileToken}
+                    disabled={loading}
                     className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
                   >
                     {loading ? "Processing..." : step === 2 ? "Complete Profile" : "Continue"}

@@ -69,41 +69,64 @@ const JoinGames = () => {
  }
  };
 
- useEffect(() => {
- const fetchUserAndGames = async () => {
- try {
- const userRes = await axiosInstance.get(`/api/user/auth/getMe`);
- const user = userRes.data.user;
- if (user?.city || user?.state) {
- setUserLocation({ city: user.city || '', state: user.state || '' });
- setSelectedState(user.state || '');
- setSelectedCity(user.city || '');
- fetchGames(user.city, user.state);
- } else {
- fetchGames();
- }
- } catch (err) {
- fetchGames();
- }
- };
- fetchUserAndGames();
+  const normalizeString = (str) => {
+    return str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
+  };
 
- // Load all Indian states for the dropdown
- const loadStates = async () => {
- setLoadingStates(true);
- const data = await fetchStates();
- setStates(data);
- setLoadingStates(false);
- };
- loadStates();
+  useEffect(() => {
+    const initializePage = async () => {
+      try {
+        setLoadingStates(true);
+        const statesData = await fetchStates();
+        setStates(statesData);
+        setLoadingStates(false);
 
- // Check for deep-link inviteToken
- const params = new URLSearchParams(window.location.search);
- const token = params.get('inviteToken');
- if (token) {
- handleVerifyInvite(token);
- }
- }, []);
+        let uCity = '';
+        let uState = '';
+        try {
+          const userRes = await axiosInstance.get(`/api/user/auth/getMe`);
+          const user = userRes.data.user;
+          if (user?.city || user?.state) {
+            uCity = user.city || '';
+            uState = user.state || '';
+          }
+        } catch (e) {
+          // ignore auth errors if user not logged in
+        }
+
+        let matchedState = '';
+        if (uState) {
+          matchedState = statesData.find(s => normalizeString(s) === normalizeString(uState)) || '';
+        }
+
+        let matchedCity = '';
+        if (matchedState && uCity) {
+          const citiesData = await fetchCities(matchedState);
+          setCities(citiesData);
+          matchedCity = citiesData.find(c => normalizeString(c) === normalizeString(uCity)) || '';
+        }
+
+        if (matchedCity || matchedState) {
+          setUserLocation({ city: matchedCity, state: matchedState });
+          setSelectedState(matchedState);
+          setSelectedCity(matchedCity);
+          fetchGames(matchedCity, matchedState);
+        } else {
+          fetchGames();
+        }
+      } catch (err) {
+        fetchGames();
+      }
+    };
+    initializePage();
+
+    // Check for deep-link inviteToken
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('inviteToken');
+    if (token) {
+      handleVerifyInvite(token);
+    }
+  }, []);
 
  const handleVerifyInvite = async (token) => {
  try {
@@ -217,7 +240,7 @@ const JoinGames = () => {
  gateInteraction(async () => {
  try {
  const res = await axiosInstance.post(`/api/hosted-game/join`, {
- gameId: selectedGame._id,
+ gameId: selectedGame.id,
  team: joiningSlot.team,
  slotIndex: joiningSlot.index,
  role: joiningSlot.role
@@ -415,7 +438,7 @@ const JoinGames = () => {
 
   return (
    <motion.div
-   key={game._id}
+   key={game.id}
    initial={{ opacity: 0, y: 20 }}
    animate={{ opacity: 1, y: 0 }}
    whileHover={{ y: -6, scale: 1.01 }}
@@ -632,8 +655,6 @@ const JoinGames = () => {
   { label: "Time", value: selectedGame.time },
   { label: "Fee", value: selectedGame.perPlayerCharge ? `${selectedGame.perPlayerCharge} Coins` : 'Free' },
   { label: "Umpire", value: selectedGame.umpire ? 'Verified' : 'Unmanaged' },
-  { label: "Streamer", value: selectedGame.streamer || 'None' },
-  { label: "Scorer", value: selectedGame.scorer || 'None' },
   ].map((stat, i, arr) => (
   <div key={i} className="flex items-center">
   <div className="px-4 py-1 text-center">
@@ -675,14 +696,14 @@ const JoinGames = () => {
   {isJoined ? (
   slot.user?.profilePicture
   ? <img src={slot.user.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
-  : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[9px] md:text-[11px] font-bold text-white">{slot.user?.name?.[0]?.toUpperCase() || 'P'}</div>
+  : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[9px] md:text-[11px] font-bold text-white">{(slot.user?.name || slot.customPlayer?.name)?.[0]?.toUpperCase() || 'P'}</div>
   ) : <span className="text-white/25 text-lg font-bold">+</span>}
   <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#08080a] border border-white/10 flex items-center justify-center">
   <RoleIcon size={8} className="text-[#55DEE8]" />
   </div>
   </button>
   <span className="font-inter text-[8px] text-white/40 uppercase tracking-wide text-center truncate w-full">
-  {isJoined ? (slot.user?.name?.split(' ')[0] || 'Player') : ''}
+  {isJoined ? ((slot.user?.name || slot.customPlayer?.name)?.split(' ')[0] || 'Player') : ''}
   </span>
   </div>
   );
@@ -718,14 +739,14 @@ const JoinGames = () => {
   {isJoined ? (
   slot.user?.profilePicture
   ? <img src={slot.user.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
-  : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[10px] font-bold text-white">{slot.user?.name?.[0]?.toUpperCase() || 'P'}</div>
+  : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[10px] font-bold text-white">{(slot.user?.name || slot.customPlayer?.name)?.[0]?.toUpperCase() || 'P'}</div>
   ) : <span className="text-white/25 text-base font-bold">+</span>}
   <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#08080a] border border-white/10 flex items-center justify-center">
   <RoleIcon size={8} className="text-[#55DEE8]" />
   </div>
   </button>
   <span className="font-inter text-[8px] text-white/40 uppercase tracking-wide text-center truncate w-full">
-  {isJoined ? (slot.user?.name?.split(' ')[0] || 'Player') : ''}
+  {isJoined ? ((slot.user?.name || slot.customPlayer?.name)?.split(' ')[0] || 'Player') : ''}
   </span>
   </div>
   );

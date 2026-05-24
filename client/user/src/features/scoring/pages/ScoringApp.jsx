@@ -74,7 +74,7 @@ function MembersTab({ matchData }) {
   return (
     <div className="space-y-4 pb-4 font-inter">
       <div className="flex gap-2 bg-white/5 rounded-2xl p-1.5 border border-white/5">
-        {[['teamA', teamA?.name || 'Team A'], ['teamB', teamB?.name || 'Team B']].map(([key, label]) => (
+        {[['teamA', teamA?.name || 'TBD'], ['teamB', teamB?.name || 'TBD']].map(([key, label]) => (
           <button key={key} onClick={() => setTeamTab(key)}
             className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${teamTab === key ? 'bg-[#00C187] text-black shadow-lg' : 'text-neutral-500 hover:text-white'}`}>
             {label}

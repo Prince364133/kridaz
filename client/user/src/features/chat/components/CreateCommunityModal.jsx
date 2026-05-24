@@ -51,7 +51,7 @@ const CreateCommunityModal = ({ isOpen, onClose, onSuccess }) => {
       <div className="space-y-3 max-w-sm">
         <h2 className="text-3xl font-black text-white italic uppercase tracking-tight leading-tight">Create a New Community</h2>
         <p className="text-white/40 text-sm font-medium leading-relaxed">
-          Bring your related groupsGÇölike neighborhoods, schools, or work teamsGÇötogether under one umbrella.
+          Bring your related groupsRs ï¿½like neighborhoods, schools, or work teamsRs ï¿½together under one umbrella.
         </p>
       </div>
 

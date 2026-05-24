@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
 import useTurfData from "../hooks/useTurfData";
@@ -62,6 +62,7 @@ const TurfDetails = () => {
   const { isLoggedIn } = useSelector((/** @type {any} */ state) => state.auth);
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { loading, turfs } = useTurfData();
   const { averageRating, reviews } = useReviews(id);
   const { gateInteraction } = useLoginOnDemand();
@@ -148,16 +149,26 @@ const TurfDetails = () => {
 
   const handleBookingClick = () => {
     gateInteraction(() => {
-      navigate(`/checkout/${turf._id}`, {
-        state: {
-          turfName: turf.name,
-          selectedDate: selectedDate.toISOString(),
-          startTime: selectedStartTime,
-          duration: 1, // Default duration
-          amount: totalPrice,
-          location: turf.location
-        }
-      });
+      const returnTo = searchParams.get('returnTo');
+      if (returnTo) {
+        // Build return URL
+        const returnUrl = new URL(returnTo, window.location.origin);
+        returnUrl.searchParams.set('groundId', turf._id);
+        // Note: we can't easily pass the complex date/time to the returnUrl if HostGame relies on its own date picker, 
+        // but passing the groundId is what's essential to prepopulate it.
+        navigate(returnUrl.pathname + returnUrl.search);
+      } else {
+        navigate(`/checkout/${turf._id}`, {
+          state: {
+            turfName: turf.name,
+            selectedDate: selectedDate.toISOString(),
+            startTime: selectedStartTime,
+            duration: 1, // Default duration
+            amount: totalPrice,
+            location: turf.location
+          }
+        });
+      }
     }, {
       title: "Confirm Your Slot",
       message: "Ready to dominate the pitch? Sign in to securely book your time slot and get instant confirmation."

@@ -160,11 +160,11 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                   </div>
                   <div className="flex gap-2 mb-3">
                     <div className="flex-1 text-center bg-black/40 rounded-lg py-1 border border-white/5">
-                      <span className="text-xs text-white/80 font-bold">{item.teams?.[0]?.name || 'Team A'}</span>
+                      <span className="text-xs text-white/80 font-bold">{item.teams?.[0]?.name || 'TBD'}</span>
                     </div>
                     <div className="flex items-center justify-center text-[10px] text-white/40 font-black">VS</div>
                     <div className="flex-1 text-center bg-black/40 rounded-lg py-1 border border-white/5">
-                      <span className="text-xs text-white/80 font-bold">{item.teams?.[1]?.name || 'Team B'}</span>
+                      <span className="text-xs text-white/80 font-bold">{item.teams?.[1]?.name || 'TBD'}</span>
                     </div>
                   </div>
                   <div className="flex gap-2 mt-auto">

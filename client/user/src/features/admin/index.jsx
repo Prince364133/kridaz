@@ -1,4 +1,4 @@
-﻿// Public API boundary for features/admin
+// Public API boundary for features/admin
 export { default as UserManagement } from "./UserManagement/UserPage";
 export { default as VerificationCenter } from "./OwnerRequests/VerificationCenter";
 export { default as AdminDashboard } from "./Dashboard/AdminDashboard";
@@ -19,3 +19,4 @@ export { default as AuditLogs } from "./Audit/AuditLogs";
 export { default as ProfessionalDetailsPage } from "./ProfessionalManagement/ProfessionalDetailsPage";
 export { default as FinancialMissionControl } from "./Finance/FinancialMissionControl";
 export { default as HostedGamesPage } from "./HostedGames/HostedGamesPage";
+export { default as CouponManagement } from "./Coupons/CouponManagement";

@@ -212,7 +212,7 @@ const MyHostedGames = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Team A Slots */}
                   <div className="space-y-3">
-                    <h4 className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-2 px-2">TEAM A SLOTS</h4>
+                    <h4 className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-2 px-2">{game.teams?.teamA?.name ? `${game.teams.teamA.name} SLOTS` : "HOME TEAM SLOTS"}</h4>
                     {game.teams?.teamA?.slots?.map((slot, index) => (
                       <div key={`A-${index}`} className="flex items-center justify-between p-3 bg-neutral-900 rounded-2xl border border-neutral-800/50">
                         <div className="flex items-center gap-3">
@@ -225,7 +225,7 @@ const MyHostedGames = () => {
                           </div>
                           <div>
                             <p className="text-xs font-bold text-white uppercase tracking-tighter">
-                              {slot.user?.name || "OPEN SLOT"}
+                              {slot.user?.name || slot.customPlayer?.name || "OPEN SLOT"}
                             </p>
                             <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase ${
                               slot.status === 'RESERVED' ? 'bg-amber-500/10 text-amber-500' : 
@@ -257,7 +257,7 @@ const MyHostedGames = () => {
 
                   {/* Team B Slots */}
                   <div className="space-y-3">
-                    <h4 className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-2 px-2">TEAM B SLOTS</h4>
+                    <h4 className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-2 px-2">{game.teams?.teamB?.name ? `${game.teams.teamB.name} SLOTS` : "AWAY TEAM SLOTS"}</h4>
                     {game.teams?.teamB?.slots?.map((slot, index) => (
                       <div key={`B-${index}`} className="flex items-center justify-between p-3 bg-neutral-900 rounded-2xl border border-neutral-800/50">
                         <div className="flex items-center gap-3">
@@ -270,7 +270,7 @@ const MyHostedGames = () => {
                           </div>
                           <div>
                             <p className="text-xs font-bold text-white uppercase tracking-tighter">
-                              {slot.user?.name || "OPEN SLOT"}
+                              {slot.user?.name || slot.customPlayer?.name || "OPEN SLOT"}
                             </p>
                             <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase ${
                               slot.status === 'RESERVED' ? 'bg-amber-500/10 text-amber-500' : 

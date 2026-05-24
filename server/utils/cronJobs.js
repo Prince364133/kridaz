@@ -1,4 +1,4 @@
-﻿import nodeCron from "node-cron";
+import nodeCron from "node-cron";
 import { prisma } from "../config/prisma.js";
 import logger from "./logger.js";
 
@@ -186,9 +186,9 @@ export const autoSettleHostedGames = async () => {
       const cutoffTime = new Date(scheduledStart.getTime() + 24 * 60 * 60 * 1000);
 
       if (now > cutoffTime) {
-        logger.info(\[CRON] Auto-settling game \. 24 hours passed since scheduled start.\);
+        logger.info("[CRON] Auto-settling game 24 hours passed since scheduled start.");
         try {
-          await prisma.\(async (tx) => {
+          await prisma.$transaction(async (tx) => {
             await tx.hostedGame.update({
               where: { id: game.id },
               data: { coinTransferStatus: "COMPLETED" }
@@ -205,20 +205,20 @@ export const autoSettleHostedGames = async () => {
                   amount: totalAmount,
                   type: "SLOT_INCOME",
                   status: "SUCCESS",
-                  description: \Received payment from players for \ game (Auto-settled)\
+                  description: "Received payment from players for game (Auto-settled)"
                 }
               });
             }
           });
           settledCount++;
         } catch (err) {
-          logger.error(\[CRON] Error auto-settling game \:\, err);
+          logger.error("[CRON] Error auto-settling game: ", err);
         }
       }
     }
 
     if (settledCount > 0) {
-      logger.info(\[CRON] Auto-settlement complete — settled \ games.\);
+      logger.info(`[CRON] Auto-settlement complete — settled ${settledCount} games.`);
     }
   } catch (error) {
     logger.error("[CRON] Error during auto-settlement:", error);

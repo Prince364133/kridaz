@@ -153,6 +153,20 @@ router.get("/followers-for-slot", verifyUser, controller.getFollowersForSlot); /
 
 /**
  * @swagger
+ * /hosted-game/validate-coupon:
+ *   post:
+ *     summary: Validate a coupon code
+ *     tags: [HostedGame]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Coupon validated
+ */
+router.post("/validate-coupon", verifyUser, controller.validateCoupon);
+
+/**
+ * @swagger
  * /hosted-game/create:
  *   post:
  *     summary: Create a hosted game

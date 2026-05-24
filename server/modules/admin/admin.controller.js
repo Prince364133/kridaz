@@ -815,7 +815,7 @@ export const approveWithdrawalRequest = async (req, res) => {
       <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
         <h2 style="color: #4CAF50;">Withdrawal Successful!</h2>
         <p>Hello ${owner.name},</p>
-        <p>Your withdrawal request for <strong>â‚¹${request.amount}</strong> has been approved and processed.</p>
+        <p>Your withdrawal request for <strong>Ã¢â€šÂ¹${request.amount}</strong> has been approved and processed.</p>
         <p><strong>Transaction ID:</strong> ${transactionId || "N/A"}</p>
         <p>The funds should reflect in your bank account shortly.</p>
         <p>Best regards,<br/>The Kridaz Team</p>
@@ -884,7 +884,7 @@ export const rejectWithdrawalRequest = async (req, res) => {
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
           <h2 style="color: #f44336;">Withdrawal Request Update</h2>
           <p>Hello ${owner.name},</p>
-          <p>Your withdrawal request for <strong>â‚¹${request.amount}</strong> has been rejected.</p>
+          <p>Your withdrawal request for <strong>Ã¢â€šÂ¹${request.amount}</strong> has been rejected.</p>
           <p><strong>Reason:</strong> ${reason || "No specific reason provided."}</p>
           <p>The amount has been credited back to your usable wallet balance.</p>
           <p>Best regards,<br/>The Kridaz Team</p>
@@ -1354,7 +1354,7 @@ export const resolveDispute = async (req, res) => {
               amount: totalAmountCollected,
               type: "SLOT_INCOME",
               status: "SUCCESS",
-              description: \Received payment from players for \ game (Dispute Resolved)\
+              description: `Received payment from players for game (Dispute Resolved)`
             }
           });
         }
@@ -1365,7 +1365,7 @@ export const resolveDispute = async (req, res) => {
           for (const refund of refunds) {
             const { userId, amount } = refund;
             if (amount > game.perPlayerCharge) {
-              throw new Error(\Refund amount for user \ cannot exceed \\);
+              throw new Error("Refund amount cannot exceed limit");
             }
             
             await WalletService.credit(userId, 'user', amount, tx);
@@ -1375,7 +1375,7 @@ export const resolveDispute = async (req, res) => {
                 amount,
                 type: "REFUND",
                 status: "SUCCESS",
-                description: \Partial refund for disputed \ game\
+                description: "Partial refund for disputed game"
               }
             });
             totalRefunded += amount;
@@ -1391,7 +1391,7 @@ export const resolveDispute = async (req, res) => {
               amount: remainingToHost,
               type: "SLOT_INCOME",
               status: "SUCCESS",
-              description: \Received remaining payment for \ game after refunds\
+              description: "Received remaining payment for game after refunds"
             }
           });
         }

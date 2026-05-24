@@ -1,4 +1,4 @@
-import express from "express";
+﻿import express from "express";
 import { 
   registerUser, 
   login,
@@ -33,7 +33,6 @@ import {
   authLimiter,
   otpLimiter,
 } from "../../../middleware/rateLimiter.middleware.js";
-import { verifyTurnstile } from "../../../middleware/turnstile.middleware.js";
 
 const router = express.Router();
 
@@ -44,7 +43,7 @@ const router = express.Router();
  *   description: User authentication and profile management
  */
 
-// ── Public Routes (Registration / Login) ────────────────────────────────────
+// â”€â”€ Public Routes (Registration / Login) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * @swagger
@@ -53,7 +52,7 @@ const router = express.Router();
  *     summary: Send OTP to email
  *     tags: [Auth]
  */
-router.post("/send-otp", otpLimiter, verifyTurnstile, validate(sendOtpSchema), sendOtp);
+router.post("/send-otp", otpLimiter, validate(sendOtpSchema), sendOtp);
 router.post("/verify-otp", otpLimiter, verifyOtp);
 
 /**
@@ -63,7 +62,7 @@ router.post("/verify-otp", otpLimiter, verifyOtp);
  *     summary: Register a new user
  *     tags: [Auth]
  */
-router.post("/register", authLimiter, verifyTurnstile, validate(userRegisterSchema), registerUser);
+router.post("/register", authLimiter, validate(userRegisterSchema), registerUser);
 
 /**
  * @swagger
@@ -72,7 +71,7 @@ router.post("/register", authLimiter, verifyTurnstile, validate(userRegisterSche
  *     summary: Login Step 1 - Password verification
  *     tags: [Auth]
  */
-router.post("/login-step1", otpLimiter, verifyTurnstile, validate(loginStep1Schema), loginStep1);
+router.post("/login-step1", otpLimiter, validate(loginStep1Schema), loginStep1);
 
 /**
  * @swagger
@@ -81,7 +80,7 @@ router.post("/login-step1", otpLimiter, verifyTurnstile, validate(loginStep1Sche
  *     summary: Login Step 2 - Complete login
  *     tags: [Auth]
  */
-router.post("/login", authLimiter, verifyTurnstile, validate(userLoginSchema), login);
+router.post("/login", authLimiter, validate(userLoginSchema), login);
 
 /**
  * @swagger
@@ -119,7 +118,7 @@ router.post("/refresh", refreshToken);
  */
 router.post("/recovery/login", loginWithRecoveryToken);
 
-// ── Authenticated Routes (Profile / Session) ────────────────────────────────
+// â”€â”€ Authenticated Routes (Profile / Session) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * @swagger
@@ -177,7 +176,7 @@ router.post("/recovery/generate", userAuth, generateRecoveryTokens);
  */
 router.post("/upgrade-request", userAuth, upload.array("documents", 10), upgradeRequest);
 
-// ── Password Reset Routes ───────────────────────────────────────────────────
+// â”€â”€ Password Reset Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 router.post("/forgot-password-otp", forgotPasswordOtp);
 router.post("/reset-password", resetPassword);
 

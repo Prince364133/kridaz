@@ -4,7 +4,7 @@ import useCoachDashboard from "@hooks/owner/useCoachDashboard";
 import DashboardSkeleton from "@features/venue-owner/Dashboard/DashboardSkeleton";
 
 /**
- * CoachMasterclass GÇö Virtual training content feed.
+ * CoachMasterclass Rs ï¿½ Virtual training content feed.
  * Standardized for the Console design language (Inter font, 8px radii, Lime theme).
  */
 

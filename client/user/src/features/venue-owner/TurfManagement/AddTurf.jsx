@@ -289,7 +289,7 @@ const AddTurf = () => {
                         rel="noopener noreferrer"
                         className="text-[10px] font-bold text-[#878C9F] hover:text-[#55DEE8] uppercase tracking-widest transition-colors"
                       >
-                        Open in Maps G��
+                        Open in Maps Rs �
                       </a>
                     )}
                   </div>

@@ -148,17 +148,33 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  setIsTyping(false);
  if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
+ const messageContent = message;
+ setMessage('');
+
+ const tempId = `temp-${Date.now()}`;
+ const optimisticMsg = {
+   _id: tempId,
+   id: tempId,
+   content: messageContent,
+   createdAt: new Date().toISOString(),
+   sender: user,
+   isOptimistic: true,
+   chat: chat._id
+ };
+
+ setMessages((prev) => [...prev, optimisticMsg]);
+
  try {
  const data = await sendMessageMutation({
  chatId: chat._id,
- content: message
+ content: messageContent
  }).unwrap();
 
  socket.emit('new message', data);
- setMessages((prev) => [...prev, data]);
- setMessage('');
+ setMessages((prev) => prev.map(m => m._id === tempId ? data : m));
  } catch (err) {
  console.error("Failed to send message:", err);
+ setMessages((prev) => prev.filter(m => m._id !== tempId));
  }
  };
 
@@ -849,10 +865,16 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
  </span>
  {isMine && (
- <svg className={`w-4 h-[11px] ${isRead ? 'text-[#34B7F1]' : 'text-[#55DEE8]/40'}`} viewBox="0 0 20 12" fill="none">
- <path d="M1 6l4 4L13 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
- <path d="M7 6l4 4L19 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"/>
+ m.isOptimistic ? (
+ <svg className="w-3 h-3 text-[#55DEE8]/60" viewBox="0 0 24 24" fill="none">
+ <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
  </svg>
+ ) : (
+ <svg className={`w-4 h-[11px] ${isRead ? 'text-[#34B7F1]' : 'text-[#55DEE8]/60'}`} viewBox="0 0 20 12" fill="none">
+ <path d="M1 6l4 4L13 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+ <path d="M7 6l4 4L19 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={isRead ? "1" : "0.6"}/>
+ </svg>
+ )
  )}
  </div>
  </div>

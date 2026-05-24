@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma.js";
 import NotificationService from "../../services/notification.service.js";
 import logger from "../../utils/logger.js";
+import { uploadToCloudinary } from "../../utils/cloudinary.js";
 
 /**
  * USER: Raise a new dispute for a booking in the IN_REVIEW_WINDOW
@@ -8,14 +9,22 @@ import logger from "../../utils/logger.js";
 export const raiseDispute = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { bookingId, reason, customReason, description, images } = req.body;
+    const { bookingId, reason, customReason, description } = req.body;
+
+    let imageUrls = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const url = await uploadToCloudinary(file.buffer, "disputes");
+        imageUrls.push(url);
+      }
+    }
 
     const result = await prisma.$transaction(async (tx) => {
       const booking = await tx.booking.findFirst({
         where: {
           id: bookingId,
           userId: userId,
-          status: "IN_REVIEW_WINDOW"
+          status: { in: ["CONFIRMED", "PLAYING", "IN_REVIEW_WINDOW"] }
         },
         include: { turf: true }
       });
@@ -42,7 +51,7 @@ export const raiseDispute = async (req, res) => {
           ownerId: booking.turf.ownerId,
           reason: disputeReason,
           description,
-          images: images || [],
+          images: imageUrls,
           status: "OPEN",
           bookingDetails: {
             turfName: booking.turf.name,
@@ -60,13 +69,26 @@ export const raiseDispute = async (req, res) => {
         data: { status: "DISPUTED" }
       });
 
-      // 3. Freeze Funds from Owner (Move from inProgress to disputeBalance)
-      const owner = await tx.ownerProfile.update({
-        where: { id: booking.turf.ownerId },
-        data: {
+      // 3. Freeze Funds from Owner
+      // Determine where the funds currently reside based on the booking's previous status
+      let balanceUpdate = {};
+      if (booking.status === "CONFIRMED" || booking.status === "PLAYING") {
+        // Funds are still in pendingBalance
+        balanceUpdate = {
+          pendingBalance: { decrement: booking.ownerRevenue },
+          disputeBalance: { increment: booking.ownerRevenue }
+        };
+      } else if (booking.status === "IN_REVIEW_WINDOW") {
+        // Funds are in inProgressBalance
+        balanceUpdate = {
           inProgressBalance: { decrement: booking.ownerRevenue },
           disputeBalance: { increment: booking.ownerRevenue }
-        }
+        };
+      }
+
+      const owner = await tx.ownerProfile.update({
+        where: { id: booking.turf.ownerId },
+        data: balanceUpdate
       });
 
       await tx.walletTransaction.create({
