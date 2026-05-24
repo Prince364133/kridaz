@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { Search, MapPin, Star, ChevronRight, Users, User, Calendar, Shield, Trophy, Activity, Award, CheckCircle, Filter, Loader2, Check, X, LayoutGrid, Video, Dribbble, ChevronDown } from "lucide-react";
@@ -14,6 +14,7 @@ const roles = ["All", "Coach", "Umpire", "Scorer", "Streamer"];
 
 export default function FindProfessionals() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isLoggedIn, user } = useSelector((state) => state.auth);
   const [professionals, setProfessionals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -217,7 +218,11 @@ export default function FindProfessionals() {
               <div 
                 key={pro._id} 
                 className="group cursor-pointer"
-                onClick={() => navigate(`/professionals/${pro.id || pro._id}`)}
+                onClick={() => {
+                  const returnTo = searchParams.get('returnTo');
+                  const baseTo = `/professionals/${pro.id || pro._id}`;
+                  navigate(returnTo ? `${baseTo}?returnTo=${encodeURIComponent(returnTo)}` : baseTo);
+                }}
               >
                 <div className="relative bg-[#1a1a1a] rounded-xl p-1.5 border border-white/10 transition-all duration-500 hover:border-[#55DEE8]/30 hover:shadow-[0_15px_30px_rgba(0,0,0,0.5)]">
                   
@@ -292,7 +297,9 @@ export default function FindProfessionals() {
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/professionals/${pro.id || pro._id}`);
+                          const returnTo = searchParams.get('returnTo');
+                          const baseTo = `/professionals/${pro.id || pro._id}`;
+                          navigate(returnTo ? `${baseTo}?returnTo=${encodeURIComponent(returnTo)}` : baseTo);
                         }}
                         className="px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all duration-300 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-sans hover:scale-105 shadow-lg active:scale-95 shrink-0"
                       >

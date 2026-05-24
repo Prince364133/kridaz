@@ -379,13 +379,20 @@ const HostGame = () => {
     if (step === 3) {
       const urlGroundId = searchParams.get('groundId');
       const urlUmpireId = searchParams.get('umpireId');
+      const urlDate = searchParams.get('date');
+      const urlTime = searchParams.get('time');
 
       if (urlGroundId && (!selectedGround || selectedGround._id !== urlGroundId)) {
         axiosInstance.get(`/api/user/turf/${urlGroundId}`)
           .then(res => {
             const turf = res.data.turf || res.data;
             setSelectedGround(turf);
-            setGameData(prev => ({ ...prev, groundId: turf._id }));
+            setGameData(prev => ({ 
+              ...prev, 
+              groundId: turf._id,
+              date: urlDate ? new Date(urlDate).toISOString().split('T')[0] : prev.date,
+              time: urlTime || prev.time
+            }));
           })
           .catch(err => console.error("Error fetching ground details:", err));
       }

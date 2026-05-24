@@ -62,8 +62,14 @@ export default function ProfessionalDetails() {
     gateInteraction(async () => {
       const returnTo = searchParams.get('returnTo');
       if (returnTo) {
+        if (selectedSlots.length === 0) {
+          toast.error("Please select at least one slot");
+          return;
+        }
         const returnUrl = new URL(returnTo, window.location.origin);
         returnUrl.searchParams.set('umpireId', id);
+        returnUrl.searchParams.set('date', selectedDate);
+        returnUrl.searchParams.set('time', selectedSlots[0].startTime);
         navigate(returnUrl.pathname + returnUrl.search);
         return;
       }
@@ -334,10 +340,10 @@ export default function ProfessionalDetails() {
 
                 <button 
                   onClick={handleBooking}
-                  disabled={searchParams.get('returnTo') ? false : (bookingLoading || selectedSlots.length === 0)}
+                  disabled={bookingLoading || selectedSlots.length === 0}
                   className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black py-4 rounded-lg font-bold hover:opacity-90 transition-all disabled:opacity-50 disabled:grayscale shadow-lg active:scale-95"
                 >
-                  {bookingLoading ? <Loader2 className="animate-spin mx-auto text-black" size={20} /> : (searchParams.get('returnTo') ? "SELECT PROFESSIONAL" : "PAY NOW")}
+                  {bookingLoading ? <Loader2 className="animate-spin mx-auto text-black" size={20} /> : (searchParams.get('returnTo') ? "ADD THIS PROFESSIONAL TO MY HOST GAME" : "PAY NOW")}
                 </button>
               </div>
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { MapPin, Star, ChevronLeft, ChevronRight, Zap, Heart, Timer, MessageSquareShare } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 
@@ -7,9 +7,12 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // Ensure fallback values so we don't crash
-  const to = `/venue/${turf.id || turf._id}`;
+  const returnTo = searchParams.get('returnTo');
+  const baseTo = `/venue/${turf.id || turf._id}`;
+  const to = returnTo ? `${baseTo}?returnTo=${encodeURIComponent(returnTo)}` : baseTo;
   const images = turf.images?.length > 0 ? turf.images : [turf.image];
   const rating = turf.avgRating ?? 4.8;
   const price = turf.pricePerHour ?? 800;

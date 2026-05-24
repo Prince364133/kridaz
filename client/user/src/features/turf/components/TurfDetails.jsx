@@ -154,8 +154,8 @@ const TurfDetails = () => {
         // Build return URL
         const returnUrl = new URL(returnTo, window.location.origin);
         returnUrl.searchParams.set('groundId', turf._id);
-        // Note: we can't easily pass the complex date/time to the returnUrl if HostGame relies on its own date picker, 
-        // but passing the groundId is what's essential to prepopulate it.
+        returnUrl.searchParams.set('date', selectedDate.toISOString());
+        returnUrl.searchParams.set('time', selectedStartTime);
         navigate(returnUrl.pathname + returnUrl.search);
       } else {
         navigate(`/checkout/${turf._id}`, {
@@ -326,7 +326,7 @@ const TurfDetails = () => {
           disabled={bookingLoading || !selectedStartTime}
           className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-8 h-12 rounded-[10px] font-bold text-[14px] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:grayscale shadow-[0_0_15px_rgba(85,222,232,0.3)] hover:shadow-[0_0_25px_rgba(191,243,103,0.5)]"
         >
-          {bookingLoading ? "..." : "Proceed"}
+          {bookingLoading ? "..." : (searchParams.get('returnTo') ? "Add this slot to my host game" : "Proceed")}
         </button>
       </div>
 
