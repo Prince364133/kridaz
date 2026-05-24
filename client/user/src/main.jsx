@@ -27,12 +27,13 @@ if (import.meta.env.VITE_SENTRY_DSN) {
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-// Register Service Worker for PWA
-if ('serviceWorker' in navigator && import.meta.env.MODE === 'production') {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(registration => console.log('SW registered: ', registration))
-      .catch(error => console.log('SW registration failed: ', error));
+// Unregister any existing service workers to fix caching issues (white screen on new deployments)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (let registration of registrations) {
+      registration.unregister();
+      console.log('Service Worker unregistered to clear old cache.');
+    }
   });
 }
 
