@@ -271,7 +271,17 @@ const LiveOverlay = () => {
       } else {
         // Fallback to BROWSER_TTS
         const utterance = new SpeechSynthesisUtterance(data.text);
-        utterance.lang = data.language === 'hi' ? 'hi-IN' : 'en-US';
+        const langMap = {
+          'hi': 'hi-IN',
+          'en': 'en-US',
+          'pa': 'pa-IN',
+          'bn': 'bn-IN',
+          'mr': 'mr-IN',
+          'ta': 'ta-IN',
+          'te': 'te-IN',
+          'gu': 'gu-IN'
+        };
+        utterance.lang = langMap[data.language] || 'en-US';
         window.speechSynthesis.speak(utterance);
       }
     });

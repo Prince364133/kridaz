@@ -1,5 +1,5 @@
 import { Queue, Worker } from 'bullmq';
-import Redis from 'ioredis';
+import { bullmqConnection, redisClient } from '../../config/redis.js';
 import OpenAI from 'openai';
 import { getIO } from '../../config/socket.js';
 import logger from '../../utils/logger.js';
@@ -11,12 +11,7 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-// Connection for BullMQ
-const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-  maxRetriesPerRequest: null,
-});
-
-export const commentaryQueue = new Queue('commentary-generation', { connection });
+export const commentaryQueue = new Queue('commentary-generation', { connection: bullmqConnection });
 
 // Initialize OpenAI
 const openai = new OpenAI({
@@ -196,7 +191,7 @@ const worker = new Worker('commentary-generation', async (job) => {
   try {
     // 1. Check if AI commentary is enabled for this match using REDIS CACHE
     const cacheKey = `hostedGame_settings_${matchId}`;
-    let hostedGameStr = await connection.get(cacheKey);
+    let hostedGameStr = await redisClient.get(cacheKey);
     let hostedGame;
 
     if (hostedGameStr) {
@@ -207,7 +202,7 @@ const worker = new Worker('commentary-generation', async (job) => {
         select: { isAiCommentaryEnabled: true, commentaryVoice: true, commentaryLanguage: true, commentaryStyle: true }
       });
       if (hostedGame) {
-        await connection.setex(cacheKey, 60, JSON.stringify(hostedGame)); // Cache for 60 seconds
+        await redisClient.setex(cacheKey, 60, JSON.stringify(hostedGame)); // Cache for 60 seconds
       }
     }
 
@@ -244,7 +239,7 @@ const worker = new Worker('commentary-generation', async (job) => {
     logger.error("[Commentary] Worker Error:", error);
     throw error;
   }
-}, { connection });
+}, { connection: bullmqConnection });
 
 worker.on('failed', (job, err) => {
   logger.error(`[Commentary] Job ${job.id} failed with error ${err.message}`);
