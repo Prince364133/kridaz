@@ -545,7 +545,8 @@ const Community = () => {
         previewUrl: URL.createObjectURL(file),
         metadata: {
           type: 'story',
-          content: ''
+          content: '',
+          durationDays: newStory.durationDays
         }
       }));
       setNewStory({ content: '', mediaFiles: [], durationDays: 1 });
@@ -1718,10 +1719,35 @@ const Community = () => {
                   <textarea
                     value={newStory.content}
                     onChange={(e) => setNewStory({ ...newStory, content: e.target.value })}
-                    placeholder="Share a quick moment, match update, highlight, or announcementâ€¦"
+                    placeholder="Share a quick moment, match update, highlight, or announcement..."
                     style={SUBHEADING_STYLE}
                     className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#55DEE8]/30 focus:bg-white/[0.03] rounded-xl h-20 p-3 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
                   />
+                </div>
+
+                {/* Expiry Duration Dropdown */}
+                <div className="flex items-center justify-between bg-white/[0.01] border border-white/5 p-3 rounded-xl">
+                  <span className="text-xs text-neutral-400 font-bold" style={SUBHEADING_STYLE}>Expiry Duration</span>
+                  <div className="relative">
+                    <select
+                      className="border border-transparent rounded-[15px] py-1.5 pl-3 pr-8 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer"
+                      style={{ 
+                        fontFamily: "'Inter', sans-serif",
+                        backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
+                        backgroundOrigin: "border-box",
+                        backgroundClip: "padding-box, border-box"
+                      }}
+                      value={newStory.durationDays}
+                      onChange={(e) => setNewStory(prev => ({ ...prev, durationDays: parseInt(e.target.value) }))}
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7].map(d => (
+                        <option key={d} value={d} className="bg-neutral-950 text-white">{d} {d === 1 ? 'Day' : 'Days'}</option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-white/40">
+                      <ChevronDown size={10} />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Aspect 9:16 Live Preview */}

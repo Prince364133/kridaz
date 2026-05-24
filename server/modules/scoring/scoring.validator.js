@@ -57,6 +57,8 @@ export const setupScoringGameSchema = z.object({
     tossDecision: z.string().optional(),
     scoringPassword: z.string().min(4, "Password must be at least 4 characters").optional().nullable().or(z.literal('')),
     youtubeLiveUrl: z.string().url().optional().nullable().or(z.literal('')),
+    customDays: z.number().int().min(1).max(10).optional(),
+    customOversPerDay: z.number().int().min(1).max(100).optional(),
   })
 });
 

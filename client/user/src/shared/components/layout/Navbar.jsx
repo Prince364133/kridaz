@@ -344,7 +344,7 @@ const Navbar = () => {
                         </Link>
 
                         <Link
-                          to="/profile?tab=bookings"
+                          to="/booking-history"
                           className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <Clock size={18} className="text-white/40" />

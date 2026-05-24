@@ -36,15 +36,30 @@ export const initCronJobs = () => {
   nodeCron.schedule("5 0 * * *", async () => {
     logger.info("[CRON] Purging expired stories...");
     try {
-      const result = await prisma.story.deleteMany({
+      const expiredStories = await prisma.story.findMany({
         where: { expiresAt: { lt: new Date() } }
       });
-      logger.info(`[CRON] Story cleanup complete — removed ${result.count} expired stories.`);
+
+      if (expiredStories.length > 0) {
+        logger.info(`[CRON] Found ${expiredStories.length} expired stories. Deleting files from R2...`);
+        const { deleteStoryFilesFromR2 } = await import("./r2.js");
+        
+        await Promise.all(
+          expiredStories.map(story => deleteStoryFilesFromR2(story).catch(err => logger.error(`[CRON] R2 cleanup error for story ${story.id}:`, err)))
+        );
+
+        const result = await prisma.story.deleteMany({
+          where: { id: { in: expiredStories.map(s => s.id) } }
+        });
+        logger.info(`[CRON] Story cleanup complete — removed ${result.count} expired stories.`);
+      } else {
+        logger.info("[CRON] No expired stories to purge.");
+      }
     } catch (error) {
       logger.error("[CRON] Story cleanup error:", error);
     }
   });
-
+ 
   // ── 03:00: Failed media record cleanup ────────────────────────────────────
   // Reels, Stories, and Posts stuck in `status: "failed"` for more than 24 hours
   // should be purged so users can re-upload without being blocked by ghost records.
@@ -52,6 +67,19 @@ export const initCronJobs = () => {
     logger.info("[CRON] Purging stale failed media records...");
     const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours ago
     try {
+      // Find failed stories older than cutoff to purge R2 files
+      const failedStories = await prisma.story.findMany({
+        where: { status: "failed", updatedAt: { lt: cutoff } }
+      });
+
+      if (failedStories.length > 0) {
+        logger.info(`[CRON] Found ${failedStories.length} stale failed stories. Deleting files from R2...`);
+        const { deleteStoryFilesFromR2 } = await import("./r2.js");
+        await Promise.all(
+          failedStories.map(story => deleteStoryFilesFromR2(story).catch(err => logger.error(`[CRON] R2 cleanup error for failed story ${story.id}:`, err)))
+        );
+      }
+
       const [reels, stories, posts] = await Promise.all([
         prisma.reel.deleteMany({
           where: { status: "failed", updatedAt: { lt: cutoff } }
@@ -71,6 +99,64 @@ export const initCronJobs = () => {
     }
   });
 
-  logger.info("[CRON] All cron jobs initialized (token cleanup, story expiry, media cleanup).");
+  // ── Every Hour: Auto-end matches exceeding duration limit ─────────────────
+  nodeCron.schedule("0 * * * *", async () => {
+    await autoEndExpiredMatches();
+  });
+
+  logger.info("[CRON] All cron jobs initialized (token cleanup, story expiry, media cleanup, match auto-end).");
+};
+
+/**
+ * Automatically finalize matches that have been running for longer than their allowed duration.
+ */
+export const autoEndExpiredMatches = async () => {
+  logger.info("[CRON] Checking for expired live matches to auto-end...");
+  try {
+    const activeGames = await prisma.hostedGame.findMany({
+      where: {
+        gameType: "SCORING_MATCH",
+        scoringStatus: { in: ["LIVE", "PAUSED"] }
+      },
+      include: {
+        cricketMatch: true
+      }
+    });
+
+    logger.info(`[CRON] Found ${activeGames.length} active scoring matches in progress.`);
+
+    let endCount = 0;
+    const { finalizeMatch } = await import("../modules/scoring/scoring.service.js");
+
+    for (const game of activeGames) {
+      if (!game.cricketMatch) {
+        continue;
+      }
+
+      const matchStart = new Date(game.cricketMatch.createdAt).getTime();
+      const matchDays = game.customDays || 1;
+      const allowedDurationMs = matchDays * 24 * 60 * 60 * 1000;
+      const elapsedTimeMs = Date.now() - matchStart;
+
+      if (elapsedTimeMs > allowedDurationMs) {
+        logger.info(`[CRON] Match ${game.id} ("${game.name}") has exceeded its allowed duration of ${matchDays} day(s). Elapsed: ${(elapsedTimeMs / (1000 * 60 * 60)).toFixed(1)} hours. Auto-ending match...`);
+        try {
+          await finalizeMatch(game.cricketMatch.id);
+          logger.info(`[CRON] Successfully auto-ended match ${game.id}.`);
+          endCount++;
+        } catch (finalizeError) {
+          logger.error(`[CRON] Failed to auto-end match ${game.id}:`, finalizeError);
+        }
+      }
+    }
+
+    if (endCount > 0) {
+      logger.info(`[CRON] Expired match cleanup complete — auto-ended ${endCount} matches.`);
+    } else {
+      logger.info("[CRON] No matches needed auto-ending.");
+    }
+  } catch (error) {
+    logger.error("[CRON] Error during auto-ending expired matches:", error);
+  }
 };
 

@@ -14,7 +14,8 @@ import {
   createProfessionalTask,
   getProfessionalCustomers,
   createProfessionalCustomer,
-  updateWorkingHours
+  updateWorkingHours,
+  getUserProfessionalBookings
 } from "../professional.controller.js";
 import protect from "../../../middleware/jwt/auth.middleware.js";
 
@@ -105,6 +106,7 @@ router.get("/details/:id", getProfessionalById);
  *         description: Booking request sent
  */
 router.post("/book", protect, bookProfessional);
+router.get("/user-bookings", protect, getUserProfessionalBookings);
 
 /**
  * @swagger

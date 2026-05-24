@@ -452,6 +452,8 @@ model HostedGame {
   scoringPassword   String?
   youtubeLiveUrl    String?
   maxMembers        Int                  @default(11)
+  customDays        Int                  @default(1)
+  customOversPerDay Int                  @default(20)
   
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt

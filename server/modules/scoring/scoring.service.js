@@ -493,7 +493,7 @@ export const configureStream = async (matchId, { youtubeVideoId, youtubeLiveChat
 export const finalizeMatch = async (scoringId) => {
   const scoring = await prisma.cricketMatch.findUnique({
     where: { id: scoringId },
-    include: { innings: true, playerStats: true }
+    include: { innings: true, playerStats: true, timeline: true }
   });
 
   if (!scoring) {
@@ -1628,8 +1628,28 @@ export const createScoringMatch = async (userId, matchData) => {
     tossDecision,
     scoringPassword,
     youtubeLiveUrl,
-    location
+    location,
+    customDays,
+    customOversPerDay
   } = matchData;
+
+  // Determine match duration in days based on format
+  let resolvedDays = 1;
+  let resolvedOversPerDay = 20;
+
+  if (format === 'TEST' || format === '5_DAY') {
+    resolvedDays = 5;
+    resolvedOversPerDay = 90;
+  } else if (format === '1_WEEK') {
+    resolvedDays = 7;
+    resolvedOversPerDay = 90;
+  } else if (format === 'CUSTOM') {
+    resolvedDays = customDays ? parseInt(customDays) || 1 : 1;
+    resolvedOversPerDay = customOversPerDay ? parseInt(customOversPerDay) || 20 : 20;
+  } else {
+    resolvedDays = 1;
+    resolvedOversPerDay = format === 'ODI' ? 50 : format === 'T10' ? 10 : format === 'THE_HUNDRED' ? 20 : 20;
+  }
 
   // Hash the scoring password for security (argon2)
   let hashedPassword = null;
@@ -1708,9 +1728,11 @@ export const createScoringMatch = async (userId, matchData) => {
       scoringPassword: hashedPassword,
       youtubeLiveUrl: youtubeLiveUrl || null,
       maxMembers: maxMembers || 11,
+      customDays: resolvedDays,
+      customOversPerDay: resolvedOversPerDay,
       date: new Date(),
       time: new Date().toTimeString().split(' ')[0],
-      oversPerInnings: format === 'T20' ? 20 : format === 'ODI' ? 50 : format === 'T10' ? 10 : 20,
+      oversPerInnings: format === 'T20' ? 20 : format === 'ODI' ? 50 : format === 'T10' ? 10 : format === 'CUSTOM' ? resolvedOversPerDay : 20,
       teams: {
         create: [
           {

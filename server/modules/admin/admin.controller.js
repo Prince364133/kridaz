@@ -14,6 +14,17 @@ const cleanupUserData = async (userIds) => {
     const owners = await prisma.ownerProfile.findMany({ where: { userId: { in: userIds } } });
     const ownerIds = owners.map(o => o.id);
     
+    // Find all stories for these users to clean up R2
+    const userStories = await prisma.story.findMany({
+      where: { userId: { in: userIds } }
+    });
+    if (userStories.length > 0) {
+      const { deleteStoryFilesFromR2 } = await import("../../utils/r2.js");
+      await Promise.all(
+        userStories.map(story => deleteStoryFilesFromR2(story).catch(err => logger.error(`[ADMIN_CLEANUP] R2 cleanup error for user story ${story.id}:`, err)))
+      );
+    }
+    
     await prisma.$transaction([
       // 1. Content: Posts & Stories
       prisma.post.deleteMany({ where: { authorId: { in: userIds } } }),

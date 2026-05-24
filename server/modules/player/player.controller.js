@@ -316,7 +316,7 @@ export const getPlayerProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
     
-    const [bookingCount, followerIds, followingIds, userStats, wallet, careerStats, userBadges, matchHistory, teams, network] = await Promise.all([
+    const [bookingCount, followerIds, followingIds, userStats, wallet, careerStats, userBadges, matchHistory, teams, network, liveMatches] = await Promise.all([
       prisma.booking.count({ where: { userId: user.id } }),
       SocialService.getFollowerIds(user.id),
       SocialService.getFollowingIds(user.id),
@@ -381,7 +381,39 @@ export const getPlayerProfile = async (req, res) => {
           city: true
         }
       }),
-      SocialService.getNetwork(user.id)
+      SocialService.getNetwork(user.id),
+      // Live matches: games currently in progress where the user is a participant
+      prisma.hostedGame.findMany({
+        where: {
+          isLive: true,
+          scoringStatus: { in: ["LIVE", "PAUSED"] },
+          teams: {
+            some: {
+              slots: {
+                some: { userId: user.id }
+              }
+            }
+          }
+        },
+        select: {
+          id: true,
+          gameType: true,
+          format: true,
+          city: true,
+          customVenue: true,
+          liveStartedAt: true,
+          teams: {
+            select: {
+              id: true,
+              name: true,
+              teamKey: true
+            }
+          },
+          turf: {
+            select: { name: true, city: true }
+          }
+        }
+      })
     ]);
     
     // Check for active stories
@@ -436,6 +468,7 @@ export const getPlayerProfile = async (req, res) => {
         badges: userBadges.length > 0 ? userBadges : (userStats?.badges || []),
         matchHistory: matchHistory,
         teams: teams,
+        liveMatches: liveMatches,
         followersList: network?.followers || [],
         followingList: network?.following || [],
         wallet: wallet,
