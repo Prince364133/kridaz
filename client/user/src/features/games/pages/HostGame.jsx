@@ -383,7 +383,7 @@ const HostGame = () => {
       const urlTime = searchParams.get('time');
 
       if (urlGroundId && (!selectedGround || selectedGround._id !== urlGroundId)) {
-        axiosInstance.get(`/api/user/turf/${urlGroundId}`)
+        axiosInstance.get(`/api/user/turf/details/${urlGroundId}`)
           .then(res => {
             const turf = res.data.turf || res.data;
             setSelectedGround(turf);
@@ -398,11 +398,16 @@ const HostGame = () => {
       }
 
       if (urlUmpireId && (!selectedUmpire || selectedUmpire._id !== urlUmpireId)) {
-        axiosInstance.get(`/api/professional/details/${urlUmpireId}?date=${new Date().toISOString()}`)
+        axiosInstance.get(`/api/professional/details/${urlUmpireId}?date=${urlDate || new Date().toISOString()}`)
           .then(res => {
             const pro = res.data.professional;
             setSelectedUmpire(pro);
-            setGameData(prev => ({ ...prev, umpireId: pro._id }));
+            setGameData(prev => ({ 
+              ...prev, 
+              umpireId: pro._id,
+              date: urlDate ? new Date(urlDate).toISOString().split('T')[0] : prev.date,
+              time: urlTime || prev.time
+            }));
           })
           .catch(err => console.error("Error fetching professional details:", err));
       }
@@ -941,6 +946,18 @@ const HostGame = () => {
                         <p className="flex text-[11px] text-neutral-500 mb-3 items-center gap-1 font-medium">
                           <MapPin size={12} /> {selectedGround.location}
                         </p>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {gameData.date && (
+                            <span className="px-2 py-1 bg-neutral-800 rounded text-[10px] text-cyan-400 font-bold uppercase">
+                              {new Date(gameData.date).toLocaleDateString()}
+                            </span>
+                          )}
+                          {gameData.time && (
+                            <span className="px-2 py-1 bg-neutral-800 rounded text-[10px] text-lime-400 font-bold uppercase">
+                              {gameData.time}
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center justify-between mt-4">
                           <span className="text-yellow-500 font-black text-sm">₹{selectedGround.pricePerHour}/hr</span>
                           <button 
@@ -985,6 +1002,18 @@ const HostGame = () => {
                       <img src={selectedUmpire.profilePicture || "https://ui-avatars.com/api/?name="+selectedUmpire.name} className="w-16 h-16 rounded-full object-cover border-2 border-neutral-800" />
                       <div className="flex-1">
                         <h3 className="font-black text-base mb-1 tracking-tight">{selectedUmpire.name}</h3>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {gameData.date && (
+                            <span className="px-2 py-1 bg-neutral-800 rounded text-[10px] text-cyan-400 font-bold uppercase">
+                              {new Date(gameData.date).toLocaleDateString()}
+                            </span>
+                          )}
+                          {gameData.time && (
+                            <span className="px-2 py-1 bg-neutral-800 rounded text-[10px] text-lime-400 font-bold uppercase">
+                              {gameData.time}
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center justify-between mt-2">
                           <span className="text-yellow-500 font-black text-sm">₹{selectedUmpire.price}</span>
                           <button 
