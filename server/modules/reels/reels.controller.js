@@ -15,7 +15,7 @@ import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 const COOKIE_SETTINGS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
   domain: process.env.COOKIE_DOMAIN || (process.env.NODE_ENV === 'production' ? '.kridaz.com' : 'localhost'),
   maxAge: 7200 * 1000
 };
