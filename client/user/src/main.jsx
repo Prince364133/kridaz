@@ -27,15 +27,7 @@ if (import.meta.env.VITE_SENTRY_DSN) {
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-// Unregister any existing service workers to fix caching issues (white screen on new deployments)
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    for (let registration of registrations) {
-      registration.unregister();
-      console.log('Service Worker unregistered to clear old cache.');
-    }
-  });
-}
+
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
