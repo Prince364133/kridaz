@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, ChevronRight, ChevronLeft, Shield, Video, Users, Trophy,
@@ -79,7 +80,8 @@ const selectClass =
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
-const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
+const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
+  const { user } = useSelector((state) => state.auth);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     matchName: '',
@@ -90,6 +92,8 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
     maxMembers: 11,
     teamAId: '',
     teamBId: '',
+    teamAName: '',
+    teamBName: '',
     teamAPlayers: [],
     teamBPlayers: [],
     venueId: null,
@@ -108,6 +112,71 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
     pitchType: 'TURF',
     matchTiming: 'DAY',
   });
+
+  useEffect(() => {
+    if (isOpen && initialData) {
+      const tA = initialData.teams?.teamA;
+      const tB = initialData.teams?.teamB;
+      const nameA = tA?.name || '';
+      const nameB = tB?.name || '';
+      const mName = (nameA && nameB) ? `${nameA} vs ${nameB}` : '';
+      const sType = initialData.gameType ? initialData.gameType.toUpperCase() : 'CRICKET';
+      
+      const loc = initialData.turf?.location || initialData.customVenue || '';
+      const vId = initialData.turf?._id || null;
+      let mDateTime = '';
+      if (initialData.date && initialData.time) {
+        try {
+          const d = new Date(initialData.date);
+          mDateTime = `${d.toISOString().split('T')[0]}T${initialData.time}`;
+        } catch(e) {}
+      }
+
+      const extractPlayers = (teamObj) => {
+        if (!teamObj || !Array.isArray(teamObj.slots)) return [];
+        return teamObj.slots
+          .filter(s => s.user || s.userId || s.customPlayerId || s.customPlayer)
+          .map(s => {
+            if (s.user || s.userId) {
+              return {
+                id: s.user?._id || s.user?.id || s.userId,
+                name: s.user?.name || s.user?.username || 'Player',
+                profilePicture: s.user?.profilePicture || null,
+                role: 'PLAYER',
+                isCustom: false,
+              };
+            } else {
+              return {
+                 id: s.customPlayerId || s.customPlayer?.id || Math.random().toString(),
+                 name: s.customPlayer?.name || 'Custom Player',
+                 profilePicture: null,
+                 role: 'PLAYER',
+                 isCustom: true,
+              };
+            }
+          });
+      };
+
+      const pA = extractPlayers(tA);
+      const pB = extractPlayers(tB);
+
+      setFormData(f => ({
+        ...f,
+        matchName: mName || f.matchName,
+        sportType: sType,
+        teamAId: tA?._id || tA?.id || tA?.teamId || f.teamAId,
+        teamBId: tB?._id || tB?.id || tB?.teamId || f.teamBId,
+        teamAName: nameA || f.teamAName,
+        teamBName: nameB || f.teamBName,
+        teamAPlayers: pA.length > 0 ? pA : f.teamAPlayers,
+        teamBPlayers: pB.length > 0 ? pB : f.teamBPlayers,
+        location: loc || f.location,
+        venueId: vId || f.venueId,
+        customVenue: initialData.customVenue || f.customVenue,
+        matchDateTime: mDateTime || f.matchDateTime,
+      }));
+    }
+  }, [isOpen, initialData]);
 
   // Team selector popup state
   const [selectingTeam, setSelectingTeam] = useState(null); // 'A' | 'B'
@@ -134,6 +203,8 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
   const [proRoleFilter, setProRoleFilter] = useState('');
   const [proStateFilter, setProStateFilter] = useState('');
   const [proCityFilter, setProCityFilter] = useState('');
+  const [states, setStates] = useState([]);
+  const [venueCities, setVenueCities] = useState([]);
   const [proCities, setProCities] = useState([]);
 
   const handleProStateChange = async (stateVal) => {
@@ -288,8 +359,15 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const getTeamName = (id) => {
+    if (!id) return 'Team Selected';
     const t = allTeams.find(t => (t._id || t.id) === id);
-    return t?.name || (searchedTeamData?.team && (searchedTeamData.team._id || searchedTeamData.team.id) === id ? searchedTeamData.team.name : 'Team Selected');
+    if (t?.name) return t.name;
+    if (searchedTeamData?.team && (searchedTeamData.team._id || searchedTeamData.team.id) === id) return searchedTeamData.team.name;
+    if (id === formData.teamAId && teamADetails?.team?.name) return teamADetails.team.name;
+    if (id === formData.teamBId && teamBDetails?.team?.name) return teamBDetails.team.name;
+    if (id === formData.teamAId && formData.teamAName) return formData.teamAName;
+    if (id === formData.teamBId && formData.teamBName) return formData.teamBName;
+    return 'Team Selected';
   };
 
   // ─── Playing XI ─────────────────────────────────────────────────────────────
@@ -333,7 +411,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
 
   const handleInviteAndAdd = async (player) => {
     const teamId = playerPopup?.teamKey === 'A' ? formData.teamAId : formData.teamBId;
-    if (teamId) {
+    if (teamId && !initialData) {
       try {
         await invitePlayer({ teamId, userId: player._id || player.id }).unwrap();
         toast.success('Invitation sent to player!');
@@ -349,8 +427,11 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
     if (!customPlayerName.trim()) return toast.error('Player Name is required');
 
     const teamId = playerPopup?.teamKey === 'A' ? formData.teamAId : formData.teamBId;
-    if (!teamId) {
-      selectPlayer({ name: customPlayerName, isCustom: true });
+    if (!teamId || initialData) {
+      selectPlayer({ id: Math.random().toString(), name: customPlayerName, isCustom: true, phone: customPlayerPhone });
+      setCustomPlayerName('');
+      setCustomPlayerPhone('');
+      toast.success('Custom player added to match!');
       return;
     }
 
@@ -402,6 +483,92 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
     }, 500);
     return () => clearTimeout(delayDebounceFn);
   }, [playerSearchQuery, searchPlayers]);
+
+  //  Handlers 
+  
+  // Initialize location filters
+  useEffect(() => {
+    if (user) {
+      if (user.state) {
+        setVenueStateFilter(user.state);
+        setProStateFilter(user.state);
+      }
+      if (user.city) {
+        setVenueCityFilter(user.city);
+        setProCityFilter(user.city);
+      }
+    }
+  }, [user]);
+
+  // Validate state filters against loaded states
+  useEffect(() => {
+    if (states.length > 0) {
+      if (venueStateFilter && !states.includes(venueStateFilter)) {
+        setVenueStateFilter('');
+      }
+      if (proStateFilter && !states.includes(proStateFilter)) {
+        setProStateFilter('');
+      }
+    }
+  }, [states, venueStateFilter, proStateFilter]);
+
+  // Validate city filters against loaded cities
+  useEffect(() => {
+    if (venueCities.length > 0) {
+      if (venueCityFilter && !venueCities.includes(venueCityFilter)) {
+        setVenueCityFilter('');
+      }
+    } else if (venueStateFilter === '') {
+      setVenueCityFilter('');
+    }
+  }, [venueCities, venueCityFilter, venueStateFilter]);
+
+  useEffect(() => {
+    if (proCities.length > 0) {
+      if (proCityFilter && !proCities.includes(proCityFilter)) {
+        setProCityFilter('');
+      }
+    } else if (proStateFilter === '') {
+      setProCityFilter('');
+    }
+  }, [proCities, proCityFilter, proStateFilter]);
+
+  // Fetch all states
+  useEffect(() => {
+    const loadStates = async () => {
+      const fetchedStates = await fetchStates();
+      setStates(fetchedStates);
+    };
+    loadStates();
+  }, []);
+
+  // Fetch venue cities when state changes
+  useEffect(() => {
+    const loadCities = async () => {
+      if (venueStateFilter) {
+        const fetchedCities = await fetchCities(venueStateFilter);
+        setVenueCities(fetchedCities);
+      } else {
+        setVenueCities([]);
+        setVenueCityFilter('');
+      }
+    };
+    loadCities();
+  }, [venueStateFilter]);
+
+  // Fetch pro cities when state changes
+  useEffect(() => {
+    const loadCities = async () => {
+      if (proStateFilter) {
+        const fetchedCities = await fetchCities(proStateFilter);
+        setProCities(fetchedCities);
+      } else {
+        setProCities([]);
+        setProCityFilter('');
+      }
+    };
+    loadCities();
+  }, [proStateFilter]);
 
   const selectPlayer = (player) => {
     if (!playerPopup) return;
@@ -1143,7 +1310,25 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
                         onChange={e => setVenueSearchQuery(e.target.value)}
                       />
                     </div>
-
+                    <div className="flex gap-2">
+                      <select 
+                        className={`${selectClass} py-2 text-sm w-1/2`} 
+                        value={venueStateFilter} 
+                        onChange={e => setVenueStateFilter(e.target.value)}
+                      >
+                        <option value="">All States</option>
+                        {states.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      <select 
+                        className={`${selectClass} py-2 text-sm w-1/2`} 
+                        value={venueCityFilter} 
+                        onChange={e => setVenueCityFilter(e.target.value)}
+                        disabled={!venueStateFilter}
+                      >
+                        <option value="">All Cities</option>
+                        {venueCities.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
                   </div>
 
                   {/* Venue List */}
@@ -1197,17 +1382,34 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
                 <div className="space-y-4 pr-1">
                   {/* Professionals Search & Filters */}
                   <div className="space-y-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
+                      <input
+                        type="text"
+                        placeholder="Search professionals (name, phone, email)..."
+                        className={`${inputClass} pl-10 py-2 text-sm`}
+                        value={proSearchQuery}
+                        onChange={e => setProSearchQuery(e.target.value)}
+                      />
+                    </div>
                     <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
-                        <input
-                          type="text"
-                          placeholder="Search professionals (name or phone)..."
-                          className={`${inputClass} pl-10 py-2 text-sm`}
-                          value={proSearchQuery}
-                          onChange={e => setProSearchQuery(e.target.value)}
-                        />
-                      </div>
+                      <select 
+                        className={`${selectClass} py-2 text-sm w-1/3`} 
+                        value={proStateFilter} 
+                        onChange={e => handleProStateChange(e.target.value)}
+                      >
+                        <option value="">All States</option>
+                        {states.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      <select 
+                        className={`${selectClass} py-2 text-sm w-1/3`} 
+                        value={proCityFilter} 
+                        onChange={e => setProCityFilter(e.target.value)}
+                        disabled={!proStateFilter}
+                      >
+                        <option value="">All Cities</option>
+                        {proCities.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
                       <select className={`${selectClass} py-2 text-sm w-1/3`} value={proRoleFilter} onChange={e => setProRoleFilter(e.target.value)}>
                         <option value="">All Roles</option>
                         <option value="UMPIRE">Umpire</option>
@@ -1215,7 +1417,6 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
                         <option value="COMMENTATOR">Commentator</option>
                       </select>
                     </div>
-
                   </div>
 
                   <button onClick={() => setShowCustomProInvite(true)} className="w-full py-3 rounded-xl border border-dashed border-[#55DEE8]/50 text-[#55DEE8] flex items-center justify-center gap-2 text-sm font-bold hover:bg-[#55DEE8]/10 transition-colors">
@@ -1421,6 +1622,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
         const ballLabel = BALL_TYPES.find(b => b.value === formData.ballType)?.label || formData.ballType;
         const groundLabel = GROUND_TYPES.find(g => g.value === formData.groundType)?.label || formData.groundType;
         const timingLabel = MATCH_TIMINGS.find(t => t.value === formData.matchTiming)?.label || formData.matchTiming;
+        const selectedVenueName = formData.venueId ? groundsData?.grounds?.find(g => g.id === formData.venueId)?.name : null;
         return (
           <div className="space-y-5">
             {/* Match Summary */}
@@ -1441,7 +1643,9 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess }) => {
                 </div>
                 <div className="bg-white/5 rounded-xl p-2">
                   <div className="text-[10px] text-white/40 uppercase">Ground</div>
-                  <div className="text-white text-xs font-bold">{groundLabel}</div>
+                  <div className="text-white text-xs font-bold truncate" title={selectedVenueName || groundLabel}>
+                    {selectedVenueName || groundLabel}
+                  </div>
                 </div>
                 <div className="bg-white/5 rounded-xl p-2">
                   <div className="text-[10px] text-white/40 uppercase">Players</div>

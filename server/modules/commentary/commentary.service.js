@@ -30,7 +30,7 @@ const openai = new OpenAI({
 const generateCommentaryText = async (liveData, ballEvent, language = 'en', style = 'professional', io = null, matchId = null) => {
   const isBoundary = ballEvent.runs >= 4;
   const isWicket = ballEvent.isWicket;
-  
+
   // LEVEL 1: Template Engine for standard deliveries (Fast & Free, English Only)
   if (!isBoundary && !isWicket && language === 'en') {
     const templates = [
@@ -45,7 +45,7 @@ const generateCommentaryText = async (liveData, ballEvent, language = 'en', styl
     } else if (ballEvent.isExtra) {
       selectedTemplate = `That's an extra, given as ${ballEvent.extraType}.`;
     }
-    
+
     // Simulate streaming for standard templates to keep UI consistent
     if (io && matchId) {
       io.to(matchId).emit('COMMENTARY_CHUNK', { chunk: selectedTemplate, isFinished: true, language });
@@ -65,7 +65,7 @@ const generateCommentaryText = async (liveData, ballEvent, language = 'en', styl
       'te': 'Telugu (in Telugu script)',
       'gu': 'Gujarati (in Gujarati script)'
     };
-    const targetLanguage = languageMap[language] || language || 'English'; 
+    const targetLanguage = languageMap[language] || language || 'English';
 
     let styleInstruction = "Professional, Energetic TV Broadcast Style.";
     if (style === 'natural') styleInstruction = "Natural, conversational, like a fan watching the game with friends.";
@@ -80,7 +80,7 @@ const generateCommentaryText = async (liveData, ballEvent, language = 'en', styl
 
     const batterName = ballEvent.batter?.name || "The batter";
     const bowlerName = ballEvent.bowler?.name || "The bowler";
-    
+
     let eventDetails = `- Bowler: ${bowlerName}\n- Batter on strike: ${batterName}\n- Runs scored on this ball: ${ballEvent.runs}`;
     if (ballEvent.isExtra) {
       eventDetails += ` (Extra: ${ballEvent.extraType})`;
@@ -124,7 +124,7 @@ Return ONLY the commentary text. Nothing else. No quotes, no intro.`;
       temperature: 0.8,
       stream: true, // Industry standard: STREAMING
     });
-    
+
     let fullText = "";
     for await (const chunk of stream) {
       const content = chunk.choices[0]?.delta?.content || "";
@@ -135,11 +135,11 @@ Return ONLY the commentary text. Nothing else. No quotes, no intro.`;
         }
       }
     }
-    
+
     if (io && matchId) {
       io.to(matchId).emit('COMMENTARY_CHUNK', { chunk: "", isFinished: true, language });
     }
-    
+
     return fullText.trim();
   } catch (error) {
     logger.error("[Commentary] OpenAI Error:", error);
@@ -155,7 +155,7 @@ const generateOpenAIAudio = async (text, voiceModel = "alloy") => {
   try {
     const outputFileName = `commentary-${Date.now()}.mp3`;
     const outputPath = path.join(process.cwd(), 'public', 'audio', outputFileName);
-    
+
     // Ensure public/audio directory exists
     const audioDir = path.dirname(outputPath);
     if (!fs.existsSync(audioDir)) {
@@ -167,10 +167,10 @@ const generateOpenAIAudio = async (text, voiceModel = "alloy") => {
       voice: voiceModel,
       input: text,
     });
-    
+
     const buffer = Buffer.from(await response.arrayBuffer());
     await fs.promises.writeFile(outputPath, buffer);
-    
+
     // Auto-delete the file after 30 seconds (fallback if it wasn't deleted by the client player)
     setTimeout(() => {
       fs.unlink(outputPath, (err) => {
@@ -192,13 +192,13 @@ const generateOpenAIAudio = async (text, voiceModel = "alloy") => {
 const worker = new Worker('commentary-generation', async (job) => {
   const { matchId, liveData, ballEvent } = job.data;
   const io = getIO();
-  
+
   try {
     // 1. Check if AI commentary is enabled for this match using REDIS CACHE
     const cacheKey = `hostedGame_settings_${matchId}`;
     let hostedGameStr = await connection.get(cacheKey);
     let hostedGame;
-    
+
     if (hostedGameStr) {
       hostedGame = JSON.parse(hostedGameStr);
     } else {

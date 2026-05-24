@@ -27,7 +27,7 @@ const CricketBallIcon = ({ size = 12, className = '' }) => (
 const JoinGames = () => {
  const navigate = useNavigate();
  const { gateInteraction } = useLoginOnDemand();
- const { isAuthenticated } = useSelector((/** @type {any} */ state) => state.auth);
+ const { isAuthenticated, user } = useSelector((/** @type {any} */ state) => state.auth);
  const [games, setGames] = useState([]);
  const [loading, setLoading] = useState(true);
  const [selectedGame, setSelectedGame] = useState(null);
@@ -216,12 +216,19 @@ const JoinGames = () => {
 
  const handleSearch = (e) => setSearch(e.target.value);
 
- const filteredGames = games.filter(game => {
+  const filteredGames = games.filter(game => {
+    if (!game) return false;
+    const currentUserId = user?.id || user?._id;
+    
+    if (matchTypeFilter === 'My Hosted Games') {
+      if (!currentUserId || (game.hostId !== currentUserId && game.host?._id !== currentUserId && game.host?.id !== currentUserId)) {
+        return false;
+      }
+    }
+
     if (matchTypeFilter === 'Live' && !game.isLive) return false;
     if (matchTypeFilter === 'Quick' && game.gameMode?.toUpperCase() !== 'QUICK') return false;
     if (matchTypeFilter === 'Professional' && game.gameMode?.toUpperCase() !== 'PROFESSIONAL') return false;
-
-    if (!game) return false;
 
     const searchLower = search ? search.toLowerCase() : '';
     if (!searchLower) return true;
@@ -389,6 +396,7 @@ const JoinGames = () => {
           onChange={(e) => setMatchTypeFilter(e.target.value)}
         >
           <option className="bg-[#0a0a0a] text-white" value="All Matches">All Matches</option>
+          <option className="bg-[#0a0a0a] text-white" value="My Hosted Games">My Hosted Games</option>
           <option className="bg-[#0a0a0a] text-white" value="Live">Live Matches</option>
           <option className="bg-[#0a0a0a] text-white" value="Quick">Quick Matches</option>
           <option className="bg-[#0a0a0a] text-white" value="Professional">Professional</option>
@@ -687,6 +695,12 @@ const JoinGames = () => {
   disabled={isJoined}
   onClick={() => {
   if (!isAuthenticated) { toast.error("Please login to join this game"); navigate('/login'); return; }
+  const currentUserId = user?.id || user?._id;
+  const hasAlreadyJoined = selectedGame.quickSlots?.some(s => s.userId === currentUserId || s.user?._id === currentUserId || s.user?.id === currentUserId);
+  if (hasAlreadyJoined) {
+    toast.error("You have already joined a slot in this game.");
+    return;
+  }
   setJoiningSlot({ team: 'QUICK', index: sIdx, role: slot.role });
   setShowConfirm(true);
   }}
@@ -730,6 +744,13 @@ const JoinGames = () => {
   disabled={isJoined}
   onClick={() => {
   if (!isAuthenticated) { toast.error("Please login to join this game"); navigate('/login'); return; }
+  const currentUserId = user?.id || user?._id;
+  const hasAlreadyJoined = selectedGame.teams?.teamA?.slots?.some(s => s.userId === currentUserId || s.user?._id === currentUserId || s.user?.id === currentUserId) ||
+                           selectedGame.teams?.teamB?.slots?.some(s => s.userId === currentUserId || s.user?._id === currentUserId || s.user?.id === currentUserId);
+  if (hasAlreadyJoined) {
+    toast.error("You have already joined a slot in this game.");
+    return;
+  }
   setJoiningSlot({ team: teamKey === 'teamA' ? 'A' : 'B', index: sIdx, role: slot.role });
   setShowConfirm(true);
   }}

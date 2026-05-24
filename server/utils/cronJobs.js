@@ -104,7 +104,12 @@ export const initCronJobs = () => {
     await autoEndExpiredMatches();
   });
 
-  logger.info("[CRON] All cron jobs initialized (token cleanup, story expiry, media cleanup, match auto-end).");
+  // â”€â”€ Every Hour: Auto-settle hosted games 24h after start â”€â”€â”€â”€â”€â”€â”€
+  nodeCron.schedule("0 * * * *", async () => {
+    await autoSettleHostedGames();
+  });
+
+  logger.info("[CRON] All cron jobs initialized (token cleanup, story expiry, media cleanup, match auto-end, game auto-settle).");
 };
 
 /**
@@ -166,11 +171,13 @@ export const autoSettleHostedGames = async () => {
   try {
     const pendingGames = await prisma.hostedGame.findMany({
       where: {
-        coinTransferStatus: "PENDING",
-        perPlayerCharge: { gt: 0 }
+        payoutStatus: "PENDING",
+        disputeRaised: false,
+        escrowAmount: { gt: 0 }
       },
       include: {
-        slots: true
+        slots: true,
+        teams: true
       }
     });
 
@@ -186,33 +193,49 @@ export const autoSettleHostedGames = async () => {
       const cutoffTime = new Date(scheduledStart.getTime() + 24 * 60 * 60 * 1000);
 
       if (now > cutoffTime) {
-        logger.info("[CRON] Auto-settling game 24 hours passed since scheduled start.");
+        logger.info(`[CRON] Auto-settling game ${game.id} 24 hours passed since scheduled start.`);
         try {
           await prisma.$transaction(async (tx) => {
+            const amountToPayout = Number(game.escrowAmount);
+            
             await tx.hostedGame.update({
               where: { id: game.id },
-              data: { coinTransferStatus: "COMPLETED" }
+              data: { 
+                payoutStatus: "PAID",
+                escrowAmount: 0,
+                coinTransferStatus: "COMPLETED" // Legacy backwards compatibility
+              }
             });
 
-            const totalPaidSlots = game.slots.filter(s => s.status === "JOINED" && s.userId).length;
-            const totalAmount = Number(game.perPlayerCharge) * totalPaidSlots;
-            
-            if (totalAmount > 0) {
-              await WalletService.credit(game.hostId, 'user', totalAmount, tx);
+            if (amountToPayout > 0) {
+              await WalletService.credit(game.hostId, 'user', amountToPayout, tx);
               await tx.walletTransaction.create({
                 data: {
                   userId: game.hostId,
-                  amount: totalAmount,
-                  type: "SLOT_INCOME",
+                  amount: amountToPayout,
+                  type: "ESCROW_PAYOUT",
                   status: "SUCCESS",
-                  description: "Received payment from players for game (Auto-settled)"
+                  description: "Received escrow payout for hosted game (Auto-settled)"
                 }
               });
+            }
+
+            // Archive temporary teams
+            for (const team of game.teams) {
+              if (team.linkedTeamId) {
+                const actualTeam = await tx.team.findUnique({ where: { id: team.linkedTeamId } });
+                if (actualTeam && actualTeam.isTemporaryPickup) {
+                  await tx.team.update({
+                    where: { id: actualTeam.id },
+                    data: { status: "ARCHIVED" }
+                  });
+                }
+              }
             }
           });
           settledCount++;
         } catch (err) {
-          logger.error("[CRON] Error auto-settling game: ", err);
+          logger.error(`[CRON] Error auto-settling game ${game.id}: `, err);
         }
       }
     }

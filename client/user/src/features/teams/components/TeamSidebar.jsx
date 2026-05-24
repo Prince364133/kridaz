@@ -5,12 +5,26 @@ import { Plus, Users, Search, ChevronRight, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AddOpponentModal from './AddOpponentModal';
 import StartScoringModal from '@features/scoring/components/StartScoringModal';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('myTeams'); // 'myTeams', 'opponentTeams', 'scoringMatches'
   const [isAddOpponentOpen, setIsAddOpponentOpen] = useState(false);
   const [isStartScoringOpen, setIsStartScoringOpen] = useState(false);
+  const [startScoringInitialData, setStartScoringInitialData] = useState(null);
+
+  React.useEffect(() => {
+    if (location.state?.openStartScoringModal) {
+      setIsStartScoringOpen(true);
+      if (location.state?.initialGameData) {
+        setStartScoringInitialData(location.state.initialGameData);
+      }
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, location.pathname]);
 
   const { data: myData, isLoading: isMyLoading } = useGetMyTeamsQuery();
   const { data: oppData, isLoading: isOppLoading } = useGetOpponentTeamsQuery(undefined, {
@@ -235,9 +249,14 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
 
       <StartScoringModal
         isOpen={isStartScoringOpen}
-        onClose={() => setIsStartScoringOpen(false)}
+        initialData={startScoringInitialData}
+        onClose={() => {
+          setIsStartScoringOpen(false);
+          setStartScoringInitialData(null);
+        }}
         onSuccess={() => {
           setIsStartScoringOpen(false);
+          setStartScoringInitialData(null);
           setActiveTab('scoringMatches');
         }}
       />

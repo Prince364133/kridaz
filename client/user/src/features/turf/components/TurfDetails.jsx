@@ -156,6 +156,7 @@ const TurfDetails = () => {
         returnUrl.searchParams.set('groundId', turf._id);
         returnUrl.searchParams.set('date', selectedDate.toISOString());
         returnUrl.searchParams.set('time', selectedStartTime);
+        returnUrl.searchParams.set('price', totalPrice || turf.pricePerHour);
         navigate(returnUrl.pathname + returnUrl.search);
       } else {
         navigate(`/checkout/${turf._id}`, {

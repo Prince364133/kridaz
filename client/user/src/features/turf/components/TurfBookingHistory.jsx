@@ -228,9 +228,9 @@ const TurfBookingHistory = () => {
                         <div className="flex flex-col justify-between items-end py-2 shrink-0 mt-4 md:mt-0 border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6">
                           <div className="flex flex-col items-end">
                             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Paid</span>
-                            <div className="text-2xl font-black text-white">₹{booking.advanceAmount || booking.totalPrice || '1,500'}</div>
+                            <div className="text-2xl font-black text-white">₹{Number(booking.advanceAmount) || Number(booking.totalPrice) || Number(booking.turf?.pricePerHour) || '1,500'}</div>
                             {booking.paymentType === "PARTIAL" && (
-                              <div className="text-[9px] font-bold text-yellow-500 uppercase tracking-widest mt-1">Bal: ₹{booking.balanceAmount}</div>
+                              <div className="text-[9px] font-bold text-yellow-500 uppercase tracking-widest mt-1">Bal: ₹{Number(booking.balanceAmount) || 0}</div>
                             )}
                           </div>
                           

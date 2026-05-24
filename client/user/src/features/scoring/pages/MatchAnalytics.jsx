@@ -19,7 +19,8 @@ import {
   Zap,
   Wifi,
   WifiOff,
-  User
+  User,
+  Swords
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -439,14 +440,20 @@ const MatchAnalytics = () => {
   }
 
   if (!analytics && liveScore?.status === 'NOT_STARTED') {
-    const teamAObj = liveScore.teams?.find(t => t.teamKey === 'teamA') || liveScore.teams?.[0];
-    const teamBObj = liveScore.teams?.find(t => t.teamKey === 'teamB') || liveScore.teams?.[1];
+    const teamAObj = liveScore.teamA || liveScore.teams?.find(t => t.teamKey === 'teamA') || liveScore.teams?.[0] || {};
+    const teamBObj = liveScore.teamB || liveScore.teams?.find(t => t.teamKey === 'teamB') || liveScore.teams?.[1] || {};
     
     const teamA = teamAObj?.name || 'TBD';
     const teamB = teamBObj?.name || 'TBD';
     const loc = liveScore.city || liveScore.state || liveScore.location || 'Location Unspecified';
-    const ground = liveScore.customVenue || liveScore.turf?.name || liveScore.ground || 'Local Ground';
+    const ground = liveScore.customVenue || liveScore.turf?.name || liveScore.ground?.name || liveScore.ground || 'Local Ground';
     const professionals = liveScore.professionals || liveScore.customProfessionals || [];
+
+    let formattedDateTime = null;
+    const startDateTime = liveScore.scheduledStartAt || liveScore.date;
+    if (startDateTime) {
+      formattedDateTime = new Date(startDateTime).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    }
 
     return (
       <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
@@ -464,41 +471,88 @@ const MatchAnalytics = () => {
             </div>
             
             <h2 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[#00C187]">Match Not Started Yet</h2>
-            <p className="text-sm text-gray-400 font-bold tracking-widest uppercase mb-8">
+            <p className="text-sm text-gray-400 font-bold tracking-widest uppercase mb-4">
               {liveScore.matchName || 'Official Match'}
             </p>
+
+            {formattedDateTime && (
+              <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#00C187] bg-[#00C187]/10 px-4 py-2 rounded-full border border-[#00C187]/20 w-fit mx-auto mb-8 shadow-[0_0_15px_rgba(0,193,135,0.1)]">
+                <Clock size={14} />
+                <span>STARTS: {formattedDateTime.toUpperCase()}</span>
+              </div>
+            )}
 
             <div className="flex items-center justify-center gap-6 mb-8">
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center border-2 border-white/10 overflow-hidden">
-                  {liveScore.teamA?.logo ? <img src={liveScore.teamA.logo} alt={teamA} className="w-full h-full object-cover" /> : <span className="font-black text-xl">{teamA.substring(0,2).toUpperCase()}</span>}
+                  {teamAObj?.image || teamAObj?.logo ? <img src={teamAObj.image || teamAObj.logo} alt={teamA} className="w-full h-full object-cover" /> : <span className="font-black text-xl">{teamA.substring(0,2).toUpperCase()}</span>}
                 </div>
                 <span className="mt-3 font-black text-sm">{teamA}</span>
+                {teamAObj?.captain && (
+                  <button onClick={() => navigate(`/profile/${teamAObj.captain.id}`)} className="mt-2 flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-full text-xs font-bold text-gray-400 border border-white/10">
+                    {teamAObj.captain.profilePicture ? <img src={teamAObj.captain.profilePicture} alt="(C)" className="w-4 h-4 rounded-full object-cover" /> : <div className="w-4 h-4 bg-white/10 rounded-full flex items-center justify-center text-[8px] text-[#00C187]">C</div>}
+                    <span className="text-white/80">{teamAObj.captain.name} <span className="text-[#00C187]">(C)</span></span>
+                  </button>
+                )}
               </div>
               <div className="text-xl font-black text-gray-600 px-4">VS</div>
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center border-2 border-white/10 overflow-hidden">
-                  {liveScore.teamB?.logo ? <img src={liveScore.teamB.logo} alt={teamB} className="w-full h-full object-cover" /> : <span className="font-black text-xl">{teamB.substring(0,2).toUpperCase()}</span>}
+                  {teamBObj?.image || teamBObj?.logo ? <img src={teamBObj.image || teamBObj.logo} alt={teamB} className="w-full h-full object-cover" /> : <span className="font-black text-xl">{teamB.substring(0,2).toUpperCase()}</span>}
                 </div>
                 <span className="mt-3 font-black text-sm">{teamB}</span>
+                {teamBObj?.captain && (
+                  <button onClick={() => navigate(`/profile/${teamBObj.captain.id}`)} className="mt-2 flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-full text-xs font-bold text-gray-400 border border-white/10">
+                    {teamBObj.captain.profilePicture ? <img src={teamBObj.captain.profilePicture} alt="(C)" className="w-4 h-4 rounded-full object-cover" /> : <div className="w-4 h-4 bg-white/10 rounded-full flex items-center justify-center text-[8px] text-[#00C187]">C</div>}
+                    <span className="text-white/80">{teamBObj.captain.name} <span className="text-[#00C187]">(C)</span></span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-left mb-4">
+              <div className="bg-white/5 p-4 rounded-2xl flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                  <Activity size={16} className="text-orange-500" />
+                </div>
+                <div className="overflow-hidden">
+                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Ball Type</div>
+                  <div className="text-sm font-bold text-white/90 truncate">{liveScore.ballType || 'Tennis'}</div>
+                </div>
+              </div>
+              <div className="bg-white/5 p-4 rounded-2xl flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                  <Swords size={16} className="text-purple-500" />
+                </div>
+                <div className="overflow-hidden">
+                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Format</div>
+                  <div className="text-sm font-bold text-white/90 truncate">{liveScore.format || 'T20'} {liveScore.oversPerInnings ? `(${liveScore.oversPerInnings} Ov)` : ''}</div>
+                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-left">
               <div className="bg-white/5 p-4 rounded-2xl flex items-center gap-3">
-                <MapPin size={20} className="text-[#55DEE8]" />
-                <div>
+                <div className="w-8 h-8 rounded-full bg-[#55DEE8]/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin size={16} className="text-[#55DEE8]" />
+                </div>
+                <div className="overflow-hidden">
                   <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Location</div>
-                  <div className="text-sm font-bold text-white/90">{loc}</div>
+                  <div className="text-sm font-bold text-white/90 truncate">{loc}</div>
                 </div>
               </div>
-              <div className="bg-white/5 p-4 rounded-2xl flex items-center gap-3">
-                <Trophy size={20} className="text-[#BFF367]" />
-                <div>
+              <button 
+                onClick={() => navigate(`/venue/${liveScore?.venueId || 'not-found'}`)}
+                className="bg-white/5 p-4 rounded-2xl flex items-center gap-3 text-left cursor-pointer hover:bg-white/10 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#BFF367]/10 flex items-center justify-center flex-shrink-0">
+                  <Trophy size={16} className="text-[#BFF367]" />
+                </div>
+                <div className="overflow-hidden">
                   <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Ground</div>
-                  <div className="text-sm font-bold text-white/90">{ground}</div>
+                  <div className="text-sm font-bold text-white/90 truncate">{ground}</div>
                 </div>
-              </div>
+              </button>
             </div>
 
             {professionals.length > 0 && (
@@ -507,11 +561,29 @@ const MatchAnalytics = () => {
                   <User size={14} className="text-[#00C187]"/> Officials
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {professionals.map((p, i) => (
-                    <span key={i} className="px-3 py-1 bg-white/10 rounded-lg text-xs font-bold text-white/80">
-                      {p}
-                    </span>
-                  ))}
+                  {professionals.map((p, i) => {
+                    const isObj = typeof p === 'object' && p !== null;
+                    const name = isObj ? p.name : p;
+                    const role = isObj ? p.role : '';
+                    const id = isObj ? p.id : null;
+                    const pic = isObj ? p.profilePicture : null;
+
+                    if (id) {
+                      return (
+                        <button key={i} onClick={() => navigate(`/profile/${id}`)} className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-xl text-xs font-bold text-white/90 border border-white/5">
+                          {pic ? <img src={pic} alt={name} className="w-5 h-5 rounded-full object-cover" /> : <div className="w-5 h-5 bg-white/10 rounded-full flex items-center justify-center text-[8px] text-[#00C187]">{name.substring(0, 2).toUpperCase()}</div>}
+                          <span className="flex items-center gap-1">
+                             {role && <span className="text-white/50">{role}:</span>} {name}
+                          </span>
+                        </button>
+                      );
+                    }
+                    return (
+                      <span key={i} className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl text-xs font-bold text-white/90 border border-white/5">
+                        {role && <span className="text-white/50">{role}:</span>} {name}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             )}

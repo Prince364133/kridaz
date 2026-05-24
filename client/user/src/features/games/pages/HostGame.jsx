@@ -398,7 +398,8 @@ const HostGame = () => {
               ...prev, 
               groundId: turf._id,
               date: urlDate ? new Date(urlDate).toISOString().split('T')[0] : prev.date,
-              time: urlTime || prev.time
+              time: urlTime || prev.time,
+              groundPrice: searchParams.get('price') ? Number(searchParams.get('price')) : turf.pricePerHour
             }));
           })
           .catch(err => console.error("Error fetching ground details:", err));
@@ -421,7 +422,8 @@ const HostGame = () => {
     }
   }, [step, searchParams, selectedGround, selectedUmpire]);
 
-  const subTotal = (selectedGround?.pricePerHour || 0) + (selectedUmpire?.price || 0);
+  const groundCost = gameData.groundPrice !== undefined ? gameData.groundPrice : (selectedGround?.pricePerHour || 0);
+  const subTotal = groundCost + (selectedUmpire?.price || 0);
   const discountAmount = couponData?.discountAmount || 0;
   const platformFee = couponData ? couponData.platformFee : ((subTotal - discountAmount) * 0.015);
   const totalCost = couponData ? couponData.finalCost : ((subTotal - discountAmount) + platformFee);
@@ -433,7 +435,7 @@ const HostGame = () => {
     try {
       const res = await axiosInstance.post("/api/hosted-game/validate-coupon", {
         code: couponCode,
-        groundCost: selectedGround?.pricePerHour || 0,
+        groundCost: groundCost,
         umpireCost: selectedUmpire?.price || 0
       });
       if (res.data.success) {
@@ -966,7 +968,7 @@ const HostGame = () => {
                           )}
                         </div>
                         <div className="flex items-center justify-between mt-4">
-                          <span className="text-yellow-500 font-black text-sm">₹{selectedGround.pricePerHour}/hr</span>
+                          <span className="text-yellow-500 font-black text-sm">₹{gameData.groundPrice !== undefined ? gameData.groundPrice : selectedGround.pricePerHour}</span>
                           <button 
                             onClick={() => {
                               setSelectedGround(null);

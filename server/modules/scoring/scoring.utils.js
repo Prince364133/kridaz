@@ -196,6 +196,9 @@ export const computeScoreSnapshot = (scoring, match) => {
     matchId: scoring.gameId,
     battingTeamName,
     battingTeamImage,
+    date: match.date,
+    time: match.time,
+    scheduledStartAt: match.scheduledStartAt,
     totalRuns,
     totalWickets,
     runs: totalRuns,
@@ -231,7 +234,30 @@ export const computeScoreSnapshot = (scoring, match) => {
     powerplayOvers: currentInnings.powerplayOvers || 0,
     isInningsComplete,
     isMatchComplete,
-    currentInningsIndex
+    currentInningsIndex,
+    location: match.city || match.state ? `${match.city || ''} ${match.state || ''}`.trim() : null,
+    venueId: match.turfId || null,
+    ground: match.ground || match.customVenue || null,
+    ballType: match.ballType || null,
+    format: match.format || match.gameType || null,
+    professionals: (() => {
+      const pros = [];
+      if (match.umpire?.name) pros.push({ id: match.umpire.id, name: match.umpire.name, role: 'Umpire', profilePicture: match.umpire.profilePicture });
+      else if (match.customUmpire?.name) pros.push({ name: match.customUmpire.name, role: 'Umpire' });
+
+      if (match.scorer?.name) pros.push({ id: match.scorer.id, name: match.scorer.name, role: 'Scorer', profilePicture: match.scorer.profilePicture });
+      else if (match.customScorer?.name) pros.push({ name: match.customScorer.name, role: 'Scorer' });
+
+      if (match.streamer?.name) pros.push({ id: match.streamer.id, name: match.streamer.name, role: 'Streamer', profilePicture: match.streamer.profilePicture });
+      else if (match.customStreamer?.name) pros.push({ name: match.customStreamer.name, role: 'Streamer' });
+
+      if (Array.isArray(match.customProfessionals)) {
+        match.customProfessionals.forEach(p => {
+          if (p?.name) pros.push({ name: p.name, role: p.role || 'Official' });
+        });
+      }
+      return pros;
+    })(),
   };
 };
 

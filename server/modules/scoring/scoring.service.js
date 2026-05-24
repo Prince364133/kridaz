@@ -9,6 +9,10 @@ import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 import { computeScoreSnapshot } from "./scoring.utils.js";
 
 const HOSTED_GAME_SCORING_INCLUDE = {
+  turf: true,
+  umpire: { select: { id: true, name: true, profilePicture: true } },
+  scorer: { select: { id: true, name: true, profilePicture: true } },
+  streamer: { select: { id: true, name: true, profilePicture: true } },
   teams: {
     include: {
       slots: {
@@ -28,6 +32,18 @@ const mapHostedGame = (hostedGame) => {
   if (!hostedGame) return null;
   const teamA = hostedGame.teams?.find(t => t.teamKey === "teamA") || { name: "Team A", slots: [] };
   const teamB = hostedGame.teams?.find(t => t.teamKey === "teamB") || { name: "Team B", slots: [] };
+  
+  const getCaptain = (team) => {
+    const captainSlot = team.slots?.find(s => s.role && (s.role.trim().toLowerCase() === "captain" || s.role.trim().toLowerCase() === "c" || s.role.trim().toLowerCase() === "(c)"));
+    if (captainSlot) {
+      if (captainSlot.user) return { id: captainSlot.user.id, name: captainSlot.user.name, profilePicture: captainSlot.user.profilePicture, type: 'user' };
+      if (captainSlot.customPlayer) return { id: captainSlot.customPlayer.id, name: captainSlot.customPlayer.name, type: 'custom' };
+    }
+    return null;
+  };
+  teamA.captain = getCaptain(teamA);
+  teamB.captain = getCaptain(teamB);
+
   const mapped = {
     ...hostedGame,
     teamA,
@@ -300,6 +316,9 @@ export const goLiveSession = async (matchId) => {
         matchName: mappedMatch.name,
         teamA: mappedMatch.teamA,
         teamB: mappedMatch.teamB,
+        date: mappedMatch.date,
+        time: mappedMatch.time,
+        scheduledStartAt: mappedMatch.scheduledStartAt,
         tossWinner: null,
         tossDecision: null,
         message: 'Match starts soon',
@@ -392,6 +411,9 @@ export const endLiveSession = async (matchId) => {
         matchName: mappedMatch.name,
         teamA: mappedMatch.teamA,
         teamB: mappedMatch.teamB,
+        date: mappedMatch.date,
+        time: mappedMatch.time,
+        scheduledStartAt: mappedMatch.scheduledStartAt,
         tossWinner: null,
         tossDecision: null,
         message: 'Match starts soon',
@@ -471,6 +493,9 @@ export const configureStream = async (matchId, { youtubeVideoId, youtubeLiveChat
         matchName: mappedMatch.name,
         teamA: mappedMatch.teamA,
         teamB: mappedMatch.teamB,
+        date: mappedMatch.date,
+        time: mappedMatch.time,
+        scheduledStartAt: mappedMatch.scheduledStartAt,
         tickerTheme: mappedMatch.tickerTheme || 'neon_classic',
         youtubeVideoId: updatedHostedGame.streamConfig?.youtubeVideoId || null,
         isLive: updatedHostedGame.isLive,
@@ -513,6 +538,13 @@ export const finalizeMatch = async (scoringId) => {
         scoringStatus: "COMPLETED",
         status: "COMPLETED"
       }
+    }),
+    prisma.team.updateMany({
+      where: {
+        gameId: scoring.gameId,
+        isTemporaryPickup: true
+      },
+      data: { status: "ARCHIVED" }
     })
   ]);
 
@@ -574,6 +606,22 @@ export const initializeScoringSession = async (finalMatchId, finalBattingTeam, u
   if (!isAuthorized) {
     const error = new Error("Authorization failed. Only the assigned umpire, host, or admin can score this match.");
     error.statusCode = 403;
+    throw error;
+  }
+
+  // 2-hour window check
+  const now = new Date();
+  const startTime = new Date(hostedGame.date);
+  if (hostedGame.time) {
+    const [hours, minutes] = hostedGame.time.split(':').map(Number);
+    startTime.setHours(hours || 0, minutes || 0, 0, 0);
+  }
+  const timeDiffMs = startTime.getTime() - now.getTime();
+  const twoHoursMs = 2 * 60 * 60 * 1000;
+
+  if (timeDiffMs > twoHoursMs) {
+    const error = new Error("Scoring can only be started within 2 hours of the scheduled start time.");
+    error.statusCode = 400;
     throw error;
   }
 
@@ -1543,11 +1591,22 @@ export const fetchLiveScoreSnapshot = async (matchId) => {
   }
 
   if (!snapshot) {
-    // Extract professionals from custom objects if available
+    // Extract professionals from custom objects or official assignments if available
     const professionals = [];
-    if (match.customUmpire?.name) professionals.push(match.customUmpire.name);
-    if (match.customScorer?.name) professionals.push(match.customScorer.name);
-    if (match.customStreamer?.name) professionals.push(match.customStreamer.name);
+    if (match.umpire?.name) professionals.push({ id: match.umpire.id, name: match.umpire.name, role: 'Umpire', profilePicture: match.umpire.profilePicture });
+    else if (match.customUmpire?.name) professionals.push({ name: match.customUmpire.name, role: 'Umpire' });
+
+    if (match.scorer?.name) professionals.push({ id: match.scorer.id, name: match.scorer.name, role: 'Scorer', profilePicture: match.scorer.profilePicture });
+    else if (match.customScorer?.name) professionals.push({ name: match.customScorer.name, role: 'Scorer' });
+
+    if (match.streamer?.name) professionals.push({ id: match.streamer.id, name: match.streamer.name, role: 'Streamer', profilePicture: match.streamer.profilePicture });
+    else if (match.customStreamer?.name) professionals.push({ name: match.customStreamer.name, role: 'Streamer' });
+
+    if (Array.isArray(match.customProfessionals)) {
+      match.customProfessionals.forEach(p => {
+        if (p?.name) professionals.push({ name: p.name, role: p.role || 'Official' });
+      });
+    }
 
     // Return a minimal placeholder snapshot if scoring hasn't started yet
     snapshot = {
@@ -1556,13 +1615,20 @@ export const fetchLiveScoreSnapshot = async (matchId) => {
       matchName: match.name,
       teamA: mappedMatch.teamA,
       teamB: mappedMatch.teamB,
+      date: match.date,
+      time: match.time,
+      scheduledStartAt: match.scheduledStartAt,
+      ballType: match.ballType || null,
+      format: match.format || match.gameType || null,
+      oversPerInnings: match.oversPerInnings,
       tossWinner: null,
       tossDecision: null,
       message: 'Match starts soon',
       tickerTheme: match.tickerTheme || 'neon_classic',
       isLive: match.isLive ?? false,
       location: match.city || match.state ? `${match.city || ''} ${match.state || ''}`.trim() : null,
-      ground: match.customVenue || null,
+      venueId: match.turfId || null,
+      ground: mappedMatch.ground || match.customVenue || null,
       professionals
     };
   }
@@ -1630,7 +1696,8 @@ export const createScoringMatch = async (userId, matchData) => {
     youtubeLiveUrl,
     location,
     customDays,
-    customOversPerDay
+    customOversPerDay,
+    matchDateTime
   } = matchData;
 
   // Determine match duration in days based on format
@@ -1730,8 +1797,9 @@ export const createScoringMatch = async (userId, matchData) => {
       maxMembers: maxMembers || 11,
       customDays: resolvedDays,
       customOversPerDay: resolvedOversPerDay,
-      date: new Date(),
-      time: new Date().toTimeString().split(' ')[0],
+      date: matchDateTime ? new Date(matchDateTime) : new Date(),
+      time: matchDateTime ? new Date(matchDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toTimeString().split(' ')[0],
+      scheduledStartAt: matchDateTime ? new Date(matchDateTime) : null,
       oversPerInnings: format === 'T20' ? 20 : format === 'ODI' ? 50 : format === 'T10' ? 10 : format === 'CUSTOM' ? resolvedOversPerDay : 20,
       teams: {
         create: [

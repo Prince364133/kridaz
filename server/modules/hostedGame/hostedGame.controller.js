@@ -121,7 +121,13 @@ export const getGroundsForHosting = async (req, res) => {
         isActive: true,
         ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
         ...(state ? { state: { contains: state, mode: 'insensitive' } } : {}),
-        ...(sportType ? { sportTypes: { has: sportType } } : {}), // PostgreSQL/Prisma array handling
+        ...(sportType ? { 
+          OR: [
+            { sportTypes: { has: sportType } },
+            { sportTypes: { has: sportType.charAt(0).toUpperCase() + sportType.toLowerCase().slice(1) } },
+            { sportTypes: { has: sportType.toLowerCase() } }
+          ]
+        } : {}),
         ...(searchTerm ? {
           OR: [
             { name: { contains: searchTerm, mode: 'insensitive' } },
@@ -160,7 +166,8 @@ export const getUmpiresForHosting = async (req, res) => {
           ...(searchTerm ? {
             OR: [
               { name: { contains: searchTerm, mode: 'insensitive' } },
-              { phone: { contains: searchTerm, mode: 'insensitive' } }
+              { phone: { contains: searchTerm, mode: 'insensitive' } },
+              { email: { contains: searchTerm, mode: 'insensitive' } }
             ]
           } : {})
         }
@@ -214,7 +221,8 @@ export const getStreamersForHosting = async (req, res) => {
           ...(searchTerm ? {
             OR: [
               { name: { contains: searchTerm, mode: 'insensitive' } },
-              { phone: { contains: searchTerm, mode: 'insensitive' } }
+              { phone: { contains: searchTerm, mode: 'insensitive' } },
+              { email: { contains: searchTerm, mode: 'insensitive' } }
             ]
           } : {})
         }
@@ -263,7 +271,7 @@ export const createHostedGame = async (req, res) => {
 
       const {
         gameType, date, time, groundId, umpireId, streamerId, ground, umpire, streamer,
-        perPlayerCharge, teamA, teamB, city, state,
+        perPlayerCharge, teamA, teamB, city, state, groundPrice,
         // Quick Game specific fields
         gameMode = "PROFESSIONAL",
         playerCount,
@@ -271,7 +279,7 @@ export const createHostedGame = async (req, res) => {
         customUmpireData,      // { name, email, phone }
       } = req.body;
 
-      logger.info("Game Data:", { gameType, date, time, groundId, umpireId, city });
+      logger.info("Game Data:", { gameType, date, time, groundId, umpireId, city, groundPrice });
 
       const finalGroundId = groundId || ground?.id;
       const finalUmpireId = umpireId || umpire?.id;
@@ -288,7 +296,7 @@ export const createHostedGame = async (req, res) => {
 
       if (finalGroundId) {
         const g = await tx.turf.findUnique({ where: { id: finalGroundId } });
-        groundCost = Number(g?.pricePerHour || 0);
+        groundCost = groundPrice !== undefined ? Number(groundPrice) : Number(g?.pricePerHour || 0);
       }
 
       if (finalUmpireId) {
@@ -356,6 +364,48 @@ export const createHostedGame = async (req, res) => {
         }
       });
 
+      // 5.5 Create Actual Turf Booking if finalGroundId exists
+      if (finalGroundId) {
+        const turfDate = new Date(date);
+        let adjustedStartTime = new Date(turfDate);
+        let adjustedEndTime = new Date(turfDate);
+
+        const timeParts = time.match(/(\d+):(\d+)\s(AM|PM)/i);
+        if (timeParts) {
+          let hours = parseInt(timeParts[1], 10);
+          const minutes = parseInt(timeParts[2], 10);
+          const ampm = timeParts[3].toUpperCase();
+          if (ampm === "PM" && hours < 12) hours += 12;
+          if (ampm === "AM" && hours === 12) hours = 0;
+          adjustedStartTime.setHours(hours, minutes, 0, 0);
+          adjustedEndTime.setHours(hours + 1, minutes, 0, 0); // 1 hour default
+        }
+
+        const timeSlot = await tx.timeSlot.create({
+          data: {
+            turfId: finalGroundId,
+            startTime: adjustedStartTime,
+            endTime: adjustedEndTime,
+          }
+        });
+
+        await tx.booking.create({
+          data: {
+            userId: hostId,
+            turfId: finalGroundId,
+            timeSlotId: timeSlot.id,
+            playStartTime: adjustedStartTime,
+            playEndTime: adjustedEndTime,
+            totalPrice: groundCost,
+            paidAmount: groundCost,
+            balanceAmount: 0,
+            paymentMethod: "WALLET",
+            status: "CONFIRMED",
+            bookingSource: "HOSTED_GAME",
+          }
+        });
+      }
+
       // 6. Create Teams & Slots
       if (isQuick) {
         // QUICK Mode: Flat slots
@@ -419,13 +469,35 @@ export const createHostedGame = async (req, res) => {
 
           const slots = t.data?.slots || [];
           for (const s of slots) {
+            let customPlayerId = null;
+            let slotStatus = s.status || (s.userId || s.user ? "JOINED" : "OPEN");
+
+            if (s.customPlayer && !s.userId && !s.user) {
+              const token = randomUUID();
+              const cp = s.customPlayer;
+              const invite = await tx.customPlayerInvite.create({
+                data: {
+                  gameId: hostedGame.id,
+                  name: cp.name || "Custom Player",
+                  email: cp.email || "",
+                  phone: cp.phone || "",
+                  mustPay: cp.mustPay || false,
+                  inviteToken: token,
+                  inviteStatus: "PENDING"
+                }
+              });
+              customPlayerId = invite.id;
+              slotStatus = s.status || "HELD";
+            }
+
             await tx.gameSlot.create({
               data: {
                 gameId: hostedGame.id,
                 teamId: createdTeam.id,
-                userId: s.user || null,
+                userId: s.userId || s.user || null,
+                customPlayerId,
                 role: s.role || "Player",
-                status: s.status || (s.user ? "JOINED" : "OPEN"),
+                status: slotStatus,
                 addedById: hostId
               }
             });
@@ -516,6 +588,27 @@ export const joinHostedGame = async (req, res) => {
       });
       if (!game) throw new Error("Game not found");
 
+      if (game.scoringStatus !== "NOT_STARTED") {
+        const error = new Error("Cannot join a game that is already locked for scoring.");
+        error.status = 400;
+        throw error;
+      }
+
+      if (game.hostId === userId) {
+        const error = new Error("You cannot join your own hosted game.");
+        error.status = 400;
+        throw error;
+      }
+
+      const isAlreadyInSlot = game.slots.some(s => s.userId === userId) ||
+                              game.teams.some(t => t.slots.some(s => s.userId === userId));
+      
+      if (isAlreadyInSlot) {
+        const error = new Error("You have already joined a slot in this game.");
+        error.status = 400;
+        throw error;
+      }
+
       const perPlayerCharge = Number(game.perPlayerCharge || 0);
       const usableBalance = await WalletService.getUsableBalance(userId, 'user', tx);
       if (usableBalance < perPlayerCharge) {
@@ -561,7 +654,8 @@ export const joinHostedGame = async (req, res) => {
         data: {
           userId,
           role: role || "Player",
-          status: "PENDING"
+          status: "PENDING",
+          paymentStatus: "RESERVED"
         }
       });
 
@@ -601,6 +695,12 @@ export const approveJoinRequest = async (req, res) => {
       });
       if (!game || game.hostId !== hostId) throw new Error("Unauthorized or game not found");
 
+      if (game.scoringStatus !== "NOT_STARTED") {
+        const error = new Error("Cannot modify roster for a game that is already locked for scoring.");
+        error.status = 400;
+        throw error;
+      }
+
       let targetTeam = null;
       let targetSlot;
       if (slotId) {
@@ -626,7 +726,17 @@ export const approveJoinRequest = async (req, res) => {
       if (perPlayerCharge > 0) {
         await WalletService.release(playerUserId, 'user', perPlayerCharge, true, tx);
 
-        // Update player transaction to SUCCESS
+        // Add to HostedGame escrow
+        await tx.hostedGame.update({
+          where: { id: gameId },
+          data: {
+            escrowAmount: {
+              increment: perPlayerCharge
+            }
+          }
+        });
+
+        // Update player transaction to ESCROW
         const latestReservedTx = await tx.walletTransaction.findFirst({
           where: { userId: playerUserId, amount: perPlayerCharge, status: "RESERVED", type: "JOIN_GAME" },
           orderBy: { createdAt: 'desc' }
@@ -635,14 +745,17 @@ export const approveJoinRequest = async (req, res) => {
         if (latestReservedTx) {
           await tx.walletTransaction.update({
             where: { id: latestReservedTx.id },
-            data: { status: "SUCCESS", description: `Joined ${game.gameType} game successfully` }
+            data: { status: "ESCROW", description: `Joined ${game.gameType} game successfully. Funds in Escrow.` }
           });
         }
       }
 
       await tx.gameSlot.update({
         where: { id: targetSlot.id },
-        data: { status: "JOINED" }
+        data: { 
+          status: "JOINED",
+          paymentStatus: "CAPTURED"
+        }
       });
 
       // Auto-create/link team for Cricket games
@@ -651,13 +764,15 @@ export const approveJoinRequest = async (req, res) => {
 
         if (!currentLinkedTeamId) {
           const hostProfile = await tx.user.findUnique({ where: { id: hostId } });
-          const teamName = targetTeam.name || `${hostProfile?.name || 'Host'}'s Team`;
+          const randomId = Math.random().toString(36).substring(2, 6).toUpperCase();
+          const teamName = targetTeam.name || `${hostProfile?.name || 'Host'}'s Pickup Squad B - ${randomId}`;
           const newTeam = await tx.team.create({
             data: {
               name: teamName,
               visibility: "PRIVATE",
               sportType: "CRICKET",
               ownerId: hostId,
+              isTemporaryPickup: true
             }
           });
           currentLinkedTeamId = newTeam.id;
@@ -728,6 +843,12 @@ export const rejectJoinRequest = async (req, res) => {
       });
       if (!game || game.hostId !== hostId) throw new Error("Unauthorized or game not found");
 
+      if (game.scoringStatus !== "NOT_STARTED") {
+        const error = new Error("Cannot modify roster for a game that is already locked for scoring.");
+        error.status = 400;
+        throw error;
+      }
+
       let targetSlot;
       if (slotId) {
         targetSlot = await tx.gameSlot.findUnique({ where: { id: slotId } });
@@ -766,7 +887,8 @@ export const rejectJoinRequest = async (req, res) => {
         data: {
           userId: null,
           role: "Player",
-          status: "OPEN"
+          status: "OPEN",
+          paymentStatus: "NONE"
         }
       });
     });
@@ -794,9 +916,47 @@ export const cancelHostedGame = async (req, res) => {
       });
       if (!game || game.hostId !== hostId) throw new Error("Unauthorized or game not found");
       if (game.status === "CANCELLED") throw new Error("Game already cancelled");
+      
+      if (game.scoringStatus !== "NOT_STARTED") {
+        const error = new Error("Cannot cancel a game that has already started scoring.");
+        error.status = 400;
+        throw error;
+      }
 
       // Release host's reserved coins (if any)
       // Note: We'd need to know if hosting costs coins. Assuming 0 for now as per legacy code.
+
+      // Release the associated turf booking if any
+      if (game.turfId) {
+        const turfDate = new Date(game.date);
+        let adjustedStartTime = new Date(turfDate);
+        const timeParts = game.time.match(/(\d+):(\d+)\s(AM|PM)/i);
+        if (timeParts) {
+          let hours = parseInt(timeParts[1], 10);
+          const minutes = parseInt(timeParts[2], 10);
+          const ampm = timeParts[3].toUpperCase();
+          if (ampm === "PM" && hours < 12) hours += 12;
+          if (ampm === "AM" && hours === 12) hours = 0;
+          adjustedStartTime.setHours(hours, minutes, 0, 0);
+        }
+
+        const relatedBooking = await tx.booking.findFirst({
+          where: {
+            userId: hostId,
+            turfId: game.turfId,
+            bookingSource: "HOSTED_GAME",
+            playStartTime: adjustedStartTime,
+            status: "CONFIRMED"
+          }
+        });
+
+        if (relatedBooking) {
+          await tx.booking.update({
+            where: { id: relatedBooking.id },
+            data: { status: "CANCELLED" }
+          });
+        }
+      }
 
       // Release reserved coins for all PENDING players
       let allSlots = [];
@@ -826,34 +986,31 @@ export const cancelHostedGame = async (req, res) => {
       }
 
       for (const slot of joinedSlots) {
-        // Debit host (refund from host's balance)
-        await WalletService.debit(hostId, 'user', perPlayerCharge, tx);
-        await tx.walletTransaction.create({
-          data: {
-            userId: hostId,
-            amount: perPlayerCharge,
-            type: "REFUND_DEBIT",
-            status: "SUCCESS",
-            description: `Deducted slot payment for game cancellation: ${game.gameType}`
-          }
-        });
-
-        // Credit player
+        // Credit player (Refund from escrow)
         await WalletService.credit(slot.userId, 'user', perPlayerCharge, tx);
         await tx.walletTransaction.create({
           data: {
             userId: slot.userId,
             amount: perPlayerCharge,
-            type: "REFUND",
+            type: "REFUND_ESCROW",
             status: "SUCCESS",
             description: `Refunded slot payment due to game cancellation: ${game.gameType}`
           }
+        });
+        
+        await tx.gameSlot.update({
+          where: { id: slot.id },
+          data: { paymentStatus: "REFUNDED" }
         });
       }
 
       await tx.hostedGame.update({
         where: { id: gameId },
-        data: { status: "CANCELLED" }
+        data: { 
+          status: "CANCELLED",
+          escrowAmount: 0,
+          payoutStatus: "REFUNDED"
+        }
       });
     });
 
@@ -911,6 +1068,13 @@ export const leaveHostedGame = async (req, res) => {
       if (!userSlot) throw new Error("You are not part of this game");
 
       const game = userSlot.game;
+
+      if (game.scoringStatus !== "NOT_STARTED") {
+        const error = new Error("Cannot modify roster for a game that is already locked for scoring.");
+        error.status = 400;
+        throw error;
+      }
+
       const perPlayerCharge = Number(game.perPlayerCharge || 0);
 
       // If pending, just release reserved coins
@@ -931,29 +1095,23 @@ export const leaveHostedGame = async (req, res) => {
       }
       // If joined, refund coins
       else if (userSlot.status === "JOINED") {
-        const hostId = game.hostId;
-
-        // Debit host (refund from host's balance)
-        await WalletService.debit(hostId, 'user', perPlayerCharge, tx);
-        await tx.walletTransaction.create({
-          data: {
-            userId: hostId,
-            amount: perPlayerCharge,
-            type: "REFUND_DEBIT",
-            status: "SUCCESS",
-            description: `Deducted slot payment because player left game: ${game.gameType}`
-          }
-        });
-
-        // Credit player
+        // Credit player (Refund from escrow)
         await WalletService.credit(userId, 'user', perPlayerCharge, tx);
         await tx.walletTransaction.create({
           data: {
             userId,
             amount: perPlayerCharge,
-            type: "REFUND",
+            type: "REFUND_ESCROW",
             status: "SUCCESS",
             description: `Refunded coins for leaving ${game.gameType} game`
+          }
+        });
+
+        // Decrement escrowAmount on HostedGame
+        await tx.hostedGame.update({
+          where: { id: gameId },
+          data: {
+            escrowAmount: { decrement: perPlayerCharge }
           }
         });
       }
@@ -963,7 +1121,8 @@ export const leaveHostedGame = async (req, res) => {
         where: { id: userSlot.id },
         data: {
           userId: null,
-          status: "OPEN"
+          status: "OPEN",
+          paymentStatus: "NONE"
         }
       });
     });
@@ -1980,7 +2139,11 @@ export const raiseDispute = async (req, res) => {
 
       await tx.hostedGame.update({
         where: { id: gameId },
-        data: { coinTransferStatus: "DISPUTED" }
+        data: { 
+          coinTransferStatus: "DISPUTED", // keep for legacy backwards-compatibility if needed
+          payoutStatus: "FROZEN",
+          disputeRaised: true
+        }
       });
 
       await tx.gameDispute.create({

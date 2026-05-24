@@ -23,9 +23,13 @@ const GameDetailsModal = ({ game, onClose, onJoinSlot, currentUserId }) => {
       return (
         <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4.5 w-4.5 shrink-0" />
+            {slot.user?.profilePicture ? (
+              <img src={slot.user.profilePicture} alt={slot.user.name} className="h-6 w-6 rounded-full object-cover shrink-0" />
+            ) : (
+              <CheckCircle2 className="h-4.5 w-4.5 shrink-0" />
+            )}
             <div>
-              <span className="font-semibold text-sm block">{slot.name || 'Joined Player'}</span>
+              <span className="font-semibold text-sm block">{slot.user?.name || slot.customPlayer?.name || 'Joined Player'}</span>
               <span className="text-[10px] text-emerald-400/80 uppercase tracking-wider">{slot.role}</span>
             </div>
           </div>
@@ -38,13 +42,17 @@ const GameDetailsModal = ({ game, onClose, onJoinSlot, currentUserId }) => {
       );
     }
 
-    if (slot.status === 'HELD') {
+    if (slot.status === 'HELD' || slot.status === 'PENDING') {
       return (
         <div className="flex items-center justify-between p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
           <div className="flex items-center gap-2">
-            <Lock className="h-4.5 w-4.5 shrink-0 animate-pulse" />
+            {slot.user?.profilePicture ? (
+              <img src={slot.user.profilePicture} alt={slot.user.name} className="h-6 w-6 rounded-full object-cover shrink-0 opacity-50" />
+            ) : (
+              <Lock className="h-4.5 w-4.5 shrink-0 animate-pulse" />
+            )}
             <div>
-              <span className="font-semibold text-sm block">{slot.name || 'Reserved Spot'}</span>
+              <span className="font-semibold text-sm block">{slot.user?.name || slot.customPlayer?.name || 'Reserved Spot'}</span>
               <span className="text-[10px] text-amber-400/80 uppercase tracking-wider">{slot.role}</span>
             </div>
           </div>

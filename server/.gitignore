@@ -88,3 +88,5 @@ scripts/fixProfessionalOwnerRecords.js
 # This file is imported nowhere and must not be re-introduced.
 modules/auth/auth.routes.js
 /generated/prisma
+
+public/
