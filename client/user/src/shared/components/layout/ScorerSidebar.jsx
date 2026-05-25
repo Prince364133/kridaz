@@ -60,13 +60,7 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       <Link
         key={item.to || item.label}
         to={item.to || "#"}
-        className={`flex items-center px-4 py-3 group relative transition-all duration-300 font-inter ${
-          isLogout 
-            ? "text-white/40 hover:text-red-500" 
-            : isActive 
-              ? "text-black" 
-              : "text-white/40 hover:text-white"
-        }`}
+        className={`flex items-center px-4 py-3 group relative transition-all duration-300 font-inter ${ isLogout ? "text-white/40 hover:text-red-500" : isActive ? "text-black" : "text-white/40 hover:text-white" }`}
         onClick={(e) => {
           if (isLogout) {
             e.preventDefault();
@@ -79,23 +73,17 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         }}
       >
         {isActive && !isLogout && (
-          <div className="absolute inset-x-2 inset-y-1 bg-[#00C187] rounded-xl -z-10 shadow-[0_0_15px_rgba(0,193,135,0.3)] transition-all duration-300" />
+          <div className="absolute inset-x-2 inset-y-1 bg-[#00C187] rounded-[8px] -z-10 shadow-[0_0_15px_rgba(0,193,135,0.3)] transition-all duration-300" />
         )}
         
         {!isActive && !isLogout && (
-          <div className="absolute inset-x-2 inset-y-1 bg-white/5 rounded-xl -z-10 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+          <div className="absolute inset-x-2 inset-y-1 bg-white/5 rounded-[8px] -z-10 opacity-0 group-hover:opacity-100 transition-all duration-300" />
         )}
 
         <div className="flex-shrink-0 flex items-center justify-center w-6">
           <Icon 
             size={18} 
-            className={`transition-colors duration-300 ${
-              isLogout 
-                ? "text-white/20 group-hover:text-red-500" 
-                : isActive 
-                  ? "text-black" 
-                  : "text-white/20 group-hover:text-[#00C187]"
-            }`} 
+            className={`transition-colors duration-300 ${ isLogout ? "text-white/20 group-hover:text-red-500" : isActive ? "text-black" : "text-white/20 group-hover:text-[#00C187]" }`} 
           />
         </div>
 
@@ -116,10 +104,7 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       )}
 
       <aside
-        className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#000000] border-r border-white/5 overflow-x-hidden transition-all duration-300 ease-in-out z-50 flex flex-col font-inter
-          ${isMinimized ? "lg:w-20" : "w-64"}
-          ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-          ${className || ""}`}
+        className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#000000] border-r border-white/5 overflow-x-hidden transition-all duration-300 ease-in-out z-50 flex flex-col font-inter ${isMinimized ? "lg:w-20" : "w-64"} ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} ${className || ""}`}
       >
         <div className="flex flex-col p-4 border-b border-white/5 bg-black/20 gap-4 lg:hidden">
           <div className="flex items-center justify-end">

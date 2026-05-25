@@ -25,7 +25,7 @@ import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
 const PRI = "#55DEE8";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
-const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif", fontSize: "20px" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvatarClick, currentUser, navigate, gateInteraction }) => {
   const shapes = [
@@ -41,10 +41,10 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-black rounded-[16px] border border-[#55DEE8]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-[#55DEE8]/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+      className="relative bg-black rounded-[8px] border border-[#55DEE8]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-[#55DEE8]/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
     >
       <div className="flex justify-end items-start p-4 absolute top-0 left-0 right-0 z-20">
-        <div className="p-1.5 bg-[#55DEE8]/10 rounded-lg border border-[#55DEE8]/20">
+        <div className="p-1.5 bg-[#55DEE8]/10 rounded-[8px] border border-[#55DEE8]/20">
           <ShieldCheck size={14} className="text-[#55DEE8]" />
         </div>
       </div>
@@ -91,10 +91,10 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
           </div>
         </div>
         <div className="flex items-center gap-2 w-full mt-auto">
-          <button onClick={() => handleFollowToggle(player.id || player._id)} className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player.id || player._id) ? "bg-white/5 text-white/20 border border-white/10" : "bg-[#55DEE8] text-black hover:bg-[#88EEF6]"}`}>
+          <button onClick={() => handleFollowToggle(player.id || player._id)} className={`flex-1 h-11 rounded-[8px] text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player.id || player._id) ? "bg-white/5 text-white/20 border border-white/10" : "bg-[#55DEE8] text-black hover:bg-[#88EEF6]"}`}>
             {followingIds.includes(player.id || player._id) ? "Following" : "Follow"}
           </button>
-          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player.id || player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8] transition-all">
+          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player.id || player._id}`))} className="w-11 h-11 rounded-[8px] bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8] transition-all">
             <MessageCircle size={18} />
           </button>
         </div>
@@ -109,7 +109,7 @@ const TeamCard = ({ team, navigate }) => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-[#0A0A0A] rounded-[20px] border border-white/5 overflow-hidden flex flex-col h-[380px] group hover:border-[#55DEE8]/30 transition-all duration-500 shadow-2xl"
+      className="relative bg-[#0A0A0A] rounded-[8px] border border-white/5 overflow-hidden flex flex-col h-[380px] group hover:border-[#55DEE8]/30 transition-all duration-500 shadow-2xl"
     >
       {/* Top Section: Banner */}
       <div className="h-32 relative">
@@ -121,7 +121,7 @@ const TeamCard = ({ team, navigate }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
         
         {/* Verified Badge */}
-        <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10">
+        <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1.5 rounded-[6px] border border-white/10">
           <div className="w-3.5 h-3.5 bg-[#55DEE8] rounded-full flex items-center justify-center">
             <ShieldCheck size={10} className="text-black" />
           </div>
@@ -163,7 +163,7 @@ const TeamCard = ({ team, navigate }) => {
             </div>
             <p className="text-gray-600 text-[8px] font-bold uppercase tracking-widest mt-0.5">@ {team.city || 'Global'}</p>
           </div>
-          <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-white/40 hover:text-[#55DEE8] transition-colors">
+          <div className="p-2 bg-white/5 rounded-[8px] border border-white/10 text-white/40 hover:text-[#55DEE8] transition-colors">
             <Star size={16} />
           </div>
         </div>
@@ -171,7 +171,7 @@ const TeamCard = ({ team, navigate }) => {
         {/* Stats Section */}
         <div className="grid grid-cols-2 gap-2 py-3 border-y border-white/5 mb-3">
           <div className="flex items-center gap-2">
-             <div className="p-2 bg-white/5 rounded-lg border border-white/10">
+             <div className="p-2 bg-white/5 rounded-[8px] border border-white/10">
                 <Users size={14} className="text-[#55DEE8]" />
              </div>
              <div>
@@ -180,7 +180,7 @@ const TeamCard = ({ team, navigate }) => {
              </div>
           </div>
           <div className="flex items-center gap-2">
-             <div className="p-2 bg-white/5 rounded-lg border border-white/10">
+             <div className="p-2 bg-white/5 rounded-[8px] border border-white/10">
                 <Target size={14} className="text-[#55DEE8]" />
              </div>
              <div>
@@ -194,14 +194,14 @@ const TeamCard = ({ team, navigate }) => {
         <div className="grid grid-cols-2 gap-3 mb-4">
            <Link 
               to={`/team/${team._id}`}
-              className="h-12 bg-[#55DEE8] text-black rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_15px_rgba(85, 222, 232,0.2)]"
+              className="h-12 bg-[#55DEE8] text-black rounded-[8px] font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_15px_rgba(85, 222, 232,0.2)]"
            >
               <UserPlus size={14} strokeWidth={3} />
               Join Team
            </Link>
            <Link 
               to={`/team/${team._id}`}
-              className="h-12 bg-transparent border-2 border-white/10 text-white rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
+              className="h-12 bg-transparent border-2 border-white/10 text-white rounded-[8px] font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
            >
               <Swords size={14} />
               Challenge
@@ -358,7 +358,7 @@ const FindPlayers = () => {
         </div>
 
         {/* Compact Header Row */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02] border border-white/5 rounded-2xl p-3 md:p-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02] border border-white/5 rounded-[8px] p-3 md:p-4">
           <div className="flex items-center gap-4 flex-1">
             <h2 className="text-[10px] md:text-xs font-bold text-white/20 uppercase tracking-[0.2em] whitespace-nowrap hidden sm:block" style={SUBHEADING_STYLE}>{activeTab === "players" ? "Active Players" : "Verified Teams"}</h2>
             <div className="relative flex-1 max-w-md group">
@@ -368,7 +368,7 @@ const FindPlayers = () => {
                 value={searchQuery}
                 onChange={handleSearch}
                 placeholder="SEARCH..."
-                className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#55DEE8]/50 rounded-xl h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
+                className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#55DEE8]/50 rounded-[8px] h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
               />
             </div>
           </div>
@@ -377,7 +377,7 @@ const FindPlayers = () => {
             <select 
               value={filters.sport}
               onChange={(e) => handleFilterChange("sport", e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
+              className="bg-white/5 border border-white/10 rounded-[6px] px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
             >
               <option value="">All Sports</option>
               {sports.map(s => <option key={s} value={s}>{s}</option>)}
@@ -399,7 +399,7 @@ const FindPlayers = () => {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-[520px] bg-white/[0.02] border border-white/5 rounded-[32px] animate-pulse" />
+              <div key={i} className="h-[520px] bg-white/[0.02] border border-white/5 rounded-[8px] animate-pulse" />
             ))}
           </div>
         ) : activeTab === "players" ? (

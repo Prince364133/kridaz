@@ -65,7 +65,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/80 backdrop-blur-xl animate-fade-in font-inter">
       {/* Modal Container */}
-      <div className="relative w-full max-w-5xl h-[88vh] md:h-[80vh] flex flex-col bg-neutral-950 border border-white/10 rounded-[32px] overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.8)]">
+      <div className="relative w-full max-w-5xl h-[88vh] md:h-[80vh] flex flex-col bg-neutral-950 border border-white/10 rounded-[8px] overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.8)]">
         
         {/* Header */}
         <div className="flex items-center justify-between p-6 md:px-8 border-b border-white/5 bg-white/[0.01]">
@@ -99,11 +99,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
                   onClick={() => setSelectedTheme(theme.id)}
                   onMouseEnter={() => setHoveredTheme(theme.id)}
                   onMouseLeave={() => setHoveredTheme(null)}
-                  className={`group relative flex flex-col justify-between p-6 rounded-[24px] border cursor-pointer transition-all duration-500 overflow-hidden ${
-                    isSelected 
-                      ? 'border-[#00C187] bg-white/[0.02] shadow-[0_15px_30px_rgba(0,193,135,0.06)]' 
-                      : 'border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]'
-                  }`}
+                  className={`group relative flex flex-col justify-between p-6 rounded-[8px] border cursor-pointer transition-all duration-500 overflow-hidden ${ isSelected ? 'border-[#00C187] bg-white/[0.02] shadow-[0_15px_30px_rgba(0,193,135,0.06)]' : 'border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]' }`}
                 >
                   {/* Dynamic Glowing Accent Background on Hover */}
                   <div 
@@ -134,7 +130,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
                     </p>
 
                     {/* CSS LIVE PREVIEW TICKER */}
-                    <div className={`w-full py-4 px-3 rounded-2xl flex items-center justify-between overflow-hidden shadow-lg ${theme.previewBg}`}>
+                    <div className={`w-full py-4 px-3 rounded-[8px] flex items-center justify-between overflow-hidden shadow-lg ${theme.previewBg}`}>
                       {theme.id === 'neon_classic' && (
                         <>
                           <div className="flex items-center gap-2">
@@ -199,11 +195,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
                         <div className="w-4 h-4 rounded-full bg-[#00C187]/80 border border-black" />
                       </div>
 
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 ${
-                        isSelected 
-                          ? 'bg-[#00C187]/10 border-[#00C187] text-[#00C187]' 
-                          : 'bg-white/5 border-white/5 text-neutral-600'
-                      }`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 ${ isSelected ? 'bg-[#00C187]/10 border-[#00C187] text-[#00C187]' : 'bg-white/5 border-white/5 text-neutral-600' }`}>
                         {isSelected ? <Check size={14} className="stroke-[3]" /> : <Circle size={4} className="fill-neutral-600" />}
                       </div>
                     </div>
@@ -224,14 +216,14 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
           <div className="flex items-center gap-3 w-full md:w-auto">
             <button 
               onClick={onClose}
-              className="flex-1 md:flex-none px-6 py-3.5 rounded-2xl bg-neutral-900 border border-white/5 text-neutral-400 hover:text-white hover:bg-neutral-800 text-[10px] font-black uppercase tracking-widest transition-all"
+              className="flex-1 md:flex-none px-6 py-3.5 rounded-[8px] bg-neutral-900 border border-white/5 text-neutral-400 hover:text-white hover:bg-neutral-800 text-[10px] font-black uppercase tracking-widest transition-all"
             >
               Cancel
             </button>
             <button 
               onClick={handleApplyTheme}
               disabled={isApplying}
-              className="flex-1 md:flex-none px-8 py-3.5 rounded-2xl bg-[#00C187] hover:bg-[#00e39e] text-black font-black uppercase text-[10px] tracking-widest transition-all shadow-[0_10px_30px_rgba(0,193,135,0.2)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 md:flex-none px-8 py-3.5 rounded-[8px] bg-[#00C187] hover:bg-[#00e39e] text-black font-black uppercase text-[10px] tracking-widest transition-all shadow-[0_10px_30px_rgba(0,193,135,0.2)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isApplying ? (
                 <>

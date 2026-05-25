@@ -133,10 +133,10 @@ export default function ProfessionalDetails() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Left Column: Profile Info */}
           <div className="lg:col-span-8">
-            <div className="bg-neutral-900/40 rounded-xl border border-neutral-800 p-8 md:p-12 mb-8">
+            <div className="bg-neutral-900/40 rounded-[8px] border border-neutral-800 p-8 md:p-12 mb-8">
               <div className="flex flex-col md:flex-row gap-8 items-start">
                 <div className="relative">
-                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl overflow-hidden p-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">
+                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-[8px] overflow-hidden p-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">
                     <div className="w-full h-full bg-black rounded-lg overflow-hidden flex items-center justify-center">
                       {pro.profilePicture ? (
                         <img 
@@ -164,7 +164,7 @@ export default function ProfessionalDetails() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h1 className="font-heading text-4xl md:text-5xl uppercase leading-none">{pro.name}</h1>
-                    <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[10px] font-bold tracking-widest border border-[#BFF367]/20 uppercase">
+                    <span className="px-3 py-1 rounded-[8px] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[10px] font-bold tracking-widest border border-[#BFF367]/20 uppercase">
                       PRO {pro.role}
                     </span>
                   </div>
@@ -191,17 +191,17 @@ export default function ProfessionalDetails() {
             </div>
 
             {/* Certifications */}
-            <div className="bg-neutral-900/40 rounded-xl border border-neutral-800 p-8 mb-8">
+            <div className="bg-neutral-900/40 rounded-[8px] border border-neutral-800 p-8 mb-8">
               <h3 className="font-heading text-xl uppercase mb-6 flex items-center gap-2">
                 <Shield size={18} className="text-[#55DEE8]" /> Certifications
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {pro.certifications?.length > 0 ? pro.certifications.map((cert, i) => (
-                  <div key={i} className="aspect-video rounded-xl bg-black border border-neutral-800 overflow-hidden group cursor-pointer">
+                  <div key={i} className="aspect-video rounded-[8px] bg-black border border-neutral-800 overflow-hidden group cursor-pointer">
                     <img src={cert} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                   </div>
                 )) : [1, 2, 3, 4].map(i => (
-                  <div key={i} className="aspect-video rounded-xl bg-black/40 border border-dashed border-neutral-800 flex items-center justify-center">
+                  <div key={i} className="aspect-video rounded-[8px] bg-black/40 border border-dashed border-neutral-800 flex items-center justify-center">
                     <Camera size={20} className="text-neutral-800" />
                   </div>
                 ))}
@@ -214,7 +214,7 @@ export default function ProfessionalDetails() {
             <div className="sticky top-24 space-y-6">
               
               {/* Select Schedule Card */}
-              <div className="bg-[#1a1a1a] rounded-xl p-6 border border-neutral-800/60 shadow-lg">
+              <div className="bg-[#1a1a1a] rounded-[8px] p-6 border border-neutral-800/60 shadow-lg">
                 <h2 className="font-heading text-xl font-bold text-white mb-6">Select Schedule</h2>
 
                 {/* Date Selection */}
@@ -227,11 +227,7 @@ export default function ProfessionalDetails() {
                         <button 
                           key={dateStr}
                           onClick={() => setSelectedDate(dateStr)}
-                          className={`flex flex-col items-center justify-center min-w-[56px] h-[64px] rounded-lg transition-all ${
-                            isSelected 
-                            ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black" 
-                            : "bg-black border border-neutral-800 text-gray-400 hover:border-neutral-600"
-                          }`}
+                          className={`flex flex-col items-center justify-center min-w-[56px] h-[64px] rounded-lg transition-all ${ isSelected ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black" : "bg-black border border-neutral-800 text-gray-400 hover:border-neutral-600" }`}
                         >
                           <span className="text-[10px] font-semibold mb-1">{format(date, 'EEE')}</span>
                           <span className="text-lg font-bold leading-none">{format(date, 'dd')}</span>
@@ -256,13 +252,7 @@ export default function ProfessionalDetails() {
                           key={i}
                           disabled={!slot.isAvailable}
                           onClick={() => handleSlotToggle(slot)}
-                          className={`px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${
-                            !slot.isAvailable 
-                            ? "bg-neutral-900 border border-neutral-900 text-neutral-600 cursor-not-allowed line-through" 
-                            : selectedSlots.some(s => s.startTime === slot.startTime)
-                            ? "bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#BFF367] text-[#BFF367]"
-                            : "bg-black border border-neutral-800 text-gray-300 hover:border-neutral-600"
-                          }`}
+                          className={`px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${ !slot.isAvailable ? "bg-neutral-900 border border-neutral-900 text-neutral-600 cursor-not-allowed line-through" : selectedSlots.some(s => s.startTime === slot.startTime) ? "bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#BFF367] text-[#BFF367]" : "bg-black border border-neutral-800 text-gray-300 hover:border-neutral-600" }`}
                         >
                           {slot.startTime} - {slot.endTime}
                         </button>
@@ -273,14 +263,14 @@ export default function ProfessionalDetails() {
 
                 <textarea 
                   placeholder="Special request (Optional)"
-                  className="w-full bg-black border border-neutral-800 rounded-lg p-3 text-sm focus:border-[#55DEE8] outline-none transition-colors h-20 resize-none text-white font-sans placeholder:text-gray-600"
+                  className="w-full bg-black border border-neutral-800 rounded-[8px] p-3 text-sm focus:border-[#55DEE8] outline-none transition-colors h-20 resize-none text-white font-sans placeholder:text-gray-600"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
               </div>
 
               {/* Checkout Card */}
-              <div className="bg-[#1a1a1a] rounded-xl p-6 lg:p-8 border border-neutral-800/60 shadow-lg">
+              <div className="bg-[#1a1a1a] rounded-[8px] p-6 lg:p-8 border border-neutral-800/60 shadow-lg">
                 <h2 className="font-heading text-2xl font-bold text-white mb-6">Checkout</h2>
                 
                 {/* Selected Slots Preview */}
@@ -348,10 +338,10 @@ export default function ProfessionalDetails() {
               </div>
 
               {/* Reviews Card */}
-              <div className="bg-[#1a1a1a] rounded-xl p-6 border border-neutral-800/60 shadow-lg">
+              <div className="bg-[#1a1a1a] rounded-[8px] p-6 border border-neutral-800/60 shadow-lg">
                 <div className="flex justify-between items-center mb-6">
                   <span className="text-sm text-white/60 font-sans">How was your experience</span>
-                  <button className="px-3 py-1.5 rounded-md border border-[#BFF367]/40 text-[#BFF367] text-xs font-bold hover:bg-[#BFF367]/10 transition-colors">
+                  <button className="px-3 py-1.5 rounded-[6px] border border-[#BFF367]/40 text-[#BFF367] text-xs font-bold hover:bg-[#BFF367]/10 transition-colors">
                     RATE PRO
                   </button>
                 </div>

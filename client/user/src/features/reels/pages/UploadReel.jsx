@@ -56,7 +56,7 @@ const UploadReel = () => {
 
       <div className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto">
         {/* Video Preview / Upload Area */}
-        <div className="relative aspect-[9/16] w-full max-w-sm mx-auto bg-white/5 rounded-2xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center overflow-hidden group">
+        <div className="relative aspect-[9/16] w-full max-w-sm mx-auto bg-white/5 rounded-[8px] border-2 border-dashed border-white/20 flex flex-col items-center justify-center overflow-hidden group">
           {preview ? (
             <>
               <video src={preview} className="w-full h-full object-cover" controls={false} autoPlay muted loop />
@@ -89,7 +89,7 @@ const UploadReel = () => {
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               placeholder="Write a catchy caption..."
-              className="w-full bg-white/5 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-[#55DEE8] transition-colors resize-none h-24"
+              className="w-full bg-white/5 border border-white/10 rounded-[8px] p-4 focus:outline-none focus:border-[#55DEE8] transition-colors resize-none h-24"
             />
           </div>
 
@@ -100,11 +100,11 @@ const UploadReel = () => {
               value={hashtags}
               onChange={(e) => setHashtags(e.target.value)}
               placeholder="#sports #kridaz #goals"
-              className="w-full bg-white/5 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-[#55DEE8] transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-[8px] p-4 focus:outline-none focus:border-[#55DEE8] transition-colors"
             />
           </div>
 
-          <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex gap-3">
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-[8px] p-4 flex gap-3">
             <AlertCircle size={20} className="text-blue-400 shrink-0" />
             <p className="text-xs text-blue-100 leading-relaxed">
               Your video will be automatically optimized for mobile streaming. This might take a few minutes.
@@ -114,7 +114,7 @@ const UploadReel = () => {
           <button 
             onClick={handleUpload}
             disabled={!file || isPreparing}
-            className="w-full py-4 bg-[#55DEE8] text-black font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#74b314] transition-colors mt-4"
+            className="w-full py-4 bg-[#55DEE8] text-black font-bold rounded-[8px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#74b314] transition-colors mt-4"
           >
             {isPreparing ? 'Preparing...' : 'Share Reel'}
           </button>

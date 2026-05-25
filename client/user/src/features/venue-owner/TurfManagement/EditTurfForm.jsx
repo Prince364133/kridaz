@@ -98,9 +98,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                 type="text"
                 {...register('name')}
                 placeholder="E.g. Wembley Pro"
-                className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all ${
-                  errors.name ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
-                }`}
+                className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all ${ errors.name ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50' }`}
               />
             </InputWrapper>
 
@@ -109,9 +107,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                 {...register('description')}
                 placeholder="Describe the atmosphere and facilities..."
                 rows={4}
-                className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all resize-none ${
-                  errors.description ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
-                }`}
+                className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all resize-none ${ errors.description ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50' }`}
               ></textarea>
             </InputWrapper>
 
@@ -121,9 +117,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                 maxLength={1000}
                 placeholder="Rules, cancellation terms, safety... (Min 200 chars)"
                 rows={6}
-                className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all resize-none ${
-                  errors.policies ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
-                }`}
+                className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all resize-none ${ errors.policies ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50' }`}
               ></textarea>
               {!errors.policies && (
                 <p className="text-[9px] font-bold text-[#444] uppercase tracking-widest ml-1 mt-1">
@@ -138,9 +132,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                   type="number"
                   {...register('pricePerHour', { valueAsNumber: true })}
                   placeholder="2500"
-                  className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all ${
-                    errors.pricePerHour ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
-                  }`}
+                  className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all ${ errors.pricePerHour ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50' }`}
                 />
               </InputWrapper>
 
@@ -149,9 +141,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                   type="text"
                   {...register('location')}
                   placeholder="City, State"
-                  className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all ${
-                    errors.location ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
-                  }`}
+                  className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white placeholder-[#333] focus:outline-none transition-all ${ errors.location ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50' }`}
                 />
               </InputWrapper>
             </div>
@@ -164,7 +154,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                   <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-3 bg-[#050505] border border-[#2D2D2D] rounded-[8px]">
                     {watch('sportTypes')?.length > 0 ? (
                       watch('sportTypes').map((sport) => (
-                        <span key={sport} className="px-3 py-1 bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
+                        <span key={sport} className="px-3 py-1 bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 rounded-[6px] text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
                           {sport}
                           <button type="button" onClick={() => setValue('sportTypes', watch('sportTypes').filter(s => s !== sport))} className="hover:text-white transition-colors">
                             <X size={10} />
@@ -196,7 +186,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                     <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-3 bg-[#050505] border border-[#2D2D2D] rounded-[8px]">
                       {watch('groundTypes')?.length > 0 ? (
                         watch('groundTypes').map((ground) => (
-                          <span key={ground} className="px-3 py-1 bg-white/5 text-white border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
+                          <span key={ground} className="px-3 py-1 bg-white/5 text-white border border-white/10 rounded-[6px] text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
                             {ground}
                             <button type="button" onClick={() => setValue('groundTypes', watch('groundTypes').filter(g => g !== ground))} className="hover:text-[#55DEE8] transition-colors">
                               <X size={10} />
@@ -227,7 +217,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                     <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-3 bg-[#050505] border border-[#2D2D2D] rounded-[8px]">
                       {watch('facilities')?.length > 0 ? (
                         watch('facilities').map((facility) => (
-                          <span key={facility} className="px-3 py-1 bg-[#1A1A1A] text-[#878C9F] border border-[#2D2D2D] rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
+                          <span key={facility} className="px-3 py-1 bg-[#1A1A1A] text-[#878C9F] border border-[#2D2D2D] rounded-[6px] text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
                             {facility}
                             <button type="button" onClick={() => setValue('facilities', watch('facilities').filter(f => f !== facility))} className="hover:text-white transition-colors">
                               <X size={10} />
@@ -271,9 +261,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                       timeIntervals={60}
                       timeCaption="Time"
                       dateFormat="h:mm aa"
-                      className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white focus:outline-none transition-all ${
-                        errors.openTime ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
-                      }`}
+                      className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white focus:outline-none transition-all ${ errors.openTime ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50' }`}
                       filterTime={filterPassedTime}
                     />
                   )}
@@ -293,9 +281,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                       timeIntervals={60}
                       timeCaption="Time"
                       dateFormat="h:mm aa"
-                      className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white focus:outline-none transition-all ${
-                        errors.closeTime ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50'
-                      }`}
+                      className={`w-full bg-[#050505] border rounded-[8px] px-4 py-3 text-sm text-white focus:outline-none transition-all ${ errors.closeTime ? 'border-red-500/50 bg-red-500/5' : 'border-[#2D2D2D] focus:border-[#55DEE8]/50' }`}
                       filterTime={filterCloseTime}
                       disabled={!getValues('openTime')}
                     />

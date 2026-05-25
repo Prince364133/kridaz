@@ -120,31 +120,19 @@ const TurfBookingHistory = () => {
           <div className="flex flex-wrap gap-2">
             <button 
               onClick={() => setBookingSubTab('venues')}
-              className={`px-4 py-2.5 rounded-full font-black uppercase tracking-wider text-[10px] border transition-all ${
-                bookingSubTab === 'venues' 
-                  ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]' 
-                  : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10'
-              }`}
+              className={`px-4 py-2.5 rounded-[6px] font-black uppercase tracking-wider text-[10px] border transition-all ${ bookingSubTab === 'venues' ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10' }`}
             >
               Venue Bookings
             </button>
             <button 
               onClick={() => setBookingSubTab('games')}
-              className={`px-4 py-2.5 rounded-full font-black uppercase tracking-wider text-[10px] border transition-all ${
-                bookingSubTab === 'games' 
-                  ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]' 
-                  : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10'
-              }`}
+              className={`px-4 py-2.5 rounded-[6px] font-black uppercase tracking-wider text-[10px] border transition-all ${ bookingSubTab === 'games' ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10' }`}
             >
               Joined Games
             </button>
             <button 
               onClick={() => setBookingSubTab('professionals')}
-              className={`px-4 py-2.5 rounded-full font-black uppercase tracking-wider text-[10px] border transition-all ${
-                bookingSubTab === 'professionals' 
-                  ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]' 
-                  : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10'
-              }`}
+              className={`px-4 py-2.5 rounded-[6px] font-black uppercase tracking-wider text-[10px] border transition-all ${ bookingSubTab === 'professionals' ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10' }`}
             >
               Hired Professionals
             </button>
@@ -157,13 +145,13 @@ const TurfBookingHistory = () => {
               {/* ── Bookings Feed ───────────────────────────────────────────── */}
               <div className="space-y-4">
                 {bookings.length === 0 ? (
-                  <div className="bg-[#111111] p-20 rounded-[24px] border border-white/5 text-center flex flex-col items-center justify-center">
+                  <div className="bg-[#111111] p-20 rounded-[8px] border border-white/5 text-center flex flex-col items-center justify-center">
                     <div className="w-16 h-16 mx-auto rounded-full bg-[#222] flex items-center justify-center text-gray-500 mb-4">
                       <Calendar size={24} />
                     </div>
                     <h2 className="text-xl font-black text-white uppercase tracking-tight">No Bookings Yet</h2>
                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-2">Explore local arenas and book your first game!</p>
-                    <Link to="/" className="mt-6 px-6 py-3 rounded-full bg-[#CCFF00] text-black text-[10px] font-black uppercase tracking-widest hover:bg-[#b3ff00] transition-colors">
+                    <Link to="/" className="mt-6 px-6 py-3 rounded-[6px] bg-[#CCFF00] text-black text-[10px] font-black uppercase tracking-widest hover:bg-[#b3ff00] transition-colors">
                       Explore Venues
                     </Link>
                   </div>
@@ -174,10 +162,10 @@ const TurfBookingHistory = () => {
                     const slotOver = new Date() > new Date(booking.playEndTime);
 
                     return (
-                      <div key={booking.id || booking._id} className="bg-[#111111] border border-white/5 rounded-[24px] p-4 flex flex-col md:flex-row gap-6 hover:border-[#CCFF00]/30 transition-colors group relative overflow-hidden">
+                      <div key={booking.id || booking._id} className="bg-[#111111] border border-white/5 rounded-[8px] p-4 flex flex-col md:flex-row gap-6 hover:border-[#CCFF00]/30 transition-colors group relative overflow-hidden">
                         
                         {/* Left Image */}
-                        <div className="w-full md:w-64 h-40 shrink-0 rounded-2xl overflow-hidden bg-[#222]">
+                        <div className="w-full md:w-64 h-40 shrink-0 rounded-[8px] overflow-hidden bg-[#222]">
                           <img src={booking.turf?.images?.[0] || 'https://images.unsplash.com/photo-1518605368461-1ee7111d4e7a?auto=format&fit=crop&q=80'} className="w-full h-full object-cover transition-all duration-500" alt="Turf" />
                         </div>
 
@@ -200,24 +188,24 @@ const TurfBookingHistory = () => {
 
                           {/* Actions Row */}
                           <div className="flex flex-wrap items-center gap-2 mt-4 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <Link to={`/booking-pass/${booking.id || booking._id}`} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-[#CCFF00] hover:text-black hover:border-[#CCFF00] text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                            <Link to={`/booking-pass/${booking.id || booking._id}`} className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:bg-[#CCFF00] hover:text-black hover:border-[#CCFF00] text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                               <Ticket size={12} /> Pass
                             </Link>
-                            <Link to={`/booking-invoice/${booking.id || booking._id}`} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                            <Link to={`/booking-invoice/${booking.id || booking._id}`} className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                               <FileText size={12} /> Invoice
                             </Link>
                             {booking.status === "CONFIRMED" && hrs >= 72 && !slotOver && (
-                              <button onClick={() => cancelBooking(booking)} className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                              <button onClick={() => cancelBooking(booking)} className="px-4 py-2 rounded-[6px] bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                                 Cancel
                               </button>
                             )}
                             {booking.status !== "CANCELLED" && booking.status !== "DISPUTED" && (
-                              <button onClick={() => setSelectedDisputeBooking(booking)} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-yellow-500/50 hover:text-yellow-500 text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                              <button onClick={() => setSelectedDisputeBooking(booking)} className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:border-yellow-500/50 hover:text-yellow-500 text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                                 Dispute
                               </button>
                             )}
                             {booking.status === "COMPLETED" && (
-                              <button onClick={() => openReviewModal(booking.turf._id)} className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:text-[#CCFF00] text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                              <button onClick={() => openReviewModal(booking.turf._id)} className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:text-[#CCFF00] text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                                 Review
                               </button>
                             )}
@@ -263,7 +251,7 @@ const TurfBookingHistory = () => {
                       {[...Array(4)].map((_, i) => (
                         <div 
                           key={i} 
-                          className="h-[280px] rounded-[24px] bg-[#111] border border-white/5 animate-pulse relative overflow-hidden"
+                          className="h-[280px] rounded-[8px] bg-[#111] border border-white/5 animate-pulse relative overflow-hidden"
                         >
                           <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent h-[50%]" />
                           <div className="absolute bottom-0 left-0 right-0 p-6 space-y-2">
@@ -304,7 +292,7 @@ const TurfBookingHistory = () => {
                       {[...Array(4)].map((_, i) => (
                         <div 
                           key={i} 
-                          className="h-[280px] rounded-[24px] bg-[#111] border border-white/5 animate-pulse relative overflow-hidden"
+                          className="h-[280px] rounded-[8px] bg-[#111] border border-white/5 animate-pulse relative overflow-hidden"
                         >
                           <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent h-[50%]" />
                           <div className="absolute bottom-0 left-0 right-0 p-6 space-y-2">
@@ -333,12 +321,12 @@ const TurfBookingHistory = () => {
           {bookingSubTab === 'games' && (
             <div className="space-y-4">
               {loadingJoinedGames ? (
-                <div className="text-center py-12 bg-[#0a0a0a] rounded-[15px] border border-white/5">
+                <div className="text-center py-12 bg-[#0a0a0a] rounded-[8px] border border-white/5">
                   <Loader2 className="w-8 h-8 text-[#CCFF00] animate-spin mx-auto mb-2" />
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Loading Joined Games...</p>
                 </div>
               ) : joinedGames.length === 0 ? (
-                <div className="bg-[#111111] p-16 rounded-[24px] border border-white/5 text-center flex flex-col items-center justify-center">
+                <div className="bg-[#111111] p-16 rounded-[8px] border border-white/5 text-center flex flex-col items-center justify-center">
                   <div className="w-14 h-14 rounded-full bg-[#222] flex items-center justify-center text-gray-500 mb-4">
                     <Zap size={24} />
                   </div>
@@ -356,12 +344,12 @@ const TurfBookingHistory = () => {
                   const statusClass = statusColors[statusText] || 'text-gray-400 bg-white/5 border-white/10';
 
                   return (
-                    <div key={game._id} className="group relative rounded-[15px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#CCFF00] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[15px]" />
-                      <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[15px]" />
+                    <div key={game._id} className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#CCFF00] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
+                      <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px]" />
                       
-                      <div className="relative bg-[#0d0d0d] rounded-[15px] p-4 flex flex-col md:flex-row gap-6 w-full">
-                        <div className="w-full md:w-48 h-32 shrink-0 rounded-[15px] overflow-hidden bg-white/5 flex items-center justify-center relative">
+                      <div className="relative bg-[#0d0d0d] rounded-[8px] p-4 flex flex-col md:flex-row gap-6 w-full">
+                        <div className="w-full md:w-48 h-32 shrink-0 rounded-[8px] overflow-hidden bg-white/5 flex items-center justify-center relative">
                           {game.turf?.images?.[0] ? (
                             <img src={game.turf.images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
                           ) : (
@@ -411,7 +399,7 @@ const TurfBookingHistory = () => {
                               {Number(game.perPlayerCharge) > 0 ? `₹${game.perPlayerCharge}` : 'Free'}
                             </p>
                           </div>
-                          <div className={`px-3 py-1 rounded-[15px] text-[8px] font-black uppercase tracking-widest border ${statusClass}`}>
+                          <div className={`px-3 py-1 rounded-[8px] text-[8px] font-black uppercase tracking-widest border ${statusClass}`}>
                             {statusText}
                           </div>
                         </div>
@@ -426,12 +414,12 @@ const TurfBookingHistory = () => {
           {bookingSubTab === 'professionals' && (
             <div className="space-y-4">
               {loadingProBookings ? (
-                <div className="text-center py-12 bg-[#0a0a0a] rounded-[15px] border border-white/5">
+                <div className="text-center py-12 bg-[#0a0a0a] rounded-[8px] border border-white/5">
                   <Loader2 className="w-8 h-8 text-[#CCFF00] animate-spin mx-auto mb-2" />
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Loading Hired Professionals...</p>
                 </div>
               ) : professionalBookings.length === 0 ? (
-                <div className="bg-[#111111] p-16 rounded-[24px] border border-white/5 text-center flex flex-col items-center justify-center">
+                <div className="bg-[#111111] p-16 rounded-[8px] border border-white/5 text-center flex flex-col items-center justify-center">
                   <div className="w-14 h-14 rounded-full bg-[#222] flex items-center justify-center text-gray-500 mb-4">
                     <User size={24} />
                   </div>
@@ -462,12 +450,12 @@ const TurfBookingHistory = () => {
                   }
 
                   return (
-                    <div key={booking.id} className="group relative rounded-[15px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#CCFF00] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[15px]" />
-                      <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[15px]" />
+                    <div key={booking.id} className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#CCFF00] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
+                      <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px]" />
                       
-                      <div className="relative bg-[#0d0d0d] rounded-[15px] p-4 flex flex-col md:flex-row gap-6 w-full">
-                        <div className="w-full md:w-32 h-32 shrink-0 rounded-[15px] overflow-hidden bg-white/5 flex items-center justify-center border border-white/5 relative">
+                      <div className="relative bg-[#0d0d0d] rounded-[8px] p-4 flex flex-col md:flex-row gap-6 w-full">
+                        <div className="w-full md:w-32 h-32 shrink-0 rounded-[8px] overflow-hidden bg-white/5 flex items-center justify-center border border-white/5 relative">
                           {profPic ? (
                             <img src={profPic} className="w-full h-full object-cover transition-all duration-500" alt="" />
                           ) : (
@@ -505,7 +493,7 @@ const TurfBookingHistory = () => {
                             <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-1">Total Paid</p>
                             <p className="text-xl font-black text-white">₹{booking.totalAmount}</p>
                           </div>
-                          <div className={`px-3 py-1 rounded-[15px] text-[8px] font-black uppercase tracking-widest border ${statusClass}`}>
+                          <div className={`px-3 py-1 rounded-[8px] text-[8px] font-black uppercase tracking-widest border ${statusClass}`}>
                             {booking.status}
                           </div>
                         </div>

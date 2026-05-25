@@ -134,13 +134,13 @@ const MyJoinedGames = () => {
             placeholder="Search by Host, Team or Match Type..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-neutral-800/50 border border-neutral-800 rounded-2xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-yellow-500 transition-colors placeholder:text-neutral-600 font-inter"
+            className="w-full bg-neutral-800/50 border border-neutral-800 rounded-[8px] py-3 pl-12 pr-4 text-white focus:outline-none focus:border-yellow-500 transition-colors placeholder:text-neutral-600 font-inter"
           />
         </div>
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="bg-neutral-800/50 border border-neutral-800 rounded-2xl py-3 px-4 text-white focus:outline-none focus:border-yellow-500 transition-colors appearance-none min-w-[150px] font-inter font-bold"
+          className="bg-neutral-800/50 border border-neutral-800 rounded-[8px] py-3 px-4 text-white focus:outline-none focus:border-yellow-500 transition-colors appearance-none min-w-[150px] font-inter font-bold"
         >
           <option value="ALL">All Status</option>
           <option value="JOINED">Joined</option>
@@ -152,9 +152,9 @@ const MyJoinedGames = () => {
 
       <div className="max-w-4xl mx-auto space-y-6">
         {loading ? (
-          [1, 2].map(i => <div key={i} className="h-48 bg-neutral-800 rounded-3xl animate-pulse" />)
+          [1, 2].map(i => <div key={i} className="h-48 bg-neutral-800 rounded-[8px] animate-pulse" />)
         ) : filteredGames.length === 0 ? (
-          <div className="py-20 text-center bg-neutral-800/20 rounded-3xl border-2 border-dashed border-neutral-800">
+          <div className="py-20 text-center bg-neutral-800/20 rounded-[8px] border-2 border-dashed border-neutral-800">
             <Trophy size={48} className="mx-auto mb-4 text-neutral-700" />
             <h3 className="text-xl font-bold">
               {joinedGames.length === 0 ? "No matches joined yet" : "No matches found"}
@@ -163,7 +163,7 @@ const MyJoinedGames = () => {
               {joinedGames.length === 0 ? "Explore games hosted by the community and join one!" : "Try adjusting your search filters"}
             </p>
             {joinedGames.length === 0 && (
-              <button onClick={() => window.location.href='/join-games'} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-xl">
+              <button onClick={() => window.location.href='/join-games'} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-[8px]">
                 Find Games
               </button>
             )}
@@ -185,7 +185,7 @@ const MyJoinedGames = () => {
             const collectedCoins = joinedSlotsCount * perPlayerCharge;
 
             return (
-            <div key={game._id} className="bg-neutral-800/50 border border-neutral-800 rounded-3xl overflow-hidden relative shadow-2xl mb-6">
+            <div key={game._id} className="bg-neutral-800/50 border border-neutral-800 rounded-[8px] overflow-hidden relative shadow-2xl mb-6">
               {game.status === 'CANCELLED' && (
                 <div className="absolute inset-0 bg-black/60 z-10 flex items-center justify-center backdrop-blur-[2px]">
                    <span className="bg-red-500 text-white px-6 py-2 rounded-full font-black uppercase italic tracking-tighter transform -rotate-12">
@@ -204,7 +204,7 @@ const MyJoinedGames = () => {
                       {game.shortId && (
                         <button
                           onClick={() => { navigator.clipboard?.writeText(game.shortId); toast.success('Game ID copied!'); }}
-                          className="bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-yellow-500 hover:border-yellow-500/40 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider transition-all flex items-center gap-1"
+                          className="bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-yellow-500 hover:border-yellow-500/40 text-[10px] font-black px-2 py-0.5 rounded-[6px] uppercase tracking-wider transition-all flex items-center gap-1"
                           title="Click to copy Game ID"
                         >
                           <Info size={10} />
@@ -219,9 +219,7 @@ const MyJoinedGames = () => {
                     </h2>
                   </div>
                   <div className="text-right">
-                    <p className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest inline-block ${
-                      game.mySlotStatus === 'PENDING' ? 'bg-orange-500/20 text-orange-500' : 'bg-green-500/20 text-green-500'
-                    }`}>
+                    <p className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest inline-block ${ game.mySlotStatus === 'PENDING' ? 'bg-orange-500/20 text-orange-500' : 'bg-green-500/20 text-green-500' }`}>
                       {game.mySlotStatus}
                     </p>
                     <p className="text-xs text-neutral-500 mt-2 font-bold uppercase">{game.myRole}</p>
@@ -231,13 +229,13 @@ const MyJoinedGames = () => {
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="flex flex-wrap gap-4 text-xs font-medium text-neutral-400">
-                      <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-full">
+                      <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-[6px]">
                         <Calendar size={14} className="text-yellow-500" /> {new Date(game.date).toLocaleDateString()}
                       </div>
-                      <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-full">
+                      <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-[6px]">
                         <Clock size={14} className="text-yellow-500" /> {game.time}
                       </div>
-                      <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-full">
+                      <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-[6px]">
                         <MapPin size={14} className="text-yellow-500 min-w-[14px]" /> 
                         {game.turf?.mapUrl ? (
                           <a href={game.turf.mapUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#55DEE8] hover:underline transition-colors flex items-center gap-1 truncate max-w-[200px]" title={game.turf?.location || game.turf?.name}>
@@ -259,12 +257,12 @@ const MyJoinedGames = () => {
                           <button 
                             onClick={() => handleVoteStarted(game._id)}
                             disabled={actionLoading}
-                            className="flex items-center gap-2 px-4 py-1.5 bg-green-500/20 text-green-500 text-[10px] font-black rounded-full hover:bg-green-500 hover:text-white transition-all uppercase tracking-wider disabled:opacity-50"
+                            className="flex items-center gap-2 px-4 py-1.5 bg-green-500/20 text-green-500 text-[10px] font-black rounded-[6px] hover:bg-green-500 hover:text-white transition-all uppercase tracking-wider disabled:opacity-50"
                           >
                             <Trophy size={12} /> Game Started
                           </button>
                         ) : (
-                          <span className="flex items-center gap-2 px-4 py-1.5 bg-green-500/10 border border-green-500/30 text-green-500 text-[10px] font-black rounded-full uppercase tracking-wider">
+                          <span className="flex items-center gap-2 px-4 py-1.5 bg-green-500/10 border border-green-500/30 text-green-500 text-[10px] font-black rounded-[6px] uppercase tracking-wider">
                             Voted Started
                           </span>
                         )}
@@ -272,7 +270,7 @@ const MyJoinedGames = () => {
                           <button 
                             onClick={() => setDisputeModal({ isOpen: true, gameId: game._id, reason: "" })}
                             disabled={actionLoading}
-                            className="flex items-center gap-2 px-4 py-1.5 bg-orange-500/20 text-orange-500 text-[10px] font-black rounded-full hover:bg-orange-500 hover:text-black transition-all uppercase tracking-wider disabled:opacity-50"
+                            className="flex items-center gap-2 px-4 py-1.5 bg-orange-500/20 text-orange-500 text-[10px] font-black rounded-[6px] hover:bg-orange-500 hover:text-black transition-all uppercase tracking-wider disabled:opacity-50"
                           >
                             <Info size={12} /> Raise Dispute
                           </button>
@@ -280,12 +278,12 @@ const MyJoinedGames = () => {
                       </>
                     )}
                     {game.coinTransferStatus === 'DISPUTED' && (
-                      <span className="flex items-center gap-2 px-4 py-1.5 bg-orange-500/20 text-orange-500 text-[10px] font-black rounded-full uppercase tracking-wider">
+                      <span className="flex items-center gap-2 px-4 py-1.5 bg-orange-500/20 text-orange-500 text-[10px] font-black rounded-[6px] uppercase tracking-wider">
                         Dispute Active
                       </span>
                     )}
                     {game.coinTransferStatus === 'COMPLETED' && (
-                      <span className="flex items-center gap-2 px-4 py-1.5 bg-green-500/20 text-green-500 text-[10px] font-black rounded-full uppercase tracking-wider">
+                      <span className="flex items-center gap-2 px-4 py-1.5 bg-green-500/20 text-green-500 text-[10px] font-black rounded-[6px] uppercase tracking-wider">
                         Settled
                       </span>
                     )}
@@ -294,7 +292,7 @@ const MyJoinedGames = () => {
                       <button 
                         onClick={() => handleLeave(game._id)}
                         disabled={actionLoading}
-                        className="flex items-center gap-2 px-4 py-1.5 bg-neutral-800 text-neutral-400 text-[10px] font-black rounded-full hover:bg-red-500 hover:text-white transition-all uppercase tracking-wider disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-1.5 bg-neutral-800 text-neutral-400 text-[10px] font-black rounded-[6px] hover:bg-red-500 hover:text-white transition-all uppercase tracking-wider disabled:opacity-50"
                       >
                         <LogOut size={12} /> Leave Match
                       </button>
@@ -303,17 +301,17 @@ const MyJoinedGames = () => {
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2 border-t border-neutral-800/50 pt-4">
-                    <div className="bg-neutral-900/50 p-2 rounded-xl flex flex-col items-center justify-center">
+                    <div className="bg-neutral-900/50 p-2 rounded-[8px] flex flex-col items-center justify-center">
                       <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider mb-1">Slot Collections</p>
                       <p className="text-xs font-black text-[#55DEE8]">{collectedCoins} / {totalPossibleCoins} Coins</p>
                       <p className="text-[8px] text-neutral-500 mt-0.5">{game.perPlayerCharge || 0} Coins per slot</p>
                     </div>
-                    <div className="bg-neutral-900/50 p-2 rounded-xl flex flex-col items-center justify-center">
+                    <div className="bg-neutral-900/50 p-2 rounded-[8px] flex flex-col items-center justify-center">
                       <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider mb-1">Turf Expense</p>
                       <p className="text-xs font-black text-white">{game.groundCost || 0} Coins</p>
                       {(game.turf?.name || game.ground?.name) && <p className="text-[8px] text-yellow-500 truncate max-w-full px-2 mt-0.5">{game.turf?.name || game.ground?.name}</p>}
                     </div>
-                    <div className="bg-neutral-900/50 p-2 rounded-xl flex flex-col items-center justify-center">
+                    <div className="bg-neutral-900/50 p-2 rounded-[8px] flex flex-col items-center justify-center">
                       <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider mb-1">Professionals</p>
                       {((game.umpireCost || 0) + (game.streamerCost || 0)) > 0 && <p className="text-xs font-black text-white">{(game.umpireCost || 0) + (game.streamerCost || 0)} Coins</p>}
                       <div className="flex gap-2 mt-1">
@@ -392,11 +390,7 @@ const MyJoinedGames = () => {
                               </div>
                             )}
                             
-                            <div className={`absolute top-0 right-1 w-3 h-3 rounded-full border-2 border-[#121212] ${
-                              slot.status === 'PENDING' ? 'bg-amber-500' : 
-                              slot.status === 'HELD' ? 'bg-blue-500' : 
-                              slot.status === 'JOINED' ? 'bg-green-500' : 'bg-neutral-600'
-                            }`} title={slot.status} />
+                            <div className={`absolute top-0 right-1 w-3 h-3 rounded-full border-2 border-[#121212] ${ slot.status === 'PENDING' ? 'bg-amber-500' : slot.status === 'HELD' ? 'bg-blue-500' : slot.status === 'JOINED' ? 'bg-green-500' : 'bg-neutral-600' }`} title={slot.status} />
 
                             <div className="text-center w-full">
                               {slot.user || slot.userId ? (
@@ -436,11 +430,7 @@ const MyJoinedGames = () => {
                             </div>
                           )}
                           
-                          <div className={`absolute top-0 right-1 w-3 h-3 rounded-full border-2 border-[#121212] ${
-                            slot.status === 'PENDING' ? 'bg-amber-500' : 
-                            slot.status === 'HELD' ? 'bg-blue-500' : 
-                            slot.status === 'JOINED' ? 'bg-green-500' : 'bg-neutral-600'
-                          }`} title={slot.status} />
+                          <div className={`absolute top-0 right-1 w-3 h-3 rounded-full border-2 border-[#121212] ${ slot.status === 'PENDING' ? 'bg-amber-500' : slot.status === 'HELD' ? 'bg-blue-500' : slot.status === 'JOINED' ? 'bg-green-500' : 'bg-neutral-600' }`} title={slot.status} />
 
                           <div className="text-center w-full">
                             {slot.user ? (
@@ -480,11 +470,7 @@ const MyJoinedGames = () => {
                             </div>
                           )}
                           
-                          <div className={`absolute top-0 right-1 w-3 h-3 rounded-full border-2 border-[#121212] ${
-                            slot.status === 'PENDING' ? 'bg-amber-500' : 
-                            slot.status === 'HELD' ? 'bg-blue-500' : 
-                            slot.status === 'JOINED' ? 'bg-green-500' : 'bg-neutral-600'
-                          }`} title={slot.status} />
+                          <div className={`absolute top-0 right-1 w-3 h-3 rounded-full border-2 border-[#121212] ${ slot.status === 'PENDING' ? 'bg-amber-500' : slot.status === 'HELD' ? 'bg-blue-500' : slot.status === 'JOINED' ? 'bg-green-500' : 'bg-neutral-600' }`} title={slot.status} />
 
                           <div className="text-center w-full">
                             {slot.user ? (
@@ -541,7 +527,7 @@ const MyJoinedGames = () => {
       {/* Dispute Modal */}
       {disputeModal.isOpen && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-          <div className="bg-[#111] border border-neutral-800 p-8 rounded-[2rem] w-full max-w-md animate-slide-up shadow-2xl">
+          <div className="bg-[#111] border border-neutral-800 p-8 rounded-[8px] w-full max-w-md animate-slide-up shadow-2xl">
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white">Raise Dispute</h2>
@@ -563,13 +549,13 @@ const MyJoinedGames = () => {
                   value={disputeModal.reason}
                   onChange={(e) => setDisputeModal({ ...disputeModal, reason: e.target.value })}
                   placeholder="Host didn't show up, match didn't happen, etc."
-                  className="w-full bg-neutral-900 border border-neutral-800 rounded-2xl p-4 text-white focus:outline-none focus:border-orange-500 transition-colors h-32 resize-none font-medium"
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-[8px] p-4 text-white focus:outline-none focus:border-orange-500 transition-colors h-32 resize-none font-medium"
                 />
               </div>
               <button 
                 type="submit" 
                 disabled={actionLoading || !disputeModal.reason.trim()}
-                className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-black uppercase italic tracking-tighter text-lg rounded-2xl transition-all shadow-[0_0_20px_rgba(249,115,22,0.3)]"
+                className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-black font-black uppercase italic tracking-tighter text-lg rounded-[8px] transition-all shadow-[0_0_20px_rgba(249,115,22,0.3)]"
               >
                 {actionLoading ? "Submitting..." : "Submit Dispute"}
               </button>

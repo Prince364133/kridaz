@@ -179,7 +179,7 @@ const ScorerBanking = () => {
           <div className="lg:col-span-8 space-y-10">
              
              {/* Payout Trigger Card */}
-             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-8 shadow-2xl relative overflow-hidden group">
+             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-[#00C187]/5 blur-[100px] pointer-events-none" />
                 <div className="flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
                    <div className="space-y-4 text-center md:text-left">
@@ -203,7 +203,7 @@ const ScorerBanking = () => {
              </div>
 
              {/* Financial Ledger */}
-             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg overflow-hidden shadow-2xl">
+             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] overflow-hidden shadow-2xl">
                 <div className="p-8 border-b border-white/5 flex justify-between items-center">
                    <div className="flex items-center gap-4">
                       <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: themeColor }} />
@@ -265,7 +265,7 @@ const ScorerBanking = () => {
           <div className="lg:col-span-4 space-y-10">
              
              {/* Banking Hub */}
-             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-8 space-y-8 shadow-2xl relative overflow-hidden">
+             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 space-y-8 shadow-2xl relative overflow-hidden">
                 <div className="flex justify-between items-center">
                    <div className="flex items-center gap-3">
                       <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: themeColor }} />
@@ -341,7 +341,7 @@ const ScorerBanking = () => {
                   </form>
                 ) : (
                   <div className="space-y-8 animate-fade-in">
-                       <div className="flex items-center gap-5 bg-white/[0.02] p-6 rounded-lg border border-white/5">
+                       <div className="flex items-center gap-5 bg-white/[0.02] p-6 rounded-[8px] border border-white/5">
                           <div className="w-14 h-14 rounded-lg flex items-center justify-center border" style={{ backgroundColor: `${themeColor}1A`, color: themeColor, borderColor: `${themeColor}33` }}>
                              <Landmark size={28} />
                           </div>
@@ -371,7 +371,7 @@ const ScorerBanking = () => {
                        </div>
 
                        {!isBankingInfoComplete && (
-                         <div className="p-6 bg-red-500/5 border border-red-500/10 rounded-lg space-y-4 mt-6">
+                         <div className="p-6 bg-red-500/5 border border-red-500/10 rounded-[8px] space-y-4 mt-6">
                            <div className="flex items-center gap-3">
                               <AlertCircle className="text-red-500" size={16} />
                               <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">KYC REQUIRED</span>
@@ -391,7 +391,7 @@ const ScorerBanking = () => {
              </div>
 
              {/* Recent Settlements */}
-             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-8 shadow-2xl">
+             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 shadow-2xl">
                 <div className="flex items-center gap-3 mb-8">
                    <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: themeColor }} />
                    <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Recent Records</h3>
@@ -399,13 +399,9 @@ const ScorerBanking = () => {
                  <div className="space-y-4">
                    {withdrawals && withdrawals.length > 0 ? (
                       withdrawals.slice(0, 3).map((withdrawal, i) => (
-                         <div key={withdrawal._id || i} className="flex justify-between items-center p-5 bg-white/[0.02] rounded-lg border border-white/5 hover:border-white/10 transition-all group">
+                         <div key={withdrawal._id || i} className="flex justify-between items-center p-5 bg-white/[0.02] rounded-[8px] border border-white/5 hover:border-white/10 transition-all group">
                             <div className="flex items-center gap-4">
-                               <div className={`w-10 h-10 rounded-lg flex items-center justify-center border transition-all ${
-                                  withdrawal.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
-                                  withdrawal.status === 'PENDING' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' :
-                                  'bg-red-500/10 text-red-500 border-red-500/20'
-                               }`}>
+                               <div className={`w-10 h-10 rounded-lg flex items-center justify-center border transition-all ${ withdrawal.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : withdrawal.status === 'PENDING' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20' }`}>
                                   {withdrawal.status === 'SUCCESS' ? <CheckCircle size={16} /> : <History size={16} />}
                                </div>
                                <div>
@@ -415,10 +411,7 @@ const ScorerBanking = () => {
                                   </p>
                                </div>
                             </div>
-                            <span className={`text-[9px] font-black uppercase tracking-widest ${
-                               withdrawal.status === 'SUCCESS' ? 'text-emerald-500' : 
-                               withdrawal.status === 'PENDING' ? 'text-orange-500' : 'text-red-500'
-                            }`}>
+                            <span className={`text-[9px] font-black uppercase tracking-widest ${ withdrawal.status === 'SUCCESS' ? 'text-emerald-500' : withdrawal.status === 'PENDING' ? 'text-orange-500' : 'text-red-500' }`}>
                                {withdrawal.status}
                             </span>
                          </div>
@@ -478,7 +471,7 @@ const ScorerBanking = () => {
                     </div>
                   ) : withdrawStep === 1 ? (
                     <div className="space-y-8 animate-scale-in">
-                       <div className="bg-white/[0.02] p-8 rounded-lg border border-white/5 relative overflow-hidden group">
+                       <div className="bg-white/[0.02] p-8 rounded-[8px] border border-white/5 relative overflow-hidden group">
                           <p className="text-[10px] text-neutral-500 font-black uppercase tracking-[0.2em] mb-4 relative z-10">Confirmed Liquidity</p>
                           <div className="flex items-center gap-3 relative z-10">
                              <span className="text-4xl font-black" style={{ color: themeColor }}>Rs</span>
@@ -504,7 +497,7 @@ const ScorerBanking = () => {
                              </div>
                           </div>
 
-                          <div className="space-y-3 p-6 bg-white/[0.03] rounded-lg border border-white/5">
+                          <div className="space-y-3 p-6 bg-white/[0.03] rounded-[8px] border border-white/5">
                              <p className="text-[10px] font-black uppercase tracking-[0.2em] ml-1" style={{ color: themeColor }}>Release Volume</p>
                              <div className="flex items-center gap-3">
                                 <span className="text-4xl font-black" style={{ color: themeColor }}>Rs</span>

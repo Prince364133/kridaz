@@ -103,12 +103,12 @@ const WicketModal = ({
         <motion.div
           initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
           transition={{ type: 'spring', damping: 22 }}
-          className="relative w-full max-w-md bg-[#111] rounded-3xl border border-red-500/20 overflow-hidden z-10"
+          className="relative w-full max-w-md bg-[#111] rounded-[8px] border border-red-500/20 overflow-hidden z-10"
         >
           {/* Header */}
           <div className="px-6 pt-6 pb-4 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-red-500/15 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-[8px] bg-red-500/15 flex items-center justify-center">
                 <AlertTriangle size={16} className="text-red-400" />
               </div>
               <div>
@@ -137,7 +137,7 @@ const WicketModal = ({
                   <button
                     key={wt.key}
                     onClick={() => handleTypeSelect(wt)}
-                    className="p-4 rounded-2xl border border-white/8 bg-white/4 hover:border-red-500/50 hover:bg-red-500/8 transition-all text-left group"
+                    className="p-4 rounded-[8px] border border-white/8 bg-white/4 hover:border-red-500/50 hover:bg-red-500/8 transition-all text-left group"
                   >
                     <span className="text-sm font-black text-white group-hover:text-red-400 transition-colors">{wt.label}</span>
                   </button>
@@ -152,9 +152,9 @@ const WicketModal = ({
                   <button
                     key={player.userId}
                     onClick={() => handleWhoOutSelect(player.userId)}
-                    className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl border border-white/8 bg-white/4 hover:border-red-500/40 hover:bg-red-500/8 transition-all group mb-2"
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-[8px] border border-white/8 bg-white/4 hover:border-red-500/40 hover:bg-red-500/8 transition-all group mb-2"
                   >
-                    <div className="w-9 h-9 rounded-xl bg-neutral-800 flex items-center justify-center text-sm font-black text-red-400 shrink-0">
+                    <div className="w-9 h-9 rounded-[8px] bg-neutral-800 flex items-center justify-center text-sm font-black text-red-400 shrink-0">
                       {player.name?.charAt(0)?.toUpperCase()}
                     </div>
                     <div className="flex-1 text-left">
@@ -174,7 +174,7 @@ const WicketModal = ({
                   <button
                     key={run}
                     onClick={() => handleRunsSelect(run)}
-                    className="p-4 rounded-2xl border border-white/8 bg-white/4 hover:border-red-500/50 hover:bg-red-500/8 transition-all text-center group"
+                    className="p-4 rounded-[8px] border border-white/8 bg-white/4 hover:border-red-500/50 hover:bg-red-500/8 transition-all text-center group"
                   >
                     <span className="text-xl font-black text-white group-hover:text-red-400 transition-colors">{run}</span>
                   </button>
@@ -189,9 +189,9 @@ const WicketModal = ({
                   <button
                     key={player.userId}
                     onClick={() => handleFielderSelect(player.userId)}
-                    className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl border border-white/8 bg-white/4 hover:border-red-500/40 hover:bg-red-500/8 transition-all group"
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-[8px] border border-white/8 bg-white/4 hover:border-red-500/40 hover:bg-red-500/8 transition-all group"
                   >
-                    <div className="w-9 h-9 rounded-xl bg-neutral-800 flex items-center justify-center text-sm font-black text-red-400 shrink-0">
+                    <div className="w-9 h-9 rounded-[8px] bg-neutral-800 flex items-center justify-center text-sm font-black text-red-400 shrink-0">
                       {player.name?.charAt(0)?.toUpperCase()}
                     </div>
                     <span className="flex-1 font-bold text-white text-sm">{player.name}</span>
@@ -200,7 +200,7 @@ const WicketModal = ({
                 ))}
                 <button
                   onClick={() => setStep('nextBatter')}
-                  className="w-full py-3 rounded-2xl border border-dashed border-white/15 text-neutral-500 text-sm font-bold hover:border-white/30 transition-colors"
+                  className="w-full py-3 rounded-[8px] border border-dashed border-white/15 text-neutral-500 text-sm font-bold hover:border-white/30 transition-colors"
                 >
                   Skip (fielder unknown)
                 </button>
@@ -216,7 +216,7 @@ const WicketModal = ({
                     <p className="text-neutral-500 text-sm font-medium">All wickets fallen — innings over!</p>
                     <button
                       onClick={() => onConfirm({ wicketType, fielderId, nextBatterId: null, runs: runsCompleted, playerOutId })}
-                      className="mt-4 px-6 py-3 bg-red-500 text-white font-black rounded-2xl text-sm uppercase tracking-widest hover:bg-red-600 transition-colors"
+                      className="mt-4 px-6 py-3 bg-red-500 text-white font-black rounded-[8px] text-sm uppercase tracking-widest hover:bg-red-600 transition-colors"
                     >
                       End Innings
                     </button>
@@ -226,9 +226,9 @@ const WicketModal = ({
                     <button
                       key={player.userId}
                       onClick={() => handleNextBatterSelect(player.userId)}
-                      className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl border border-white/8 bg-white/4 hover:border-yellow-500/40 hover:bg-yellow-500/8 transition-all group"
+                      className="w-full flex items-center gap-4 px-4 py-3 rounded-[8px] border border-white/8 bg-white/4 hover:border-yellow-500/40 hover:bg-yellow-500/8 transition-all group"
                     >
-                      <div className="w-9 h-9 rounded-xl bg-neutral-800 flex items-center justify-center text-sm font-black text-yellow-400 shrink-0">
+                      <div className="w-9 h-9 rounded-[8px] bg-neutral-800 flex items-center justify-center text-sm font-black text-yellow-400 shrink-0">
                         {player.name?.charAt(0)?.toUpperCase()}
                       </div>
                       <span className="flex-1 font-bold text-white text-sm">{player.name}</span>

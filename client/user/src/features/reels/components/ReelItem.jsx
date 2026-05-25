@@ -189,7 +189,7 @@ const ReelItem = ({ reel, isVisible }) => {
                   initial={{ opacity: 0, x: 20, scale: 0.9 }}
                   animate={{ opacity: 1, x: 0, scale: 1 }}
                   exit={{ opacity: 0, x: 20, scale: 0.9 }}
-                  className="absolute right-0 bottom-0 mb-14 w-48 bg-zinc-950 border border-white/20 rounded-2xl overflow-hidden z-50 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
+                  className="absolute right-0 bottom-0 mb-14 w-48 bg-zinc-950 border border-white/20 rounded-[8px] overflow-hidden z-50 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
                 >
                   {isCreator ? (
                     <button 
@@ -237,7 +237,7 @@ const ReelItem = ({ reel, isVisible }) => {
             <div className="flex items-center gap-2">
               <h3 className="text-white font-bold text-[15px]">@{reel.creatorId?.username || 'kridaz_user'}</h3>
               <span className="text-white/40 text-xs">Rs �</span>
-              <button className="text-white border border-white/40 px-3 py-0.5 rounded-md text-[11px] font-bold hover:bg-white/10 transition-colors">
+              <button className="text-white border border-white/40 px-3 py-0.5 rounded-[6px] text-[11px] font-bold hover:bg-white/10 transition-colors">
                 Follow
               </button>
             </div>
@@ -251,7 +251,7 @@ const ReelItem = ({ reel, isVisible }) => {
           ))}
         </p>
 
-        <div className="flex items-center gap-2 bg-black/30 w-fit px-3 py-1 rounded-full backdrop-blur-sm">
+        <div className="flex items-center gap-2 bg-black/30 w-fit px-3 py-1 rounded-[6px] backdrop-blur-sm">
           <Music size={12} className="text-white animate-spin-slow" />
           <div className="overflow-hidden w-32">
             <p className="text-white text-[11px] font-semibold whitespace-nowrap animate-marquee">
@@ -299,7 +299,7 @@ const ReelItem = ({ reel, isVisible }) => {
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Add a comment..."
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#55DEE8] transition-colors pr-14"
+                  className="w-full bg-white/5 border border-white/10 rounded-[8px] px-5 py-4 text-white text-sm focus:outline-none focus:border-[#55DEE8] transition-colors pr-14"
                 />
                 <button 
                   type="submit"

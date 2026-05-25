@@ -40,7 +40,7 @@ const GameCard = ({ game, onSelect, actionButton }) => {
   const fillPercentage = totalSlots > 0 ? (filledSlots / totalSlots) * 100 : 0;
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-slate-900/60 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-violet-500/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)]">
+    <div className="group relative overflow-hidden rounded-[8px] border border-white/5 bg-slate-900/60 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-violet-500/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)]">
       {/* Decorative gradient header based on sport */}
       <div className={`h-2 bg-gradient-to-r ${getSportColor(game.gameType)}`} />
 
@@ -48,14 +48,10 @@ const GameCard = ({ game, onSelect, actionButton }) => {
         {/* Top bar with tags */}
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r ${getSportColor(game.gameType)} text-white shadow-sm`}>
+            <span className={`inline-flex items-center px-3 py-1 rounded-[6px] text-xs font-semibold bg-gradient-to-r ${getSportColor(game.gameType)} text-white shadow-sm`}>
               {game.gameType}
             </span>
-            <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${
-              game.gameMode === 'QUICK' 
-                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
-                : 'bg-violet-500/10 text-violet-400 border border-violet-500/20'
-            }`}>
+            <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${ game.gameMode === 'QUICK' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-violet-500/10 text-violet-400 border border-violet-500/20' }`}>
               {game.gameMode}
             </span>
           </div>
@@ -157,7 +153,7 @@ const GameCard = ({ game, onSelect, actionButton }) => {
             {onSelect && (
               <button 
                 onClick={() => onSelect(game)}
-                className="flex-1 px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/5 hover:border-white/10 transition-all text-center"
+                className="flex-1 px-4 py-2 text-xs font-semibold rounded-[8px] bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/5 hover:border-white/10 transition-all text-center"
               >
                 Inspect Match
               </button>

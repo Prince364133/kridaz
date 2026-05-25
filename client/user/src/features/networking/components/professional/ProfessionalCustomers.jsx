@@ -103,7 +103,7 @@ export default function ProfessionalCustomers() {
 
       {/* Customer List */}
       {filteredCustomers.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[400px] bg-white/[0.03] backdrop-blur-xl rounded-lg border border-white/5 border-dashed p-12 text-center shadow-2xl relative overflow-hidden">
+        <div className="flex flex-col items-center justify-center min-h-[400px] bg-white/[0.03] backdrop-blur-xl rounded-[8px] border border-white/5 border-dashed p-12 text-center shadow-2xl relative overflow-hidden">
            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
            <div className="w-20 h-20 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-8 relative z-10 shadow-inner">
              <Users size={40} className="text-neutral-600" />
@@ -118,9 +118,9 @@ export default function ProfessionalCustomers() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredCustomers.map((customer) => (
-            <div key={customer.id} className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg overflow-hidden group hover:border-white/10 transition-all shadow-2xl p-6">
+            <div key={customer.id} className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] overflow-hidden group hover:border-white/10 transition-all shadow-2xl p-6">
               <div className="flex items-start gap-4 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0" style={{ color: themeColor }}>
+                <div className="w-12 h-12 rounded-[8px] bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0" style={{ color: themeColor }}>
                   <User size={24} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -158,7 +158,7 @@ export default function ProfessionalCustomers() {
       {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#111111] border border-white/10 rounded-xl w-full max-w-md overflow-hidden shadow-2xl font-inter animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-[#111111] border border-white/10 rounded-[8px] w-full max-w-md overflow-hidden shadow-2xl font-inter animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-white/5">
               <h3 className="text-xl font-black text-white uppercase tracking-tight">Add New <span style={{ color: themeColor }}>Customer</span></h3>
             </div>
@@ -200,7 +200,7 @@ export default function ProfessionalCustomers() {
                   value={newCustomer.notes}
                   onChange={(e) => setNewCustomer({...newCustomer, notes: e.target.value})}
                   placeholder="Additional information..."
-                  className="w-full h-24 bg-white/5 border border-white/10 rounded-lg p-4 text-white placeholder-neutral-600 focus:outline-none focus:border-white/20 transition-colors resize-none"
+                  className="w-full h-24 bg-white/5 border border-white/10 rounded-[8px] p-4 text-white placeholder-neutral-600 focus:outline-none focus:border-white/20 transition-colors resize-none"
                 />
               </div>
 

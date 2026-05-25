@@ -17,7 +17,7 @@ const NotificationBadge = () => {
   const { unreadCount } = useNotifications();
   if (unreadCount <= 0) return null;
   return (
-    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full flex items-center justify-center text-[9px] font-black text-white border-2 border-[#050505]">
+    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-[8px] flex items-center justify-center text-[9px] font-black text-white border-2 border-[#050505]">
       {unreadCount > 9 ? "9+" : unreadCount}
     </span>
   );
@@ -105,9 +105,7 @@ const Navbar = () => {
   // Removed dedicated BOOKINGS link
 
   return (
-    <nav className={`sticky top-0 z-[100] flex flex-col transition-transform duration-500 ${
-      scrollDirection === "down" ? "-translate-y-full" : "translate-y-0"
-    }`}>
+    <nav className={`sticky top-0 z-[100] flex flex-col transition-transform duration-500 ${ scrollDirection === "down" ? "-translate-y-full" : "translate-y-0" }`}>
 
       <div className={`flex justify-center transition-all duration-500 ${isScrolled ? "pt-0" : "pt-0"}`}>
         <div
@@ -151,13 +149,12 @@ const Navbar = () => {
                   <div key={link.name} className="dropdown dropdown-hover group/link">
                     <label
                       tabIndex={0}
-                      className={`text-sm font-semibold transition-all hover:text-primary relative flex items-center gap-1 cursor-pointer ${location.pathname.startsWith("/partners") ? "text-primary" : "text-white/60"
-                        }`}
+                      className={`text-sm font-semibold transition-all hover:text-primary relative flex items-center gap-1 cursor-pointer ${location.pathname.startsWith("/partners") ? "text-primary" : "text-white/60" }`}
                     >
                       {link.name}
                       <span className={`absolute -bottom-2 left-0 h-[2px] bg-primary transition-all duration-300 ${location.pathname.startsWith("/partners") ? "w-full" : "w-0 group-hover/link:w-full"}`} />
                     </label>
-                    <ul tabIndex={0} className="dropdown-content z-[100] mt-4 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-xl w-48 overflow-hidden backdrop-blur-xl">
+                    <ul tabIndex={0} className="dropdown-content z-[100] mt-4 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl">
                       <li>
                         <Link to="/business/venue" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
                           Venue Owner
@@ -177,8 +174,7 @@ const Navbar = () => {
                   key={link.name}
                   to={link.path}
                   onMouseEnter={() => {}}
-                  className={`text-sm font-semibold transition-all hover:text-primary relative group/link ${location.pathname === link.path ? "text-primary" : "text-white/60"
-                    }`}
+                  className={`text-sm font-semibold transition-all hover:text-primary relative group/link ${location.pathname === link.path ? "text-primary" : "text-white/60" }`}
                 >
                   {link.name}
                   <span className={`absolute -bottom-2 left-0 h-[2px] bg-primary transition-all duration-300 ${location.pathname === link.path ? "w-full" : "w-0 group-hover/link:w-full"}`} />
@@ -199,7 +195,7 @@ const Navbar = () => {
                   Login
                 </Link>
 
-                <Link to="/signup" className="bg-[#84CC16] hover:bg-[#a3e635] text-black h-9 sm:h-11 px-4 sm:px-8 text-xs sm:text-sm font-bold flex items-center gap-2 sm:gap-3 rounded-xl transition-all shadow-[0_0_20px_rgba(132,204,22,0.2)]">
+                <Link to="/signup" className="bg-[#84CC16] hover:bg-[#a3e635] text-black h-9 sm:h-11 px-4 sm:px-8 text-xs sm:text-sm font-bold flex items-center gap-2 sm:gap-3 rounded-[8px] transition-all shadow-[0_0_20px_rgba(132,204,22,0.2)]">
                   Join Now <ArrowRight size={16} />
                 </Link>
               </>
@@ -262,13 +258,13 @@ const Navbar = () => {
                       <div className="absolute inset-0 bg-[#84CC16]/10 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
                     </div>
 
-                    <div tabIndex={0} className="dropdown-content mt-2 w-64 bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] overflow-hidden backdrop-blur-3xl animate-in fade-in slide-in-from-top-2 duration-300 z-[100]">
+                    <div tabIndex={0} className="dropdown-content mt-2 w-64 bg-[#0A0A0A] border border-white/10 rounded-[8px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] overflow-hidden backdrop-blur-3xl animate-in fade-in slide-in-from-top-2 duration-300 z-[100]">
                       {/* Navigation Groups */}
                       <div className="p-2 space-y-1">
                         {/* User info / Profile Link */}
                         <Link
                           to="/profile"
-                          className="flex items-center gap-3 p-3 rounded-xl bg-white/5 text-white transition-all mb-2"
+                          className="flex items-center gap-3 p-3 rounded-[8px] bg-white/5 text-white transition-all mb-2"
                         >
                           <div className="w-8 h-8 rounded-full border border-white/10 bg-white/10 flex items-center justify-center shrink-0">
                             {(() => {
@@ -305,19 +301,19 @@ const Navbar = () => {
                           ["bmsp_admin", "admin", "venu_owners", "venue_owners", "venue", "coach", "umpire", "limited_umpire", "scorer", "limited_scorer", "streamer"].some(r => user?.role?.toLowerCase().includes(r))) && (
                             <>
                               {(role?.toLowerCase() === "admin" || role?.toLowerCase().includes("bmsp_admin") || user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase().includes("bmsp_admin")) && (
-                                <Link to="/admin" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                <Link to="/admin" className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                   <ShieldCheck size={18} className="text-white/40" />
                                   <span className="text-sm font-medium">Admin Panel</span>
                                 </Link>
                               )}
                               {(role?.toLowerCase().includes("venu_owners") || user?.role?.toLowerCase().includes("venu_owners") || role?.toLowerCase().includes("venue") || user?.role?.toLowerCase().includes("venue") || role?.toLowerCase().includes("owner") || user?.role?.toLowerCase().includes("owner")) && (
-                                <Link to="/venue-owner" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                <Link to="/venue-owner" className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                   <Activity size={18} className="text-white/40" />
                                   <span className="text-sm font-medium">Venue Owner Dashboard</span>
                                 </Link>
                               )}
                               {(["coach", "umpire", "streamer", "commentator", "limited_umpire", "limited_streamer", "scorer"].some(r => role?.toLowerCase().includes(r) || user?.role?.toLowerCase().includes(r))) && (
-                                <Link to={`/professional/${role?.toLowerCase() || user?.role?.toLowerCase()}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                <Link to={`/professional/${role?.toLowerCase() || user?.role?.toLowerCase()}`} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                   <Zap size={18} className="text-white/40" />
                                   <span className="text-sm font-medium">Professional Portal</span>
                                 </Link>
@@ -329,7 +325,7 @@ const Navbar = () => {
                         {/* ACCOUNT SECTION */}
                         <Link
                           to="/messages"
-                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all"
+                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <MessageCircle size={18} className="text-white/40" />
                           <span className="text-sm font-medium">Messages</span>
@@ -337,7 +333,7 @@ const Navbar = () => {
 
                         <Link
                           to="/my-teams"
-                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all"
+                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <Users size={18} className="text-white/40" />
                           <span className="text-sm font-medium">My Teams</span>
@@ -345,7 +341,7 @@ const Navbar = () => {
 
                         <Link
                           to="/booking-history"
-                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all"
+                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <Clock size={18} className="text-white/40" />
                           <span className="text-sm font-medium">My Bookings</span>
@@ -353,7 +349,7 @@ const Navbar = () => {
 
                         <Link
                           to="/my-hosted-games"
-                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all"
+                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <Target size={18} className="text-white/40" />
                           <span className="text-sm font-medium">My Hosted Games</span>
@@ -361,7 +357,7 @@ const Navbar = () => {
 
                         <Link
                           to="/my-joined-games"
-                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all"
+                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <Trophy size={18} className="text-white/40" />
                           <span className="text-sm font-medium">My Joined Matches</span>
@@ -369,7 +365,7 @@ const Navbar = () => {
 
                         <Link
                           to="/leaderboard"
-                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-primary/10 text-primary border border-primary/10 transition-all"
+                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-primary/10 text-primary border border-primary/10 transition-all"
                         >
                           <Trophy size={18} className="text-primary/70" />
                           <span className="text-sm font-bold">Global Leaderboard</span>
@@ -377,7 +373,7 @@ const Navbar = () => {
 
                         <Link
                           to="/wallet"
-                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-all"
+                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <Zap size={18} className="text-white/40" />
                           <span className="text-sm font-medium">My Wallet</span>
@@ -387,7 +383,7 @@ const Navbar = () => {
 
                         <button
                           onClick={handleLogout}
-                          className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-all"
+                          className="w-full flex items-center gap-3 p-3 rounded-[8px] hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-all"
                         >
                           <LogOut size={18} className="opacity-70" />
                           <span className="text-sm font-medium">Logout</span>

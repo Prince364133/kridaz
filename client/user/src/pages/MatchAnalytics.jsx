@@ -285,7 +285,7 @@ const MatchAnalytics = () => {
           <button 
             onClick={handleShare}
             disabled={isCapturing}
-            className="p-3 bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 rounded-2xl hover:bg-[#55DEE8] hover:text-black transition-all disabled:opacity-50 flex items-center gap-2"
+            className="p-3 bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 rounded-[8px] hover:bg-[#55DEE8] hover:text-black transition-all disabled:opacity-50 flex items-center gap-2"
           >
             <Share2 size={18} />
             <span className="text-[10px] font-black uppercase tracking-widest hidden md:block">Share Card</span>
@@ -306,7 +306,7 @@ const MatchAnalytics = () => {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden bg-gradient-to-br from-[#55DEE8] to-[#4D7C0F] rounded-[2.5rem] p-8"
+            className="relative overflow-hidden bg-gradient-to-br from-[#55DEE8] to-[#4D7C0F] rounded-[8px] p-8"
           >
             <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
               <div className="relative">
@@ -323,7 +323,7 @@ const MatchAnalytics = () => {
               </div>
               
               <div className="flex-1 text-center md:text-left">
-                <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest text-white mb-2">
+                <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-[8px] text-[10px] font-black uppercase tracking-widest text-white mb-2">
                   Player of the Match
                 </span>
                 <h2 className="text-4xl font-black uppercase tracking-tighter mb-1">{mvp.name}</h2>
@@ -331,7 +331,7 @@ const MatchAnalytics = () => {
               </div>
 
               <div className="flex gap-4">
-                <div className="px-6 py-4 bg-black/10 backdrop-blur-md rounded-3xl border border-white/10 text-center">
+                <div className="px-6 py-4 bg-black/10 backdrop-blur-md rounded-[8px] border border-white/10 text-center">
                   <span className="block text-[10px] font-bold uppercase opacity-60">Points</span>
                   <span className="text-2xl font-black">{mvp.points}</span>
                 </div>
@@ -346,29 +346,29 @@ const MatchAnalytics = () => {
 
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
+          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[8px] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Runs</span>
             <div className="flex items-baseline gap-2">
               <span className="text-4xl font-black text-white">{scoring?.innings[0]?.totalRuns || 0}</span>
               <span className="text-sm font-bold text-gray-500">/ {scoring?.innings[0]?.totalWickets || 0}</span>
             </div>
           </div>
-          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
+          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[8px] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Run Rate</span>
             <span className="text-4xl font-black text-[#55DEE8]">{stats?.runRate || '0.00'}</span>
           </div>
-          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
+          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[8px] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Fours</span>
             <span className="text-4xl font-black text-white">{stats?.totalFours || 0}</span>
           </div>
-          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[2rem] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
+          <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[8px] flex flex-col group hover:border-[#55DEE8]/30 transition-colors">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Sixes</span>
             <span className="text-4xl font-black text-white">{stats?.totalSixes || 0}</span>
           </div>
         </div>
 
         {/* Top Performers List */}
-        <div className="bg-[#0A0A0A] border border-white/5 rounded-[2.5rem] p-8">
+        <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
               <Award className="text-[#55DEE8]" />
@@ -379,7 +379,7 @@ const MatchAnalytics = () => {
             {stats?.topPerformers?.map((player, idx) => (
               <div 
                 key={idx}
-                className="flex items-center gap-4 p-4 bg-white/[0.02] border border-white/5 rounded-3xl group hover:bg-white/[0.04] transition-all"
+                className="flex items-center gap-4 p-4 bg-white/[0.02] border border-white/5 rounded-[8px] group hover:bg-white/[0.04] transition-all"
               >
                 <div className="text-xl font-black text-white/20 w-8">{idx + 1}</div>
                 <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10">
@@ -409,7 +409,7 @@ const MatchAnalytics = () => {
         </div>
 
         {/* Detailed Scorecard (Compact) */}
-        <div className="bg-[#0A0A0A] border border-white/5 rounded-[2.5rem] overflow-hidden">
+        <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] overflow-hidden">
           <div className="p-8 border-b border-white/5">
              <h3 className="text-xl font-black uppercase tracking-tighter">Innings Scorecard</h3>
           </div>
@@ -453,7 +453,7 @@ const MatchAnalytics = () => {
         </div>
 
         {/* Ball-by-Ball History Section */}
-        <div className="bg-[#0A0A0A] border border-white/5 rounded-[2.5rem] p-8">
+        <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8">
            <h3 className="text-xl font-black uppercase tracking-tighter mb-8">Ball-by-Ball Timeline</h3>
            <BallByBallHistory matchData={scoring} />
         </div>

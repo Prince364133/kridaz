@@ -128,11 +128,7 @@ const VerificationCenter = () => {
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-1.5 rounded-[4px] text-[11px] font-semibold uppercase tracking-wider transition-all ${
-                          activeTab === tab
-                            ? "bg-[#CCFF00] text-black"
-                            : "text-[#878C9F] hover:text-white"
-                        }`}
+                        className={`px-4 py-1.5 rounded-[4px] text-[11px] font-semibold uppercase tracking-wider transition-all ${ activeTab === tab ? "bg-[#CCFF00] text-black" : "text-[#878C9F] hover:text-white" }`}
                       >
                         {tab}
                       </button>
@@ -165,8 +161,7 @@ const VerificationCenter = () => {
                                 handleRoleFilter(role.id);
                                 setIsRoleDropdownOpen(false);
                               }}
-                              className={`w-full px-4 py-3 text-left text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-between
-                                ${roleFilter === role.id ? 'bg-[#CCFF00]/10 text-[#CCFF00]' : 'text-gray-400 hover:bg-white/[0.03] hover:text-white'}`}
+                              className={`w-full px-4 py-3 text-left text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-between ${roleFilter === role.id ? 'bg-[#CCFF00]/10 text-[#CCFF00]' : 'text-gray-400 hover:bg-white/[0.03] hover:text-white'}`}
                             >
                               {role.label}
                               {roleFilter === role.id && <Zap size={10} className="text-[#CCFF00]" />}
@@ -233,7 +228,7 @@ const VerificationCenter = () => {
           {showApprovalModal && (
             <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
               <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowApprovalModal(false)} />
-              <div className="relative w-full max-w-md bg-[#0D0D0D] border border-[#2D2D2D] rounded-2xl p-8 space-y-6 shadow-2xl animate-scale-in">
+              <div className="relative w-full max-w-md bg-[#0D0D0D] border border-[#2D2D2D] rounded-[8px] p-8 space-y-6 shadow-2xl animate-scale-in">
                 <div className="space-y-2">
                   <h3 className="text-xl font-display uppercase tracking-tight text-white">Partner Authorization</h3>
                   <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
@@ -249,7 +244,7 @@ const VerificationCenter = () => {
                       value={adminInfo.name}
                       onChange={(e) => setAdminInfo({...adminInfo, name: e.target.value})}
                       placeholder="ENTER FULL NAME"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-[#CCFF00]/50 transition-colors uppercase font-bold"
+                      className="w-full bg-white/5 border border-white/10 rounded-[8px] px-4 py-3 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-[#CCFF00]/50 transition-colors uppercase font-bold"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -259,7 +254,7 @@ const VerificationCenter = () => {
                       value={adminInfo.designation}
                       onChange={(e) => setAdminInfo({...adminInfo, designation: e.target.value})}
                       placeholder="E.G. OPERATIONS HEAD"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-[#CCFF00]/50 transition-colors uppercase font-bold"
+                      className="w-full bg-white/5 border border-white/10 rounded-[8px] px-4 py-3 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-[#CCFF00]/50 transition-colors uppercase font-bold"
                     />
                   </div>
                 </div>
@@ -267,14 +262,14 @@ const VerificationCenter = () => {
                 <div className="grid grid-cols-2 gap-4 pt-4">
                   <button 
                     onClick={() => setShowApprovalModal(false)}
-                    className="py-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 bg-white/5 hover:bg-white/10 transition-colors"
+                    className="py-4 rounded-[8px] text-[10px] font-black uppercase tracking-widest text-gray-500 bg-white/5 hover:bg-white/10 transition-colors"
                   >
                     Abort
                   </button>
                   <button 
                     onClick={confirmApproval}
                     disabled={!adminInfo.name || !adminInfo.designation}
-                    className="py-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-black bg-[#CCFF00] hover:bg-[#b8e600] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(204,255,0,0.2)]"
+                    className="py-4 rounded-[8px] text-[10px] font-black uppercase tracking-widest text-black bg-[#CCFF00] hover:bg-[#b8e600] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(204,255,0,0.2)]"
                   >
                     Authorize Partner
                   </button>

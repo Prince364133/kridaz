@@ -90,14 +90,14 @@ export default function TickerGallery() {
                 <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Active Credits</p>
                 <p className="text-xl font-black text-white uppercase">Pro Plan</p>
              </div>
-             <div className="w-12 h-12 rounded-2xl bg-violet-500 flex items-center justify-center shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+             <div className="w-12 h-12 rounded-[8px] bg-violet-500 flex items-center justify-center shadow-[0_0_20px_rgba(139,92,246,0.3)]">
                 <Star size={24} className="text-white fill-white" />
              </div>
           </div>
         </div>
 
         {/* Hero Preview */}
-        <div className="relative h-[400px] w-full rounded-[3rem] overflow-hidden group shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border border-white/10">
+        <div className="relative h-[400px] w-full rounded-[8px] overflow-hidden group shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border border-white/10">
            <img 
              src={themes.find(t => t.id === selectedTheme)?.preview} 
              className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" 
@@ -115,13 +115,13 @@ export default function TickerGallery() {
                  </p>
                  <div className="flex flex-wrap gap-3">
                     {themes.find(t => t.id === selectedTheme)?.features.map((f, i) => (
-                      <span key={i} className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[9px] font-black uppercase tracking-widest text-white/80 border border-white/10">
+                      <span key={i} className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-[8px] text-[9px] font-black uppercase tracking-widest text-white/80 border border-white/10">
                         {f}
                       </span>
                     ))}
                  </div>
               </div>
-              <button className="h-16 px-10 bg-white text-black font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(255,255,255,0.1)] hover:bg-gray-100 transition-all flex items-center gap-3">
+              <button className="h-16 px-10 bg-white text-black font-black uppercase text-xs tracking-widest rounded-[8px] shadow-[0_10px_30px_rgba(255,255,255,0.1)] hover:bg-gray-100 transition-all flex items-center gap-3">
                  Live Demo <Play size={16} fill="currentColor" />
               </button>
            </div>
@@ -133,10 +133,10 @@ export default function TickerGallery() {
              <div 
                key={theme.id}
                onClick={() => !loadingTheme && handleSelect(theme.id)}
-               className={`group relative p-8 rounded-[2.5rem] border-2 transition-all cursor-pointer ${selectedTheme === theme.id ? 'bg-violet-500/5 border-violet-500 shadow-[0_0_50px_rgba(139,92,246,0.1)]' : 'bg-white/[0.02] border-white/5 hover:border-white/20'}`}
+               className={`group relative p-8 rounded-[8px] border-2 transition-all cursor-pointer ${selectedTheme === theme.id ? 'bg-violet-500/5 border-violet-500 shadow-[0_0_50px_rgba(139,92,246,0.1)]' : 'bg-white/[0.02] border-white/5 hover:border-white/20'}`}
              >
                 <div className="space-y-6">
-                   <div className={`w-16 h-16 rounded-2xl ${theme.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                   <div className={`w-16 h-16 rounded-[8px] ${theme.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
                       {loadingTheme === theme.id ? <Loader2 className="text-white animate-spin" size={32} /> : <Palette size={32} className="text-white" />}
                    </div>
                    <div className="space-y-2">
@@ -168,8 +168,8 @@ export default function TickerGallery() {
         </div>
 
         {/* Pro Tip */}
-        <div className="mt-20 p-8 bg-gradient-to-r from-violet-500/10 to-transparent border border-violet-500/20 rounded-[2rem] flex flex-col md:flex-row items-center gap-8 shadow-[0_0_50px_rgba(139,92,246,0.05)]">
-           <div className="w-16 h-16 rounded-2xl bg-violet-500/10 flex items-center justify-center shrink-0 border border-violet-500/20">
+        <div className="mt-20 p-8 bg-gradient-to-r from-violet-500/10 to-transparent border border-violet-500/20 rounded-[8px] flex flex-col md:flex-row items-center gap-8 shadow-[0_0_50px_rgba(139,92,246,0.05)]">
+           <div className="w-16 h-16 rounded-[8px] bg-violet-500/10 flex items-center justify-center shrink-0 border border-violet-500/20">
               <Shield className="text-violet-500" size={32} />
            </div>
            <div className="space-y-1 text-center md:text-left">
@@ -181,7 +181,7 @@ export default function TickerGallery() {
            </div>
            <button 
              onClick={() => navigate(-1)}
-             className="w-full md:w-auto h-14 px-10 bg-white text-black font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-gray-100 transition-all ml-auto"
+             className="w-full md:w-auto h-14 px-10 bg-white text-black font-black uppercase text-xs tracking-widest rounded-[8px] hover:bg-gray-100 transition-all ml-auto"
            >
               Return to Setup
            </button>

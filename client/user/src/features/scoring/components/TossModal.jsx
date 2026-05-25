@@ -53,7 +53,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: 80, opacity: 0, scale: 0.95 }}
           transition={{ type: 'spring', damping: 22 }}
-          className="relative w-full max-w-md bg-[#111] rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl z-10"
+          className="relative w-full max-w-md bg-[#111] rounded-[8px] border border-white/10 overflow-hidden shadow-2xl z-10"
         >
           {/* Header */}
           <div className="px-6 pt-6 pb-4 border-b border-white/10 text-center">
@@ -100,13 +100,13 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                   <div className="flex flex-col gap-3">
                     <button
                       onClick={handleFlip}
-                      className="px-8 py-4 bg-[#00C187] text-black font-black uppercase tracking-widest rounded-2xl hover:bg-[#00e39f] hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,193,135,0.4)]"
+                      className="px-8 py-4 bg-[#00C187] text-black font-black uppercase tracking-widest rounded-[8px] hover:bg-[#00e39f] hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,193,135,0.4)]"
                     >
                       Flip Coin
                     </button>
                     <button
                       onClick={() => setStep('WINNER_SELECT')}
-                      className="px-8 py-3 bg-white/5 border border-white/10 text-neutral-400 font-bold uppercase tracking-widest rounded-2xl hover:bg-white/10 hover:text-white transition-all text-xs"
+                      className="px-8 py-3 bg-white/5 border border-white/10 text-neutral-400 font-bold uppercase tracking-widest rounded-[8px] hover:bg-white/10 hover:text-white transition-all text-xs"
                     >
                       Skip & Enter Manually
                     </button>
@@ -122,7 +122,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                     <p className="text-2xl font-black text-white">It's {coinResult}!</p>
                     <button
                       onClick={() => setStep('WINNER_SELECT')}
-                      className="px-8 py-4 bg-[#00C187]/20 border border-[#00C187]/40 text-[#00C187] font-black uppercase tracking-widest rounded-2xl hover:bg-[#00C187]/30 transition-all"
+                      className="px-8 py-4 bg-[#00C187]/20 border border-[#00C187]/40 text-[#00C187] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#00C187]/30 transition-all"
                     >
                       Continue
                     </button>
@@ -140,7 +140,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                       setWinnerTeam(team.id);
                       setStep('DECISION_SELECT');
                     }}
-                    className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl border border-white/8 bg-white/4 hover:border-[#00C187]/50 hover:bg-[#00C187]/8 transition-all group text-left"
+                    className="w-full flex items-center gap-4 px-4 py-4 rounded-[8px] border border-white/8 bg-white/4 hover:border-[#00C187]/50 hover:bg-[#00C187]/8 transition-all group text-left"
                   >
                     <span className="flex-1 font-bold text-white text-base">{team.name}</span>
                     <ChevronRight size={20} className="text-neutral-600 group-hover:text-[#00C187] transition-colors" />
@@ -156,7 +156,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                     setDecision('BAT');
                     setStep('SUMMARY');
                   }}
-                  className="flex flex-col items-center justify-center py-6 rounded-2xl border border-white/8 bg-white/4 hover:border-[#00C187]/50 hover:bg-[#00C187]/8 transition-all"
+                  className="flex flex-col items-center justify-center py-6 rounded-[8px] border border-white/8 bg-white/4 hover:border-[#00C187]/50 hover:bg-[#00C187]/8 transition-all"
                 >
                   <span className="text-lg font-black text-white">BAT</span>
                 </button>
@@ -165,7 +165,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                     setDecision('BOWL');
                     setStep('SUMMARY');
                   }}
-                  className="flex flex-col items-center justify-center py-6 rounded-2xl border border-white/8 bg-white/4 hover:border-[#00C187]/50 hover:bg-[#00C187]/8 transition-all"
+                  className="flex flex-col items-center justify-center py-6 rounded-[8px] border border-white/8 bg-white/4 hover:border-[#00C187]/50 hover:bg-[#00C187]/8 transition-all"
                 >
                   <span className="text-lg font-black text-white">BOWL</span>
                 </button>
@@ -181,7 +181,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                   </p>
                 </div>
                 
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+                <div className="bg-white/5 border border-white/10 rounded-[8px] p-4 text-center">
                   <p className="text-sm font-bold text-white">
                     <span className="text-[#00C187]">{teams.find(t => t.id === winnerTeam)?.name}</span> won the toss and chose to <span className="text-[#00C187]">{decision}</span>.
                   </p>
@@ -197,7 +197,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter password..."
-                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-sm font-bold text-white focus:outline-none focus:border-[#00C187]/50 transition-all text-center tracking-[0.2em]"
+                      className="w-full bg-black/40 border border-white/10 rounded-[8px] px-4 py-4 text-sm font-bold text-white focus:outline-none focus:border-[#00C187]/50 transition-all text-center tracking-[0.2em]"
                     />
                   </div>
                 )}
@@ -206,7 +206,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                   <button
                     onClick={handleStartMatch}
                     disabled={(hasPassword && !password) || isSubmitting}
-                    className="w-full py-4 bg-red-600 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-red-700 transition-all shadow-[0_0_20px_rgba(220,38,38,0.3)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-red-600 text-white font-black uppercase tracking-widest rounded-[8px] hover:bg-red-700 transition-all shadow-[0_0_20px_rgba(220,38,38,0.3)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <>
@@ -225,7 +225,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                       setDecision(null);
                       setCoinResult(null);
                     }}
-                    className={`w-full flex items-center justify-center gap-2 py-3 bg-white/5 text-neutral-400 font-bold uppercase tracking-widest rounded-2xl transition-all text-[11px] ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10 hover:text-white'}`}
+                    className={`w-full flex items-center justify-center gap-2 py-3 bg-white/5 text-neutral-400 font-bold uppercase tracking-widest rounded-[8px] transition-all text-[11px] ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10 hover:text-white'}`}
                   >
                     <RotateCcw size={14} /> Re-Toss
                   </button>

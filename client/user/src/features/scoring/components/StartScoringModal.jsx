@@ -681,7 +681,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="relative w-full max-w-md bg-[#0F0F0F] border border-white/10 rounded-[20px] shadow-2xl overflow-hidden"
+          className="relative w-full max-w-md bg-[#0F0F0F] border border-white/10 rounded-[8px] shadow-2xl overflow-hidden"
         >
           <div className="flex items-center justify-between p-5 border-b border-white/10">
             <h3 className="text-lg font-black text-white uppercase tracking-wider">
@@ -693,7 +693,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           </div>
           <div className="p-5 space-y-4">
             {/* Tabs */}
-            <div className="flex gap-2 p-1 bg-white/[0.03] rounded-xl border border-white/5">
+            <div className="flex gap-2 p-1 bg-white/[0.03] rounded-[8px] border border-white/5">
               {['myTeams', 'opponentTeams'].map(tab => (
                 <button key={tab} onClick={() => setTeamTab(tab)}
                   className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${teamTab === tab ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}>
@@ -713,7 +713,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                   className={inputClass}
                 />
                 <button onClick={handleTeamSearch} disabled={isSearching}
-                  className="px-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-white">
+                  className="px-3 bg-white/10 hover:bg-white/20 rounded-[8px] transition-colors text-white">
                   {isSearching ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
                 </button>
               </div>
@@ -725,7 +725,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 const isSelected = formData.teamAId === tid || formData.teamBId === tid;
                 return (
                   <button key={tid} onClick={() => selectTeam(tid)}
-                    className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
+                    className="w-full flex items-center justify-between p-3 rounded-[8px] bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
                     <div className="flex items-center gap-3">
                       {t.logo ? <img src={t.logo} className="w-8 h-8 rounded-lg object-cover" alt={t.name} /> : <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white/40"><Users size={14} /></div>}
                       <span className="font-bold text-white text-sm">{t.name}</span>
@@ -741,7 +741,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     const isSelected = formData.teamAId === tid || formData.teamBId === tid;
                     return (
                       <button key={tid} onClick={() => selectTeam(tid)}
-                        className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
+                        className="w-full flex items-center justify-between p-3 rounded-[8px] bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
                         <div className="flex items-center gap-3">
                           {t.logo ? <img src={t.logo} className="w-8 h-8 rounded-lg object-cover" alt={t.name} /> : <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white/40"><Swords size={14} /></div>}
                           <div>
@@ -755,7 +755,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                   })}
                   {searchedTeamData?.team && (
                     <button onClick={() => selectTeam(searchedTeamData.team._id || searchedTeamData.team.id)}
-                      className="w-full flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/30 hover:border-[#55DEE8] transition-all text-left mt-2">
+                      className="w-full flex items-center justify-between p-3 rounded-[8px] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/30 hover:border-[#55DEE8] transition-all text-left mt-2">
                       <div>
                         <div className="font-bold text-white text-sm">{searchedTeamData.team.name}</div>
                         <div className="text-[10px] text-[#55DEE8]">Search Result · {searchedTeamData.team.teamCode}</div>
@@ -802,7 +802,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="relative w-full max-w-md bg-[#0F0F0F] border border-white/10 rounded-[20px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+          className="relative w-full max-w-md bg-[#0F0F0F] border border-white/10 rounded-[8px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
         >
           <div className="flex items-center justify-between p-5 border-b border-white/10 flex-shrink-0">
             <h3 className="text-lg font-black text-white uppercase tracking-wider">
@@ -855,7 +855,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         selectPlayer(p);
                       }
                     }}
-                      className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left ${isAdded ? 'bg-[#BFF367]/10 border-[#BFF367]/30' : 'bg-white/5 hover:bg-white/10 border-transparent hover:border-white/10'}`}>
+                      className={`w-full flex items-center justify-between p-3 rounded-[8px] border transition-all text-left ${isAdded ? 'bg-[#BFF367]/10 border-[#BFF367]/30' : 'bg-white/5 hover:bg-white/10 border-transparent hover:border-white/10'}`}>
                       <div className="flex items-center gap-3">
                         {p.profilePicture ? <img src={p.profilePicture} className="w-10 h-10 rounded-full object-cover" alt={p.name} /> : <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/40"><Users size={16} /></div>}
                         <div>
@@ -896,7 +896,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 <div className="space-y-2">
                   {searchPlayersData?.players?.map(p => (
                     <button key={p._id} onClick={() => handleInviteAndAdd(p)}
-                      className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
+                      className="w-full flex items-center justify-between p-3 rounded-[8px] bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
                       <div className="flex items-center gap-3">
                         {p.profilePicture ? <img src={p.profilePicture} className="w-10 h-10 rounded-full object-cover" alt={p.username} /> : <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/40"><Users size={16} /></div>}
                         <div>
@@ -925,7 +925,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <div className="space-y-4">
                 {!customInviteData ? (
                   <form onSubmit={handleAddCustomPlayerSubmit} className="space-y-4">
-                    <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-xl p-4 flex gap-3">
+                    <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-[8px] p-4 flex gap-3">
                       <Sparkles size={20} className="text-[#55DEE8] flex-shrink-0 mt-0.5" />
                       <div className="text-sm text-[#55DEE8]">
                         Create a custom player placeholder. If you add their phone number, they'll get an invite to join Kridaz!
@@ -969,7 +969,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                       </p>
                     </div>
                     <button type="submit" disabled={isAddingCustom || !customPlayerName.trim()}
-                      className="w-full py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-xl uppercase tracking-wider text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 mt-2">
+                      className="w-full py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] uppercase tracking-wider text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 mt-2">
                       {isAddingCustom ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
                       Add Custom Player
                     </button>
@@ -993,7 +993,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                             setPlayerPopup(null);
                             setCustomInviteData(null);
                           }}
-                          className="flex-1 py-3 bg-[#25D366] text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-[#20bd5a] transition-colors"
+                          className="flex-1 py-3 bg-[#25D366] text-white font-bold rounded-[8px] flex items-center justify-center gap-2 hover:bg-[#20bd5a] transition-colors"
                         >
                           <MessageCircle size={18} />
                           Send WhatsApp
@@ -1003,7 +1003,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                             setPlayerPopup(null);
                             setCustomInviteData(null);
                           }}
-                          className="py-3 px-6 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-colors"
+                          className="py-3 px-6 bg-white/10 text-white font-bold rounded-[8px] hover:bg-white/20 transition-colors"
                         >
                           Skip
                         </button>
@@ -1076,7 +1076,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             </div>
 
             {formData.format === 'CUSTOM' && (
-              <div className="grid grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl border border-white/10">
+              <div className="grid grid-cols-2 gap-4 bg-white/5 p-4 rounded-[8px] border border-white/10">
                 <div>
                   <label className={labelClass}>Days</label>
                   <input type="number" min="1" max="10" value={formData.customDays}
@@ -1109,7 +1109,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 />
               </div>
               {showLocationSuggestions && locationSuggestions.length > 0 && (
-                <div className="absolute top-full mt-2 w-full bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[100]">
+                <div className="absolute top-full mt-2 w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[100]">
                   <div className="max-h-[200px] overflow-y-auto">
                     {locationSuggestions.map((loc, idx) => (
                       <button
@@ -1191,10 +1191,10 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               const team = allTeams.find(t => (t._id || t.id) === id);
               return (
                 <button key={key} onClick={() => setSelectingTeam(key)}
-                  className="w-full flex items-center justify-between p-4 rounded-xl border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition-all">
+                  className="w-full flex items-center justify-between p-4 rounded-[8px] border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition-all">
                   <div className="flex items-center gap-3">
-                    {team?.logo ? <img src={team.logo} className="w-10 h-10 rounded-xl object-cover" alt="" /> : (
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${color}20`, border: `1px solid ${color}40` }}>
+                    {team?.logo ? <img src={team.logo} className="w-10 h-10 rounded-[8px] object-cover" alt="" /> : (
+                      <div className="w-10 h-10 rounded-[8px] flex items-center justify-center" style={{ background: `${color}20`, border: `1px solid ${color}40` }}>
                         <Users size={18} style={{ color }} />
                       </div>
                     )}
@@ -1208,7 +1208,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               );
             })}
             {formData.teamAId && formData.teamBId && formData.teamAId === formData.teamBId && (
-              <p className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl p-3">
+              <p className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-[8px] p-3">
                 Team A and Team B cannot be the same team.
               </p>
             )}
@@ -1284,7 +1284,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <p className="text-sm text-white/40">Optionally hire a venue or professionals. You can skip this step.</p>
             </div>
 
-            <div className="flex gap-2 p-1 bg-white/[0.03] rounded-xl border border-white/5 flex-shrink-0">
+            <div className="flex gap-2 p-1 bg-white/[0.03] rounded-[8px] border border-white/5 flex-shrink-0">
               <button onClick={() => setAddonsTab('VENUE')}
                 className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${addonsTab === 'VENUE' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}>
                 Venue
@@ -1345,7 +1345,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                       return filteredVenues.length > 0 ? (
                         filteredVenues.map(g => (
                           <button key={g.id} onClick={() => setFormData(f => ({ ...f, venueId: f.venueId === g.id ? null : g.id, customVenue: '' }))}
-                            className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left ${formData.venueId === g.id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
+                            className={`w-full flex items-center justify-between p-3 rounded-[8px] border transition-all text-left ${formData.venueId === g.id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
                             <div className="flex items-center gap-3">
                               <MapPin size={18} className={formData.venueId === g.id ? 'text-[#55DEE8]' : 'text-white/40'} />
                               <div>
@@ -1419,7 +1419,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     </div>
                   </div>
 
-                  <button onClick={() => setShowCustomProInvite(true)} className="w-full py-3 rounded-xl border border-dashed border-[#55DEE8]/50 text-[#55DEE8] flex items-center justify-center gap-2 text-sm font-bold hover:bg-[#55DEE8]/10 transition-colors">
+                  <button onClick={() => setShowCustomProInvite(true)} className="w-full py-3 rounded-[8px] border border-dashed border-[#55DEE8]/50 text-[#55DEE8] flex items-center justify-center gap-2 text-sm font-bold hover:bg-[#55DEE8]/10 transition-colors">
                     <UserPlus size={16} />
                     Invite Custom Professional
                   </button>
@@ -1427,7 +1427,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                   <div className="space-y-2">
                     {/* List Custom Professionals already added */}
                     {formData.customProfessionals?.map((cp, idx) => (
-                      <div key={`custom-${idx}`} className="w-full flex items-center justify-between p-3 rounded-xl border bg-[#BFF367]/10 border-[#BFF367]">
+                      <div key={`custom-${idx}`} className="w-full flex items-center justify-between p-3 rounded-[8px] border bg-[#BFF367]/10 border-[#BFF367]">
                         <div className="flex items-center gap-3">
                           <UserCheck size={18} className="text-[#BFF367]" />
                           <div>
@@ -1453,7 +1453,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                           const isSelected = formData.professionals.includes(u.id);
                           return (
                             <button key={u.id} onClick={() => setFormData(f => ({ ...f, professionals: isSelected ? f.professionals.filter(id => id !== u.id) : [...f.professionals, u.id] }))}
-                              className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left ${isSelected ? 'bg-[#BFF367]/10 border-[#BFF367]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
+                              className={`w-full flex items-center justify-between p-3 rounded-[8px] border transition-all text-left ${isSelected ? 'bg-[#BFF367]/10 border-[#BFF367]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
                               <div className="flex items-center gap-3">
                                 {u.profilePicture ? <img src={u.profilePicture} className="w-8 h-8 rounded-full object-cover" alt={u.name} /> : <UserCheck size={18} className={isSelected ? 'text-[#BFF367]' : 'text-white/40'} />}
                                 <div>
@@ -1501,7 +1501,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                             {customProInviteData.name} has been added to the match setup. Send them a WhatsApp message to join and onboard as {customProInviteData.role}.
                           </p>
                         </div>
-                        <div className="bg-white/5 p-3 rounded-lg text-left w-full mt-4 border border-white/10">
+                        <div className="bg-white/5 p-3 rounded-[8px] text-left w-full mt-4 border border-white/10">
                           <p className="text-xs text-white/60 font-mono break-words">
                             Hey {customProInviteData.name}, I've invited you to officiate as a {customProInviteData.role} for an upcoming match on Kridaz! Click here to join:
                             https://kridaz.com/invite?token=CUSTOM&role={customProInviteData.role}
@@ -1514,7 +1514,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                             setShowCustomProInvite(false);
                             setCustomProInviteData(null);
                           }}
-                          className="w-full py-4 rounded-xl bg-[#BFF367] text-black font-black uppercase tracking-wider hover:bg-[#a5db4e] transition-colors mt-6"
+                          className="w-full py-4 rounded-[8px] bg-[#BFF367] text-black font-black uppercase tracking-wider hover:bg-[#a5db4e] transition-colors mt-6"
                         >
                           Send via WhatsApp
                         </button>
@@ -1595,7 +1595,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                           setCustomProfessionalPhone('');
                         }}
                         disabled={!customProfessionalName || !customProfessionalPhone}
-                        className="w-full py-4 rounded-xl bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-wider disabled:opacity-50 mt-auto hover:opacity-90 transition-opacity shadow-lg shadow-[#55DEE8]/20"
+                        className="w-full py-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-wider disabled:opacity-50 mt-auto hover:opacity-90 transition-opacity shadow-lg shadow-[#55DEE8]/20"
                       >
                         Add to Match & Invite
                       </button>
@@ -1605,7 +1605,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               )}
             </AnimatePresence>
 
-            <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-xl p-4 flex gap-3 flex-shrink-0">
+            <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-[8px] p-4 flex gap-3 flex-shrink-0">
               <Sparkles size={20} className="text-[#55DEE8] flex-shrink-0 mt-0.5" />
               <div className="text-sm text-[#55DEE8]">
                 Venues and professionals selected here are added to your scoring match directly. No payment or coin transaction is required.
@@ -1626,7 +1626,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         return (
           <div className="space-y-5">
             {/* Match Summary */}
-            <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-4 space-y-3">
+            <div className="bg-white/[0.03] rounded-[8px] border border-white/5 p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-white font-black text-lg truncate">{formData.matchName}</span>
                 <span className="text-xs px-2 py-1 rounded-lg bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 font-bold">{formatLabel}</span>
@@ -1637,17 +1637,17 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 <span className="truncate">{teamBName}</span>
               </div>
               <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="bg-white/5 rounded-xl p-2">
+                <div className="bg-white/5 rounded-[8px] p-2">
                   <div className="text-[10px] text-white/40 uppercase">Ball</div>
                   <div className="text-white text-xs font-bold">{ballLabel}</div>
                 </div>
-                <div className="bg-white/5 rounded-xl p-2">
+                <div className="bg-white/5 rounded-[8px] p-2">
                   <div className="text-[10px] text-white/40 uppercase">Ground</div>
                   <div className="text-white text-xs font-bold truncate" title={selectedVenueName || groundLabel}>
                     {selectedVenueName || groundLabel}
                   </div>
                 </div>
-                <div className="bg-white/5 rounded-xl p-2">
+                <div className="bg-white/5 rounded-[8px] p-2">
                   <div className="text-[10px] text-white/40 uppercase">Players</div>
                   <div className="text-white text-xs font-bold">{formData.maxMembers} per side</div>
                 </div>
@@ -1689,7 +1689,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-2xl bg-[#0F0F0F] border border-white/10 rounded-[24px] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        className="relative w-full max-w-2xl bg-[#0F0F0F] border border-white/10 rounded-[8px] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-white/[0.02] flex-shrink-0">
@@ -1728,24 +1728,24 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         <div className="flex gap-3 p-5 border-t border-white/10 bg-white/[0.01] flex-shrink-0">
           {step > 1 && (
             <button onClick={handlePrev}
-              className="px-5 py-3 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all flex items-center gap-2 text-sm uppercase tracking-wider">
+              className="px-5 py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 transition-all flex items-center gap-2 text-sm uppercase tracking-wider">
               <ChevronLeft size={14} /> Back
             </button>
           )}
           {step === 4 && (
             <button onClick={handleNext}
-              className="px-5 py-3 rounded-xl border border-white/10 text-white/50 hover:text-white font-bold hover:bg-white/5 transition-all flex items-center gap-2 text-sm uppercase tracking-wider">
+              className="px-5 py-3 rounded-[8px] border border-white/10 text-white/50 hover:text-white font-bold hover:bg-white/5 transition-all flex items-center gap-2 text-sm uppercase tracking-wider">
               <SkipForward size={14} /> Skip
             </button>
           )}
           {step < STEPS.length ? (
             <button onClick={handleNext} disabled={!canGoNext()}
-              className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black hover:opacity-90 transition-all flex items-center justify-center gap-2 uppercase text-sm tracking-wider disabled:opacity-40 disabled:cursor-not-allowed">
+              className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black hover:opacity-90 transition-all flex items-center justify-center gap-2 uppercase text-sm tracking-wider disabled:opacity-40 disabled:cursor-not-allowed">
               Next <ChevronRight size={14} />
             </button>
           ) : (
             <button onClick={handleSubmit} disabled={isLoading || !canGoNext()}
-              className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black hover:opacity-90 transition-all flex items-center justify-center gap-2 uppercase text-sm tracking-wider disabled:opacity-40 disabled:cursor-not-allowed">
+              className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black hover:opacity-90 transition-all flex items-center justify-center gap-2 uppercase text-sm tracking-wider disabled:opacity-40 disabled:cursor-not-allowed">
               {isLoading ? <><Loader2 size={16} className="animate-spin" /> Creating...</> : <><Trophy size={16} /> Create Match</>}
             </button>
           )}
@@ -1779,26 +1779,26 @@ const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, on
       <div className="flex gap-2 flex-shrink-0">
         {!hasAutoLoaded && teamDetails?.members?.length > 0 && (
           <button onClick={onInit}
-            className="flex-1 py-3 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5"
+            className="flex-1 py-3 rounded-[8px] border text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5"
             style={{ borderColor: `${color}40`, color, background: `${color}10` }}>
             <Users size={14} /> Auto-load Roster
           </button>
         )}
         <button onClick={onAdd} disabled={players.length >= maxMembers}
-          className="flex-1 py-3 rounded-xl border border-white/10 text-white hover:bg-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 disabled:opacity-50">
+          className="flex-1 py-3 rounded-[8px] border border-white/10 text-white hover:bg-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 disabled:opacity-50">
           + Add Player
         </button>
       </div>
 
       {players.length === 0 && (
-        <div className="text-center py-8 text-white/30 text-sm bg-white/5 rounded-xl border border-white/5 border-dashed flex-shrink-0">
+        <div className="text-center py-8 text-white/30 text-sm bg-white/5 rounded-[8px] border border-white/5 border-dashed flex-shrink-0">
           No players added yet.<br />Auto-load from roster or add manually.
         </div>
       )}
 
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
         {players.map((p, idx) => (
-          <div key={p.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 group hover:border-white/20 transition-all">
+          <div key={p.id} className="flex items-center gap-3 p-3 rounded-[8px] bg-white/5 border border-white/10 group hover:border-white/20 transition-all">
             <span className="text-white/30 text-xs w-5 text-right font-mono">{idx + 1}</span>
             {p.profilePicture
               ? <img src={p.profilePicture} className="w-8 h-8 rounded-full object-cover border border-white/10" alt={p.name} />
@@ -1828,7 +1828,7 @@ const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, on
       </div>
 
       {players.length > 0 && players.length < maxMembers && (
-        <p className="text-[10px] uppercase tracking-wider text-yellow-400/80 bg-yellow-400/10 border border-yellow-400/20 rounded-xl p-3 flex-shrink-0 text-center font-bold">
+        <p className="text-[10px] uppercase tracking-wider text-yellow-400/80 bg-yellow-400/10 border border-yellow-400/20 rounded-[8px] p-3 flex-shrink-0 text-center font-bold">
           Needs {maxMembers - players.length} more player(s) for a full XI
         </p>
       )}

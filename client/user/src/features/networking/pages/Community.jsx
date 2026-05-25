@@ -43,7 +43,7 @@ import { uploadFileToR2 } from "@utils/mediaUpload";
 
 const PRI = "#55DEE8";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
-const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 const getPostShareId = (post) => post?._id || post?.id;
 
@@ -755,7 +755,7 @@ const Community = () => {
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: -20, opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-[15px] overflow-hidden shadow-2xl mx-4"
+              className="w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl mx-4"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 p-5 border-b border-white/5 bg-[#111]">
@@ -787,7 +787,7 @@ const Community = () => {
                           setShowGlobalSearch(false);
                           navigate(`/profile/${player._id}`);
                         }}
-                        className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-all group"
+                        className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-[8px] cursor-pointer transition-all group"
                       >
                         <div className="w-[46px] h-[46px] rounded-full bg-[#111] border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
                           <img
@@ -841,7 +841,7 @@ const Community = () => {
                     <input
                       type="text"
                       placeholder="Search community posts or players..."
-                      className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm font-bold text-white outline-none focus:border-[#55DEE8]/50 focus:ring-1 focus:ring-[#55DEE8]/20 transition-all placeholder:text-white/30"
+                      className="w-full bg-[#0A0A0A] border border-white/10 rounded-[8px] py-3 pl-11 pr-4 text-sm font-bold text-white outline-none focus:border-[#55DEE8]/50 focus:ring-1 focus:ring-[#55DEE8]/20 transition-all placeholder:text-white/30"
                       value={feedSearchQuery}
                       onChange={(e) => setFeedSearchQuery(e.target.value)}
                     />
@@ -902,7 +902,7 @@ const Community = () => {
 
                 {/* Stories Section */}
                 {!debouncedSearchQuery.trim() && (
-                  <div className="bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5">
+                  <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5">
                     <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth items-center pb-2">
 
                       {/* Add Story */}
@@ -970,10 +970,7 @@ const Community = () => {
                         <button
                           key={filter}
                           onClick={() => handleSetActiveFilter(filter)}
-                          className={`px-4 py-2 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border ${activeFilter === filter
-                              ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent hover:brightness-110'
-                              : 'bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white'
-                            }`}
+                          className={`px-4 py-2 rounded-[6px] text-[11px] font-bold whitespace-nowrap transition-all border ${activeFilter === filter ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent hover:brightness-110' : 'bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white' }`}
                         >
                           {filter}
                         </button>
@@ -997,7 +994,7 @@ const Community = () => {
                           </div>
                         </div>
                         {/* Sort: Latest */}
-                        <button className="px-3 py-2 rounded-full bg-transparent border border-white/10 text-white/70 hover:bg-white/5 text-[11px] font-bold flex items-center gap-1.5">
+                        <button className="px-3 py-2 rounded-[6px] bg-transparent border border-white/10 text-white/70 hover:bg-white/5 text-[11px] font-bold flex items-center gap-1.5">
                           Latest <ChevronDown size={12} />
                         </button>
                       </div>
@@ -1008,11 +1005,7 @@ const Community = () => {
                       {/* Mobile Reels Button */}
                       <button
                         onClick={() => handleSetActiveFilter(activeFilter === "Reels" ? "All" : "Reels")}
-                        className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-[15px] text-[10px] font-bold uppercase tracking-wider transition-all shrink-0 z-10 group ${
-                          activeFilter === 'Reels' 
-                            ? 'text-[#55DEE8] bg-[#55DEE8]/10' 
-                            : 'text-white/70 hover:text-white'
-                        }`}
+                        className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[10px] font-bold uppercase tracking-wider transition-all shrink-0 z-10 group ${ activeFilter === 'Reels' ? 'text-[#55DEE8] bg-[#55DEE8]/10' : 'text-white/70 hover:text-white' }`}
                       >
                         <svg className="absolute inset-0 w-full h-full pointer-events-none z-[-1]">
                           <defs>
@@ -1030,7 +1023,7 @@ const Community = () => {
                       {/* Features Dropdown */}
                       <div className="relative w-[115px]">
                         <select
-                          className="w-full bg-neutral-900 border border-white/10 rounded-[15px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none focus:border-[#55DEE8]/40 transition-all appearance-none cursor-pointer"
+                          className="w-full bg-neutral-900 border border-white/10 rounded-[8px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none focus:border-[#55DEE8]/40 transition-all appearance-none cursor-pointer"
                           style={{ fontFamily: "'Inter', sans-serif" }}
                           value={activeFilter}
                           onChange={(e) => handleSetActiveFilter(e.target.value)}
@@ -1047,7 +1040,7 @@ const Community = () => {
                       {/* Categories Dropdown */}
                       <div className="relative w-[115px]">
                         <select
-                          className="w-full border border-transparent rounded-[15px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
+                          className="w-full border border-transparent rounded-[8px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
                           style={{ 
                             fontFamily: "'Inter', sans-serif",
                             backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
@@ -1072,7 +1065,7 @@ const Community = () => {
 
                 {/* Players Search Results Section */}
                 {debouncedSearchQuery.trim() !== "" && (
-                  <div className="flex flex-col gap-3 bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5">
+                  <div className="flex flex-col gap-3 bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5">
                     <div className="flex items-center justify-between mb-1">
                       <h3 className="text-xs font-black uppercase tracking-widest text-[#55DEE8]" style={HEADING_STYLE}>
                         PLAYERS MATCHING "{debouncedSearchQuery}"
@@ -1094,7 +1087,7 @@ const Community = () => {
                           <div 
                             key={player.id}
                             onClick={() => navigate(`/profile/${player.id}`)}
-                            className="flex items-center gap-3 bg-neutral-900/50 hover:bg-neutral-900 border border-white/5 hover:border-[#55DEE8]/30 p-3 rounded-xl cursor-pointer transition-all min-w-[220px] max-w-[280px] group shrink-0"
+                            className="flex items-center gap-3 bg-neutral-900/50 hover:bg-neutral-900 border border-white/5 hover:border-[#55DEE8]/30 p-3 rounded-[8px] cursor-pointer transition-all min-w-[220px] max-w-[280px] group shrink-0"
                           >
                             <div className="w-[42px] h-[42px] rounded-full bg-[#111] border border-white/10 overflow-hidden shrink-0">
                               <img 
@@ -1141,32 +1134,32 @@ const Community = () => {
 
             {/* Main Feed Posts / Reels */}
             {activeFilter === "Reels" ? (
-              <div className="relative flex justify-center h-[calc(100vh-180px)] bg-black/40 rounded-[15px]">
+              <div className="relative flex justify-center h-[calc(100vh-180px)] bg-black/40 rounded-[8px]">
                 {/* Back button & header */}
                 <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => handleSetActiveFilter("All")}
-                      className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 text-white px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-all"
+                      className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 text-white px-3 py-2 rounded-[8px] text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-all"
                     >
                       <ArrowLeft size={14} strokeWidth={2.5} />
                       <span>Community</span>
                     </button>
-                    <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#55DEE8]/20 text-[#55DEE8] px-3 py-2 rounded-xl text-xs font-black uppercase tracking-widest">
+                    <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#55DEE8]/20 text-[#55DEE8] px-3 py-2 rounded-[8px] text-xs font-black uppercase tracking-widest">
                       <PlaySquare size={13} />
                       <span>Shots</span>
                     </div>
                   </div>
                   <button
                     onClick={() => gateInteraction(() => navigate('/reels/upload'))}
-                    className="flex items-center gap-1.5 bg-[#55DEE8] text-black px-3 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#BFF367] transition-colors shadow-lg shadow-[#55DEE8]/20"
+                    className="flex items-center gap-1.5 bg-[#55DEE8] text-black px-3 py-2 rounded-[8px] text-xs font-black uppercase tracking-widest hover:bg-[#BFF367] transition-colors shadow-lg shadow-[#55DEE8]/20"
                   >
                     <Plus size={14} strokeWidth={3} />
                     <span>Upload</span>
                   </button>
                 </div>
                 <div
-                  className="h-full aspect-[9/16] overflow-y-scroll snap-y snap-mandatory no-scrollbar rounded-[15px] bg-black shadow-2xl mx-auto"
+                  className="h-full aspect-[9/16] overflow-y-scroll snap-y snap-mandatory no-scrollbar rounded-[8px] bg-black shadow-2xl mx-auto"
                   onScroll={(e) => {
                     const el = e.currentTarget;
                     const idx = Math.round(el.scrollTop / el.clientHeight);
@@ -1206,13 +1199,13 @@ const Community = () => {
                 <Loader2 size={32} className="text-[#55DEE8] animate-spin" />
               </div>
             ) : loadedPosts.length === 0 ? (
-              <div className="bg-[#0A0A0A] border border-white/5 rounded-[15px] p-16 text-center text-white/30 font-bold uppercase tracking-widest text-sm">
+              <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-16 text-center text-white/30 font-bold uppercase tracking-widest text-sm">
                 No posts found
               </div>
             ) : (
               <div className="space-y-6">
                 {loadedPosts.map(post => (
-                  <div key={post._id} className="bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5 space-y-4">
+                  <div key={post._id} className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5 space-y-4">
                     {/* Post Header */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -1238,7 +1231,7 @@ const Community = () => {
                     </div>
 
                     {(post.image || post.imageUrl || post.mediaUrl) && (
-                      <div className="relative rounded-[15px] overflow-hidden group border border-white/5 bg-[#111]">
+                      <div className="relative rounded-[8px] overflow-hidden group border border-white/5 bg-[#111]">
                         <img
                           src={post.image || post.imageUrl || post.thumbnailUrl}
                           className={`w-full object-cover max-h-[500px] transition-all duration-500 ${(post.status === 'pending' || post.status === 'processing') ? 'blur-xl scale-110 opacity-50' : ''}`}
@@ -1401,7 +1394,7 @@ const Community = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 24, scale: 0.96 }}
               transition={{ type: "spring", damping: 24, stiffness: 260 }}
-              className="relative z-20 w-full max-h-[86vh] overflow-hidden rounded-t-[24px] border border-white/10 bg-neutral-950/95 shadow-[0_25px_80px_rgba(0,0,0,0.85)] backdrop-blur-2xl sm:max-w-xl sm:rounded-[22px]"
+              className="relative z-20 w-full max-h-[86vh] overflow-hidden rounded-t-[24px] border border-white/10 bg-neutral-950/95 shadow-[0_25px_80px_rgba(0,0,0,0.85)] backdrop-blur-2xl sm:max-w-xl sm:rounded-[8px]"
               style={HEADING_STYLE}
               onClick={(e) => e.stopPropagation()}
             >
@@ -1464,7 +1457,7 @@ const Community = () => {
               animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }} 
               exit={{ opacity: 0, y: 30, scale: 0.95, rotateX: 5 }}
               transition={{ type: "spring", damping: 25, stiffness: 240 }}
-              className="relative w-full max-w-lg bg-neutral-950/80 border border-white/5 rounded-[15px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
+              className="relative w-full max-w-lg bg-neutral-950/80 border border-white/5 rounded-[8px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
             >
               {/* Dual Glowing Spots using the new gradient stops */}
               <div className="absolute -top-24 -left-24 w-52 h-52 bg-[#55DEE8]/10 blur-[80px] rounded-full pointer-events-none" />
@@ -1484,7 +1477,7 @@ const Community = () => {
                   {/* Sports Dropdown */}
                   <div className="relative">
                     <select
-                      className="border border-transparent rounded-[15px] py-1.5 pl-3 pr-8 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
+                      className="border border-transparent rounded-[8px] py-1.5 pl-3 pr-8 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
                       style={{ 
                         fontFamily: "'Inter', sans-serif",
                         backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
@@ -1543,7 +1536,7 @@ const Community = () => {
                     placeholder="Title (Optional)"
                     maxLength={80}
                     style={SUBHEADING_STYLE}
-                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#55DEE8]/30 focus:bg-white/[0.03] rounded-xl h-10 px-3.5 text-white text-xs outline-none transition-all duration-300 placeholder:text-white/20"
+                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#55DEE8]/30 focus:bg-white/[0.03] rounded-[8px] h-10 px-3.5 text-white text-xs outline-none transition-all duration-300 placeholder:text-white/20"
                   />
                   {newPost.title.length > 0 && (
                     <span className="absolute right-3.5 top-3 text-[9px] font-bold text-neutral-500" style={SUBHEADING_STYLE}>
@@ -1560,7 +1553,7 @@ const Community = () => {
                     placeholder="Whatâ€™s happening in your match? Share updates, highlights, or announcementsâ€¦"
                     maxLength={1000}
                     style={SUBHEADING_STYLE}
-                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#BFF367]/30 focus:bg-white/[0.03] rounded-xl min-h-[100px] max-h-[200px] p-3.5 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
+                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#BFF367]/30 focus:bg-white/[0.03] rounded-[8px] min-h-[100px] max-h-[200px] p-3.5 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
                   />
                   {newPost.content.length > 0 && (
                     <span className="absolute right-3.5 bottom-3.5 text-[9px] font-bold text-neutral-500" style={SUBHEADING_STYLE}>
@@ -1575,7 +1568,7 @@ const Community = () => {
                     initial={{ opacity: 0, scale: 0.97, y: 5 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.97, y: -5 }}
-                    className="relative h-36 w-full rounded-xl overflow-hidden border border-white/5 group shadow-lg"
+                    className="relative h-36 w-full rounded-[8px] overflow-hidden border border-white/5 group shadow-lg"
                   >
                     <img src={postImagePreview} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" />
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
@@ -1604,7 +1597,7 @@ const Community = () => {
                         style={SUBHEADING_STYLE} 
                         whileHover={{ scale: 1.05, backgroundColor: "rgba(85,222,232,0.08)", border: "1px solid rgba(85,222,232,0.2)", color: "#55DEE8" }}
                         whileTap={{ scale: 0.95 }}
-                        className="p-2.5 bg-white/[0.02] border border-white/5 rounded-xl text-neutral-400 hover:text-[#55DEE8] transition-all flex items-center justify-center cursor-pointer"
+                        className="p-2.5 bg-white/[0.02] border border-white/5 rounded-[8px] text-neutral-400 hover:text-[#55DEE8] transition-all flex items-center justify-center cursor-pointer"
                         title="Add Image"
                       >
                         <ImageIcon size={16} />
@@ -1617,7 +1610,7 @@ const Community = () => {
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-xl px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400" 
+                        className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-[8px] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400" 
                         style={SUBHEADING_STYLE}
                       >
                         <ShieldCheck size={12} className="text-[#55DEE8]" />
@@ -1633,7 +1626,7 @@ const Community = () => {
                       onClick={closePostModal}
                       whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.03)" }}
                       whileTap={{ scale: 0.98 }}
-                      className="px-4 h-9 rounded-xl text-xs font-bold text-neutral-400 hover:text-white transition-all cursor-pointer"
+                      className="px-4 h-9 rounded-[8px] text-xs font-bold text-neutral-400 hover:text-white transition-all cursor-pointer"
                     >
                       Cancel
                     </motion.button>
@@ -1644,7 +1637,7 @@ const Community = () => {
                       style={SUBHEADING_STYLE}
                       whileHover={{ scale: 1.03, boxShadow: "0px 8px 25px rgba(85,222,232,0.18)", filter: "brightness(1.04)" }}
                       whileTap={{ scale: 0.97 }}
-                      className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-5 h-9 rounded-xl font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-25 disabled:cursor-not-allowed text-xs cursor-pointer group/publish"
+                      className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-5 h-9 rounded-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-25 disabled:cursor-not-allowed text-xs cursor-pointer group/publish"
                     >
                       {isPublishing ? (
                         <Loader2 size={13} className="animate-spin" />
@@ -1675,7 +1668,7 @@ const Community = () => {
               animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }} 
               exit={{ opacity: 0, y: 30, scale: 0.95, rotateX: 5 }}
               transition={{ type: "spring", damping: 25, stiffness: 240 }}
-              className="relative w-full max-w-lg bg-neutral-950/80 border border-white/5 rounded-[15px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
+              className="relative w-full max-w-lg bg-neutral-950/80 border border-white/5 rounded-[8px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
             >
               {/* Dual Glowing Spots using the same brand gradient stops */}
               <div className="absolute -top-24 -left-24 w-52 h-52 bg-[#55DEE8]/10 blur-[80px] rounded-full pointer-events-none" />
@@ -1721,16 +1714,16 @@ const Community = () => {
                     onChange={(e) => setNewStory({ ...newStory, content: e.target.value })}
                     placeholder="Share a quick moment, match update, highlight, or announcement..."
                     style={SUBHEADING_STYLE}
-                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#55DEE8]/30 focus:bg-white/[0.03] rounded-xl h-20 p-3 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
+                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#55DEE8]/30 focus:bg-white/[0.03] rounded-[8px] h-20 p-3 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
                   />
                 </div>
 
                 {/* Expiry Duration Dropdown */}
-                <div className="flex items-center justify-between bg-white/[0.01] border border-white/5 p-3 rounded-xl">
+                <div className="flex items-center justify-between bg-white/[0.01] border border-white/5 p-3 rounded-[8px]">
                   <span className="text-xs text-neutral-400 font-bold" style={SUBHEADING_STYLE}>Expiry Duration</span>
                   <div className="relative">
                     <select
-                      className="border border-transparent rounded-[15px] py-1.5 pl-3 pr-8 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer"
+                      className="border border-transparent rounded-[8px] py-1.5 pl-3 pr-8 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer"
                       style={{ 
                         fontFamily: "'Inter', sans-serif",
                         backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
@@ -1756,7 +1749,7 @@ const Community = () => {
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.97 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="relative aspect-[9/16] h-52 rounded-xl overflow-hidden border border-white/5 group shadow-2xl bg-neutral-900"
+                      className="relative aspect-[9/16] h-52 rounded-[8px] overflow-hidden border border-white/5 group shadow-2xl bg-neutral-900"
                     >
                       <img src={storyMediaPreviews[0]} alt="" className="w-full h-full object-cover group-hover:scale-102 transition-all duration-700" />
                       <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
@@ -1790,7 +1783,7 @@ const Community = () => {
                         style={SUBHEADING_STYLE} 
                         whileHover={{ scale: 1.05, backgroundColor: "rgba(85,222,232,0.08)", border: "1px solid rgba(85,222,232,0.2)", color: "#55DEE8" }}
                         whileTap={{ scale: 0.95 }}
-                        className="p-2.5 bg-white/[0.02] border border-white/5 rounded-[15px] text-neutral-400 hover:text-[#55DEE8] transition-all flex items-center justify-center cursor-pointer"
+                        className="p-2.5 bg-white/[0.02] border border-white/5 rounded-[8px] text-neutral-400 hover:text-[#55DEE8] transition-all flex items-center justify-center cursor-pointer"
                         title="Upload Photo/Video"
                       >
                         <ImageIcon size={16} />
@@ -1802,7 +1795,7 @@ const Community = () => {
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-xl px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400" 
+                        className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-[8px] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400" 
                         style={SUBHEADING_STYLE}
                       >
                         <ShieldCheck size={12} className="text-[#55DEE8]" />
@@ -1818,7 +1811,7 @@ const Community = () => {
                       onClick={() => setShowStoryModal(false)}
                       whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.03)" }}
                       whileTap={{ scale: 0.98 }}
-                      className="px-4 h-9 rounded-xl text-xs font-bold text-neutral-400 hover:text-white transition-all cursor-pointer"
+                      className="px-4 h-9 rounded-[8px] text-xs font-bold text-neutral-400 hover:text-white transition-all cursor-pointer"
                     >
                       Cancel
                     </motion.button>
@@ -1829,7 +1822,7 @@ const Community = () => {
                       style={SUBHEADING_STYLE}
                       whileHover={{ scale: 1.03, boxShadow: "0px 8px 25px rgba(85,222,232,0.18)", filter: "brightness(1.04)" }}
                       whileTap={{ scale: 0.97 }}
-                      className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-5 h-9 rounded-xl font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-25 disabled:cursor-not-allowed text-xs cursor-pointer group/story"
+                      className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-5 h-9 rounded-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-25 disabled:cursor-not-allowed text-xs cursor-pointer group/story"
                     >
                       {isPublishing ? (
                         <Loader2 size={13} className="animate-spin" />

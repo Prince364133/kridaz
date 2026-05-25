@@ -57,11 +57,7 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       <Link
         key={item.to || item.label}
         to={item.to || "#"}
-        className={`flex items-center h-[48px] px-4 group relative transition-all duration-300 rounded-[8px] mx-2 mb-1 border border-transparent ${
-          isActive 
-            ? "bg-[#55DEE8] text-black shadow-[0_4px_15px_rgba(204,255,0,0.2)] border-[#55DEE8]/20" 
-            : "bg-transparent text-[#999999] hover:bg-[#55DEE8]/5 hover:text-[#55DEE8] hover:border-[#55DEE8]/10"
-        } ${isLogout ? "hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20" : ""}`}
+        className={`flex items-center h-[48px] px-4 group relative transition-all duration-300 rounded-[8px] mx-2 mb-1 border border-transparent ${ isActive ? "bg-[#55DEE8] text-black shadow-[0_4px_15px_rgba(204,255,0,0.2)] border-[#55DEE8]/20" : "bg-transparent text-[#999999] hover:bg-[#55DEE8]/5 hover:text-[#55DEE8] hover:border-[#55DEE8]/10" } ${isLogout ? "hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20" : ""}`}
         onClick={(e) => {
           if (isLogout) {
             e.preventDefault();
@@ -76,9 +72,7 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         <div className="flex-shrink-0 flex items-center justify-center w-6">
           <Icon 
             size={20} 
-            className={`transition-colors duration-300 ${
-              isActive ? "text-black" : "text-[#999999] group-hover:text-[#55DEE8]"
-            } ${isLogout ? "group-hover:text-red-500" : ""}`} 
+            className={`transition-colors duration-300 ${ isActive ? "text-black" : "text-[#999999] group-hover:text-[#55DEE8]" } ${isLogout ? "group-hover:text-red-500" : ""}`} 
           />
         </div>
 
@@ -91,10 +85,7 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
 
   return (
     <aside
-      className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#000000] border-r border-[#2D2D2D] overflow-x-hidden transition-all duration-300 ease-in-out z-40 flex flex-col
-        ${isMinimized ? "lg:w-20" : "w-64 lg:w-[280px]"}
-        ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-        ${className || ""}`}
+      className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#000000] border-r border-[#2D2D2D] overflow-x-hidden transition-all duration-300 ease-in-out z-40 flex flex-col ${isMinimized ? "lg:w-20" : "w-64 lg:w-[280px]"} ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} ${className || ""}`}
     >
       <div className="flex flex-col p-4 border-b border-[#2D2D2D] bg-[#000000] gap-4 lg:hidden">
         <div className="flex items-center justify-end">

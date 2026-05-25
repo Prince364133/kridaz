@@ -192,14 +192,14 @@ const ReelsFeed = () => {
       <div className="absolute top-0 w-full max-w-[500px] p-6 flex items-center justify-between z-30 pointer-events-none">
         <button 
           onClick={() => navigate(-1)} 
-          className="p-2.5 bg-black/30 rounded-full text-white pointer-events-auto backdrop-blur-md border border-white/10 active:scale-90 transition-transform"
+          className="p-2.5 bg-black/30 rounded-[8px] text-white pointer-events-auto backdrop-blur-md border border-white/10 active:scale-90 transition-transform"
         >
           <ChevronLeft size={24} />
         </button>
         <h2 className="text-white font-bold text-xl tracking-tight pointer-events-auto drop-shadow-md">Shorts</h2>
         <button 
           onClick={() => navigate('/reels/upload')}
-          className="p-2.5 bg-black/30 rounded-full text-white pointer-events-auto backdrop-blur-md border border-white/10 active:scale-90 transition-transform"
+          className="p-2.5 bg-black/30 rounded-[8px] text-white pointer-events-auto backdrop-blur-md border border-white/10 active:scale-90 transition-transform"
         >
           <Camera size={24} />
         </button>

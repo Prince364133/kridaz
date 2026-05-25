@@ -62,7 +62,7 @@ const OwnerDashboard = () => {
         <p className="font-bold text-xl uppercase tracking-wider text-red-500">Connection Interrupted</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-6 px-8 py-3 border border-red-500/50 text-red-500 font-bold uppercase rounded-xl hover:bg-red-500/10 transition-all"
+          className="mt-6 px-8 py-3 border border-red-500/50 text-red-500 font-bold uppercase rounded-[8px] hover:bg-red-500/10 transition-all"
         >
           Try Again
         </button>
@@ -138,8 +138,8 @@ const OwnerDashboard = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-2xl backdrop-blur-xl">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${themeColor}1A`, color: themeColor }}>
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-[8px] backdrop-blur-xl">
+              <div className="w-12 h-12 rounded-[8px] flex items-center justify-center" style={{ backgroundColor: `${themeColor}1A`, color: themeColor }}>
                 <Calendar size={24} />
               </div>
               <div className="space-y-0.5">
@@ -178,12 +178,7 @@ const OwnerDashboard = () => {
                       <button
                         key={filter}
                         onClick={() => setRevenueFilter(filter === "Weekly" ? "Week" : "Month")}
-                        className={`px-4 py-1.5 rounded-[4px] text-[11px] font-normal uppercase tracking-wider transition-all font-inter ${
-                          (revenueFilter === "Week" && filter === "Weekly") ||
-                          (revenueFilter === "Month" && filter === "Monthly")
-                            ? "bg-[#55DEE8] text-black"
-                            : "text-[#999999] hover:text-[#FFFFFF]"
-                        }`}
+                        className={`px-4 py-1.5 rounded-[4px] text-[11px] font-normal uppercase tracking-wider transition-all font-inter ${ (revenueFilter === "Week" && filter === "Weekly") || (revenueFilter === "Month" && filter === "Monthly") ? "bg-[#55DEE8] text-black" : "text-[#999999] hover:text-[#FFFFFF]" }`}
                       >
                         {filter}
                       </button>
@@ -321,11 +316,7 @@ const OwnerDashboard = () => {
                                 </div>
                               </td>
                               <td className="py-4">
-                                <span className={`px-3 py-1 text-[12px] font-medium uppercase tracking-wider rounded-[12px] border ${
-                                  booking?.status === "CANCELLED"
-                                    ? "bg-red-500/15 text-red-400 border-red-500/30"
-                                    : "bg-[#4CAF50]/15 text-[#4CAF50] border-[#4CAF50]/30"
-                                }`}>
+                                <span className={`px-3 py-1 text-[12px] font-medium uppercase tracking-wider rounded-[12px] border ${ booking?.status === "CANCELLED" ? "bg-red-500/15 text-red-400 border-red-500/30" : "bg-[#4CAF50]/15 text-[#4CAF50] border-[#4CAF50]/30" }`}>
                                   {booking?.status || "Confirmed"}
                                 </span>
                               </td>
@@ -365,7 +356,7 @@ const OwnerDashboard = () => {
                 <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] flex-1">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider">Live Feed</h2>
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-widest animate-pulse border"
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-[6px] text-[10px] font-medium uppercase tracking-widest animate-pulse border"
                          style={{ backgroundColor: `${themeColor}1A`, color: themeColor, borderColor: `${themeColor}33` }}>
                       <span className="w-1 h-1 rounded-full" style={{ backgroundColor: themeColor }} /> Live
                     </div>

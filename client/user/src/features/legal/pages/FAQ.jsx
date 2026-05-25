@@ -93,7 +93,7 @@ const FAQItem = ({ q, a }) => {
 
   return (
     <div
-      className="border rounded-xl overflow-hidden transition-all duration-300 cursor-pointer"
+      className="border rounded-[8px] overflow-hidden transition-all duration-300 cursor-pointer"
       style={{ borderColor: open ? "rgba(85,222,232,0.3)" : BDR, backgroundColor: open ? "rgba(85,222,232,0.04)" : "#0d0d0d" }}
       onClick={() => setOpen(!open)}
     >
@@ -138,7 +138,7 @@ const FAQ = () => {
 
         {/* Header */}
         <div className="text-center mb-14">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border text-xs font-black uppercase tracking-widest" style={{ borderColor: BDR, background: "rgba(85,222,232,0.07)", color: "#55DEE8" }}>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[6px] mb-6 border text-xs font-black uppercase tracking-widest" style={{ borderColor: BDR, background: "rgba(85,222,232,0.07)", color: "#55DEE8" }}>
             <HelpCircle size={12} /> Help Center
           </div>
           <h1 className="text-5xl md:text-7xl font-black uppercase leading-[0.9] mb-6" style={{ fontFamily: "'Open Sans', sans-serif" }}>
@@ -161,7 +161,7 @@ const FAQ = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search questions..."
-            className="w-full bg-[#0d0d0d] border rounded-2xl pl-12 pr-5 py-4 text-white placeholder-gray-600 outline-none transition-all"
+            className="w-full bg-[#0d0d0d] border rounded-[8px] pl-12 pr-5 py-4 text-white placeholder-gray-600 outline-none transition-all"
             style={{ borderColor: BDR, fontSize: "16px" }}
             onFocus={(e) => (e.target.style.borderColor = "rgba(85,222,232,0.5)")}
             onBlur={(e) => (e.target.style.borderColor = BDR)}
@@ -198,12 +198,12 @@ const FAQ = () => {
         )}
 
         {/* CTA */}
-        <div className="mt-16 rounded-3xl p-8 md:p-12 text-center border" style={{ borderColor: BDR, background: "linear-gradient(135deg, rgba(85,222,232,0.06) 0%, rgba(191,243,103,0.04) 100%)" }}>
+        <div className="mt-16 rounded-[8px] p-8 md:p-12 text-center border" style={{ borderColor: BDR, background: "linear-gradient(135deg, rgba(85,222,232,0.06) 0%, rgba(191,243,103,0.04) 100%)" }}>
           <h3 className="text-2xl font-black mb-3 uppercase" style={{ fontFamily: "'Open Sans', sans-serif" }}>Still have questions?</h3>
           <p className="text-gray-400 mb-6" style={{ fontSize: "20px" }}>Our support team is ready to help you out.</p>
           <a
             href="/contact-us"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-black text-black uppercase tracking-wider text-sm hover:scale-105 transition-all shadow-[0_0_30px_rgba(85,222,232,0.2)]"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-[8px] font-black text-black uppercase tracking-wider text-sm hover:scale-105 transition-all shadow-[0_0_30px_rgba(85,222,232,0.2)]"
             style={{ background: GRAD }}
           >
             Contact Support

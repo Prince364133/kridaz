@@ -28,7 +28,7 @@ const ReelAnalytics = () => {
         <StatCard icon={<Share2 size={20} />} label="Shares" value={stats.shares} color="purple" />
       </div>
 
-      <div className="bg-white/5 rounded-2xl p-6 mb-8">
+      <div className="bg-white/5 rounded-[8px] p-6 mb-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold">Recent Reels</h2>
           <TrendingUp size={20} className="text-[#55DEE8]" />
@@ -36,7 +36,7 @@ const ReelAnalytics = () => {
         
         <div className="flex flex-col gap-4">
           {data?.reels?.map(reel => (
-            <div key={reel.id} className="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
+            <div key={reel.id} className="flex items-center gap-4 p-3 bg-white/5 rounded-[8px]">
               <div className="w-12 h-16 bg-gray-800 rounded-lg shrink-0 overflow-hidden">
                 <img src={reel.thumbnailUrl} alt="" className="w-full h-full object-cover" />
               </div>
@@ -65,8 +65,8 @@ const StatCard = ({ icon, label, value, color }) => {
   };
 
   return (
-    <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${colors[color]}`}>
+    <div className="bg-white/5 p-4 rounded-[8px] border border-white/5">
+      <div className={`w-10 h-10 rounded-[8px] flex items-center justify-center mb-3 ${colors[color]}`}>
         {icon}
       </div>
       <p className="text-xs text-gray-400 mb-1">{label}</p>

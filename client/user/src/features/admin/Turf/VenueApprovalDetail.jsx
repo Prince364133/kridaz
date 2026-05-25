@@ -63,7 +63,7 @@ const VenueApprovalDetail = () => {
           Return to Queue
         </button>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1 bg-[#CCFF00]/10 rounded-full border border-[#CCFF00]/20">
+          <div className="flex items-center gap-2 px-3 py-1 bg-[#CCFF00]/10 rounded-[6px] border border-[#CCFF00]/20">
             <Activity size={12} className="text-[#CCFF00] animate-pulse" />
             <span className="text-[9px] font-black text-[#CCFF00] uppercase tracking-widest">Active Verification Session</span>
           </div>
@@ -72,7 +72,7 @@ const VenueApprovalDetail = () => {
 
       <div className="max-w-7xl mx-auto p-6 lg:p-12 space-y-12">
         {/* Hero Section */}
-        <div className="relative h-[50vh] rounded-[40px] overflow-hidden border border-[#2D2D2D] shadow-2xl">
+        <div className="relative h-[50vh] rounded-[8px] overflow-hidden border border-[#2D2D2D] shadow-2xl">
           <img 
             src={turf.image} 
             alt={turf.name}
@@ -86,11 +86,7 @@ const VenueApprovalDetail = () => {
               <span className="px-4 py-1.5 bg-[#CCFF00] text-black text-[10px] font-black uppercase tracking-widest rounded-full">
                 Venue Verification
               </span>
-              <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                turf.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                turf.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-              }`}>
+              <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${ turf.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' : turf.status === 'rejected' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' }`}>
                 {turf.status}
               </span>
             </div>
@@ -113,7 +109,7 @@ const VenueApprovalDetail = () => {
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#CCFF00]/10 border border-[#CCFF00]/30 text-[#CCFF00] text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-[#CCFF00]/20 transition-all"
+                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#CCFF00]/10 border border-[#CCFF00]/30 text-[#CCFF00] text-[10px] font-black uppercase tracking-widest rounded-[6px] hover:bg-[#CCFF00]/20 transition-all"
               >
                 <Navigation size={10} />
                 Get Directions
@@ -162,7 +158,7 @@ const VenueApprovalDetail = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                   {turf.images.map((img, i) => (
-                    <div key={i} className="group relative aspect-video rounded-3xl overflow-hidden border border-[#2D2D2D] hover:border-[#CCFF00]/50 transition-all cursor-zoom-in">
+                    <div key={i} className="group relative aspect-video rounded-[8px] overflow-hidden border border-[#2D2D2D] hover:border-[#CCFF00]/50 transition-all cursor-zoom-in">
                       <img src={img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={`Gallery ${i}`} />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <span className="text-[10px] font-black uppercase tracking-widest px-4 py-2 bg-[#CCFF00] text-black rounded-full">Expand Intelligence</span>
@@ -183,8 +179,8 @@ const VenueApprovalDetail = () => {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {turf.facilities?.map((facility, i) => (
-                  <div key={i} className="p-6 bg-white/[0.02] border border-white/5 rounded-[24px] flex flex-col items-center gap-4 text-center group hover:bg-[#CCFF00]/5 hover:border-[#CCFF00]/30 transition-all">
-                     <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-[#CCFF00] group-hover:scale-110 transition-transform">
+                  <div key={i} className="p-6 bg-white/[0.02] border border-white/5 rounded-[8px] flex flex-col items-center gap-4 text-center group hover:bg-[#CCFF00]/5 hover:border-[#CCFF00]/30 transition-all">
+                     <div className="w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center text-[#CCFF00] group-hover:scale-110 transition-transform">
                         <Activity size={20} />
                      </div>
                      <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest group-hover:text-white transition-colors">{facility}</span>
@@ -202,7 +198,7 @@ const VenueApprovalDetail = () => {
                 <h2 className="text-xs font-black uppercase tracking-[0.2em]">Venue Policies</h2>
               </div>
               {turf.policies ? (
-                <div className="p-6 bg-white/[0.02] border border-white/5 rounded-[24px] space-y-3 relative">
+                <div className="p-6 bg-white/[0.02] border border-white/5 rounded-[8px] space-y-3 relative">
                   <p className={`text-gray-400 text-sm leading-relaxed whitespace-pre-wrap ${!isPolicyExpanded ? 'line-clamp-2' : ''}`}>{turf.policies}</p>
                   {turf.policies?.length > 150 && (
                     <button 
@@ -214,7 +210,7 @@ const VenueApprovalDetail = () => {
                   )}
                 </div>
               ) : (
-                <div className="p-6 bg-white/[0.02] border border-dashed border-white/10 rounded-[24px] flex items-center gap-3">
+                <div className="p-6 bg-white/[0.02] border border-dashed border-white/10 rounded-[8px] flex items-center gap-3">
                   <Shield size={16} className="text-gray-600 shrink-0" />
                   <p className="text-gray-600 text-xs font-bold uppercase tracking-widest">No specific policies defined — standard facility rules apply.</p>
                 </div>
@@ -235,11 +231,7 @@ const VenueApprovalDetail = () => {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-72 overflow-y-auto pr-1">
                   {turf.generatedSlots.map((slot, i) => (
-                    <div key={i} className={`p-4 rounded-[20px] border flex flex-col gap-1 ${
-                      slot.isActive !== false
-                        ? "bg-white/[0.02] border-white/5 hover:border-[#CCFF00]/20"
-                        : "bg-transparent border-dashed border-white/5 opacity-40"
-                    } transition-colors`}>
+                    <div key={i} className={`p-4 rounded-[8px] border flex flex-col gap-1 ${ slot.isActive !== false ? "bg-white/[0.02] border-white/5 hover:border-[#CCFF00]/20" : "bg-transparent border-dashed border-white/5 opacity-40" } transition-colors`}>
                       <span className="text-white text-[10px] font-black">{slot.startTime}</span>
                       <span className="text-gray-600 text-[9px] font-bold">→ {slot.endTime}</span>
                       <span className="text-[#CCFF00] text-sm font-black mt-1">Rs {slot.price ?? turf.pricePerHour}</span>
@@ -255,7 +247,7 @@ const VenueApprovalDetail = () => {
             
             {/* Action Center */}
             {turf.status === 'pending' && (
-              <div className="p-8 bg-[#0a0a0a] border border-[#CCFF00]/30 rounded-[32px] space-y-6 shadow-2xl shadow-[#CCFF00]/5 relative overflow-hidden">
+              <div className="p-8 bg-[#0a0a0a] border border-[#CCFF00]/30 rounded-[8px] space-y-6 shadow-2xl shadow-[#CCFF00]/5 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/10 blur-[60px] pointer-events-none" />
                 <div className="relative z-10 space-y-6">
                   <div className="space-y-2">
@@ -265,14 +257,14 @@ const VenueApprovalDetail = () => {
                   <div className="flex flex-col gap-4">
                     <button 
                       onClick={() => setConfirmModal({ isOpen: true, type: "approve" })}
-                      className="w-full py-5 bg-[#CCFF00] text-black font-black uppercase tracking-[0.2em] text-xs rounded-2xl hover:bg-[#CCFF00]/80 transition-all flex items-center justify-center gap-3 shadow-xl shadow-[#CCFF00]/20"
+                      className="w-full py-5 bg-[#CCFF00] text-black font-black uppercase tracking-[0.2em] text-xs rounded-[8px] hover:bg-[#CCFF00]/80 transition-all flex items-center justify-center gap-3 shadow-xl shadow-[#CCFF00]/20"
                     >
                       <Check size={18} />
                       Authorize Venue
                     </button>
                     <button 
                       onClick={() => setConfirmModal({ isOpen: true, type: "reject" })}
-                      className="w-full py-5 bg-white/5 border border-red-500/30 text-red-500 font-black uppercase tracking-[0.2em] text-xs rounded-2xl hover:bg-red-500/10 transition-all flex items-center justify-center gap-3"
+                      className="w-full py-5 bg-white/5 border border-red-500/30 text-red-500 font-black uppercase tracking-[0.2em] text-xs rounded-[8px] hover:bg-red-500/10 transition-all flex items-center justify-center gap-3"
                     >
                       <X size={18} />
                       Decline Request
@@ -283,7 +275,7 @@ const VenueApprovalDetail = () => {
             )}
 
             {/* Metadata Summary */}
-            <div className="p-10 bg-white/[0.02] border border-white/5 rounded-[40px] space-y-8">
+            <div className="p-10 bg-white/[0.02] border border-white/5 rounded-[8px] space-y-8">
               <div className="pb-8 border-b border-white/5">
                 <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-2">Base Operations Cost</p>
                 <div className="flex items-baseline gap-2">
@@ -311,7 +303,7 @@ const VenueApprovalDetail = () => {
                     }
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-3 bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-2xl text-[#CCFF00] text-[10px] font-black uppercase tracking-widest hover:bg-[#CCFF00]/20 transition-all group"
+                    className="flex items-center gap-2 px-4 py-3 bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-[8px] text-[#CCFF00] text-[10px] font-black uppercase tracking-widest hover:bg-[#CCFF00]/20 transition-all group"
                   >
                     <Navigation size={12} className="group-hover:translate-x-0.5 transition-transform" />
                     Open in Google Maps
@@ -324,13 +316,13 @@ const VenueApprovalDetail = () => {
               {(turf.slotDuration || turf.breakTime !== undefined) && (
                 <div className="pt-4 border-t border-white/5 grid grid-cols-2 gap-4">
                   {turf.slotDuration && (
-                    <div className="p-3 bg-white/[0.02] rounded-2xl border border-white/5">
+                    <div className="p-3 bg-white/[0.02] rounded-[8px] border border-white/5">
                       <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Slot Duration</p>
                       <p className="text-white font-black text-sm">{turf.slotDuration} min</p>
                     </div>
                   )}
                   {turf.breakTime !== undefined && (
-                    <div className="p-3 bg-white/[0.02] rounded-2xl border border-white/5">
+                    <div className="p-3 bg-white/[0.02] rounded-[8px] border border-white/5">
                       <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Break Time</p>
                       <p className="text-white font-black text-sm">{turf.breakTime} min</p>
                     </div>
@@ -343,12 +335,12 @@ const VenueApprovalDetail = () => {
                 <div className="pt-8 border-t border-white/5 space-y-6">
                   <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Ground Intelligence</p>
                   {turf.managerContacts.map((contact, i) => (
-                    <div key={i} className="flex items-center justify-between group p-3 hover:bg-white/5 rounded-2xl transition-colors">
+                    <div key={i} className="flex items-center justify-between group p-3 hover:bg-white/5 rounded-[8px] transition-colors">
                       <div className="flex flex-col">
                         <span className="text-white font-black text-sm uppercase tracking-tight">{contact.name}</span>
                         <span className="text-gray-500 text-xs font-bold">{contact.phone}</span>
                       </div>
-                      <a href={`tel:${contact.phone}`} className="p-3 bg-[#CCFF00]/10 text-[#CCFF00] rounded-xl group-hover:bg-[#CCFF00] group-hover:text-black transition-all">
+                      <a href={`tel:${contact.phone}`} className="p-3 bg-[#CCFF00]/10 text-[#CCFF00] rounded-[8px] group-hover:bg-[#CCFF00] group-hover:text-black transition-all">
                         <Phone size={16} />
                       </a>
                     </div>
@@ -358,7 +350,7 @@ const VenueApprovalDetail = () => {
             </div>
 
             {/* Owner Intelligence Card */}
-            <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[40px] space-y-6">
+            <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[8px] space-y-6">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-8 h-8 rounded-lg bg-[#CCFF00]/10 flex items-center justify-center border border-[#CCFF00]/20">
                   <User size={16} className="text-[#CCFF00]" />
@@ -368,7 +360,7 @@ const VenueApprovalDetail = () => {
 
               {/* Avatar + name row */}
               <div className="flex items-center gap-5">
-                <div className="w-16 h-16 rounded-2xl bg-[#1A1A1A] border border-[#2D2D2D] overflow-hidden shrink-0 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-[8px] bg-[#1A1A1A] border border-[#2D2D2D] overflow-hidden shrink-0 flex items-center justify-center">
                   {turf.owner?.profileImage ? (
                     <img src={turf.owner.profileImage} alt={turf.owner?.name} className="w-full h-full object-cover" />
                   ) : (
@@ -389,8 +381,8 @@ const VenueApprovalDetail = () => {
                 {/* Email */}
                 {turf.owner?.email && (
                   <a href={`mailto:${turf.owner.email}`}
-                    className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-2xl border border-white/5 hover:border-[#CCFF00]/30 hover:bg-[#CCFF00]/5 transition-all group">
-                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                    className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-[8px] border border-white/5 hover:border-[#CCFF00]/30 hover:bg-[#CCFF00]/5 transition-all group">
+                    <div className="w-8 h-8 rounded-[8px] bg-white/5 flex items-center justify-center shrink-0">
                       <Mail size={14} className="text-[#CCFF00]" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -404,8 +396,8 @@ const VenueApprovalDetail = () => {
                 {/* Phone */}
                 {turf.owner?.phoneNumber && (
                   <a href={`tel:${turf.owner.phoneNumber}`}
-                    className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-2xl border border-white/5 hover:border-[#CCFF00]/30 hover:bg-[#CCFF00]/5 transition-all group">
-                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                    className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-[8px] border border-white/5 hover:border-[#CCFF00]/30 hover:bg-[#CCFF00]/5 transition-all group">
+                    <div className="w-8 h-8 rounded-[8px] bg-white/5 flex items-center justify-center shrink-0">
                       <Phone size={14} className="text-[#CCFF00]" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -418,8 +410,8 @@ const VenueApprovalDetail = () => {
 
                 {/* Joined */}
                 {turf.owner?.createdAt && (
-                  <div className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-2xl border border-white/5">
-                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                  <div className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-[8px] border border-white/5">
+                    <div className="w-8 h-8 rounded-[8px] bg-white/5 flex items-center justify-center shrink-0">
                       <Calendar size={14} className="text-[#CCFF00]" />
                     </div>
                     <div>
@@ -433,8 +425,8 @@ const VenueApprovalDetail = () => {
 
                 {/* Rating */}
                 {turf.owner?.rating !== undefined && (
-                  <div className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-2xl border border-white/5">
-                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                  <div className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-[8px] border border-white/5">
+                    <div className="w-8 h-8 rounded-[8px] bg-white/5 flex items-center justify-center shrink-0">
                       <Star size={14} className="text-[#CCFF00]" />
                     </div>
                     <div>

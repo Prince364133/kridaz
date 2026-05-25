@@ -46,7 +46,7 @@ const ContactUs = () => {
 
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border text-xs font-black uppercase tracking-widest" style={{ borderColor: BDR, background: "rgba(85,222,232,0.07)", color: "#55DEE8" }}>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[6px] mb-6 border text-xs font-black uppercase tracking-widest" style={{ borderColor: BDR, background: "rgba(85,222,232,0.07)", color: "#55DEE8" }}>
             <MessageCircle size={12} /> Get In Touch
           </div>
           <h1 className="text-5xl md:text-7xl font-black uppercase leading-[0.9] mb-6" style={{ fontFamily: "'Open Sans', sans-serif" }}>
@@ -63,8 +63,8 @@ const ContactUs = () => {
         {/* Contact Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-16">
           {contactCards.map((card, i) => (
-            <div key={i} className="rounded-2xl p-6 border flex flex-col items-center text-center gap-4 group hover:border-[#55DEE8]/40 transition-all duration-300" style={{ borderColor: BDR, backgroundColor: "#0d0d0d" }}>
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: GRAD }}>
+            <div key={i} className="rounded-[8px] p-6 border flex flex-col items-center text-center gap-4 group hover:border-[#55DEE8]/40 transition-all duration-300" style={{ borderColor: BDR, backgroundColor: "#0d0d0d" }}>
+              <div className="w-12 h-12 rounded-[8px] flex items-center justify-center shrink-0" style={{ background: GRAD }}>
                 {card.icon}
               </div>
               <div>
@@ -77,7 +77,7 @@ const ContactUs = () => {
         </div>
 
         {/* Form */}
-        <div className="rounded-3xl border p-8 md:p-12" style={{ borderColor: BDR, backgroundColor: "#0a0a0a" }}>
+        <div className="rounded-[8px] border p-8 md:p-12" style={{ borderColor: BDR, backgroundColor: "#0a0a0a" }}>
           {submitted ? (
             <div className="text-center py-16">
               <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: GRAD }}>
@@ -103,7 +103,7 @@ const ContactUs = () => {
                       onChange={handleChange}
                       required
                       placeholder="Your name"
-                      className="w-full bg-[#111] border rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none focus:border-[#55DEE8] transition-colors"
+                      className="w-full bg-[#111] border rounded-[8px] px-4 py-3 text-white placeholder-gray-600 outline-none focus:border-[#55DEE8] transition-colors"
                       style={{ borderColor: BDR }}
                     />
                   </div>
@@ -116,7 +116,7 @@ const ContactUs = () => {
                       onChange={handleChange}
                       required
                       placeholder="you@example.com"
-                      className="w-full bg-[#111] border rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none focus:border-[#55DEE8] transition-colors"
+                      className="w-full bg-[#111] border rounded-[8px] px-4 py-3 text-white placeholder-gray-600 outline-none focus:border-[#55DEE8] transition-colors"
                       style={{ borderColor: BDR }}
                     />
                   </div>
@@ -130,7 +130,7 @@ const ContactUs = () => {
                     onChange={handleChange}
                     required
                     placeholder="What's this about?"
-                    className="w-full bg-[#111] border rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none focus:border-[#55DEE8] transition-colors"
+                    className="w-full bg-[#111] border rounded-[8px] px-4 py-3 text-white placeholder-gray-600 outline-none focus:border-[#55DEE8] transition-colors"
                     style={{ borderColor: BDR }}
                   />
                 </div>
@@ -144,14 +144,14 @@ const ContactUs = () => {
                     required
                     rows={6}
                     placeholder="Tell us more..."
-                    className="w-full bg-[#111] border rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none focus:border-[#55DEE8] transition-colors resize-none"
+                    className="w-full bg-[#111] border rounded-[8px] px-4 py-3 text-white placeholder-gray-600 outline-none focus:border-[#55DEE8] transition-colors resize-none"
                     style={{ borderColor: BDR }}
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-3 px-8 py-4 rounded-xl font-black text-black uppercase tracking-wider text-sm hover:scale-105 transition-all shadow-[0_0_30px_rgba(85,222,232,0.2)]"
+                  className="inline-flex items-center gap-3 px-8 py-4 rounded-[8px] font-black text-black uppercase tracking-wider text-sm hover:scale-105 transition-all shadow-[0_0_30px_rgba(85,222,232,0.2)]"
                   style={{ background: GRAD }}
                 >
                   <Send size={16} /> Send Message

@@ -61,7 +61,7 @@ const GameDisputeManager = () => {
               placeholder="Search games or host..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full md:w-80 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-white focus:outline-none focus:border-orange-500 transition-all font-bold"
+              className="w-full md:w-80 bg-white/5 border border-white/10 rounded-[8px] pl-12 pr-4 py-3 text-white focus:outline-none focus:border-orange-500 transition-all font-bold"
             />
           </div>
         </div>
@@ -77,7 +77,7 @@ const GameDisputeManager = () => {
             {/* Left Panel: Dispute List */}
             <div className={`w-full ${selectedGame ? 'hidden lg:block lg:w-1/3 xl:w-1/4' : 'max-w-4xl'} h-full overflow-y-auto no-scrollbar space-y-4 pr-2`}>
               {filteredGames.length === 0 ? (
-                <div className="text-center py-20 bg-white/5 rounded-3xl border border-white/5">
+                <div className="text-center py-20 bg-white/5 rounded-[8px] border border-white/5">
                   <CheckCircle size={48} className="text-green-500 mx-auto mb-4 opacity-50" />
                   <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">No Active Game Disputes</p>
                 </div>
@@ -90,11 +90,7 @@ const GameDisputeManager = () => {
                       setDecision("TRANSFER_TO_HOST");
                       setRefundInputs({});
                     }}
-                    className={`w-full text-left p-5 rounded-3xl transition-all duration-300 border ${
-                      selectedGame?.id === game.id
-                        ? "bg-orange-500/10 border-orange-500/30"
-                        : "bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10"
-                    }`}
+                    className={`w-full text-left p-5 rounded-[8px] transition-all duration-300 border ${ selectedGame?.id === game.id ? "bg-orange-500/10 border-orange-500/30" : "bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10" }`}
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex items-center gap-2">
@@ -121,7 +117,7 @@ const GameDisputeManager = () => {
 
             {/* Right Panel: Dispute Details */}
             {selectedGame && (
-              <div className="flex-1 bg-white/5 rounded-[2rem] border border-white/10 flex flex-col h-full overflow-hidden animate-fade-in relative">
+              <div className="flex-1 bg-white/5 rounded-[8px] border border-white/10 flex flex-col h-full overflow-hidden animate-fade-in relative">
                 <div className="p-6 md:p-8 border-b border-white/5 flex-shrink-0">
                   <div className="flex justify-between items-start">
                     <div>
@@ -149,7 +145,7 @@ const GameDisputeManager = () => {
                       </h3>
                       <div className="space-y-3">
                         {selectedGame.disputes?.map(d => (
-                          <div key={d.id} className="p-4 bg-[#0a0a0a] rounded-2xl border border-white/5">
+                          <div key={d.id} className="p-4 bg-[#0a0a0a] rounded-[8px] border border-white/5">
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-sm font-bold text-white">{d.raisedBy?.name}</span>
                               <span className="text-xs text-gray-500">{new Date(d.createdAt).toLocaleString()}</span>
@@ -164,7 +160,7 @@ const GameDisputeManager = () => {
                       </h3>
                       <div className="space-y-3">
                         {selectedGame.slots?.map(slot => (
-                          <div key={slot.id} className="p-4 bg-[#0a0a0a] rounded-2xl border border-white/5">
+                          <div key={slot.id} className="p-4 bg-[#0a0a0a] rounded-[8px] border border-white/5">
                             <div className="flex justify-between items-center">
                               <div className="flex items-center gap-3">
                                 <User size={16} className="text-gray-400" />
@@ -200,9 +196,7 @@ const GameDisputeManager = () => {
                       <div className="space-y-3">
                         <button
                           onClick={() => setDecision("TRANSFER_TO_HOST")}
-                          className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${
-                            decision === "TRANSFER_TO_HOST" ? "bg-orange-500/10 border-orange-500" : "bg-white/5 border-white/10 hover:bg-white/10"
-                          }`}
+                          className={`w-full flex items-center justify-between p-4 rounded-[8px] border transition-all ${ decision === "TRANSFER_TO_HOST" ? "bg-orange-500/10 border-orange-500" : "bg-white/5 border-white/10 hover:bg-white/10" }`}
                         >
                           <span className={`font-bold uppercase tracking-wider text-sm ${decision === "TRANSFER_TO_HOST" ? "text-orange-500" : "text-white"}`}>
                             Transfer All to Host
@@ -212,9 +206,7 @@ const GameDisputeManager = () => {
 
                         <button
                           onClick={() => setDecision("REFUND_SELECTED")}
-                          className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${
-                            decision === "REFUND_SELECTED" ? "bg-orange-500/10 border-orange-500" : "bg-white/5 border-white/10 hover:bg-white/10"
-                          }`}
+                          className={`w-full flex items-center justify-between p-4 rounded-[8px] border transition-all ${ decision === "REFUND_SELECTED" ? "bg-orange-500/10 border-orange-500" : "bg-white/5 border-white/10 hover:bg-white/10" }`}
                         >
                           <span className={`font-bold uppercase tracking-wider text-sm ${decision === "REFUND_SELECTED" ? "text-orange-500" : "text-white"}`}>
                             Refund Selected Players
@@ -227,7 +219,7 @@ const GameDisputeManager = () => {
                         <button
                           onClick={handleConfirmResolve}
                           disabled={processingId === selectedGame.id || (decision === "REFUND_SELECTED" && Object.keys(refundInputs).length === 0)}
-                          className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-black rounded-2xl font-black uppercase tracking-widest transition-all disabled:opacity-30 shadow-[0_10px_20px_rgba(249,115,22,0.2)]"
+                          className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-black rounded-[8px] font-black uppercase tracking-widest transition-all disabled:opacity-30 shadow-[0_10px_20px_rgba(249,115,22,0.2)]"
                         >
                           {processingId === selectedGame.id ? "Processing..." : "Confirm Resolution"}
                         </button>

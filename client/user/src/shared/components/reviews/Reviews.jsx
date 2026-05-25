@@ -13,7 +13,7 @@ const Reviews = ({ turfId }) => {
  return (
  <div className="space-y-8">
  {reviews.length === 0 ? (
- <div className="bg-zinc-900/30 border border-zinc-800 rounded-3xl p-12 text-center">
+ <div className="bg-zinc-900/30 border border-zinc-800 rounded-[8px] p-12 text-center">
  <Quote className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
  <p className="text-zinc-500 font-bold uppercase tracking-widest text-sm">No feedback yet. Be the first to review!</p>
  </div>
@@ -25,9 +25,9 @@ const Reviews = ({ turfId }) => {
  key={review._id} 
  className="shrink-0 w-[85vw] md:w-[350px] snap-start group relative"
  >
- <div className="absolute -inset-0.5 bg-gradient-to-r from-[#55DEE8]/20 to-lime-600/0 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+ <div className="absolute -inset-0.5 bg-gradient-to-r from-[#55DEE8]/20 to-lime-600/0 rounded-[8px] blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
  <div 
- className="relative h-full bg-zinc-900/40 border border-zinc-800 group-hover:border-[#55DEE8]/50 rounded-2xl p-6 transition-all duration-300 animate-fade-in flex flex-col justify-between gap-6"
+ className="relative h-full bg-zinc-900/40 border border-zinc-800 group-hover:border-[#55DEE8]/50 rounded-[8px] p-6 transition-all duration-300 animate-fade-in flex flex-col justify-between gap-6"
  style={{ animationDelay: `${idx * 100}ms` }}
  >
  <div className="space-y-4">
@@ -55,7 +55,7 @@ const Reviews = ({ turfId }) => {
  <div className="flex items-center gap-4 pt-4 border-t border-zinc-800/50">
  <Link 
  to={`/profile/${review.user?._id}`}
- className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[#55DEE8] font-black text-sm uppercase group-hover:bg-[#55DEE8] group-hover:text-black transition-all duration-300 overflow-hidden relative z-10"
+ className="w-10 h-10 rounded-[8px] bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[#55DEE8] font-black text-sm uppercase group-hover:bg-[#55DEE8] group-hover:text-black transition-all duration-300 overflow-hidden relative z-10"
  >
  {review.user?.profilePicture ? (
  <img 

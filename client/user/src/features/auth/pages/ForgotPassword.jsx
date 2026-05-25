@@ -95,11 +95,11 @@ const ForgotPassword = () => {
           Back to Login
         </Link>
 
-        <div className="bg-[#0A0A0A] border border-white/5 rounded-[32px] p-8 md:p-12 shadow-2xl relative overflow-hidden">
+        <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8 md:p-12 shadow-2xl relative overflow-hidden">
           <div className="absolute -top-32 -right-32 w-64 h-64 bg-[#55DEE8]/10 blur-[100px] rounded-full pointer-events-none" />
 
           <div className="mb-10 text-center">
-            <div className="w-16 h-16 bg-[#55DEE8]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-[#55DEE8]/20">
+            <div className="w-16 h-16 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center mx-auto mb-6 border border-[#55DEE8]/20">
               {step === 1 && <Mail size={32} className="text-[#55DEE8]" />}
               {step === 2 && <ShieldCheck size={32} className="text-[#55DEE8]" />}
               {step === 3 && <KeyRound size={32} className="text-[#55DEE8]" />}
@@ -130,13 +130,13 @@ const ForgotPassword = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter registered email or phone"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
+                    className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
                   />
                 </div>
               </div>
               <button
                 type="submit" disabled={loading}
-                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
+                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-[8px] flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
               >
                 {loading ? <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" /> : <>Send Code <ArrowRight size={16} /></>}
               </button>
@@ -158,13 +158,13 @@ const ForgotPassword = () => {
                     onChange={(e) => setOtp(e.target.value)}
                     placeholder="ΓÇóΓÇóΓÇóΓÇóΓÇóΓÇó"
                     maxLength={6}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-center text-xl font-black tracking-[0.5em]"
+                    className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-center text-xl font-black tracking-[0.5em]"
                   />
                 </div>
               </div>
               <button
                 type="submit"
-                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
+                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-[8px] flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
               >
                 Verify Code <CheckCircle2 size={16} />
               </button>
@@ -187,7 +187,7 @@ const ForgotPassword = () => {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Min 8 characters"
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
+                      className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
                     />
                   </div>
                 </div>
@@ -202,14 +202,14 @@ const ForgotPassword = () => {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Repeat new password"
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
+                      className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
                     />
                   </div>
                 </div>
               </div>
               <button
                 type="submit" disabled={loading}
-                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
+                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-[8px] flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
               >
                 {loading ? <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" /> : "Update Password"}
               </button>

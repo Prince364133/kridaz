@@ -2,7 +2,7 @@ import CountUp from "react-countup";
 import { TrendingUp } from "lucide-react";
 
 const StatCard = ({ title, value, icon: Icon, className, prefix = "", trend, trendValue }) => (
-  <div className={`relative overflow-hidden group p-3 md:p-6 rounded-xl md:rounded-2xl transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#0A0A0A] ${className}`}>
+  <div className={`relative overflow-hidden group p-3 md:p-6 rounded-[8px] md:rounded-[8px] transition-all duration-500 hover:scale-[1.02] border border-white/5 bg-[#0A0A0A] ${className}`}>
     {/* Subtle Background Glow */}
     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[80px] group-hover:bg-primary/10 transition-all duration-700" />
     
@@ -18,7 +18,7 @@ const StatCard = ({ title, value, icon: Icon, className, prefix = "", trend, tre
       </div>
       
       {Icon && (
-        <div className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-white/5 rounded-lg md:rounded-xl border border-white/5 group-hover:border-[#55DEE8]/30 transition-all">
+        <div className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-white/5 rounded-lg md:rounded-[8px] border border-white/5 group-hover:border-[#55DEE8]/30 transition-all">
           <Icon className="text-[#55DEE8] group-hover:scale-110 transition-transform" size={16} md:size={20} />
         </div>
       )}

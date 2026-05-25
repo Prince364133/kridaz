@@ -386,7 +386,7 @@ export default function Home() {
  to={isLoggedIn ? "/venues" : "/signup"}
  className="block w-fit group mb-4 lg:mb-12"
  >
- <div className="inline-flex items-center gap-2 text-black px-8 py-3.5 rounded-full font-bold group-hover:scale-105 transition-all text-sm lg:text-base shadow-[0_0_20px_rgba(85,222,232,0.4)]" style={{ background: GRAD }}>
+ <div className="inline-flex items-center gap-2 text-black px-8 py-3.5 rounded-[6px] font-bold group-hover:scale-105 transition-all text-sm lg:text-base shadow-[0_0_20px_rgba(85,222,232,0.4)]" style={{ background: GRAD }}>
  Book Now <ArrowRight size={18} />
  </div>
  </Link>
@@ -403,7 +403,7 @@ export default function Home() {
  <Link
  key={c.label}
  to="/arenas"
- className={`relative ${c.cls} rounded-2xl overflow-hidden border shadow-2xl transition-all hover:scale-105 hover:z-20 hover:opacity-100 duration-500 group flex-shrink-0`}
+ className={`relative ${c.cls} rounded-[8px] overflow-hidden border shadow-2xl transition-all hover:scale-105 hover:z-20 hover:opacity-100 duration-500 group flex-shrink-0`}
  style={{ borderColor: BDR }}
  >
  <img src={c.img} alt={c.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -414,7 +414,7 @@ export default function Home() {
  </div>
 
  {/* 1M+ Bookings Card - Moved to Top Right Corner */}
- <div className="absolute top-12 right-12 rounded-2xl p-4 border z-20"
+ <div className="absolute top-12 right-12 rounded-[8px] p-4 border z-20"
  style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", borderColor: "rgba(85,222,232,0.25)" }}>
  <p className="font-display text-2xl leading-none" style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>1M+</p>
  <p className="text-[10px] uppercase tracking-wider mt-1 opacity-60" style={{ color: "#fff" }}>Bookings Made</p>
@@ -427,22 +427,22 @@ export default function Home() {
  <section className="border-y border-white/5 bg-black py-3 md:py-8">
  {/* Mobile: 2x2 grid | Desktop: single row */}
  <div className="max-w-7xl mx-auto px-4 md:px-6 grid grid-cols-2 md:flex md:items-center md:justify-around gap-2 md:gap-6 w-full">
- <Link to="/leaderboard" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-lg py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
+ <Link to="/leaderboard" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-[6px] py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
  <Activity size={16} className="text-[#60A5FA] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
  <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-[#60A5FA] whitespace-nowrap font-inter">LIVE SCORE</span>
  </Link>
 
- <Link to="/join-games" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-lg py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
+ <Link to="/join-games" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-[6px] py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
  <Trophy size={16} className="text-[#F59E0B] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
  <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-[#F59E0B] whitespace-nowrap font-inter">JOIN TOURNAMENTS</span>
  </Link>
 
- <Link to="/players" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-lg py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
+ <Link to="/players" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-[6px] py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
  <Search size={16} className="text-[#84CC16] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
  <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-[#84CC16] whitespace-nowrap font-inter">FIND PLAYERS</span>
  </Link>
 
- <Link to="/community" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-lg py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
+ <Link to="/community" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-[6px] py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
  <Users size={16} className="text-[#A855F7] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
  <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-[#A855F7] whitespace-nowrap font-inter">COMMUNITY</span>
  </Link>
@@ -479,7 +479,7 @@ export default function Home() {
  {loading || turfLoading ? (
  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
  {[...Array(10)].map((_, i) => (
- <div key={i} className="rounded-2xl border animate-pulse" style={{ height: 260, backgroundColor: "#111", borderColor: BDR }} />
+ <div key={i} className="rounded-[8px] border animate-pulse" style={{ height: 260, backgroundColor: "#111", borderColor: BDR }} />
  ))}
  </div>
  ) : (error || (turfs || []).length === 0) ? (
@@ -491,7 +491,7 @@ export default function Home() {
  <p className="text-gray-500 text-sm uppercase tracking-wider mb-8">Try adjusting your search or filters</p>
  <button
  onClick={() => setTurfFilters({ searchTerm: "", city: "", state: "" })}
- className="px-8 py-3 text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-xl hover:scale-105 transition-all shadow-[0_0_20px_rgba(85,222,232,0.2)]" style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}
+ className="px-8 py-3 text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-[8px] hover:scale-105 transition-all shadow-[0_0_20px_rgba(85,222,232,0.2)]" style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}
  >
  View All Venues
  </button>
@@ -512,7 +512,7 @@ export default function Home() {
  )}
 
  <div className="text-center mt-6 lg:mt-10">
- <Link to="/venues" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-full border transition-all hover:border-[#55DEE8] hover:text-[#55DEE8]"
+ <Link to="/venues" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-[6px] border transition-all hover:border-[#55DEE8] hover:text-[#55DEE8]"
  style={{ borderColor: BDR, color: "#888" }}>
  View All Venues <ChevronRight size={16} />
  </Link>
@@ -540,7 +540,7 @@ export default function Home() {
  {loading ? (
  <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
  {[...Array(10)].map((_, i) => (
- <div key={i} className="shrink-0 w-[160px] md:w-[190px] rounded-[28px] border border-white/5 animate-pulse bg-white/5" style={{ height: 260 }} />
+ <div key={i} className="shrink-0 w-[160px] md:w-[190px] rounded-[8px] border border-white/5 animate-pulse bg-white/5" style={{ height: 260 }} />
  ))}
  </div>
  ) : players.length === 0 ? (
@@ -559,10 +559,10 @@ export default function Home() {
  
  return (
  <div key={p.id || p._id} className="shrink-0 w-[160px] md:w-[190px] group">
- <div className="relative rounded-[28px] p-[1px] bg-white/5 transition-all duration-500 group-hover:bg-gradient-to-r group-hover:from-[#55DEE8] group-hover:to-[#BFF367] group-hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
+ <div className="relative rounded-[8px] p-[1px] bg-white/5 transition-all duration-500 group-hover:bg-gradient-to-r group-hover:from-[#55DEE8] group-hover:to-[#BFF367] group-hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
  {/* Profile Image */}
- <div className="relative bg-[#121212] rounded-[27px] p-2.5 h-full">
- <Link to={`/profile/${p.id || p._id}`} className="relative aspect-[1/1.1] rounded-[20px] overflow-hidden block mb-4">
+ <div className="relative bg-[#121212] rounded-[8px] p-2.5 h-full">
+ <Link to={`/profile/${p.id || p._id}`} className="relative aspect-[1/1.1] rounded-[8px] overflow-hidden block mb-4">
  <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
  {(p.profilePicture || p.profileImage) ? (
  <img 
@@ -611,10 +611,7 @@ export default function Home() {
 
  <button 
  onClick={(e) => handleFollowToggle(e, p)}
- className={`px-2 py-1 rounded-lg font-black text-[8px] uppercase tracking-wider transition-all duration-300
- ${isFollowing 
- ? 'bg-white/5 border border-white/10 text-white/30 hover:bg-white/10' 
- : 'bg-[#222] border border-white/5 text-white hover:bg-white hover:text-black shadow-lg'}`}
+ className={`px-2 py-1 rounded-[6px] font-black text-[8px] uppercase tracking-wider transition-all duration-300 ${isFollowing ? 'bg-white/5 border border-white/10 text-white/30 hover:bg-white/10' : 'bg-[#222] border border-white/5 text-white hover:bg-white hover:text-black shadow-lg'}`}
  >
  {isFollowing ? 'Following' : 'Follow +'}
  </button>
@@ -630,7 +627,7 @@ export default function Home() {
 
  {/* View More Players btn */}
  <div className="text-center mt-6 lg:mt-10">
- <Link to="/players" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-full border transition-all hover:border-[#55DEE8] hover:text-[#55DEE8]"
+ <Link to="/players" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-[6px] border transition-all hover:border-[#55DEE8] hover:text-[#55DEE8]"
  style={{ borderColor: BDR, color: "#888" }}>
  View More Players <ChevronRight size={16} />
  </Link>
@@ -658,7 +655,7 @@ export default function Home() {
  </p>
  </div>
 
- <Link to="/join-games" className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-[#55DEE8] hover:text-black hover:border-[#55DEE8] transition-all duration-500">
+ <Link to="/join-games" className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-[6px] hover:bg-[#55DEE8] hover:text-black hover:border-[#55DEE8] transition-all duration-500">
  <span className="text-[11px] font-black uppercase tracking-widest">View More Games</span>
  <div className="w-6 h-6 rounded-full bg-white/5 group-hover:bg-black/10 flex items-center justify-center transition-colors">
  <ChevronRight size={14} />
@@ -677,7 +674,7 @@ export default function Home() {
  setSelectedHomeCity("");
  }}
  disabled={loadingStates}
- className="w-full bg-[#111] border border-white/10 rounded-2xl py-3 pl-12 pr-4 appearance-none text-sm text-white focus:border-[#55DEE8] outline-none transition-all font-bold disabled:opacity-50"
+ className="w-full bg-[#111] border border-white/10 rounded-[8px] py-3 pl-12 pr-4 appearance-none text-sm text-white focus:border-[#55DEE8] outline-none transition-all font-bold disabled:opacity-50"
  >
  <option value="">{loadingStates ? 'Loading States...' : 'Select State'}</option>
  {states.map(s => <option key={s} value={s}>{s}</option>)}
@@ -690,7 +687,7 @@ export default function Home() {
  value={selectedHomeCity}
  onChange={(e) => setSelectedHomeCity(e.target.value)}
  disabled={!selectedHomeState || loadingCities}
- className="w-full bg-[#111] border border-white/10 rounded-2xl py-3 pl-12 pr-4 appearance-none text-sm text-white focus:border-[#55DEE8] outline-none transition-all font-bold disabled:opacity-50"
+ className="w-full bg-[#111] border border-white/10 rounded-[8px] py-3 pl-12 pr-4 appearance-none text-sm text-white focus:border-[#55DEE8] outline-none transition-all font-bold disabled:opacity-50"
  >
  <option value="">
  {loadingCities ? 'Loading Cities...' : !selectedHomeState ? 'Select state first' : 'Select City'}
@@ -718,10 +715,10 @@ export default function Home() {
  <div className="flex md:grid md:grid-cols-2 lg:grid-cols-5 gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-4 md:pb-0">
  {hostedGamesLoading ? (
  [1, 2, 3, 4].map(i => (
- <div key={i} className="min-w-[75vw] md:min-w-0 snap-center h-[360px] rounded-3xl bg-neutral-900 border animate-pulse" style={{ borderColor: BDR }} />
+ <div key={i} className="min-w-[75vw] md:min-w-0 snap-center h-[360px] rounded-[8px] bg-neutral-900 border animate-pulse" style={{ borderColor: BDR }} />
  ))
  ) : hostedGames.length === 0 ? (
- <div className="col-span-full py-12 text-center border-2 border-dashed border-neutral-800 rounded-3xl">
+ <div className="col-span-full py-12 text-center border-2 border-dashed border-neutral-800 rounded-[8px]">
  <p className="text-neutral-500 font-bold uppercase tracking-widest">No games hosted yet</p>
  </div>
  ) : (
@@ -748,7 +745,7 @@ export default function Home() {
  onClick={() => navigate('/join-games')}
  >
  {/* ── Premium card matching JoinGames page ── */}
- <div className="relative rounded-[28px] overflow-hidden border border-white/10 flex flex-col"
+ <div className="relative rounded-[8px] overflow-hidden border border-white/10 flex flex-col"
  style={{ height: 340, background: 'linear-gradient(160deg,#0d0d0d 0%,#111 100%)' }}
  >
  {/* Background image */}
@@ -776,7 +773,7 @@ export default function Home() {
  <div className="flex items-center gap-2">
  <button
  onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(g.shortId || g._id); toast.success('Game ID copied!'); }}
- className="px-2.5 py-1 bg-black/50 border border-white/15 hover:border-[#55DEE8]/40 rounded-full inline-flex items-center gap-1 transition-all"
+ className="px-2.5 py-1 bg-black/50 border border-white/15 hover:border-[#55DEE8]/40 rounded-[6px] inline-flex items-center gap-1 transition-all"
  title="Click to copy"
  >
  <Info size={9} className="text-[#55DEE8]/70" />
@@ -802,14 +799,14 @@ export default function Home() {
  toast.success('Link copied to clipboard!');
  }
  }}
- className="p-1.5 bg-black/50 border border-white/15 hover:border-[#55DEE8]/40 rounded-full flex items-center justify-center transition-all"
+ className="p-1.5 bg-black/50 border border-white/15 hover:border-[#55DEE8]/40 rounded-[8px] flex items-center justify-center transition-all"
  title="Share Match"
  >
  <Share2 size={10} className="text-[#55DEE8]/70" />
  </button>
  </div>
  </div>
- <div className="flex items-center gap-1 bg-black/40 px-2.5 py-1 rounded-full border border-white/10">
+ <div className="flex items-center gap-1 bg-black/40 px-2.5 py-1 rounded-[6px] border border-white/10">
  <span className="text-[10px] font-black text-[#55DEE8]">₹</span>
  <span className="text-xs font-black text-white">{g.perPlayerCharge || 'FREE'}</span>
  </div>
@@ -829,7 +826,7 @@ export default function Home() {
  <>Casual {g.gameType} Match</>
  ) : (
  <>{g.teams?.teamA?.name || 'TBD'}{' '}
- <span className="text-[#55DEE8] ">VS</span>{' '}
+ <span className="text-[#55DEE8]">VS</span>{' '}
  {g.teams?.teamB?.name || 'TBD'}</>
  )}
  </h3>
@@ -843,11 +840,11 @@ export default function Home() {
 
  {/* Date + Time pills */}
  <div className="grid grid-cols-2 gap-2">
- <div className="bg-black/50 border border-white/10 rounded-xl px-3 py-2">
+ <div className="bg-black/50 border border-white/10 rounded-[8px] px-3 py-2">
  <p className="text-[8px] font-black text-white/30 uppercase tracking-widest mb-0.5">Kickoff Date</p>
  <p className="text-sm font-black text-white">{dateLabel}</p>
  </div>
- <div className="bg-black/50 border border-white/10 rounded-xl px-3 py-2">
+ <div className="bg-black/50 border border-white/10 rounded-[8px] px-3 py-2">
  <p className="text-[8px] font-black text-white/30 uppercase tracking-widest mb-0.5">Precision Time</p>
  <p className="text-sm font-black text-white">{g.time || '—'}</p>
  </div>
@@ -887,7 +884,7 @@ export default function Home() {
  </div>
  <button
  onClick={(e) => { e.stopPropagation(); navigate('/join-games'); }}
- className="flex items-center gap-2 text-black px-5 py-2 rounded-full font-black text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(85,222,232,0.4)] hover:scale-105"
+ className="flex items-center gap-2 text-black px-5 py-2 rounded-[6px] font-black text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(85,222,232,0.4)] hover:scale-105"
  style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}
  >
  JOIN <ChevronRight size={14} />
@@ -924,10 +921,7 @@ export default function Home() {
  {["ALL SPORTS", "CRICKET", "BADMINTON", "FOOTBALL", "TENNIS"].map((tab, i) => (
  <button 
  key={tab} 
- className={`px-6 py-2.5 rounded-full font-black text-[10px] shrink-0 transition-all duration-300 uppercase tracking-widest border
- ${i === 0 
- ? "text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" 
- : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"}`} style={i === 0 ? { background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)", borderColor: "#55DEE8" } : {}}
+ className={`px-6 py-2.5 rounded-full font-black text-[10px] shrink-0 transition-all duration-300 uppercase tracking-widest border ${i === 0 ? "text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"}`} style={i === 0 ? { background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)", borderColor: "#55DEE8" } : {}}
  >
  {tab}
  </button>
@@ -939,10 +933,10 @@ export default function Home() {
  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 gap-3 md:gap-4">
  {professionalsLoading ? (
  [...Array(6)].map((_, i) => (
- <div key={i} className="aspect-[1/1.3] rounded-[20px] bg-white/5 border border-white/5 animate-pulse" />
+ <div key={i} className="aspect-[1/1.3] rounded-[8px] bg-white/5 border border-white/5 animate-pulse" />
  ))
  ) : professionals.length === 0 ? (
- <div className="col-span-full py-12 text-center border-2 border-dashed border-white/5 rounded-[40px]">
+ <div className="col-span-full py-12 text-center border-2 border-dashed border-white/5 rounded-[8px]">
  <p className="text-white/20 font-mono text-[10px] uppercase tracking-widest">No professionals active in your area</p>
  </div>
  ) : (
@@ -952,10 +946,10 @@ export default function Home() {
  className="group cursor-pointer"
  onClick={() => navigate(`/professionals/${pro._id}`)}
  >
- <div className="relative bg-[#121212] rounded-[20px] p-1.5 border border-white/5 transition-all duration-500 hover:border-[#55DEE8]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
+ <div className="relative bg-[#121212] rounded-[8px] p-1.5 border border-white/5 transition-all duration-500 hover:border-[#55DEE8]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
  
  {/* Compact Profile Image Section */}
- <div className="relative aspect-[1/1.2] rounded-[15px] overflow-hidden block mb-2.5">
+ <div className="relative aspect-[1/1.2] rounded-[8px] overflow-hidden block mb-2.5">
  <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
  {pro.profilePicture ? (
  <img 
@@ -980,14 +974,14 @@ export default function Home() {
  
  {/* Price Badge */}
  <div className="absolute top-2 right-2 z-20">
- <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#55DEE8] text-[8px] font-bold shadow-lg">
+ <div className="px-2 py-1 rounded-[6px] bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#55DEE8] text-[8px] font-bold shadow-lg">
  ₹{pro.price || "500"}/{pro.role === "coach" ? "hr" : "match"}
  </div>
  </div>
 
  {/* Role Badge */}
  <div className="absolute top-2 left-2 z-20">
- <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white text-[8px] font-black tracking-widest gap-1 shadow-lg">
+ <div className="px-2 py-1 rounded-[6px] bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white text-[8px] font-black tracking-widest gap-1 shadow-lg">
  {pro.role === 'umpire' ? <Shield size={8} className="text-[#55DEE8]" /> : 
  pro.role === 'streamer' ? <Video size={8} className="text-[#55DEE8]" /> : 
  pro.role === 'scorer' ? <Activity size={8} className="text-[#55DEE8]" /> : 
@@ -1031,7 +1025,7 @@ export default function Home() {
  e.stopPropagation();
  navigate(`/professionals/${pro._id}`);
  }}
- className="px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-wider transition-all duration-300 text-black hover:scale-105 shadow-[0_0_15px_rgba(85,222,232,0.3)]"
+ className="px-4 py-2 rounded-[8px] font-black text-[9px] uppercase tracking-wider transition-all duration-300 text-black hover:scale-105 shadow-[0_0_15px_rgba(85,222,232,0.3)]"
  style={{ background: GRAD }}
  >
  BOOK
@@ -1058,8 +1052,8 @@ export default function Home() {
 
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5" style={{ minHeight: "400px" }}>
  {/* Left Large Card */}
- <div className="lg:col-span-1 rounded-3xl p-8 relative overflow-hidden flex flex-col justify-end min-h-[300px]" style={{ background: "linear-gradient(135deg, #001f22, #0a0a0a)", border: `1px solid ${BDR}` }}>
- <div className="absolute top-6 left-6 w-12 h-12 rounded-2xl flex items-center justify-center z-20" style={{ background: GRAD }}>
+ <div className="lg:col-span-1 rounded-[8px] p-8 relative overflow-hidden flex flex-col justify-end min-h-[300px]" style={{ background: "linear-gradient(135deg, #001f22, #0a0a0a)", border: `1px solid ${BDR}` }}>
+ <div className="absolute top-6 left-6 w-12 h-12 rounded-[8px] flex items-center justify-center z-20" style={{ background: GRAD }}>
  <BookOpen size={20} style={{ color: "#000" }} />
  </div>
  <div className="absolute right-0 top-0 w-3/4 h-3/4 bg-no-repeat bg-contain bg-right-top z-10" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&q=80')", opacity: 0.3 }} />
@@ -1079,7 +1073,7 @@ export default function Home() {
  <div className="lg:col-span-2 grid grid-rows-2 gap-5">
  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
  {/* Challenge Players */}
- <div className="rounded-3xl p-8 relative overflow-hidden border min-h-[200px]" style={{ borderColor: BDR, backgroundColor: "#111" }}>
+ <div className="rounded-[8px] p-8 relative overflow-hidden border min-h-[200px]" style={{ borderColor: BDR, backgroundColor: "#111" }}>
  <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=600&q=80')", opacity: 0.4 }} />
  <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #111, transparent)" }} />
  <div className="relative z-10 flex flex-col h-full justify-between">
@@ -1093,7 +1087,7 @@ export default function Home() {
  </div>
  </div>
  {/* Join Games Promo */}
- <Link to="/join-games" className="rounded-3xl p-6 relative border flex flex-col justify-between min-h-[200px] overflow-hidden group transition-all hover:border-[#55DEE8]/50" style={{ borderColor: BDR, backgroundColor: "#000" }}>
+ <Link to="/join-games" className="rounded-[8px] p-6 relative border flex flex-col justify-between min-h-[200px] overflow-hidden group transition-all hover:border-[#55DEE8]/50" style={{ borderColor: BDR, backgroundColor: "#000" }}>
  {/* Background Image */}
  <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&q=80')", opacity: 0.45 }} />
  {/* Dark overlay */}
@@ -1128,7 +1122,7 @@ export default function Home() {
  {/* Marketplace, Coaches, Umpires */}
  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
  {/* Featured Community Highlight */}
- <div className="rounded-3xl p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#55DEE8] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
+ <div className="rounded-[8px] p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#55DEE8] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
  {realSocialPosts[0]?.image ? (
  <div className="absolute inset-0 bg-cover bg-center opacity-40 transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url(${realSocialPosts[0].image})` }} />
  ) : (
@@ -1149,11 +1143,11 @@ export default function Home() {
  </div>
 
  {/* Coaches */}
- <div className="rounded-3xl p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#55DEE8] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
+ <div className="rounded-[8px] p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#55DEE8] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
  <div className="absolute inset-0 bg-cover bg-center opacity-20 transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1526676037777-05a232554f77?w=600&q=80')" }} />
  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
  <div className="relative z-10 flex flex-col h-full justify-between">
- <div className="w-10 h-10 rounded-xl flex items-center justify-center border" style={{ borderColor: "transparent", background: GRAD }}>
+ <div className="w-10 h-10 rounded-[8px] flex items-center justify-center border" style={{ borderColor: "transparent", background: GRAD }}>
  <Award size={20} style={{ color: "#000" }} />
  </div>
  <div>
@@ -1165,11 +1159,11 @@ export default function Home() {
  </div>
 
  {/* Umpires */}
- <div className="rounded-3xl p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#55DEE8] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
+ <div className="rounded-[8px] p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#55DEE8] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
  <div className="absolute inset-0 bg-cover bg-center opacity-20 transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1519861531473-9200262188bf?w=600&q=80')" }} />
  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
  <div className="relative z-10 flex flex-col h-full justify-between">
- <div className="w-10 h-10 rounded-xl flex items-center justify-center border" style={{ borderColor: "transparent", background: GRAD }}>
+ <div className="w-10 h-10 rounded-[8px] flex items-center justify-center border" style={{ borderColor: "transparent", background: GRAD }}>
  <Shield size={20} style={{ color: "#000" }} />
  </div>
  <div>
@@ -1203,7 +1197,7 @@ export default function Home() {
  const isFollowing = author && followingIds.includes(author.id || author._id);
  
  return (
- <div key={post._id || idx} className="w-[300px] md:w-[340px] aspect-[4/5] shrink-0 bg-[#0A0A0A] border rounded-[2rem] overflow-hidden snap-start group transition-all flex flex-col" style={{ borderColor: BDR }}>
+ <div key={post._id || idx} className="w-[300px] md:w-[340px] aspect-[4/5] shrink-0 bg-[#0A0A0A] border rounded-[8px] overflow-hidden snap-start group transition-all flex flex-col" style={{ borderColor: BDR }}>
  {/* Image Container */}
  <div className="relative flex-1 overflow-hidden">
  <img
@@ -1301,11 +1295,11 @@ export default function Home() {
  </div>
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
  {features.map(f => (
- <div key={f.title} className="bms-card group rounded-3xl border overflow-hidden flex flex-col" style={{ backgroundColor: "#111", borderColor: BDR }}>
+ <div key={f.title} className="bms-card group rounded-[8px] border overflow-hidden flex flex-col" style={{ backgroundColor: "#111", borderColor: BDR }}>
  <div className="relative h-48 overflow-hidden shrink-0">
  <img src={f.img} alt={f.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
  <div className="absolute inset-0 transition-colors" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} />
- <div className="absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center border backdrop-blur-md"
+ <div className="absolute top-4 left-4 w-10 h-10 rounded-[8px] flex items-center justify-center border backdrop-blur-md"
  style={{ borderColor: "rgba(132,204,22,0.4)", backgroundColor: "rgba(0,0,0,0.6)" }}>
  <f.icon size={18} style={{ color: PRI }} />
  </div>
@@ -1325,7 +1319,7 @@ export default function Home() {
  {/* ── APP DOWNLOAD SECTION ── */}
  <section className="pt-4 lg:pt-8 pb-8 lg:pb-16 relative overflow-hidden px-4 lg:px-12">
  <div className="max-w-full mx-auto">
- <div className="bg-gradient-to-br from-[#0D0D0D] to-black border-y lg:border lg:rounded-[3rem] p-6 md:p-12 lg:p-16 overflow-hidden relative" style={{ borderColor: BDR }}>
+ <div className="bg-gradient-to-br from-[#0D0D0D] to-black border-y lg:border lg:rounded-[8px] p-6 md:p-12 lg:p-16 overflow-hidden relative" style={{ borderColor: BDR }}>
  <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-16 relative z-10">
 
  {/* Left Side: Mockup */}
@@ -1361,7 +1355,7 @@ export default function Home() {
  <div className="absolute -top-2 -right-1 sm:-right-2 z-20 text-black text-[6px] sm:text-[9px] font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest shadow-lg whitespace-nowrap" style={{ background: GRAD }}>
  Coming Soon
  </div>
- <a href="#" className="flex items-center justify-center gap-2 sm:gap-4 bg-white/5 border px-3 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl transition-all cursor-not-allowed w-full" style={{ borderColor: BDR }}>
+ <a href="#" className="flex items-center justify-center gap-2 sm:gap-4 bg-white/5 border px-3 sm:px-8 py-3 sm:py-4 rounded-[8px] sm:rounded-[8px] transition-all cursor-not-allowed w-full" style={{ borderColor: BDR }}>
  <div className="w-5 h-5 sm:w-8 sm:h-8 flex items-center justify-center opacity-50 shrink-0">
  <svg className="w-full h-full text-white" viewBox="0 0 24 24" fill="currentColor">
  <path d="M3.609 1.814L13.792 12 3.609 22.186c-.18.23-.209.534-.075.79.133.257.394.424.681.424h.01c.145 0 .284-.041.405-.119l12.784-7.464 3.031 3.031c.141.141.331.22.53.22.199 0 .389-.079.53-.22l3.031-3.031c.141-.141.22-.331.22-.53 0-.199-.079-.389-.22-.53l-3.031-3.031 12.784-7.464c.121-.078.26-.119.405-.119h.01c.287 0 .548-.167.681-.424.134-.256.105-.56-.075-.79L3.609 1.814z" />
@@ -1379,7 +1373,7 @@ export default function Home() {
  <div className="absolute -top-2 -right-1 sm:-right-2 z-20 text-black text-[6px] sm:text-[9px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest shadow-lg whitespace-nowrap" style={{ background: GRAD }}>
  Coming Soon
  </div>
- <a href="#" className="flex items-center justify-center gap-2 sm:gap-4 bg-white/5 border border-white/10 px-3 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl transition-all cursor-not-allowed w-full">
+ <a href="#" className="flex items-center justify-center gap-2 sm:gap-4 bg-white/5 border border-white/10 px-3 sm:px-8 py-3 sm:py-4 rounded-[8px] sm:rounded-[8px] transition-all cursor-not-allowed w-full">
  <div className="w-5 h-5 sm:w-8 sm:h-8 flex items-center justify-center opacity-50 shrink-0">
  <svg className="w-full h-full text-white" viewBox="0 0 24 24" fill="currentColor">
  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.1 2.48-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.31-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
