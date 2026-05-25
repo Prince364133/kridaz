@@ -24,6 +24,8 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
+
 const DashboardProfile = () => {
   const user = useSelector((state) => state.auth.user);
   const role = useSelector((state) => state.auth.role);
@@ -52,7 +54,7 @@ const DashboardProfile = () => {
       <div className="max-w-[1600px] mx-auto mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#2D2D2D] pb-10">
         <div>
           <h1 className="text-3xl font-semibold text-white uppercase tracking-tight mb-2 italic">My Profile</h1>
-          <p className="text-[12px] font-normal text-[#999999] uppercase tracking-widest">Identity and professional credentials</p>
+          <p className="text-[12px] text-[#999999] uppercase tracking-widest" style={SUBHEADING_STYLE}>Identity and professional credentials</p>
         </div>
         <div className="flex items-center gap-4">
            <div className="flex items-center gap-2 px-4 py-2 bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-[6px]">

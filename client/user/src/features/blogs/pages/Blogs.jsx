@@ -1,10 +1,11 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Eye, ThumbsUp, ArrowLeft, Search, Calendar, Clock, Tag } from 'lucide-react';
 import axios from 'axios';
 
 const PRI = "#55DEE8";
 const BDR = "#2A2A2A";
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
@@ -73,7 +74,7 @@ const Blogs = () => {
               The <span style={{ color: PRI }}>Playbook</span> <br />
               <span className="text-white/20 italic">Stories & Insights</span>
             </h1>
-            <p className="text-gray-500 font-mono text-xs uppercase tracking-[0.3em] mt-6 leading-relaxed">
+            <p className="text-gray-500 text-xs uppercase tracking-[0.3em] mt-6 leading-relaxed" style={SUBHEADING_STYLE}>
               Discover the latest in sports, fitness, and venue management from the Kridaz community.
             </p>
           </div>

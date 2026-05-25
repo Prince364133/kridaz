@@ -193,7 +193,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
             </div>
             <div>
               <h2 className="text-lg font-black uppercase tracking-tight text-white leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>Edit Profile</h2>
-              <p className="text-sm text-[#BFF367] font-black uppercase tracking-tight mt-1 leading-none" style={{ fontFamily: "'Inter', sans-serif" }}>Customize your identity</p>
+              <p className="text-sm text-[#BFF367] font-black uppercase tracking-tight mt-1 leading-none" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>Customize your identity</p>
             </div>
           </div>
           <button 

@@ -176,7 +176,7 @@ export default function ProfessionalLanding() {
               Build Your <br />
               <span style={{ background: GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Legacy.</span>
             </h1>
-            <p className="text-gray-400 mb-6 max-w-lg mx-auto md:mx-0 leading-relaxed text-sm md:text-base" style={{ fontFamily: "'Inter'" }}>
+            <p className="text-gray-400 mb-6 max-w-lg mx-auto md:mx-0 leading-relaxed text-sm md:text-base" style={{ fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 }}>
               Take your professional career to the next level. Kridaz provides the digital infrastructure to manage your clients, schedule sessions, and grow your brand as a Coach, Umpire, Scorer, or Streamer.
             </p>
             <button

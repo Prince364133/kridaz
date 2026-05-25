@@ -8,6 +8,8 @@ import {
   Trophy, Info, Calendar, Coins, User, Search
 } from 'lucide-react';
 
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
+
 const isWithin24HoursOfStart = (gameDate, gameTime) => {
   if (!gameDate || !gameTime) return false;
   const matchDateTime = new Date(gameDate);
@@ -123,7 +125,7 @@ const MyJoinedGames = () => {
     <div className="min-h-screen bg-neutral-900 text-white p-4 pb-24">
       <div className="max-w-4xl mx-auto mb-8">
         <h1 className="text-3xl font-black italic tracking-tighter uppercase">MY JOINED MATCHES</h1>
-        <p className="text-neutral-400">Games you&apos;ve requested to join or have already joined</p>
+        <p className="text-neutral-400" style={SUBHEADING_STYLE}>Games you&apos;ve requested to join or have already joined</p>
       </div>
 
       <div className="max-w-4xl mx-auto mb-6 flex flex-col md:flex-row gap-4">

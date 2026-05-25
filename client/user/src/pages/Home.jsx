@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import useTurfData from "../features/turf/hooks/useTurfData";
-import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, MessageSquare, MessageSquareShare, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus, Loader2, LayoutGrid, Video } from "lucide-react";
+import { Search, MapPin, Star, ChevronRight, ArrowRight, Building, Users, User, Calendar, Shield, Trophy, Store, Ticket, Download, CalendarDays, BookOpen, ShoppingBag, Activity, Award, CheckCircle, Heart, MessageCircle, MessageSquare, MessageSquareShare, Share2, Info, Check, X, RefreshCcw, Timer, Zap, Plus, Loader2, LayoutGrid, Video, Play } from "lucide-react";
 import toast from "react-hot-toast";
 import { AdBannerSection } from "../shared/components/Marketing/AdBannerSection";
 import { VideoSection } from "../shared/components/Marketing/VideoSection";
@@ -28,11 +28,11 @@ const stats = [
 ];
 
 const socialPosts = [
- { image: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800&q=80", likes: "1.2k", comments: "84" },
- { image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80", likes: "2.5k", comments: "120" },
- { image: "https://images.unsplash.com/photo-1519861531473-9200262188bf?w=800&q=80", likes: "890", comments: "45" },
- { image: "https://images.unsplash.com/photo-1526676037777-05a232554f77?w=800&q=80", likes: "1.8k", comments: "62" },
- { image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&q=80", likes: "3.1k", comments: "156" },
+  { video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", image: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800&q=80", likes: "1.2k", comments: "84" },
+  { video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80", likes: "2.5k", comments: "120" },
+  { video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", image: "https://images.unsplash.com/photo-1519861531473-9200262188bf?w=800&q=80", likes: "890", comments: "45" },
+  { video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", image: "https://images.unsplash.com/photo-1526676037777-05a232554f77?w=800&q=80", likes: "1.8k", comments: "62" },
+  { video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&q=80", likes: "3.1k", comments: "156" },
 ];
 
 
@@ -300,7 +300,9 @@ export default function Home() {
  setTurfFilters(filters);
  };
 
- // Auto-apply user location to venue filters once detected
+  const [activeReel, setActiveReel] = useState(null);
+
+  // Auto-apply user location to venue filters once detected
  useEffect(() => {
  if (locationStatus === "granted" && userLocation) {
  setTurfFilters(prev => ({
@@ -348,106 +350,194 @@ export default function Home() {
 
  return (
  <div className="min-h-screen text-white" style={{ backgroundColor: "#000" }}>
+  {/* ── REDESIGNED DASHBOARD HERO ── */}
+  <section className="pt-3 sm:pt-5 pb-4 px-4 md:px-8 max-w-5xl mx-auto w-full">
+    {/* Stories Row */}
+    <div className="flex gap-5 md:gap-8 overflow-x-auto no-scrollbar py-4 px-2 items-center justify-center">
+      {/* Your Story */}
+      <div 
+        onClick={() => navigate("/community")}
+        className="flex flex-col items-center gap-2 cursor-pointer group flex-shrink-0"
+      >
+        <div className="relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full p-[2px] bg-white/10 hover:scale-105 transition-transform duration-300">
+          <div className="w-full h-full rounded-full bg-[#FCECDD] flex items-center justify-center overflow-hidden border border-black p-2.5">
+            <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="3" width="14" height="18" rx="2" fill="white" stroke="#EEDBC5" strokeWidth="1" />
+              <circle cx="12" cy="9" r="2.5" fill="#EEDBC5" />
+              <rect x="8" y="14" width="8" height="2" rx="1" fill="#EEDBC5" />
+            </svg>
+          </div>
+          {/* Plus Badge */}
+          <div className="absolute bottom-0 right-0 w-6 h-6 bg-[#00E676] rounded-full border-2 border-[#000] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+            <Plus size={14} strokeWidth={4} className="text-black" />
+          </div>
+        </div>
+        <span className="text-[11px] sm:text-xs font-semibold text-white/70 group-hover:text-white transition-colors tracking-wide">
+          Your Story
+        </span>
+      </div>
 
- {/* ── HERO ── */}
- {/* ── HERO ── */}
- <section className="relative lg:min-h-screen flex items-start pt-24 lg:pt-5 pb-24 overflow-hidden">
- {/* Further Enhanced Cinematic Background */}
- <div className="absolute inset-y-0 right-0 w-full lg:w-[75%] z-0 pointer-events-none overflow-hidden">
- <div className="relative h-full w-full">
- <img
- src="/hero%20image.png"
- alt="Hero Background"
- className="absolute inset-0 w-full h-full object-cover object-center lg:object-[right_15%] opacity-70 brightness-[75%] transform scale-110 transition-transform duration-1000"
- />
- {/* Blending Gradients */}
- <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent lg:from-black lg:via-black/30 lg:to-transparent" />
- <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black" />
- </div>
- </div>
+      {/* Cricket */}
+      <div 
+        onClick={() => navigate("/venues?sport=Cricket")}
+        className="flex flex-col items-center gap-2 cursor-pointer group flex-shrink-0"
+      >
+        <div className="relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full p-[2px] bg-gradient-to-tr from-[#55DEE8] to-[#BFF367] hover:scale-105 transition-transform duration-300">
+          <div className="w-full h-full rounded-full bg-black overflow-hidden border border-black p-[2px]">
+            <img 
+              src="https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=150&h=150&fit=crop&q=80" 
+              alt="Cricket" 
+              className="w-full h-full rounded-full object-cover group-hover:scale-110 transition-transform duration-500" 
+            />
+          </div>
+        </div>
+        <span className="text-[11px] sm:text-xs font-semibold text-white/70 group-hover:text-white transition-colors tracking-wide">
+          Cricket
+        </span>
+      </div>
 
- <div className="absolute inset-0 opacity-[0.03] z-1"
- style={{ backgroundImage: `radial-gradient(#55DEE8 1px, transparent 1px)`, backgroundSize: "48px 48px" }} />
+      {/* Football */}
+      <div 
+        onClick={() => navigate("/venues?sport=Football")}
+        className="flex flex-col items-center gap-2 cursor-pointer group flex-shrink-0"
+      >
+        <div className="relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full p-[2px] bg-gradient-to-tr from-[#55DEE8] to-[#BFF367] hover:scale-105 transition-transform duration-300">
+          <div className="w-full h-full rounded-full bg-black overflow-hidden border border-black p-[2px]">
+            <img 
+              src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=150&h=150&fit=crop&q=80" 
+              alt="Football" 
+              className="w-full h-full rounded-full object-cover group-hover:scale-110 transition-transform duration-500" 
+            />
+          </div>
+        </div>
+        <span className="text-[11px] sm:text-xs font-semibold text-white/70 group-hover:text-white transition-colors tracking-wide">
+          Football
+        </span>
+      </div>
 
- <div className="relative w-full px-4 lg:px-12 grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center pt-4 md:pt-0">
- <div className="space-y-4 lg:space-y-6 relative z-10">
- <div>
- <h1 className="uppercase" style={{ fontFamily: "'Open Sans', sans-serif", fontWeight: "700", fontSize: "clamp(40px, 6vw, 51.74px)", lineHeight: "1.14", letterSpacing: "0" }}>
- More Than <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Booking.</span><br />
- Where Players<br />Belong.
- </h1>
- <p className="font-script text-xl lg:text-2xl mt-2 lg:mt-3" style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>where champions play</p>
- </div>
- <p className="opacity-70 max-w-xl mb-4 lg:mb-10" style={{ fontFamily: "'Inter', sans-serif", fontWeight: "300", fontSize: "20.04px", lineHeight: "119%", letterSpacing: "1.5%" }}>
- Discover premium sports venues, book your slot instantly, and connect with players across India.
- </p>
+      {/* Badminton */}
+      <div 
+        onClick={() => navigate("/venues?sport=Badminton")}
+        className="flex flex-col items-center gap-2 cursor-pointer group flex-shrink-0"
+      >
+        <div className="relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full p-[2px] bg-gradient-to-tr from-[#55DEE8] to-[#BFF367] hover:scale-105 transition-transform duration-300">
+          <div className="w-full h-full rounded-full bg-black overflow-hidden border border-black p-[2px]">
+            <img 
+              src="https://images.unsplash.com/photo-1613243555988-441166d4d6fd?w=150&h=150&fit=crop&q=80" 
+              alt="Badminton" 
+              className="w-full h-full rounded-full object-cover group-hover:scale-110 transition-transform duration-500" 
+            />
+          </div>
+        </div>
+        <span className="text-[11px] sm:text-xs font-semibold text-white/70 group-hover:text-white transition-colors tracking-wide">
+          Badminton
+        </span>
+      </div>
 
- <Link
- to={isLoggedIn ? "/venues" : "/signup"}
- className="block w-fit group mb-4 lg:mb-12"
- >
- <div className="inline-flex items-center gap-2 text-black px-8 py-3.5 rounded-[6px] font-bold group-hover:scale-105 transition-all text-sm lg:text-base shadow-[0_0_20px_rgba(85,222,232,0.4)]" style={{ background: GRAD }}>
- Book Now <ArrowRight size={18} />
- </div>
- </Link>
- </div>
+      {/* Tennis */}
+      <div 
+        onClick={() => navigate("/venues?sport=Tennis")}
+        className="flex flex-col items-center gap-2 cursor-pointer group flex-shrink-0"
+      >
+        <div className="relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full p-[2px] bg-gradient-to-tr from-[#55DEE8] to-[#BFF367] hover:scale-105 transition-transform duration-300">
+          <div className="w-full h-full rounded-full bg-black overflow-hidden border border-black p-[2px]">
+            <img 
+              src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=150&h=150&fit=crop&q=80" 
+              alt="Tennis" 
+              className="w-full h-full rounded-full object-cover group-hover:scale-110 transition-transform duration-500" 
+            />
+          </div>
+        </div>
+        <span className="text-[11px] sm:text-xs font-semibold text-white/70 group-hover:text-white transition-colors tracking-wide">
+          Tennis
+        </span>
+      </div>
+    </div>
 
- <div className="relative hidden lg:block h-[600px]">
- {/* Arena Gallery at bottom */}
- <div className="absolute bottom-0 right-0 w-full flex items-center justify-end gap-4 z-20 pb-4 pr-12">
- {[
- { img: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=700&q=80", label: "Football Ground", cls: "w-56 h-36 opacity-80" },
- { img: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=700&q=80", label: "Cricket Campus", cls: "w-72 h-52 z-10" },
- { img: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=700&q=80", label: "Badminton Hub", cls: "w-56 h-36 opacity-80" },
- ].map(c => (
- <Link
- key={c.label}
- to="/arenas"
- className={`relative ${c.cls} rounded-[8px] overflow-hidden border shadow-2xl transition-all hover:scale-105 hover:z-20 hover:opacity-100 duration-500 group flex-shrink-0`}
- style={{ borderColor: BDR }}
- >
- <img src={c.img} alt={c.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
- <div className="absolute inset-0" style={{ background: "linear-gradient(to top,rgba(0,0,0,0.8),transparent)" }} />
- <p className="absolute bottom-3 left-3 font-display text-lg uppercase tracking-tighter">{c.label}</p>
- </Link>
- ))}
- </div>
+    {/* Dashboard Buttons Grid */}
+    <div className="grid grid-cols-2 gap-3 mt-6 max-w-[390px] mx-auto w-full">
+      {/* Leaderboard */}
+      <Link 
+        to="/leaderboard"
+        className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
+        style={{ 
+          background: "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #2087FF 0%, #0E49B5 45%, #031533 100%)",
+          overflow: "visible"
+        }}
+      >
+        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[6px]" />
+        <span className="relative z-20 text-white font-bold text-xs sm:text-sm tracking-tight leading-tight max-w-[55%] font-open-sans">
+          Leaderboard
+        </span>
+        <img 
+          src="/3d_map_location.svg" 
+          alt="Leaderboard Map Icon" 
+          className="absolute -right-2.5 -top-[16px] w-[98px] h-[98px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10" 
+        />
+      </Link>
 
- {/* 1M+ Bookings Card - Moved to Top Right Corner */}
- <div className="absolute top-12 right-12 rounded-[8px] p-4 border z-20"
- style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", borderColor: "rgba(85,222,232,0.25)" }}>
- <p className="font-display text-2xl leading-none" style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>1M+</p>
- <p className="text-[10px] uppercase tracking-wider mt-1 opacity-60" style={{ color: "#fff" }}>Bookings Made</p>
- </div>
- </div>
- </div>
- </section>
+      {/* Shop Here */}
+      <div 
+        onClick={() => toast.success("🛒 Marketplace coming soon! Stay tuned.")}
+        className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
+        style={{ 
+          background: "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #FFA2FF 0%, #A726E2 50%, #220038 100%)",
+          overflow: "visible"
+        }}
+      >
+        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[6px]" />
+        <span className="relative z-20 text-white font-bold text-xs sm:text-sm tracking-tight leading-tight max-w-[55%] font-open-sans">
+          Shop Here
+        </span>
+        <img 
+          src="/3d_shopping_bag.svg" 
+          alt="Shop Here Bag Icon" 
+          className="absolute -right-2 -top-[14px] w-[94px] h-[94px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10" 
+        />
+      </div>
 
- {/* ── QUICK LINKS ── */}
- <section className="border-y border-white/5 bg-black py-3 md:py-8">
- {/* Mobile: 2x2 grid | Desktop: single row */}
- <div className="max-w-7xl mx-auto px-4 md:px-6 grid grid-cols-2 md:flex md:items-center md:justify-around gap-2 md:gap-6 w-full">
- <Link to="/leaderboard" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-[6px] py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
- <Activity size={16} className="text-[#60A5FA] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
- <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-[#60A5FA] whitespace-nowrap font-inter">LIVE SCORE</span>
- </Link>
+      {/* Host & Join Games */}
+      <Link 
+        to="/join-games"
+        className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
+        style={{ 
+          background: "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #22C55E 0%, #15803D 45%, #032512 100%)",
+          overflow: "visible"
+        }}
+      >
+        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[6px]" />
+        <span className="relative z-20 text-white font-bold text-xs sm:text-sm tracking-tight leading-tight max-w-[55%] font-open-sans">
+          Host & Join Games
+        </span>
+        <img 
+          src="/3d_whistle.svg" 
+          alt="Host & Join Games Whistle Icon" 
+          className="absolute -right-2.5 -top-[14px] w-[98px] h-[98px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10" 
+        />
+      </Link>
 
- <Link to="/join-games" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-[6px] py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
- <Trophy size={16} className="text-[#F59E0B] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
- <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-[#F59E0B] whitespace-nowrap font-inter">JOIN TOURNAMENTS</span>
- </Link>
+      {/* Tournaments */}
+      <div 
+        onClick={() => toast.success("🏆 Tournaments coming soon! Stay tuned.")}
+        className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
+        style={{ 
+          background: "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #FF9800 0%, #E65100 45%, #3E1700 100%)",
+          overflow: "visible"
+        }}
+      >
+        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[6px]" />
+        <span className="relative z-20 text-white font-bold text-xs sm:text-sm tracking-tight leading-tight max-w-[55%] font-open-sans">
+          Tournaments
+        </span>
+        <img 
+          src="/3d_stadium.svg" 
+          alt="Tournaments Stadium Icon" 
+          className="absolute -right-2 -top-[16px] w-[94px] h-[94px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10" 
+        />
+      </div>
+    </div>
+  </section>
 
- <Link to="/players" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-[6px] py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
- <Search size={16} className="text-[#84CC16] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
- <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-[#84CC16] whitespace-nowrap font-inter">FIND PLAYERS</span>
- </Link>
-
- <Link to="/community" className="flex items-center gap-2 group justify-center md:justify-start border border-white/5 md:border-0 rounded-[6px] py-2 md:py-0 px-2 md:px-0 bg-white/[0.02] md:bg-transparent hover:bg-white/5 md:hover:bg-transparent transition-colors">
- <Users size={16} className="text-[#A855F7] group-hover:scale-110 transition-transform md:w-6 md:h-6 shrink-0" />
- <span className="font-bold text-[11px] md:text-[20px] tracking-tight uppercase text-[#A855F7] whitespace-nowrap font-inter">COMMUNITY</span>
- </Link>
- </div>
- </section>
 
 
 
@@ -456,20 +546,19 @@ export default function Home() {
 
  {/* ── FIND YOUR ARENA ── */}
  <section className="py-6 lg:py-12 px-4 lg:px-12 w-full">
- <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16 border-b border-white/5 pb-10">
+ <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
  <div className="relative">
- <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block" style={{ background: GRAD }}></div>
  <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
  Find Your <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Arena</span>
  </h2>
- <p className="font-bold text-white/40 uppercase tracking-[0.15em] mt-4" style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}>
+ <p className="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.15em] mt-4" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>
  Premium Venue Discovery • Elite Sports Infrastructure
  </p>
  </div>
  </div>
 
  {/* Search Row */}
- <div className="flex flex-col gap-8 mb-16 w-full">
+ <div className="flex flex-col gap-6 mb-10 w-full">
  <div className="w-full animate-fade-in relative z-20">
  <SearchTurf onSearch={handleTurfSearch} userLocation={userLocation} />
  </div>
@@ -529,7 +618,7 @@ export default function Home() {
  <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
  Find Players <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Near You</span>
  </h2>
- <p className="font-bold text-white/40 uppercase tracking-[0.3em] mt-3" style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}>
+ <p className="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.3em] mt-3" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>
  Global Talent Network • Skill-Matched Athletes
  </p>
  </div>
@@ -650,7 +739,7 @@ export default function Home() {
  <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
  JOIN <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>GAMES</span>
  </h2>
- <p className="font-bold text-white/40 uppercase tracking-[0.3em] mt-4" style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}>
+ <p className="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.3em] mt-4" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>
  Community Matchmaking • No Team? No Problem.
  </p>
  </div>
@@ -911,7 +1000,7 @@ export default function Home() {
  <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
  PRO <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>EXPERTS</span>
  </h2>
- <p className="font-bold text-white/40 uppercase tracking-[0.3em] mt-4" style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}>
+ <p className="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.3em] mt-4" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>
  Certified Coaching • Professional Officiating
  </p>
  </div>
@@ -1041,142 +1130,7 @@ export default function Home() {
  </section>
  )}
 
- {/* ── BENTO GRID ── */}
- <section className="pt-10 lg:pt-20 pb-4 lg:pb-6 px-4 lg:px-12 w-full">
- <div className="text-center mb-8 lg:mb-14">
- <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
- ALL IN ONE <span className="text-gray-500">SPORTS</span><br />
- EXPERIENCE <span className="inline-block px-4 py-2 ml-2 align-middle rounded-full font-script text-3xl md:text-4xl text-black shadow-[0_0_25px_rgba(85,222,232,0.4)]" style={{ background: GRAD }}>Powered by AI ✨</span>
- </h2>
- </div>
 
- <div className="grid grid-cols-1 lg:grid-cols-3 gap-5" style={{ minHeight: "400px" }}>
- {/* Left Large Card */}
- <div className="lg:col-span-1 rounded-[8px] p-8 relative overflow-hidden flex flex-col justify-end min-h-[300px]" style={{ background: "linear-gradient(135deg, #001f22, #0a0a0a)", border: `1px solid ${BDR}` }}>
- <div className="absolute top-6 left-6 w-12 h-12 rounded-[8px] flex items-center justify-center z-20" style={{ background: GRAD }}>
- <BookOpen size={20} style={{ color: "#000" }} />
- </div>
- <div className="absolute right-0 top-0 w-3/4 h-3/4 bg-no-repeat bg-contain bg-right-top z-10" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&q=80')", opacity: 0.3 }} />
- <div className="relative z-20">
- <h3 className="text-3xl md:text-5xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-none mb-2" style={{ fontFamily: "'Open Sans', sans-serif" }}>BOOK VENUES</h3>
- <p className="text-gray-400 mb-6 max-w-sm">Find the perfect spot for Cricket, Football, Swimming, and more.</p>
- <div className="flex flex-wrap gap-2 mb-6">
- {["Cricket", "Football", "Swimming", "Badminton"].map(t => (
- <span key={t} className="px-4 py-1.5 rounded-full text-xs font-bold border" style={{ borderColor: BDR, backgroundColor: "rgba(255,255,255,0.05)" }}>{t}</span>
- ))}
- </div>
- <Link to="/venues" className="inline-block text-black font-bold py-3 px-8 rounded-full hover:scale-105 transition-all shadow-[0_0_20px_rgba(85,222,232,0.3)]" style={{ background: GRAD }}>Find Venues</Link>
- </div>
- </div>
-
- {/* Right Column Grid */}
- <div className="lg:col-span-2 grid grid-rows-2 gap-5">
- <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
- {/* Challenge Players */}
- <div className="rounded-[8px] p-8 relative overflow-hidden border min-h-[200px]" style={{ borderColor: BDR, backgroundColor: "#111" }}>
- <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=600&q=80')", opacity: 0.4 }} />
- <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #111, transparent)" }} />
- <div className="relative z-10 flex flex-col h-full justify-between">
- <div className="flex items-center gap-2">
- <span className="text-[#55DEE8] font-bold text-xs uppercase tracking-widest flex items-center gap-1"><Trophy size={14} /> COMPETITIVE</span>
- </div>
- <div>
- <h3 className="text-2xl md:text-4xl lg:text-4xl font-black text-white uppercase tracking-tighter leading-none mb-1" style={{ fontFamily: "'Open Sans', sans-serif" }}>CHALLENGE<br />PLAYERS</h3>
- <p className="text-gray-400 text-sm mb-4">Skill-matched opponents.</p>
- </div>
- </div>
- </div>
- {/* Join Games Promo */}
- <Link to="/join-games" className="rounded-[8px] p-6 relative border flex flex-col justify-between min-h-[200px] overflow-hidden group transition-all hover:border-[#55DEE8]/50" style={{ borderColor: BDR, backgroundColor: "#000" }}>
- {/* Background Image */}
- <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&q=80')", opacity: 0.45 }} />
- {/* Dark overlay */}
- <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(0,0,0,0.85) 40%, rgba(85,222,232,0.08) 100%)" }} />
- {/* Hover glow */}
- <div className="absolute inset-0 bg-gradient-to-br from-[#55DEE8]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
- <div className="relative z-10 flex flex-col h-full">
- <div className="flex items-center justify-between mb-4">
- <div className="flex items-center gap-2">
- <div className="w-8 h-8 rounded-lg flex items-center justify-center border transition-colors group-hover:border-[#55DEE8]/30 group-hover:bg-[#55DEE8]/10" style={{ borderColor: "rgba(255,255,255,0.1)", backgroundColor: "rgba(255,255,255,0.05)" }}>
- <Users size={14} className="text-[#55DEE8]" />
- </div>
- <h3 className="text-xl font-black text-white uppercase tracking-tighter group-hover:text-[#55DEE8] transition-colors" style={{ fontFamily: "'Open Sans', sans-serif" }}>JOIN GAMES</h3>
- </div>
- <ChevronRight size={20} className="text-gray-500 group-hover:text-[#55DEE8] transition-all duration-300 group-hover:translate-x-1" />
- </div>
-
- <div className="flex-1 space-y-3">
- <div className="h-full flex flex-col justify-center py-2">
- <p className="text-lg font-bold mb-2 text-white">No Team? No Problem.</p>
- <p className="text-xs text-gray-400 leading-relaxed max-w-[90%]">Find local pickup games, join open matches, and play your favorite sports today.</p>
- <div className="mt-4 inline-flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-[#55DEE8]">
- Find Games Near You
- </div>
- </div>
- </div>
- </div>
- </Link>
- </div>
-
- {/* Marketplace, Coaches, Umpires */}
- <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
- {/* Featured Community Highlight */}
- <div className="rounded-[8px] p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#55DEE8] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
- {realSocialPosts[0]?.image ? (
- <div className="absolute inset-0 bg-cover bg-center opacity-40 transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url(${realSocialPosts[0].image})` }} />
- ) : (
- <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80')" }} />
- )}
- <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
- <div className="relative z-10 flex flex-col h-full justify-between">
- <div className="w-8 h-8 rounded-lg flex items-center justify-center border" style={{ borderColor: "transparent", background: GRAD }}>
- <Zap size={16} style={{ color: "#000" }} />
- </div>
- <div>
- <span className="text-[8px] font-bold text-[#55DEE8] uppercase tracking-widest mb-1 block">Trending Now</span>
- <h3 className="text-xl font-black text-white uppercase tracking-tighter leading-tight truncate mb-1" style={{ fontFamily: "'Open Sans', sans-serif" }}>{realSocialPosts[0]?.title || "SOCIAL ARENA"}</h3>
- <p className="text-gray-400 text-[10px] mb-4 line-clamp-1">{realSocialPosts[0]?.content || "Check out what's happening in the field."}</p>
- 
- </div>
- </div>
- </div>
-
- {/* Coaches */}
- <div className="rounded-[8px] p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#55DEE8] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
- <div className="absolute inset-0 bg-cover bg-center opacity-20 transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1526676037777-05a232554f77?w=600&q=80')" }} />
- <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
- <div className="relative z-10 flex flex-col h-full justify-between">
- <div className="w-10 h-10 rounded-[8px] flex items-center justify-center border" style={{ borderColor: "transparent", background: GRAD }}>
- <Award size={20} style={{ color: "#000" }} />
- </div>
- <div>
- <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-none mb-1" style={{ fontFamily: "'Open Sans', sans-serif" }}>PRO COACHES</h3>
- <p className="text-gray-400 text-xs mb-4">Expert training.</p>
- <Link to="/professionals" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#55DEE8] transition-colors">Find Coach <ArrowRight size={14} /></Link>
- </div>
- </div>
- </div>
-
- {/* Umpires */}
- <div className="rounded-[8px] p-6 border flex flex-col justify-between min-h-[200px] group hover:border-[#55DEE8] transition-all relative overflow-hidden" style={{ borderColor: BDR, backgroundColor: "#111" }}>
- <div className="absolute inset-0 bg-cover bg-center opacity-20 transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1519861531473-9200262188bf?w=600&q=80')" }} />
- <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
- <div className="relative z-10 flex flex-col h-full justify-between">
- <div className="w-10 h-10 rounded-[8px] flex items-center justify-center border" style={{ borderColor: "transparent", background: GRAD }}>
- <Shield size={20} style={{ color: "#000" }} />
- </div>
- <div>
- <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-none mb-1" style={{ fontFamily: "'Open Sans', sans-serif" }}>OFFICIALS</h3>
- <p className="text-gray-400 text-[10px] mb-4 uppercase tracking-tighter">Umpires • Scorers • Streamers</p>
- <Link to="/professionals" className="font-bold text-white text-[11px] flex items-center gap-2 hover:text-[#55DEE8] transition-colors">Hire Now <ArrowRight size={14} /></Link>
- </div>
- </div>
- </div>
- </div>
- </div>
- </div>
- </section>
 
  {/* ── SOCIAL ARENA ── */}
  <section className="pt-4 lg:pt-6 pb-4 lg:pb-6 w-full overflow-hidden">
@@ -1186,44 +1140,87 @@ export default function Home() {
  <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none flex items-center gap-2 md:gap-3" style={{ fontFamily: "'Open Sans', sans-serif" }}>
  Your <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Social Arena</span> <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
  </h2>
- <p className="text-gray-400 mt-2" style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}>Swipe to see what's happening in the field</p>
+ <p className="text-xs md:text-sm font-medium text-gray-400 mt-2" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>Swipe to see what's happening in the field</p>
  </div>
- 
  </div>
 
- <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x">
+ {/* Reels Section (Horizontal Mock Data) */}
+ <div className="mb-8">
+ <h3 className="text-lg md:text-xl font-bold text-white/80 mb-4 tracking-wide">REELS</h3>
+ <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
+ {socialPosts.map((reel, idx) => (
+ <div key={`reel-${idx}`} className="w-[140px] md:w-[160px] aspect-[9/16] shrink-0 bg-[#0A0A0A] border rounded-[12px] overflow-hidden snap-start group transition-all relative cursor-pointer" style={{ borderColor: BDR }} onClick={(e) => { e.preventDefault(); setActiveReel(reel); }}>
+ <img
+ src={reel.image}
+ alt="Reel thumbnail"
+ className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+ />
+ <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+ <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40">
+ <Play size={16} className="text-white fill-white ml-1" />
+ </div>
+ </div>
+ </div>
+ ))}
+ </div>
+ </div>
+
+ {/* Posts Section (Vertical) */}
+ <div className="mt-10 max-w-2xl mx-auto">
+ <h3 className="text-lg md:text-xl font-bold text-white/80 mb-6 tracking-wide">RECENT POSTS</h3>
+ <div className="flex flex-col gap-8">
  {(realSocialPosts.length > 0 ? realSocialPosts : socialPosts).map((post, idx) => {
  const author = post.adminId || post.userId || post.ownerId;
- const isFollowing = author && followingIds.includes(author.id || author._id);
+ const isFollowing = author && followingIds.includes(author?.id || author?._id);
  
  return (
- <div key={post._id || idx} className="w-[300px] md:w-[340px] aspect-[4/5] shrink-0 bg-[#0A0A0A] border rounded-[8px] overflow-hidden snap-start group transition-all flex flex-col" style={{ borderColor: BDR }}>
+ <div key={post._id || idx} className="w-full bg-[#0A0A0A] border rounded-[12px] overflow-hidden flex flex-col" style={{ borderColor: BDR }}>
+ {/* Post Header */}
+ <div className="flex items-center justify-between p-4 border-b border-white/5 bg-[#080808]">
+   <div className="flex items-center gap-3">
+     <div className="w-10 h-10 rounded-full bg-[#1A1A1A] overflow-hidden border border-white/10">
+       <img src={author?.profilePicture || author?.profileImage || "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=100&q=80"} alt="User" className="w-full h-full object-cover" />
+     </div>
+     <div>
+       <h4 className="text-sm font-bold text-white">{author?.name || "Community Member"}</h4>
+       <p className="text-[10px] text-gray-400">{post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "2 hours ago"}</p>
+     </div>
+   </div>
+   {author && (
+     <button 
+     onClick={(e) => handleFollowToggle(e, author)}
+     className={`px-3 py-1.5 rounded-full font-bold text-[10px] uppercase tracking-wider transition-all duration-300 ${isFollowing ? 'bg-white/5 border border-white/10 text-white/30 hover:bg-white/10' : 'bg-[#222] border border-white/5 text-white hover:bg-white hover:text-black'}`}
+     >
+     {isFollowing ? 'Following' : 'Follow +'}
+     </button>
+   )}
+ </div>
+
  {/* Image Container */}
- <div className="relative flex-1 overflow-hidden">
+ <div className="relative w-full aspect-square md:aspect-[4/5] bg-black">
  <img
  src={post.image || post.imageUrl || post.image}
  alt="Social post"
- className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+ className="w-full h-full object-cover"
  onError={(e) => {
  e.target.src = "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800&q=80"; 
  }}
  />
  </div>
 
- {/* Exact UI Action Footer */}
- <div className="bg-[#0D0D0D] p-4 px-5 flex items-center justify-between border-t border-white/5">
- <div className="flex items-center gap-5">
+ {/* Post Actions */}
+ <div className="bg-[#0D0D0D] p-4 flex items-center justify-between">
+ <div className="flex items-center gap-6">
  <button 
  onClick={(e) => {
  e.preventDefault();
  navigate(`/community?post=${post._id}`);
  }}
- className="flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors"
+ className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
  >
- <Heart size={16} className={(post.likes?.length > 0 || post.likes > 0) ? "fill-white text-white" : ""} />
- <span className="text-[10px] font-bold text-gray-400">
+ <Heart size={20} className={(post.likes?.length > 0 || post.likes > 0) ? "fill-white text-white" : ""} />
+ <span className="text-xs font-bold text-gray-400">
  {Array.isArray(post.likes) ? post.likes.length : post.likes || 0}
- {(Array.isArray(post.likes) ? post.likes.length : post.likes || 0) > 999 ? 'k' : ''}
  </span>
  </button>
  <button 
@@ -1231,10 +1228,10 @@ export default function Home() {
  e.preventDefault();
  navigate(`/community?post=${post._id}`);
  }}
- className="flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors"
+ className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
  >
- <MessageSquare size={16} />
- <span className="text-[10px] font-bold text-gray-400">
+ <MessageSquare size={20} />
+ <span className="text-xs font-bold text-gray-400">
  {Array.isArray(post.comments) ? post.comments.length : post.comments || 0}
  </span>
  </button>
@@ -1248,12 +1245,13 @@ export default function Home() {
  }}
  className="text-gray-400 hover:text-white transition-colors"
  >
- <Share2 size={16} />
+ <Share2 size={20} />
  </button>
  </div>
  </div>
  );
  })}
+ </div>
  </div>
  </div>
  </section>
@@ -1316,106 +1314,7 @@ export default function Home() {
 
 
 
- {/* ── APP DOWNLOAD SECTION ── */}
- <section className="pt-4 lg:pt-8 pb-8 lg:pb-16 relative overflow-hidden px-4 lg:px-12">
- <div className="max-w-full mx-auto">
- <div className="bg-gradient-to-br from-[#0D0D0D] to-black border-y lg:border lg:rounded-[8px] p-6 md:p-12 lg:p-16 overflow-hidden relative" style={{ borderColor: BDR }}>
- <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-16 relative z-10">
 
- {/* Left Side: Mockup */}
- <div className="relative order-2 lg:order-1 mt-12 lg:mt-0">
- <div className="relative group">
- <div className="absolute -inset-10 bg-primary/5 rounded-full opacity-10 group-hover:opacity-20 transition-opacity" />
- <img
- src="/sports_app_mockup_1777351423147.png"
- alt="Kridaz App Mockup"
- className="relative w-full max-w-2xl mx-auto transform scale-[1.5] sm:scale-110 lg:scale-150 -rotate-6 hover:rotate-0 transition-all duration-700"
- />
- </div>
- </div>
-
- {/* Right Side: Content */}
- <div className="order-1 lg:order-2 text-center lg:text-left">
- <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full mb-8" style={{ background: GRAD }}>
- <div className="w-2 h-2 bg-black rounded-full animate-pulse" />
- <span className="text-[10px] font-bold tracking-widest text-black uppercase">Mobile App Coming Soon</span>
- </div>
-
- <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-6xl font-bold uppercase leading-[0.9] mb-6 tracking-tight whitespace-nowrap" style={{ fontFamily: "'Open Sans', sans-serif" }}>
- BOOK <span className="text-white/20">•</span> PLAY <span className="text-white/20">•</span> <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>WIN</span>
- </h2>
-
- <p className="text-gray-400 mb-12 max-w-xl mx-auto lg:mx-0" style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}>
- Take the ecosystem anywhere. Book slots, join matches, and track your stats.
- </p>
-
- <div className="flex flex-row items-center gap-3 sm:gap-6 justify-center lg:justify-start w-full">
- {/* Google Play Button */}
- <div className="relative group flex-1 sm:flex-none">
- <div className="absolute -top-2 -right-1 sm:-right-2 z-20 text-black text-[6px] sm:text-[9px] font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest shadow-lg whitespace-nowrap" style={{ background: GRAD }}>
- Coming Soon
- </div>
- <a href="#" className="flex items-center justify-center gap-2 sm:gap-4 bg-white/5 border px-3 sm:px-8 py-3 sm:py-4 rounded-[8px] sm:rounded-[8px] transition-all cursor-not-allowed w-full" style={{ borderColor: BDR }}>
- <div className="w-5 h-5 sm:w-8 sm:h-8 flex items-center justify-center opacity-50 shrink-0">
- <svg className="w-full h-full text-white" viewBox="0 0 24 24" fill="currentColor">
- <path d="M3.609 1.814L13.792 12 3.609 22.186c-.18.23-.209.534-.075.79.133.257.394.424.681.424h.01c.145 0 .284-.041.405-.119l12.784-7.464 3.031 3.031c.141.141.331.22.53.22.199 0 .389-.079.53-.22l3.031-3.031c.141-.141.22-.331.22-.53 0-.199-.079-.389-.22-.53l-3.031-3.031 12.784-7.464c.121-.078.26-.119.405-.119h.01c.287 0 .548-.167.681-.424.134-.256.105-.56-.075-.79L3.609 1.814z" />
- </svg>
- </div>
- <div className="flex flex-col items-start leading-none opacity-50 whitespace-nowrap">
- <p className="text-[6px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest mb-0.5 sm:mb-1">Get it on</p>
- <p className="text-[11px] sm:text-lg font-bold text-white">Google Play</p>
- </div>
- </a>
- </div>
-
- {/* App Store Button */}
- <div className="relative group flex-1 sm:flex-none">
- <div className="absolute -top-2 -right-1 sm:-right-2 z-20 text-black text-[6px] sm:text-[9px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest shadow-lg whitespace-nowrap" style={{ background: GRAD }}>
- Coming Soon
- </div>
- <a href="#" className="flex items-center justify-center gap-2 sm:gap-4 bg-white/5 border border-white/10 px-3 sm:px-8 py-3 sm:py-4 rounded-[8px] sm:rounded-[8px] transition-all cursor-not-allowed w-full">
- <div className="w-5 h-5 sm:w-8 sm:h-8 flex items-center justify-center opacity-50 shrink-0">
- <svg className="w-full h-full text-white" viewBox="0 0 24 24" fill="currentColor">
- <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.1 2.48-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.31-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
- </svg>
- </div>
- <div className="flex flex-col items-start leading-none opacity-50 whitespace-nowrap">
- <p className="text-[6px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest mb-0.5 sm:mb-1">Download on</p>
- <p className="text-[11px] sm:text-lg font-bold text-white">App Store</p>
- </div>
- </a>
- </div>
- </div>
- </div>
-
- </div>
-
- <div className="absolute top-0 right-0 w-96 h-96 bg-primary/2 rounded-full -translate-y-1/2 translate-x-1/2 opacity-5" />
- <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/2 rounded-full translate-y-1/2 -translate-x-1/2 opacity-5" />
- </div>
- </div>
- </section>
- {/* ── FOOTER BANNER ── */}
- <section className="w-full">
- <div className="border-t border-b grid grid-cols-4 lg:flex lg:flex-nowrap items-stretch p-2 lg:p-4 divide-x" style={{ borderColor: BDR, backgroundColor: "#0A0A0A" }}>
- {[
- { title: "LIST VENUE", sub: "EARN NOW", icon: Store, link: "/venues" },
- { title: "HOST GAME", sub: "START HOSTING", icon: Ticket, link: "/join-games" },
- { title: "GET APP", sub: "ANDROID & IOS", icon: Download, link: "#" },
- { title: "BOOKINGS", sub: "YOUR PAST", icon: CalendarDays, link: "/profile" }
- ].map(item => (
- <Link to={item.link} key={item.title} className="flex-1 flex flex-col lg:flex-row items-center justify-center lg:justify-start text-center lg:text-left gap-2 lg:gap-4 px-1 lg:px-6 py-4 lg:py-2 hover:bg-white/5 transition-colors cursor-pointer" style={{ borderColor: BDR }}>
- <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-full flex items-center justify-center border shrink-0" style={{ borderColor: "transparent", background: GRAD }}>
- <item.icon className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: "#000" }} />
- </div>
- <div className="w-full">
- <h4 className="font-display text-[9px] sm:text-xs lg:text-xl leading-tight lg:leading-none mb-0.5 lg:mb-1 text-white">{item.title}</h4>
- <p className="text-[6px] sm:text-[8px] lg:text-[10px] font-bold text-gray-500 uppercase tracking-wider lg:tracking-widest hidden sm:block">{item.sub}</p>
- </div>
- </Link>
- ))}
- </div>
- </section>
  <InterestsModal
  isOpen={showInterests}
  onClose={() => setShowInterests(false)}
@@ -1424,6 +1323,46 @@ export default function Home() {
  setShowInterests(false);
  }}
  />
+
+ {/* ── REEL MODAL ── */}
+ {activeReel && (
+   <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
+     <button 
+       onClick={() => setActiveReel(null)}
+       className="absolute top-6 right-6 z-[10000] p-3 bg-black/50 hover:bg-white/20 rounded-full text-white transition-colors"
+     >
+       <X size={24} />
+     </button>
+     <div className="w-full max-w-[450px] h-[100dvh] md:h-[90vh] relative bg-[#111] md:rounded-[16px] overflow-hidden flex items-center justify-center shadow-2xl border border-white/10">
+       {/* Reel Video Player */}
+       <video
+         src={activeReel.video || activeReel.videoUrl || "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"}
+         className="w-full h-full object-cover"
+         autoPlay
+         controls
+         loop
+         playsInline
+       />
+       {/* Gradient Overlay for Text */}
+       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 pointer-events-none" />
+       
+       {/* Reel Info */}
+       <div className="absolute bottom-0 left-0 right-0 p-6 pointer-events-none">
+         <h3 className="text-white font-bold text-lg mb-2">{activeReel.title || "Social Arena Reel"}</h3>
+         <div className="flex items-center gap-4 text-white/80">
+           <div className="flex items-center gap-1.5">
+             <Heart size={18} className="fill-white text-white" />
+             <span className="text-sm font-bold">{activeReel.likes || "1.2k"}</span>
+           </div>
+           <div className="flex items-center gap-1.5">
+             <MessageSquare size={18} />
+             <span className="text-sm font-bold">{activeReel.comments || "84"}</span>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+ )}
  </div>
  );
 }

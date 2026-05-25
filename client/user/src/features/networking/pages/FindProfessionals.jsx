@@ -11,6 +11,7 @@ const BDR = "#2A2A2A";
 
 const sports = ["ALL SPORTS", "CRICKET", "BADMINTON", "FOOTBALL", "TENNIS", "PICKLEBALL"];
 const roles = ["All", "Coach", "Umpire", "Scorer", "Streamer"];
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 export default function FindProfessionals() {
   const navigate = useNavigate();
@@ -98,7 +99,7 @@ export default function FindProfessionals() {
         <h1 className="font-['Open_Sans'] font-extrabold text-7xl lg:text-[84px] uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mb-2 leading-[0.9]">
           PRO'S
         </h1>
-        <p className="hidden md:block font-sans font-medium text-[20px] text-white/60 uppercase tracking-[0.15em] leading-relaxed whitespace-nowrap overflow-hidden">
+        <p className="hidden md:block text-[20px] text-white/60 uppercase tracking-[0.15em] leading-relaxed whitespace-nowrap overflow-hidden" style={SUBHEADING_STYLE}>
           Elite Coaching • Certified Officiating • Expert Training • Efficient Streaming
         </p>
       </div>
@@ -210,7 +211,7 @@ export default function FindProfessionals() {
           <div className="text-center py-20 border-2 border-dashed border-neutral-800 rounded-[8px]">
             <Users size={48} className="mx-auto text-neutral-800 mb-4" />
             <h3 className="text-3xl md:text-4xl font-open-sans font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mb-2">No professionals found</h3>
-            <p className="text-[#999999] mt-2 font-inter text-[20px]">Try adjusting your filters or location</p>
+            <p className="text-[#999999] mt-2 text-[20px]" style={SUBHEADING_STYLE}>Try adjusting your filters or location</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">

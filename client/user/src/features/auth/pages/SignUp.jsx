@@ -8,6 +8,8 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import { useDispatch } from "react-redux";
 import { login } from "@redux/slices/authSlice";
 
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
+
 const SignUp = () => {
   const [mounted, setMounted] = useState(false);
   const [authMode, setAuthMode] = useState('unified'); // 'unified', 'email', 'phone'
@@ -196,7 +198,7 @@ const SignUp = () => {
             <div className="flex flex-col items-center justify-center text-center mb-10">
                <div className="space-y-2">
                  <h2 className="text-3xl font-bold text-white">Create Account</h2>
-                 <p className="text-sm text-white/60">Sign up to get started</p>
+                 <p className="text-sm text-white/60" style={SUBHEADING_STYLE}>Sign up to get started</p>
                </div>
             </div>
 

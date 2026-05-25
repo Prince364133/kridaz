@@ -12,6 +12,7 @@ import { format, addDays, startOfToday } from "date-fns";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
 const PRI = "#84CC16";
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 export default function ProfessionalDetails() {
   const { id } = useParams();
@@ -175,7 +176,7 @@ export default function ProfessionalDetails() {
                     <span className="flex items-center gap-2"><Award size={18} className="text-[#55DEE8]" /> {pro.businessDetails?.experience || "5+ Years"} exp</span>
                   </div>
 
-                  <p className="text-white/70 leading-relaxed mb-10 max-w-2xl text-[18px] font-sans">
+                  <p className="text-white/70 leading-relaxed mb-10 max-w-2xl text-[18px]" style={SUBHEADING_STYLE}>
                     {pro.bio || `Specialized in ${pro.gameTypes?.join(", ")}. Providing high-quality professional services to elevate your sports experience. Certified and experienced in handling complex match scenarios and coaching sessions.`}
                   </p>
 

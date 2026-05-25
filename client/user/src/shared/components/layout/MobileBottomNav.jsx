@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Users, MessageSquare, UserSearch, Zap } from "lucide-react";
+import { Home, Search, Users, UserSearch, Trophy } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useScrollDirection } from "@hooks/useScrollDirection.js";
 
@@ -21,13 +21,9 @@ const MobileBottomNav = () => {
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Venues", path: "/venues", icon: Search },
-    { 
-      name: "Community", 
-      path: "/community", 
-      icon: MessageSquare,
-    },
-    { name: "Games", path: "/join-games", icon: Zap },
-    { name: "Players", path: "/players", icon: UserSearch, protected: true },
+    { name: "Profiles", path: "/players", icon: UserSearch },
+    { name: "Pros", path: "/professionals", icon: Trophy },
+    { name: "My Teams", path: "/my-teams", icon: Users, protected: true },
   ];
 
   // Filter items based on login status and role
@@ -37,7 +33,7 @@ const MobileBottomNav = () => {
   });
 
   return (
-    <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-black/80 backdrop-blur-2xl border-t border-white/10 px-4 pb-safe-area-inset-bottom transition-transform duration-500 ${ scrollDirection === "up" ? "translate-y-full" : "translate-y-0" }`}>
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-black/80 backdrop-blur-2xl border-t border-white/10 px-4 pb-safe-area-inset-bottom transition-transform duration-500 translate-y-0">
       <div className="flex justify-between items-center h-16 max-w-md mx-auto">
         {visibleItems.slice(0, 5).map((item) => {
           const isActive = location.pathname === item.path;

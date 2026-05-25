@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 import { updateUser } from "@redux/slices/authSlice";
 import { loadRazorpay } from "@infrastructure/razorpay";
 
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
+
 const WalletPage = () => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -115,7 +117,7 @@ const WalletPage = () => {
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter font-open-sans">My Wallet</h1>
-          <p className="text-zinc-500 font-bold uppercase tracking-widest font-inter text-[20px]">Manage your coins & transactions</p>
+          <p className="text-zinc-500 uppercase tracking-widest text-[20px]" style={SUBHEADING_STYLE}>Manage your coins & transactions</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">

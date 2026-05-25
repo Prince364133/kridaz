@@ -29,6 +29,8 @@ import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { handlePayment, createOrder } from "@infrastructure/razorpay";
 
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
+
 // Helper: parse "01:00 PM" slot time + date into ISO string
 const buildDateTime = (dateStr, timeStr, addHrs = 0) => {
   const base = new Date(dateStr);
@@ -229,7 +231,7 @@ const CheckoutPage = () => {
           </div>
           
           <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-4 font-open-sans">Slot Secured!</h2>
-          <p className="text-zinc-400 font-bold uppercase text-[20px] tracking-widest mb-10 font-inter">Your booking at {turfName} is confirmed.</p>
+          <p className="text-zinc-400 uppercase text-[20px] tracking-widest mb-10" style={SUBHEADING_STYLE}>Your booking at {turfName} is confirmed.</p>
           
           <div className="grid grid-cols-1 gap-4">
             <Link 
@@ -362,7 +364,7 @@ const CheckoutPage = () => {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-xl font-bold text-zinc-300 uppercase tracking-wide font-open-sans">Select Payment Plan</h3>
-                  <p className="text-xs text-zinc-500 mt-1 font-medium font-inter">Flexible advance options available</p>
+                  <p className="text-xs text-zinc-500 mt-1" style={SUBHEADING_STYLE}>Flexible advance options available</p>
                 </div>
                 <div className="bg-[#BFF367]/10 px-2 py-1 rounded-[6px] flex items-center gap-1.5 border border-[#BFF367]/20">
                   <Zap size={12} style={{ stroke: 'url(#theme-gradient)', fill: 'url(#theme-gradient)' }} />
@@ -411,7 +413,7 @@ const CheckoutPage = () => {
             <div className="bg-[#121212] border border-zinc-800 rounded-[8px] p-6">
               <div className="mb-6">
                 <h3 className="text-xl font-bold text-zinc-300 uppercase tracking-wide font-open-sans">Payment Mode</h3>
-                <p className="text-xs text-zinc-500 mt-1.5 font-medium font-inter">Choose your preferred payment option</p>
+                <p className="text-xs text-zinc-500 mt-1.5" style={SUBHEADING_STYLE}>Choose your preferred payment option</p>
               </div>
 
               <div className="space-y-3">

@@ -509,3 +509,8 @@ body {
 .datepicker-dark .react-datepicker__time-list::-webkit-scrollbar-thumb {
   background: #333 !important;
 }
+
+.force-overflow-visible {
+  overflow: visible !important;
+}
+

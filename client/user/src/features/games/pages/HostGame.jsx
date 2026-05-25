@@ -16,6 +16,8 @@ import { useGetMyTeamsQuery } from '@redux/api/teamApi';
 import CoinAnimation from '@components/CoinAnimation';
 import { fetchStates, fetchCities } from '@utils/locationService';
 
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
+
 const MOCK_TEAM_IMAGES = [
   { label: "Stadium Night",  url: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&q=80" },
   { label: "Football Arena", url: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80" },
@@ -573,7 +575,7 @@ const HostGame = () => {
         <div className="hidden sm:flex items-center justify-between mb-4 gap-4">
           <div className="min-w-0 flex-1">
             <h1 className="text-[24px] sm:text-3xl xl:text-4xl 2xl:text-5xl font-black mb-1 sm:mb-2 tracking-tight font-open-sans normal-case truncate">Host a Match</h1>
-            <p className="text-xs sm:text-[20px] text-neutral-500 font-medium font-inter truncate sm:truncate-none sm:whitespace-normal whitespace-nowrap">Create a game and find players in your area</p>
+            <p className="text-xs sm:text-[20px] text-neutral-500 truncate sm:truncate-none sm:whitespace-normal whitespace-nowrap" style={SUBHEADING_STYLE}>Create a game and find players in your area</p>
           </div>
           <div className="hidden md:flex gap-2 shrink-0">
             {[1, 2, 3, 4, 5].map(s => (

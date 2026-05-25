@@ -17,7 +17,7 @@ const NotificationBadge = () => {
   const { unreadCount } = useNotifications();
   if (unreadCount <= 0) return null;
   return (
-    <span className="absolute right-3 top-1/2 -translate-y-1/2 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full flex items-center justify-center text-[9px] font-black text-white border border-[#0A0A0A]">
+    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-[8px] flex items-center justify-center text-[9px] font-black text-white border-2 border-[#050505]">
       {unreadCount > 9 ? "9+" : unreadCount}
     </span>
   );
@@ -105,17 +105,14 @@ const Navbar = () => {
   // Removed dedicated BOOKINGS link
 
   return (
-    <nav className={`sticky top-0 z-[100] flex flex-col transition-transform duration-500 ${ scrollDirection === "down" ? "-translate-y-full" : "translate-y-0" }`}>
-
-      <div className={`flex justify-center transition-all duration-500 ${isScrolled ? "pt-0" : "pt-0"}`}>
-        <div
-          className={`relative w-full max-w-full h-16 sm:h-20 border-b border-white/10 flex items-center justify-between px-6 sm:px-12 transition-all duration-500 ${isScrolled ? "bg-black/90 backdrop-blur-2xl" : "bg-black/40 backdrop-blur-xl"}`}
-          style={{
-            boxShadow: isScrolled ? "0 20px 40px rgba(0, 0, 0, 0.4)" : "none"
-          }}
-        >
+    <nav className={`sticky top-0 lg:fixed lg:top-0 lg:left-0 z-[90] flex flex-col transition-transform duration-500 
+      ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full" : "translate-y-0" }
+      lg:transform-none lg:h-screen lg:w-64 lg:border-r lg:border-white/10 bg-black/40 lg:bg-[#050505] backdrop-blur-xl lg:backdrop-blur-none
+    `}>
+      <div className={`flex justify-center transition-all duration-500 lg:h-full`}>
+        <div className={`relative w-full max-w-full h-16 sm:h-20 lg:h-auto border-b border-white/10 lg:border-none flex items-center lg:items-start lg:flex-col justify-between lg:justify-start px-6 sm:px-12 lg:px-6 lg:pt-8 transition-all duration-500`}>
           {/* Logo & Mobile Location Section */}
-          <div className="flex flex-col items-start justify-center">
+          <div className="flex flex-col items-start justify-center lg:mb-8">
             <Link to="/" className="group flex items-center justify-center">
               <img src="/logo.png" alt="Kridaz" className="h-8 lg:h-10 w-auto brightness-125 group-hover:scale-105 transition-transform duration-500" />
             </Link>
@@ -142,19 +139,18 @@ const Navbar = () => {
           </div>
 
           {/* DESKTOP LINKS */}
-          <div className="hidden lg:flex items-center gap-10">
+          <div className="hidden lg:flex lg:flex-col lg:items-start gap-2 lg:w-full">
             {navLinks.map((link) => {
               if (link.name === "Business") {
                 return (
-                  <div key={link.name} className="dropdown dropdown-hover group/link">
+                  <div key={link.name} className="dropdown dropdown-hover group/link w-full">
                     <label
                       tabIndex={0}
-                      className={`text-sm font-semibold transition-all hover:text-primary relative flex items-center gap-1 cursor-pointer ${location.pathname.startsWith("/partners") ? "text-primary" : "text-white/60" }`}
+                      className={`flex w-full px-4 py-3 rounded-xl text-base font-bold items-center gap-1 cursor-pointer transition-all ${location.pathname.startsWith("/partners") ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(85,222,232,0.1)]" : "text-white/60 hover:bg-white/5 hover:text-white border border-transparent"}`}
                     >
                       {link.name}
-                      <span className={`absolute -bottom-2 left-0 h-[2px] bg-primary transition-all duration-300 ${location.pathname.startsWith("/partners") ? "w-full" : "w-0 group-hover/link:w-full"}`} />
                     </label>
-                    <ul tabIndex={0} className="dropdown-content z-[100] mt-4 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl">
+                    <ul tabIndex={0} className="dropdown-content z-[100] mt-1 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl">
                       <li>
                         <Link to="/business/venue" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
                           Venue Owner
@@ -174,17 +170,16 @@ const Navbar = () => {
                   key={link.name}
                   to={link.path}
                   onMouseEnter={() => {}}
-                  className={`text-sm font-semibold transition-all hover:text-primary relative group/link ${location.pathname === link.path ? "text-primary" : "text-white/60" }`}
+                  className={`block w-full px-4 py-3 rounded-xl text-base font-bold transition-all ${location.pathname === link.path ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(85,222,232,0.1)]" : "text-white/60 hover:bg-white/5 hover:text-white border border-transparent"}`}
                 >
                   {link.name}
-                  <span className={`absolute -bottom-2 left-0 h-[2px] bg-primary transition-all duration-300 ${location.pathname === link.path ? "w-full" : "w-0 group-hover/link:w-full"}`} />
                 </Link>
               );
             })}
           </div>
 
           {/* ACTIONS */}
-          <div className="flex items-center gap-3 sm:gap-6">
+          <div className="flex items-center gap-3 sm:gap-6 lg:fixed lg:top-4 lg:right-6 lg:z-[100]">
             {!isLoggedIn ? (
               <>
                 <Link
@@ -201,6 +196,18 @@ const Navbar = () => {
               </>
             ) : (
               <div className="flex items-center gap-2 sm:gap-4">
+
+                {/* Notification Bell */}
+                <Link
+                  to="/notifications"
+                  className="relative w-10 sm:w-11 h-10 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
+                >
+                  <Bell size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+                  <NotificationBadge />
+                </Link>
+
+
+
                 <div className="flex items-center gap-2">
 
 
@@ -311,15 +318,6 @@ const Navbar = () => {
                           )}
 
                         {/* ACCOUNT SECTION */}
-                        <Link
-                          to="/notifications"
-                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all relative"
-                        >
-                          <Bell size={18} className="text-white/40" />
-                          <span className="text-sm font-medium">Notifications</span>
-                          <NotificationBadge />
-                        </Link>
-
                         <Link
                           to="/messages"
                           className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"

@@ -54,15 +54,24 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
     <div className="w-full md:w-80 h-full border-r border-white/10 bg-black/20 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="p-5 border-b border-white/10 bg-black/40">
-        <div className="mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+            <h2 className="text-xl font-bold text-white tracking-tight uppercase" style={{ fontFamily: "'Open Sans', sans-serif" }}>
               {activeTab === 'myTeams' ? 'My Teams' : activeTab === 'opponentTeams' ? 'Opponents' : 'My Matches'}
             </h2>
             <p className="text-xs text-white/40 font-medium tracking-wide mt-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>
               {activeTab === 'myTeams' ? 'Manage your squads' : activeTab === 'opponentTeams' ? 'Rival discovery' : 'Manage your scoring matches'}
             </p>
           </div>
+          {activeTab !== 'scoringMatches' && (
+            <button 
+              onClick={activeTab === 'myTeams' ? onCreateTeam : () => setIsAddOpponentOpen(true)}
+              className="w-8 h-8 flex items-center justify-center bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 hover:scale-105 transition-all duration-300 shrink-0"
+              title={activeTab === 'myTeams' ? 'Create Team' : 'Add Opponent'}
+            >
+              <Plus size={18} strokeWidth={3} />
+            </button>
+          )}
         </div>
 
         {/* Start Scoring Button */}
@@ -77,9 +86,9 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
           </button>
         </div>
 
-        {/* Search and Action Button */}
-        <div className="flex items-center gap-2 mb-4">
-          <div className="relative flex-1">
+        {/* Search */}
+        <div className="mb-4">
+          <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm" />
             <input 
               type="text" 
@@ -90,17 +99,6 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          {activeTab !== 'scoringMatches' && (
-            <button 
-              onClick={activeTab === 'myTeams' ? onCreateTeam : () => setIsAddOpponentOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black rounded-[12px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-300 shrink-0"
-            >
-              <Plus size={14} />
-              <span className="uppercase tracking-wider" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {activeTab === 'myTeams' ? 'Create Team' : 'Add Opponent'}
-              </span>
-            </button>
-          )}
         </div>
 
         {/* Tabs */}

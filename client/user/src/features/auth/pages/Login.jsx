@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { FormField } from "@components/common";
 
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
+
 const Login = () => {
   const navigate = useNavigate();
   const { 
@@ -75,7 +77,7 @@ const Login = () => {
             <div className="flex flex-col items-center justify-center text-center mb-10">
                <div className="space-y-2">
                  <h2 className="text-3xl font-bold text-white">Login</h2>
-                 <p className="text-sm text-white/60">Welcome back, please enter your details</p>
+                 <p className="text-sm text-white/60" style={SUBHEADING_STYLE}>Welcome back, please enter your details</p>
                </div>
             </div>
 

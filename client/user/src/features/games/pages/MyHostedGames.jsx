@@ -11,6 +11,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import HireOfficialModal from '@components/official/HireOfficialModal';
 import SelectVenueModal from '@components/official/SelectVenueModal';
 
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
+
 const isWithinTwoHours = (gameDate, gameTime) => {
   if (!gameDate || !gameTime) return false;
   const matchDateTime = new Date(gameDate);
@@ -135,7 +137,7 @@ const MyHostedGames = () => {
     <div className="min-h-screen bg-neutral-900 text-white p-4 pb-24">
       <div className="max-w-4xl mx-auto mb-8">
         <h1 className="text-3xl font-black tracking-tighter font-open-sans text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mb-2 uppercase">MY HOSTED GAMES</h1>
-        <p className="text-neutral-400 font-inter text-[20px]">Manage your matches and approve players</p>
+        <p className="text-neutral-400 text-[20px]" style={SUBHEADING_STYLE}>Manage your matches and approve players</p>
       </div>
 
       <div className="max-w-4xl mx-auto mb-6 flex flex-col md:flex-row gap-4">
@@ -170,7 +172,7 @@ const MyHostedGames = () => {
             <h3 className="text-2xl md:text-3xl font-black tracking-tighter font-open-sans text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mb-2 uppercase">
               {myGames.length === 0 ? "No games hosted yet" : "No matches found"}
             </h3>
-            <p className="text-neutral-500 mb-6 font-inter text-[20px]">
+            <p className="text-neutral-500 mb-6 text-[20px]" style={SUBHEADING_STYLE}>
               {myGames.length === 0 ? "Start hosting and build your community!" : "Try adjusting your search filters"}
             </p>
             {myGames.length === 0 && (

@@ -64,7 +64,7 @@ export default function VenueOwnerLanding() {
           {/* Paragraph (Subheading) */}
           <p 
             className="text-gray-300 leading-relaxed mb-8 max-w-2xl"
-            style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}
+            style={{ fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300, fontSize: "20px" }}
           >
             Kridaz helps you automate bookings, manage operations, and connect with thousands of players looking for venues like yours.
           </p>

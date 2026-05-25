@@ -13,7 +13,7 @@ export default function ProtectedLayout() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow pt-20 sm:pt-24">
+      <main className="flex-grow pt-20 sm:pt-24 lg:ml-64">
         <Outlet />
       </main>
       <UserFooter />

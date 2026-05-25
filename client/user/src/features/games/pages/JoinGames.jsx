@@ -15,6 +15,8 @@ import { fetchStates, fetchCities } from '@utils/locationService';
 import CoinAnimation from '@components/CoinAnimation';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
+
 
 // Custom cricket ball SVG icon for Bowler role
 const CricketBallIcon = ({ size = 12, className = '' }) => (
@@ -276,7 +278,6 @@ const JoinGames = () => {
   {/* Header Section */}
   <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-10 border-b border-[#2D2D2D] pb-10 mb-12">
   <div className="relative w-full lg:w-auto">
-  <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-full shadow-[0_0_25px_rgba(85,222,232,0.4)] hidden md:block"></div>
   <div className="flex items-center justify-between lg:justify-start gap-4 mb-4 w-full">
     <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
     Join <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent">Games</span>
@@ -288,7 +289,7 @@ const JoinGames = () => {
     <Trophy size={14} /> Host Match
     </button>
   </div>
-  <p className="text-sm md:text-xl font-medium text-[#999999] tracking-tight max-w-xl">
+  <p className="text-sm md:text-xl text-[#999999] tracking-tight max-w-xl" style={SUBHEADING_STYLE}>
   Competitive Matchmaking • Discover & participate in matches hosted by the elite sports community.
   </p>
   </div>
