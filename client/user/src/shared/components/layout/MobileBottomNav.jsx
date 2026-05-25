@@ -21,8 +21,8 @@ const MobileBottomNav = () => {
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Venues", path: "/venues", icon: Search },
-    { name: "Profiles", path: "/players", icon: UserSearch },
     { name: "Pros", path: "/professionals", icon: Trophy },
+    { name: "Players", path: "/players", icon: UserSearch },
     { name: "My Teams", path: "/my-teams", icon: Users, protected: true },
   ];
 

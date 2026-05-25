@@ -131,118 +131,133 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
 };
 
 const TeamCard = ({ team, navigate }) => {
+  const sportBanners = {
+    Cricket: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2067&auto=format&fit=crop',
+    Football: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2076&auto=format&fit=crop',
+    Basketball: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=2090&auto=format&fit=crop',
+    default: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=2070&auto=format&fit=crop',
+  };
+  const banner = sportBanners[team.sportType] || sportBanners.default;
+
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-[#0A0A0A] rounded-[8px] border border-white/5 overflow-hidden flex flex-col h-[380px] group hover:border-[#55DEE8]/30 transition-all duration-500 shadow-2xl"
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      onClick={() => navigate(`/team/${team._id}`)}
+      className="relative bg-[#0D0D0D] rounded-2xl border border-white/[0.07] overflow-hidden flex flex-col cursor-pointer group"
+      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}
     >
-      {/* Top Section: Banner */}
-      <div className="h-32 relative">
-        <img 
-          src={team.sportType === 'Cricket' ? 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2067&auto=format&fit=crop' : 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2076&auto=format&fit=crop'} 
-          alt="" 
-          className="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700"
+      {/* ── Banner ── */}
+      <div className="h-28 relative overflow-hidden">
+        <img
+          src={banner}
+          alt=""
+          className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700 grayscale-[40%] group-hover:grayscale-0"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
-        
-        {/* Verified Badge */}
-        <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1.5 rounded-[6px] border border-white/10">
-          <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center" style={{ background: GRAD }}>
-            <ShieldCheck size={10} className="text-black" />
-          </div>
-          <span className="text-[8px] font-black text-white uppercase tracking-widest">Verified</span>
+        {/* deep gradient so content below is legible */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/60 to-transparent" />
+
+        {/* Verified pill – top-right */}
+        <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full border border-white/10">
+          <ShieldCheck size={9} className="text-[#55DEE8]" />
+          <span className="text-[7px] font-black uppercase tracking-widest text-white/80">Verified</span>
         </div>
 
-        {/* Team Avatar Overlay */}
-        <div className="absolute bottom-[-16px] left-4 z-10">
-          <div className="w-14 h-14 rounded-full border-[2px] border-[#0A0A0A] bg-[#0A0A0A] relative overflow-hidden group/avatar">
-            <div className="absolute inset-0 border-2 border-[#55DEE8] rounded-full z-20" />
-            <div className="w-full h-full flex items-center justify-center bg-[#111] relative z-10">
-              {team.logo ? (
-                <img src={team.logo} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <div className="flex flex-col items-center text-[#55DEE8]">
-                  <Crown size={24} className="mb-1" />
-                  <div className="w-10 h-10 border-2 border-[#55DEE8] rounded-full flex items-center justify-center p-1">
-                     {team.sportType === 'Cricket' ? <Trophy size={16} /> : <Activity size={16} />}
-                  </div>
-                </div>
-              )}
-            </div>
-            {/* Status Indicator */}
-            <div className="absolute bottom-2 right-2 w-4 h-4 bg-[#55DEE8] rounded-full border-[3px] border-[#0A0A0A] z-30" />
-          </div>
+        {/* Sport chip – top-left */}
+        <div
+          className="absolute top-3 left-3 px-2 py-1 rounded-full text-[7px] font-black uppercase tracking-widest text-black"
+          style={{ background: GRAD }}
+        >
+          {team.sportType || 'Sport'}
         </div>
       </div>
 
-      {/* Middle Section: Details */}
-      <div className="flex-1 pt-6 px-4 pb-2 flex flex-col">
-        <div className="flex justify-between items-start mb-1">
-          <div>
-            <h3 className="text-base font-black text-white uppercase tracking-tighter mb-0.5" style={HEADING_STYLE}>{team.name}</h3>
-            <div className="flex items-center gap-2">
-              <span className="text-[#55DEE8] font-black text-[8px] uppercase tracking-widest flex items-center gap-1.5">
-                {team.sportType === 'Cricket' ? <Trophy size={10} /> : <Activity size={10} />}
-                {team.sportType}
+      {/* ── Avatar row ── */}
+      <div className="relative px-4 -mt-6 flex items-end mb-3">
+        {/* Avatar */}
+        <div className="relative">
+          <div
+            className="w-12 h-12 rounded-xl border-2 border-[#0D0D0D] overflow-hidden bg-[#111] flex items-center justify-center"
+            style={{ boxShadow: '0 0 0 2px #55DEE8, 0 0 16px rgba(85,222,232,0.35)' }}
+          >
+            {team.logo ? (
+              <img src={team.logo} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-[#55DEE8] font-black text-lg leading-none">
+                {team.name?.charAt(0).toUpperCase()}
               </span>
-            </div>
-            <p className="text-gray-600 text-[8px] font-bold uppercase tracking-widest mt-0.5">@ {team.city || 'Global'}</p>
+            )}
           </div>
-          <div className="p-2 bg-white/5 rounded-[8px] border border-white/10 text-white/40 hover:text-[#55DEE8] transition-colors">
-            <Star size={16} />
-          </div>
+          {/* Online dot */}
+          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#BFF367] rounded-full border-2 border-[#0D0D0D]" />
+        </div>
+      </div>
+
+      {/* ── Body ── */}
+      <div className="flex-1 px-4 pb-4 flex flex-col gap-3">
+
+        {/* Name + Location */}
+        <div>
+          <h3
+            className="text-sm font-black text-white uppercase tracking-tight leading-tight line-clamp-1"
+            style={HEADING_STYLE}
+          >
+            {team.name}
+          </h3>
+          <p className="text-[9px] font-semibold text-white/30 mt-0.5 flex items-center gap-1">
+            <MapPin size={8} className="text-[#55DEE8]" />
+            {team.city || 'Global'}
+          </p>
         </div>
 
-        {/* Stats Section */}
-        <div className="grid grid-cols-2 gap-2 py-3 border-y border-white/5 mb-3">
-          <div className="flex items-center gap-2">
-             <div className="p-2 bg-white/5 rounded-[8px] border border-white/10">
-                <Users size={14} className="text-[#55DEE8]" />
-             </div>
-             <div>
-                <p className="text-sm font-black text-white leading-none mb-0.5">{team.memberCount || 1}</p>
-                <p className="text-[6px] text-gray-500 font-black uppercase tracking-widest">Members</p>
-             </div>
-          </div>
-          <div className="flex items-center gap-2">
-             <div className="p-2 bg-white/5 rounded-[8px] border border-white/10">
-                <Target size={14} className="text-[#55DEE8]" />
-             </div>
-             <div>
-                <p className="text-sm font-black text-white leading-none mb-0.5">{team.matchesPlayed || 0}</p>
-                <p className="text-[6px] text-gray-500 font-black uppercase tracking-widest">Matches</p>
-             </div>
-          </div>
+        {/* Stats inline row */}
+        <div className="flex items-center gap-2 text-[10px] font-bold text-white/40">
+          <Users size={10} className="text-[#55DEE8] shrink-0" />
+          <span><span className="text-white font-black">{team.memberCount || 1}</span> Members</span>
+          <span className="text-white/15">·</span>
+          <Target size={10} className="text-[#55DEE8] shrink-0" />
+          <span><span className="text-white font-black">{team.matchesPlayed || 0}</span> Matches</span>
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-           <Link 
-              to={`/team/${team._id}`}
-              className="h-12 text-black rounded-[8px] font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.2)]"
-              style={{ background: GRAD }}
-           >
-              <UserPlus size={14} strokeWidth={3} />
-              Join Team
-           </Link>
-           <Link 
-              to={`/team/${team._id}`}
-              className="h-12 bg-transparent border-2 border-white/10 text-white rounded-[8px] font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
-           >
-              <Swords size={14} />
-              Challenge
-           </Link>
+        <div className="grid grid-cols-2 gap-2 mt-auto">
+          <Link
+            to={`/team/${team._id}`}
+            onClick={e => e.stopPropagation()}
+            className="h-9 text-black rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+            style={{ background: GRAD, boxShadow: '0 4px 14px rgba(85,222,232,0.25)' }}
+          >
+            <UserPlus size={12} strokeWidth={3} />
+            Join
+          </Link>
+          <Link
+            to={`/team/${team._id}`}
+            onClick={e => e.stopPropagation()}
+            className="h-9 bg-white/[0.04] border border-white/10 text-white/70 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-1.5 hover:bg-white/10 hover:text-white transition-all active:scale-95"
+          >
+            <Swords size={12} />
+            Challenge
+          </Link>
         </div>
 
-        <Link 
+        {/* Team Pass link */}
+        <Link
           to={`/team-pass/${team._id}`}
-          className="mt-3 flex items-center justify-center gap-2 text-gray-600 hover:text-[#55DEE8] text-[9px] font-black uppercase tracking-[0.2em] transition-all"
+          onClick={e => e.stopPropagation()}
+          className="flex items-center justify-center gap-1 text-white/20 hover:text-[#55DEE8] text-[8px] font-black uppercase tracking-[0.2em] transition-all group/pass"
         >
-          View Team Pass <ChevronRight size={12} />
+          <span>View Team Pass</span>
+          <ChevronRight size={10} className="group-hover/pass:translate-x-0.5 transition-transform" />
         </Link>
       </div>
+
+      {/* Subtle glow border on hover */}
+      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{ boxShadow: 'inset 0 0 0 1px rgba(85,222,232,0.2)' }}
+      />
     </motion.div>
   );
 };
@@ -437,14 +452,16 @@ const FindPlayers = () => {
   }, [isTrackingActive, isLocationSharing, socket, activeTab]);
 
   useEffect(() => {
-    if (snapState !== 'COLLAPSED') {
+    if (activeTab === 'players' && snapState !== 'COLLAPSED') {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (activeTab === 'players' && snapState === 'COLLAPSED') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
     return () => { document.body.style.overflow = 'unset'; };
-  }, [snapState]);
+  }, [snapState, activeTab]);
 
   const toggleLocationSharing = async () => {
     const newState = !isLocationSharing;
@@ -725,14 +742,18 @@ const FindPlayers = () => {
   };
 
   const handleDragEnd = (_, info) => {
-    const threshold = 50;
-    const velocity = info.velocity.y;
-    const currentHeight = SNAP_STATES[snapState];
-    
-    if (velocity > threshold) {
+    const velocityThreshold = 30;
+    const offsetThreshold = 40;
+    const vy = info.velocity.y;
+    const dy = info.offset.y;
+
+    // Drag UP (negative y) → close/collapse map
+    if (vy < -velocityThreshold || dy < -offsetThreshold) {
       if (snapState === "EXPANDED") setSnapState("HALF");
       else if (snapState === "HALF") setSnapState("COLLAPSED");
-    } else if (velocity < -threshold) {
+    }
+    // Drag DOWN (positive y) → open/expand map
+    else if (vy > velocityThreshold || dy > offsetThreshold) {
       if (snapState === "COLLAPSED") setSnapState("HALF");
       else if (snapState === "HALF") setSnapState("EXPANDED");
     }
@@ -746,7 +767,11 @@ const FindPlayers = () => {
           <motion.div 
             animate={{ height: `${SNAP_STATES[snapState]}vh` }}
             transition={{ type: "spring", damping: 25, stiffness: 150 }}
-            className="relative w-full bg-[#0a0a0a] border-b border-[#55DEE8]/30 overflow-hidden lg:hidden"
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.1}
+            onDragEnd={handleDragEnd}
+            className="relative w-full bg-[#0a0a0a] border-b border-[#55DEE8]/30 overflow-hidden lg:hidden cursor-grab active:cursor-grabbing"
           >
             <AnimatePresence>
               {snapState !== "COLLAPSED" && (
@@ -1039,7 +1064,7 @@ const FindPlayers = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
               {teams.length > 0 ? (
                 teams.map((team) => (
                   <TeamCard key={team._id} team={team} navigate={navigate} />

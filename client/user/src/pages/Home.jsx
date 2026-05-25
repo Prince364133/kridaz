@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import useTurfData from "../features/turf/hooks/useTurfData";
@@ -14,6 +14,8 @@ import SearchTurf from "../shared/components/search/SearchTurf";
 import InterestsModal from "../shared/components/modals/InterestsModal";
 import { updateUser } from "@redux/slices/authSlice";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import Community from "../features/networking/pages/Community";
+import { useGetReelsFeedQuery } from "@redux/api/reelsApi";
 
 const PRI = "#55DEE8";
 const GRAD = "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)";
@@ -76,7 +78,13 @@ export default function Home() {
  const navigate = useNavigate();
  const { isLoggedIn, role, user } = useSelector((state) => state.auth);
  const { gateInteraction } = useLoginOnDemand();
+ const [searchParams] = useSearchParams();
+ const isReelsView = searchParams.get("tab") === "shots";
+ const [isCommunitySearchActive, setIsCommunitySearchActive] = useState(false);
+ const shouldHideRest = isReelsView || isCommunitySearchActive;
  const [showInterests, setShowInterests] = useState(false);
+ const { data: reelsData } = useGetReelsFeedQuery();
+ const reelsFeed = reelsData?.reels?.slice(0, 10) || [];
  const [activeTab, setActiveTab] = useState("venues");
  const [players, setPlayers] = useState([]);
  const [followingIds, setFollowingIds] = useState([]);
@@ -349,113 +357,18 @@ export default function Home() {
  };
 
  return (
- <div className="min-h-screen text-white" style={{ backgroundColor: "#000" }}>
+ <div className={`min-h-screen text-white ${isReelsView ? 'h-[100dvh] overflow-hidden' : ''}`} style={{ backgroundColor: "#000" }}>
   {/* ── REDESIGNED DASHBOARD HERO ── */}
-  <section className="pt-3 sm:pt-5 pb-4 px-4 md:px-8 max-w-5xl mx-auto w-full">
-    {/* Stories Row */}
-    <div className="flex gap-5 md:gap-8 overflow-x-auto no-scrollbar py-4 px-2 items-center justify-center">
-      {/* Your Story */}
-      <div 
-        onClick={() => navigate("/community")}
-        className="flex flex-col items-center gap-2 cursor-pointer group flex-shrink-0"
-      >
-        <div className="relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full p-[2px] bg-white/10 hover:scale-105 transition-transform duration-300">
-          <div className="w-full h-full rounded-full bg-[#FCECDD] flex items-center justify-center overflow-hidden border border-black p-2.5">
-            <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="5" y="3" width="14" height="18" rx="2" fill="white" stroke="#EEDBC5" strokeWidth="1" />
-              <circle cx="12" cy="9" r="2.5" fill="#EEDBC5" />
-              <rect x="8" y="14" width="8" height="2" rx="1" fill="#EEDBC5" />
-            </svg>
-          </div>
-          {/* Plus Badge */}
-          <div className="absolute bottom-0 right-0 w-6 h-6 bg-[#00E676] rounded-full border-2 border-[#000] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-            <Plus size={14} strokeWidth={4} className="text-black" />
-          </div>
-        </div>
-        <span className="text-[11px] sm:text-xs font-semibold text-white/70 group-hover:text-white transition-colors tracking-wide">
-          Your Story
-        </span>
-      </div>
+  <section className={`px-4 md:px-8 max-w-5xl mx-auto w-full ${isReelsView ? 'pt-0 pb-0' : 'pt-1 sm:pt-2 pb-4'}`}>
 
-      {/* Cricket */}
-      <div 
-        onClick={() => navigate("/venues?sport=Cricket")}
-        className="flex flex-col items-center gap-2 cursor-pointer group flex-shrink-0"
-      >
-        <div className="relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full p-[2px] bg-gradient-to-tr from-[#55DEE8] to-[#BFF367] hover:scale-105 transition-transform duration-300">
-          <div className="w-full h-full rounded-full bg-black overflow-hidden border border-black p-[2px]">
-            <img 
-              src="https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=150&h=150&fit=crop&q=80" 
-              alt="Cricket" 
-              className="w-full h-full rounded-full object-cover group-hover:scale-110 transition-transform duration-500" 
-            />
-          </div>
-        </div>
-        <span className="text-[11px] sm:text-xs font-semibold text-white/70 group-hover:text-white transition-colors tracking-wide">
-          Cricket
-        </span>
-      </div>
 
-      {/* Football */}
-      <div 
-        onClick={() => navigate("/venues?sport=Football")}
-        className="flex flex-col items-center gap-2 cursor-pointer group flex-shrink-0"
-      >
-        <div className="relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full p-[2px] bg-gradient-to-tr from-[#55DEE8] to-[#BFF367] hover:scale-105 transition-transform duration-300">
-          <div className="w-full h-full rounded-full bg-black overflow-hidden border border-black p-[2px]">
-            <img 
-              src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=150&h=150&fit=crop&q=80" 
-              alt="Football" 
-              className="w-full h-full rounded-full object-cover group-hover:scale-110 transition-transform duration-500" 
-            />
-          </div>
-        </div>
-        <span className="text-[11px] sm:text-xs font-semibold text-white/70 group-hover:text-white transition-colors tracking-wide">
-          Football
-        </span>
-      </div>
 
-      {/* Badminton */}
-      <div 
-        onClick={() => navigate("/venues?sport=Badminton")}
-        className="flex flex-col items-center gap-2 cursor-pointer group flex-shrink-0"
-      >
-        <div className="relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full p-[2px] bg-gradient-to-tr from-[#55DEE8] to-[#BFF367] hover:scale-105 transition-transform duration-300">
-          <div className="w-full h-full rounded-full bg-black overflow-hidden border border-black p-[2px]">
-            <img 
-              src="https://images.unsplash.com/photo-1613243555988-441166d4d6fd?w=150&h=150&fit=crop&q=80" 
-              alt="Badminton" 
-              className="w-full h-full rounded-full object-cover group-hover:scale-110 transition-transform duration-500" 
-            />
-          </div>
-        </div>
-        <span className="text-[11px] sm:text-xs font-semibold text-white/70 group-hover:text-white transition-colors tracking-wide">
-          Badminton
-        </span>
-      </div>
 
-      {/* Tennis */}
-      <div 
-        onClick={() => navigate("/venues?sport=Tennis")}
-        className="flex flex-col items-center gap-2 cursor-pointer group flex-shrink-0"
-      >
-        <div className="relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full p-[2px] bg-gradient-to-tr from-[#55DEE8] to-[#BFF367] hover:scale-105 transition-transform duration-300">
-          <div className="w-full h-full rounded-full bg-black overflow-hidden border border-black p-[2px]">
-            <img 
-              src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=150&h=150&fit=crop&q=80" 
-              alt="Tennis" 
-              className="w-full h-full rounded-full object-cover group-hover:scale-110 transition-transform duration-500" 
-            />
-          </div>
-        </div>
-        <span className="text-[11px] sm:text-xs font-semibold text-white/70 group-hover:text-white transition-colors tracking-wide">
-          Tennis
-        </span>
-      </div>
-    </div>
-
-    {/* Dashboard Buttons Grid */}
-    <div className="grid grid-cols-2 gap-3 mt-6 max-w-[390px] mx-auto w-full">
+    {/* Community Feed Added Below Stores Section */}
+    <div className={`${isReelsView ? 'mt-0 mb-0' : 'mt-2 mb-2'} -mx-4 md:-mx-8`}>
+      <Community onSearchActive={setIsCommunitySearchActive}>
+        {/* Dashboard Buttons Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 w-full">
       {/* Leaderboard */}
       <Link 
         to="/leaderboard"
@@ -535,17 +448,10 @@ export default function Home() {
           className="absolute -right-2 -top-[16px] w-[94px] h-[94px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10" 
         />
       </div>
-    </div>
-  </section>
+        </div>
 
-
-
-
-
-
-
- {/* ── FIND YOUR ARENA ── */}
- <section className="py-6 lg:py-12 px-4 lg:px-12 w-full">
+  {/* ── FIND YOUR ARENA ── */}
+  <section className="py-6 mb-6 w-full">
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
  <div className="relative">
  <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
@@ -564,13 +470,13 @@ export default function Home() {
  </div>
  </div>
 
- {/* Venue grid — 5 per row, 2 rows max, sorted by highest rating */}
- {loading || turfLoading ? (
- <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
- {[...Array(10)].map((_, i) => (
- <div key={i} className="rounded-[8px] border animate-pulse" style={{ height: 260, backgroundColor: "#111", borderColor: BDR }} />
- ))}
- </div>
+ {/* Venue grid — 4 per row, 2 rows max, sorted by highest rating */}
+  {loading || turfLoading ? (
+  <div className="grid grid-rows-2 grid-flow-col gap-3 overflow-x-auto no-scrollbar pb-2 md:grid-rows-none md:grid-flow-row md:grid-cols-3 md:overflow-visible">
+  {[...Array(6)].map((_, i) => (
+  <div key={i} className="w-[42vw] sm:w-[200px] md:w-auto shrink-0 rounded-[8px] border animate-pulse" style={{ height: 260, backgroundColor: "#111", borderColor: BDR }} />
+  ))}
+  </div>
  ) : (error || (turfs || []).length === 0) ? (
  <div className="text-center py-24 animate-fadeIn">
  <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -580,25 +486,26 @@ export default function Home() {
  <p className="text-gray-500 text-sm uppercase tracking-wider mb-8">Try adjusting your search or filters</p>
  <button
  onClick={() => setTurfFilters({ searchTerm: "", city: "", state: "" })}
- className="px-8 py-3 text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-[8px] hover:scale-105 transition-all shadow-[0_0_20px_rgba(85,222,232,0.2)]" style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}
+ className="px-8 py-3 text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-[8px] hover:scale-105 transition-all shadow-[0_0_20px_rgba(85,222,e32,0.2)]" style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}
  >
  View All Venues
  </button>
  </div>
- ) : (
- <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
- {[...(turfs || [])]
- .sort((a, b) => (b.averageRating ?? b.rating ?? 0) - (a.averageRating ?? a.rating ?? 0))
- .slice(0, 10)
- .map((t) => (
- <TurfCard 
- key={t._id} 
- turf={t} 
- distance={t.distance ? `${t.distance} km` : "1.2 km"}
- />
- ))}
- </div>
- )}
+  ) : (
+  <div className="grid grid-rows-2 grid-flow-col gap-3 overflow-x-auto no-scrollbar pb-2 md:grid-rows-none md:grid-flow-row md:grid-cols-3 md:overflow-visible">
+  {[...(turfs || [])]
+  .sort((a, b) => (b.averageRating ?? b.rating ?? 0) - (a.averageRating ?? a.rating ?? 0))
+  .slice(0, 10)
+  .map((t) => (
+  <div key={t._id} className="w-[42vw] sm:w-[200px] md:w-auto shrink-0">
+    <TurfCard 
+    turf={t} 
+    distance={t.distance ? `${t.distance} km` : "1.2 km"}
+    />
+  </div>
+  ))}
+  </div>
+  )}
 
  <div className="text-center mt-6 lg:mt-10">
  <Link to="/venues" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-[6px] border transition-all hover:border-[#55DEE8] hover:text-[#55DEE8]"
@@ -609,7 +516,7 @@ export default function Home() {
  </section>
 
  {/* ── FIND PLAYERS NEAR YOU ── */}
- <section className="py-6 lg:py-12 px-4 lg:px-12" style={{ backgroundColor: "#0A0A0A" }}>
+ <section className="py-6 mb-6 w-full">
  <div className="w-full">
  {/* Refined Section Header */}
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-8">
@@ -645,6 +552,11 @@ export default function Home() {
  {players.slice(0, 10).map(p => {
  const initials = p.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "??";
  const isFollowing = followingIds.includes(p.id || p._id);
+ const formatLoc = (loc) => {
+   if (!loc) return "Nearby Player";
+   const pts = loc.split(',').map(s => s.trim());
+   return pts.length >= 3 ? `${pts[0]}, ${pts[pts.length-2]}, ${pts[pts.length-1]}` : loc;
+ };
  
  return (
  <div key={p.id || p._id} className="shrink-0 w-[160px] md:w-[190px] group">
@@ -689,7 +601,7 @@ export default function Home() {
  </div>
  
  <p className="text-white/30 text-[10px] font-medium leading-tight mb-4 line-clamp-2 flex items-center gap-1.5">
- <MapPin size={10} className="text-[#55DEE8]" /> {p.distance ? `${(p.distance/1000).toFixed(1)} km Away` : (p.city || "Nearby Player")}
+ <MapPin size={10} className="text-[#55DEE8]" /> {p.distance ? `${(p.distance/1000).toFixed(1)} km Away` : formatLoc(p.city)}
  </p>
 
  {/* Bottom Bar */}
@@ -725,13 +637,46 @@ export default function Home() {
  </section>
 
 
+ {/* ── SOCIAL ARENA ── */}
+ <section className="py-6 mb-6 w-full overflow-hidden">
+ <div className="w-full">
+ <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 lg:mb-10 gap-4">
+ <div>
+ <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none flex items-center gap-2 md:gap-3" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+ Your <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Social Arena</span> <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
+ </h2>
+ <p className="text-xs md:text-sm font-medium text-gray-400 mt-2" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>Swipe to see what's happening in the field</p>
+ </div>
+ </div>
 
- {/* ── AD BANNERS ── */}
- <AdBannerSection banners={marketing.banners} />
+ {/* Reels Section (Horizontal Mock Data) */}
+ <div className="mb-8">
+ <h3 className="text-lg md:text-xl font-bold text-white/80 mb-4 tracking-wide">REELS</h3>
+ <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
+ {(reelsFeed.length > 0 ? reelsFeed : socialPosts).map((reel, idx) => (
+ <div key={`reel-${idx}`} className="w-[140px] md:w-[160px] aspect-[9/16] shrink-0 bg-[#0A0A0A] border rounded-[12px] overflow-hidden snap-start group transition-all relative cursor-pointer" style={{ borderColor: BDR }} onClick={(e) => { e.preventDefault(); navigate(`/?tab=shots&id=${reel.id || reel._id || ''}`); }}>
+ <img
+ src={reel.thumbnailUrl || reel.image || reel.mediaUrl || ''}
+ alt="Reel thumbnail"
+ className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+ />
+ <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+ <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40">
+ <Play size={16} className="text-white fill-white ml-1" />
+ </div>
+ </div>
+ </div>
+ ))}
+ </div>
+ </div>
+ </div>
+ </section>
 
- {/* ── JOIN GAMES NEAR YOU (Feature Flag) ── */}
+      
+
+  {/* ── JOIN GAMES NEAR YOU (Feature Flag) ── */}
  {featureFlags['join_games'] && (
- <section className="py-6 lg:py-12 px-4 lg:px-12" style={{ backgroundColor: "#0A0A0A" }}>
+ <section className="py-6 mb-6 w-full">
  <div className="w-full">
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-10">
  <div className="relative">
@@ -990,6 +935,16 @@ export default function Home() {
  </section>
  )}
 
+ 
+
+      </Community>
+    </div>
+  </section>
+
+  <div className={shouldHideRest ? 'hidden' : ''}>
+ {/* ── AD BANNERS ── */}
+ <AdBannerSection banners={marketing.banners} />
+
  {/* ── FIND PROFESSIONALS (Feature Flag) ── */}
  {featureFlags['find_professionals'] && (
  <section className="py-6 lg:py-12 px-4 lg:px-12 border-b" style={{ backgroundColor: "#000", borderColor: "#1A1A1A" }}>
@@ -1132,129 +1087,6 @@ export default function Home() {
 
 
 
- {/* ── SOCIAL ARENA ── */}
- <section className="pt-4 lg:pt-6 pb-4 lg:pb-6 w-full overflow-hidden">
- <div className="w-full px-4 lg:px-12">
- <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 lg:mb-10 gap-4">
- <div>
- <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none flex items-center gap-2 md:gap-3" style={{ fontFamily: "'Open Sans', sans-serif" }}>
- Your <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Social Arena</span> <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
- </h2>
- <p className="text-xs md:text-sm font-medium text-gray-400 mt-2" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>Swipe to see what's happening in the field</p>
- </div>
- </div>
-
- {/* Reels Section (Horizontal Mock Data) */}
- <div className="mb-8">
- <h3 className="text-lg md:text-xl font-bold text-white/80 mb-4 tracking-wide">REELS</h3>
- <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
- {socialPosts.map((reel, idx) => (
- <div key={`reel-${idx}`} className="w-[140px] md:w-[160px] aspect-[9/16] shrink-0 bg-[#0A0A0A] border rounded-[12px] overflow-hidden snap-start group transition-all relative cursor-pointer" style={{ borderColor: BDR }} onClick={(e) => { e.preventDefault(); setActiveReel(reel); }}>
- <img
- src={reel.image}
- alt="Reel thumbnail"
- className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
- />
- <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
- <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40">
- <Play size={16} className="text-white fill-white ml-1" />
- </div>
- </div>
- </div>
- ))}
- </div>
- </div>
-
- {/* Posts Section (Vertical) */}
- <div className="mt-10 max-w-2xl mx-auto">
- <h3 className="text-lg md:text-xl font-bold text-white/80 mb-6 tracking-wide">RECENT POSTS</h3>
- <div className="flex flex-col gap-8">
- {(realSocialPosts.length > 0 ? realSocialPosts : socialPosts).map((post, idx) => {
- const author = post.adminId || post.userId || post.ownerId;
- const isFollowing = author && followingIds.includes(author?.id || author?._id);
- 
- return (
- <div key={post._id || idx} className="w-full bg-[#0A0A0A] border rounded-[12px] overflow-hidden flex flex-col" style={{ borderColor: BDR }}>
- {/* Post Header */}
- <div className="flex items-center justify-between p-4 border-b border-white/5 bg-[#080808]">
-   <div className="flex items-center gap-3">
-     <div className="w-10 h-10 rounded-full bg-[#1A1A1A] overflow-hidden border border-white/10">
-       <img src={author?.profilePicture || author?.profileImage || "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=100&q=80"} alt="User" className="w-full h-full object-cover" />
-     </div>
-     <div>
-       <h4 className="text-sm font-bold text-white">{author?.name || "Community Member"}</h4>
-       <p className="text-[10px] text-gray-400">{post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "2 hours ago"}</p>
-     </div>
-   </div>
-   {author && (
-     <button 
-     onClick={(e) => handleFollowToggle(e, author)}
-     className={`px-3 py-1.5 rounded-full font-bold text-[10px] uppercase tracking-wider transition-all duration-300 ${isFollowing ? 'bg-white/5 border border-white/10 text-white/30 hover:bg-white/10' : 'bg-[#222] border border-white/5 text-white hover:bg-white hover:text-black'}`}
-     >
-     {isFollowing ? 'Following' : 'Follow +'}
-     </button>
-   )}
- </div>
-
- {/* Image Container */}
- <div className="relative w-full aspect-square md:aspect-[4/5] bg-black">
- <img
- src={post.image || post.imageUrl || post.image}
- alt="Social post"
- className="w-full h-full object-cover"
- onError={(e) => {
- e.target.src = "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800&q=80"; 
- }}
- />
- </div>
-
- {/* Post Actions */}
- <div className="bg-[#0D0D0D] p-4 flex items-center justify-between">
- <div className="flex items-center gap-6">
- <button 
- onClick={(e) => {
- e.preventDefault();
- navigate(`/community?post=${post._id}`);
- }}
- className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
- >
- <Heart size={20} className={(post.likes?.length > 0 || post.likes > 0) ? "fill-white text-white" : ""} />
- <span className="text-xs font-bold text-gray-400">
- {Array.isArray(post.likes) ? post.likes.length : post.likes || 0}
- </span>
- </button>
- <button 
- onClick={(e) => {
- e.preventDefault();
- navigate(`/community?post=${post._id}`);
- }}
- className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
- >
- <MessageSquare size={20} />
- <span className="text-xs font-bold text-gray-400">
- {Array.isArray(post.comments) ? post.comments.length : post.comments || 0}
- </span>
- </button>
- </div>
- <button 
- onClick={(e) => {
- e.preventDefault();
- const url = `${window.location.origin}/community?post=${post._id}`;
- navigator.clipboard.writeText(url);
- toast.success("Link copied to clipboard!");
- }}
- className="text-gray-400 hover:text-white transition-colors"
- >
- <Share2 size={20} />
- </button>
- </div>
- </div>
- );
- })}
- </div>
- </div>
- </div>
- </section>
 
  {/* ── BLOGS & ARTICLES ── */}
  <BlogSection />
@@ -1314,6 +1146,8 @@ export default function Home() {
 
 
 
+
+ </div>
 
  <InterestsModal
  isOpen={showInterests}

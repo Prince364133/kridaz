@@ -697,17 +697,9 @@ export default function Profile() {
               <div className="flex flex-wrap gap-2 pt-2">
                 {isOwnProfile ? (
                   <>
-                    <button className="px-5 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.25)] flex items-center gap-2">
-                      <UserPlus size={14} strokeWidth={3} />
-                      Invite Player
-                    </button>
                   </>
                 ) : (
                   <>
-                    <button className="px-5 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.25)] flex items-center gap-2">
-                      <UserPlus size={14} strokeWidth={3} />
-                      Invite Player
-                    </button>
                     <button onClick={() => navigate(`/messages?userId=${targetUserId}`)} className="px-4 py-2.5 bg-white/5 text-white rounded-[8px] font-black uppercase tracking-wider text-[11px] hover:bg-white/10 transition-all backdrop-blur-md border border-white/10 flex items-center gap-2">
                       <MessageCircle size={14} />
                       Message

@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
 import { reelsApi } from "@redux/api/reelsApi";
 import toast from "react-hot-toast";
@@ -36,6 +37,7 @@ const Navbar = () => {
   // ── Auto-detect city + state via browser Geolocation + Nominatim reverse-geocode ──
   const [geoLabel, setGeoLabel] = useState(null); // null = not yet tried
   const [geoLoading, setGeoLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const detectLocation = useCallback(() => {
     if (!navigator.geolocation) return;
@@ -97,7 +99,6 @@ const Navbar = () => {
     { name: "Venues", path: "/venues" },
     { name: "Pros", path: "/professionals" },
     { name: "Join Games", path: "/join-games" },
-    { name: "Community", path: "/community" },
     { name: "Players", path: "/players" },
     { name: "Business", path: "#" },
   ];
@@ -211,9 +212,9 @@ const Navbar = () => {
                 <div className="flex items-center gap-2">
 
 
-                  {/* PROFILE DROPDOWN */}
-                  <div className="dropdown dropdown-end group/profile">
-                    <div tabIndex={0} role="button" className="relative w-10 sm:w-12 h-10 sm:h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group overflow-hidden">
+                  {/* PROFILE SIDEBAR TOGGLE */}
+                  <div className="relative">
+                    <div onClick={() => setIsSidebarOpen(true)} role="button" className="relative w-10 sm:w-12 h-10 sm:h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group overflow-hidden">
                       {(() => {
                         if (user?.profilePicture || user?.profileImage) {
                           return (
@@ -253,15 +254,31 @@ const Navbar = () => {
                       <div className="absolute inset-0 bg-[#84CC16]/10 opacity-0 group-hover:opacity-100 transition-opacity z-20" />
                     </div>
 
-                    <div tabIndex={0} className="dropdown-content mt-2 w-64 bg-[#0A0A0A] border border-white/10 rounded-[8px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] overflow-hidden backdrop-blur-3xl animate-in fade-in slide-in-from-top-2 duration-300 z-[100]">
+                    {/* OVERLAY */}
+                    {isSidebarOpen && createPortal(
+                      <div className="fixed inset-0 bg-black/60 z-[999] backdrop-blur-sm transition-opacity" onClick={() => setIsSidebarOpen(false)} />,
+                      document.body
+                    )}
+
+                    {/* SIDEBAR PANEL */}
+                    {createPortal(
+                      <div className={`fixed top-0 right-0 h-[100dvh] w-72 sm:w-80 bg-[#0A0A0A] border-l border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] overflow-y-auto z-[1000] transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                      <div className="p-4 flex items-center justify-between border-b border-white/5 sticky top-0 bg-[#0A0A0A]/90 backdrop-blur-md z-10">
+                        <span className="font-bold text-white uppercase tracking-widest text-sm">Account</span>
+                        <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/70 hover:text-white">
+                          <X size={20} />
+                        </button>
+                      </div>
+
                       {/* Navigation Groups */}
-                      <div className="p-2 space-y-1">
+                      <div className="p-4 space-y-2">
                         {/* User info / Profile Link */}
                         <Link
                           to="/profile"
-                          className="flex items-center gap-3 p-3 rounded-[8px] bg-white/5 text-white transition-all mb-2"
+                          onClick={() => setIsSidebarOpen(false)}
+                          className="flex items-center gap-4 p-3 rounded-[8px] bg-white/5 hover:bg-white/10 text-white transition-all mb-4"
                         >
-                          <div className="w-8 h-8 rounded-full border border-white/10 bg-white/10 flex items-center justify-center shrink-0">
+                          <div className="w-10 h-10 rounded-full border border-white/10 bg-white/10 flex items-center justify-center shrink-0">
                             {(() => {
                               if (user?.profilePicture || user?.profileImage) {
                                 return <img src={user.profilePicture || user.profileImage} alt="" className="w-full h-full object-cover rounded-full" />;
@@ -275,51 +292,52 @@ const Navbar = () => {
                               }
                               if (user?.name) {
                                 return (
-                                  <span className="text-[#84CC16] font-bold text-xs">
+                                  <span className="text-[#84CC16] font-bold text-sm">
                                     {user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
                                   </span>
                                 );
                               }
-                              return <User size={16} className="text-[#84CC16]" />;
+                              return <User size={20} className="text-[#84CC16]" />;
                             })()}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-white truncate">{user?.name || "Profile"}</p>
-                            <p className="text-[10px] text-white/40 truncate">{user?.email || "View Account"}</p>
+                            <p className="text-base font-bold text-white truncate">{user?.name || "Profile"}</p>
+                            <p className="text-xs text-white/40 truncate">{user?.email || "View Account"}</p>
                           </div>
                         </Link>
 
-                        <div className="h-[1px] bg-white/5 my-1" />
+                        <div className="h-[1px] bg-white/5 my-2" />
 
                         {/* DASHBOARDS SECTION */}
                         {(["bmsp_admin", "admin", "venu_owners", "venue_owners", "venue", "coach", "umpire", "limited_umpire", "scorer", "limited_scorer", "streamer"].some(r => role?.toLowerCase().includes(r)) ||
                           ["bmsp_admin", "admin", "venu_owners", "venue_owners", "venue", "coach", "umpire", "limited_umpire", "scorer", "limited_scorer", "streamer"].some(r => user?.role?.toLowerCase().includes(r))) && (
                             <>
                               {(role?.toLowerCase() === "admin" || role?.toLowerCase().includes("bmsp_admin") || user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase().includes("bmsp_admin")) && (
-                                <Link to="/admin" className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                <Link to="/admin" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                   <ShieldCheck size={18} className="text-white/40" />
                                   <span className="text-sm font-medium">Admin Panel</span>
                                 </Link>
                               )}
                               {(role?.toLowerCase().includes("venu_owners") || user?.role?.toLowerCase().includes("venu_owners") || role?.toLowerCase().includes("venue") || user?.role?.toLowerCase().includes("venue") || role?.toLowerCase().includes("owner") || user?.role?.toLowerCase().includes("owner")) && (
-                                <Link to="/venue-owner" className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                <Link to="/venue-owner" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                   <Activity size={18} className="text-white/40" />
                                   <span className="text-sm font-medium">Venue Owner Dashboard</span>
                                 </Link>
                               )}
                               {(["coach", "umpire", "streamer", "commentator", "limited_umpire", "limited_streamer", "scorer"].some(r => role?.toLowerCase().includes(r) || user?.role?.toLowerCase().includes(r))) && (
-                                <Link to={`/professional/${role?.toLowerCase() || user?.role?.toLowerCase()}`} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                <Link to={`/professional/${role?.toLowerCase() || user?.role?.toLowerCase()}`} onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                   <Zap size={18} className="text-white/40" />
                                   <span className="text-sm font-medium">Professional Portal</span>
                                 </Link>
                               )}
-                              <div className="h-[1px] bg-white/5 my-1" />
+                              <div className="h-[1px] bg-white/5 my-2" />
                             </>
                           )}
 
                         {/* ACCOUNT SECTION */}
                         <Link
                           to="/messages"
+                          onClick={() => setIsSidebarOpen(false)}
                           className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <MessageCircle size={18} className="text-white/40" />
@@ -328,6 +346,7 @@ const Navbar = () => {
 
                         <Link
                           to="/my-teams"
+                          onClick={() => setIsSidebarOpen(false)}
                           className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <Users size={18} className="text-white/40" />
@@ -336,6 +355,7 @@ const Navbar = () => {
 
                         <Link
                           to="/booking-history"
+                          onClick={() => setIsSidebarOpen(false)}
                           className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <Clock size={18} className="text-white/40" />
@@ -344,6 +364,7 @@ const Navbar = () => {
 
                         <Link
                           to="/my-hosted-games"
+                          onClick={() => setIsSidebarOpen(false)}
                           className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <Target size={18} className="text-white/40" />
@@ -352,6 +373,7 @@ const Navbar = () => {
 
                         <Link
                           to="/my-joined-games"
+                          onClick={() => setIsSidebarOpen(false)}
                           className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <Trophy size={18} className="text-white/40" />
@@ -360,6 +382,7 @@ const Navbar = () => {
 
                         <Link
                           to="/leaderboard"
+                          onClick={() => setIsSidebarOpen(false)}
                           className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-primary/10 text-primary border border-primary/10 transition-all"
                         >
                           <Trophy size={18} className="text-primary/70" />
@@ -368,23 +391,29 @@ const Navbar = () => {
 
                         <Link
                           to="/wallet"
+                          onClick={() => setIsSidebarOpen(false)}
                           className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
                         >
                           <Zap size={18} className="text-white/40" />
                           <span className="text-sm font-medium">My Wallet</span>
                         </Link>
 
-                        <div className="h-[1px] bg-white/5 my-1" />
+                        <div className="h-[1px] bg-white/5 my-2" />
 
                         <button
-                          onClick={handleLogout}
+                          onClick={() => {
+                            setIsSidebarOpen(false);
+                            handleLogout();
+                          }}
                           className="w-full flex items-center gap-3 p-3 rounded-[8px] hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-all"
                         >
                           <LogOut size={18} className="opacity-70" />
                           <span className="text-sm font-medium">Logout</span>
                         </button>
                       </div>
-                    </div>
+                    </div>,
+                    document.body
+                    )}
                   </div>
                 </div>
               </div>

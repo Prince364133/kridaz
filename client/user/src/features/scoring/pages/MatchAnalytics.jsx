@@ -596,6 +596,15 @@ const MatchAnalytics = () => {
 
   const { scoring, analytics: stats } = analytics || {};
   const mvp = stats?.mvp;
+  
+  const rawYoutubeVideoId = scoring?.game?.youtubeVideoId || scoring?.game?.streamConfig?.youtubeVideoId || liveScore?.youtubeVideoId;
+  const extractYoutubeId = (url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : url;
+  };
+  const youtubeVideoId = extractYoutubeId(rawYoutubeVideoId);
 
   // Extract unique team names
   const teamAName = scoring?.game?.teamA?.name || 'TBD';
@@ -714,6 +723,21 @@ const MatchAnalytics = () => {
           </div>
         </div>
       </div>
+
+      {youtubeVideoId && (
+        <div className="w-full bg-black border-b border-white/5 flex justify-center">
+          <div className="w-full max-w-4xl aspect-video relative">
+            <iframe 
+              src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1`}
+              title="Match Live Stream"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute top-0 left-0 w-full h-full"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Tabs navigation */}
       <div className="bg-[#050505] border-b border-white/5 sticky top-[73px] z-40">

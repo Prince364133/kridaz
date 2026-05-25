@@ -25,7 +25,6 @@ const GuestNavbar = () => {
     { name: "Venue Owner Overview", path: "/venue-owners" },
     { name: "Venues", path: "/business/venue" },
     { name: "Professionals", path: "/business/professional" },
-    { name: "Community", path: "/community" },
     { name: "Find Players", path: "/players" },
   ];
 
@@ -70,14 +69,6 @@ const GuestNavbar = () => {
               </li>
             </ul>
           </div>
-
-          <Link
-            to="/community"
-            className={`text-sm font-medium transition-all relative group ${ location.pathname === "/community" ? "text-[#55DEE8]" : "text-white/60 hover:text-white" }`}
-          >
-            Community
-            <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#55DEE8] transition-all duration-300 ${ location.pathname === "/community" ? "w-full" : "w-0 group-hover:w-full" }`} />
-          </Link>
 
           <Link
             to="/players"

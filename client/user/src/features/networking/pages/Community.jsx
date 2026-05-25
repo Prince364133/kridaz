@@ -55,7 +55,7 @@ const sharePlatforms = [
   { id: "facebook", name: "Facebook", icon: Facebook },
 ];
 
-const Community = () => {
+const Community = ({ children, onSearchActive }) => {
   const { user, role, isLoggedIn, followingIds } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const { gateInteraction } = useLoginOnDemand();
@@ -91,13 +91,25 @@ const Community = () => {
   const [activePanel, setActivePanel] = useState(null); // 'messages' | 'notifications' | null
   const togglePanel = (panel) => setActivePanel(prev => prev === panel ? null : panel);
 
+  // Sync activeFilter if URL changes (e.g. from Home page click)
+  useEffect(() => {
+    if (searchParams.get("tab") === "shots") {
+      setActiveFilter("Reels");
+    } else if (activeFilter === "Reels") {
+      setActiveFilter("All");
+    }
+  }, [searchParams.get("tab")]);
+
   // Sync URL when Shots/Reels view is toggled (also puts the reel id in the URL)
   const handleSetActiveFilter = (filter) => {
     setActiveFilter(filter);
     if (filter === "Reels") {
-      setSearchParams({ tab: "shots" }, { replace: true });
+      searchParams.set("tab", "shots");
+      setSearchParams(searchParams, { replace: true });
     } else {
-      setSearchParams({}, { replace: true });
+      searchParams.delete("tab");
+      searchParams.delete("id");
+      setSearchParams(searchParams, { replace: true });
     }
   };
 
@@ -121,16 +133,23 @@ const Community = () => {
     if (currentReel?.id) {
       setSearchParams({ tab: "shots", id: currentReel.id }, { replace: true });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeReelIndex, activeFilter, reels.length]);
 
   const { socket, onlineCount } = useSocket();
 
   // (activeFilter, activeSportFilter, activePanel are declared above â€” before the reels hook)
-  
+
   // Search state
   const [feedSearchQuery, setFeedSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+  // Notify parent of search state
+  useEffect(() => {
+    if (onSearchActive) {
+      onSearchActive(debouncedSearchQuery.trim() !== "");
+    }
+  }, [debouncedSearchQuery, onSearchActive]);
 
   // Debounce search input
   useEffect(() => {
@@ -432,7 +451,7 @@ const Community = () => {
         setNewPost(prev => ({ ...prev, content: text }));
       }
       setShowPostModal(true);
-      
+
       // Clean up the URL
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('createPost');
@@ -827,13 +846,13 @@ const Community = () => {
 
 
           {/* ================= FEED (centered, full-width on desktop) ================= */}
-          <div className={`max-w-3xl mx-auto w-full transition-all duration-300 ${activeFilter === 'Reels' ? 'h-[calc(100vh-100px)] sticky top-[80px] max-w-none' : 'space-y-6'}`}>
+          <div className={`max-w-3xl mx-auto w-full transition-all duration-300 ${activeFilter === 'Reels' ? 'h-[calc(100vh-100px)] sticky top-[80px] max-w-none' : 'space-y-2'}`}>
 
             {activeFilter !== "Reels" && (
-              <div className="space-y-6 mb-6">
+              <div className="space-y-3 mb-2">
 
                 {/* Search, Post, and Message Header Row */}
-                <div className="relative z-10 flex items-center gap-3 pb-4">
+                <div className="relative z-10 flex items-center gap-3">
 
                   {/* Search input field styled with theme */}
                   <div className="relative flex-1">
@@ -876,26 +895,7 @@ const Community = () => {
                     <Plus size={20} strokeWidth={2.5} className="relative z-10 text-white group-hover:text-black transition-colors" />
                   </motion.button>
 
-                  {/* Message Button */}
-                  <motion.button
-                    onClick={() => gateInteraction(() => navigate('/messages'))}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    title="Messages"
-                    className="relative flex items-center justify-center w-11 h-11 rounded-full shrink-0 group z-10"
-                  >
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-[-1]" viewBox="0 0 100 100">
-                      <defs>
-                        <linearGradient id="msg-btn-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop stopColor="#55DEE8" offset="0%" />
-                          <stop stopColor="#BFF367" offset="100%" />
-                        </linearGradient>
-                      </defs>
-                      <circle cx="50" cy="50" r="47" fill="none" stroke="url(#msg-btn-grad)" strokeWidth="4" pathLength="100" strokeDasharray="4 6" strokeLinecap="round" />
-                    </svg>
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity z-[-1]" />
-                    <Send size={18} className="relative z-10 text-white group-hover:text-black transition-colors transform rotate-0 -ml-0.5" />
-                  </motion.button>
+                  {/* Removed Message Button */}
                 </div>
 
 
@@ -961,6 +961,8 @@ const Community = () => {
                   </div>
                 )}
 
+                {!debouncedSearchQuery.trim() && children}
+
                 {/* Filters Row */}
                 {!debouncedSearchQuery.trim() && (
                   <div>
@@ -970,7 +972,7 @@ const Community = () => {
                         <button
                           key={filter}
                           onClick={() => handleSetActiveFilter(filter)}
-                          className={`px-4 py-2 rounded-[6px] text-[11px] font-bold whitespace-nowrap transition-all border ${activeFilter === filter ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent hover:brightness-110' : 'bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white' }`}
+                          className={`px-4 py-2 rounded-[6px] text-[11px] font-bold whitespace-nowrap transition-all border ${activeFilter === filter ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent hover:brightness-110' : 'bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white'}`}
                         >
                           {filter}
                         </button>
@@ -1005,7 +1007,7 @@ const Community = () => {
                       {/* Mobile Reels Button */}
                       <button
                         onClick={() => handleSetActiveFilter(activeFilter === "Reels" ? "All" : "Reels")}
-                        className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[10px] font-bold uppercase tracking-wider transition-all shrink-0 z-10 group ${ activeFilter === 'Reels' ? 'text-[#55DEE8] bg-[#55DEE8]/10' : 'text-white/70 hover:text-white' }`}
+                        className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[10px] font-bold uppercase tracking-wider transition-all shrink-0 z-10 group ${activeFilter === 'Reels' ? 'text-[#55DEE8] bg-[#55DEE8]/10' : 'text-white/70 hover:text-white'}`}
                       >
                         <svg className="absolute inset-0 w-full h-full pointer-events-none z-[-1]">
                           <defs>
@@ -1041,7 +1043,7 @@ const Community = () => {
                       <div className="relative w-[115px]">
                         <select
                           className="w-full border border-transparent rounded-[8px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
-                          style={{ 
+                          style={{
                             fontFamily: "'Inter', sans-serif",
                             backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
                             backgroundOrigin: "border-box",
@@ -1078,21 +1080,21 @@ const Community = () => {
                         No players found
                       </div>
                     ) : (
-                      <div 
+                      <div
                         className="grid grid-rows-2 grid-flow-col gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 scroll-smooth"
                         style={{ maxHeight: "240px", minHeight: loadedPlayers.length > 1 ? "180px" : "90px" }}
                         onScroll={handlePlayersHorizontalScroll}
                       >
                         {loadedPlayers.map(player => (
-                          <div 
+                          <div
                             key={player.id}
                             onClick={() => navigate(`/profile/${player.id}`)}
                             className="flex items-center gap-3 bg-neutral-900/50 hover:bg-neutral-900 border border-white/5 hover:border-[#55DEE8]/30 p-3 rounded-[8px] cursor-pointer transition-all min-w-[220px] max-w-[280px] group shrink-0"
                           >
                             <div className="w-[42px] h-[42px] rounded-full bg-[#111] border border-white/10 overflow-hidden shrink-0">
-                              <img 
-                                src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} 
-                                className="w-full h-full object-cover" 
+                              <img
+                                src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`}
+                                className="w-full h-full object-cover"
                                 alt=""
                               />
                             </div>
@@ -1452,9 +1454,9 @@ const Community = () => {
               onClick={closePostModal}
               className="absolute inset-0 bg-[#030303]/75 backdrop-blur-md"
             />
-            <motion.div 
-              initial={{ opacity: 0, y: 50, scale: 0.95, rotateX: -8 }} 
-              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }} 
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.95, rotateX: -8 }}
+              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               exit={{ opacity: 0, y: 30, scale: 0.95, rotateX: 5 }}
               transition={{ type: "spring", damping: 25, stiffness: 240 }}
               className="relative w-full max-w-lg bg-neutral-950/80 border border-white/5 rounded-[8px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
@@ -1478,7 +1480,7 @@ const Community = () => {
                   <div className="relative">
                     <select
                       className="border border-transparent rounded-[8px] py-1.5 pl-3 pr-8 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
-                      style={{ 
+                      style={{
                         fontFamily: "'Inter', sans-serif",
                         backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
                         backgroundOrigin: "border-box",
@@ -1497,10 +1499,10 @@ const Community = () => {
                     </div>
                   </div>
 
-                  <motion.button 
+                  <motion.button
                     whileHover={{ rotate: 90, scale: 1.08, backgroundColor: "rgba(239, 68, 68, 0.12)", color: "#ef4444" }}
                     whileTap={{ scale: 0.92 }}
-                    onClick={closePostModal} 
+                    onClick={closePostModal}
                     className="p-1.5 rounded-full text-white/40 transition-colors cursor-pointer"
                   >
                     <X size={18} />
@@ -1510,9 +1512,9 @@ const Community = () => {
 
               {/* User Profile Section */}
               <div className="flex items-center gap-3 px-5 pt-3.5 pb-1 relative z-10">
-                <img 
-                  src={user?.profilePicture || "/default-avatar.png"} 
-                  className="w-9 h-9 rounded-full object-cover border border-white/10 bg-neutral-900" 
+                <img
+                  src={user?.profilePicture || "/default-avatar.png"}
+                  className="w-9 h-9 rounded-full object-cover border border-white/10 bg-neutral-900"
                   alt=""
                 />
                 <div>
@@ -1564,7 +1566,7 @@ const Community = () => {
 
                 {/* Visual Image Preview */}
                 {postImagePreview && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, scale: 0.97, y: 5 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.97, y: -5 }}
@@ -1574,8 +1576,8 @@ const Community = () => {
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
                       <span className="text-[9px] font-bold text-white uppercase tracking-widest bg-black/60 px-3 py-1.5 rounded-full border border-white/10" style={SUBHEADING_STYLE}>Image Selected</span>
                     </div>
-                    <motion.button 
-                      type="button" 
+                    <motion.button
+                      type="button"
                       whileHover={{ scale: 1.08, backgroundColor: "#ef4444" }}
                       whileTap={{ scale: 0.92 }}
                       onClick={() => { setNewPost({ ...newPost, image: null }); setPostImagePreview(null); }}
@@ -1592,9 +1594,9 @@ const Community = () => {
                   <div className="flex items-center gap-2">
                     {/* Image Selector Button */}
                     <div className="relative">
-                      <motion.button 
-                        type="button" 
-                        style={SUBHEADING_STYLE} 
+                      <motion.button
+                        type="button"
+                        style={SUBHEADING_STYLE}
                         whileHover={{ scale: 1.05, backgroundColor: "rgba(85,222,232,0.08)", border: "1px solid rgba(85,222,232,0.2)", color: "#55DEE8" }}
                         whileTap={{ scale: 0.95 }}
                         className="p-2.5 bg-white/[0.02] border border-white/5 rounded-[8px] text-neutral-400 hover:text-[#55DEE8] transition-all flex items-center justify-center cursor-pointer"
@@ -1607,10 +1609,10 @@ const Community = () => {
 
                     {/* Image Upload Status capsule */}
                     {newPost.image && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-[8px] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400" 
+                        className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-[8px] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400"
                         style={SUBHEADING_STYLE}
                       >
                         <ShieldCheck size={12} className="text-[#55DEE8]" />
@@ -1621,7 +1623,7 @@ const Community = () => {
 
                   {/* Right Side: Action Button Clusters */}
                   <div className="flex items-center gap-2">
-                    <motion.button 
+                    <motion.button
                       type="button"
                       onClick={closePostModal}
                       whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.03)" }}
@@ -1631,7 +1633,7 @@ const Community = () => {
                       Cancel
                     </motion.button>
 
-                    <motion.button 
+                    <motion.button
                       type="submit"
                       disabled={isPublishing || (!newPost.content.trim() && !newPost.image)}
                       style={SUBHEADING_STYLE}
@@ -1643,7 +1645,7 @@ const Community = () => {
                         <Loader2 size={13} className="animate-spin" />
                       ) : (
                         <Send size={12} className="group-hover/publish:translate-x-0.5 group-hover/publish:-translate-y-0.5 transition-transform duration-300" />
-                      )} 
+                      )}
                       {isPublishing ? "Saving..." : (editingPost ? "Update" : "Post")}
                     </motion.button>
                   </div>
@@ -1656,16 +1658,16 @@ const Community = () => {
         {/* Story Modal */}
         {showStoryModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
-              onClick={() => setShowStoryModal(false)} 
-              className="absolute inset-0 bg-[#030303]/75 backdrop-blur-md" 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowStoryModal(false)}
+              className="absolute inset-0 bg-[#030303]/75 backdrop-blur-md"
             />
-            <motion.div 
-              initial={{ opacity: 0, y: 50, scale: 0.95, rotateX: -8 }} 
-              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }} 
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.95, rotateX: -8 }}
+              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               exit={{ opacity: 0, y: 30, scale: 0.95, rotateX: 5 }}
               transition={{ type: "spring", damping: 25, stiffness: 240 }}
               className="relative w-full max-w-lg bg-neutral-950/80 border border-white/5 rounded-[8px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
@@ -1682,10 +1684,10 @@ const Community = () => {
                     Share quick updates with your community
                   </p>
                 </div>
-                <motion.button 
+                <motion.button
                   whileHover={{ rotate: 90, scale: 1.08, backgroundColor: "rgba(239, 68, 68, 0.12)", color: "#ef4444" }}
                   whileTap={{ scale: 0.92 }}
-                  onClick={() => setShowStoryModal(false)} 
+                  onClick={() => setShowStoryModal(false)}
                   className="p-1.5 rounded-full text-white/40 transition-colors cursor-pointer"
                 >
                   <X size={18} />
@@ -1694,9 +1696,9 @@ const Community = () => {
 
               {/* User Profile Section */}
               <div className="flex items-center gap-3 px-5 pt-3.5 pb-1 relative z-10">
-                <img 
-                  src={user?.profilePicture || "/default-avatar.png"} 
-                  className="w-9 h-9 rounded-full object-cover border border-white/10 bg-neutral-900" 
+                <img
+                  src={user?.profilePicture || "/default-avatar.png"}
+                  className="w-9 h-9 rounded-full object-cover border border-white/10 bg-neutral-900"
                   alt=""
                 />
                 <div>
@@ -1724,7 +1726,7 @@ const Community = () => {
                   <div className="relative">
                     <select
                       className="border border-transparent rounded-[8px] py-1.5 pl-3 pr-8 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer"
-                      style={{ 
+                      style={{
                         fontFamily: "'Inter', sans-serif",
                         backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
                         backgroundOrigin: "border-box",
@@ -1746,7 +1748,7 @@ const Community = () => {
                 {/* Aspect 9:16 Live Preview */}
                 {storyMediaPreviews.length > 0 && (
                   <div className="flex justify-center py-1">
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, scale: 0.97 }}
                       animate={{ opacity: 1, scale: 1 }}
                       className="relative aspect-[9/16] h-52 rounded-[8px] overflow-hidden border border-white/5 group shadow-2xl bg-neutral-900"
@@ -1755,8 +1757,8 @@ const Community = () => {
                       <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
                         <span className="text-[9px] font-bold text-white uppercase tracking-widest bg-black/60 px-2.5 py-1.5 rounded-full border border-white/10" style={SUBHEADING_STYLE}>Preview</span>
                       </div>
-                      <motion.button 
-                        type="button" 
+                      <motion.button
+                        type="button"
                         whileHover={{ scale: 1.08, backgroundColor: "#ef4444" }}
                         whileTap={{ scale: 0.92 }}
                         onClick={() => {
@@ -1778,9 +1780,9 @@ const Community = () => {
                   {/* Modern Compact Toolbar */}
                   <div className="flex items-center gap-2">
                     <div className="relative">
-                      <motion.button 
-                        type="button" 
-                        style={SUBHEADING_STYLE} 
+                      <motion.button
+                        type="button"
+                        style={SUBHEADING_STYLE}
                         whileHover={{ scale: 1.05, backgroundColor: "rgba(85,222,232,0.08)", border: "1px solid rgba(85,222,232,0.2)", color: "#55DEE8" }}
                         whileTap={{ scale: 0.95 }}
                         className="p-2.5 bg-white/[0.02] border border-white/5 rounded-[8px] text-neutral-400 hover:text-[#55DEE8] transition-all flex items-center justify-center cursor-pointer"
@@ -1792,10 +1794,10 @@ const Community = () => {
                     </div>
 
                     {storyMediaPreviews.length > 0 && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-[8px] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400" 
+                        className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-[8px] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400"
                         style={SUBHEADING_STYLE}
                       >
                         <ShieldCheck size={12} className="text-[#55DEE8]" />
@@ -1806,7 +1808,7 @@ const Community = () => {
 
                   {/* Actions clusters */}
                   <div className="flex items-center gap-2">
-                    <motion.button 
+                    <motion.button
                       type="button"
                       onClick={() => setShowStoryModal(false)}
                       whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.03)" }}
@@ -1816,7 +1818,7 @@ const Community = () => {
                       Cancel
                     </motion.button>
 
-                    <motion.button 
+                    <motion.button
                       type="submit"
                       disabled={isPublishing || (!newStory.content.trim() && storyMediaPreviews.length === 0)}
                       style={SUBHEADING_STYLE}
@@ -1828,7 +1830,7 @@ const Community = () => {
                         <Loader2 size={13} className="animate-spin" />
                       ) : (
                         <Plus size={12} className="group-hover/story:scale-110 transition-transform duration-300" />
-                      )} 
+                      )}
                       {isPublishing ? "Posting..." : "Post Story"}
                     </motion.button>
                   </div>
