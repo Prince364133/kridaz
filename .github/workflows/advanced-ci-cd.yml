@@ -134,7 +134,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Login to Azure
-        uses: azure/login@v1
+        uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Deploy via Azure Web Apps
