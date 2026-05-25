@@ -17,7 +17,7 @@ const NotificationBadge = () => {
   const { unreadCount } = useNotifications();
   if (unreadCount <= 0) return null;
   return (
-    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-[8px] flex items-center justify-center text-[9px] font-black text-white border-2 border-[#050505]">
+    <span className="absolute right-3 top-1/2 -translate-y-1/2 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full flex items-center justify-center text-[9px] font-black text-white border border-[#0A0A0A]">
       {unreadCount > 9 ? "9+" : unreadCount}
     </span>
   );
@@ -201,18 +201,6 @@ const Navbar = () => {
               </>
             ) : (
               <div className="flex items-center gap-2 sm:gap-4">
-
-                {/* Notification Bell */}
-                <Link
-                  to="/notifications"
-                  className="relative w-10 sm:w-11 h-10 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
-                >
-                  <Bell size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
-                  <NotificationBadge />
-                </Link>
-
-
-
                 <div className="flex items-center gap-2">
 
 
@@ -323,6 +311,15 @@ const Navbar = () => {
                           )}
 
                         {/* ACCOUNT SECTION */}
+                        <Link
+                          to="/notifications"
+                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all relative"
+                        >
+                          <Bell size={18} className="text-white/40" />
+                          <span className="text-sm font-medium">Notifications</span>
+                          <NotificationBadge />
+                        </Link>
+
                         <Link
                           to="/messages"
                           className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
