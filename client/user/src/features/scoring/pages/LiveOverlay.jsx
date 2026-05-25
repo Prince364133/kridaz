@@ -262,12 +262,9 @@ const LiveOverlay = () => {
       if (data.audioUrl) {
         const audio = new Audio(`${API_BASE}${data.audioUrl}`);
         audio.play().catch(e => {
-          console.warn('Overlay audio play failed:', e);
-          socket.emit('COMMENTARY_AUDIO_PLAYED', { audioUrl: data.audioUrl });
+          console.warn('Overlay audio autoplay blocked or failed:', e);
+          // Do NOT emit audio played here, backend auto-deletes after 30s
         });
-        audio.onended = () => {
-          socket.emit('COMMENTARY_AUDIO_PLAYED', { audioUrl: data.audioUrl });
-        };
       } else {
         // Fallback to BROWSER_TTS
         const utterance = new SpeechSynthesisUtterance(data.text);

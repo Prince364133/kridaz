@@ -112,16 +112,8 @@ const socketConfig = (server) => {
       socket.in(chatId).emit("message deleted", { chatId, messageIds });
     });
 
-    socket.on("COMMENTARY_AUDIO_PLAYED", (data) => {
-      if (data && data.audioUrl) {
-        const filePath = path.join(process.cwd(), 'public', data.audioUrl);
-        fs.unlink(filePath, (err) => {
-          if (err && err.code !== 'ENOENT') {
-            logger.error(`[Socket] Failed to delete audio file ${data.audioUrl}:`, err);
-          }
-        });
-      }
-    });
+    // COMMENTARY_AUDIO_PLAYED removed to prevent premature audio deletion 
+    // files are automatically cleaned up after 30s in commentary.service.js
 
     socket.on("location:update", async (data) => {
       const { lat, lng } = data;
