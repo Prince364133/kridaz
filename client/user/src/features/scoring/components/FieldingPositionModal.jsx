@@ -56,12 +56,12 @@ const FieldingPositionModal = ({ runs, isBoundary, onConfirm, onClose }) => {
         <motion.div
           initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
           transition={{ type: 'spring', damping: 22 }}
-          className="relative w-full max-w-md bg-[#111] rounded-3xl border border-blue-500/20 overflow-hidden z-10"
+          className="relative w-full max-w-md bg-[#111] rounded-[8px] border border-blue-500/20 overflow-hidden z-10"
         >
           {/* Header */}
           <div className="px-6 pt-6 pb-4 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-blue-500/15 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-[8px] bg-blue-500/15 flex items-center justify-center">
                 <Target size={16} className="text-blue-400" />
               </div>
               <div>
@@ -87,7 +87,7 @@ const FieldingPositionModal = ({ runs, isBoundary, onConfirm, onClose }) => {
                   <button
                     key={pos.key}
                     onClick={() => handlePositionSelect(pos.key)}
-                    className="p-4 rounded-2xl border border-white/8 bg-white/4 hover:border-blue-500/50 hover:bg-blue-500/8 transition-all text-left group"
+                    className="p-4 rounded-[8px] border border-white/8 bg-white/4 hover:border-blue-500/50 hover:bg-blue-500/8 transition-all text-left group"
                   >
                     <span className="text-sm font-black text-white group-hover:text-blue-400 transition-colors">{pos.label}</span>
                   </button>
@@ -101,7 +101,7 @@ const FieldingPositionModal = ({ runs, isBoundary, onConfirm, onClose }) => {
                   <button
                     key={dist.key}
                     onClick={() => handleDistanceSelect(dist.key)}
-                    className="p-4 rounded-2xl border border-white/8 bg-white/4 hover:border-blue-500/50 hover:bg-blue-500/8 transition-all text-left group"
+                    className="p-4 rounded-[8px] border border-white/8 bg-white/4 hover:border-blue-500/50 hover:bg-blue-500/8 transition-all text-left group"
                   >
                     <span className="text-sm font-black text-white group-hover:text-blue-400 transition-colors">{dist.label}</span>
                   </button>
@@ -112,7 +112,7 @@ const FieldingPositionModal = ({ runs, isBoundary, onConfirm, onClose }) => {
             {step === 'position' && (
               <button
                 onClick={handleSkip}
-                className="w-full mt-2 py-3 rounded-2xl border border-dashed border-white/15 text-neutral-500 text-sm font-bold hover:border-white/30 transition-colors"
+                className="w-full mt-2 py-3 rounded-[8px] border border-dashed border-white/15 text-neutral-500 text-sm font-bold hover:border-white/30 transition-colors"
               >
                 Skip Wagon Wheel
               </button>

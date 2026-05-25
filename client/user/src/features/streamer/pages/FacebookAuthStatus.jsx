@@ -33,7 +33,7 @@ export const FacebookConnected = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A] p-4 text-white font-sans">
-      <div className="bg-[#111111] p-10 rounded-[2.5rem] border border-white/10 text-center max-w-sm w-full shadow-2xl">
+      <div className="bg-[#111111] p-10 rounded-[8px] border border-white/10 text-center max-w-sm w-full shadow-2xl">
         <div className="w-20 h-20 bg-blue-500/20 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-blue-500/30 animate-bounce">
           <CheckCircle2 size={40} />
         </div>
@@ -47,7 +47,7 @@ export const FacebookConnected = () => {
           </p>
           <button 
             onClick={() => window.close()} 
-            className="w-full bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-xs py-4 rounded-2xl border border-white/10 transition-all active:scale-95"
+            className="w-full bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-xs py-4 rounded-[8px] border border-white/10 transition-all active:scale-95"
           >
             Close Now
           </button>
@@ -60,7 +60,7 @@ export const FacebookConnected = () => {
 export const FacebookError = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A] p-4 text-white font-sans">
-      <div className="bg-[#111111] p-10 rounded-[2.5rem] border border-white/10 text-center max-w-sm w-full shadow-2xl">
+      <div className="bg-[#111111] p-10 rounded-[8px] border border-white/10 text-center max-w-sm w-full shadow-2xl">
         <div className="w-20 h-20 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/30">
           <XCircle size={40} />
         </div>
@@ -70,7 +70,7 @@ export const FacebookError = () => {
         </p>
         <button 
           onClick={() => window.close()} 
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-xs py-4 rounded-2xl transition-all shadow-[0_10px_20px_rgba(220,38,38,0.2)] active:scale-95"
+          className="w-full bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-xs py-4 rounded-[8px] transition-all shadow-[0_10px_20px_rgba(220,38,38,0.2)] active:scale-95"
         >
           Try Again
         </button>

@@ -20,7 +20,7 @@ const TransactionSection = () => {
   if (loading) return <TransactionSkeleton />;
   if (error) return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-10">
-      <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-8 text-center">
+      <div className="bg-red-500/10 border border-red-500/20 rounded-[8px] p-8 text-center">
         <p className="font-bold text-xl text-red-500 uppercase tracking-widest">System Error Detected</p>
         <p className="text-sm text-red-400 mt-2">{error}</p>
       </div>
@@ -47,7 +47,7 @@ const TransactionSection = () => {
         />
 
         {/* Table */}
-        <div className="bg-[#111] rounded-2xl border border-white/10 overflow-hidden">
+        <div className="bg-[#111] rounded-[8px] border border-white/10 overflow-hidden">
           <TransactionTable
             transactions={filteredAndSortedTransactions}
             sortField={sortField}

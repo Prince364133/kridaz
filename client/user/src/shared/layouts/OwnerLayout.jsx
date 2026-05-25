@@ -28,20 +28,11 @@ const PartnerLayout = () => {
             isOpen={isOpen}
             toggleSidebar={toggleSidebar}
             isMinimized={isMinimized}
-            className={`${
-              isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-            }`}
+            className={`${ isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0" }`}
           />
         </div>
         <main
-          className={`
-          flex-1 
-          overflow-x-hidden
-          transition-all 
-          duration-300 
-          ease-in-out
-          ${isMinimized ? "lg:ml-20" : "lg:ml-64"}
-        `}
+          className={`flex-1 overflow-x-hidden transition-all duration-300 ease-in-out ${isMinimized ? "lg:ml-20" : "lg:ml-64"}`}
         >
           <div className="w-full pt-0 px-4 pb-24 lg:pt-0 lg:px-8 lg:pb-10">
             <RootErrorBoundary>

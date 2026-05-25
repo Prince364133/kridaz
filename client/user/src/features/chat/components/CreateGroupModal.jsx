@@ -75,11 +75,7 @@ const CreateGroupModal = ({ isOpen, onClose, onSuccess }) => {
                   <div 
                     key={user._id}
                     onClick={() => toggleUser(user._id)}
-                    className={`flex items-center gap-3 p-3 rounded-[6px] border cursor-pointer transition-all ${
-                      selectedUsers.includes(user._id) 
-                        ? 'bg-primary/20 border-primary/50' 
-                        : 'bg-[#000000] border-transparent hover:border-[#2D2D2D]'
-                    }`}
+                    className={`flex items-center gap-3 p-3 rounded-[6px] border cursor-pointer transition-all ${ selectedUsers.includes(user._id) ? 'bg-primary/20 border-primary/50' : 'bg-[#000000] border-transparent hover:border-[#2D2D2D]' }`}
                   >
                     <img src={user.profilePicture || "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-10 h-10 rounded-full" alt={user.name} />
                     <div className="flex-1">

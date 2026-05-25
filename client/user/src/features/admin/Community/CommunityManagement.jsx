@@ -69,16 +69,16 @@ const CommunityManagement = () => {
           <p className="text-white/20 text-xs font-bold uppercase tracking-[0.2em] mt-1">Manage posts and stories across the platform</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-1 flex">
+          <div className="bg-white/5 border border-white/10 rounded-[8px] p-1 flex">
             <button 
               onClick={() => setActiveTab("posts")}
-              className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === "posts" ? "bg-[#55DEE8] text-black" : "text-white/40 hover:text-white"}`}
+              className={`px-6 py-2.5 rounded-[8px] text-xs font-bold uppercase tracking-widest transition-all ${activeTab === "posts" ? "bg-[#55DEE8] text-black" : "text-white/40 hover:text-white"}`}
             >
               Posts
             </button>
             <button 
               onClick={() => setActiveTab("stories")}
-              className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === "stories" ? "bg-[#55DEE8] text-black" : "text-white/40 hover:text-white"}`}
+              className={`px-6 py-2.5 rounded-[8px] text-xs font-bold uppercase tracking-widest transition-all ${activeTab === "stories" ? "bg-[#55DEE8] text-black" : "text-white/40 hover:text-white"}`}
             >
               Stories
             </button>
@@ -95,14 +95,14 @@ const CommunityManagement = () => {
             placeholder={`SEARCH ${activeTab.toUpperCase()}...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-2xl h-12 pl-12 pr-4 text-white text-xs font-bold tracking-widest outline-none focus:border-[#55DEE8]/50 transition-all placeholder:text-white/10"
+            className="w-full bg-white/5 border border-white/10 rounded-[8px] h-12 pl-12 pr-4 text-white text-xs font-bold tracking-widest outline-none focus:border-[#55DEE8]/50 transition-all placeholder:text-white/10"
           />
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
-          <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white/40 hover:text-white px-6 h-12 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all">
+          <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white/40 hover:text-white px-6 h-12 rounded-[8px] text-xs font-bold uppercase tracking-widest transition-all">
             <Filter size={16} /> Filter
           </button>
-          <button onClick={fetchItems} className="p-3 bg-white/5 border border-white/10 text-white/40 hover:text-white rounded-2xl transition-all">
+          <button onClick={fetchItems} className="p-3 bg-white/5 border border-white/10 text-white/40 hover:text-white rounded-[8px] transition-all">
             <Clock size={18} />
           </button>
         </div>
@@ -115,7 +115,7 @@ const CommunityManagement = () => {
           <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.3em]">Auditing Content...</p>
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="bg-white/[0.02] border border-white/5 rounded-[40px] p-24 text-center space-y-6">
+        <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-24 text-center space-y-6">
           <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto">
             <MessageSquare size={32} className="text-white/10" />
           </div>
@@ -124,7 +124,7 @@ const CommunityManagement = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredItems.map((item) => (
-            <div key={item._id} className="bg-white/[0.03] border border-white/5 rounded-[32px] overflow-hidden flex flex-col group hover:border-white/10 transition-all">
+            <div key={item._id} className="bg-white/[0.03] border border-white/5 rounded-[8px] overflow-hidden flex flex-col group hover:border-white/10 transition-all">
               {/* Media Preview */}
               <div className="relative aspect-video bg-black overflow-hidden">
                 {activeTab === "posts" ? (
@@ -147,7 +147,7 @@ const CommunityManagement = () => {
                 
                 {/* Badge */}
                 <div className="absolute top-4 left-4 flex gap-2">
-                  <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full flex items-center gap-2">
+                  <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1 rounded-[6px] flex items-center gap-2">
                     <Clock size={10} className="text-[#55DEE8]" />
                     <span className="text-[9px] font-bold text-white uppercase tracking-widest">
                       {new Date(item.createdAt).toLocaleDateString()}
@@ -197,12 +197,12 @@ const CommunityManagement = () => {
                     )}
                   </div>
                   <div className="flex gap-2">
-                    <button className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all">
+                    <button className="w-10 h-10 rounded-[8px] bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all">
                       <Eye size={16} />
                     </button>
                     <button 
                       onClick={() => handleDelete(item._id)}
-                      className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                      className="w-10 h-10 rounded-[8px] bg-red-500/10 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all"
                     >
                       <Trash2 size={16} />
                     </button>

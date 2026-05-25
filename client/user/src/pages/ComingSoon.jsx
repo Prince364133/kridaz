@@ -68,7 +68,7 @@ const ComingSoon = () => {
         {/* Icon */}
         <div className="flex justify-center mb-8">
           <div
-            className="w-24 h-24 rounded-3xl flex items-center justify-center"
+            className="w-24 h-24 rounded-[8px] flex items-center justify-center"
             style={{ backgroundColor: `${config.accent}15`, border: `1px solid ${config.accent}30` }}
           >
             <Rocket size={40} style={{ color: config.accent }} />
@@ -76,7 +76,7 @@ const ComingSoon = () => {
         </div>
 
         {/* Success pill */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border bg-white/[0.02] mb-6"
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[6px] border bg-white/[0.02] mb-6"
           style={{ borderColor: `${config.accent}30` }}>
           <CheckCircle2 size={14} style={{ color: config.accent }} />
           <span className="text-xs font-bold tracking-[0.2em] uppercase" style={{ color: config.accent }}>
@@ -99,7 +99,7 @@ const ComingSoon = () => {
         {/* Waitlist Card */}
         {waitlistNumber && (
           <div
-            className="relative rounded-3xl p-8 mb-12 overflow-hidden"
+            className="relative rounded-[8px] p-8 mb-12 overflow-hidden"
             style={{ backgroundColor: `${config.accent}08`, border: `1px solid ${config.accent}20` }}
           >
             <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${config.accent}40, transparent)` }} />
@@ -126,7 +126,7 @@ const ComingSoon = () => {
             { step: "02", label: "Under Review", status: "next" },
             { step: "03", label: "Early Access", status: "pending" },
           ].map((item) => (
-            <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+            <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-[8px] bg-white/[0.02] border border-white/5">
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black"
                 style={item.status === "done"
@@ -147,7 +147,7 @@ const ComingSoon = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             to="/login"
-            className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold uppercase tracking-wider text-sm transition-all group"
+            className="flex items-center justify-center gap-2 px-8 py-4 rounded-[8px] font-bold uppercase tracking-wider text-sm transition-all group"
             style={{ backgroundColor: config.accent, color: "#000" }}
           >
             Go to Portal Login
@@ -155,7 +155,7 @@ const ComingSoon = () => {
           </Link>
           <Link
             to="/"
-            className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold uppercase tracking-wider text-sm text-white/30 hover:text-white border border-white/10 hover:border-white/30 transition-all"
+            className="flex items-center justify-center gap-2 px-8 py-4 rounded-[8px] font-bold uppercase tracking-wider text-sm text-white/30 hover:text-white border border-white/10 hover:border-white/30 transition-all"
           >
             <Clock size={16} />
             Back to Home

@@ -60,13 +60,7 @@ const ProfessionalSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) 
       <Link
         key={item.to || item.label}
         to={item.to || "#"}
-        className={`flex items-center px-4 py-3 group relative transition-all duration-300 font-inter ${
-          isLogout 
-            ? "text-white/40 hover:text-red-500" 
-            : isActive 
-              ? "text-black" 
-              : "text-[#878C9F] hover:text-white"
-        }`}
+        className={`flex items-center px-4 py-3 group relative transition-all duration-300 font-inter ${ isLogout ? "text-white/40 hover:text-red-500" : isActive ? "text-black" : "text-[#878C9F] hover:text-white" }`}
         onClick={(e) => {
           if (isLogout) {
             e.preventDefault();
@@ -95,13 +89,7 @@ const ProfessionalSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) 
         <div className="flex-shrink-0 flex items-center justify-center w-6">
           <Icon 
             size={18} 
-            className={`transition-colors duration-300 ${
-              isLogout 
-                ? "text-white/20 group-hover:text-red-500" 
-                : isActive 
-                  ? "text-black" 
-                  : "text-[#878C9F] group-hover:text-[#55DEE8]"
-            }`} 
+            className={`transition-colors duration-300 ${ isLogout ? "text-white/20 group-hover:text-red-500" : isActive ? "text-black" : "text-[#878C9F] group-hover:text-[#55DEE8]" }`} 
           />
         </div>
 
@@ -123,10 +111,7 @@ const ProfessionalSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) 
       )}
 
       <aside
-        className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#000000] border-r border-[#2D2D2D] overflow-x-hidden transition-all duration-300 ease-in-out z-50 flex flex-col font-open-sans
-          ${isMinimized ? "lg:w-20" : "w-64"}
-          ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-          ${className || ""}`}
+        className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#000000] border-r border-[#2D2D2D] overflow-x-hidden transition-all duration-300 ease-in-out z-50 flex flex-col font-open-sans ${isMinimized ? "lg:w-20" : "w-64"} ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} ${className || ""}`}
       >
         <div className="flex flex-col p-4 border-b border-[#2D2D2D] bg-[#000000] gap-4 lg:hidden">
           <div className="flex items-center justify-end">

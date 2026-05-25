@@ -23,7 +23,7 @@ import { useGetMyScoringGamesQuery } from '@redux/api/scoringApi';
 
 const PRI = "#55DEE8";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
-const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 // Mock data for 15+ players to demonstrate the UI
 const MOCK_SQUAD = [
@@ -81,7 +81,7 @@ const TeamProfile = () => {
         <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2" style={HEADING_STYLE}>Team Not Found</h2>
         <button
           onClick={() => navigate('/players')}
-          className="px-6 py-2.5 bg-[#55DEE8] text-black rounded-xl font-black uppercase text-[10px] tracking-widest hover:brightness-110 transition-all"
+          className="px-6 py-2.5 bg-[#55DEE8] text-black rounded-[8px] font-black uppercase text-[10px] tracking-widest hover:brightness-110 transition-all"
         >
           Back to Discovery
         </button>
@@ -160,7 +160,7 @@ const TeamProfile = () => {
           
           {/* Main Hero Container */}
           <div className="lg:col-span-9 relative">
-            <div className="relative bg-[#0A0A0A] border border-white/5 rounded-[24px] overflow-hidden p-4 md:p-5 min-h-[380px] flex flex-col">
+            <div className="relative bg-[#0A0A0A] border border-white/5 rounded-[8px] overflow-hidden p-4 md:p-5 min-h-[380px] flex flex-col">
               {/* Stadium Background */}
               <div className="absolute inset-0 z-0">
                 <img 
@@ -174,10 +174,10 @@ const TeamProfile = () => {
 
               {/* Top Row: Logo & Info */}
               <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start mb-auto">
-                <div className="w-32 h-32 md:w-36 md:h-36 rounded-[24px] bg-black border-2 border-[#55DEE8] p-2 flex items-center justify-center shadow-[0_0_30px_rgba(85,222,232,0.1)] relative overflow-hidden group shrink-0">
+                <div className="w-32 h-32 md:w-36 md:h-36 rounded-[8px] bg-black border-2 border-[#55DEE8] p-2 flex items-center justify-center shadow-[0_0_30px_rgba(85,222,232,0.1)] relative overflow-hidden group shrink-0">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#55DEE8]/20 to-transparent" />
                   {team.logo ? (
-                    <img src={team.logo} alt={team.name} className="w-full h-full object-cover rounded-[16px]" />
+                    <img src={team.logo} alt={team.name} className="w-full h-full object-cover rounded-[8px]" />
                   ) : (
                     <Trophy size={40} className="text-[#55DEE8]/20" />
                   )}
@@ -243,7 +243,7 @@ const TeamProfile = () => {
               </div>
 
               {/* Stats Bar */}
-              <div className="relative z-10 mt-6 bg-white/[0.02] border border-white/5 rounded-[20px] p-4">
+              <div className="relative z-10 mt-6 bg-white/[0.02] border border-white/5 rounded-[8px] p-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-4">
                   {[
                     { label: 'Played', value: '128', icon: Trophy },
@@ -269,18 +269,18 @@ const TeamProfile = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-3">
-            <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-5 space-y-4 h-full flex flex-col">
+            <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5 space-y-4 h-full flex flex-col">
               <div className="space-y-0.5">
                 <h3 className="text-md font-black uppercase tracking-tight" style={HEADING_STYLE}>Squad Status</h3>
                 <p className="text-[7px] font-black text-gray-700 uppercase tracking-widest">Live tracker</p>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
+                <div className="bg-white/5 p-3 rounded-[8px] border border-white/5 text-center">
                   <p className="text-xl font-black text-white mb-0.5">{displayMembers.length}</p>
                   <p className="text-[7px] font-black text-gray-700 uppercase tracking-widest">Players</p>
                 </div>
-                <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
+                <div className="bg-white/5 p-3 rounded-[8px] border border-white/5 text-center">
                   <p className="text-xl font-black text-blue-500 mb-0.5">0</p>
                   <p className="text-[7px] font-black text-gray-700 uppercase tracking-widest">Wins</p>
                 </div>
@@ -291,7 +291,7 @@ const TeamProfile = () => {
                   {isMember ? (
                     <button 
                       onClick={() => toast.success('Left the team.')}
-                      className="py-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-red-500/20 transition-all"
+                      className="py-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-[8px] font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-red-500/20 transition-all"
                     >
                       <UserPlus size={14} className="rotate-45" />
                       Leave Team
@@ -300,7 +300,7 @@ const TeamProfile = () => {
                     <button 
                       onClick={handleJoinRequest}
                       disabled={isJoining || isPendingMember || isOwner}
-                      className={`py-3 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 transition-all ${isPendingMember || isOwner ? 'bg-white/5 text-white/20 border border-white/10' : 'bg-[#55DEE8] text-black hover:brightness-110 shadow-[0_5px_15px_rgba(85,222,232,0.2)]'}`}
+                      className={`py-3 rounded-[8px] font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 transition-all ${isPendingMember || isOwner ? 'bg-white/5 text-white/20 border border-white/10' : 'bg-[#55DEE8] text-black hover:brightness-110 shadow-[0_5px_15px_rgba(85,222,232,0.2)]'}`}
                     >
                       {isJoining ? <Loader2 size={12} className="animate-spin" /> : (
                         <>
@@ -312,7 +312,7 @@ const TeamProfile = () => {
                   )}
                   <button 
                     onClick={() => setShowChallengeModal(true)}
-                    className="py-3 border-2 border-[#55DEE8] text-[#55DEE8] rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-[#55DEE8] hover:text-black transition-all"
+                    className="py-3 border-2 border-[#55DEE8] text-[#55DEE8] rounded-[8px] font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-[#55DEE8] hover:text-black transition-all"
                   >
                     <Swords size={14} />
                     Challenge
@@ -322,13 +322,13 @@ const TeamProfile = () => {
                 <div className="space-y-2">
                   <button 
                     onClick={() => navigate(`/messages?teamId=${id}`)}
-                    className="w-full py-2.5 bg-white/5 border border-white/10 rounded-xl text-white font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-2 hover:bg-white/10"
+                    className="w-full py-2.5 bg-white/5 border border-white/10 rounded-[8px] text-white font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-2 hover:bg-white/10"
                   >
                     <MessageCircle size={12} /> Chat with Team
                   </button>
 
                   {/* Digital Pass QR Card */}
-                  <div className="bg-gradient-to-br from-[#55DEE8]/10 to-transparent border border-white/5 rounded-2xl p-4 flex flex-col items-center gap-3 relative overflow-hidden group">
+                  <div className="bg-gradient-to-br from-[#55DEE8]/10 to-transparent border border-white/5 rounded-[8px] p-4 flex flex-col items-center gap-3 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-16 h-16 bg-[#55DEE8]/5 blur-xl rounded-full" />
                     
                     <div className="flex items-center justify-between w-full">
@@ -339,7 +339,7 @@ const TeamProfile = () => {
                       <Fingerprint size={12} className="text-white/20" />
                     </div>
 
-                    <div className="relative w-28 h-28 bg-white border border-white/10 rounded-xl p-2 flex items-center justify-center group-hover:scale-[1.02] transition-transform overflow-hidden">
+                    <div className="relative w-28 h-28 bg-white border border-white/10 rounded-[8px] p-2 flex items-center justify-center group-hover:scale-[1.02] transition-transform overflow-hidden">
                       {team.qrCode ? (
                         <img 
                           src={team.qrCode} 
@@ -356,7 +356,7 @@ const TeamProfile = () => {
 
                     <button 
                       onClick={() => navigate(`/team-pass/${id}`)}
-                      className="w-full py-2 bg-[#55DEE8]/10 hover:bg-[#55DEE8] hover:text-black border border-[#55DEE8]/20 rounded-xl text-[#55DEE8] font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-1.5 transition-all"
+                      className="w-full py-2 bg-[#55DEE8]/10 hover:bg-[#55DEE8] hover:text-black border border-[#55DEE8]/20 rounded-[8px] text-[#55DEE8] font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-1.5 transition-all"
                     >
                       View Full Pass
                     </button>
@@ -365,7 +365,7 @@ const TeamProfile = () => {
 
                 <button
                   onClick={() => setShowScoringModal(true)}
-                  className="w-full mt-2 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-widest text-[9px] rounded-xl flex items-center justify-center gap-2 hover:brightness-110 shadow-lg shadow-[#55DEE8]/10"
+                  className="w-full mt-2 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-widest text-[9px] rounded-[8px] flex items-center justify-center gap-2 hover:brightness-110 shadow-lg shadow-[#55DEE8]/10"
                 >
                   <Play size={14} className="fill-black" />
                   Start Scoring Match
@@ -373,7 +373,7 @@ const TeamProfile = () => {
 
                 <button 
                   onClick={() => setShowShareModal(true)}
-                  className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-white font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-2 hover:bg-white/10"
+                  className="w-full py-3 bg-white/5 border border-white/10 rounded-[8px] text-white font-black uppercase tracking-widest text-[8px] flex items-center justify-center gap-2 hover:bg-white/10"
                 >
                   <Share2 size={12} /> Share Team
                 </button>
@@ -393,7 +393,7 @@ const TeamProfile = () => {
           <div className="lg:col-span-8 space-y-4">
             
             {/* Active Squad */}
-            <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-6 space-y-4">
+            <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-black uppercase tracking-tight flex items-center gap-2" style={HEADING_STYLE}>
                    Active Squad <span className="text-gray-700 text-sm">({displayMembers.length})</span>
@@ -408,7 +408,7 @@ const TeamProfile = () => {
 
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 {displayMembers.slice(0, 5).map((member, i) => (
-                  <div key={i} className="bg-white/[0.01] border border-white/5 rounded-[20px] p-3 flex flex-col items-center gap-2 group hover:border-[#55DEE8]/20 transition-all text-center">
+                  <div key={i} className="bg-white/[0.01] border border-white/5 rounded-[8px] p-3 flex flex-col items-center gap-2 group hover:border-[#55DEE8]/20 transition-all text-center">
                     <div className="relative">
                       <div className="w-14 h-14 rounded-full border-2 border-[#55DEE8] p-0.5 overflow-hidden">
                          <div className="w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden">
@@ -436,7 +436,7 @@ const TeamProfile = () => {
 
             {/* Active Scoring Matches */}
             {teamMatches && teamMatches.length > 0 && (
-              <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-6 space-y-4">
+              <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <h2 className="text-lg font-black uppercase tracking-tight flex items-center gap-2" style={HEADING_STYLE}>
@@ -475,7 +475,7 @@ const TeamProfile = () => {
             )}
 
             {/* Match History */}
-            <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-6 space-y-4">
+            <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-black uppercase tracking-tight" style={HEADING_STYLE}>Match History</h2>
                 <button className="text-[8px] font-black text-[#55DEE8] uppercase tracking-widest bg-[#55DEE8]/10 px-3 py-1.5 rounded-lg border border-[#55DEE8]/20">Full History</button>
@@ -519,14 +519,14 @@ const TeamProfile = () => {
 
           <div className="lg:col-span-4 space-y-4">
              {/* Promo */}
-             <div className="bg-gradient-to-br from-[#55DEE8]/10 to-transparent border border-white/5 rounded-[24px] p-6 relative overflow-hidden group">
+             <div className="bg-gradient-to-br from-[#55DEE8]/10 to-transparent border border-white/5 rounded-[8px] p-6 relative overflow-hidden group">
                <div className="relative z-10 space-y-4">
                   <Zap size={32} className="text-[#55DEE8]" />
                   <div>
                     <h3 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2" style={HEADING_STYLE}>Elevate Squad</h3>
                     <p className="text-gray-600 text-[9px] font-black uppercase leading-relaxed tracking-widest">Upgrade to pro for advanced analytics and live streaming.</p>
                   </div>
-                  <button className="w-full py-3 bg-white text-black rounded-xl font-black uppercase text-[9px] flex items-center justify-between px-6 hover:brightness-110">
+                  <button className="w-full py-3 bg-white text-black rounded-[8px] font-black uppercase text-[9px] flex items-center justify-between px-6 hover:brightness-110">
                     Upgrade <ArrowRight size={14} strokeWidth={3} />
                   </button>
                </div>
@@ -534,7 +534,7 @@ const TeamProfile = () => {
             </div>
 
             {/* Rivals */}
-             <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-6 space-y-4">
+             <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-6 space-y-4">
                <div className="flex items-center justify-between">
                 <h2 className="text-lg font-black uppercase tracking-tight" style={HEADING_STYLE}>Rivals</h2>
                 <button className="text-[8px] font-black text-[#55DEE8] uppercase tracking-widest bg-[#55DEE8]/10 px-2.5 py-1.5 rounded-lg border border-[#55DEE8]/20">All</button>
@@ -544,7 +544,7 @@ const TeamProfile = () => {
                   { name: 'RG Titans', score: 87 },
                   { name: 'Warriors XI', score: 75 },
                 ].map((r, i) => (
-                  <div key={i} className="flex items-center gap-3 bg-white/[0.01] p-3 rounded-xl border border-white/5">
+                  <div key={i} className="flex items-center gap-3 bg-white/[0.01] p-3 rounded-[8px] border border-white/5">
                      <div className="w-8 h-8 rounded-lg bg-black border border-white/10 flex items-center justify-center shrink-0">
                         <Shield size={16} className="text-[#55DEE8]/20" />
                      </div>
@@ -569,7 +569,7 @@ const TeamProfile = () => {
         {showSquadModal && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowSquadModal(false)} className="absolute inset-0 bg-black/90 backdrop-blur-md" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[80vh]">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl flex flex-col max-h-[80vh]">
                <div className="p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0A0A0A] z-10">
                   <div>
                     <h2 className="text-xl font-black text-white uppercase tracking-tighter" style={HEADING_STYLE}>Full Squad Roster</h2>
@@ -583,7 +583,7 @@ const TeamProfile = () => {
                <div className="p-6 overflow-y-auto custom-scrollbar">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {displayMembers.map((member, i) => (
-                      <div key={i} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 flex flex-col items-center gap-3 hover:border-[#55DEE8]/20 transition-all text-center">
+                      <div key={i} className="bg-white/[0.02] border border-white/5 rounded-[8px] p-4 flex flex-col items-center gap-3 hover:border-[#55DEE8]/20 transition-all text-center">
                         <div className="relative">
                           <div className="w-16 h-16 rounded-full border-2 border-[#55DEE8] p-0.5 overflow-hidden">
                             <div className="w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden">
@@ -612,17 +612,17 @@ const TeamProfile = () => {
         {showChallengeModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowChallengeModal(false)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-sm bg-[#0A0A0A] border border-white/10 rounded-[24px] p-6">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-sm bg-[#0A0A0A] border border-white/10 rounded-[8px] p-6">
                <h2 className="text-xl font-black text-white uppercase tracking-tighter mb-4">Challenge Squad</h2>
                <div className="space-y-3">
                  {myTeamsData?.teams?.filter(t => t.sportType === team.sportType)?.map(t => (
-                   <button key={t._id} onClick={() => setSelectedMyTeam(t._id)} className={`w-full p-3 rounded-xl border transition-all flex items-center gap-3 text-left ${selectedMyTeam === t._id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/5'}`}>
+                   <button key={t._id} onClick={() => setSelectedMyTeam(t._id)} className={`w-full p-3 rounded-[8px] border transition-all flex items-center gap-3 text-left ${selectedMyTeam === t._id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/5'}`}>
                      <p className="font-black uppercase text-[10px] text-white">{t.name}</p>
                    </button>
                  ))}
                  <div className="flex gap-3 pt-4">
-                   <button onClick={() => setShowChallengeModal(false)} className="flex-1 py-3 bg-white/5 rounded-xl text-white font-black uppercase text-[9px]">Cancel</button>
-                   <button onClick={handleChallenge} className="flex-1 py-3 bg-[#55DEE8] rounded-xl text-black font-black uppercase text-[9px]">Send</button>
+                   <button onClick={() => setShowChallengeModal(false)} className="flex-1 py-3 bg-white/5 rounded-[8px] text-white font-black uppercase text-[9px]">Cancel</button>
+                   <button onClick={handleChallenge} className="flex-1 py-3 bg-[#55DEE8] rounded-[8px] text-black font-black uppercase text-[9px]">Send</button>
                  </div>
                </div>
             </motion.div>
@@ -633,28 +633,28 @@ const TeamProfile = () => {
         {showShareModal && (
           <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowShareModal(false)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-sm bg-[#0A0A0A] border border-white/10 rounded-[24px] p-6 text-center">
-               <div className="w-16 h-16 mx-auto bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-4">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-sm bg-[#0A0A0A] border border-white/10 rounded-[8px] p-6 text-center">
+               <div className="w-16 h-16 mx-auto bg-white/5 border border-white/10 rounded-[8px] flex items-center justify-center mb-4">
                  <Share2 size={24} className="text-[#55DEE8]" />
                </div>
                <h2 className="text-xl font-black text-white uppercase tracking-tighter mb-2">Share Team</h2>
                <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-6">Invite players to join {team.name}</p>
                
                <div className="space-y-3">
-                 <button onClick={handleShare} className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white font-black uppercase text-[10px] flex items-center justify-center gap-2 border border-white/5 transition-colors">
+                 <button onClick={handleShare} className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-[8px] text-white font-black uppercase text-[10px] flex items-center justify-center gap-2 border border-white/5 transition-colors">
                    <Share2 size={14} /> Native Share
                  </button>
                  <button onClick={() => {
                    navigator.clipboard.writeText(window.location.href);
                    toast.success('Link copied to clipboard!');
                    setShowShareModal(false);
-                 }} className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white font-black uppercase text-[10px] flex items-center justify-center gap-2 border border-white/5 transition-colors">
+                 }} className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-[8px] text-white font-black uppercase text-[10px] flex items-center justify-center gap-2 border border-white/5 transition-colors">
                    <Copy size={14} /> Copy Link
                  </button>
                  <button onClick={() => {
                    const text = `Hey, join my team ${team.name}!\n\nLink: ${window.location.href}`;
                    navigate(`/community?createPost=true&text=${encodeURIComponent(text)}`);
-                 }} className="w-full py-3 bg-[#55DEE8] hover:brightness-110 rounded-xl text-black font-black uppercase text-[10px] flex items-center justify-center gap-2 transition-colors shadow-[0_0_15px_rgba(85,222,232,0.2)]">
+                 }} className="w-full py-3 bg-[#55DEE8] hover:brightness-110 rounded-[8px] text-black font-black uppercase text-[10px] flex items-center justify-center gap-2 transition-colors shadow-[0_0_15px_rgba(85,222,232,0.2)]">
                    <Users size={14} /> Post to Community
                  </button>
                </div>

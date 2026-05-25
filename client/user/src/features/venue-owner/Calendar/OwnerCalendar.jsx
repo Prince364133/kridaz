@@ -93,7 +93,7 @@ const OwnerCalendar = () => {
                  </div>
               </div>
 
-              <div className="px-5 py-2 bg-[#1A1A1A] border border-[#2D2D2D] rounded-full flex items-center gap-3">
+              <div className="px-5 py-2 bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] flex items-center gap-3">
                  <div className="w-2 h-2 rounded-full bg-[#55DEE8] animate-pulse" />
                  <span className="text-[11px] font-black text-white uppercase tracking-[2px]">{data?.stats?.averageLoad || 0}% Load</span>
               </div>

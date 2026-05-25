@@ -49,7 +49,7 @@ export const AdBannerSection = ({ banners = [] }) => {
  return (
  <section className="relative w-full overflow-hidden bg-black py-4 md:py-6">
  <div className="w-full px-4 lg:px-12">
- <div className="relative group aspect-[16/9] md:aspect-[21/9] rounded-2xl md:rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl">
+ <div className="relative group aspect-[16/9] md:aspect-[21/9] rounded-[8px] md:rounded-[8px] overflow-hidden border border-white/10 shadow-2xl">
  {/* Progress Bar */}
  <div className="absolute top-0 left-0 w-full h-1 bg-white/10 z-30">
  <div 
@@ -84,7 +84,7 @@ export const AdBannerSection = ({ banners = [] }) => {
  href={currentBanner.targetUrl}
  target="_blank"
  rel="noopener noreferrer"
- className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-full font-bold hover:bg-primary hover:scale-105 transition-all text-sm group"
+ className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-[6px] font-bold hover:bg-primary hover:scale-105 transition-all text-sm group"
  >
  Explore Now <ExternalLink size={16} className="group-hover:translate-x-1 transition-transform" />
  </a>
@@ -116,9 +116,7 @@ export const AdBannerSection = ({ banners = [] }) => {
  <button
  key={idx}
  onClick={() => setCurrentIndex(idx)}
- className={`h-1.5 rounded-full transition-all ${
- idx === currentIndex ? "w-8 bg-primary" : "w-2 bg-white/20 hover:bg-white/40"
- }`}
+ className={`h-1.5 rounded-full transition-all ${ idx === currentIndex ? "w-8 bg-primary" : "w-2 bg-white/20 hover:bg-white/40" }`}
  style={idx === currentIndex ? { backgroundColor: PRI } : {}}
  />
  ))}

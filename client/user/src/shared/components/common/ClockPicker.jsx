@@ -156,7 +156,7 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
         <div
           ref={popupRef}
           style={{ position: "absolute", top: pos.top, left: pos.left, zIndex: 99999 }}
-          className="w-[270px] bg-[#0A0A0A] border border-[#2D2D2D] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden select-none"
+          className="w-[270px] bg-[#0A0A0A] border border-[#2D2D2D] rounded-[8px] shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden select-none"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-[#1A1A1A]">

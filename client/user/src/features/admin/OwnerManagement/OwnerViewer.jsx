@@ -127,7 +127,7 @@ const OwnerViewer = () => {
 
           {/* Bulk Actions Bar */}
           {selectedIds.length > 0 && (
-            <div className="sticky top-6 z-[40] bg-[#0d0d0d] border border-[#CCFF00]/30 rounded-2xl p-4 shadow-2xl flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
+            <div className="sticky top-6 z-[40] bg-[#0d0d0d] border border-[#CCFF00]/30 rounded-[8px] p-4 shadow-2xl flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
               <div className="flex items-center gap-6 pl-4">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded bg-[#CCFF00] flex items-center justify-center text-black font-black text-xs">
@@ -146,20 +146,20 @@ const OwnerViewer = () => {
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => handleBatchStatusUpdate("blocked")}
-                  className="px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-xl text-orange-400 font-black text-[10px] uppercase tracking-widest hover:bg-orange-500/20 transition-all flex items-center gap-2"
+                  className="px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-[8px] text-orange-400 font-black text-[10px] uppercase tracking-widest hover:bg-orange-500/20 transition-all flex items-center gap-2"
                 >
                   <Ban size={14} /> Block
                 </button>
                 <button 
                   onClick={() => handleBatchStatusUpdate("active")}
-                  className="px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 font-black text-[10px] uppercase tracking-widest hover:bg-green-500/20 transition-all flex items-center gap-2"
+                  className="px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-[8px] text-green-400 font-black text-[10px] uppercase tracking-widest hover:bg-green-500/20 transition-all flex items-center gap-2"
                 >
                   <CheckCircle size={14} /> Activate
                 </button>
                 <div className="w-px h-6 bg-white/10 mx-2" />
                 <button 
                   onClick={openBatchDeleteModal}
-                  className="px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 font-black text-[10px] uppercase tracking-widest hover:bg-red-500/20 transition-all flex items-center gap-2"
+                  className="px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-[8px] text-red-400 font-black text-[10px] uppercase tracking-widest hover:bg-red-500/20 transition-all flex items-center gap-2"
                 >
                   <Trash2 size={14} /> Delete
                 </button>
@@ -249,7 +249,7 @@ const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend }
       <div className="w-12 h-12 bg-[#CCFF00]/10 rounded-[10px] text-[#CCFF00] flex items-center justify-center border border-[#CCFF00]/20 shadow-[0_0_15px_rgba(204,255,0,0.1)] transition-transform group-hover:scale-110">
         <Icon size={22} />
       </div>
-      <div className="px-3 py-1 rounded-full bg-white/5 text-white/40 text-[9px] font-black uppercase tracking-widest border border-white/5 group-hover:border-[#CCFF00]/20 group-hover:text-[#CCFF00] transition-all">
+      <div className="px-3 py-1 rounded-[8px] bg-white/5 text-white/40 text-[9px] font-black uppercase tracking-widest border border-white/5 group-hover:border-[#CCFF00]/20 group-hover:text-[#CCFF00] transition-all">
         {trend}
       </div>
     </div>

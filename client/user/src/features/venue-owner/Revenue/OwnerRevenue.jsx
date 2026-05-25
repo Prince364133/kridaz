@@ -83,7 +83,7 @@ export default function OwnerRevenue() {
             <Wallet size={18} />
             Withdrawal Request
           </button>
-          <button className="flex items-center justify-center gap-3 px-8 py-4 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 rounded-lg text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-xl text-neutral-400 hover:text-white">
+          <button className="flex items-center justify-center gap-3 px-8 py-4 bg-white/[0.03] hover:bg-white/[0.05] border border-white/5 rounded-[6px] text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-xl text-neutral-400 hover:text-white">
             <Download size={18} />
             Data Export
           </button>
@@ -93,7 +93,7 @@ export default function OwnerRevenue() {
       {/* Financial Matrix (6 Cards in one line) */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         
-        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-5 flex flex-col relative overflow-hidden transition-all duration-500 shadow-2xl group hover:border-white/10">
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden transition-all duration-500 shadow-2xl group hover:border-white/10">
           <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-5 border border-white/10 bg-white/[0.05] group-hover:border-[#00C187]/30 transition-all shadow-inner" style={{ color: themeColor }}>
              <CheckCircle2 size={18} />
           </div>
@@ -102,7 +102,7 @@ export default function OwnerRevenue() {
           <p className="text-[7px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Liquid / Available</p>
         </div>
 
-        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-5 flex flex-col relative overflow-hidden shadow-2xl hover:border-amber-500/20 transition-all duration-500 group">
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-2xl hover:border-amber-500/20 transition-all duration-500 group">
           <div className="w-10 h-10 bg-amber-500/10 rounded-lg flex items-center justify-center mb-5 border border-white/10 group-hover:border-amber-500/30 transition-all text-amber-500 shadow-inner">
              <Hourglass size={18} />
           </div>
@@ -111,7 +111,7 @@ export default function OwnerRevenue() {
           <p className="text-[7px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Escrow Window</p>
         </div>
 
-        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-5 flex flex-col relative overflow-hidden shadow-2xl hover:border-red-500/20 transition-all duration-500 group">
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-2xl hover:border-red-500/20 transition-all duration-500 group">
           <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center mb-5 border border-white/10 group-hover:border-red-500/30 transition-all text-red-500 shadow-inner">
              <AlertOctagon size={18} />
           </div>
@@ -120,7 +120,7 @@ export default function OwnerRevenue() {
           <p className="text-[7px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Frozen Assets</p>
         </div>
 
-        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-5 flex flex-col relative overflow-hidden shadow-2xl transition-all duration-500 hover:border-white/10 group">
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-2xl transition-all duration-500 hover:border-white/10 group">
           <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center mb-5 border border-white/10 group-hover:border-white/20 transition-all text-neutral-500 shadow-inner">
              <TrendingUp size={18} />
           </div>
@@ -128,7 +128,7 @@ export default function OwnerRevenue() {
           <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Rs {(balances?.totalRevenue || 0).toLocaleString()}</h3>
         </div>
 
-        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-5 flex flex-col relative overflow-hidden shadow-2xl transition-all duration-500 hover:border-white/10 group">
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-2xl transition-all duration-500 hover:border-white/10 group">
           <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center mb-5 border border-white/10 group-hover:border-white/20 transition-all text-neutral-500 shadow-inner">
              <Landmark size={18} />
           </div>
@@ -136,7 +136,7 @@ export default function OwnerRevenue() {
           <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Rs {(balances?.withdrawn || 0).toLocaleString()}</h3>
         </div>
 
-        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-5 flex flex-col relative overflow-hidden shadow-2xl transition-all duration-500 group hover:border-blue-500/20">
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-2xl transition-all duration-500 group hover:border-blue-500/20">
           <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center mb-5 border border-white/10 group-hover:border-blue-500/30 transition-all text-blue-500 shadow-inner">
              <Calendar size={18} />
           </div>
@@ -149,7 +149,7 @@ export default function OwnerRevenue() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 relative z-10">
         
         {/* Review Pipeline List */}
-        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-8 lg:p-10 shadow-2xl flex flex-col max-h-[600px] group overflow-hidden relative">
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 lg:p-10 shadow-2xl flex flex-col max-h-[600px] group overflow-hidden relative">
            <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6 relative z-10">
               <div className="flex items-center gap-4">
                  <div className="w-1.5 h-8 bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.3)]" />
@@ -164,7 +164,7 @@ export default function OwnerRevenue() {
               <div className="space-y-6">
                  {inProgressBookings && inProgressBookings.length > 0 ? (
                    inProgressBookings.map((booking) => (
-                     <div key={booking._id} className="p-6 bg-white/[0.02] rounded-lg border border-white/5 flex items-center justify-between hover:border-amber-500/20 transition-all shadow-lg group/item">
+                     <div key={booking._id} className="p-6 bg-white/[0.02] rounded-[8px] border border-white/5 flex items-center justify-between hover:border-amber-500/20 transition-all shadow-lg group/item">
                         <div className="space-y-1.5">
                            <p className="text-[14px] font-black text-white uppercase tracking-tight">{booking.turf?.name || 'Arena Node'}</p>
                            <div className="flex items-center gap-2">
@@ -192,7 +192,7 @@ export default function OwnerRevenue() {
         </div>
 
         {/* Transaction History */}
-        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg p-8 lg:p-10 shadow-2xl flex flex-col max-h-[600px] group overflow-hidden relative">
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 lg:p-10 shadow-2xl flex flex-col max-h-[600px] group overflow-hidden relative">
            <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6 relative z-10">
                <div className="flex items-center gap-4">
                   <div className="w-1.5 h-8 rounded-full shadow-[0_0_10px_rgba(0,193,135,0.3)]" style={{ backgroundColor: themeColor }} />
@@ -227,10 +227,10 @@ export default function OwnerRevenue() {
                       }
 
                      return (
-                       <div key={tx._id} className="p-6 bg-white/[0.02] rounded-lg border border-white/5 flex items-center justify-between hover:border-white/10 transition-all shadow-lg">
+                       <div key={tx._id} className="p-6 bg-white/[0.02] rounded-[8px] border border-white/5 flex items-center justify-between hover:border-white/10 transition-all shadow-lg">
                           <div className="space-y-1.5">
                              <div className="flex items-center gap-2">
-                                <span className="p-1.5 bg-white/5 rounded-lg border border-white/5" style={{ color: colorStyle?.color || 'inherit' }}>{icon}</span>
+                                <span className="p-1.5 bg-white/5 rounded-[8px] border border-white/5" style={{ color: colorStyle?.color || 'inherit' }}>{icon}</span>
                                 <p className="text-[12px] font-black text-white uppercase tracking-wider">{tx.type.replace(/_/g, ' ')}</p>
                              </div>
                              <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest mt-1 ml-9">
@@ -272,7 +272,7 @@ export default function OwnerRevenue() {
               </div>
               
               <form onSubmit={handleWithdrawSubmit} className="p-8 space-y-8 relative z-10 h-[500px] overflow-y-auto no-scrollbar pb-10">
-                  <div className="rounded-lg p-6 flex items-start gap-5 border border-white/5 bg-white/[0.02]" style={{ borderColor: `${themeColor}20` }}>
+                  <div className="rounded-[8px] p-6 flex items-start gap-5 border border-white/5 bg-white/[0.02]" style={{ borderColor: `${themeColor}20` }}>
                     <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${themeColor}1A`, color: themeColor }}>
                        <Wallet size={24} />
                     </div>
@@ -304,7 +304,7 @@ export default function OwnerRevenue() {
                        </div>
                     </div>
 
-                    <div className="space-y-6 bg-white/[0.02] p-6 rounded-lg border border-white/5">
+                    <div className="space-y-6 bg-white/[0.02] p-6 rounded-[8px] border border-white/5">
                        <p className="text-[9px] font-black text-neutral-600 uppercase tracking-widest mb-4 text-center">Settlement Credentials</p>
                        
                        <div className="space-y-2">

@@ -77,11 +77,7 @@ const FileUpload = ({ label, onUploadSuccess, folder = "kridaz/verification", ac
         {label}
       </label>
       
-      <div className={`relative min-h-[120px] rounded-2xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center p-4 overflow-hidden ${
-        uploadedUrl 
-          ? "border-[#55DEE8]/50 bg-[#55DEE8]/5" 
-          : "border-white/5 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]"
-      }`}>
+      <div className={`relative min-h-[120px] rounded-[8px] border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center p-4 overflow-hidden ${ uploadedUrl ? "border-[#55DEE8]/50 bg-[#55DEE8]/5" : "border-white/5 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]" }`}>
         
         {!file ? (
           <>
@@ -92,7 +88,7 @@ const FileUpload = ({ label, onUploadSuccess, folder = "kridaz/verification", ac
               className="absolute inset-0 opacity-0 cursor-pointer z-10"
             />
             <div className="flex flex-col items-center gap-3 text-center pointer-events-none">
-              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-[8px] bg-white/5 flex items-center justify-center">
                 <Upload size={18} className="text-white/20" />
               </div>
               <div className="space-y-1">
@@ -104,7 +100,7 @@ const FileUpload = ({ label, onUploadSuccess, folder = "kridaz/verification", ac
         ) : (
           <div className="w-full flex items-center gap-4 relative z-20">
             {/* Preview or Icon */}
-            <div className="w-16 h-16 rounded-xl bg-black border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="w-16 h-16 rounded-[8px] bg-black border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
               {preview ? (
                 <img src={preview} alt="Preview" className="w-full h-full object-cover" />
               ) : (

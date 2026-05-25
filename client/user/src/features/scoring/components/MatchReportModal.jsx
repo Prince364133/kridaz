@@ -28,12 +28,12 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
-      <div className="relative w-full max-w-3xl max-h-[85vh] bg-[#0A0A0A] border border-white/10 rounded-[2rem] p-6 shadow-2xl flex flex-col animate-in zoom-in-95">
+      <div className="relative w-full max-w-3xl max-h-[85vh] bg-[#0A0A0A] border border-white/10 rounded-[8px] p-6 shadow-2xl flex flex-col animate-in zoom-in-95">
 
         {/* Header */}
         <div className="flex justify-between items-center mb-6 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
+            <div className="w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center border border-white/10">
               <FileText size={22} className="text-white" />
             </div>
             <div>
@@ -41,7 +41,7 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
               <p className="text-[11px] text-[#00C187] uppercase tracking-[0.2em] font-black">Detailed Metrics & Timers</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-3 bg-white/5 rounded-2xl text-neutral-400 hover:text-white transition-all border border-white/5 hover:border-white/20">
+          <button onClick={onClose} className="p-3 bg-white/5 rounded-[8px] text-neutral-400 hover:text-white transition-all border border-white/5 hover:border-white/20">
             <X size={20} />
           </button>
         </div>
@@ -55,7 +55,7 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
 
             {/* Venue & Officials */}
             {report?.game && (
-              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 mb-4">
+              <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-4 mb-4">
                 <h4 className="text-xs font-black text-neutral-400 uppercase tracking-[0.2em] mb-3">Match Details</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {report.game.customVenue && (
@@ -69,7 +69,7 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
                       <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest mb-1">Match Officials</p>
                       <div className="flex flex-wrap gap-2">
                         {report.game.customProfessionals.map((prof, idx) => (
-                          <div key={idx} className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 flex items-center gap-2">
+                          <div key={idx} className="bg-white/5 border border-white/10 rounded-[6px] px-2 py-1 flex items-center gap-2">
                             <span className="text-[10px] font-black text-[#00C187] uppercase">{prof.role}:</span>
                             <span className="text-xs font-bold text-white">{prof.name}</span>
                           </div>
@@ -83,22 +83,22 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
 
             {/* Top Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 flex flex-col justify-center items-center text-center">
+              <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-4 flex flex-col justify-center items-center text-center">
                 <Clock size={20} className="text-neutral-500 mb-2" />
                 <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest mb-1">Total Time</p>
                 <p className="text-xl font-black text-white font-mono">{formatTimer(report?.match?.totalDurationSeconds)}</p>
               </div>
-              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 flex flex-col justify-center items-center text-center">
+              <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-4 flex flex-col justify-center items-center text-center">
                 <ShieldAlert size={20} className="text-neutral-500 mb-2" />
                 <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest mb-1">Match Status</p>
                 <p className="text-sm font-black text-[#00C187]">{report?.match?.status}</p>
               </div>
-              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 flex flex-col justify-center items-center text-center">
+              <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-4 flex flex-col justify-center items-center text-center">
                 <Zap size={20} className="text-red-500 mb-2" />
                 <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest mb-1">Team A Penalties</p>
                 <p className="text-xl font-black text-red-500">{report?.match?.penaltyRuns?.teamA || 0}</p>
               </div>
-              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 flex flex-col justify-center items-center text-center">
+              <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-4 flex flex-col justify-center items-center text-center">
                 <Zap size={20} className="text-red-500 mb-2" />
                 <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest mb-1">Team B Penalties</p>
                 <p className="text-xl font-black text-red-500">{report?.match?.penaltyRuns?.teamB || 0}</p>
@@ -109,10 +109,10 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
             <div className="space-y-3">
               <h4 className="text-xs font-black text-neutral-400 uppercase tracking-[0.2em] mb-2 px-1">Player Statistics</h4>
               {report?.players?.map((player, idx) => (
-                <div key={idx} className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div key={idx} className="bg-white/[0.03] border border-white/5 rounded-[8px] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 
                   <div className="flex items-center gap-3 w-1/3">
-                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-[8px] bg-white/10 flex items-center justify-center shrink-0">
                       <User size={18} className="text-white/50" />
                     </div>
                     <div>

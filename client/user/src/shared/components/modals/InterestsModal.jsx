@@ -44,7 +44,7 @@ const InterestsModal = ({ isOpen, onClose, onSaved }) => {
 
  return (
  <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
- <div className="bg-[#000000] border border-[#2D2D2D] w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+ <div className="bg-[#000000] border border-[#2D2D2D] w-full max-w-lg rounded-[8px] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
  <div className="p-8 space-y-8">
  <div className="flex justify-between items-start">
  <div className="space-y-1">
@@ -63,11 +63,7 @@ const InterestsModal = ({ isOpen, onClose, onSaved }) => {
  <button
  key={sport}
  onClick={() => toggleSport(sport)}
- className={`flex items-center justify-between p-4 rounded-[8px] border transition-all duration-300 ${
- isSelected 
- ? "bg-[#55DEE8] border-[#55DEE8] text-black scale-[1.02]" 
- : "bg-[#000000] border-[#2D2D2D] text-white/60 hover:border-white/20"
- }`}
+ className={`flex items-center justify-between p-4 rounded-[8px] border transition-all duration-300 ${ isSelected ? "bg-[#55DEE8] border-[#55DEE8] text-black scale-[1.02]" : "bg-[#000000] border-[#2D2D2D] text-white/60 hover:border-white/20" }`}
  >
  <span className="text-xs font-black uppercase tracking-wider">{sport}</span>
  {isSelected ? <Check size={14} strokeWidth={3} /> : <div className="w-3.5 h-3.5 rounded-full border border-current opacity-20" />}

@@ -41,7 +41,7 @@ const CoachDashboard = () => {
         <p className="font-bold text-xl uppercase tracking-wider text-red-500">Connection Interrupted</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-6 px-8 py-3 border border-red-500/50 text-red-500 font-bold uppercase rounded-xl hover:bg-red-500/10 transition-all"
+          className="mt-6 px-8 py-3 border border-red-500/50 text-red-500 font-bold uppercase rounded-[8px] hover:bg-red-500/10 transition-all"
         >
           Try Again
         </button>
@@ -85,8 +85,8 @@ const CoachDashboard = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-2xl backdrop-blur-xl">
-              <div className="w-12 h-12 bg-[#55DEE8]/10 rounded-xl flex items-center justify-center text-[#55DEE8]">
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-[8px] backdrop-blur-xl">
+              <div className="w-12 h-12 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center text-[#55DEE8]">
                 <Calendar size={24} />
               </div>
               <div className="space-y-0.5">

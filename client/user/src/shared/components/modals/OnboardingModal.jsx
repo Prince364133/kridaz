@@ -273,7 +273,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl overflow-y-auto custom-scrollbar">
-      <div className="bg-[#000000] border border-[#2D2D2D] w-full max-w-xl rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in duration-500 max-h-[90vh] flex flex-col my-auto">
+      <div className="bg-[#000000] border border-[#2D2D2D] w-full max-w-xl rounded-[8px] shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in duration-500 max-h-[90vh] flex flex-col my-auto">
         
         {/* Progress Bar */}
         <div className="flex h-1.5 bg-[#000000]">
@@ -421,11 +421,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                       <button
                         key={g}
                         onClick={() => setFormData({...formData, gender: g})}
-                        className={`py-3 rounded-[8px] border font-bold text-xs uppercase tracking-wider transition-all duration-300 ${
-                          formData.gender === g
-                            ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_0_20px_rgba(85,222,232,0.2)]"
-                            : "bg-white/[0.03] border-[#2D2D2D] text-white/40 hover:border-[#2D2D2D]"
-                        }`}
+                        className={`py-3 rounded-[8px] border font-bold text-xs uppercase tracking-wider transition-all duration-300 ${ formData.gender === g ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_0_20px_rgba(85,222,232,0.2)]" : "bg-white/[0.03] border-[#2D2D2D] text-white/40 hover:border-[#2D2D2D]" }`}
                       >
                         {g}
                       </button>
@@ -507,11 +503,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                   <button
                     key={sport.name}
                     onClick={() => toggleSport(sport.name)}
-                    className={`flex items-center gap-3 p-4 rounded-[8px] border transition-all duration-300 ${
-                      formData.sportTypes.includes(sport.name)
-                        ? "bg-[#55DEE8] border-[#55DEE8] text-black scale-[1.02] shadow-[0_0_20px_rgba(85,222,232,0.2)]"
-                        : "bg-white/[0.03] border-[#2D2D2D] text-white/40 hover:border-[#2D2D2D] hover:bg-white/[0.05]"
-                    }`}
+                    className={`flex items-center gap-3 p-4 rounded-[8px] border transition-all duration-300 ${ formData.sportTypes.includes(sport.name) ? "bg-[#55DEE8] border-[#55DEE8] text-black scale-[1.02] shadow-[0_0_20px_rgba(85,222,232,0.2)]" : "bg-white/[0.03] border-[#2D2D2D] text-white/40 hover:border-[#2D2D2D] hover:bg-white/[0.05]" }`}
                   >
                     <div className={formData.sportTypes.includes(sport.name) ? "text-black" : "text-[#55DEE8]"}>
                       {sport.icon}

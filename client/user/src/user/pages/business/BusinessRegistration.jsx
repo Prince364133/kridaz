@@ -617,11 +617,7 @@ export default function BusinessRegistration() {
               <button 
                 type="submit"
                 disabled={loading || hasRoleConflict}
-                className={`w-full py-6 rounded-[8px] font-normal text-[13px] uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 ${
-                  hasRoleConflict 
-                    ? 'bg-[#2D2D2D] text-[#878C9F] cursor-not-allowed'
-                    : 'bg-[#55DEE8] hover:opacity-90 text-black '
-                }`}
+                className={`w-full py-6 rounded-[8px] font-normal text-[13px] uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 ${ hasRoleConflict ? 'bg-[#2D2D2D] text-[#878C9F] cursor-not-allowed' : 'bg-[#55DEE8] hover:opacity-90 text-black ' }`}
               >
                 {loading ? (
                   <>
@@ -706,11 +702,7 @@ function DocumentUpload({ label, id, onFileSelect, selectedFile }) {
       />
       <label 
         htmlFor={id}
-        className={`flex flex-col items-center justify-center p-6 border border-dashed transition-all cursor-pointer h-32 text-center rounded-[8px]
-          ${selectedFile 
-            ? 'border-[#55DEE8] bg-[#55DEE8]/5' 
-            : 'border-[#2D2D2D] bg-[#000000] hover:border-[#55DEE8]/50 hover:bg-[#55DEE8]/5'
-          }`}
+        className={`flex flex-col items-center justify-center p-6 border border-dashed transition-all cursor-pointer h-32 text-center rounded-[8px] ${selectedFile ? 'border-[#55DEE8] bg-[#55DEE8]/5' : 'border-[#2D2D2D] bg-[#000000] hover:border-[#55DEE8]/50 hover:bg-[#55DEE8]/5' }`}
       >
         {selectedFile ? (
           <div className="space-y-1">

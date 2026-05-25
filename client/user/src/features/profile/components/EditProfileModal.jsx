@@ -200,7 +200,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
           {/* Profile Picture Upload */}
           <div className="flex flex-col items-center justify-center mb-8">
             <div className="relative group">
-              <div className="w-24 h-24 rounded-3xl bg-[#CCFF00]/5 border border-[#2D2D2D] overflow-hidden flex items-center justify-center group-hover:border-[#CCFF00]/30 transition-all">
+              <div className="w-24 h-24 rounded-[8px] bg-[#CCFF00]/5 border border-[#2D2D2D] overflow-hidden flex items-center justify-center group-hover:border-[#CCFF00]/30 transition-all">
                 {user?.profilePicture ? (
                   <img 
                     src={user.profilePicture} 
@@ -222,7 +222,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
               
               <label 
                 htmlFor="modal-profile-upload" 
-                className="absolute -bottom-2 -right-2 w-10 h-10 bg-[#CCFF00] rounded-2xl flex items-center justify-center cursor-pointer shadow-lg shadow-[#CCFF00]/20 hover:scale-110 active:scale-95 transition-all z-20 border-4 border-black"
+                className="absolute -bottom-2 -right-2 w-10 h-10 bg-[#CCFF00] rounded-[8px] flex items-center justify-center cursor-pointer shadow-lg shadow-[#CCFF00]/20 hover:scale-110 active:scale-95 transition-all z-20 border-4 border-black"
               >
                 <Camera size={16} className="text-black" />
                 <input 
@@ -261,11 +261,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
               <div className="flex items-center justify-between ml-1">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">Username</label>
                 {usernameStatus && (
-                  <span className={`text-[9px] font-bold uppercase tracking-wider ${
-                    usernameStatus === 'available' ? 'text-[#CCFF00]' : 
-                    usernameStatus === 'taken' ? 'text-red-500' : 
-                    usernameStatus === 'short' ? 'text-orange-500' : 'text-white/20'
-                  }`}>
+                  <span className={`text-[9px] font-bold uppercase tracking-wider ${ usernameStatus === 'available' ? 'text-[#CCFF00]' : usernameStatus === 'taken' ? 'text-red-500' : usernameStatus === 'short' ? 'text-orange-500' : 'text-white/20' }`}>
                     {usernameStatus === 'checking' ? 'Checking...' :
                      usernameStatus === 'available' ? 'Available' :
                      usernameStatus === 'taken' ? 'Username Taken' :
@@ -274,20 +270,13 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
                 )}
               </div>
               <div className="relative group">
-                <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-black text-sm transition-colors ${
-                  usernameStatus === 'available' ? 'text-[#CCFF00]' : 
-                  usernameStatus === 'taken' ? 'text-red-500' : 'text-white/20'
-                }`}>@</span>
+                <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-black text-sm transition-colors ${ usernameStatus === 'available' ? 'text-[#CCFF00]' : usernameStatus === 'taken' ? 'text-red-500' : 'text-white/20' }`}>@</span>
                 <input
                   type="text"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
-                  className={`w-full bg-[#000000] border rounded-[8px] py-4 pl-10 pr-12 text-sm text-white focus:outline-none focus:ring-4 transition-all ${
-                    usernameStatus === 'available' ? 'border-[#CCFF00]/50 focus:border-[#CCFF00] focus:ring-[#CCFF00]/10' :
-                    usernameStatus === 'taken' ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/10' :
-                    'border-[#2D2D2D] focus:border-[#CCFF00] focus:ring-[#CCFF00]/10'
-                  }`}
+                  className={`w-full bg-[#000000] border rounded-[8px] py-4 pl-10 pr-12 text-sm text-white focus:outline-none focus:ring-4 transition-all ${ usernameStatus === 'available' ? 'border-[#CCFF00]/50 focus:border-[#CCFF00] focus:ring-[#CCFF00]/10' : usernameStatus === 'taken' ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/10' : 'border-[#2D2D2D] focus:border-[#CCFF00] focus:ring-[#CCFF00]/10' }`}
                   placeholder="username"
                   required
                 />
@@ -403,7 +392,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Sports & Interests</label>
             <div className="flex flex-wrap gap-2 mb-2">
               {(formData.interests || []).map((interest, idx) => (
-                <span key={idx} className="px-3 py-1 bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-full text-[10px] font-bold text-[#CCFF00] flex items-center gap-2">
+                <span key={idx} className="px-3 py-1 bg-[#CCFF00]/10 border border-[#CCFF00]/20 rounded-[6px] text-[10px] font-bold text-[#CCFF00] flex items-center gap-2">
                   {interest}
                   <button 
                     type="button"

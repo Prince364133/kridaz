@@ -41,9 +41,9 @@ export default function BlogDetail() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="space-y-6 w-full max-w-3xl px-6 pt-4">
-          <div className="h-10 w-2/3 bg-white/5 animate-pulse rounded-xl" />
-          <div className="h-6 w-1/3 bg-white/5 animate-pulse rounded-xl" />
-          <div className="h-96 w-full bg-white/5 animate-pulse rounded-3xl" />
+          <div className="h-10 w-2/3 bg-white/5 animate-pulse rounded-[8px]" />
+          <div className="h-6 w-1/3 bg-white/5 animate-pulse rounded-[8px]" />
+          <div className="h-96 w-full bg-white/5 animate-pulse rounded-[8px]" />
         </div>
       </div>
     );
@@ -55,7 +55,7 @@ export default function BlogDetail() {
         <p className="text-7xl font-black text-white/5 mb-4">404</p>
         <h1 className="text-2xl font-bold uppercase tracking-tight mb-2 text-white">Article Not Found</h1>
         <p className="text-gray-500 text-sm mb-8">This article may have been moved or removed.</p>
-        <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-black font-bold text-sm uppercase tracking-widest" style={{ backgroundColor: PRI }}>
+        <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-[8px] text-black font-bold text-sm uppercase tracking-widest" style={{ backgroundColor: PRI }}>
           <ArrowLeft size={14} /> Go Back Home
         </Link>
       </div>
@@ -78,7 +78,7 @@ export default function BlogDetail() {
         <div className="absolute top-10 left-6 z-10">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-bold text-white/60 hover:text-white hover:border-white/30 transition-all backdrop-blur-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-[8px] border text-sm font-bold text-white/60 hover:text-white hover:border-white/30 transition-all backdrop-blur-sm"
             style={{ borderColor: BDR, backgroundColor: "rgba(0,0,0,0.5)" }}
           >
             <ArrowLeft size={14} /> Back
@@ -149,18 +149,7 @@ export default function BlogDetail() {
       {/* ΓöÇΓöÇ ARTICLE BODY ΓöÇΓöÇ */}
       <div className="max-w-4xl mx-auto px-6 pt-14">
         <div
-          className="text-gray-400 text-lg leading-relaxed space-y-6
-            [&_h2]:text-white [&_h2]:text-3xl [&_h2]:font-black [&_h2]:uppercase [&_h2]:tracking-tight [&_h2]:mt-12 [&_h2]:mb-4
-            [&_h3]:text-white [&_h3]:text-2xl [&_h3]:font-black [&_h3]:uppercase [&_h3]:tracking-tight [&_h3]:mt-8 [&_h3]:mb-3
-            [&_p]:mb-6 [&_p]:leading-relaxed
-            [&_strong]:text-white [&_strong]:font-bold
-            [&_a]:text-[#55DEE8] [&_a]:no-underline hover:[&_a]:underline
-            [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2
-            [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:space-y-2
-            [&_li]:leading-relaxed
-            [&_blockquote]:border-l-4 [&_blockquote]:border-[#55DEE8] [&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-gray-500
-            [&_hr]:border-white/10 [&_hr]:my-10
-            [&_img]:rounded-2xl [&_img]:w-full [&_img]:object-cover"
+          className="text-gray-400 text-lg leading-relaxed space-y-6 [&_h2]:text-white [&_h2]:text-3xl [&_h2]:font-black [&_h2]:uppercase [&_h2]:tracking-tight [&_h2]:mt-12 [&_h2]:mb-4 [&_h3]:text-white [&_h3]:text-2xl [&_h3]:font-black [&_h3]:uppercase [&_h3]:tracking-tight [&_h3]:mt-8 [&_h3]:mb-3 [&_p]:mb-6 [&_p]:leading-relaxed [&_strong]:text-white [&_strong]:font-bold [&_a]:text-[#55DEE8] [&_a]:no-underline hover:[&_a]:underline [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:space-y-2 [&_li]:leading-relaxed [&_blockquote]:border-l-4 [&_blockquote]:border-[#55DEE8] [&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-gray-500 [&_hr]:border-white/10 [&_hr]:my-10 [&_img]:rounded-[8px] [&_img]:w-full [&_img]:object-cover"
           dangerouslySetInnerHTML={{ __html: blog.content }}
         />
       </div>
@@ -168,7 +157,7 @@ export default function BlogDetail() {
       {/* ΓöÇΓöÇ FOOTER CTA ΓöÇΓöÇ */}
       <div className="max-w-4xl mx-auto px-6 pt-20">
         <div
-          className="rounded-[2rem] border p-10 text-center"
+          className="rounded-[8px] border p-10 text-center"
           style={{ borderColor: BDR, backgroundColor: "#0A0A0A" }}
         >
           <h3 className="text-2xl font-black uppercase tracking-tight mb-3">
@@ -177,7 +166,7 @@ export default function BlogDetail() {
           <p className="text-gray-500 text-sm mb-6">Book a premium sports venue in your city ΓÇö instantly.</p>
           <Link
             to="/venues"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-sm uppercase tracking-widest text-black hover:brightness-110 transition-all"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-[8px] font-bold text-sm uppercase tracking-widest text-black hover:brightness-110 transition-all"
             style={{ backgroundColor: PRI }}
           >
             Explore Venues <ChevronRight size={16} />

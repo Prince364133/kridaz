@@ -42,7 +42,7 @@ const BlogSection = () => {
  <div className="h-12 w-64 bg-white/5 animate-pulse rounded-lg mb-8" />
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
  {[...Array(4)].map((_, i) => (
- <div key={i} className="aspect-[3/4] bg-white/5 animate-pulse rounded-3xl" />
+ <div key={i} className="aspect-[3/4] bg-white/5 animate-pulse rounded-[8px]" />
  ))}
  </div>
  </section>
@@ -68,18 +68,12 @@ const BlogSection = () => {
  </div>
 
  {/* Mobile: horizontal scroll | Desktop: grid */}
- <div className="
- flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth no-scrollbar
- md:grid md:grid-cols-2 md:overflow-visible md:pb-0
- lg:grid-cols-5
- ">
+ <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth no-scrollbar md:grid md:grid-cols-2 md:overflow-visible md:pb-0 lg:grid-cols-5">
  {blogs.slice(0, 5).map((blog, idx) => (
  <Link 
  key={blog._id} 
  to={`/blogs/${blog._id}`}
- className="group relative rounded-[2rem] overflow-hidden border border-white/5 bg-zinc-900 flex flex-col snap-start
- shrink-0 w-[75vw] aspect-[3/4]
- md:w-auto md:shrink md:aspect-[3/4]"
+ className="group relative rounded-[8px] overflow-hidden border border-white/5 bg-zinc-900 flex flex-col snap-start shrink-0 w-[75vw] aspect-[3/4] md:w-auto md:shrink md:aspect-[3/4]"
  >
  {/* Background Image */}
  <div className="absolute inset-0 z-0">

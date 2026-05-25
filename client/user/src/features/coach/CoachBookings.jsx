@@ -76,8 +76,8 @@ export default function CoachBookings() {
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-2xl backdrop-blur-xl">
-              <div className="w-12 h-12 bg-[#55DEE8]/10 rounded-xl flex items-center justify-center text-[#55DEE8]">
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-[8px] backdrop-blur-xl">
+              <div className="w-12 h-12 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center text-[#55DEE8]">
                 <Calendar size={24} />
               </div>
               <div className="space-y-0.5">
@@ -129,11 +129,7 @@ export default function CoachBookings() {
 
                   {/* Booking Details */}
                   <div className="flex flex-col md:items-end gap-2">
-                    <div className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border font-inter ${
-                      booking.status === 'PENDING' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
-                      booking.status === 'ACCEPTED' ? 'bg-[#55DEE8]/10 border-[#55DEE8]/20 text-[#55DEE8]' :
-                      'bg-red-500/10 border-red-500/20 text-red-500'
-                    }`}>
+                    <div className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border font-inter ${ booking.status === 'PENDING' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' : booking.status === 'ACCEPTED' ? 'bg-[#55DEE8]/10 border-[#55DEE8]/20 text-[#55DEE8]' : 'bg-red-500/10 border-red-500/20 text-red-500' }`}>
                       {booking.status}
                     </div>
                     <p className="text-2xl font-bold text-white mt-2 font-inter tracking-tight">Rs {booking.totalAmount}</p>

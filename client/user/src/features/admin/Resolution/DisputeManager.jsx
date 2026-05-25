@@ -93,7 +93,7 @@ const DisputeManager = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Dispute List (Left Sidebar) */}
           <div className={`lg:col-span-4 space-y-4 ${selectedDispute ? 'hidden lg:block' : 'block'}`}>
-             <div className="bg-[#111] border border-white/10 rounded-2xl overflow-hidden">
+             <div className="bg-[#111] border border-white/10 rounded-[8px] overflow-hidden">
                 <div className="px-6 py-4 bg-white/5 border-b border-white/10 flex justify-between items-center">
                    <p className="text-xs font-black uppercase tracking-widest text-gray-400">All Disputes</p>
                    <span className="text-[10px] bg-orange-500 text-black px-2 py-0.5 rounded font-black">{filteredDisputes.length}</span>
@@ -138,7 +138,7 @@ const DisputeManager = () => {
              {selectedDispute ? (
                <div className="space-y-6">
                   {/* Summary Header Card */}
-                  <div className="bg-[#111] border border-white/10 rounded-3xl p-8 relative overflow-hidden">
+                  <div className="bg-[#111] border border-white/10 rounded-[8px] p-8 relative overflow-hidden">
                      <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[100px] -z-10" />
                      
                      <div className="flex flex-col md:flex-row justify-between items-start gap-6">
@@ -161,12 +161,12 @@ const DisputeManager = () => {
                            {selectedDispute.status !== 'RESOLVED' && (
                              <button 
                                onClick={() => setIsResolveModalOpen(true)}
-                               className="bg-orange-500 text-black px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-orange-400 transition-all shadow-[0_5px_15px_rgba(249,115,22,0.3)]"
+                               className="bg-orange-500 text-black px-6 py-3 rounded-[8px] text-xs font-black uppercase tracking-widest hover:bg-orange-400 transition-all shadow-[0_5px_15px_rgba(249,115,22,0.3)]"
                              >
                                 Resolve Case
                              </button>
                            )}
-                           <button className="bg-white/5 border border-white/10 text-white px-5 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2">
+                           <button className="bg-white/5 border border-white/10 text-white px-5 py-3 rounded-[8px] text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2">
                               Log <AlertCircle size={14}/>
                            </button>
                         </div>
@@ -175,9 +175,9 @@ const DisputeManager = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                      {/* Customer Card */}
-                     <div className="bg-[#111] border border-white/10 rounded-3xl p-6 group hover:border-orange-500/20 transition-all">
+                     <div className="bg-[#111] border border-white/10 rounded-[8px] p-6 group hover:border-orange-500/20 transition-all">
                         <div className="flex items-center gap-4 mb-6">
-                           <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/20 group-hover:scale-110 transition-transform">
+                           <div className="w-12 h-12 rounded-[8px] bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/20 group-hover:scale-110 transition-transform">
                               <User size={24} />
                            </div>
                            <div>
@@ -186,11 +186,11 @@ const DisputeManager = () => {
                            </div>
                         </div>
                         <div className="space-y-4">
-                           <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                           <div className="flex items-center justify-between p-3 bg-white/5 rounded-[8px] border border-white/5">
                               <span className="text-xs text-gray-500 font-bold uppercase flex items-center gap-2"><Phone size={12}/> Phone</span>
                               <span className="text-xs font-bold text-white">{selectedDispute.raisedBy?.phone || "N/A"}</span>
                            </div>
-                           <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                           <div className="flex items-center justify-between p-3 bg-white/5 rounded-[8px] border border-white/5">
                               <span className="text-xs text-gray-500 font-bold uppercase flex items-center gap-2"><Clock size={12}/> Registered</span>
                               <span className="text-xs font-bold text-white">{selectedDispute.raisedBy?.createdAt ? new Date(selectedDispute.raisedBy.createdAt).toLocaleDateString() : "N/A"}</span>
                            </div>
@@ -198,9 +198,9 @@ const DisputeManager = () => {
                      </div>
 
                      {/* Venue Card */}
-                     <div className="bg-[#111] border border-white/10 rounded-3xl p-6 group hover:border-orange-500/20 transition-all">
+                     <div className="bg-[#111] border border-white/10 rounded-[8px] p-6 group hover:border-orange-500/20 transition-all">
                         <div className="flex items-center gap-4 mb-6">
-                           <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20 group-hover:scale-110 transition-transform">
+                           <div className="w-12 h-12 rounded-[8px] bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20 group-hover:scale-110 transition-transform">
                               <Building size={24} />
                            </div>
                            <div>
@@ -209,11 +209,11 @@ const DisputeManager = () => {
                            </div>
                         </div>
                         <div className="space-y-4">
-                           <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                           <div className="flex items-center justify-between p-3 bg-white/5 rounded-[8px] border border-white/5">
                               <span className="text-xs text-gray-500 font-bold uppercase flex items-center gap-2"><User size={12}/> Owner</span>
                               <span className="text-xs font-bold text-white truncate">{selectedDispute.bookingDetails?.ownerName}</span>
                            </div>
-                           <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                           <div className="flex items-center justify-between p-3 bg-white/5 rounded-[8px] border border-white/5">
                               <span className="text-xs text-gray-500 font-bold uppercase flex items-center gap-2"><Phone size={12}/> Contact</span>
                               <span className="text-xs font-bold text-white">{selectedDispute.bookingDetails?.ownerPhone || "N/A"}</span>
                            </div>
@@ -224,7 +224,7 @@ const DisputeManager = () => {
                   {/* Booking Details & Evidence Gallery */}
                   <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                      <div className="xl:col-span-1 space-y-6">
-                        <div className="bg-[#111] border border-white/10 rounded-3xl p-6">
+                        <div className="bg-[#111] border border-white/10 rounded-[8px] p-6">
                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-6">Financial Snapshot</h4>
                            <div className="space-y-4">
                               <div className="flex justify-between items-center text-sm">
@@ -249,14 +249,14 @@ const DisputeManager = () => {
                      </div>
 
                      {/* Evidence Gallery */}
-                     <div className="xl:col-span-2 bg-[#111] border border-white/10 rounded-3xl p-6">
+                     <div className="xl:col-span-2 bg-[#111] border border-white/10 rounded-[8px] p-6">
                         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-6 flex items-center gap-2">
                            <ImageIcon size={14}/> Evidence Gallery
                         </h4>
                         {selectedDispute.images && selectedDispute.images.length > 0 ? (
                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                               {selectedDispute.images.map((img, i) => (
-                                 <a key={i} href={img} target="_blank" rel="noreferrer" className="block relative aspect-square rounded-2xl overflow-hidden border border-white/5 hover:border-orange-500/50 transition-all group/img">
+                                 <a key={i} href={img} target="_blank" rel="noreferrer" className="block relative aspect-square rounded-[8px] overflow-hidden border border-white/5 hover:border-orange-500/50 transition-all group/img">
                                     <img src={img} alt={`evidence-${i}`} className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110" />
                                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
                                        <ExternalLink size={20} className="text-white" />
@@ -265,7 +265,7 @@ const DisputeManager = () => {
                               ))}
                            </div>
                         ) : (
-                           <div className="flex flex-col items-center justify-center py-10 bg-white/[0.02] rounded-2xl border border-dashed border-white/10 text-gray-600">
+                           <div className="flex flex-col items-center justify-center py-10 bg-white/[0.02] rounded-[8px] border border-dashed border-white/10 text-gray-600">
                               <ImageIcon size={32} className="mb-2 opacity-20" />
                               <p className="text-xs font-bold uppercase">No photographic evidence provided</p>
                            </div>
@@ -274,7 +274,7 @@ const DisputeManager = () => {
                   </div>
 
                   {/* Communication Thread */}
-                  <div className="bg-[#111] border border-white/10 rounded-3xl overflow-hidden flex flex-col min-h-[500px]">
+                  <div className="bg-[#111] border border-white/10 rounded-[8px] overflow-hidden flex flex-col min-h-[500px]">
                      <div className="px-8 py-4 bg-white/5 border-b border-white/10">
                         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 flex items-center gap-2">
                            <MessageSquare size={14}/> Communication Thread
@@ -291,11 +291,7 @@ const DisputeManager = () => {
 
                         {selectedDispute.replies && selectedDispute.replies.map((reply, idx) => (
                            <div key={idx} className={`flex flex-col ${reply.sender === 'ADMIN' ? 'items-end' : 'items-start'} max-w-[85%] ${reply.sender === 'ADMIN' ? 'ml-auto' : ''}`}>
-                              <div className={`p-5 rounded-2xl border shadow-xl ${
-                                 reply.sender === 'ADMIN' 
-                                   ? 'bg-orange-500/10 border-orange-500/20 rounded-tr-none' 
-                                   : 'bg-[#1a1a1a] border-white/10 rounded-tl-none'
-                              }`}>
+                              <div className={`p-5 rounded-[8px] border shadow-xl ${ reply.sender === 'ADMIN' ? 'bg-orange-500/10 border-orange-500/20 rounded-tr-none' : 'bg-[#1a1a1a] border-white/10 rounded-tl-none' }`}>
                                  <p className="text-sm leading-relaxed text-gray-200">{reply.message}</p>
                               </div>
                               <div className="flex items-center gap-2 mt-2 px-1">
@@ -317,7 +313,7 @@ const DisputeManager = () => {
                               <input 
                                 type="text"
                                 placeholder="Type a message to the user..."
-                                className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-orange-500 transition-all placeholder:text-gray-600"
+                                className="flex-1 bg-white/5 border border-white/10 rounded-[8px] px-6 py-4 text-sm focus:outline-none focus:border-orange-500 transition-all placeholder:text-gray-600"
                                 value={replyText}
                                 onChange={(e) => setReplyText(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && replyText.trim() && handleReply(selectedDispute._id, replyText).then(() => setReplyText(""))}
@@ -325,7 +321,7 @@ const DisputeManager = () => {
                               <button 
                                 onClick={() => replyText.trim() && handleReply(selectedDispute._id, replyText).then(() => setReplyText(""))}
                                 disabled={!replyText.trim()}
-                                className="bg-orange-500 text-black p-4 rounded-2xl hover:bg-orange-400 transition-all disabled:opacity-50 shadow-[0_5px_15px_rgba(249,115,22,0.2)]"
+                                className="bg-orange-500 text-black p-4 rounded-[8px] hover:bg-orange-400 transition-all disabled:opacity-50 shadow-[0_5px_15px_rgba(249,115,22,0.2)]"
                               >
                                  <Send size={20} />
                               </button>
@@ -335,10 +331,10 @@ const DisputeManager = () => {
                   </div>
                </div>
              ) : (
-               <div className="h-[800px] bg-[#111] border border-white/10 rounded-3xl flex flex-col items-center justify-center text-center p-12 relative overflow-hidden group">
+               <div className="h-[800px] bg-[#111] border border-white/10 rounded-[8px] flex flex-col items-center justify-center text-center p-12 relative overflow-hidden group">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-orange-500/5 via-transparent to-transparent opacity-50" />
                   
-                  <div className="w-24 h-24 bg-white/5 rounded-[2.5rem] flex items-center justify-center mb-8 border border-white/10 group-hover:scale-110 transition-transform duration-700">
+                  <div className="w-24 h-24 bg-white/5 rounded-[8px] flex items-center justify-center mb-8 border border-white/10 group-hover:scale-110 transition-transform duration-700">
                      <ShieldAlert className="text-gray-500 group-hover:text-orange-500 transition-colors" size={40} />
                   </div>
                   <h3 className="text-3xl font-bold mb-3 tracking-tight">Resolution Center</h3>
@@ -354,9 +350,9 @@ const DisputeManager = () => {
       {/* Resolution Modal */}
       {isResolveModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in">
-          <div className="bg-[#111] border border-orange-500/30 rounded-[2.5rem] w-full max-w-xl p-10 relative shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+          <div className="bg-[#111] border border-orange-500/30 rounded-[8px] w-full max-w-xl p-10 relative shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
             <div className="flex items-center gap-3 mb-8">
-               <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-500">
+               <div className="w-10 h-10 rounded-[8px] bg-orange-500/20 flex items-center justify-center text-orange-500">
                   <CheckCircle size={20} />
                </div>
                <h2 className="text-2xl font-bold text-white uppercase tracking-tight">Issue Final Resolution</h2>
@@ -375,7 +371,7 @@ const DisputeManager = () => {
                       <button
                         key={action.id}
                         onClick={() => setDecision(action.id)}
-                        className={`flex items-center gap-3 p-4 rounded-2xl border text-xs font-bold transition-all ${decision === action.id ? 'bg-orange-500 border-orange-500 text-black shadow-[0_5px_15px_rgba(249,115,22,0.3)]' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'}`}
+                        className={`flex items-center gap-3 p-4 rounded-[8px] border text-xs font-bold transition-all ${decision === action.id ? 'bg-orange-500 border-orange-500 text-black shadow-[0_5px_15px_rgba(249,115,22,0.3)]' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'}`}
                       >
                          <action.icon size={16} />
                          {action.label}
@@ -394,7 +390,7 @@ const DisputeManager = () => {
                        value={partialAmount}
                        onChange={(e) => setPartialAmount(e.target.value)}
                        placeholder="Enter amount to refund..."
-                       className="w-full bg-[#0a0a0a] border border-white/10 rounded-2xl pl-8 pr-4 py-4 text-white focus:outline-none focus:border-orange-500 transition-all font-bold"
+                       className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] pl-8 pr-4 py-4 text-white focus:outline-none focus:border-orange-500 transition-all font-bold"
                      />
                   </div>
                   <p className="text-[9px] text-gray-600 mt-2 font-bold uppercase italic">* Remaining ₹{selectedDispute.bookingDetails?.ownerRevenue - (parseFloat(partialAmount) || 0)} will be released to owner.</p>
@@ -407,21 +403,21 @@ const DisputeManager = () => {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Summarize the investigation and reason for this outcome..."
-                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-2xl px-6 py-4 text-white min-h-[120px] resize-none focus:outline-none focus:border-orange-500 transition-all text-sm leading-relaxed"
+                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] px-6 py-4 text-white min-h-[120px] resize-none focus:outline-none focus:border-orange-500 transition-all text-sm leading-relaxed"
                 />
               </div>
 
               <div className="flex gap-4 pt-6">
                 <button
                   onClick={() => setIsResolveModalOpen(false)}
-                  className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black uppercase tracking-widest transition-all border border-white/10"
+                  className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white rounded-[8px] font-black uppercase tracking-widest transition-all border border-white/10"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmResolve}
                   disabled={!notes || (decision === "PARTIAL_REFUND" && !partialAmount) || processingId === selectedDispute._id}
-                  className="flex-1 py-4 bg-orange-500 hover:bg-orange-600 text-black rounded-2xl font-black uppercase tracking-widest transition-all disabled:opacity-30 shadow-[0_10px_20px_rgba(249,115,22,0.2)]"
+                  className="flex-1 py-4 bg-orange-500 hover:bg-orange-600 text-black rounded-[8px] font-black uppercase tracking-widest transition-all disabled:opacity-30 shadow-[0_10px_20px_rgba(249,115,22,0.2)]"
                 >
                   {processingId === selectedDispute._id ? "Processing..." : "Confirm Final Decision"}
                 </button>

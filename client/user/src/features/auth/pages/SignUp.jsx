@@ -241,7 +241,7 @@ const SignUp = () => {
                         <select
                           value={countryCode}
                           onChange={(e) => setCountryCode(e.target.value)}
-                          className="bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 px-2 text-white text-sm outline-none transition-all cursor-pointer w-20 appearance-none text-center"
+                          className="bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-2 text-white text-sm outline-none transition-all cursor-pointer w-20 appearance-none text-center"
                         >
                           <option value="+91" className="text-black">+91 ðŸ‡®ðŸ‡³</option>
                           <option value="+1" className="text-black">+1 ðŸ‡ºðŸ‡¸</option>
@@ -260,7 +260,7 @@ const SignUp = () => {
                               setIdentifier(val.slice(0, 10));
                             }}
                             placeholder="9876543210"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
                       </div>
@@ -281,7 +281,7 @@ const SignUp = () => {
                           value={otp}
                           onChange={(e) => setOtp(e.target.value)}
                           placeholder="6-digit OTP"
-                          className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all tracking-[0.5em] font-mono"
+                          className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all tracking-[0.5em] font-mono"
                         />
                       </div>
                     </div>
@@ -293,7 +293,7 @@ const SignUp = () => {
                   <button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
+                    className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-[8px] font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
                   >
                     {loading ? "Processing..." : step === 2 ? "Complete Profile" : "Continue"}
                     {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}

@@ -40,7 +40,7 @@ const ExtraRunsModal = ({ extraType = 'WIDE', onConfirm, onClose }) => {
         <motion.div
           initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
           transition={{ type: 'spring', damping: 24 }}
-          className="relative w-full max-w-sm bg-[#000] rounded-3xl border border-white/5 overflow-hidden z-10 shadow-2xl"
+          className="relative w-full max-w-sm bg-[#000] rounded-[8px] border border-white/5 overflow-hidden z-10 shadow-2xl"
         >
           {/* Header */}
           <div className="px-6 pt-6 pb-5 flex items-center justify-between border-b border-white/5">
@@ -54,7 +54,7 @@ const ExtraRunsModal = ({ extraType = 'WIDE', onConfirm, onClose }) => {
               <h2 className="text-xl font-black text-white leading-tight tracking-tight uppercase">Extras</h2>
               <p className="text-[11px] text-neutral-500 font-bold uppercase tracking-widest mt-1.5">{meta.note}</p>
             </div>
-            <button onClick={onClose} className="p-2 bg-white/5 border border-white/5 rounded-full text-neutral-500 hover:text-white transition-all">
+            <button onClick={onClose} className="p-2 bg-white/5 border border-white/5 rounded-[8px] text-neutral-500 hover:text-white transition-all">
               <X size={16} />
             </button>
           </div>
@@ -67,11 +67,7 @@ const ExtraRunsModal = ({ extraType = 'WIDE', onConfirm, onClose }) => {
                   key={r}
                   onClick={() => setRuns(r)}
                   style={runs === r ? { background: THEME_COLOR, color: '#000', boxShadow: `0 0 20px ${THEME_COLOR}4d` } : {}}
-                  className={`flex-1 h-14 rounded-xl text-xl font-black transition-all ${
-                    runs === r
-                      ? 'scale-105'
-                      : 'bg-white/5 text-neutral-400 border border-white/5 hover:border-white/10'
-                  }`}
+                  className={`flex-1 h-14 rounded-[8px] text-xl font-black transition-all ${ runs === r ? 'scale-105' : 'bg-white/5 text-neutral-400 border border-white/5 hover:border-white/10' }`}
                 >
                   {r}
                 </button>
@@ -81,7 +77,7 @@ const ExtraRunsModal = ({ extraType = 'WIDE', onConfirm, onClose }) => {
             {/* Manual input */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest ml-1">Overthrows / Manual</label>
-              <div className="flex items-center gap-3 bg-neutral-900/50 border border-white/5 rounded-2xl px-5 py-4 focus-within:border-[#00C187] transition-all">
+              <div className="flex items-center gap-3 bg-neutral-900/50 border border-white/5 rounded-[8px] px-5 py-4 focus-within:border-[#00C187] transition-all">
                 <span className="text-neutral-500 text-sm font-bold uppercase">Other</span>
                 <input
                   type="number"
@@ -95,7 +91,7 @@ const ExtraRunsModal = ({ extraType = 'WIDE', onConfirm, onClose }) => {
             </div>
 
             {/* Total display */}
-            <div className="bg-white/5 rounded-2xl px-5 py-4 flex justify-between items-center border border-white/5">
+            <div className="bg-white/5 rounded-[8px] px-5 py-4 flex justify-between items-center border border-white/5">
               <span className="text-neutral-500 text-[10px] font-black uppercase tracking-widest">Total Impact</span>
               <span className="font-black text-lg" style={{ color: THEME_COLOR }}>{totalDisplay}</span>
             </div>
@@ -104,13 +100,13 @@ const ExtraRunsModal = ({ extraType = 'WIDE', onConfirm, onClose }) => {
             <div className="flex gap-4">
               <button
                 onClick={onClose}
-                className="flex-1 py-5 rounded-xl font-black text-white text-[11px] uppercase tracking-[0.2em] transition-all bg-white/5 border border-white/5 hover:bg-white/10 active:scale-95"
+                className="flex-1 py-5 rounded-[8px] font-black text-white text-[11px] uppercase tracking-[0.2em] transition-all bg-white/5 border border-white/5 hover:bg-white/10 active:scale-95"
               >
                 Cancel
               </button>
               <button
                 onClick={() => onConfirm(runs)}
-                className="flex-[2] py-5 rounded-xl font-black text-black text-[11px] uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl"
+                className="flex-[2] py-5 rounded-[8px] font-black text-black text-[11px] uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl"
                 style={{ backgroundColor: THEME_COLOR, boxShadow: `0 10px 30px ${THEME_COLOR}33` }}
               >
                 Confirm {meta.label}

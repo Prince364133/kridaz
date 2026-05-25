@@ -79,13 +79,13 @@ const BookingPass = () => {
   if (!booking) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <div className="bg-zinc-900 border border-zinc-800 p-10 rounded-[32px] text-center max-w-md w-full">
+        <div className="bg-zinc-900 border border-zinc-800 p-10 rounded-[8px] text-center max-w-md w-full">
           <Info className="w-16 h-16 text-zinc-500 mx-auto mb-6" />
           <h2 className="text-2xl font-bold text-white mb-2 uppercase">Pass Not Found</h2>
           <p className="text-zinc-400 mb-8 text-sm">We couldn't find the booking pass you're looking for. It might have expired or doesn't exist.</p>
           <Link 
             to="/booking-history" 
-            className="inline-flex items-center gap-2 bg-[#84CC16] text-black px-8 py-4 rounded-2xl font-bold uppercase text-xs hover:scale-105 transition-transform"
+            className="inline-flex items-center gap-2 bg-[#84CC16] text-black px-8 py-4 rounded-[8px] font-bold uppercase text-xs hover:scale-105 transition-transform"
           >
             <ChevronLeft className="w-4 h-4" />
             My Bookings
@@ -110,10 +110,10 @@ const BookingPass = () => {
             Back
           </Link>
           <div className="flex gap-3">
-            <button onClick={handleDownload} className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-[#84CC16] transition-all">
+            <button onClick={handleDownload} className="p-3 bg-zinc-900 border border-zinc-800 rounded-[8px] text-zinc-400 hover:text-[#84CC16] transition-all">
               <Download size={18} />
             </button>
-            <button onClick={handleShare} className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-[#84CC16] transition-all">
+            <button onClick={handleShare} className="p-3 bg-zinc-900 border border-zinc-800 rounded-[8px] text-zinc-400 hover:text-[#84CC16] transition-all">
               <Share2 size={18} />
             </button>
           </div>
@@ -126,10 +126,10 @@ const BookingPass = () => {
           className="relative"
         >
           {/* Background Glow */}
-          <div className="absolute -inset-4 bg-[#84CC16]/10 blur-3xl rounded-[40px] pointer-events-none" />
+          <div className="absolute -inset-4 bg-[#84CC16]/10 blur-3xl rounded-[8px] pointer-events-none" />
 
           {/* Pass Body */}
-          <div ref={passRef} className="relative bg-[#0A0A0A] border border-white/10 rounded-[40px] overflow-hidden shadow-2xl">
+          <div ref={passRef} className="relative bg-[#0A0A0A] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl">
             {/* Top Section: Venue Image & Basic Info */}
             <div className="relative h-48 sm:h-56">
               <img 
@@ -172,8 +172,8 @@ const BookingPass = () => {
               {/* Location Section */}
               <div className="space-y-3">
                 <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Venue Location</p>
-                <div className="flex items-start gap-3 bg-white/5 p-4 rounded-2xl border border-white/5">
-                  <div className="p-2 bg-[#84CC16]/10 text-[#84CC16] rounded-xl shrink-0">
+                <div className="flex items-start gap-3 bg-white/5 p-4 rounded-[8px] border border-white/5">
+                  <div className="p-2 bg-[#84CC16]/10 text-[#84CC16] rounded-[8px] shrink-0">
                     <MapPin size={18} />
                   </div>
                   <div className="flex-1">
@@ -192,7 +192,7 @@ const BookingPass = () => {
               </div>
 
               {/* Financial Breakdown Section */}
-              <div className="p-5 bg-white/5 border border-white/5 rounded-3xl space-y-4">
+              <div className="p-5 bg-white/5 border border-white/5 rounded-[8px] space-y-4">
                 <div className="flex justify-between items-center">
                   <div className="space-y-0.5">
                     <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-tight">Total Value</p>
@@ -224,7 +224,7 @@ const BookingPass = () => {
                 </div>
 
                 {booking.paymentType === "PARTIAL" && (
-                    <div className="flex items-center gap-2 p-2 bg-orange-400/10 rounded-xl">
+                    <div className="flex items-center gap-2 p-2 bg-orange-400/10 rounded-[8px]">
                         <Info size={12} className="text-orange-400" />
                         <p className="text-[8px] font-bold text-orange-400 uppercase leading-none">Please pay balance at venue before playing</p>
                     </div>
@@ -237,7 +237,7 @@ const BookingPass = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {turf.managerContacts && turf.managerContacts.length > 0 ? (
                     turf.managerContacts.map((manager, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl group hover:border-[#84CC16]/30 transition-all">
+                      <div key={idx} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-[8px] group hover:border-[#84CC16]/30 transition-all">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-[#84CC16]">
                             <UserIcon size={14} />
@@ -253,7 +253,7 @@ const BookingPass = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="col-span-full py-4 text-center border border-dashed border-zinc-800 rounded-2xl">
+                    <div className="col-span-full py-4 text-center border border-dashed border-zinc-800 rounded-[8px]">
                       <p className="text-[10px] font-bold text-zinc-600 uppercase">Manager contacts not provided</p>
                     </div>
                   )}
@@ -288,7 +288,7 @@ const BookingPass = () => {
 
               {/* Entry Verification */}
               <div className="flex flex-col items-center gap-6 pb-4">
-                <div className="relative p-6 bg-white rounded-3xl shadow-[0_0_50px_rgba(255,255,255,0.1)] group overflow-hidden">
+                <div className="relative p-6 bg-white rounded-[8px] shadow-[0_0_50px_rgba(255,255,255,0.1)] group overflow-hidden">
                   <motion.div 
                     animate={{ x: [-100, 200] }}
                     transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
@@ -332,13 +332,13 @@ const BookingPass = () => {
 
         {/* Action Buttons */}
         <div className="mt-8 grid grid-cols-2 gap-4">
-           <button onClick={handleDownload} className="w-full bg-zinc-900 border border-zinc-800 text-white h-14 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-zinc-800 transition-all flex items-center justify-center gap-2">
+           <button onClick={handleDownload} className="w-full bg-zinc-900 border border-zinc-800 text-white h-14 rounded-[8px] font-bold uppercase text-[10px] tracking-widest hover:bg-zinc-800 transition-all flex items-center justify-center gap-2">
               <Download size={14} />
               Save Pass Image
            </button>
            <button 
              onClick={() => window.print()}
-             className="w-full bg-white/5 border border-white/10 text-white h-14 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+             className="w-full bg-white/5 border border-white/10 text-white h-14 rounded-[8px] font-bold uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2"
            >
               <ExternalLink size={14} />
               Print Pass
@@ -362,7 +362,7 @@ const BookingPass = () => {
                 {[...Array(3)].map((_, i) => (
                   <div 
                     key={i} 
-                    className="h-[280px] rounded-3xl bg-zinc-900/40 border border-white/5 animate-pulse relative overflow-hidden"
+                    className="h-[280px] rounded-[8px] bg-zinc-900/40 border border-white/5 animate-pulse relative overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent h-[50%]" />
                     <div className="absolute bottom-0 left-0 right-0 p-6 space-y-2">

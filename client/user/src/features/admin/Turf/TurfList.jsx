@@ -26,7 +26,7 @@ const TurfList = () => {
   if (loading) {
     return (
       <div className="space-y-12 animate-pulse">
-        <div className="h-48 bg-white/5 rounded-3xl border border-white/5" />
+        <div className="h-48 bg-white/5 rounded-[8px] border border-white/5" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, index) => (
             <TurfSkeleton key={index} />
@@ -51,7 +51,7 @@ const TurfList = () => {
       {owner && (
         <div className="relative group">
           {/* Decorative background glow */}
-          <div className="absolute -inset-4 bg-gradient-to-r from-[#CCFF00]/5 to-transparent rounded-[40px] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="absolute -inset-4 bg-gradient-to-r from-[#CCFF00]/5 to-transparent rounded-[8px] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
           
           <div className="relative bms-card p-8 sm:p-10 overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#CCFF00]/5 rounded-full -mr-32 -mt-32 blur-3xl" />
@@ -59,14 +59,14 @@ const TurfList = () => {
             <div className="flex flex-col lg:flex-row gap-10 items-start lg:items-center">
               {/* Profile Avatar Container */}
               <div className="relative shrink-0">
-                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-zinc-900 rounded-3xl border-2 border-[#CCFF00]/20 flex items-center justify-center overflow-hidden shadow-2xl relative z-10">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-zinc-900 rounded-[8px] border-2 border-[#CCFF00]/20 flex items-center justify-center overflow-hidden shadow-2xl relative z-10">
                   {owner.profilePicture ? (
                     <img src={owner.profilePicture} alt={owner.name} className="w-full h-full object-cover" />
                   ) : (
                     <User size={48} className="text-[#CCFF00]/40" />
                   )}
                 </div>
-                <div className="absolute -bottom-2 -right-2 bg-[#CCFF00] text-black p-2 rounded-xl shadow-lg z-20">
+                <div className="absolute -bottom-2 -right-2 bg-[#CCFF00] text-black p-2 rounded-[8px] shadow-lg z-20">
                   <ShieldCheck size={18} />
                 </div>
               </div>
@@ -90,7 +90,7 @@ const TurfList = () => {
                 <div className="flex gap-3">
                   <button 
                     onClick={() => setShowDeleteModal(true)}
-                    className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-red-500/20 transition-all flex items-center gap-2"
+                    className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 font-black text-[10px] uppercase tracking-widest rounded-[8px] hover:bg-red-500/20 transition-all flex items-center gap-2"
                   >
                     <Trash2 size={14} /> Terminate Partnership
                   </button>
@@ -98,7 +98,7 @@ const TurfList = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="flex items-center gap-4 group/item">
-                    <div className="p-3 bg-white/5 rounded-xl border border-white/5 group-hover/item:border-[#CCFF00]/30 transition-colors">
+                    <div className="p-3 bg-white/5 rounded-[8px] border border-white/5 group-hover/item:border-[#CCFF00]/30 transition-colors">
                       <Mail size={16} className="text-[#CCFF00]" />
                     </div>
                     <div>
@@ -108,7 +108,7 @@ const TurfList = () => {
                   </div>
 
                   <div className="flex items-center gap-4 group/item">
-                    <div className="p-3 bg-white/5 rounded-xl border border-white/5 group-hover/item:border-[#CCFF00]/30 transition-colors">
+                    <div className="p-3 bg-white/5 rounded-[8px] border border-white/5 group-hover/item:border-[#CCFF00]/30 transition-colors">
                       <Phone size={16} className="text-[#CCFF00]" />
                     </div>
                     <div>
@@ -118,7 +118,7 @@ const TurfList = () => {
                   </div>
 
                   <div className="flex items-center gap-4 group/item">
-                    <div className="p-3 bg-white/5 rounded-xl border border-white/5 group-hover/item:border-[#CCFF00]/30 transition-colors">
+                    <div className="p-3 bg-white/5 rounded-[8px] border border-white/5 group-hover/item:border-[#CCFF00]/30 transition-colors">
                       <Calendar size={16} className="text-[#CCFF00]" />
                     </div>
                     <div>
@@ -156,7 +156,7 @@ const TurfList = () => {
               </div>
 
               {/* Stats Module */}
-              <div className="w-full lg:w-48 p-6 bg-white/5 rounded-3xl border border-white/5 space-y-4">
+              <div className="w-full lg:w-48 p-6 bg-white/5 rounded-[8px] border border-white/5 space-y-4">
                 <div className="text-center">
                   <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Total Assets</p>
                   <p className="text-4xl font-display text-[#CCFF00] tracking-tighter">{turfData?.length || 0}</p>
@@ -179,7 +179,7 @@ const TurfList = () => {
       <div className="space-y-8">
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-4">
-            <div className="p-2 bg-[#CCFF00]/10 rounded-lg border border-[#CCFF00]/20">
+            <div className="p-2 bg-[#CCFF00]/10 rounded-[8px] border border-[#CCFF00]/20">
               <Building2 size={20} className="text-[#CCFF00]" />
             </div>
             <div>
