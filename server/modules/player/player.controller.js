@@ -4,6 +4,7 @@ import WalletService from "../../services/wallet.service.js";
 import { findNearby, updateGeoPoint } from "../../utils/geo.util.js";
 import logger from "../../utils/logger.js";
 import { getUserRecommendations } from "../../services/recommendation.service.js";
+import redisClient from "../../config/redis.js";
 
 
 const resolveUserId = async (id) => {
@@ -47,6 +48,31 @@ export const getPublicPlayers = async (req, res) => {
           }
         }
       });
+      
+      // Get real-time online users from Redis (who might not be in Postgres yet)
+      let onlineUserIds = [];
+      try {
+        onlineUserIds = await redisClient.georadius("kridaz:geo:online", lng, lat, radius / 1000, "km") || [];
+      } catch (err) {
+        logger.error("Redis georadius error", err);
+      }
+      
+      const postgresUserIds = new Set(nearbyUsers.map(u => u.id.toString()));
+      if (currentUserId) postgresUserIds.add(currentUserId.toString());
+      
+      const missingUserIds = onlineUserIds.filter(id => !postgresUserIds.has(id));
+      
+      if (missingUserIds.length > 0) {
+        const missingUsers = await prisma.user.findMany({
+          where: { ...where, id: { in: missingUserIds } },
+          include: { _count: { select: { bookings: true } } }
+        });
+        
+        missingUsers.forEach(u => {
+          u.distance = 0; // approximate distance for real-time users
+          nearbyUsers.push(u);
+        });
+      }
       
       // If we used findNearby, we already have the users
       if (nearbyUsers.length > 0) {

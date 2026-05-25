@@ -113,6 +113,18 @@ const Community = ({ children, onSearchActive }) => {
     }
   };
 
+  // Disable body scroll when viewing Reels
+  useEffect(() => {
+    if (activeFilter === "Reels") {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [activeFilter]);
+
 
   // Reels (Shots) hook â€” cursor-based infinite scroll
   const [reelCursor, setReelCursor] = useState(null);
@@ -755,7 +767,7 @@ const Community = ({ children, onSearchActive }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white pt-4 pb-12 px-4 md:px-6 font-sans relative">
+    <div className={`min-h-screen bg-[#050505] text-white pt-4 pb-12 ${activeFilter === 'Reels' ? 'px-0 md:px-6' : 'px-4 md:px-6'} font-sans relative`}>
 
 
 
@@ -1136,7 +1148,7 @@ const Community = ({ children, onSearchActive }) => {
 
             {/* Main Feed Posts / Reels */}
             {activeFilter === "Reels" ? (
-              <div className="relative flex justify-center h-[calc(100vh-180px)] bg-black/40 rounded-[8px]">
+              <div className="relative flex justify-center h-[calc(100vh-180px)] bg-black/40 md:rounded-[8px]">
                 {/* Back button & header */}
                 <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -1161,7 +1173,7 @@ const Community = ({ children, onSearchActive }) => {
                   </button>
                 </div>
                 <div
-                  className="h-full aspect-[9/16] overflow-y-scroll snap-y snap-mandatory no-scrollbar rounded-[8px] bg-black shadow-2xl mx-auto"
+                  className="w-full h-full md:w-auto md:aspect-[9/16] overflow-y-scroll snap-y snap-mandatory no-scrollbar md:rounded-[8px] bg-black shadow-2xl mx-auto"
                   onScroll={(e) => {
                     const el = e.currentTarget;
                     const idx = Math.round(el.scrollTop / el.clientHeight);

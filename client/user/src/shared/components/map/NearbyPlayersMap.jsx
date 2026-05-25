@@ -1,8 +1,8 @@
-﻿import { MapContainer, TileLayer, useMap, useMapEvents, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, useMap, useMapEvents, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useMemo } from "react";
 import L from "leaflet";
-import { Activity, Users, MapPin, User } from "lucide-react";
+import { Activity, Users, MapPin, User, Navigation } from "lucide-react";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
@@ -228,6 +228,18 @@ const PlayerMarker = ({ player, onPlayerClick }) => {
   );
 };
 
+const MapResizer = () => {
+  const map = useMap();
+  useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
+  return null;
+};
+
 const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapMove }) => {
   const map = useMap();
   
@@ -244,6 +256,7 @@ const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapM
 
   return (
     <>
+      <MapResizer />
       <TileLayer
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         attribution='&copy; <a href="https://carto.com/attributions">CartoDB</a>'
@@ -253,6 +266,23 @@ const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapM
       
       <MapController userLocation={userLocation} radiusKm={radiusKm} />
       <MapEventsHandler onMapMove={onMapMove} />
+
+      {/* Relocate Button */}
+      {userLocation && (
+        <div className="absolute bottom-[60px] right-4 z-[1000]">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              map.flyTo([userLocation.lat, userLocation.lng], 14, { duration: 1.5 });
+            }}
+            className="w-10 h-10 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-[#55DEE8] hover:bg-[#55DEE8]/20 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer"
+            title="Locate me"
+          >
+            <Navigation size={18} className="-ml-0.5 mt-0.5" />
+          </button>
+        </div>
+      )}
 
       {userLocation && (
         <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
@@ -306,6 +336,7 @@ const NearbyPlayersMap = ({
         maxZoom={18}
         zoomControl={false}
         preferCanvas={true}
+        attributionControl={false}
       >
         <MapInner 
           nearbyPlayers={nearbyPlayers}

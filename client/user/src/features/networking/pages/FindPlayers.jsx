@@ -39,7 +39,7 @@ const PRI = "#55DEE8";
 const GRAD = "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)";
 const HEADING_STYLE = { fontFamily: '"Outfit", sans-serif' };
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
-const SNAP_STATES = { COLLAPSED: 0, HALF: 33, EXPANDED: 50 };
+const SNAP_STATES = { COLLAPSED: 0, HALF: 33, EXPANDED: 85 };
 
 const MOCK_PLAYERS = [
   { _id: "m1", name: "Simulated Virat", latOffset: 0.015, lngOffset: 0.015, sport: "Cricket" },
@@ -48,83 +48,120 @@ const MOCK_PLAYERS = [
   { _id: "m4", name: "Simulated Rahul", latOffset: -0.015, lngOffset: -0.015, sport: "Cricket" }
 ];
 
-const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvatarClick, currentUser, navigate, gateInteraction }) => {
-  const shapes = [
-    "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
-    "circle(50% at 50% 50%)",
-    "polygon(50% 0%, 100% 100%, 0% 100%)",
-    "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)"
-  ];
-  const shape = shapes[rank % shapes.length];
+const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClick, currentUser, navigate, gateInteraction }) => {
+  const isFollowing = followingIds.includes(player.id || player._id);
+  const playerId = player.id || player._id;
+
+  const sportTypes = player.sportTypes || (player.sport ? [player.sport] : []);
+
+  const locationParts = [
+    player.city,
+    player.state,
+    player.country,
+  ].filter(Boolean);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-black rounded-[8px] border border-[#55DEE8]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-[#55DEE8]/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+      transition={{ duration: 0.25 }}
+      className="flex items-center gap-3 bg-[#0D0D0D] border border-white/[0.07] rounded-2xl px-4 py-3 group hover:border-[#55DEE8]/20 transition-all duration-300"
+      style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
     >
-      <div className="flex justify-end items-start p-4 absolute top-0 left-0 right-0 z-20">
-        <div className="p-1.5 bg-[#55DEE8]/10 rounded-[8px] border border-[#55DEE8]/20">
-          <ShieldCheck size={14} className="text-[#55DEE8]" />
-        </div>
-      </div>
-
-      <div className="h-40 relative mt-2 flex items-center justify-center overflow-hidden">
-        <div 
-          className="absolute w-52 h-52 bg-[#55DEE8]/10 border border-[#55DEE8]/30 blur-sm opacity-50 group-hover:opacity-80 transition-opacity duration-700"
-          style={{ clipPath: shape }}
-        />
-        <div 
-          className="absolute w-48 h-48 border-2 border-[#55DEE8]/40"
-          style={{ clipPath: shape }}
-        />
-        <div className="relative w-full h-full flex items-center justify-center z-10 pointer-events-none">
-          <img 
-            src={player.profilePicture || "https://pngimg.com/d/cricket_PNG102.png"} 
-            alt="" 
-            className="h-[95%] w-[90%] object-contain filter drop-shadow-[0_10px_30px_rgba(85,222,232,0.4)] group-hover:scale-110 transition-transform duration-700 select-none"
-          />
-        </div>
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-          <div className="bg-black border-2 border-[#55DEE8] w-12 h-14 flex items-center justify-center" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
-            <span className="text-[#55DEE8] font-black text-sm uppercase">
-              {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
+      {/* Avatar */}
+      <div
+        className="relative shrink-0 cursor-pointer"
+        onClick={() => handleAvatarClick(player)}
+      >
+        <div
+          className="w-14 h-14 rounded-2xl overflow-hidden bg-[#111] flex items-center justify-center border-2 border-transparent"
+          style={{ boxShadow: '0 0 0 2px rgba(85,222,232,0.4)' }}
+        >
+          {player.profilePicture ? (
+            <img src={player.profilePicture} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-[#55DEE8] font-black text-xl leading-none">
+              {player.name?.charAt(0).toUpperCase()}
             </span>
-          </div>
+          )}
         </div>
+        {/* online dot */}
+        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#BFF367] rounded-full border-2 border-[#0D0D0D]" />
       </div>
 
-      <div className="flex-1 px-3 pt-4 pb-2 flex flex-col items-center text-center">
-        <h3 className="text-sm font-black text-white uppercase tracking-tight mb-1 truncate w-full" style={HEADING_STYLE}>
-          {player.name}
-        </h3>
-        <div className="flex items-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-4">
-          <MapPin size={10} className="text-[#55DEE8]" />
-          {player.city || 'Athletic'}
+      {/* Info block */}
+      <div className="flex-1 min-w-0">
+        {/* Name row */}
+        <div className="flex items-center gap-2 mb-0.5">
+          <h3
+            className="text-sm font-black text-white uppercase tracking-tight truncate cursor-pointer hover:text-[#55DEE8] transition-colors"
+            style={HEADING_STYLE}
+            onClick={() => navigate(`/profile/${playerId}`)}
+          >
+            {player.name}
+          </h3>
+          {player.isVerified && (
+            <ShieldCheck size={12} className="text-[#55DEE8] shrink-0" />
+          )}
         </div>
-        <div className="grid grid-cols-3 w-full border-t border-white/5 pt-2 mb-2">
-          <div className="flex flex-col items-center">
-            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Matches</span>
-            <span className="text-white font-black text-[10px]">GÇö</span>
-          </div>
-          <div className="flex flex-col items-center border-x border-white/5">
-            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Runs</span>
-            <span className="text-white font-black text-[10px]">GÇö</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Strike Rate</span>
-            <span className="text-white font-black text-[10px]">GÇö</span>
-          </div>
+
+        {/* Followers only */}
+        <div className="flex items-center gap-1 mb-2">
+          <span className="text-[10px] text-white/40 font-bold">
+            <span className="text-white font-black">{player.followersCount ?? player.followers?.length ?? 0}</span> Followers
+          </span>
         </div>
-        <div className="flex items-center gap-2 w-full mt-auto">
-          <button onClick={() => handleFollowToggle(player.id || player._id)} className={`flex-1 h-11 rounded-[8px] text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player.id || player._id) ? "bg-white/5 text-white/20 border border-white/10" : "text-black hover:scale-105 shadow-[0_0_15px_rgba(85,222,232,0.3)]"}`} style={!followingIds.includes(player.id || player._id) ? { background: GRAD } : {}}>
-            {followingIds.includes(player.id || player._id) ? "Following" : "Follow"}
+
+        {/* Sports chips – max 2 */}
+        {sportTypes.length > 0 && (
+          <div className="flex gap-1 mb-2">
+            {sportTypes.slice(0, 2).map(s => (
+              <span
+                key={s}
+                className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest text-black"
+                style={{ background: GRAD }}
+              >
+                {s}
+              </span>
+            ))}
+            {sportTypes.length > 2 && (
+              <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest text-white/30 bg-white/5 border border-white/10">
+                +{sportTypes.length - 2}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Location */}
+        {locationParts.length > 0 && (
+          <div className="flex items-center gap-1 text-[9px] text-white/30 font-semibold">
+            <MapPin size={9} className="text-[#55DEE8] shrink-0" />
+            <span className="truncate">{locationParts.join(', ')}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Single action button – Follow or Message */}
+      <div className="shrink-0">
+        {isFollowing ? (
+          <button
+            onClick={() => gateInteraction(() => navigate(`/messages?userId=${playerId}`))}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-black active:scale-95 transition-all whitespace-nowrap shadow-[0_4px_14px_rgba(85,222,232,0.25)]"
+            style={{ background: GRAD }}
+          >
+            <MessageCircle size={12} className="shrink-0" />
+            Message
           </button>
-          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player.id || player._id}`))} className="w-11 h-11 rounded-[8px] bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8] transition-all">
-            <MessageCircle size={18} />
+        ) : (
+          <button
+            onClick={() => handleFollowToggle(playerId)}
+            className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-black active:scale-95 transition-all whitespace-nowrap shadow-[0_4px_14px_rgba(85,222,232,0.25)]"
+            style={{ background: GRAD }}
+          >
+            Follow
           </button>
-        </div>
+        )}
       </div>
     </motion.div>
   );
@@ -329,7 +366,7 @@ const FindPlayers = () => {
   const lastEmittedLocation = useRef(null);
   const lastEmitTime = useRef(0);
   const watchId = useRef(null);
-  const MOVEMENT_THRESHOLD_METERS = 10;
+  const MOVEMENT_THRESHOLD_METERS = 50;
   const HEARTBEAT_INTERVAL_MS = 30000;
 
   const clusterPlayers = (players, zoom, radiusPx) => {
@@ -350,7 +387,8 @@ const FindPlayers = () => {
         return distPx < radiusPx;
       });
       
-      if (nearby.length >= 2) {
+      // If there is at least 1 other nearby player, form a cluster (total >= 2)
+      if (nearby.length >= 1) {
         const clusterMembers = [player, ...nearby];
         clusterMembers.forEach(member => {
           const idx = players.findIndex(p => (p.id || p._id) === (member.id || member._id));
@@ -406,12 +444,22 @@ const FindPlayers = () => {
 
     watchId.current = navigator.geolocation.watchPosition(
       (position) => {
+        const newLat = position.coords.latitude;
+        const newLng = position.coords.longitude;
         const newLocation = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
+          lat: newLat,
+          lng: newLng,
           profilePicture: currentUser?.profilePicture || currentUser?.profileImage
         };
-        setUserLocation(newLocation);
+
+        setUserLocation(prev => {
+          if (!prev) return newLocation;
+          const dist = haversineMeters(prev.lat, prev.lng, newLat, newLng);
+          if (dist > MOVEMENT_THRESHOLD_METERS) {
+            return newLocation;
+          }
+          return prev;
+        });
         setLocationError(null);
 
         // Adaptive emitting logic
@@ -606,19 +654,23 @@ const FindPlayers = () => {
 
   useEffect(() => {
     if (userLocation) {
-      setIsRadiusChanging(true);
       fetchNearbyPlayers();
-      setTimeout(() => setIsRadiusChanging(false), 500);
-      
       const interval = setInterval(fetchNearbyPlayers, HEARTBEAT_INTERVAL_MS);
       return () => clearInterval(interval);
     }
-  }, [userLocation, fetchNearbyPlayers, selectedRadius]);
+  }, [userLocation, fetchNearbyPlayers]);
+
+  useEffect(() => {
+    if (userLocation) {
+      setIsRadiusChanging(true);
+      setTimeout(() => setIsRadiusChanging(false), 500);
+    }
+  }, [selectedRadius]);
 
   useEffect(() => {
     if (!socket || !userLocation || snapState === 'COLLAPSED' || !isLocationSharing) return;
     
-    socket.emit("location:start", {
+    socket.emit("location:update", {
       lat: userLocation.lat,
       lng: userLocation.lng,
       radiusKm: selectedRadius
@@ -633,8 +685,11 @@ const FindPlayers = () => {
         const existing = prev.find(p => (p.id || p._id) === userId);
         if (existing) {
           return prev.map(p => (p.id || p._id) === userId ? { ...p, lat, lng } : p);
+        } else {
+          // New user moved into radius, trigger fetch to get their profile data
+          fetchNearbyPlayers();
+          return prev;
         }
-        return prev;
       });
     };
 
@@ -664,20 +719,27 @@ const FindPlayers = () => {
     } finally {
       setLoading(false);
     }
-  }, [filters, searchQuery, selectedRadius, userLocation]);
+  }, [filters, searchQuery]);
+  const fetchTeamsRef = useRef(fetchTeams);
+  const fetchPlayersRef = useRef(fetchPlayers);
 
   useEffect(() => {
-    if (activeTab === "players") fetchPlayers();
-    else fetchTeams();
-  }, [activeTab, fetchPlayers, fetchTeams]);
+    fetchTeamsRef.current = fetchTeams;
+    fetchPlayersRef.current = fetchPlayers;
+  }, [fetchTeams, fetchPlayers]);
+
+  useEffect(() => {
+    if (activeTab === "players") fetchPlayersRef.current();
+    else fetchTeamsRef.current();
+  }, [activeTab, filters, selectedRadius, showNearbyOnly, userLocation]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (activeTab === "players") fetchPlayers();
-      else fetchTeams();
+      if (activeTab === "players") fetchPlayersRef.current();
+      else fetchTeamsRef.current();
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchQuery, activeTab, fetchPlayers, fetchTeams]);
+  }, [searchQuery]);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -687,24 +749,57 @@ const FindPlayers = () => {
     setFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFollowToggle = async (targetUserId) => {
+  const handleFollowToggle = (targetUserId) => {
     gateInteraction(async () => {
-      const isFollowing = followingIds.includes(targetUserId);
+      const wasFollowing = followingIds.includes(targetUserId);
+
+      // ── Optimistic update: flip state instantly ──────────────────────
+      setFollowingIds(prev =>
+        wasFollowing
+          ? prev.filter(id => id !== targetUserId)
+          : [...prev, targetUserId]
+      );
+
+      // ── Also update follower count in the players list optimistically ─
+      setPlayers(prev =>
+        prev.map(p => {
+          const id = p.id || p._id;
+          if (id !== targetUserId) return p;
+          const delta = wasFollowing ? -1 : 1;
+          return {
+            ...p,
+            followersCount: Math.max(0, (p.followersCount ?? p.followers?.length ?? 0) + delta),
+          };
+        })
+      );
+
       try {
-        const endpoint = `/api/user/players/${targetUserId}/${isFollowing ? 'unfollow' : 'follow'}`;
+        const endpoint = `/api/user/players/${targetUserId}/${wasFollowing ? 'unfollow' : 'follow'}`;
         await axiosInstance.post(endpoint);
-        if (isFollowing) {
-          setFollowingIds(prev => prev.filter(id => id !== targetUserId));
-          toast.success("Unfollowed player");
-        } else {
-          setFollowingIds(prev => [...prev, targetUserId]);
-          toast.success("Following player");
-        }
+        // Success – no toast needed, the UI already reflected the change
       } catch (error) {
-        toast.error("Failed to update follow status");
+        // ── Rollback on failure ──────────────────────────────────────────
+        setFollowingIds(prev =>
+          wasFollowing
+            ? [...prev, targetUserId]
+            : prev.filter(id => id !== targetUserId)
+        );
+        setPlayers(prev =>
+          prev.map(p => {
+            const id = p.id || p._id;
+            if (id !== targetUserId) return p;
+            const delta = wasFollowing ? 1 : -1;
+            return {
+              ...p,
+              followersCount: Math.max(0, (p.followersCount ?? p.followers?.length ?? 0) + delta),
+            };
+          })
+        );
+        toast.error("Couldn't update follow status. Please try again.");
       }
     });
   };
+
 
   const handleAvatarClick = (player) => {
     gateInteraction(() => {
@@ -767,11 +862,7 @@ const FindPlayers = () => {
           <motion.div 
             animate={{ height: `${SNAP_STATES[snapState]}vh` }}
             transition={{ type: "spring", damping: 25, stiffness: 150 }}
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={0.1}
-            onDragEnd={handleDragEnd}
-            className="relative w-full bg-[#0a0a0a] border-b border-[#55DEE8]/30 overflow-hidden lg:hidden cursor-grab active:cursor-grabbing"
+            className="relative w-full bg-[#0a0a0a] border-b border-[#55DEE8]/30 overflow-hidden lg:hidden"
           >
             <AnimatePresence>
               {snapState !== "COLLAPSED" && (
@@ -790,42 +881,18 @@ const FindPlayers = () => {
                   />
 
                   {/* HEADER STATUS BAR */}
-                  <div className="absolute top-4 left-4 right-4 z-[1000] flex items-center justify-between pointer-events-none">
-                    <div className="flex items-center gap-3 bg-black/60 backdrop-blur-xl border border-white/10 p-1.5 px-4 rounded-[8px] shadow-2xl">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-[#55DEE8] rounded-full animate-pulse shadow-[0_0_10px_#55DEE8]" />
-                        <span className="text-white text-[11px] font-black uppercase tracking-widest">Live Map</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Users size={12} className="text-[#55DEE8]" />
-                        <span className="text-[#55DEE8] text-[11px] font-black">{allNearbyPlayers.length}</span>
-                        <span className="text-white/40 text-[9px] font-bold uppercase">Players</span>
-                      </div>
-
-                      {allNearbyPlayers.length === 0 && userLocation && !locationError && (
-                        <>
-                          <div className="w-px h-3 bg-white/10" />
-                          <div className="flex items-center gap-1.5">
-                            <AlertCircle size={12} className="text-white/40" />
-                            <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">
-                              No players nearby in {selectedRadius}KM
-                            </span>
-                          </div>
-                        </>
-                      )}
+                  <div className="absolute top-4 left-4 z-[1000] flex items-center gap-2 pointer-events-auto">
+                    <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-xl border border-white/10 p-1.5 px-2.5 rounded-[8px] shadow-2xl">
+                      <Users size={14} className="text-[#55DEE8]" />
+                      <span className="text-[#55DEE8] text-[12px] font-black">{allNearbyPlayers.length}</span>
                     </div>
 
-                    <div className="flex items-center gap-2 pointer-events-auto">
-                      <button 
-                        onClick={toggleLocationSharing}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-[8px] border transition-all duration-300 backdrop-blur-xl shadow-2xl ${ isLocationSharing ? "bg-[#55DEE8]/20 border-[#55DEE8]/30 text-[#55DEE8]" : "bg-red-500/10 border-red-500/20 text-red-500" }`}
-                      >
-                        {isLocationSharing ? <Eye size={14} /> : <EyeOff size={14} />}
-                        <span className="text-[10px] font-black uppercase tracking-widest">
-                          {isLocationSharing ? "Visible" : "Hidden"}
-                        </span>
-                      </button>
-                    </div>
+                    <button 
+                      onClick={toggleLocationSharing}
+                      className={`flex items-center justify-center p-1.5 w-8 h-8 rounded-[8px] border transition-all duration-300 backdrop-blur-xl shadow-2xl ${ isLocationSharing ? "bg-[#55DEE8]/20 border-[#55DEE8]/30 text-[#55DEE8]" : "bg-red-500/10 border-red-500/20 text-red-500" }`}
+                    >
+                      {isLocationSharing ? <Eye size={16} /> : <EyeOff size={16} />}
+                    </button>
                   </div>
 
                   {/* LOADING SKELETON */}
@@ -884,23 +951,21 @@ const FindPlayers = () => {
                     )}
                   </AnimatePresence>
 
-                  <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-xs">
-                    <div className="bg-black/80 backdrop-blur-2xl border border-[#55DEE8]/30 rounded-[8px] p-1.5 px-6 flex items-center justify-between shadow-2xl">
-                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Radius</span>
-                        <div className="flex items-center gap-1">
-                          {[5, 10, 20, 50, 100].map(r => (
-                              <button 
-                                key={r}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedRadius(r);
-                                }}
-                                className={`min-w-[40px] px-2 py-1.5 rounded-full text-[9px] font-black transition-all uppercase ${selectedRadius === r ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" : "text-white/40 hover:text-white/70"}`}
-                              >
-                                {r}KM
-                              </button>
-                          ))}
-                        </div>
+                  <div className="absolute bottom-0 left-0 w-full z-[1000]">
+                    <div className="bg-black/80 backdrop-blur-xl border-t border-white/10 p-2.5 px-6 flex items-center gap-4 pointer-events-auto w-full">
+                        <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Radius</span>
+                        <input 
+                          type="range"
+                          min="5" max="100" step="5"
+                          value={selectedRadius}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            setSelectedRadius(Number(e.target.value));
+                          }}
+                          className="flex-1 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-[#55DEE8]"
+                        />
+                        <span className="text-[#55DEE8] text-[10px] font-black min-w-[40px] text-right">{selectedRadius} KM</span>
                     </div>
                   </div>
                 </motion.div>
@@ -1041,18 +1106,17 @@ const FindPlayers = () => {
 
           {/* Content Grid */}
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="h-[360px] bg-white/[0.02] border border-white/5 rounded-[8px] animate-pulse" />
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="h-20 bg-white/[0.02] border border-white/5 rounded-2xl animate-pulse" />
               ))}
             </div>
           ) : activeTab === "players" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {players.map((player, idx) => (
-                <div key={player.id || player._id} id={`player-card-${player.id || player._id}`} className="transition-all duration-500">
-                  <PlayerCard 
-                    player={player} 
-                    rank={idx}
+            <div className="space-y-3">
+              {players.map((player) => (
+                <div key={player.id || player._id} id={`player-card-${player.id || player._id}`}>
+                  <PlayerCard
+                    player={player}
                     followingIds={followingIds}
                     handleFollowToggle={handleFollowToggle}
                     handleAvatarClick={handleAvatarClick}
